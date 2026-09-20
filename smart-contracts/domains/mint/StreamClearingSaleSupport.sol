@@ -160,7 +160,8 @@ library StreamClearingSaleSupport {
         p.chargedPrice = a.hasPriceOverride && a.priceOverride < p.schedulePrice
             ? a.priceOverride
             : p.schedulePrice;
-        if (a.unitPrice < p.chargedPrice) {
+        // Only proven Merkle ceilings replace unitPrice; preserve the signed-only path.
+        if ((priceCounterId == 0 || !a.hasPriceOverride) && a.unitPrice < p.chargedPrice) {
             revert IStreamNativeClearingSale.ClearingPriceAboveMaximum(a.unitPrice, p.chargedPrice);
         }
         p.captured.reveal = StreamDutchSaleSupport.revealPolicy(x, config.collectionId);

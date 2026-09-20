@@ -3,6 +3,16 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Native Merkle charging ceilings
+
+- Make a verified Dutch or clearing Merkle price override replace the signed
+  unit-price ceiling, as required by the original sale-kind rule. Keep the
+  original signed fields, digest and Manager replay identity unchanged.
+- Retain native funding and reveal-fee checks, no-override signed maxima,
+  declared-free controls, and clearing floor, supplement and rebate accounting.
+  Add exact-signature underfunding/retry and proof regressions; full-current
+  execution remains separate from the source batch.
+
 ## Current burn-redemption acceptance recipes
 
 - Add actual current Core, Manager, Artist, registry and delayed-governance

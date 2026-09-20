@@ -51,7 +51,8 @@ the final step interval is partial. Pre-start quotes show the starting price;
 purchases before the start reject. Unused LINEAR step fields must be zero,
 reserved decay kinds reject, and positive flat schedules are valid.
 
-The signed `unitPrice` is a maximum. It remains unchanged in the complete
+The signed `unitPrice` is a maximum unless a proven Merkle leaf replaces that
+role as described below. It remains unchanged in the complete
 EIP712 authorization digest and canonical Manager authorization ID when a
 later block lowers the charge. The payer supplies at least the execution-time
 price plus the separately captured live reveal fee. Only the price enters
@@ -95,9 +96,10 @@ are included in the sale execution commitment.
 
 An enabled leaf replaces the charging ceiling: the charge is
 `min(currentSchedulePrice, priceOverride)`. An absent override keeps the schedule
-price. The original signed `unitPrice` remains an additional maximum on the
-actual charge; neither the signature nor the Manager authorization digest is
-rewritten. A full-width ceiling above the schedule still charges the schedule.
+price. A proven override replaces the signed `unitPrice` charging ceiling;
+the old signed maximum is not applied again. The supplied native amount must
+still cover the actual charge and reveal fee. Neither the signed fields nor
+the signature or Manager authorization digest is rewritten. A full-width ceiling above the schedule still charges the schedule.
 `currentPrice(saleId)` remains the public schedule quote, before any buyer proof.
 
 A zero override requires `config.declaredFree = true` at registration, including
@@ -140,10 +142,15 @@ Actual current-stack composition, requester admission and fully cold gas sizing
 remain integration evidence. The Merkle consumer tests add explicit typed
 counter-read seams to the existing Manager fixture; they do not substitute for
 actual Manager/Ledger cap or whole-stack acceptance. ABI/type validation covers
-the new source. A targeted Solidity 0.8.19 via-IR, optimizer-200, Paris build
-measures the host at 22,239 runtime bytes and its worker at 9,771 bytes, leaving
+the new source. An earlier targeted Solidity 0.8.19 via-IR, optimizer-200, Paris build
+measured the host at 22,239 runtime bytes and its worker at 9,771 bytes, leaving
 2,337 host bytes below EIP-170. Combined native execution and whole-stack size
 acceptance remain pending for this batch. Universal ERC20 Dutch and permit paths, uniform
 clearing rebates, public purchases without buyer signatures, generalized content/quantity
 profiles, delegated claims and governed surplus/export tooling remain separate
 delivery slices. A standard native Dutch test does not establish those branches.
+
+The revised Merkle-ceiling regression cases have source/type coverage. Their
+legacy Core fixtures still need the permanent conservation-floor binding
+before paid-path runtime acceptance; these authored cases are not a native
+execution pass or a production deployment claim.

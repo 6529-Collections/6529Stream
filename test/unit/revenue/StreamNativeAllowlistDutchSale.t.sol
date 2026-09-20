@@ -289,12 +289,25 @@ contract StreamNativeAllowlistDutchSaleTest is DutchSaleTestBase {
         );
     }
 
-    function testLeafWithoutOverrideUsesOriginalSchedulePrice() public {
+    function testLeafWithoutOverrideRetainsSignedMaximumAndOriginalSchedulePrice() public {
         IStreamMintCounterPolicy.AllowlistProof memory p = _proof(false, 0);
         _bind(p, payer, IStreamMintManager.CounterKeyMode.PAYER);
         _registerAllowlist(false);
+        IStreamNativeDutchSale.DutchPurchaseData memory d = _dutchData(1, payer, payer);
+        d.authorization.unitPrice = 999;
+        _signDutch(d);
+        uint256 balanceBefore = payer.balance;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeDutchSale.DutchPaymentBelowPrice.selector, uint256(999), uint256(1000)
+            )
+        );
+        _purchaseProof(d, _resolverData(p), 1100);
+        _assertUnused(balanceBefore);
+        d.authorization.unitPrice = 1000;
+        _signDutch(d);
         IStreamNativeDutchSale.DutchPurchaseResult memory r =
-            _purchaseProof(_dutchData(1, payer, payer), _resolverData(p), 1100);
+            _purchaseProof(d, _resolverData(p), 1100);
         require(r.chargedAmount == 1000 && wallet.balance == 1000, "no override schedule fallback");
     }
 
@@ -310,7 +323,7 @@ contract StreamNativeAllowlistDutchSaleTest is DutchSaleTestBase {
         );
     }
 
-    function testBothSignedAndFundedMaximumStillBoundDiscountedCharge() public {
+    function testAuthenticatedCeilingReplacesSignedMaximumWithExactProofFundingRetry() public {
         IStreamMintCounterPolicy.AllowlistProof memory p = _proof(true, 600);
         _bind(p, payer, IStreamMintManager.CounterKeyMode.PAYER);
         _registerAllowlist(false);
@@ -318,16 +331,10 @@ contract StreamNativeAllowlistDutchSaleTest is DutchSaleTestBase {
         d.authorization.unitPrice = 599;
         _signDutch(d);
         bytes memory proof = _resolverData(p);
+        bytes32 exactPurchase = keccak256(abi.encode(d, proof));
+        bytes32 digest = dutchSale.authorizationDigest(d.authorization);
+        bytes32 expected = _expectedRoot(d, proof);
         uint256 balanceBefore = payer.balance;
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamNativeDutchSale.DutchPaymentBelowPrice.selector, uint256(599), uint256(600)
-            )
-        );
-        _purchaseProof(d, proof, 1100);
-        _assertUnused(balanceBefore);
-        d.authorization.unitPrice = 600;
-        _signDutch(d);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamNativeDutchSale.DutchPaymentBelowPrice.selector, uint256(599), uint256(600)
@@ -335,7 +342,70 @@ contract StreamNativeAllowlistDutchSaleTest is DutchSaleTestBase {
         );
         _purchaseProof(d, proof, 699);
         _assertUnused(balanceBefore);
-        require(_purchaseProof(d, proof, 700).chargedAmount == 600, "same proof healthy control");
+        IStreamNativeDutchSale.DutchPurchaseResult memory r = _purchaseProof(d, proof, 900);
+        require(
+            keccak256(abi.encode(d, proof)) == exactPurchase && d.authorization.unitPrice == 599,
+            "retry must retain every signed and proven byte"
+        );
+        require(
+            r.operationRoot == expected && refundManager.lastContextHash() == digest
+                && refundManager.lastAuthorizationId()
+                    == keccak256(
+                        abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest)
+                    ),
+            "original signed ceiling remains in digest and mint request"
+        );
+        require(
+            r.chargedAmount == 600 && r.revealFeeForwarded == 100 && r.excessCredited == 200
+                && wallet.balance == 600 && recorder.totalOfficialSettled(address(0)) == 600
+                && refundEntropy.revealFeeEscrow(1) == 100
+                && dutchSale.refundableBalance(dutchId, payer) == 200
+                && dutchSale.refundLiability() == 200 && refundManager.nonce() == 1,
+            "proven ceiling, live fee and buyer funding maximum"
+        );
+    }
+
+    function testAuthenticatedCeilingDoesNotPermitMutatingTheSignedMaximum() public {
+        IStreamMintCounterPolicy.AllowlistProof memory p = _proof(true, 600);
+        _bind(p, payer, IStreamMintManager.CounterKeyMode.PAYER);
+        _registerAllowlist(false);
+        IStreamNativeDutchSale.DutchPurchaseData memory d = _dutchData(1, payer, payer);
+        d.authorization.unitPrice = 599;
+        _signDutch(d);
+        bytes memory proof = _resolverData(p);
+        bytes32 exactPurchase = keccak256(abi.encode(d, proof));
+        uint256 balanceBefore = payer.balance;
+        d.authorization.unitPrice = 598;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeDutchSale.DutchSignatureInvalid.selector, vm.addr(PLATFORM_KEY)
+            )
+        );
+        _purchaseProof(d, proof, 700);
+        _assertUnused(balanceBefore);
+        d.authorization.unitPrice = 599;
+        require(keccak256(abi.encode(d, proof)) == exactPurchase, "restore original signed bytes");
+        require(_purchaseProof(d, proof, 700).chargedAmount == 600, "original signature retry");
+    }
+
+    function testOrdinaryDutchWithoutMerklePolicyRetainsSignedMaximum() public {
+        require(dutchSale.allowlistPriceCounter(dutchId) == 0, "ordinary sale profile");
+        IStreamNativeDutchSale.DutchPurchaseData memory d = _dutchData(1, payer, payer);
+        d.authorization.unitPrice = 999;
+        _signDutch(d);
+        uint256 balanceBefore = payer.balance;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeDutchSale.DutchPaymentBelowPrice.selector, uint256(999), uint256(1000)
+            )
+        );
+        vm.prank(payer);
+        dutchSale.purchase{ value: 1100 }(d);
+        _assertUnused(balanceBefore);
+        d.authorization.unitPrice = 1000;
+        _signDutch(d);
+        vm.prank(payer);
+        require(dutchSale.purchase{ value: 1100 }(d).chargedAmount == 1000, "ordinary cap retained");
     }
 
     function testUndeclaredZeroOverrideRejectsWithoutPaymentOrReplayWrites() public {

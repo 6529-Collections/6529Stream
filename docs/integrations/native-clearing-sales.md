@@ -84,8 +84,9 @@ evidence. No signed price field is rewritten to the eventual charge.
 
 The current schedule price follows the existing LINEAR or STEPPED specification.
 An authenticated override is a ceiling, so the purchase charges the smaller of
-that ceiling and the schedule. Both the signed unit maximum and the supplied
-value after the captured fee must cover that charge. The positive resting floor
+that ceiling and the schedule. Supplied value after the captured fee must cover
+the charge. Without a proven Merkle override, the signed unit maximum must also
+cover it. The positive resting floor
 is official revenue; charge minus floor stays held; every excess wei is an
 immediate per-sale credit. Zero-floor configurations reject. Positive flat
 schedules work and require no later zero-valued receipt.
@@ -231,8 +232,11 @@ signed no-override shape `false/0`. The configured floor revenue, schedule-based
 clearing-price fixing, permanent buyer rebates, held supplements and refund
 credits keep their original accounting. For example, a 400 ceiling at schedule
 640 charges 400 but never makes 400 the sale's schedule reference for fixing.
-The original signed maximum still bounds the charged price. This is an inline
-Merkle counter consumer; a distinct gate authorization envelope is not supplied.
+A proven override replaces the signed unit maximum; that old maximum is not
+applied again. The supplied native amount still bounds the charge plus reveal
+fee. Without an enabled proven override, the original signed maximum remains
+enforced, including on the separate non-Merkle signed-override path. This is an
+inline Merkle counter consumer; a distinct gate authorization envelope is not supplied.
 
 These rules implement [MPA-MERKLE rule 5](../mint-policy-and-accounting.md) and
 [SSA-AUTH rule 3](../stream-sales-and-auctions.md)
@@ -283,3 +287,8 @@ also exclude cold-gas acceptance; whole-test totals are not collector-call costs
 themselves satisfy the ceiling while those shared paths remain unchanged.
 Shared mint, authorization and receipt cost work remains open for integration;
 this implementation neither changes the ceiling nor calls those costs accepted.
+
+The revised Merkle-ceiling regression cases have source/type coverage. Their
+legacy Core fixtures still need the permanent conservation-floor binding
+before paid-path runtime acceptance; these authored cases are not a native
+execution pass or a production deployment claim.

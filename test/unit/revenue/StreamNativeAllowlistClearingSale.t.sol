@@ -273,6 +273,19 @@ contract StreamNativeAllowlistClearingSaleTest is ClearingSaleTestBase {
         _purchase(d, data, 1020);
         _assertUnused(beforeBalance);
         d = _signed(1, false, 0);
+        d.authorization.unitPrice = 999;
+        _signClearing(d);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeClearingSale.ClearingPriceAboveMaximum.selector,
+                uint256(999),
+                uint256(1000)
+            )
+        );
+        _purchase(d, data, 1020);
+        _assertUnused(beforeBalance);
+        d.authorization.unitPrice = 1000;
+        _signClearing(d);
         IStreamNativeClearingSale.ClearingPurchaseResult memory result = _purchase(d, data, 1020);
         require(result.chargedAmount == 1000 && result.heldOverage == 900, "schedule fallback");
         require(!clearingSale.purchaseRecord(result.purchaseId).hasPriceOverride, "stored absence");
@@ -340,7 +353,7 @@ contract StreamNativeAllowlistClearingSaleTest is ClearingSaleTestBase {
         );
     }
 
-    function testSignedMaximumAndPaidMaximumStillApplyToAuthenticatedCeiling() public {
+    function testAuthenticatedCeilingReplacesSignedMaximumWithExactProofFundingRetry() public {
         IStreamMintCounterPolicy.AllowlistProof memory proof = _proof(true, 500);
         _register(proof);
         bytes memory data = _data(proof);
@@ -348,17 +361,9 @@ contract StreamNativeAllowlistClearingSaleTest is ClearingSaleTestBase {
         IStreamNativeClearingSale.ClearingPurchaseData memory d = _signed(1, true, 500);
         d.authorization.unitPrice = 499;
         _signClearing(d);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamNativeClearingSale.ClearingPriceAboveMaximum.selector,
-                uint256(499),
-                uint256(500)
-            )
-        );
-        _purchase(d, data, 520);
-        _assertUnused(beforeBalance);
-        d.authorization.unitPrice = 500;
-        _signClearing(d);
+        bytes32 exactPurchase = keccak256(abi.encode(d, data));
+        bytes32 digest = clearingSale.authorizationDigest(d.authorization);
+        bytes32 expected = _expectedRoot(d, data);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamNativeClearingSale.ClearingPriceAboveMaximum.selector,
@@ -368,7 +373,79 @@ contract StreamNativeAllowlistClearingSaleTest is ClearingSaleTestBase {
         );
         _purchase(d, data, 519);
         _assertUnused(beforeBalance);
+        IStreamNativeClearingSale.ClearingPurchaseResult memory r = _purchase(d, data, 527);
+        require(
+            keccak256(abi.encode(d, data)) == exactPurchase && d.authorization.unitPrice == 499,
+            "retry must retain every signed and proven byte"
+        );
+        require(
+            r.operationRoot == expected && clearingManager.isOperationRootUsed(expected)
+                && clearingManager.lastContextHash() == digest
+                && clearingManager.lastAuthorizationId()
+                    == keccak256(
+                        abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest)
+                    ),
+            "original signed ceiling remains in digest and mint request"
+        );
+        require(
+            r.chargedAmount == 500 && r.floorRevenue == 100 && r.heldOverage == 400
+                && r.revealFeeForwarded == 20 && r.excessCredited == 7 && wallet.balance == 100
+                && recorder.totalOfficialSettled(address(0)) == 100
+                && refundEntropy.revealFeeEscrow(1) == 20
+                && clearingSale.totalBuyerLiabilities() == 407
+                && clearingSale.refundableBalance(clearingId, payer) == 7
+                && clearingManager.nonce() == 1,
+            "floor, refundable overage, live fee and excess remain separate"
+        );
+    }
+
+    function testAuthenticatedCeilingDoesNotPermitMutatingTheSignedMaximum() public {
+        IStreamMintCounterPolicy.AllowlistProof memory proof = _proof(true, 500);
+        _register(proof);
+        bytes memory data = _data(proof);
+        IStreamNativeClearingSale.ClearingPurchaseData memory d = _signed(1, true, 500);
+        d.authorization.unitPrice = 499;
+        _signClearing(d);
+        bytes32 exactPurchase = keccak256(abi.encode(d, data));
+        uint256 beforeBalance = payer.balance;
+        d.authorization.unitPrice = 498;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeClearingSale.ClearingSignatureInvalid.selector, vm.addr(PLATFORM_KEY)
+            )
+        );
         _purchase(d, data, 520);
+        _assertUnused(beforeBalance);
+        d.authorization.unitPrice = 499;
+        require(keccak256(abi.encode(d, data)) == exactPurchase, "restore original signed bytes");
+        require(_purchase(d, data, 520).chargedAmount == 500, "original signature retry");
+    }
+
+    function testOrdinarySignedOverrideWithoutMerklePolicyRetainsBothCeilings() public {
+        require(_allowlist().allowlistPriceCounter(clearingId) == 0, "ordinary sale profile");
+        IStreamNativeClearingSale.ClearingPurchaseData memory d = _signed(1, true, 500);
+        d.authorization.unitPrice = 499;
+        _signClearing(d);
+        uint256 beforeBalance = payer.balance;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeClearingSale.ClearingPriceAboveMaximum.selector,
+                uint256(499),
+                uint256(500)
+            )
+        );
+        vm.prank(payer);
+        clearingSale.purchase{ value: 520 }(d);
+        _assertUnused(beforeBalance);
+        d.authorization.unitPrice = 500;
+        _signClearing(d);
+        vm.prank(payer);
+        IStreamNativeClearingSale.ClearingPurchaseResult memory r =
+            clearingSale.purchase{ value: 520 }(d);
+        require(
+            r.chargedAmount == 500 && r.floorRevenue == 100 && r.heldOverage == 400,
+            "ordinary signed override and signed cap retained"
+        );
     }
 
     function testTamperedProofRejectsThenExactBytesSucceedAndReplayRejects() public {
@@ -435,11 +512,18 @@ contract StreamNativeAllowlistClearingSaleTest is ClearingSaleTestBase {
         config.maxSaleQuantity = 2;
         clearingId = _allowlist().registerAllowlistClearingSale(config, PRICE_COUNTER);
         uint256 beforeBalance = payer.balance;
+        IStreamNativeClearingSale.ClearingPurchaseData memory firstData =
+            _signed(1, true, type(uint256).max);
+        firstData.authorization.unitPrice = 999;
+        _signClearing(firstData);
         IStreamNativeClearingSale.ClearingPurchaseResult memory a =
-            _purchase(_signed(1, true, type(uint256).max), _data(first), 1027);
+            _purchase(firstData, _data(first), 1027);
         vm.warp(1040);
+        IStreamNativeClearingSale.ClearingPurchaseData memory secondData = _signed(2, true, 400);
+        secondData.authorization.unitPrice = 399;
+        _signClearing(secondData);
         IStreamNativeClearingSale.ClearingPurchaseResult memory b =
-            _purchase(_signed(2, true, 400), _data(second), 420);
+            _purchase(secondData, _data(second), 420);
         vm.warp(1050);
         clearingSale.fixClearingPrice(clearingId);
         require(

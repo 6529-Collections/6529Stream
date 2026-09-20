@@ -224,8 +224,10 @@ library StreamDutchSaleSupport {
                 || block.timestamp > a.deadline || a.tokenDataHash != keccak256(d.tokenData)
         ) revert IStreamNativeDutchSale.InvalidDutchSale();
         uint256 charge = StreamDutchPricing.price(config.schedule, block.timestamp);
+        bool overridden;
         if (counterId != 0) {
-            (bool overridden, uint256 price) = StreamMintSaleAllowlist.price(
+            uint256 price;
+            (overridden, price) = StreamMintSaleAllowlist.price(
                 address(x.manager),
                 config.collectionId,
                 config.phaseId,
@@ -241,7 +243,8 @@ library StreamDutchSaleSupport {
                 if (price < charge) charge = price;
             }
         }
-        if (a.unitPrice < charge) {
+        // A verified leaf replaces the signed maximum; the host still enforces funding.
+        if (!overridden && a.unitPrice < charge) {
             revert IStreamNativeDutchSale.DutchPaymentBelowPrice(a.unitPrice, charge);
         }
         capture.reveal = revealPolicy(x, config.collectionId);
