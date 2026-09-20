@@ -2,8 +2,8 @@
 
 The local implementation accompanying ADR 0045 is applied. Solidity 0.8.19
 ABI/type and recursive storage checks pass, preserving original selectors,
-signing tuples and the existing storage prefix. Native runtime, size and
-capacity validation remain pending. This is not deployment or release acceptance.
+signing tuples and the existing storage prefix. Selected native contract-size
+checks pass; behavioral runtime and gas-capacity validation remain pending. This is not deployment or release acceptance.
 
 The four ERC-20 settlement entrypoints retain their selectors and all original
 PaymentIntent, EIP-2612, Permit2 and UniversalSaleAuthorization fields. Their
@@ -39,9 +39,17 @@ not a measured production requirement or gas-capacity claim. The original owner,
 reentrancy and six sale storage declarations move together into a base that
 precedes the new GGP and refund storage. Recursive compiler comparison preserves
 the existing eight entries at slots 0 through 7; new state occupies slots 8
-through 14. Native code-size and runtime measurements remain pending. Manager,
+through 14. Manager,
 Core, revenue-result, signature preimage, selector, permit capability and
 token allowance semantics are unchanged.
+
+The Universal adapter links its existing lifecycle and Artist admission checks
+through StreamUniversalSaleExecution. All original arguments, check order,
+adapter ABI (including errors), and recursive storage are retained. Solidity
+0.8.19, via IR, optimizer 200, Paris and no CBOR metadata produce these selected
+runtime sizes: Payment 24,244; Universal 23,708; Offer 22,873; Burn 14,524; new
+admission library 5,475 bytes. Universal has 868 bytes of EIP-170 headroom. These
+measurements are a local size gate; genuine native behavioral tests are pending.
 
 Regression sources cover zero-fee OWNER_WINDOW/AT_MINT, two distinct threshold
 Safes, native funder refunds, live fee drift, complete signed Safe retry after a

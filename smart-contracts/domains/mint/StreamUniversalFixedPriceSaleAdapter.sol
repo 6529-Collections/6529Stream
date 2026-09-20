@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
 import "./StreamUniversalSaleState.sol";
+import "./StreamUniversalSaleExecution.sol";
 import "./StreamImmediateSaleReveal.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "./StreamSaleConsent.sol";
@@ -33,6 +34,17 @@ contract StreamUniversalFixedPriceSaleAdapter is
     IStreamImmediateSaleReveal,
     ERC165
 {
+    // Keep original adapter ABI errors available for decoding linked admission failures.
+    error ArtistRegistryArtistMismatch(uint256 collectionId, address accepted, address supplied);
+    error ArtistRegistryBindingChanged(address selected);
+    error IncompleteArtistAttribution(uint256 collectionId);
+    error SaleLifecycleMismatch(address saleAdapter, bytes32 saleId);
+    error SaleLifecycleReadFailed(address saleAdapter);
+    error SaleLifecycleReadMalformed(address saleAdapter, uint256 length);
+    error SettlementModuleNotAdmitted(address module);
+    error SettlementModuleReadFailed(address module);
+    error SettlementModuleReadMalformed(address module, uint256 length);
+
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
         "UniversalSaleAuthorization(bytes32 saleId,bytes32 saleConfigHash,address payer,address executor,address recipient,address artist,bytes32 tokenDataHash,bytes32 mintCommitment,uint256 executionNonce,bytes32 nonce,uint64 deadline)"
     );
@@ -166,7 +178,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
                 != config.expectedPrimaryPolicyHash
         ) revert InvalidUniversalSale();
         StreamPrimarySettlementTypes.SaleLifecycleBinding memory binding =
-            StreamSettlementAdmission.capture(moduleRegistry, address(this), config.paymentAdapter);
+            StreamUniversalSaleExecution.capture(moduleRegistry, address(this), config.paymentAdapter);
         if (
             _read(
                         config.paymentAdapter,
@@ -303,7 +315,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
             msg.sender != c.lifecycleBinding.paymentAdapter
                 || keccak256(abi.encode(c)) != keccak256(abi.encode(candidate))
         ) revert UniversalCandidateMismatch();
-        StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
+        StreamUniversalSaleExecution.requireAdmission(moduleRegistry, msg.sender, c);
         uint256 originalNativeBalance = address(this).balance - msg.value;
         if (originalNativeBalance < refundLiability) revert SaleRevealAccountingMismatch();
         RevealQuote memory quote = StreamImmediateSaleReveal.quote(core, c.sale.collectionId);
@@ -325,8 +337,8 @@ contract StreamUniversalFixedPriceSaleAdapter is
         result = _settle(c);
         _requireSaleContext();
         _requireConsent(e.authorization.saleId);
-        StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
-        StreamSaleArtist.requireArtist(
+        StreamUniversalSaleExecution.requireAdmission(moduleRegistry, msg.sender, c);
+        StreamUniversalSaleExecution.requireArtist(
             artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
         );
         if (keccak256(abi.encode(_rights(c.sale.collectionId))) != keccak256(abi.encode(c.rights))) revert UniversalCandidateMismatch();
@@ -342,8 +354,8 @@ contract StreamUniversalFixedPriceSaleAdapter is
         );
         _requireSaleContext();
         _requireConsent(e.authorization.saleId);
-        StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
-        StreamSaleArtist.requireArtist(
+        StreamUniversalSaleExecution.requireAdmission(moduleRegistry, msg.sender, c);
+        StreamUniversalSaleExecution.requireArtist(
             artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
         );
         if (keccak256(abi.encode(_rights(c.sale.collectionId))) != keccak256(abi.encode(c.rights))) {
@@ -448,7 +460,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
             revert UniversalExecutionUsed(a.saleId, a.executionNonce);
         }
         bytes32 digest = _authorizationDigest(a);
-        StreamSaleArtist.requireArtist(
+        StreamUniversalSaleExecution.requireArtist(
             artistRegistry, artistRegistryCodeHash, record.config.collectionId, a.artist
         );
         if (!_validSignature(platformSigner, digest, e.platformSignature)) {
