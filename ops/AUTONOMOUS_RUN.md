@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `c6528fcf`: generation history, current redemption and attestation capacity source joined. ABI112: 2,921 sources / zero errors. ERC20 native93 passes with independent readback; generation stage19 passes. Root clients1,525/Museum30 unchanged; each result retains its source boundary. |
+| Source checkpoint | `45836680`: canonical claim/PWYW, VIEW adoption, transport/export, writer capacity, Museum V5 and revenue clients integrated. ABI116: 2,984 sources / zero errors. Clients1,588 and Museum31 pass; metric native17 eight pass / one fail. Every runtime result retains its recorded source boundary. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,56 +30,42 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 20 September
 
 Current source and scoped outcomes are in [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md).
-Root owns integration; builders continue coherent features while frozen tests run.
+Root owns integration, shared interfaces and the remaining metric transaction
+gas failure. Builders continue coherent features while frozen tests run.
 
-- A: metadata optimization/fidelity is integrated with 46 retained passes.
-  Attestation capacity is source-integrated; its frozen19-case run is active.
-  Build the next unheld Artist history composition and review C's VIEW seams.
-- B: external guards and price capacity are integrated; price35 is running.
-  Build canonical ERC20 standard Dutch, coordinating Payment/admission and the
-  original Sales signature domain with Mint. Existing Payment entries remain.
-- C: prospective native11 is complete. Finish canonical VIEW adoption/STATIC
-  routing/rendering. Selected Router21,320 and fixed read facade7,693 fit;
-  finish the corrected real-STATIC test before source handoff.
-- Mint: canonical signed/public native sales are integrated; frozen unit45 is
-  being rebuilt after a reviewed test-only IR stack repair. Actual-current3 joins
-  the shared plan. Build native ZERO_PRICE_CLAIM
-  and PWYW, including explicitly coordinated historical kind3/12/13 revocation.
-- Burn: content35 passes and actual-current redemption12 is integrated. Build
-  recipient MERKLE_STATIC distribution with an additive publication-bound phase
-  hash. Generation composition belongs to the Prepared lead. The
-  separate held burn-fee extension remains unapplied.
-- Museum: DIRECT floor/personhood and tier/selection are integrated, root35/30
-  pass. Build a separate complete-packet native authority/scope and DIRECT
-  representation; preserve frozen V4 and explicit remaining requirements.
-- Clients: recovered 511 is integrated. Build missing clone-wallet release,
-  ClaimRouter and Escrow flush/recovery workflows, preserving genuine governance
-  boundaries and all previous source snapshots.
-- Testing: bounded historical discovery is complete at its time cap. Prepare
-  the expanded exact-source current/Safe and stateful campaign with canonical
-  Sales3 and Burn12. Burn source review is clear; do not substitute stubs or
-  repeat discovery while the assigned dependency repairs are in flight.
-- Conservation/native task `01a0be37-2432-7a63-8820-fc42f159eb1d`: independent
-  ERC20 fixture, Prepared and complete Identity source reviews are clear. Own
-  isolated HydrationCommit and RegistryWriterDeployment/WriterExtension capacity
-  repairs; preserve mutation/order/ABI/storage and obtain independent review.
-- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: completed the repaired
-  93-case capture at `5df9808e`, independently verified. Build the additive full-current
-  two-Safe/nonzero-fee/ASYNC_REQUIRED Universal tests; preserve older failures.
-- Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: first preparation and
-  record/delegation and complete source decoder repairs are integrated. Binding
-  generation composition is integrated and stage19 passes. Repair
-  IdentityTransport and its oversized export worker with the same source-bound
-  storage roots; include Import/Continuations in bounded dependency measurements.
+- A: pending-generation plus original op24 attestation history composition;
+  existing attestation19 passes. Own only the coordinated preparation join.
+- B: canonical ERC20 standard Dutch and the corrected frozen price35 campaign;
+  original fixed/payment domains remain intact.
+- C: actual non-COLLECTION full-policy factory and VIEW current-source,
+  output/checkpoint/finality continuation. Adoption/STATIC21 already passes.
+- Mint: canonical native Dutch; corrected URI native25 run. Root integrated
+  claim/PWYW, verifier and proven Dutch/clearing price ceilings.
+- Burn: actual-current source/target policy and Safe rollback cases;
+  redemption12 and Merkle distribution are source-integrated. The distribution
+  attempt timed out before execution; no unchanged retry or fake pass.
+- Museum: actual attribution/sanction joins on additive V5; then historical
+  masters/archive joins. Frozen supplied schemas and source boundaries remain.
+- Clients: canonical native fixed/open/claim/PWYW callers against ABI113;
+  keep all earlier ABI snapshots. Root owns generated Safe inventory.
+- Testing: reviewed actual-current claims8 is integrated. Maintain the frozen
+  current82 plan and independently review root's metric gas optimization;
+  refresh the campaign once the next genuine linked graph stabilizes.
+- Capacity task `01a0be37-2432-7a63-8820-fc42f159eb1d`: Commit/Writer repair
+  integrated. Approved exact ABI115 three groups of 20 dependency coordinates,
+  sequential, one pass at most 480 seconds/group; preserve failures/timeouts.
+- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: native-floor fixture repair
+  and three actual-current ERC20 Safe cases integrated. Build eight bounded
+  current revenue/Safe claim cases, separating official and passive receipts.
+- Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: transport/export and
+  continuations integrated; complete original Identity Import split and actual
+  record rollback evidence. A owns the generation/attestation join.
 
-Root's combined client run completed: 1,525 passed, zero failed/skipped.
-The source-specific content35 and corrected metadata46 runs pass. Root metric
-native17 is building the accepted parser optimization against the
-original native16 fixture. Testing's bounded historical discovery ended at its
-1,200-second limit with 112 measurements and 125 reached products unmeasured;
-no automatic retries. It now maintains the expanded current-contract source plan.
-No funding or onchain action is needed. RC1 remains immutable. Full actual
-current/Safe/fuzz/capacity/CI, final source freeze and matching testnet remain.
+Root clients1,588 and Museum V5 31 pass on their recorded source. Metric native17
+is eight pass/one transaction-gas failure. Full actual current/Safe/stateful,
+whole-graph capacity, CI, final freeze and matching testnet remain. No funding
+or onchain action is needed; RC1 remains immutable.
+
 
 ## Earlier source-specific assignments
 
