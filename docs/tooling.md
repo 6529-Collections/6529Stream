@@ -200,7 +200,7 @@ against the same output/cache directories.
 
 ## Reproducible fuzz and invariant campaigns
 
-Input fuzzing varies arguments to the five `StreamCurrentStackFuzzTest`
+Input fuzzing varies arguments to the `StreamCurrentStackFuzzTest`
 properties. `StreamCurrentStackInvariantTest` drives dependent operations through
 the real stack and checks an independent accounting model after each step.
 Its opening sequence and completion assertions require successful operations;
@@ -249,7 +249,7 @@ commit when the checkout has edits; a focused copied fixture is not full-repo
 or current-export validation.
 
 The [current sale conservation campaign](testing/current-sale-conservation.md)
-documents the handler's fifteen required opening actions, independent payer and
+documents the handler's required opening sequence, independent payer and
 Ledger counter models, cancellation transitions and late-mint rollback checks.
 Its expanded source remains native-pending until the frozen current-graph run.
 
