@@ -22,6 +22,9 @@ import {
     StreamCurrentAuthorityInventoryTypes as CurrentInventory
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 import {
+    StreamPreservationPolicyRootFamiliesV2 as CurrentRootFamilies
+} from "../../../smart-contracts/domains/finality/StreamPreservationPolicyRootFamiliesV2.sol";
+import {
     StreamPreservationPolicyPublicationGraphTypesV1 as PublicationGraph
 } from "../../../smart-contracts/interfaces/stream/finality/StreamPreservationPolicyPublicationGraphTypesV1.sol";
 import {
@@ -888,6 +891,12 @@ contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
         keccak256("6529STREAM_CURRENT_AUTHORITY_PRESERVATION_POLICY_PUBLICATION_FACTORY_V1");
     bytes32 private constant CURRENT_GRAPH_DOMAIN =
         keccak256("6529STREAM_CURRENT_AUTHORITY_PRESERVATION_POLICY_PUBLICATION_GRAPH_V1");
+    bytes32 private constant CURRENT_ROOT_FAMILY =
+        keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2");
+    bytes32 private constant CURRENT_CHECKPOINT_PROFILE =
+        keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2");
+    bytes32 private constant CURRENT_OUTPUT_PROFILE =
+        keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2");
 
     struct GraphFixture {
         address factory;
@@ -896,9 +905,10 @@ contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
         CurrentInventory.Dependencies authority;
         PreservationGraph.CollectionFactoryBinding binding_;
         PublicationGraph.Graph graph;
+        Outputs.Manifest output;
     }
 
-    function testCurrentAuthorityGraphPublishesOriginalCollectionRootBinding() public {
+    function testCurrentAuthorityGraphPublishesV2FamilyInOriginalCollectionRootTuple() public {
         GraphFixture memory f = _currentGraph();
         Root.Publication memory p = _publication();
         bytes32 consent = keccak256("current graph original op17 approval");
@@ -907,8 +917,8 @@ contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
         bytes32 key = host.publishCollection(p);
         Preservation.Binding memory b = host.binding(key);
         assertEq(abi.encode(b).length, 608);
-        assertEq(b.profileId, keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1"));
-        assertEq(b.preservationOutputProfile, keccak256("6529STREAM_PRESERVATION_RENDER_V1"));
+        assertEq(b.profileId, keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V2"));
+        assertEq(b.preservationOutputProfile, CURRENT_ROOT_FAMILY);
         assertEq(b.outputManifest, f.graph.children[2]);
         assertEq(b.outputManifestCodeHash, f.graph.codeHashes[2]);
         assertEq(b.metadataRouter, address(host));
@@ -1056,6 +1066,118 @@ contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
         assertEq(host.previewCollection(_publication(), address(this)), good);
     }
 
+    function testCurrentAuthorityGraphRequiresBothChildInterfaces() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        address[2] memory targets = [f.graph.children[1], f.graph.children[2]];
+        bytes4[2] memory interfaces = [type(Checkpoint).interfaceId, type(Outputs).interfaceId];
+        for (uint256 i; i < targets.length; ++i) {
+            for (uint256 j; j < 2; ++j) {
+                _rejectDependency(
+                    targets[i],
+                    abi.encodeCall(IERC165.supportsInterface, (interfaces[i])),
+                    abi.encode(j == 0 ? uint256(0) : uint256(2)),
+                    abi.encode(true),
+                    good
+                );
+            }
+        }
+    }
+
+    function testCurrentAuthorityGraphRejectsOldChildProfilesAndWrongFamily() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        _rejectDependency(
+            f.graph.children[1],
+            abi.encodeCall(Checkpoint.preservationPolicyProfile, ()),
+            abi.encode(keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")),
+            abi.encode(CURRENT_CHECKPOINT_PROFILE),
+            good
+        );
+        _rejectDependency(
+            f.graph.children[2],
+            abi.encodeCall(Outputs.outputProfile, ()),
+            abi.encode(keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")),
+            abi.encode(CURRENT_OUTPUT_PROFILE),
+            good
+        );
+        bytes32[3] memory wrongFamilies = [
+            keccak256("6529STREAM_PRESERVATION_RENDER_V1"),
+            keccak256("6529STREAM_CURRENT_ARTIST_PRESERVATION_RENDER_V1"),
+            bytes32(0)
+        ];
+        for (uint256 i; i < wrongFamilies.length; ++i) {
+            _rejectDependency(
+                f.graph.children[1],
+                abi.encodeCall(Checkpoint.preservationOutputProfile, ()),
+                abi.encode(wrongFamilies[i]),
+                abi.encode(CURRENT_ROOT_FAMILY),
+                good
+            );
+        }
+    }
+
+    function testCurrentAuthorityGraphRejectsWrongChildCoreRouterAndCheckpoint() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        address[4] memory targets =
+            [f.graph.children[1], f.graph.children[1], f.graph.children[2], f.graph.children[2]];
+        bytes[4] memory inputs = [
+            abi.encodeCall(Checkpoint.core, ()),
+            abi.encodeCall(Checkpoint.metadataRouter, ()),
+            abi.encodeCall(Outputs.core, ()),
+            abi.encodeCall(Outputs.contentCheckpoint, ())
+        ];
+        address[4] memory canonical =
+            [address(core), address(host), address(core), f.graph.children[1]];
+        for (uint256 i; i < targets.length; ++i) {
+            _rejectDependency(
+                targets[i], inputs[i], abi.encode(address(0xBAD)), abi.encode(canonical[i]), good
+            );
+        }
+    }
+
+    function testCurrentAuthorityGraphCannotDowngradeToConsistentV1OutputPair() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        bytes32 v1 = keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1");
+        bytes32 family = keccak256("6529STREAM_PRESERVATION_RENDER_V1");
+        calls.mockCall(
+            f.graph.children[1],
+            abi.encodeCall(Checkpoint.preservationPolicyProfile, ()),
+            abi.encode(v1)
+        );
+        calls.mockCall(
+            f.graph.children[1],
+            abi.encodeCall(Checkpoint.preservationOutputProfile, ()),
+            abi.encode(family)
+        );
+        calls.mockCall(
+            f.graph.children[2], abi.encodeCall(Outputs.outputProfile, ()), abi.encode(v1)
+        );
+        Outputs.Manifest memory old = abi.decode(abi.encode(f.output), (Outputs.Manifest));
+        old.preservationProfile = family;
+        calls.mockCall(f.graph.children[2], _manifestCall(), abi.encode(old));
+        // Every old pair value agrees internally. Only the current factory's fixed
+        // V2 family should refuse; a generic family-dispatched publisher is insufficient.
+        _invalidCollection(_publication());
+        _mockCurrentOutputPair(f);
+        assertEq(host.previewCollection(_publication(), address(this)), good);
+    }
+
+    function testCurrentAuthorityGraphRequiresMatchingManifestFamilyAndRouter() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        for (uint256 i; i < 2; ++i) {
+            Outputs.Manifest memory bad = abi.decode(abi.encode(f.output), (Outputs.Manifest));
+            if (i == 0) bad.preservationProfile = keccak256("6529STREAM_PRESERVATION_RENDER_V1");
+            else bad.metadataRouter = address(0xBAD);
+            _rejectDependency(
+                f.graph.children[2], _manifestCall(), abi.encode(bad), abi.encode(f.output), good
+            );
+        }
+    }
+
     function _currentGraph() private returns (GraphFixture memory f) {
         f.factory = address(new RootArtifactsBoundary(address(schemas)));
         address sourceFactory = address(new RootArtifactsBoundary(address(schemas)));
@@ -1100,6 +1222,14 @@ contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
             f.graph.children[i] = i == 2 ? address(preservationManifest) : preservationCheckpoint;
             f.graph.codeHashes[i] = f.graph.children[i].codehash;
         }
+        // Preserve the original transport body's other fields exactly; only its
+        // explicit family changes for this separately named current-factory fixture.
+        vm.prank(address(host));
+        f.output =
+            preservationManifest.requireCurrentManifest(keccak256("verified"), keccak256("artist"));
+        f.output.preservationProfile = CURRENT_ROOT_FAMILY;
+        _mockCurrentOutputPair(f);
+        _currentRootDocuments();
         f.graph.graphId = _graphId(f, CURRENT_GRAPH_DOMAIN);
         calls.mockCall(
             provider,
@@ -1152,6 +1282,52 @@ contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
             abi.encodeCall(EntropyFactory.sourceSetForPlan, (f.graph.inventoryPlan)),
             abi.encode(f.graph.sourceSet, f.graph.sourceSetCodeHash)
         );
+    }
+
+    function _mockCurrentOutputPair(GraphFixture memory f) private {
+        calls.mockCall(
+            f.graph.children[1],
+            abi.encodeCall(Checkpoint.preservationPolicyProfile, ()),
+            abi.encode(CURRENT_CHECKPOINT_PROFILE)
+        );
+        calls.mockCall(
+            f.graph.children[1],
+            abi.encodeCall(Checkpoint.preservationOutputProfile, ()),
+            abi.encode(CURRENT_ROOT_FAMILY)
+        );
+        calls.mockCall(
+            f.graph.children[2],
+            abi.encodeCall(Outputs.outputProfile, ()),
+            abi.encode(CURRENT_OUTPUT_PROFILE)
+        );
+        calls.mockCall(f.graph.children[2], _manifestCall(), abi.encode(f.output));
+    }
+
+    function _manifestCall() private pure returns (bytes memory) {
+        return abi.encodeCall(
+            Outputs.requireCurrentManifest, (keccak256("verified"), keccak256("artist"))
+        );
+    }
+
+    function _currentRootDocuments() private {
+        string[4] memory names = [
+            "STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2",
+            "STREAM_ABI_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2",
+            "STREAM_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V2",
+            "STREAM_ABI_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V2"
+        ];
+        for (uint256 i; i < names.length; ++i) {
+            _register(
+                names[i],
+                (i == 1 || i == 3)
+                    ? IStreamSchemaRegistry.DocumentKind.CANONICALIZATION
+                    : IStreamSchemaRegistry.DocumentKind.SCHEMA,
+                CurrentRootFamilies.document(
+                    CURRENT_ROOT_FAMILY, false, keccak256(bytes(names[i]))
+                ),
+                schemas.RAW_BYTES()
+            );
+        }
     }
 
     function _mockIdentity(GraphFixture memory f) private {
