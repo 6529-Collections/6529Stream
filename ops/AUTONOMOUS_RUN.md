@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `bee91ae5`: phase freezes, multiple original-living hydration, active/cancelled-notice recovery, current gate recipes and PREMIS authority coverage are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `ea92b7d4`: counter reads, delegated authority hydration, aborted-pending recovery, scoped references and recovery stateful recipes are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,14 +29,16 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns architecture, integration and delivery. ABI63 covers all 2,282
-  sources at `bee91ae5`; clients retain explicit historical ABI52 and mode-2 ABI56.
+- Root owns architecture, integration and delivery. ABI65 covers all 2,309
+  sources at `ea92b7d4`; clients retain explicit historical ABI52 and mode-2 ABI56.
   Source integration remains separate from native acceptance.
 - Artist delivered C2PA credentials/standing conflicts (`142a3cdb`, `22095475`)
   and independently reviewed the genuine composition/recovery joins. It also
   delivered original-living multi-Artist/multi-collection hydration (`8cc47857`).
-  New Identity/Coordinator size overruns (25,254/24,698) need repair; original
-  delegated authority migration is the next active build.
+  Original-living delegation is now integrated (`48754d47`, ten reviewed
+  cases). Its exact source repairs the new Identity/Coordinator overruns:
+  all eighteen selected products fit; joined size/native acceptance remains.
+  Complete combined multiplicity/delegation is the next active build.
   Held collaborator and global-freeze artifacts remain separate.
 - Revenue independently reviews exact source, client and size handoffs. Existing
   Estate/Artist size blockers remain. Seven inactive clean worktrees are removed
@@ -48,7 +50,10 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   but final payload rereading runs out of gas. Fixed-worker
   immutable-manifest adoption is now integrated (`717968e7`) with 14 focused
   passes and all five selected products fitting. Exact native10 actual-publisher
-  retry is running; scoped finality work continues on a separate branch.
+  retry closed five passes/four failures: final adoption still runs out of gas.
+  Fixed immutable carrier binding is being built to remove duplicate storage
+  without dropping validation. Scoped BYTE_EXACT (`a8a17f94`) is integrated;
+  complete scoped inventory/provider is the next finality batch.
   Current Router size/full-graph acceptance remain open.
 - Mint delivered the fitting worker extraction (`83606e32`) and original mode-2
   consent consumer (`7badbff5`). Final exact-source Manager/fallback sizes are
@@ -56,14 +61,18 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   is now integrated (`0ab60204`), with 23 focused cases passing and final selected
   sizes 24,396/24,513. Current governance/continuity execution remains pending.
   Advisory canMint (`dc0122af`) now passes 21 focused cases with selected sizes
-  24,359/24,476. Remaining original counter-read helpers are being built;
-  held Artist freeze is separate.
+  24,359/24,476. Original counter-read helpers are now integrated (`ea92b7d4`)
+  with fifteen reviewed cases and nine fitting selected products; latest
+  Manager/fallback sizes are 24,211/24,328. One frozen36 run is assigned.
+  Actual-current mint acceptance consolidation follows; held Artist freeze is separate.
 - Burn delivered living35-to43 histories (`ed4d5572`,17 cases authored) after
   repeated recovery (`0c5de0d9`) and retained test corrections (`78735c45`). It also
   delivered active-notice (`9ff19e55`) and cancelled-notice (`ff60c308`) histories.
   Complete repeated-living history (`22e90a3b`,18 cases authored) is integrated;
-  current-cause recovery from an aborted pending rotation is next. Class4
-  and advanced hydration remain separate; native execution is pending.
+  current-cause recovery from an aborted pending rotation (`d5e3fbcb`, seven
+  cases) is now integrated. First-recovery/class-3/current-veto and cancelled
+  Estate predecessor joins are one active batch. Class4 and advanced hydration
+  remain separate; native execution is pending.
 - Museum delivered the complete catalog, historical C2PA reader and direct
   retained-file PREMIS (`a69c377e`,root53 tests). Its new official-authority
   snapshot is integrated (`e290dc4a`,37 root tests and profile/example checks),
@@ -71,7 +80,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   authority-field accounting (`53aae1b0`,62 new/compatibility/docs cases). It now
   delivered explicit-version repository export/import (`bee91ae5`), with eleven
   new root cases passing and independent source/oracle review clear. The next
-  complete adopted source-family/export flow is being selected.
+  Owner EXHIBITION source/projection/package/export flow is being completed.
   Current-chain authentication remains distinct from supplied-byte agreement.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
   (`9ac63a11`), economics15/royalty-freeze20 (`6b71507e`) and mode-2 grace
@@ -84,7 +93,9 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   (`2aed78f5`, `a86febaa`); Registry13 scoped native cases pass. It now fills
   actual-current abort/fallback campaign actions. Fourteen gate recipes
   (`f1acffbe`) and eight stateful campaign cases (`f8f78e99`) are independently
-  reviewed and integrated; campaign execution remains pending.
+  reviewed and integrated; recovery/auction actions (`1cf4a74e`, nine new
+  cases) are also integrated. Campaign execution remains pending. The next
+  active build is an actual NativeOffer economics action/fuzz campaign.
   Canonical Museum admission (`29cd8b2d`) adds11
   source-reviewed Safe cases, native pending. Complete STATIC
   admission, actual full37 launch and joined Safe/fuzz acceptance remain.

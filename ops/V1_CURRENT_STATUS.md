@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `bee91ae5`. All 2,282 sources pass the combined
-ABI/type/storage check in 21.344 seconds. This does not generate bytecode or
+Latest Solidity source checkpoint: `ea92b7d4`. All 2,309 sources pass the combined
+ABI/type/storage check in 21.563 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
@@ -53,7 +53,9 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   Active-notice dismissal (`9ff19e55`,14 cases) and cancelled-notice histories
   (`ff60c308`,15 cases) are now source-integrated and independently reviewed.
   Complete repeated-living histories (`22e90a3b`,18 cases) are also integrated;
-  current-cause aborted-pending rotation joins and native acceptance remain.
+  current-cause aborted-pending recovery (`d5e3fbcb`, seven further reviewed
+  cases) is now integrated. First-recovery, class-3 and cancelled-Estate joins
+  are the next coherent batch; native acceptance remains pending.
 - Direct retained-file PREMIS projection (`a69c377e`) passes 53 root cases and
   its exact profile check. Missing or mismatched files cannot produce a positive
   subset. Supplied bytes and current local measurements do not invent historical
@@ -75,7 +77,12 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   and two 256-input fuzz properties pass, all five selected products fit, and
   minimal-host mutation costs 11,284,045 gas including intrinsic cost. Root
   verifies all 39 sources/41 artifacts/420 source hashes. The same actual-publisher
-  fixture is running as native10 with the reviewed repair; full latest-stack capacity remains open.
+  fixture completed as native10 with five passes and four failures. Preparation
+  still fits at 13,014,541/13,677,066 gas including intrinsic cost, but final
+  publication runs out of gas during manifest adoption. All 55 Store chunk
+  reads finish; the call trace does not establish the final failing opcode.
+  A fixed immutable-manifest binding is being built to remove duplicate storage
+  copies while retaining validation. Full publication capacity remains open.
 - Museum Standing V2 (`3f0967f`) consumes original unresolved conflict history
   and historical acknowledgement guards without altering V1. Root passes 27
   consumer cases plus 17 documentation cases; both profiles and all seven source
@@ -109,14 +116,20 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   unexecuted.
 - Original-living multiple-Artist/multiple-collection hydration (`8cc47857`)
   has ten independently reviewed actual-owner/Safe cases authored. Selected
-  sizing exposes new Identity/Coordinator overruns at 25,254/24,698 bytes; the
-  builder owns those repairs separately from older held Artist blockers.
-  Delegated and other advanced migration profiles remain in progress.
+  sizing exposed new Identity/Coordinator overruns at 25,254/24,698 bytes. The
+  integrated original-living delegation profile (`48754d47`) repairs those at
+  its exact source: all 18 selected products fit, including Identity 24,555,
+  Coordinator 24,072 and Registry 24,564 bytes. Ten more actual-owner/Safe cases
+  are authored and reviewed; native and joined-source size checks remain.
+  Complete combined multiplicity/delegation and advanced profiles remain in
+  progress; older held Artist blockers are unchanged.
 - Current Allowlist/Delegate gates and Merkle counter accounting (`f1acffbe`)
   add fourteen reviewed actual-contract/Safe recipes. Eight independently
   reviewed stateful campaign cases (`f8f78e99`) now add independent accounting,
   forced coverage, randomized actions and oracle-corruption controls. Native
-  campaign execution remains pending; abort/fallback actions are being added.
+  campaign execution remains pending. The reviewed recovery/auction campaign
+  (`1cf4a74e`) adds nine cases, preserves three incident cases and uses actual
+  Core/Artist/Ledger/Safes with explicit surrounding test boundaries.
 - Complete PREMIS authority-field accounting (`53aae1b0`) passes 62 root
   new/compatibility/documentation cases and exact profile/example checks. All
   69 retained inputs match Git bytes. Its example explicitly reports 17 bound,
@@ -127,6 +140,17 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   externally pinned byte-exact restoration precede atomic no-overwrite output.
   B independently reviewed source and failure/race oracles. Original profiles
   stay unchanged; Linux publication and institutional ingestion remain separate.
+- Original counter reads (`ea92b7d4`) now expose raw/scoped values and verified
+  remaining units. Proofless Merkle allowance queries explicitly require
+  evidence. Independent review covers all fifteen new cases, the exact
+  194-source ABI and 155-source size captures, preserved host ABI/storage and
+  all nine fitting selected products. Manager/fallback are 24,211/24,328 bytes.
+  One frozen 36-case read/preview/configuration run is assigned; no result yet.
+- Scoped BYTE_EXACT references (`a8a17f94`) add TOKEN/RELEASE/SEASON publication,
+  complete scope binding, immutable history and original class-2 locks. Seven
+  authored cases and all 174 ABI sources are independently reviewed. Native
+  acceptance, complete scoped inventory/provider and remaining modes/VIEW are
+  still required.
 - Seven inactive worktrees were removed after exact cleanliness and process
   checks. Every named branch and commit was retained. Active tasks, evidence,
   dirty worktrees and the Museum runtime were preserved; no tasks were archived.
