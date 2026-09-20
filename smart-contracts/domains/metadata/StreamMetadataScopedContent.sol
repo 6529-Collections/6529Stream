@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+import {
+    IStreamScopedContentRootPublication as R
+} from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
+import { StreamMetadataScopedContentState as State } from "./StreamMetadataScopedContentState.sol";
+import {
+    StreamMetadataScopedContentSource as Source
+} from "./StreamMetadataScopedContentSource.sol";
+import { StreamMetadataRouterContent as Content } from "./StreamMetadataRouterContent.sol";
+import { StreamMetadataContentRoot } from "./StreamMetadataContentRoot.sol";
+import "../finality/StreamContentRootSchemas.sol";
+
+/// @notice Fixed original-Router scoped write transport. Uses the original consent and
+/// ratification maps; the only new authority state is the compiler-owned scoped aggregate.
+library StreamMetadataScopedContent {
+    bytes32 private constant FAMILY = keccak256("CONTENT_ROOT");
+
+    function preview(
+        State.State storage state,
+        Content.Layout memory l,
+        Content.Context memory c,
+        R.Publication memory p,
+        address publisher
+    ) public view returns (bytes32) {
+        R.Record memory prepared = Source.prepare(Source.Context(c.core, c.artist), p, publisher);
+        return _nextFamily(state, l, c, prepared);
+    }
+
+    function publish(
+        State.State storage state,
+        Content.Layout memory l,
+        Content.Context memory c,
+        R.Publication memory p
+    ) public returns (bytes32 hash) {
+        Source.Context memory ctx = Source.Context(c.core, c.artist);
+        R.Record memory prepared = Source.prepare(ctx, p, msg.sender);
+        bytes32 nextFamily = _nextFamily(state, l, c, prepared);
+        (bytes32 consent, bytes32 ratification) =
+            Content.authorize(l, c, p.scope.collectionId, FAMILY, nextFamily);
+        R.Record memory current = Source.prepare(ctx, p, msg.sender);
+        if (
+            keccak256(abi.encode(current)) != keccak256(abi.encode(prepared))
+                || _nextFamily(state, l, c, current) != nextFamily
+        ) revert R.InvalidScopedContentRoot();
+        hash = State.commit(state, c.core, prepared, consent);
+        Content.recordApplication(l, c, p.scope.collectionId, FAMILY, consent, ratification);
+    }
+
+    function read(State.State storage state, address core, bytes calldata input)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes4 selector = bytes4(input[:4]);
+        if (selector == R.scopedContentRootHead.selector) {
+            StreamFinalityScope memory scope = abi.decode(input[4:], (StreamFinalityScope));
+            return abi.encode(state.heads[State.subject(core, scope)]);
+        }
+        if (selector == R.scopedContentRootRecord.selector) {
+            bytes32 hash = abi.decode(input[4:], (bytes32));
+            R.Record memory record = state.records[hash];
+            if (record.publisher == address(0)) revert R.ScopedContentRootUnknown(hash);
+            return abi.encode(record);
+        }
+        if (selector == R.scopedTokenContentRoot.selector) {
+            StreamFinalityScope memory scope = abi.decode(input[4:], (StreamFinalityScope));
+            bytes32 hash = state.heads[State.subject(core, scope)];
+            R.Record memory record = state.records[hash];
+            return abi.encode(
+                record.contentRoot,
+                record.leafCount,
+                record.leafCount == 0 ? bytes32(0) : StreamContentRootSchemas.LEAF_SCHEMA
+            );
+        }
+        revert R.InvalidScopedContentRoot();
+    }
+
+    function _nextFamily(
+        State.State storage state,
+        Content.Layout memory l,
+        Content.Context memory c,
+        R.Record memory prepared
+    ) private view returns (bytes32) {
+        uint256 cid = prepared.publication.scope.collectionId;
+        return State.family(
+            c.core,
+            cid,
+            StreamMetadataContentRoot.familyState(_legacy(l), c.core, cid),
+            State.next(state, c.core, prepared)
+        );
+    }
+
+    function _legacy(Content.Layout memory l)
+        private
+        pure
+        returns (StreamMetadataContentRoot.State storage value)
+    {
+        uint256 slot = l._contentRoots;
+        assembly ("memory-safe") { value.slot := slot }
+    }
+}

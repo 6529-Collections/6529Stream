@@ -45,6 +45,11 @@ import "./StreamMetadataTokenRenderer.sol";
 import "./StreamMetadataTokenReads.sol";
 import "./StreamMetadataImageURI.sol";
 import "./StreamMetadataContentRoot.sol";
+import { StreamMetadataScopedContent } from "./StreamMetadataScopedContent.sol";
+import { StreamMetadataScopedContentState } from "./StreamMetadataScopedContentState.sol";
+import {
+    IStreamScopedContentRootPublication as ScopedRoot
+} from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
 import "./StreamMetadataContentLocks.sol";
 import "./StreamMetadataContentAuthorization.sol";
 import "./StreamMetadataFinalityServing.sol";
@@ -123,6 +128,15 @@ contract StreamMetadataRouter is
     StreamMetadataRecoveryRoutes.OriginalAnchor public servingOriginalFinalityAnchor;
     bool private _originalFinalityAnchorInitialized;
     mapping(uint256 => mapping(uint8 => M.Selection)) private _selectedManifests;
+    StreamMetadataScopedContentState.State private _scopedContentRoots;
+    event ScopedContentRootPublished(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed scopeSubject,
+        bytes32 indexed recordHash,
+        ScopedRoot.Record record,
+        ScopedRoot.Aggregate collectionAggregate
+    );
     event CollectionManifestSelected(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -308,6 +322,7 @@ contract StreamMetadataRouter is
             || id == type(IStreamMetadataFullViews).interfaceId
             || id == type(IStreamScriptBundleSelection).interfaceId
             || id == type(IStreamContentRootPublication).interfaceId
+            || id == type(ScopedRoot).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
@@ -802,13 +817,17 @@ contract StreamMetadataRouter is
         returns (bytes32)
     {
         _requireContentCollection(publication.collectionId);
-        return StreamMetadataContentRoot.prepare(
+        bytes32 legacy =
+            StreamMetadataContentRoot.prepare(
             _contentRoots,
             StreamMetadataContentRoot.Context(address(core), address(artistRegistry)),
             publication,
             publisher
         )
         .stateHash;
+        return StreamMetadataScopedContentState.familyCurrent(
+            address(core), publication.collectionId, legacy
+        );
     }
 
     function publishVerifiedTokenContentRoot(Publication calldata publication)
@@ -821,11 +840,68 @@ contract StreamMetadataRouter is
             StreamMetadataContentRoot.Context(address(core), address(artistRegistry));
         Record memory prepared =
             StreamMetadataContentRoot.prepare(_contentRoots, ctx, publication, msg.sender);
-        (bytes32 consent, bytes32 ratification) =
-            _authorizeContentWrite(publication.collectionId, CONTENT_ROOT, prepared.stateHash);
+        (bytes32 consent, bytes32 ratification) = _authorizeContentWrite(
+            publication.collectionId,
+            CONTENT_ROOT,
+            StreamMetadataScopedContentState.familyCurrent(
+                address(core), publication.collectionId, prepared.stateHash
+            )
+        );
         recordHash =
             StreamMetadataContentRoot.publish(_contentRoots, ctx, publication, prepared, consent);
         _recordContentApplication(publication.collectionId, CONTENT_ROOT, consent, ratification);
+    }
+
+    function previewScopedContentRootPublication(
+        ScopedRoot.Publication calldata publication,
+        address publisher
+    ) external view returns (bytes32) {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataScopedContent.preview(
+            _scopedContentRoots, _contentLayout(), _contentContext(), publication, publisher
+        );
+    }
+
+    function publishScopedContentRootPublication(ScopedRoot.Publication calldata publication)
+        external
+        returns (bytes32)
+    {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataScopedContent.publish(
+            _scopedContentRoots, _contentLayout(), _contentContext(), publication
+        );
+    }
+
+    function scopedContentRootHead(StreamFinalityScope calldata) external view returns (bytes32) {
+        bytes memory out =
+            StreamMetadataScopedContent.read(_scopedContentRoots, address(core), msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function scopedContentRootRecord(bytes32) external view returns (ScopedRoot.Record memory) {
+        bytes memory out =
+            StreamMetadataScopedContent.read(_scopedContentRoots, address(core), msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    /// @notice Direct bounded aggregate read used by the fixed common-content worker.
+    /// @dev No dependency calls or delegated reads; preserves the original worker's nine-root layout.
+    function scopedContentRootAggregate(uint256 collectionId)
+        external
+        view
+        returns (ScopedRoot.Aggregate memory)
+    {
+        return _scopedContentRoots.aggregates[collectionId];
+    }
+
+    function scopedTokenContentRoot(StreamFinalityScope calldata)
+        external
+        view
+        returns (bytes32, uint64, bytes32)
+    {
+        bytes memory out =
+            StreamMetadataScopedContent.read(_scopedContentRoots, address(core), msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function tokenContentRoot(uint256 collectionId, bytes32 subject)

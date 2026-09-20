@@ -3,8 +3,12 @@ pragma solidity ^0.8.19;
 import { StreamMetadataStaticState as StaticState } from "./StreamMetadataStaticState.sol";
 import { StreamMetadataBundleRenderer } from "./StreamMetadataBundleRenderer.sol";
 
+import { StreamMetadataRouterContentState } from "./StreamMetadataRouterContentState.sol";
 import { StreamMetadataRouter } from "./StreamMetadataRouter.sol";
 import { StreamMetadataContentRoot } from "./StreamMetadataContentRoot.sol";
+import {
+    StreamMetadataScopedContentState as ScopedState
+} from "./StreamMetadataScopedContentState.sol";
 import { StreamMetadataContentAuthorization } from "./StreamMetadataContentAuthorization.sol";
 import { StreamMetadataImageURI } from "./StreamMetadataImageURI.sol";
 import { StreamMetadataRenderer } from "./StreamMetadataRenderer.sol";
@@ -560,34 +564,7 @@ library StreamMetadataRouterContent {
         bytes32 familyId
     ) private view returns (bool supported, bytes32 currentStateHash) {
         _requireContentCollection(l, e, collectionId);
-        if (familyId == StaticState.FAMILY) return (true, StaticState.family(e.core, collectionId));
-        if (familyId == CONTENT_ROOT) {
-            return
-                (
-                    true,
-                    StreamMetadataContentRoot.familyState(_contentRoots(l), e.core, collectionId)
-                );
-        }
-        StreamMetadataRouter.CollectionMetadata storage metadata = _collections(l)[collectionId];
-        if (familyId == CONTENT_SCRIPT) {
-            return (
-                true,
-                _withManifest(
-                    _scriptState(l, e, collectionId, metadata.animationScript),
-                    _selectedManifests(l)[collectionId][2]
-                )
-            );
-        }
-        if (familyId == CONTENT_MEDIA) {
-            return (
-                true,
-                _withManifest(
-                    _mediaState(l, e, collectionId, metadata.image, metadata.animationBaseURI),
-                    _selectedManifests(l)[collectionId][3]
-                )
-            );
-        }
-        return (false, bytes32(0));
+        return StreamMetadataRouterContentState.family(l, e, collectionId, familyId);
     }
 
     function _artistContentFreezeState(Layout memory l, Context memory e, uint256 collectionId)
@@ -644,93 +621,31 @@ library StreamMetadataRouterContent {
         ) revert IStreamCollectionManifestWriter.InvalidCollectionManifest();
     }
 
-    function _contentHostContext(Layout memory l, Context memory e, uint256 collectionId)
-        private
-        view
-        returns (bytes32)
-    {
-        return keccak256(
-            abi.encode(
-                block.chainid,
-                e.core,
-                collectionId,
-                address(this),
-                address(this).codehash,
-                address(StreamMetadataRenderer),
-                address(StreamMetadataRenderer).codehash
-            )
-        );
-    }
-
     function _contentState(Layout memory l, Context memory e, uint256 collectionId)
         private
         view
         returns (bytes32)
     {
-        StreamMetadataRouter.CollectionMetadata storage metadata = _collections(l)[collectionId];
-        bytes32 serving = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ROUTER_ONCHAIN_CONTENT_V1"),
-                _contentHostContext(l, e, collectionId),
-                keccak256(bytes(metadata.image)),
-                keccak256(bytes(metadata.animationBaseURI)),
-                keccak256(bytes(metadata.animationScript))
-            )
-        );
-        bytes32 rootHead = _contentRoots(l).heads[collectionId];
-        if (rootHead != 0) {
-            serving = keccak256(
-                abi.encode(
-                    keccak256("6529STREAM_ROUTER_CONTENT_WITH_ROOT_V1"),
-                    serving,
-                    _contentRoots(l).records[rootHead].stateHash
-                )
-            );
-        }
-        M.Selection memory script = _selectedManifests(l)[collectionId][2];
-        M.Selection memory media = _selectedManifests(l)[collectionId][3];
-        if (script.manifestHash != 0 || media.manifestHash != 0) {
-            serving = keccak256(
-                abi.encode(
-                    keccak256("6529STREAM_ROUTER_CONTENT_WITH_MANIFESTS_V1"), serving, script, media
-                )
-            );
-        }
-        return StaticState.withContent(e.core, collectionId, serving);
+        return StreamMetadataRouterContentState.current(l, e, collectionId);
     }
 
     function _scriptState(
-        Layout memory l,
+        Layout memory,
         Context memory e,
         uint256 collectionId,
         string memory script
     ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ROUTER_CONTENT_FAMILY_V1"),
-                _contentHostContext(l, e, collectionId),
-                CONTENT_SCRIPT,
-                keccak256(bytes(script))
-            )
-        );
+        return StreamMetadataRouterContentState.script(e.core, collectionId, script);
     }
 
     function _mediaState(
-        Layout memory l,
+        Layout memory,
         Context memory e,
         uint256 collectionId,
         string memory image,
         string memory baseURI
     ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ROUTER_CONTENT_FAMILY_V1"),
-                _contentHostContext(l, e, collectionId),
-                CONTENT_MEDIA,
-                keccak256(bytes(image)),
-                keccak256(bytes(baseURI))
-            )
-        );
+        return StreamMetadataRouterContentState.media(e.core, collectionId, image, baseURI);
     }
 
     function _requireContentUnlocked(
