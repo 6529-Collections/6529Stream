@@ -67,8 +67,8 @@ the release policy in `docs/release-policy.md`.
 
 - Add COLLECTION V2 finality statement, source, metadata and Artist-review
   adapters with exact full-policy commitments and a shared scoped/COLLECTION
-  reference component entry. Twenty-four focused manifest/source tests pass; actual
-  combined-provider and complete finality acceptance remain separate work.
+  reference component entry. Twenty-seven focused manifest/source/component tests
+  pass; combined-provider and complete finality acceptance remain separate work.
 
 - Add a distinct explicit-policy current-output checkpoint and covered manifest,
   plus V2 canonical Router CONTENT_ROOT adoption using original Artist consent,

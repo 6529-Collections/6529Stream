@@ -119,11 +119,21 @@ chain, factory/current route, both receipt profiles, complete bundle count and
 Registry-first refusal. This is separate from the manifest run: 24 distinct
 focused cases pass across the two captures.
 
-Three actual-reference component tests are authored and type-checked. They use
-the actual V2 reference/snapshot and retained record contracts with the inherited
-explicit typed source boundaries, but have not been executed in this batch. The
-earlier 22-case snapshot/reference run is separate evidence and predates the
-added COLLECTION component entry.
+Three actual-reference component tests also pass against the frozen source.
+They use the actual V2 reference/snapshot, Metadata, Schema, Store and Membership,
+with explicit typed Core, Artist, Router, output, policy, Archive and action-context
+boundaries. The checks prove both component interfaces retain the same literal
+V2 record/lock commitment; unlocked or wrong scopes refuse; current source drift
+refuses and exact restoration preserves historical payloads. Genuine artifact
+CREATE retains constructor arguments, caller/nonce and every runtime byte outside
+the complete checked immutable ranges.
+
+This third capture has 186 exact Git source files, 207 in-closure artifact metadata
+records and 3,299 matching source Keccak commitments. Snapshot and Reference
+runtimes are 21,488 and 22,119 bytes. Cached artifacts outside that closure are
+excluded. Its unchanged large fixture gas envelope is not transaction-cap
+acceptance. Across all three captures, 27 distinct tests pass; the earlier 22-case
+snapshot/reference run remains separate and predates the COLLECTION entry.
 
 Complete combined-provider dispatch, multi-profile Discovery, current component
 evaluation, full inventory materialization and finality acceptance remain joined
