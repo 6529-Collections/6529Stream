@@ -1,15 +1,24 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { AbiCoder, Interface, ZeroAddress, ZeroHash, id, keccak256, toUtf8Bytes } from "ethers";
+import { AbiCoder, Interface, ZeroAddress, ZeroHash, getAddress, id, keccak256, toUtf8Bytes } from "ethers";
 import { inspectBurnFinalityImpact } from "../dist/current-burn-finality.js";
 import { burnMintProgramConfigHash } from "../dist/current-burn-mint.js";
 
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/current-burn-finality-abi.json", import.meta.url)));
 const abis = Object.fromEntries(Object.entries(fixture.abis).map(([key, values]) => [key, new Interface(values)]));
+const erc20Fixture = JSON.parse(readFileSync(new URL("./fixtures/current-erc20-burn-mint-abi.json", import.meta.url)));
+const erc20GateAbi = new Interface(erc20Fixture.abis.gate), erc20SaleAbi = new Interface(erc20Fixture.abis.sale);
+// Solidity interfaceId excludes inherited IStreamMintGate functions. These are exactly the
+// functions declared by IStreamERC20BurnMintGate, resolved from its retained compiler ABI.
+const erc20GateId = `0x${["core", "erc20SaleAdapter", "erc20SaleCodeHash", "configureProgram", "program", "programConfigHash",
+  "allowedSourceCollections", "burnNullifier", "previewERC20Burn", "executeERC20Burn"]
+  .reduce((value, name) => value ^ BigInt(erc20GateAbi.getFunction(name).selector), 0n).toString(16).padStart(8, "0")}`;
+const legacyGateAbi = new Interface([...fixture.abis.gate, erc20GateAbi.getFunction("supportsInterface")]);
 const coder = AbiCoder.defaultAbiCoder();
-const A = n => `0x${BigInt(n).toString(16).padStart(40, "0")}`;
+const A = n => getAddress(`0x${BigInt(n).toString(16).padStart(40, "0")}`);
 const core = A(1), registry = A(2), gate = A(3), redemption = A(4), finality = A(5), manager = A(6), operator = A(7), paidSale = A(8);
+const erc20Gate = A(9), carrier = A(10), secondErc20Gate = A(11), extraNativeGate = A(12);
 const chainId = 31337n, blockNumber = 20, blockHash = id("block20");
 const code = "0x60016000", codeHash = keccak256(code);
 const pin = address => ({ address, codeHash });
@@ -17,6 +26,8 @@ const snapshotRequest = () => ({ chainId, core: pin(core), moduleRegistry: pin(r
   burnMintDeployments: [{ ...pin(gate), fromBlock: 1 }], redemptionDeployments: [{ ...pin(redemption), fromBlock: 1 }],
   action: { kind: "block-burns", collectionId: 1n }, blockNumber, blockHash,
   limits: { maxBlockSpan: 20, maxLogs: 12, maxPrograms: 8, maxCollections: 8 } });
+const erc20Pin = (address = erc20Gate) => ({ ...pin(address), fromBlock: 1, saleAdapter: pin(carrier) });
+const erc20Request = () => ({ ...snapshotRequest(), erc20BurnMintDeployments: [erc20Pin()] });
 const configType = "tuple(uint256 collectionId,uint64 startTime,uint64 endTime,bytes32 termsHash)";
 function makeRedemption(config = { collectionId: 1n, startTime: 110n, endTime: 300n, termsHash: id("terms") }, cancelled = false) {
   const saleNonce = 3n;
@@ -40,7 +51,20 @@ function context(options = {}) {
   const mintLog = log(abis.gate, "BurnMintProgramConfigured", [1, config.targetCollectionId, config.manager, config.phaseId, mint.configHash, config], gate, 5, 0);
   const saleLog = log(abis.redemption, "SaleConfigured", [1, red.saleId, red.program.config.collectionId, ZeroHash, 9, ZeroAddress, red.program.saleConfigHash, ZeroHash, 0], redemption, 6, 1);
   const termsLog = log(abis.redemption, "RedemptionTermsRecorded", [1, red.saleId, red.program.config.termsHash, red.program.config.startTime, red.program.config.endTime, red.program.saleNonce, operator], redemption, 6, 2);
-  const logs = [mintLog, saleLog, termsLog];
+  const mints = new Map([[gate, mint]]);
+  const erc20Gates = new Set(options.erc20Gates ?? (options.erc20 ? [erc20Gate] : []));
+  const extraLogs = [];
+  for (const address of [...(options.additionalNative ? [extraNativeGate] : []), ...erc20Gates]) {
+    const isERC20 = erc20Gates.has(address);
+    const c = { ...config, phaseId: id(`phase ${address}`), prepared: false,
+      nativeSaleAdapter: isERC20 ? ZeroAddress : paidSale, ...(isERC20 ? options.erc20Config : {}) };
+    const p = { config: c, configHash: burnMintProgramConfigHash(chainId, address, core, registry, c),
+      managerCodeHash: codeHash, nativeSaleCodeHash: isERC20 ? options.erc20NativeCodeHash ?? ZeroHash : codeHash };
+    mints.set(address, p);
+    extraLogs.push(log(isERC20 ? erc20GateAbi : legacyGateAbi, "BurnMintProgramConfigured",
+      [1, c.targetCollectionId, c.manager, c.phaseId, p.configHash, c], address, 7, 3 + extraLogs.length));
+  }
+  const logs = [mintLog, saleLog, termsLog, ...extraLogs];
   const states = new Map([1n, 2n, 3n].map(cid => [cid, {
     exists: true, supplyMode: 1n, status: cid === 1n ? 2n : 0n, hasMaxSupply: true, maxSupply: 10n, mintedEver: 4n,
     frozen: false, burnsBlocked: false, burnsBlockedAtBlock: 0n, finality: emptyFinality(), freezeMode: 0n,
@@ -55,26 +79,33 @@ function context(options = {}) {
       const original = { number, hash: id(`block${number}`), timestamp: number === 5 ? 100 : number === 6 ? 110 : options.timestamp ?? 200 };
       return options.block?.(number, blockReads.get(number), original) ?? original;
     },
-    async getCode(address, tag) { assert.equal(tag, blockNumber); return options.code?.(address) ?? code; },
+    async getCode(address, tag) { queries.push({ codeAddress: address, blockTag: tag }); assert.equal(tag, blockNumber); return options.code?.(address) ?? code; },
     async getLogs(filter) {
       queries.push(filter); assert.equal(filter.fromBlock, 1); assert.equal(filter.toBlock, blockNumber);
       return options.logs?.(filter, logs) ?? logs.filter(l => l.address === filter.address && l.topics[0] === filter.topics[0]);
     },
     async call(request) {
       queries.push(request); assert.equal(request.blockTag, blockNumber);
-      const abi = request.to === core ? abis.core : request.to === gate ? abis.gate : request.to === redemption ? abis.redemption : request.to === finality ? abis.finality : bindings;
+      const abi = request.to === core ? abis.core : erc20Gates.has(request.to) ? erc20GateAbi : mints.has(request.to) ? legacyGateAbi
+        : request.to === carrier ? erc20SaleAbi : request.to === redemption ? abis.redemption : request.to === finality ? abis.finality : bindings;
       const parsed = abi.parseTransaction({ data: request.data }), name = parsed.name;
       const raw = options.raw?.(name, parsed.args, request); if (raw !== undefined) return raw;
       let values;
       if (name === "core") values = [core];
       else if (name === "moduleRegistry") values = [registry];
       else if (name === "mintManager") values = [manager];
-      else if (name === "coreCodeHash" || name === "registryCodeHash") values = [codeHash];
+      else if (["coreCodeHash", "registryCodeHash", "moduleRegistryCodeHash", "mintManagerCodeHash"].includes(name)) values = [codeHash];
+      else if (name === "erc20SaleAdapter") values = [carrier];
+      else if (name === "erc20SaleCodeHash") values = [codeHash];
+      else if (name === "supportsInterface") {
+        assert.equal(parsed.args[0], erc20GateId, "exact dedicated interface, excluding inherited selectors");
+        values = [erc20Gates.has(request.to)];
+      }
       else if (name === "getSatellitePointer") {
         const target = parsed.args[0] === id("MODULE_REGISTRY") ? registry : parsed.args[0] === id("ARTWORK_FINALITY_REGISTRY") ? finality : options.managerPointer ?? manager;
         values = [target, codeHash, false, ZeroHash, "0x00000000", registry, 1, ZeroHash, ZeroHash, 1];
-      } else if (name === "program") values = [request.to === gate ? mint : red.program];
-      else if (name === "allowedSourceCollections") values = [config.sourceCollectionIds];
+      } else if (name === "program") values = [mints.get(request.to) ?? red.program];
+      else if (name === "allowedSourceCollections") values = [mints.get(request.to).config.sourceCollectionIds];
       else if (name === "artworkFreezeMode") {
         assert.equal(parsed.args[0].scopeType, 0n); assert.equal(parsed.args[0].tokenId, 0n); assert.equal(parsed.args[0].scopeId, ZeroHash);
         values = [states.get(parsed.args[0].collectionId).freezeMode];
@@ -88,7 +119,7 @@ function context(options = {}) {
       return abi.encodeFunctionResult(name, values);
     },
   };
-  return { provider, queries, logs, mint, red, states };
+  return { provider, queries, logs, mint, mints, red, states };
 }
 
 test("bounded immutable joins keep CLOSED source burns available and separate action consequences", async () => {
@@ -242,5 +273,208 @@ test("inspection rejects historical or current block changes before returning", 
   for (const number of [5, 6, 20]) {
     const ctx = context({ block: (n, count, b) => n === number && count >= 2 ? { ...b, hash: id("new canonical block") } : undefined });
     await assert.rejects(inspectBurnFinalityImpact(ctx.provider, snapshotRequest()), /block changed/);
+  }
+});
+
+test("mixed free/native/ERC20/redemption discovery preserves original commitments and independent roles", async () => {
+  const request = erc20Request(); request.burnMintDeployments.push({ ...pin(extraNativeGate), fromBlock: 1 });
+  const ctx = context({ erc20: true, additionalNative: true });
+  const report = await inspectBurnFinalityImpact(ctx.provider, request);
+  assert.deepEqual(report.programs.map(p => p.kind).sort(), ["burn-mint", "burn-mint", "burn-redemption", "erc20-burn-mint"].sort());
+  const paid = report.programs.find(p => p.kind === "erc20-burn-mint");
+  assert.equal(paid.deployment, erc20Gate); assert.equal(paid.program.configHash, ctx.mints.get(erc20Gate).configHash);
+  assert.equal(paid.program.config.nativeSaleAdapter, ZeroAddress);
+  assert.deepEqual(paid.sourceWarnings.map(w => [w.code, w.collectionId]), [["source-burns-will-stop", 1n]]);
+  assert.equal(paid.sources[1].sourceBurnsAllowedByCollection, true);
+  assert.equal(paid.targetWarnings.length, 0); assert.equal(paid.observedBlockers.length, 0);
+  const covered = report.coverage.deployments.find(p => p.kind === "erc20-burn-mint");
+  assert.deepEqual([covered.address, covered.fromBlock, covered.toBlock, covered.logCount, covered.programCount], [erc20Gate, 1, 20, 1, 1]);
+  assert.equal(report.coverage.inventoryComplete, false); assert.equal(report.coverage.executionReadinessChecked, false);
+  for (const address of [gate, extraNativeGate, erc20Gate]) {
+    const calls = ctx.queries.filter(q => q.to === address && q.data.startsWith(erc20GateAbi.getFunction("supportsInterface").selector));
+    assert.equal(calls.length, 1); assert.equal(calls[0].blockTag, blockNumber);
+  }
+  assert.ok(ctx.queries.some(q => q.codeAddress === carrier && q.blockTag === blockNumber));
+
+  request.action = { kind: "collection-finality", collectionId: 3n };
+  const closing = await inspectBurnFinalityImpact(context({ erc20: true, additionalNative: true }).provider, request);
+  const target = closing.programs.find(p => p.kind === "erc20-burn-mint");
+  assert.equal(target.sourceWarnings.length, 0);
+  assert.ok(target.targetWarnings.some(w => w.code === "target-finality-requires-closure"));
+});
+
+test("an ERC20 gate with no discovered programs still authenticates its dedicated carrier", async () => {
+  const request = erc20Request(); request.burnMintDeployments = []; request.redemptionDeployments = [];
+  const ctx = context({ erc20: true, logs: () => [] });
+  const result = await inspectBurnFinalityImpact(ctx.provider, request);
+  assert.deepEqual(result.programs, []); assert.equal(result.collections.length, 1);
+  assert.deepEqual(result.coverage.deployments, [{ kind: "erc20-burn-mint", address: erc20Gate,
+    fromBlock: 1, toBlock: 20, logCount: 0, programCount: 0 }]);
+  assert.equal(result.coverage.inventoryComplete, false);
+  assert.ok(ctx.queries.some(q => q.codeAddress === carrier && q.blockTag === blockNumber));
+  assert.ok(ctx.queries.some(q => q.to === carrier && q.data === erc20SaleAbi.encodeFunctionData("coreCodeHash")));
+  assert.ok(!ctx.queries.some(q => q.to === erc20Gate && q.data.startsWith(erc20GateAbi.getFunction("program").selector)));
+  let carrierRead = false;
+  const invalid = context({ erc20: true, logs: () => [], raw(name, args, req) {
+    if (req.to !== carrier || name !== "core") return undefined;
+    carrierRead = true; return erc20SaleAbi.encodeFunctionResult(name, [A(99)]);
+  } });
+  await assert.rejects(inspectBurnFinalityImpact(invalid.provider, request), /carrier.*dependenc|binding/i);
+  assert.equal(carrierRead, true);
+});
+
+test("ERC20 program timing retains inclusive start and end boundaries and zero-ended availability", async () => {
+  const request = erc20Request(); request.burnMintDeployments = []; request.redemptionDeployments = [];
+  for (const [timestamp, endsAt, expected] of [
+    [249, 300n, ["program-not-started"]], [250, 300n, []], [300, 300n, []],
+    [301, 300n, ["program-ended"]], [301, 0n, []],
+  ]) {
+    const ctx = context({ erc20: true, timestamp, erc20Config: { startsAt: 250n, endsAt } });
+    const result = await inspectBurnFinalityImpact(ctx.provider, request);
+    assert.equal(result.programs[0].kind, "erc20-burn-mint");
+    assert.deepEqual(result.programs[0].observedBlockers.map(w => w.code), expected, `timestamp ${timestamp}, end ${endsAt}`);
+    assert.deepEqual(result.programs[0].sourceWarnings.map(w => w.code), ["source-burns-will-stop"]);
+  }
+});
+
+test("omitted ERC20 deployments preserve the legacy request shape and explicitly bounded inventory", async () => {
+  const ctx = context({ erc20: true });
+  const omitted = await inspectBurnFinalityImpact(ctx.provider, snapshotRequest());
+  assert.equal(Object.hasOwn(omitted.request, "erc20BurnMintDeployments"), false);
+  assert.equal(omitted.programs.length, 2); assert.equal(omitted.coverage.inventoryComplete, false);
+  assert.ok(!ctx.queries.some(q => q.to === erc20Gate || q.address === erc20Gate || q.codeAddress === carrier));
+  const explicit = { ...snapshotRequest(), erc20BurnMintDeployments: [] };
+  const empty = await inspectBurnFinalityImpact(context().provider, explicit);
+  assert.deepEqual(empty.request.erc20BurnMintDeployments, []);
+  assert.deepEqual(empty.programs, omitted.programs);
+});
+
+test("dedicated gates cannot be declared as free and original gates cannot be declared as ERC20", async () => {
+  const hidden = snapshotRequest(); hidden.burnMintDeployments = [{ ...pin(erc20Gate), fromBlock: 1 }];
+  await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true }).provider, hidden), /ERC20|profile|interface|dedicated/i);
+  const wrong = erc20Request(); wrong.burnMintDeployments = []; wrong.erc20BurnMintDeployments[0].address = gate;
+  await assert.rejects(inspectBurnFinalityImpact(context().provider, wrong), /ERC20|profile|interface|dedicated/i);
+  for (const raw of ["0x", `0x${"0".repeat(63)}2`, `0x${"0".repeat(63)}1${"00".repeat(32)}`]) {
+    await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true,
+      raw: (name, args, req) => name === "supportsInterface" && req.to === erc20Gate ? raw : undefined,
+    }).provider, erc20Request()), /length|Noncanonical|canonical|boolean/i);
+  }
+});
+
+test("ERC20 gate and carrier runtime pins are independent, nonempty and exact", async () => {
+  for (const target of [erc20Gate, carrier]) {
+    for (const runtime of ["0x", "0x60026000"]) {
+      await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true,
+        code: address => address === target ? runtime : undefined,
+      }).provider, erc20Request()), /code differs/i);
+    }
+    const request = erc20Request();
+    if (target === carrier) request.erc20BurnMintDeployments[0].saleAdapter.codeHash = id("wrong runtime pin");
+    else request.erc20BurnMintDeployments[0].codeHash = id("wrong runtime pin");
+    await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true }).provider, request), /code differs/i);
+  }
+});
+
+test("every ERC20 gate/carrier immutable address and hash binding is authenticated", async () => {
+  const mutations = [
+    [erc20Gate, erc20GateAbi, "erc20SaleAdapter", A(99)], [erc20Gate, erc20GateAbi, "erc20SaleCodeHash", id("wrong carrier hash")],
+    [erc20Gate, erc20GateAbi, "core", A(99)], [erc20Gate, erc20GateAbi, "coreCodeHash", id("wrong core hash")],
+    [erc20Gate, erc20GateAbi, "moduleRegistry", A(99)], [erc20Gate, erc20GateAbi, "registryCodeHash", id("wrong registry hash")],
+    [carrier, erc20SaleAbi, "core", A(99)], [carrier, erc20SaleAbi, "coreCodeHash", id("wrong core hash")],
+    [carrier, erc20SaleAbi, "moduleRegistry", A(99)], [carrier, erc20SaleAbi, "moduleRegistryCodeHash", id("wrong registry hash")],
+    [carrier, erc20SaleAbi, "mintManager", A(99)], [carrier, erc20SaleAbi, "mintManagerCodeHash", id("wrong manager hash")],
+  ];
+  for (const [target, abi, method, replacement] of mutations) {
+    let observed = false;
+    const ctx = context({ erc20: true, raw(name, args, req) {
+      if (req.to !== target || name !== method) return undefined;
+      observed = true; return abi.encodeFunctionResult(name, [replacement]);
+    } });
+    await assert.rejects(inspectBurnFinalityImpact(ctx.provider, erc20Request()), undefined, `${target}.${method}`);
+    assert.equal(observed, true, `read ${target}.${method} before rejecting`);
+  }
+  const replaced = await inspectBurnFinalityImpact(context({ erc20: true, managerPointer: A(99) }).provider, erc20Request());
+  assert.ok(replaced.programs.find(p => p.kind === "erc20-burn-mint").observedBlockers.some(w => w.code === "program-manager-not-selected"));
+});
+
+test("ERC20 program rejects prepared/native profiles and mismatched original event/getter sources", async () => {
+  for (const options of [{ erc20Config: { prepared: true } }, { erc20Config: { nativeSaleAdapter: paidSale } }, { erc20NativeCodeHash: codeHash }]) {
+    await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true, ...options }).provider, erc20Request()), /ERC20|prepared|native|profile/i);
+  }
+  for (const method of ["program", "allowedSourceCollections"]) {
+    const ctx = context({ erc20: true });
+    const original = ctx.provider.call.bind(ctx.provider);
+    ctx.provider.call = async req => {
+      if (req.to !== erc20Gate) return original(req);
+      const parsed = erc20GateAbi.parseTransaction({ data: req.data });
+      if (parsed.name !== method) return original(req);
+      return erc20GateAbi.encodeFunctionResult(method, method === "program"
+        ? [{ ...ctx.mints.get(erc20Gate), configHash: id("substituted original commitment") }] : [[2n]]);
+    };
+    await assert.rejects(inspectBurnFinalityImpact(ctx.provider, erc20Request()), /event|program|source/i);
+  }
+});
+
+test("distinct ERC20 gates may share one exact carrier while conflicting code pins fail", async () => {
+  const request = erc20Request(); request.erc20BurnMintDeployments.push(erc20Pin(secondErc20Gate));
+  const result = await inspectBurnFinalityImpact(context({ erc20Gates: [erc20Gate, secondErc20Gate] }).provider, request);
+  const programs = result.programs.filter(p => p.kind === "erc20-burn-mint");
+  assert.deepEqual(programs.map(p => p.deployment), [erc20Gate, secondErc20Gate]);
+  assert.notEqual(programs[0].program.configHash, programs[1].program.configHash, "original config hash remains gate-bound");
+  assert.deepEqual(result.request.erc20BurnMintDeployments.map(p => p.saleAdapter), [pin(carrier), pin(carrier)]);
+  request.erc20BurnMintDeployments[1].saleAdapter.codeHash = id("conflicting shared carrier pin");
+  await assert.rejects(inspectBurnFinalityImpact(context({ erc20Gates: [erc20Gate, secondErc20Gate] }).provider, request), /pin|code|conflict|differ/i);
+});
+
+test("ERC20 deployment fields, nested pins and aggregate discovery retain explicit bounds", async () => {
+  const invalid = [
+    r => { r.erc20BurnMintDeployments = null; },
+    r => { delete r.erc20BurnMintDeployments[0].saleAdapter; },
+    r => { r.erc20BurnMintDeployments[0].saleAdapter.address = ZeroAddress; },
+    r => { r.erc20BurnMintDeployments[0].saleAdapter.extra = true; },
+    r => { r.erc20BurnMintDeployments[0].extra = true; },
+    r => { r.erc20BurnMintDeployments[0].fromBlock = 0; },
+    r => { r.erc20BurnMintDeployments.push(erc20Pin()); },
+    r => { r.erc20BurnMintDeployments = Array.from({ length: 17 }, (_, i) => erc20Pin(A(100 + i))); },
+    r => { r.erc20BurnMintDeployments[0].saleAdapter.address = core; },
+    r => { r.erc20BurnMintDeployments[0].saleAdapter.address = erc20Gate; },
+  ];
+  for (const mutate of invalid) {
+    const request = erc20Request(); mutate(request);
+    let networkReads = 0;
+    await assert.rejects(inspectBurnFinalityImpact({ async getNetwork() { networkReads++; return { chainId }; } }, request));
+    assert.equal(networkReads, 0, "reject malformed deployment input before any RPC");
+  }
+  for (const limits of [{ maxLogs: 3 }, { maxPrograms: 2 }]) {
+    const request = erc20Request(); request.limits = { ...request.limits, ...limits };
+    await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true }).provider, request), /bound|exceed/i);
+  }
+});
+
+test("ERC20 nested deployment input is copied before await and its report is deeply frozen", async () => {
+  const request = erc20Request();
+  const ctx = context({ erc20: true, onNetwork() {
+    request.erc20BurnMintDeployments[0].address = A(99);
+    request.erc20BurnMintDeployments[0].fromBlock = 999;
+    request.erc20BurnMintDeployments[0].saleAdapter.address = A(98);
+    request.erc20BurnMintDeployments[0].saleAdapter.codeHash = id("late mutation");
+    request.erc20BurnMintDeployments.push(erc20Pin(secondErc20Gate));
+  } });
+  const result = await inspectBurnFinalityImpact(ctx.provider, request);
+  assert.deepEqual(result.request.erc20BurnMintDeployments, [erc20Pin()]);
+  assert.ok(Object.isFrozen(result.request.erc20BurnMintDeployments));
+  assert.ok(Object.isFrozen(result.request.erc20BurnMintDeployments[0]));
+  assert.ok(Object.isFrozen(result.request.erc20BurnMintDeployments[0].saleAdapter));
+  assert.ok(Object.isFrozen(result.programs.find(p => p.kind === "erc20-burn-mint").program.config));
+});
+
+test("ERC20 discovery rechecks its historical block and rejects malformed carrier return data", async () => {
+  await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true,
+    block: (number, count, value) => number === 7 && count >= 2 ? { ...value, hash: id("ERC20 orphaned event") } : undefined,
+  }).provider, erc20Request()), /block changed/);
+  for (const raw of ["0x", `0x${"00".repeat(8193)}`, `0x${"00".repeat(32)}${"00".repeat(32)}`]) {
+    await assert.rejects(inspectBurnFinalityImpact(context({ erc20: true,
+      raw: (name, args, req) => req.to === carrier && name === "mintManagerCodeHash" ? raw : undefined,
+    }).provider, erc20Request()), /length|oversized|canonical/i);
   }
 });

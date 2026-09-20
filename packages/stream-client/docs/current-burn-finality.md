@@ -10,7 +10,9 @@ It prepares no transactions and establishes no governance authority.
 
 Pass the chain, concrete block number and hash, and verified runtime code hashes
 for Core, the module registry, artwork finality registry and every relevant
-`StreamBurnMintGate` and `StreamBurnRedemption` deployment. Each program host
+`StreamBurnMintGate`, `StreamERC20BurnMintGate` and `StreamBurnRedemption`
+deployment. Pin each dedicated ERC20 gate's immutable `StreamERC20BurnMintSale`
+carrier separately. Each program host
 also needs an explicit `fromBlock`. Use its deployment block when the review
 needs its entire history through the pinned block.
 
@@ -23,6 +25,10 @@ const report = await inspectBurnFinalityImpact(provider, {
   moduleRegistry: { address: registry, codeHash: registryCodeHash },
   finality: { address: finality, codeHash: finalityCodeHash },
   burnMintDeployments: [{ address: gate, codeHash: gateCodeHash, fromBlock: gateDeploymentBlock }],
+  erc20BurnMintDeployments: [{
+    address: erc20Gate, codeHash: erc20GateCodeHash, fromBlock: erc20GateDeploymentBlock,
+    saleAdapter: { address: erc20Sale, codeHash: erc20SaleCodeHash },
+  }],
   redemptionDeployments: [{ address: redemption, codeHash: redemptionCodeHash, fromBlock: redemptionDeploymentBlock }],
   action: { kind: "collection-finality", collectionId },
   blockNumber,
@@ -34,6 +40,14 @@ const report = await inspectBurnFinalityImpact(provider, {
 Other action kinds are `block-burns` and `freeze`. These are collection actions.
 TOKEN, RELEASE, SEASON and VIEW finality are separate scopes; this helper does
 not treat them as collection closure and does not accept them as action kinds.
+
+`erc20BurnMintDeployments` is optional for existing callers. Omitting it means
+dedicated ERC20 gates are outside the supplied inventory. A supplied gate's
+ERC165 declaration must match its inventory kind; putting a dedicated ERC20
+gate in `burnMintDeployments` fails inspection. Its program uses the original
+config encoding with zero native-sale fields, so those fields alone cannot
+identify it as free. Reports label it `erc20-burn-mint` in programs and coverage.
+Multiple ERC20 gates may share a carrier with the same address and code hash.
 
 There is no all-program getter. Discovery reads `BurnMintProgramConfigured`
 events for mint targets and redemption `SaleConfigured` (kind 9) plus
@@ -55,7 +69,13 @@ The supported read profile requires the supplied module and artwork finality
 registries to be Core's current selections. An immutable program whose mint
 manager is no longer selected remains in the report with a dependency blocker.
 Runtime bytes, immutable Core/registry bindings and event/program commitments
-must still agree. The client caps each program kind at 16 supplied deployments,
+must still agree. For ERC20 programs, the gate's immutable carrier address and
+code hash, the carrier's Core/registry addresses and code hashes, and its
+Manager address and code hash must also match the pinned environment and
+retained program. The dedicated program must have `prepared = false` and
+zero native-sale fields. These checks also run for supplied ERC20 deployments
+with no discovered programs, except the program-specific Manager comparison.
+The client caps each program kind at 16 supplied deployments,
 each discovery range at 1,000,000 blocks, total logs at 4,096, programs and joined
 collections at 256 each, RPC return data at 8,192 bytes and finality URI text at
 2,048 UTF-8 bytes. These are client inspection limits, not new contract rules.
@@ -102,6 +122,16 @@ extracts exact read/event ABI entries from the retained 2,098-source compiler
 capture at `2e0fca1a`. The ten selected source files are byte-identical at
 integration `5ae32cdf`. The original [burn-to-mint client](current-burn-mint.md)
 continues to own execution preparation.
+
+Dedicated ERC20 reads and the gate interface identifier are checked against
+the existing [ERC20 fixture](../test/fixtures/current-erc20-burn-mint-abi.json)
+from compiler capture `c717a3e1`, feature source `83c67868`. The dedicated gate,
+carrier, gate interface and shared settlement context have identical literal
+Git source hashes at this extension's base `c7463363`. No new Solidity
+compilation or runtime execution is implied by this client extension. The
+[dedicated ERC20 client](current-erc20-burn-mint.md) owns payment and execution
+preparation; this warning report does not inspect individual sale records,
+asset policy, payer authorization, payment settlement or reveal funding.
 
 Client tests exercise immutable event joins, collection-role warnings,
 malformed RPC responses and pinned-block behavior. They do not establish

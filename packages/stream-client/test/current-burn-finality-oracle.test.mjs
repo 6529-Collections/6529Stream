@@ -5,10 +5,32 @@ import { AbiCoder, Interface, ZeroAddress, ZeroHash, id } from "ethers";
 import { currentBurnFinalityFixture } from "../scripts/generate-current-burn-finality-fixture.mjs";
 
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/current-burn-finality-abi.json", import.meta.url), "utf8"));
+const erc20Fixture = JSON.parse(readFileSync(new URL("./fixtures/current-erc20-burn-mint-abi.json", import.meta.url), "utf8"));
 const gate = new Interface(fixture.abis.gate), core = new Interface(fixture.abis.core);
 const redemption = new Interface(fixture.abis.redemption), finality = new Interface(fixture.abis.finality);
 const coder = AbiCoder.defaultAbiCoder();
 const address = n => `0x${BigInt(n).toString(16).padStart(40, "0")}`;
+
+test("dedicated ERC20 gate keeps the original program encoding but authenticates a separate carrier", () => {
+  const erc20Gate = new Interface(erc20Fixture.abis.gate), carrier = new Interface(erc20Fixture.abis.sale);
+  assert.equal(erc20Fixture.sourceCommit, "c717a3e10dca06950353c66c6493de41cdfcb9e1");
+  for (const name of ["program", "allowedSourceCollections"]) {
+    assert.equal(erc20Gate.getFunction(name).format("sighash"), gate.getFunction(name).format("sighash"));
+    assert.deepEqual(erc20Gate.getFunction(name).outputs.map(p => p.format("sighash")), gate.getFunction(name).outputs.map(p => p.format("sighash")));
+  }
+  assert.equal(erc20Gate.getEvent("BurnMintProgramConfigured").format("full"), gate.getEvent("BurnMintProgramConfigured").format("full"));
+  // ERC165 excludes inherited IStreamMintGate functions from this interface ID.
+  const own = ["core", "erc20SaleAdapter", "erc20SaleCodeHash", "configureProgram", "program", "programConfigHash", "allowedSourceCollections", "burnNullifier", "previewERC20Burn", "executeERC20Burn"];
+  assert.equal(own.reduce((n, name) => n ^ BigInt(erc20Gate.getFunction(name).selector), 0n), 0xdf1ac32an);
+  for (const [abi, methods] of [[erc20Gate, { erc20SaleAdapter: "address", erc20SaleCodeHash: "bytes32", supportsInterface: "bool" }],
+    [carrier, { core: "address", coreCodeHash: "bytes32", moduleRegistry: "address", moduleRegistryCodeHash: "bytes32", mintManager: "address", mintManagerCodeHash: "bytes32" }]]) {
+    for (const [name, type] of Object.entries(methods)) {
+      const fn = abi.getFunction(name);
+      assert.equal(fn.stateMutability, "view");
+      assert.deepEqual(fn.outputs.map(p => p.type), [type]);
+    }
+  }
+});
 
 test("burn warning evidence pins compiler inputs and only exact view/event interfaces", () => {
   assert.equal(fixture.sourceCommit, "2e0fca1aef41a023d76a9717651a699bbd7db155");

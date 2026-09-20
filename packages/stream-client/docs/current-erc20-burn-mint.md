@@ -138,6 +138,8 @@ and feature source `83c67868`. All 2,108 literal source inputs match that commit
 
 Client encoding, synthetic RPC and Safe-plan tests do not establish joined
 current-stack execution, real Safe execution, gas limits, deployment or release
-acceptance. The existing burn/finality warning helper targets the original
-free/native gate and redemption deployments; this dedicated ERC20 gate is a
-separate deployment whose source and target effects also need operator review.
+acceptance. The [burn/finality warning helper](current-burn-finality.md) accepts
+this dedicated gate through `erc20BurnMintDeployments`, with its own discovery
+range and a separate code pin for the immutable ERC20 sale carrier. Include it
+when reviewing source or target collection closure; omitted deployments remain
+outside the report's explicitly incomplete inventory.

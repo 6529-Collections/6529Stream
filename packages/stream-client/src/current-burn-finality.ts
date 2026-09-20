@@ -6,6 +6,11 @@ import type { BurnMintProgram, BurnMintProgramConfig } from "./current-burn-mint
 
 export interface BurnFinalityCodePin { readonly address: Address; readonly codeHash: Hex }
 export interface BurnFinalityDiscoveryPin extends BurnFinalityCodePin { readonly fromBlock: number }
+export interface BurnFinalityERC20DiscoveryPin extends BurnFinalityDiscoveryPin {
+  /** The dedicated gate's immutable ERC20 sale carrier, independently code-pinned. */
+  readonly saleAdapter: BurnFinalityCodePin;
+}
+export type BurnFinalityProgramKind = "burn-mint" | "erc20-burn-mint" | "burn-redemption";
 /** Deliberately collection-only: narrower artwork scopes do not imply collection closure. */
 export interface BurnFinalityAction {
   readonly kind: "block-burns" | "freeze" | "collection-finality";
@@ -17,6 +22,7 @@ export interface BurnFinalityRequest {
   readonly moduleRegistry: BurnFinalityCodePin;
   readonly finality: BurnFinalityCodePin;
   readonly burnMintDeployments: readonly BurnFinalityDiscoveryPin[];
+  readonly erc20BurnMintDeployments?: readonly BurnFinalityERC20DiscoveryPin[];
   readonly redemptionDeployments: readonly BurnFinalityDiscoveryPin[];
   readonly action: BurnFinalityAction;
   readonly blockNumber: number;
@@ -52,7 +58,7 @@ export interface BurnFinalityWarning {
   readonly message: string;
 }
 export interface BurnFinalityProgramImpact {
-  readonly kind: "burn-mint" | "burn-redemption";
+  readonly kind: BurnFinalityProgramKind;
   readonly deployment: Address;
   readonly programId: bigint | Hex;
   readonly configuredAtBlock: number;
@@ -71,7 +77,7 @@ export interface BurnFinalityImpact {
   readonly action: BurnFinalityAction;
   readonly coverage: {
     readonly kind: "supplied-deployments-and-block-ranges-only";
-    readonly deployments: readonly { readonly kind: "burn-mint" | "burn-redemption"; readonly address: Address; readonly fromBlock: number; readonly toBlock: number; readonly logCount: number; readonly programCount: number }[];
+    readonly deployments: readonly { readonly kind: BurnFinalityProgramKind; readonly address: Address; readonly fromBlock: number; readonly toBlock: number; readonly logCount: number; readonly programCount: number }[];
     readonly inventoryComplete: false;
     readonly executionReadinessChecked: false;
   };
@@ -117,6 +123,17 @@ const finalityAbi = new Interface([
   `function artworkFreezeMode(${scopeTuple}) view returns (uint8)`,
 ]);
 const dependencyAbi = new Interface(["function core() view returns (address)", "function moduleRegistry() view returns (address)", "function mintManager() view returns (address)"]);
+const erc20GateAbi = new Interface([...gateAbi.fragments,
+  "function erc20SaleAdapter() view returns (address)", "function erc20SaleCodeHash() view returns (bytes32)",
+]);
+const erc20SaleAbi = new Interface([...dependencyAbi.fragments,
+  "function coreCodeHash() view returns (bytes32)", "function moduleRegistryCodeHash() view returns (bytes32)",
+  "function mintManagerCodeHash() view returns (bytes32)",
+]);
+const interfaceAbi = new Interface(["function supportsInterface(bytes4) view returns (bool)"]);
+// IStreamERC20BurnMintGate's own selectors, excluding inherited IStreamMintGate selectors.
+// The retained compiled ERC20 ABI oracle independently checks this identifier.
+const ERC20_GATE_INTERFACE = "0xdf1ac32a";
 type Reader = Pick<Provider, "getNetwork" | "getBlock" | "getCode" | "getLogs" | "call">;
 type Raw = Record<string, unknown>;
 const MAX_RETURN_BYTES = 8192;
@@ -143,7 +160,7 @@ function bytes(value: unknown, max: number): Hex {
 }
 function boolean(value: unknown): boolean { if (typeof value !== "boolean") throw Error("Noncanonical boolean"); return value; }
 function same(a: unknown, b: unknown): boolean { return typeof a === "string" && typeof b === "string" && a.toLowerCase() === b.toLowerCase(); }
-function pin(value: BurnFinalityCodePin): BurnFinalityCodePin {
+function pin(value: unknown): BurnFinalityCodePin {
   keys(value, ["address", "codeHash"], "deployment pin"); return Object.freeze({ address: address(value.address), codeHash: hash(value.codeHash) });
 }
 function discoveryPins(values: readonly BurnFinalityDiscoveryPin[], blockNumber: number, maxSpan: number): readonly BurnFinalityDiscoveryPin[] {
@@ -155,16 +172,34 @@ function discoveryPins(values: readonly BurnFinalityDiscoveryPin[], blockNumber:
     return Object.freeze({ address: address(value.address), codeHash: hash(value.codeHash), fromBlock });
   }));
 }
+function erc20DiscoveryPins(values: readonly BurnFinalityERC20DiscoveryPin[], blockNumber: number, maxSpan: number): readonly BurnFinalityERC20DiscoveryPin[] {
+  if (!Array.isArray(values) || values.length > 16) throw Error("Discovery accepts at most 16 deployments per program kind");
+  return Object.freeze(values.map(value => {
+    keys(value, ["address", "codeHash", "fromBlock", "saleAdapter"], "ERC20 discovery deployment");
+    const fromBlock = integer(value.fromBlock, 0, blockNumber);
+    if (blockNumber - fromBlock + 1 > maxSpan) throw Error("Discovery block range exceeds maxBlockSpan");
+    return Object.freeze({ address: address(value.address), codeHash: hash(value.codeHash), fromBlock, saleAdapter: pin(value.saleAdapter) });
+  }));
+}
 function request(input: BurnFinalityRequest): BurnFinalityRequest {
-  keys(input, ["chainId", "core", "moduleRegistry", "finality", "burnMintDeployments", "redemptionDeployments", "action", "blockNumber", "blockHash", "limits"], "burn/finality request");
+  const hasERC20 = Object.prototype.hasOwnProperty.call(input, "erc20BurnMintDeployments");
+  keys(input, ["chainId", "core", "moduleRegistry", "finality", "burnMintDeployments", "redemptionDeployments", "action", "blockNumber", "blockHash", "limits", ...(hasERC20 ? ["erc20BurnMintDeployments"] : [])], "burn/finality request");
   keys(input.action, ["kind", "collectionId"], "collection action");
   if (!["block-burns", "freeze", "collection-finality"].includes(input.action.kind)) throw Error("Only collection-scoped burn block, freeze, and finality actions are supported");
   keys(input.limits, ["maxBlockSpan", "maxLogs", "maxPrograms", "maxCollections"], "inspection limits");
   const limits = Object.freeze({ maxBlockSpan: integer(input.limits.maxBlockSpan, 1, 1_000_000), maxLogs: integer(input.limits.maxLogs, 1, 4096), maxPrograms: integer(input.limits.maxPrograms, 1, 256), maxCollections: integer(input.limits.maxCollections, 1, 256) });
   const blockNumber = integer(input.blockNumber, 0, Number.MAX_SAFE_INTEGER);
-  const result = Object.freeze({ chainId: uint(input.chainId, 256, true), core: pin(input.core), moduleRegistry: pin(input.moduleRegistry), finality: pin(input.finality), burnMintDeployments: discoveryPins(input.burnMintDeployments, blockNumber, limits.maxBlockSpan), redemptionDeployments: discoveryPins(input.redemptionDeployments, blockNumber, limits.maxBlockSpan), action: Object.freeze({ kind: input.action.kind, collectionId: uint(input.action.collectionId, 256, true) }), blockNumber, blockHash: hash(input.blockHash), limits });
-  const addresses = [result.core.address, result.moduleRegistry.address, result.finality.address, ...result.burnMintDeployments.map(p => p.address), ...result.redemptionDeployments.map(p => p.address)].map(a => a.toLowerCase());
-  if (new Set(addresses).size !== addresses.length) throw Error("Deployment addresses must be distinct"); return result;
+  const result = Object.freeze({ chainId: uint(input.chainId, 256, true), core: pin(input.core), moduleRegistry: pin(input.moduleRegistry), finality: pin(input.finality), burnMintDeployments: discoveryPins(input.burnMintDeployments, blockNumber, limits.maxBlockSpan), ...(hasERC20 ? { erc20BurnMintDeployments: erc20DiscoveryPins(input.erc20BurnMintDeployments!, blockNumber, limits.maxBlockSpan) } : {}), redemptionDeployments: discoveryPins(input.redemptionDeployments, blockNumber, limits.maxBlockSpan), action: Object.freeze({ kind: input.action.kind, collectionId: uint(input.action.collectionId, 256, true) }), blockNumber, blockHash: hash(input.blockHash), limits });
+  const addresses = [result.core.address, result.moduleRegistry.address, result.finality.address, ...result.burnMintDeployments.map(p => p.address), ...(result.erc20BurnMintDeployments ?? []).map(p => p.address), ...result.redemptionDeployments.map(p => p.address)].map(a => a.toLowerCase());
+  if (new Set(addresses).size !== addresses.length) throw Error("Deployment addresses must be distinct");
+  const carriers = new Map<string, Hex>();
+  for (const { saleAdapter } of result.erc20BurnMintDeployments ?? []) {
+    const carrier = saleAdapter.address.toLowerCase();
+    if (addresses.includes(carrier)) throw Error("ERC20 carrier must be distinct from program hosts and Core registries");
+    if (carriers.has(carrier) && carriers.get(carrier) !== saleAdapter.codeHash) throw Error("Shared ERC20 carrier code pins differ");
+    carriers.set(carrier, saleAdapter.codeHash);
+  }
+  return result;
 }
 async function rpc(provider: Reader, target: Address, abi: Interface, name: string, args: readonly unknown[], blockNumber: number, size?: number): Promise<readonly unknown[]> {
   const raw = bytes(await provider.call({ to: target, data: abi.encodeFunctionData(name, args), blockTag: blockNumber }), MAX_RETURN_BYTES);
@@ -191,6 +226,21 @@ async function deploymentBindings(provider: Reader, r: BurnFinalityRequest, p: B
     rpc(provider, p.address, abi, "coreCodeHash", [], r.blockNumber, 32), rpc(provider, p.address, abi, "registryCodeHash", [], r.blockNumber, 32),
   ]);
   if (!same(core, r.core.address) || !same(registry, r.moduleRegistry.address) || !same(coreHash, r.core.codeHash) || !same(registryHash, r.moduleRegistry.codeHash)) throw Error("Burn deployment immutable dependencies differ");
+}
+async function gateKind(provider: Reader, r: BurnFinalityRequest, p: BurnFinalityDiscoveryPin, erc20: boolean): Promise<void> {
+  const [supported] = await rpc(provider, p.address, interfaceAbi, "supportsInterface", [ERC20_GATE_INTERFACE], r.blockNumber, 32);
+  if (boolean(supported) !== erc20) throw Error("Burn gate kind differs; supply dedicated ERC20 gates with their carrier in erc20BurnMintDeployments");
+}
+async function erc20Bindings(provider: Reader, r: BurnFinalityRequest, p: BurnFinalityERC20DiscoveryPin): Promise<void> {
+  const [[carrier], [carrierHash], [core], [coreHash], [registry], [registryHash]] = await Promise.all([
+    rpc(provider, p.address, erc20GateAbi, "erc20SaleAdapter", [], r.blockNumber, 32),
+    rpc(provider, p.address, erc20GateAbi, "erc20SaleCodeHash", [], r.blockNumber, 32),
+    rpc(provider, p.saleAdapter.address, erc20SaleAbi, "core", [], r.blockNumber, 32),
+    rpc(provider, p.saleAdapter.address, erc20SaleAbi, "coreCodeHash", [], r.blockNumber, 32),
+    rpc(provider, p.saleAdapter.address, erc20SaleAbi, "moduleRegistry", [], r.blockNumber, 32),
+    rpc(provider, p.saleAdapter.address, erc20SaleAbi, "moduleRegistryCodeHash", [], r.blockNumber, 32),
+  ]);
+  if (!same(carrier, p.saleAdapter.address) || !same(carrierHash, p.saleAdapter.codeHash) || !same(core, r.core.address) || !same(coreHash, r.core.codeHash) || !same(registry, r.moduleRegistry.address) || !same(registryHash, r.moduleRegistry.codeHash)) throw Error("ERC20 burn gate/carrier immutable dependencies differ");
 }
 function mintConfigFrom(value: unknown): BurnMintProgramConfig {
   const v = value as readonly unknown[];
@@ -322,18 +372,24 @@ function actionPreconditions(action: BurnFinalityAction, c: BurnFinalityCollecti
  */
 export async function inspectBurnFinalityImpact(provider: Reader, input: BurnFinalityRequest): Promise<BurnFinalityImpact> {
   const r = request(input);
+  const erc20Deployments = r.erc20BurnMintDeployments ?? [];
   if ((await provider.getNetwork()).chainId !== r.chainId) throw Error("RPC chain differs from requested chain");
   const timestamp = await stableBlock(provider, r);
-  await Promise.all([r.core, r.moduleRegistry, r.finality, ...r.burnMintDeployments, ...r.redemptionDeployments].map(p => code(provider, p, r.blockNumber)));
+  await Promise.all([r.core, r.moduleRegistry, r.finality, ...r.burnMintDeployments, ...erc20Deployments, ...erc20Deployments.map(p => p.saleAdapter), ...r.redemptionDeployments].map(p => code(provider, p, r.blockNumber)));
   const [[finalityCore]] = await Promise.all([
     rpc(provider, r.finality.address, finalityAbi, "core", [], r.blockNumber, 32),
     pointer(provider, r, "MODULE_REGISTRY", r.moduleRegistry), pointer(provider, r, "ARTWORK_FINALITY_REGISTRY", r.finality),
     ...r.burnMintDeployments.map(p => deploymentBindings(provider, r, p, gateAbi)),
+    ...r.burnMintDeployments.map(p => gateKind(provider, r, p, false)),
+    ...erc20Deployments.map(p => deploymentBindings(provider, r, p, erc20GateAbi)),
+    ...erc20Deployments.map(p => gateKind(provider, r, p, true)),
+    ...erc20Deployments.map(p => erc20Bindings(provider, r, p)),
     ...r.redemptionDeployments.map(p => deploymentBindings(provider, r, p, redemptionAbi)),
   ]);
   if (!same(finalityCore, r.core.address)) throw Error("Finality registry Core differs");
   const discovered = await Promise.all([
     ...r.burnMintDeployments.map(async p => ({ kind: "burn-mint" as const, pin: p, events: await discover(provider, r, p, gateAbi, "BurnMintProgramConfigured"), terms: [] as readonly Discovered[] })),
+    ...erc20Deployments.map(async p => ({ kind: "erc20-burn-mint" as const, pin: p, events: await discover(provider, r, p, erc20GateAbi, "BurnMintProgramConfigured"), terms: [] as readonly Discovered[] })),
     ...r.redemptionDeployments.map(async p => { const [events, terms] = await Promise.all([discover(provider, r, p, redemptionAbi, "SaleConfigured"), discover(provider, r, p, redemptionAbi, "RedemptionTermsRecorded")]); return { kind: "burn-redemption" as const, pin: p, events, terms }; }),
   ]);
   const count = discovered.reduce((n, d) => n + d.events.length, 0);
@@ -357,11 +413,11 @@ export async function inspectBurnFinalityImpact(provider: Reader, input: BurnFin
     const termIds = d.terms.map(e => String(e.values[1]));
     if (d.terms.length !== d.events.length || new Set(termIds).size !== termIds.length || termIds.some(id => !saleIds.has(id))) throw Error("Redemption configuration requires exactly one matching terms event");
   }
-  const entries: { kind: "burn-mint" | "burn-redemption"; deployment: Address; programId: bigint | Hex; configuredAtBlock: number; program: BurnMintProgram | BurnRedemptionProgram; sourceIds: readonly bigint[]; targetId: bigint | null; dependencyBlockers: readonly BurnFinalityWarning[] }[] = [];
+  const entries: { kind: BurnFinalityProgramKind; deployment: Address; programId: bigint | Hex; configuredAtBlock: number; program: BurnMintProgram | BurnRedemptionProgram; sourceIds: readonly bigint[]; targetId: bigint | null; dependencyBlockers: readonly BurnFinalityWarning[] }[] = [];
   for (const d of discovered) for (const e of d.events) {
     const values = e.values; const programKey = `${d.pin.address}:${values[1]}`;
     if (knownPrograms.has(programKey)) throw Error("Duplicate immutable program configuration"); knownPrograms.add(programKey);
-    if (d.kind === "burn-mint") {
+    if (d.kind !== "burn-redemption") {
       const targetId = uint(values[1], 256, true); const eventConfig = mintConfigFrom(values[5]);
       const [[raw], [allowed]] = await Promise.all([
         rpc(provider, d.pin.address, gateAbi, "program", [targetId], r.blockNumber), rpc(provider, d.pin.address, gateAbi, "allowedSourceCollections", [targetId], r.blockNumber),
@@ -374,7 +430,15 @@ export async function inspectBurnFinalityImpact(provider: Reader, input: BurnFin
       const dependencyBlockers = same(managerPointer[0], managerPin.address) && same(managerPointer[1], managerPin.codeHash) ? [] : [warning("program", targetId, "program-manager-not-selected", "The immutable program Manager is not the currently selected Core Manager; the retained program cannot execute through this gate.")];
       const [[managerCore], [managerRegistry]] = await Promise.all([rpc(provider, p.config.manager, dependencyAbi, "core", [], r.blockNumber, 32), rpc(provider, p.config.manager, dependencyAbi, "moduleRegistry", [], r.blockNumber, 32)]);
       if (!same(managerCore, r.core.address) || !same(managerRegistry, r.moduleRegistry.address)) throw Error("Burn-mint Manager dependencies differ");
-      if (p.config.nativeSaleAdapter === ZeroAddress) { if (p.nativeSaleCodeHash !== ZeroHash) throw Error("Free burn-mint program has an unexpected native-sale code hash"); }
+      if (d.kind === "erc20-burn-mint") {
+        if (p.config.prepared || p.config.nativeSaleAdapter !== ZeroAddress || p.nativeSaleCodeHash !== ZeroHash) throw Error("ERC20 burn-mint program must be immediate with zero native-sale fields");
+        const [[saleManager], [saleManagerHash]] = await Promise.all([
+          rpc(provider, d.pin.saleAdapter.address, erc20SaleAbi, "mintManager", [], r.blockNumber, 32),
+          rpc(provider, d.pin.saleAdapter.address, erc20SaleAbi, "mintManagerCodeHash", [], r.blockNumber, 32),
+        ]);
+        if (!same(saleManager, p.config.manager) || !same(saleManagerHash, p.managerCodeHash)) throw Error("ERC20 burn carrier Manager binding differs from immutable program");
+      }
+      else if (p.config.nativeSaleAdapter === ZeroAddress) { if (p.nativeSaleCodeHash !== ZeroHash) throw Error("Free burn-mint program has an unexpected native-sale code hash"); }
       else {
         await code(provider, { address: p.config.nativeSaleAdapter, codeHash: p.nativeSaleCodeHash }, r.blockNumber);
         const [[saleCore], [saleManager], [saleRegistry]] = await Promise.all([rpc(provider, p.config.nativeSaleAdapter, dependencyAbi, "core", [], r.blockNumber, 32), rpc(provider, p.config.nativeSaleAdapter, dependencyAbi, "mintManager", [], r.blockNumber, 32), rpc(provider, p.config.nativeSaleAdapter, dependencyAbi, "moduleRegistry", [], r.blockNumber, 32)]);
@@ -401,8 +465,8 @@ export async function inspectBurnFinalityImpact(provider: Reader, input: BurnFin
   const programs = entries.map(e => {
     const sources = Object.freeze(e.sourceIds.map(c => byId.get(c)!)); const target = e.targetId === null ? null : byId.get(e.targetId)!;
     const observedBlockers = [...e.dependencyBlockers, ...observedSources(sources)]; if (target) observedBlockers.push(...observedTarget(target));
-    const start = e.kind === "burn-mint" ? (e.program as BurnMintProgram).config.startsAt : (e.program as BurnRedemptionProgram).config.startTime;
-    const end = e.kind === "burn-mint" ? (e.program as BurnMintProgram).config.endsAt : (e.program as BurnRedemptionProgram).config.endTime;
+    const start = e.kind !== "burn-redemption" ? (e.program as BurnMintProgram).config.startsAt : (e.program as BurnRedemptionProgram).config.startTime;
+    const end = e.kind !== "burn-redemption" ? (e.program as BurnMintProgram).config.endsAt : (e.program as BurnRedemptionProgram).config.endTime;
     if (timestamp < start) observedBlockers.push(warning("program", null, "program-not-started", "The configured program window has not started."));
     if (end !== 0n && timestamp > end) observedBlockers.push(warning("program", null, "program-ended", "The configured program window has ended."));
     if (e.kind === "burn-redemption" && (e.program as BurnRedemptionProgram).cancelled) observedBlockers.push(warning("program", null, "program-cancelled", "The immutable redemption program has been cancelled."));
