@@ -7,7 +7,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 19 September 2026. The owner authorizes autonomous completion of the
+Updated 20 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -21,11 +21,25 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `f01e62e4`: recovered Museum joins and metric/Safe clients integrated; root 90 Museum and 415 client tests pass. Two ERC20 offer fixture corrections are integrated with cached native retries pending. See the [19 September report](V1_CURRENT_STATUS.md#19-september-recovery-and-integration) for source/runtime boundaries and active blockers. Immutable RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `5ae32cdf`: Museum capture runner 6c029d59 and ERC20 clients 0d2b62ea integrated; root112 Museum/447 client tests pass. Independently verified payment unions accept71 shared/42 carrier checks. Artifact-based fixture pilot runtime/timing pending. See the [20 September batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); immutable RC1 remains unchanged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-19 UTC` |
+| Last updated | `2026-09-20 UTC` |
+
+## Active continuation: 20 September
+
+Both payment retry captures are complete and independently verified. Testing
+owns the one warmed receipt-fixture artifact pilot; no duplicate broad compiler
+is needed. Burn finalizes dedicated ERC20 paid-burn source and its gate tests.
+Clients finished ERC20 offer calls and now build prefreeze/finality operator
+warnings. Museum extends the actual-token recipe with six same-block sources,
+populated Owner/Metadata lanes and explicit source-bound artifacts; root owns
+any subsequent local chain launch. Metadata completes the corrected publication
+fixture; revenue independently reviews exact proposals and runs the combined
+metric replay only after valid export. The price lead prepares the exact inert
+dedicated-carrier proposal after a new automatic application rejection; no
+alternate application path or implicit approval is used. Root owns integrations.
 
 ## Reboot recovery assignments: 19 September
 

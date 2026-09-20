@@ -1,6 +1,6 @@
 # Full-v1 current delivery status
 
-Updated 19 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+Updated 20 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
 records every feature family with separate build, testing and integration status.
 Use it for the common delivery scope and remaining work. This file retains the
 current narrative and historical evidence boundaries.
@@ -15,6 +15,39 @@ local inherited/global primary-freeze implementation pending a more specific
 owner approval. The separate ERC-20 payable reveal-fee implementation is also
 blocked by automatic review even after the owner explicitly approved that local
 implementation. The exact unapplied patch is prepared and an artifact-specific approval is pending; other work continues.
+
+## 20 September integrated batch
+
+- ERC20 offer clients are integrated as `0d2b62ea`; all 447 root package tests,
+  generation/build/types and the exact 2,098-source ABI-fixture check pass.
+  The package includes the four funding routes, original signatures and payer
+  intents, receipt/revocation reads and nineteen authorized user-call Safe entries.
+- Both payment fixture retries pass. Shared acceptance is 71 distinct checks
+  (40 corrected receipt cases plus 31 unchanged original cases, including three
+  256-input fuzz properties). Carrier acceptance is 42 distinct checks
+  (15 corrected current cases plus 27 unchanged proof cases). Independent review
+  verifies both source unions and compiler-artifact bindings; original failing
+  runs remain retained. These are scoped unions, not a new whole-v1 run.
+- The read-only Museum capture runner is integrated as `6c029d59`, with all
+  112 root affected/compatibility tests passing. It pins a verified V1 base and
+  all six minimum native sources before RPC, captures supported registered
+  scopes, and reconstructs the result offline. Actual new native capture and
+  global host completeness remain unproven; the populated recipe is being built.
+- Test-only `5ae32cdf` replaces eleven inline production constructors in the
+  shared sale fixture with the existing ordinary-CREATE artifact helper.
+  Constructor inputs/order, actual contracts and assertions are preserved.
+  The 413-source ABI check passes; a matched-source 40-case runtime/timing pilot
+  is pending. Compact artifact metadata is not relabeled as full AST evidence.
+- The dedicated ERC20 paid-burn batch is being finalized, with 39 authored
+  tests, clean ABI and fitting selected production products. Its current-stack
+  execution and new Safe integration are pending. The separate allowlist-price
+  design leaves the original fixed-price host unchanged, but automatic review
+  separately rejected its application; a concrete inert proposal is being
+  reviewed for an exact local-only approval. No rejected code is applied.
+
+The latest publication/finality fixture still awaits its corrected native run.
+All original deployment-size, Artist-profile, economic-continuity, full Safe,
+museum and final candidate acceptance obligations remain in the feature table.
 
 ## 19 September recovery and integration
 
