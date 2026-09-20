@@ -3,6 +3,12 @@ pragma solidity ^0.8.19;
 import { StreamArtistGuardianHistory as History } from "./StreamArtistGuardianHistory.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import {
+    StreamArtistRecoveredHydrationState as Recovered
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredIdentityWriteChronology as Chronology
+} from "./StreamArtistRecoveredIdentityWriteChronology.sol";
+import {
     StreamArtistGuardianVestingTypes as V
 } from "../../interfaces/stream/artist/StreamArtistGuardianVestingTypes.sol";
 
@@ -32,6 +38,7 @@ library StreamArtistGuardianVestingHistory {
         V.Snapshot memory item,
         uint64 actualGuardianCount
     ) public returns (bytes32) {
+        bool imported = Recovered.commitment() != 0;
         if (
             environment.chainId != block.chainid || environment.registry == address(0)
                 || item.artistId == 0 || item.transitionRecordHash == 0 || item.ownerRevision == 0
@@ -60,17 +67,29 @@ library StreamArtistGuardianVestingHistory {
             V.Snapshot storage prior = s.snapshots[previous];
             if (
                 prior.artistId != item.artistId || prior.transitionRecordHash != previous
-                    || prior.commitment == 0 || prior.ownerRevision >= item.ownerRevision
+                    || prior.commitment == 0
+                    || (!imported && prior.ownerRevision >= item.ownerRevision)
                     || prior.executedAt > item.executedAt
             ) {
                 revert V.IncompleteGuardianVestingHistory(item.artistId, previous);
             }
+            if (imported) Chronology.vesting(environment, prior, item.ownerRevision);
             item.previousCommitment = prior.commitment;
         }
         // Derive the complete prefix, never accept a caller-supplied Head as authority.
         item.guardians = History.requireComplete(history, item.artistId, actualGuardianCount);
-        if (item.guardians.ownerRevision >= item.ownerRevision) {
+        if (!imported && item.guardians.ownerRevision >= item.ownerRevision) {
             revert V.InvalidGuardianVesting(item.transitionRecordHash);
+        }
+        if (imported) {
+            Chronology.next(environment, item.ownerRevision);
+            if (item.guardians.count != 0) {
+                Chronology.guardian(
+                    environment,
+                    history.entries[history.records[item.artistId][item.guardians.count]],
+                    item.ownerRevision
+                );
+            }
         }
         item.commitment = _commitment(environment, item);
         s.snapshots[item.transitionRecordHash] = item;

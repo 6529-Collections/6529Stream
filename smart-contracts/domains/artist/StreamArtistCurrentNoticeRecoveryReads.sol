@@ -38,6 +38,22 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredHydrationTypes as RH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
+import {
+    IStreamArtistIdentityRecoveryOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
+
 /// @notice Original unresolved notice causes and their exact cancellation provenance.
 /// @dev A recovered new side may cancel only through an authenticated original35 in the same
 /// owner revision. Ordinary cancellation still requires the original incumbent for class1.
@@ -146,8 +162,17 @@ library StreamArtistCurrentNoticeRecoveryReads {
             address(this), e.registry, e.chainId, id, cause.facts.referenceHash
         );
         (uint256 causeIndex, bytes32 nativeCause) = _native(id, cause.causeHash, 33);
-        if (enteredRevision <= initiation.touchedRevision || causeIndex <= noticeIndex) {
+        if (
+            (Imported.commitment() == 0 && enteredRevision <= initiation.touchedRevision)
+                || causeIndex <= noticeIndex
+        ) {
             revert I.UnsupportedIdentityRecoveryProfile(id);
+        }
+        if (Imported.commitment() != 0) {
+            _ordered(e, id, 41, noticeHash, 33, cause.causeHash);
+            Stages.compromisePoint(
+                address(this), e.registry, e.chainId, id, cause.facts.referenceHash
+            );
         }
         bytes32 cancellationProof;
         f.activity = n.priorActivity;
@@ -208,8 +233,15 @@ library StreamArtistCurrentNoticeRecoveryReads {
         uint64 entered = Stages.compromiseRevision(
             address(this), e.registry, e.chainId, id, cause.facts.referenceHash
         );
-        if (entered <= initiated.touchedRevision || resolved.touchedRevision <= entered) {
+        if (
+            Imported.commitment() == 0
+                && (entered <= initiated.touchedRevision || resolved.touchedRevision <= entered)
+        ) {
             revert I.UnsupportedIdentityRecoveryProfile(id);
+        }
+        if (Imported.commitment() != 0) {
+            _ordered(e, id, 41, f.notice.recordHash, 33, cause.causeHash);
+            _ordered(e, id, 33, cause.causeHash, 58, dismissal.recordHash);
         }
         T.ReplayCell memory cancelled;
         if (f.phase == 2) {
@@ -220,7 +252,11 @@ library StreamArtistCurrentNoticeRecoveryReads {
                 f.notice.recordHash,
                 f.cancellation.recordHash
             );
-            if (resolved.touchedRevision >= cancelled.touchedRevision) {
+            if (Imported.commitment() != 0) {
+                _ordered(e, id, 58, dismissal.recordHash, 42, f.cancellation.recordHash);
+            }
+            if (Imported.commitment() == 0 && resolved.touchedRevision >= cancelled.touchedRevision)
+            {
                 revert I.UnsupportedIdentityRecoveryProfile(id);
             }
         }
@@ -241,12 +277,15 @@ library StreamArtistCurrentNoticeRecoveryReads {
         canonical.actor = t.actor;
         canonical.authorityClass = t.authorityClass;
         canonical.observedAt = t.observedAt;
+        Hashes.Environment memory original;
+        address originalOwner;
+        (original, originalOwner) = _original(e, 42, id, t.recordHash);
         canonical.recordHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_CANCELLATION_V1"),
-                e.chainId,
-                e.registry,
-                address(this),
+                original.chainId,
+                original.registry,
+                originalOwner,
                 canonical,
                 f.activity
             )
@@ -267,9 +306,13 @@ library StreamArtistCurrentNoticeRecoveryReads {
             t.recordHash
         );
         (uint256 index, bytes32 nativeProof) = _native(id, t.recordHash, 42);
-        if (cancellation.touchedRevision <= noticeRevision || index <= noticeIndex) {
+        if (
+            (Imported.commitment() == 0 && cancellation.touchedRevision <= noticeRevision)
+                || index <= noticeIndex
+        ) {
             revert I.UnsupportedIdentityRecoveryProfile(id);
         }
+        if (Imported.commitment() != 0) _ordered(e, id, 33, cause.causeHash, 42, t.recordHash);
         bytes32 recovered;
         if (t.authorityClass == 1 && t.actor != f.notice.incumbent) {
             recovered = _recoveredCancellation(e, f, cancellation, index);
@@ -285,11 +328,32 @@ library StreamArtistCurrentNoticeRecoveryReads {
     ) private view returns (bytes32) {
         bytes32 id = f.notice.terms.artistId;
         IStreamArtistNativeReceipts journal = IStreamArtistNativeReceipts(address(this));
-        if (index + 2 >= journal.artistNativeReceiptCount()) {
+        Runtime.Context memory clock;
+        bool imported = Imported.commitment() != 0;
+        if (imported) clock = Recovered.load(address(this), e.registry, e.chainId);
+        if (
+            index + 2
+                >= (imported ? Runtime.logicalCount(clock) : journal.artistNativeReceiptCount())
+        ) {
             revert I.UnsupportedIdentityRecoveryProfile(id);
         }
-        Native.Receipt memory primary = journal.artistNativeReceiptAt(index + 1);
-        Native.Receipt memory secondary = journal.artistNativeReceiptAt(index + 2);
+        Native.Receipt memory primary = imported
+            ? Runtime.receiptAt(clock, index + 1).receipt
+            : journal.artistNativeReceiptAt(index + 1);
+        Native.Receipt memory secondary = imported
+            ? Runtime.receiptAt(clock, index + 2).receipt
+            : journal.artistNativeReceiptAt(index + 2);
+        if (imported) {
+            Runtime.ReceiptFact memory cancelled = Runtime.receiptAt(clock, index);
+            Runtime.ReceiptFact memory first = Runtime.receiptAt(clock, index + 1);
+            Runtime.ReceiptFact memory second = Runtime.receiptAt(clock, index + 2);
+            if (
+                !Recovered.samePoint(cancelled.position.point, first.position.point)
+                    || !Recovered.samePoint(first.position.point, second.position.point)
+            ) {
+                revert I.UnsupportedIdentityRecoveryProfile(id);
+            }
+        }
         if (
             primary.operation != 35 || secondary.operation != 35 || primary.artistId != id
                 || secondary.artistId != id || primary.collectionId != 0
@@ -347,12 +411,14 @@ library StreamArtistCurrentNoticeRecoveryReads {
         view
         returns (bytes32)
     {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 41, n.terms.artistId, n.recordHash);
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_NOTICE_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 n.terms,
                 n.incumbent,
                 n.initiatedAt,
@@ -373,6 +439,16 @@ library StreamArtistCurrentNoticeRecoveryReads {
         view
         returns (uint256 index, bytes32 proof)
     {
+        if (Imported.commitment() != 0) {
+            IStreamArtistOwner source = IStreamArtistOwner(address(this));
+            Runtime.ReceiptFact memory row = Recovered.nativeFact(
+                Recovered.load(address(this), source.artistRegistry(), source.deploymentChainId()),
+                operation,
+                id,
+                hash
+            );
+            return (row.logicalIndex, keccak256(abi.encode(row)));
+        }
         IStreamArtistNativeReceipts journal = IStreamArtistNativeReceipts(address(this));
         uint256 count = journal.artistNativeReceiptCount();
         bool found;
@@ -396,6 +472,28 @@ library StreamArtistCurrentNoticeRecoveryReads {
         bytes32 scope,
         bytes32 record
     ) private view returns (T.ReplayCell memory cell) {
+        if (Imported.commitment() != 0) {
+            Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+            Runtime.ReplayFact memory replay =
+                Runtime.replay(clock, RH.originHash(clock.current), surface, scope);
+            uint16 operation = surface == keccak256("identity_authority.replay.dormancy_notice_key")
+                ? 41
+                : surface == keccak256("identity_authority.replay.dormancy_cancellation_key")
+                    ? 42
+                    : IStreamArtistIdentityRecoveryOwner(address(this))
+                        .identityRecoveryRecord(record)
+                        .recordHash == record
+                        ? 35
+                        : 58;
+            Runtime.ReceiptFact memory row = Recovered.nativeFact(clock, operation, id, record);
+            if (
+                replay.cell.commitment != record || replay.cell.status != 2 || replay.cell.kind != 1
+                    || !Recovered.samePoint(replay.admission.point, row.position.point)
+            ) {
+                revert I.UnsupportedIdentityRecoveryProfile(id);
+            }
+            return replay.cell;
+        }
         IStreamArtistOwner owner = IStreamArtistOwner(address(this));
         bytes32 key = keccak256(
             abi.encode(
@@ -417,6 +515,37 @@ library StreamArtistCurrentNoticeRecoveryReads {
                 || cell.touchedRevision > owner.ownerStateSnapshotV2().revision
         ) {
             revert I.UnsupportedIdentityRecoveryProfile(id);
+        }
+    }
+
+    function _original(
+        Hashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (Hashes.Environment memory, address) {
+        if (Imported.commitment() == 0) return (e, address(this));
+        Runtime.ReceiptFact memory row = Recovered.nativeFact(
+            Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+        );
+        return (Recovered.hashes(row.environment), row.environment.owners[2]);
+    }
+
+    function _ordered(
+        Hashes.Environment memory e,
+        bytes32 artistId,
+        uint16 earlierOperation,
+        bytes32 earlier,
+        uint16 laterOperation,
+        bytes32 later
+    ) private view {
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        Runtime.ReceiptFact memory first =
+            Recovered.nativeFact(clock, earlierOperation, artistId, earlier);
+        Runtime.ReceiptFact memory second =
+            Recovered.nativeFact(clock, laterOperation, artistId, later);
+        if (!Runtime.before(clock, first.position.point, second.position.point)) {
+            revert I.UnsupportedIdentityRecoveryProfile(artistId);
         }
     }
 }

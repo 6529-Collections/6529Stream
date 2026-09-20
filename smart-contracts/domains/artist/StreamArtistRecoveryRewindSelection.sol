@@ -45,6 +45,13 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Resumable fixed-owner election from complete original native receipt prefixes.
 /// @dev Preparation facts only. Historical getters preserve the completed scan; requireSelection
 /// additionally enforces exact current source snapshots, including the separately sealed op65534.
@@ -214,10 +221,7 @@ contract StreamArtistRecoveryRewindSelection is IStreamArtistRecoveryRewindSelec
         W.EnvironmentV3 memory e = _environment();
         _environmentMatch(key, e);
         _prefix(e.payoutOwner, b.payout, b.payout.snapshot, key);
-        if (
-            IStreamArtistNativeReceipts(owner).artistNativeReceiptCount()
-                != b.identity.identity.receiptCount
-        ) {
+        if (_count(owner) != b.identity.identity.receiptCount) {
             revert W.InvalidRecoveryRewindPreparation(actionId);
         }
         T.Snapshot memory afterPreparation = IStreamArtistOwner(owner).ownerStateSnapshotV2();
@@ -370,9 +374,18 @@ contract StreamArtistRecoveryRewindSelection is IStreamArtistRecoveryRewindSelec
                 || (head.count == 0
                         ? head.commitment != 0 || head.ownerRevision != 0
                         : head.commitment == 0 || head.ownerRevision == 0
-                        || head.ownerRevision > m.identity.snapshot.revision)
+                        || (!Recovered.active(owner)
+                            && head.ownerRevision > m.identity.snapshot.revision))
         ) {
             revert W.InvalidRecoveryRewindSelection(manifestHash);
+        }
+        if (head.count != 0 && Recovered.active(owner)) {
+            (, GH.Entry memory last,,) = IStreamArtistGuardianHistory(owner)
+                .guardianHistoryState(m.artistId, head.count, address(0), 0);
+            if (last.commitment != head.commitment || last.ownerRevision != head.ownerRevision) {
+                revert W.InvalidRecoveryRewindSelection(manifestHash);
+            }
+            Recovered.guardianEntry(Runtime.load(e, 2), last);
         }
         b.sourceCommitment = W.selectionSourceHash(e, b);
     }
@@ -400,12 +413,18 @@ contract StreamArtistRecoveryRewindSelection is IStreamArtistRecoveryRewindSelec
     ) private view {
         if (
             keccak256(abi.encode(IStreamArtistOwner(target).ownerStateSnapshotV2()))
-                    != keccak256(abi.encode(expected))
-                || IStreamArtistNativeReceipts(target).artistNativeReceiptCount()
-                    != prefix.receiptCount
+                    != keccak256(abi.encode(expected)) || _count(target) != prefix.receiptCount
         ) {
             revert W.InvalidRecoveryRewindSelection(failureKey);
         }
+    }
+
+    function _count(address target) private view returns (uint256) {
+        if (!Recovered.active(target)) {
+            return IStreamArtistNativeReceipts(target).artistNativeReceiptCount();
+        }
+        W.EnvironmentV3 memory e = _environment();
+        return Runtime.logicalCount(Runtime.load(e, target == e.identityOwner ? 2 : 5));
     }
 
     function _environmentMatch(bytes32 key, W.EnvironmentV3 memory e) private view {

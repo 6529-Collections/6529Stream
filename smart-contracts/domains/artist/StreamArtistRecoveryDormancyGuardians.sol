@@ -25,6 +25,16 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Original dormancy guardian prefix and later admitted designated-successor records.
 /// @dev The caller first authenticates the original op43 vesting, current cause and unchanged
 /// authority plan. This library does not grant recovery authority or reauthorize historical op28.
@@ -39,11 +49,17 @@ library StreamArtistRecoveryDormancyGuardians {
     ) public view returns (GH.Head memory current) {
         current = History.requireComplete(history, artistId, count);
         GH.Head memory saved = vesting.guardians;
+        if (Imported.commitment() != 0) {
+            Recovered.vesting(
+                Recovered.load(address(this), environment.registry, environment.chainId), vesting
+            );
+        }
         if (
             vesting.artistId != artistId || vesting.operationId != 43 || vesting.authorityClass != 3
                 || vesting.transitionRecordHash == 0 || vesting.commitment == 0
                 || vesting.ownerRevision == 0 || vesting.newAddress == address(0)
-                || current.count < saved.count || vesting.ownerRevision <= saved.ownerRevision
+                || current.count < saved.count
+                || (Imported.commitment() == 0 && vesting.ownerRevision <= saved.ownerRevision)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         if (saved.count == 0) {
             if (saved.ownerRevision != 0 || saved.commitment != 0) {
@@ -56,8 +72,8 @@ library StreamArtistRecoveryDormancyGuardians {
         GH.Entry memory entry = _record(history, environment, artistId, current, record);
         if (
             entry.index != saved.count || entry.ownerRevision != saved.ownerRevision
-                || entry.commitment != saved.commitment
-                || entry.ownerRevision >= vesting.ownerRevision || record.authorityClass != 1
+                || entry.commitment != saved.commitment || !_before(environment, entry, vesting)
+                || record.authorityClass != 1
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
     }
 
@@ -86,16 +102,14 @@ library StreamArtistRecoveryDormancyGuardians {
         GH.Entry memory entry = _record(history, environment, artistId, current, g);
         if (g.authorityClass == 1) {
             if (
-                entry.index > vesting.guardians.count
-                    || entry.ownerRevision >= vesting.ownerRevision
+                entry.index > vesting.guardians.count || !_before(environment, entry, vesting)
                     || !_livingAssociation(rotations, environment, artistId, vesting, g)
             ) {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             }
         } else if (g.authorityClass == 3) {
             if (
-                entry.index <= vesting.guardians.count
-                    || entry.ownerRevision <= vesting.ownerRevision
+                entry.index <= vesting.guardians.count || !_after(environment, entry, vesting)
                     || g.signer != vesting.newAddress
             ) {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
@@ -141,8 +155,7 @@ library StreamArtistRecoveryDormancyGuardians {
         GH.Entry memory entry = _record(history, environment, artistId, current, g);
         if (g.authorityClass == 1) {
             if (
-                entry.index > terminal.guardians.count
-                    || entry.ownerRevision >= terminal.ownerRevision
+                entry.index > terminal.guardians.count || !_before(environment, entry, terminal)
                     || g.signedAt > terminal.executedAt
             ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             return guardian(
@@ -152,8 +165,7 @@ library StreamArtistRecoveryDormancyGuardians {
         if (entry.index <= terminal.guardians.count) {
             if (
                 g.authorityClass != 3 || entry.index <= origin.guardians.count
-                    || entry.ownerRevision <= origin.ownerRevision
-                    || entry.ownerRevision >= terminal.ownerRevision
+                    || !_after(environment, entry, origin) || !_before(environment, entry, terminal)
                     || g.signedAt < origin.executedAt || g.signedAt > terminal.executedAt
                     || !_priorRotationAssociation(
                         rotations, environment, artistId, origin, originalWindowEndsAt, g
@@ -165,8 +177,8 @@ library StreamArtistRecoveryDormancyGuardians {
         }
         if (
             g.authorityClass != 3 || g.signer != terminal.newAddress
-                || entry.index <= terminal.guardians.count
-                || entry.ownerRevision <= terminal.ownerRevision || g.signedAt < terminal.executedAt
+                || entry.index <= terminal.guardians.count || !_after(environment, entry, terminal)
+                || g.signedAt < terminal.executedAt
                 || (g.provisional.transitionRecordHash == 0
                         ? g.provisional.windowEndsAt != 0
                         : g.provisional.transitionRecordHash != terminal.transitionRecordHash
@@ -196,7 +208,11 @@ library StreamArtistRecoveryDormancyGuardians {
             && r.transition.executedAt >= origin.executedAt && r.transition.executedAt <= g.signedAt
             && g.signedAt < a.windowEndsAt && r.transition.postWindowEndsAt == a.windowEndsAt
             && StreamArtistRotationHashes.rotationRecord(
-                e, r.terms, r.oldNonce, r.transition.stagedAt, r.transition.contestEndsAt
+                _original(e, 29, artistId, r.recordHash),
+                r.terms,
+                r.oldNonce,
+                r.transition.stagedAt,
+                r.transition.contestEndsAt
             ) == r.recordHash;
     }
 
@@ -224,7 +240,7 @@ library StreamArtistRecoveryDormancyGuardians {
             );
             return living.record.fields.newAddress == g.signer
                 && living.record.fields.recoveredAt <= g.signedAt
-                && living.vesting.ownerRevision < estate.ownerRevision
+                && _vestingBefore(e, living.vesting, estate)
                 && living.vesting.guardians.count <= estate.guardians.count
                 && g.signedAt < a.windowEndsAt
                 && living.transition.postWindowEndsAt == a.windowEndsAt
@@ -238,7 +254,11 @@ library StreamArtistRecoveryDormancyGuardians {
             && r.transition.executedAt != 0 && r.transition.executedAt <= g.signedAt
             && g.signedAt < a.windowEndsAt && r.transition.postWindowEndsAt == a.windowEndsAt
             && StreamArtistRotationHashes.rotationRecord(
-                e, r.terms, r.oldNonce, r.transition.stagedAt, r.transition.contestEndsAt
+                _original(e, 29, artistId, r.recordHash),
+                r.terms,
+                r.oldNonce,
+                r.transition.stagedAt,
+                r.transition.contestEndsAt
             ) == r.recordHash && RotationState.eligible(rotations, artistId, a);
     }
 
@@ -250,18 +270,86 @@ library StreamArtistRecoveryDormancyGuardians {
         R.GuardianRecord memory g
     ) private view returns (GH.Entry memory entry) {
         entry = history.entries[g.recordHash];
+        StreamArtistHashes.Environment memory original = environment;
+        if (Imported.commitment() != 0) {
+            original = Recovered.hashes(
+                Recovered.guardian(
+                    Recovered.load(address(this), environment.registry, environment.chainId),
+                    entry,
+                    g
+                )
+                .environment
+            );
+        }
         if (
             g.recordHash == 0 || g.terms.artistId != artistId || g.signer == address(0)
                 || g.signedAt == 0 || g.terms.guardians.length > 8
                 || g.terms.minContestSeconds > 30 days || entry.artistId != artistId
                 || entry.recordHash != g.recordHash || entry.index == 0
                 || entry.index > current.count || entry.ownerRevision == 0
-                || entry.ownerRevision > current.ownerRevision || entry.commitment == 0
-                || entry.recordDataHash != keccak256(abi.encode(g))
+                || (Imported.commitment() == 0 && entry.ownerRevision > current.ownerRevision)
+                || entry.commitment == 0 || entry.recordDataHash != keccak256(abi.encode(g))
                 || history.records[artistId][entry.index] != g.recordHash
                 || StreamArtistRotationHashes.guardianRecord(
-                        environment, g.terms, T.Authorization(g.nonce, g.signedAt, bytes(""))
+                        original, g.terms, T.Authorization(g.nonce, g.signedAt, bytes(""))
                     ) != g.recordHash
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+    }
+
+    function _original(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory) {
+        if (Imported.commitment() == 0) return e;
+        return Recovered.hashes(
+            Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+            )
+            .environment
+        );
+    }
+
+    function _before(
+        StreamArtistHashes.Environment memory e,
+        GH.Entry memory entry,
+        V.Snapshot memory v
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return entry.ownerRevision < v.ownerRevision;
+        }
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock, Recovered.guardianEntry(clock, entry).point, Recovered.vesting(clock, v).point
+        );
+    }
+
+    function _after(
+        StreamArtistHashes.Environment memory e,
+        GH.Entry memory entry,
+        V.Snapshot memory v
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return entry.ownerRevision > v.ownerRevision;
+        }
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock, Recovered.vesting(clock, v).point, Recovered.guardianEntry(clock, entry).point
+        );
+    }
+
+    function _vestingBefore(
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory a,
+        V.Snapshot memory b
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return a.ownerRevision < b.ownerRevision;
+        }
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock, Recovered.vesting(clock, a).point, Recovered.vesting(clock, b).point
+        );
     }
 }

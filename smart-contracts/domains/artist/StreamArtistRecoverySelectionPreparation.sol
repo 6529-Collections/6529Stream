@@ -38,6 +38,13 @@ import {
     StreamArtistGuardianSupersessionTypes as Supersession
 } from "../../interfaces/stream/artist/StreamArtistGuardianSupersessionTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Permissionless bounded election over an owner-authenticated V2 adjudication basis.
 /// @dev The owner proves the current cause, complete ancestry and temporally stable eligibility.
 /// This worker grants no authority, does not change owner revision and accepts no caller history.
@@ -228,32 +235,39 @@ contract StreamArtistRecoverySelectionPreparation is IStreamArtistRecoverySelect
     }
 
     function _visit(bytes32 key, V2.Basis memory basis, S.Progress memory p, uint64 index) private {
+        bool imported = Recovered.active(owner);
         (H.Head memory current, H.Entry memory entry,,) = IStreamArtistGuardianHistory(owner)
             .guardianHistoryState(basis.artistId, index, address(0), bytes32(0));
         if (
             keccak256(abi.encode(current)) != keccak256(abi.encode(basis.history))
                 || entry.artistId != basis.artistId || entry.index != index
                 || entry.recordHash == bytes32(0) || entry.previousCommitment != p.historyTip
-                || entry.ownerRevision <= p.lastOwnerRevision
-                || entry.ownerRevision > basis.history.ownerRevision
-                || entry.commitment
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
-                            deploymentChainId,
-                            artistRegistry,
-                            owner,
-                            entry.artistId,
-                            entry.index,
-                            entry.ownerRevision,
-                            entry.recordHash,
-                            entry.recordDataHash,
-                            entry.previousCommitment
-                        )
-                    )
+                || (!imported
+                    && (entry.ownerRevision <= p.lastOwnerRevision
+                        || entry.ownerRevision > basis.history.ownerRevision))
+                || (!imported
+                    && entry.commitment
+                        != keccak256(
+                            abi.encode(
+                                keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
+                                deploymentChainId,
+                                artistRegistry,
+                                owner,
+                                entry.artistId,
+                                entry.index,
+                                entry.ownerRevision,
+                                entry.recordHash,
+                                entry.recordDataHash,
+                                entry.previousCommitment
+                            )
+                        ))
         ) revert S.InvalidGuardianSelection(key);
         R.GuardianRecord memory record =
             IStreamArtistRotationReads(owner).guardianSetRecord(entry.recordHash);
+        if (imported) {
+            Runtime.Context memory clock = Recovered.load(owner, artistRegistry, deploymentChainId);
+            Recovered.guardianStep(clock, entry, record, p.lastOwnerRevision, p.historyTip);
+        }
         R.TransitionState memory associated;
         if (record.provisional.transitionRecordHash != 0) {
             associated = IStreamArtistRotationReads(owner)

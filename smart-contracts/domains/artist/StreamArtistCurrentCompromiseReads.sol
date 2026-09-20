@@ -38,6 +38,13 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Current original ACTIVE1 compromise facts after an admitted living recovery.
 /// @dev The caller supplies its fixed owner and authenticates the current principal, executed
 /// ancestry, maturity and any pending rotation's predecessor. This reader does not dismiss the
@@ -232,8 +239,16 @@ library StreamArtistCurrentCompromiseReads {
         uint64 revision = Stages.compromiseRevision(
             e.owner, e.registry, e.chainId, artistId, contest.recordHash
         );
-        Stages.EstateFacts memory estate =
-            Stages.cancelledEstate(e.owner, e.registry, e.chainId, artistId, hash, revision);
+        Stages.EstateFacts memory estate = Recovered.active(e.owner)
+            ? Stages.cancelledEstateAt(
+                e.owner,
+                e.registry,
+                e.chainId,
+                artistId,
+                hash,
+                Stages.compromisePoint(e.owner, e.registry, e.chainId, artistId, contest.recordHash)
+            )
+            : Stages.cancelledEstate(e.owner, e.registry, e.chainId, artistId, hash, revision);
         (address successor, uint64 noticeEndsAt, bytes32 activation) =
             IStreamArtistEstateOwner(e.owner).estateActivationState(artistId);
         (address old_, address new_, uint64 ends, uint32 approvals, bytes32 pending) =
@@ -289,16 +304,7 @@ library StreamArtistCurrentCompromiseReads {
                         : c.evidenceHash != 0 || c.referenceHash != c.pendingTransitionHash)
                 || c.enteredAt == 0 || c.enteredAt > block.timestamp
                 || c.executedTransitionHash != executed.recordHash
-                || current.causeHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            e.owner,
-                            c
-                        )
-                    )
+                || current.causeHash != _causeHash(e, current)
                 || (live
                     && keccak256(abi.encode(current))
                         != keccak256(
@@ -344,6 +350,24 @@ library StreamArtistCurrentCompromiseReads {
         returns (bytes32)
     {
         IStreamArtistOwner owner = IStreamArtistOwner(e.owner);
+        if (Recovered.active(e.owner)) {
+            Runtime.Context memory clock = Recovered.load(e.owner, e.registry, e.chainId);
+            Runtime.ReceiptFact memory cause = _causeOrigin(e, current);
+            Runtime.ReplayFact memory replay = Runtime.replay(
+                clock,
+                cause.position.point.environmentHash,
+                keccak256("identity_authority.replay.rotation_veto_key"),
+                current.facts.pendingTransitionHash
+            );
+            if (
+                replay.cell.commitment != current.facts.pendingTransitionHash
+                    || replay.cell.kind != 1 || replay.cell.status != 2
+                    || !Recovered.samePoint(replay.admission.point, cause.position.point)
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+            }
+            return keccak256(abi.encode(replay, cause));
+        }
         bytes32 key = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
@@ -366,6 +390,42 @@ library StreamArtistCurrentCompromiseReads {
         // The fixed-owner canonical Cause authenticates the original actor and optional reason.
         // The veto key commits P, not an independently stored Contest or a fresh role decision.
         return keccak256(abi.encode(key, cell));
+    }
+
+    function _causeOrigin(Environment memory e, D.Cause memory current)
+        private
+        view
+        returns (Runtime.ReceiptFact memory)
+    {
+        Runtime.Context memory clock = Recovered.load(e.owner, e.registry, e.chainId);
+        return Recovered.nativeFact(
+            clock, current.facts.kind == 1 ? 33 : 31, current.facts.artistId, current.causeHash
+        );
+    }
+
+    function _causeHash(Environment memory e, D.Cause memory current)
+        private
+        view
+        returns (bytes32)
+    {
+        address owner = e.owner;
+        address registry = e.registry;
+        uint256 chainId = e.chainId;
+        if (Recovered.active(e.owner)) {
+            Runtime.ReceiptFact memory origin = _causeOrigin(e, current);
+            owner = origin.environment.owners[2];
+            registry = origin.environment.registry;
+            chainId = origin.environment.chainId;
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                chainId,
+                registry,
+                owner,
+                current.facts
+            )
+        );
     }
 
     function _living(Environment memory e, bytes32 artistId) private view returns (bytes32 hash) {
@@ -391,16 +451,7 @@ library StreamArtistCurrentCompromiseReads {
                 || executed.artistId != c.artistId || executed.phase != 2
                 || executed.executedAt == 0 || executed.executedAt > c.enteredAt
                 || c.executedTransitionHash != executed.recordHash
-                || current.causeHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            e.owner,
-                            c
-                        )
-                    )
+                || current.causeHash != _causeHash(e, current)
                 || keccak256(abi.encode(current))
                     != keccak256(
                         abi.encode(
@@ -440,6 +491,15 @@ library StreamArtistCurrentCompromiseReads {
         uint8 authorityClass
     ) private view returns (bytes32) {
         D.CauseFacts memory f = current.facts;
+        StreamArtistHashes.Environment memory original;
+        original.chainId = e.chainId;
+        original.registry = e.registry;
+        if (Recovered.active(e.owner)) {
+            Runtime.Context memory clock = Recovered.load(e.owner, e.registry, e.chainId);
+            Runtime.ReceiptFact memory row =
+                Recovered.nativeFact(clock, 33, f.artistId, c.recordHash);
+            original = Recovered.hashes(row.environment);
+        }
         if (
             c.recordHash != f.referenceHash || c.terms.artistId != f.artistId
                 || c.terms.evidenceHash != f.evidenceHash || c.terms.reasonHash != f.reasonHash
@@ -453,8 +513,8 @@ library StreamArtistCurrentCompromiseReads {
                             bytes32(
                                 0x26a4221cd1625ab88b1ac279e1708a73efa176e486242b26832cdc94fe25e6bb
                             ),
-                            e.chainId,
-                            e.registry,
+                            original.chainId,
+                            original.registry,
                             c.terms.artistId,
                             c.contester,
                             c.terms.subjectRecordHash,
@@ -545,6 +605,15 @@ library StreamArtistCurrentCompromiseReads {
         StreamArtistHashes.Environment memory original;
         original.chainId = e.chainId;
         original.registry = e.registry;
+        if (Recovered.active(e.owner)) {
+            Runtime.Context memory clock = Recovered.load(e.owner, e.registry, e.chainId);
+            Runtime.ReceiptFact memory staged = Recovered.nativeFact(clock, 29, artistId, hash);
+            Runtime.ReceiptFact memory cause = _causeOrigin(e, current);
+            if (!Runtime.before(clock, staged.position.point, cause.position.point)) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+            original = Recovered.hashes(staged.environment);
+        }
         if (
             hash == executed.recordHash || r.recordHash != hash || r.terms.artistId != artistId
                 || (live

@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredTimingInventory } from "./StreamArtistRecoveredTimingInventory.sol";
+import {
+    StreamArtistRecoveredTimingTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveredTimingTypes.sol";
 
 import "./StreamArtistRotationState.sol";
 import "../../interfaces/stream/artist/IStreamArtistManagerBinding.sol";
@@ -125,6 +129,20 @@ library StreamArtistTimingState {
             s.priorStandingTailSeconds = newValue;
         }
         // Operational configuration has its own exact revision; it never updates artist liveness or records.
+        StreamArtistRecoveredTimingInventory.note(
+            StreamArtistRecoveredTimingTypes.Input(
+                parameter,
+                actionId,
+                actionKey,
+                oldHash,
+                newHash,
+                oldValue,
+                newValue,
+                floor,
+                revision,
+                nextRevision
+            )
+        );
         emit ArtistWindowChanged(1, parameter, oldValue, newValue, floor, nextRevision, actionId);
     }
 }

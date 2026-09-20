@@ -8,6 +8,18 @@ import { StreamArtistRotationState as Rotations } from "./StreamArtistRotationSt
 import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
 import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    IStreamArtistGuardianHistory
+} from "../../interfaces/stream/artist/IStreamArtistGuardianHistory.sol";
+import {
     IStreamArtistRotationReads
 } from "../../interfaces/stream/artist/IStreamArtistRotation.sol";
 import {
@@ -65,16 +77,16 @@ library StreamArtistRecoveryFamilyAncestry {
         ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
         uint256 count = 1;
         bytes32 cursor = head;
-        uint64 revision;
+        bytes32 child;
         while (cursor != 0) {
             V.Snapshot memory v = recovery.vestingHistory.snapshots[cursor];
             if (
                 v.transitionRecordHash != cursor || v.artistId != artistId || v.ownerRevision == 0
-                    || (revision != 0 && v.ownerRevision >= revision)
+                    || (child != 0 && !_before(e, v, recovery.vestingHistory.snapshots[child]))
             ) {
                 revert I.UnsupportedIdentityRecoveryProfile(artistId);
             }
-            revision = v.ownerRevision;
+            child = cursor;
             cursor = v.previousTransitionRecordHash;
             ++count;
         }
@@ -133,11 +145,10 @@ library StreamArtistRecoveryFamilyAncestry {
                         parent.transitionRecordHash != parentHash
                             || parent.commitment != v.previousCommitment
                             || parent.authorityClass != authorityClass
-                            || parent.newAddress != v.oldAddress
-                            || parent.ownerRevision >= v.ownerRevision
+                            || parent.newAddress != v.oldAddress || !_before(e, parent, v)
                             || parent.executedAt > m.transition.stagedAt
                             || parent.guardians.count > v.guardians.count
-                            || parent.guardians.ownerRevision > v.guardians.ownerRevision
+                            || !_prefixOrder(e, artistId, parent.guardians, v.guardians)
                     ) {
                         revert I.UnsupportedIdentityRecoveryProfile(artistId);
                     }
@@ -267,7 +278,7 @@ library StreamArtistRecoveryFamilyAncestry {
         }
 
         f.members = new Member[](
-            _length(recovery, artistId, head, root, crossing, current.facts.authorityClass)
+            _length(recovery, e, artistId, head, root, crossing, current.facts.authorityClass)
         );
         bytes32 cursor = head;
         address incumbent = current.facts.incumbent;
@@ -339,6 +350,7 @@ library StreamArtistRecoveryFamilyAncestry {
     /// and reject cycles; no supplied prefix or arbitrary maximum can truncate the ancestry.
     function _length(
         RecoveryState.State storage recovery,
+        Hashes.Environment memory e,
         bytes32 artistId,
         bytes32 head,
         bytes32 root,
@@ -347,14 +359,14 @@ library StreamArtistRecoveryFamilyAncestry {
     ) private view returns (uint256 count) {
         count = 1;
         bytes32 cursor = head;
-        uint64 childRevision;
+        bytes32 child;
         bool crossed = bridge == 0;
         while (cursor != root) {
             V.Snapshot memory v = recovery.vestingHistory.snapshots[cursor];
             if (
                 cursor == 0 || v.artistId != artistId || v.transitionRecordHash != cursor
                     || v.ownerRevision == 0
-                    || (childRevision != 0 && v.ownerRevision >= childRevision)
+                    || (child != 0 && !_before(e, v, recovery.vestingHistory.snapshots[child]))
                     || v.authorityClass != authorityClass
             ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
             if (cursor == bridge) {
@@ -366,7 +378,7 @@ library StreamArtistRecoveryFamilyAncestry {
             } else if (v.operationId != 32) {
                 revert I.UnsupportedIdentityRecoveryProfile(artistId);
             }
-            childRevision = v.ownerRevision;
+            child = cursor;
             cursor = v.previousTransitionRecordHash;
             ++count;
         }
@@ -410,6 +422,16 @@ library StreamArtistRecoveryFamilyAncestry {
         R.RotationRecord memory r = rotations.rotations[hash];
         R.TransitionState memory t = r.transition;
         _snapshot(recovery, e, v, artistId);
+        Hashes.Environment memory original = e;
+        if (Imported.commitment() != 0) {
+            Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+            Runtime.ReceiptFact memory stage = Recovered.nativeFact(clock, 29, artistId, hash);
+            Runtime.OriginFact memory vested = Recovered.vesting(clock, v);
+            if (!Runtime.before(clock, stage.position.point, vested.point)) {
+                revert I.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+            original = Recovered.hashes(stage.environment);
+        }
         if (
             v.transitionRecordHash != hash || v.operationId != 32 || r.recordHash != hash
                 || r.terms.artistId != artistId || r.terms.oldAddress != v.oldAddress
@@ -422,7 +444,7 @@ library StreamArtistRecoveryFamilyAncestry {
                 || (t.executedAt < t.contestEndsAt
                     && (r.approvalThreshold == 0 || r.guardianApprovals < r.approvalThreshold))
                 || StreamArtistRotationHashes.rotationRecord(
-                        e, r.terms, r.oldNonce, t.stagedAt, t.contestEndsAt
+                        original, r.terms, r.oldNonce, t.stagedAt, t.contestEndsAt
                     ) != hash
         ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
         // expectedPrevious may be zero for the first32, or an original cancelled staging record.
@@ -453,10 +475,10 @@ library StreamArtistRecoveryFamilyAncestry {
         _snapshot(recovery, e, parent, v.artistId);
         if (
             parent.transitionRecordHash != hash || parent.commitment != v.previousCommitment
-                || parent.newAddress != v.oldAddress || parent.ownerRevision >= v.ownerRevision
+                || parent.newAddress != v.oldAddress || !_before(e, parent, v)
                 || parent.executedAt > child.transition.stagedAt
                 || parent.guardians.count > v.guardians.count
-                || parent.guardians.ownerRevision > v.guardians.ownerRevision
+                || !_prefixOrder(e, v.artistId, parent.guardians, v.guardians)
                 || parent.authorityClass != authorityClass
                 || (hash != root && hash != bridge && parent.operationId != 32)
         ) revert I.UnsupportedIdentityRecoveryProfile(v.artistId);
@@ -472,8 +494,8 @@ library StreamArtistRecoveryFamilyAncestry {
             v.artistId != artistId || v.transitionRecordHash == 0 || v.ownerRevision == 0
                 || v.executedAt == 0 || v.oldAddress == address(0) || v.newAddress == address(0)
                 || v.oldAddress == v.newAddress || (v.authorityClass != 1 && v.authorityClass != 3)
-                || v.ownerRevision <= v.guardians.ownerRevision || v.commitment == 0
-                || v.commitment != _vesting(e, v)
+                || (Imported.commitment() == 0 && v.ownerRevision <= v.guardians.ownerRevision)
+                || v.commitment == 0 || v.commitment != _vesting(e, v)
                 || (v.previousTransitionRecordHash == 0) != (v.previousCommitment == 0)
         ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
         GH.Head memory h = v.guardians;
@@ -493,6 +515,42 @@ library StreamArtistRecoveryFamilyAncestry {
         }
     }
 
+    function _before(Hashes.Environment memory e, V.Snapshot memory first, V.Snapshot memory second)
+        private
+        view
+        returns (bool)
+    {
+        if (Imported.commitment() == 0) return first.ownerRevision < second.ownerRevision;
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        Runtime.OriginFact memory a = Recovered.vesting(clock, first);
+        Runtime.OriginFact memory b = Recovered.vesting(clock, second);
+        return Runtime.before(clock, a.point, b.point);
+    }
+
+    function _prefixOrder(
+        Hashes.Environment memory e,
+        bytes32 artistId,
+        GH.Head memory first,
+        GH.Head memory second
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return first.ownerRevision <= second.ownerRevision;
+        }
+        if (first.count > second.count) return false;
+        if (first.count == second.count) {
+            return keccak256(abi.encode(first)) == keccak256(abi.encode(second));
+        }
+        if (first.count == 0) return first.ownerRevision == 0 && first.commitment == 0;
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        (, GH.Entry memory earlier,,) = IStreamArtistGuardianHistory(address(this))
+            .guardianHistoryState(artistId, first.count, address(0), 0);
+        (, GH.Entry memory later,,) = IStreamArtistGuardianHistory(address(this))
+            .guardianHistoryState(artistId, second.count, address(0), 0);
+        Runtime.OriginFact memory a = Recovered.guardianEntry(clock, earlier);
+        Runtime.OriginFact memory b = Recovered.guardianEntry(clock, later);
+        return Runtime.before(clock, a.point, b.point);
+    }
+
     function _empty(V.Snapshot memory v, R.TransitionState memory t, bytes32 artistId)
         private
         pure
@@ -509,6 +567,11 @@ library StreamArtistRecoveryFamilyAncestry {
         view
         returns (bytes32)
     {
+        if (Imported.commitment() != 0) {
+            Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+            Runtime.OriginFact memory original = Recovered.vesting(clock, v);
+            return Recovered.vestingHash(original.environment, v);
+        }
         return keccak256(
             bytes.concat(
                 abi.encode(

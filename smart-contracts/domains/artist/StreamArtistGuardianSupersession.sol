@@ -53,6 +53,17 @@ import {
     StreamArtistGuardianSupersessionCutoff as Cutoff
 } from "./StreamArtistGuardianSupersessionCutoff.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
+
 /// @notice Exact current-contest guardian adjudication through admitted living and estate history.
 /// @dev Fixed Identity owner authenticates governance, current cause and original rotation.
 library StreamArtistGuardianSupersession {
@@ -142,8 +153,14 @@ library StreamArtistGuardianSupersession {
             );
             currentProof = _currentContest(environment, original, cause, contest, transition);
         } else {
-            if (cutoff.guardians.count >= head.count || cutoff.ownerRevision >= head.ownerRevision)
-            {
+            if (
+                cutoff.guardians.count >= head.count
+                    || !_afterCutoff(
+                        environment,
+                        cutoff,
+                        history.entries[history.records[request.artistId][head.count]]
+                    )
+            ) {
                 revert S.InvalidGuardianSupersession(transition);
             }
             currentProof = _currentContest(environment, request, cause, contest, transition);
@@ -228,6 +245,14 @@ library StreamArtistGuardianSupersession {
             revert S.InvalidGuardianSupersession(artistId);
         }
         findings = new Appeal.Finding[](records.length);
+        bool imported = Imported.commitment() != 0;
+        Runtime.Context memory clock;
+        Runtime.OriginFact memory cutoffOrigin;
+        if (imported) {
+            IStreamArtistOwner owner = IStreamArtistOwner(address(this));
+            clock = Recovered.load(address(this), owner.artistRegistry(), owner.deploymentChainId());
+            cutoffOrigin = Recovered.vesting(clock, cutoff);
+        }
         uint256 count;
         bytes32 previous;
         for (uint256 i; i < records.length; ++i) {
@@ -237,7 +262,7 @@ library StreamArtistGuardianSupersession {
             if (
                 hash <= previous || entry.recordHash != hash || entry.artistId != artistId
                     || entry.index == 0 || entry.index > head.count || entry.ownerRevision == 0
-                    || entry.ownerRevision > head.ownerRevision
+                    || (!imported && entry.ownerRevision > head.ownerRevision)
                     || history.records[artistId][entry.index] != hash || entry.commitment == 0
                     || record.recordHash != hash || record.terms.artistId != artistId
                     || (record.authorityClass != 1 && record.authorityClass != 3)
@@ -247,15 +272,23 @@ library StreamArtistGuardianSupersession {
             ) {
                 revert S.InvalidGuardianSupersession(hash);
             }
+            Runtime.OriginFact memory entryOrigin;
+            if (imported) entryOrigin = Recovered.guardian(clock, entry, record);
             if (entry.index <= cutoff.guardians.count) {
                 if (
-                    entry.ownerRevision > cutoff.guardians.ownerRevision
-                        || entry.ownerRevision >= cutoff.ownerRevision
+                    (!imported
+                            && (entry.ownerRevision > cutoff.guardians.ownerRevision
+                                || entry.ownerRevision >= cutoff.ownerRevision))
+                        || (imported
+                            && !Runtime.before(clock, entryOrigin.point, cutoffOrigin.point))
                         || record.terms.guardians.length == 0
                 ) revert S.InvalidGuardianSupersession(hash);
                 findings[count++] = Appeal.Finding(hash, record.terms.guardians);
             } else if (
-                entry.ownerRevision <= cutoff.ownerRevision || record.signer != cutoff.newAddress
+                (imported
+                            ? !Runtime.before(clock, cutoffOrigin.point, entryOrigin.point)
+                            : entry.ownerRevision <= cutoff.ownerRevision)
+                    || record.signer != cutoff.newAddress
                     || record.authorityClass != cutoff.authorityClass
             ) {
                 revert S.InvalidGuardianSupersession(hash);
@@ -561,7 +594,10 @@ library StreamArtistGuardianSupersession {
         C.Record memory c,
         bytes32 transition
     ) private view returns (bytes32) {
-        if (cause.facts.pendingTransitionHash == 0 && c.terms.subjectRecordHash == transition) {
+        if (
+            Imported.commitment() == 0 && cause.facts.pendingTransitionHash == 0
+                && c.terms.subjectRecordHash == transition
+        ) {
             _contest(e, p, cause, c, transition);
             return 0;
         }
@@ -628,5 +664,21 @@ library StreamArtistGuardianSupersession {
         ) {
             revert S.InvalidGuardianSupersession(c.recordHash);
         }
+    }
+
+    function _afterCutoff(
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory cutoff,
+        GH.Entry memory entry
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return cutoff.ownerRevision < entry.ownerRevision;
+        }
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock,
+            Recovered.vesting(clock, cutoff).point,
+            Recovered.guardianEntry(clock, entry).point
+        );
     }
 }

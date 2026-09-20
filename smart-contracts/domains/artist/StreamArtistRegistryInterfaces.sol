@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistRecoveredHydration
+} from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationAuthorityHydration.sol";
@@ -192,6 +195,7 @@ library StreamArtistRegistryInterfaces {
             || id == type(IStreamArtistPayoutAuthorityHydration).interfaceId
             || id == type(IStreamArtistMultipleAuthorityHydration).interfaceId
             || id == type(IStreamArtistMultipleRecordsHydration).interfaceId
+            || id == type(IStreamArtistRecoveredHydration).interfaceId
             || id == type(IStreamArtistDelegationAuthorityHydration).interfaceId
             || id == type(IStreamArtistAuthorityHydration).interfaceId
             || id == type(IStreamArtistHistory).interfaceId

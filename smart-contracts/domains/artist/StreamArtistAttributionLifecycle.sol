@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredCollectionHydration
+} from "./StreamArtistRecoveredCollectionHydration.sol";
+import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
 import "./StreamArtistC2PACredentials.sol";
 import "./StreamArtistDisputeWithdrawalState.sol";
 import {
@@ -680,10 +684,28 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         );
     }
 
-    function _hydrateAuthority(AH.Query calldata, AH.OwnerData calldata) internal override {
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 4)) {
+            if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistRecoveredCollectionHydration.importAttribution(
+                _attestationStore(), q, p.typedState
+            );
+            return;
+        }
         StreamArtistAttributionHydrationTransport.importEncoded(
             _attestationStore(), _environment(), msg.data
         );
+    }
+
+    function _recoveredHydrationFeatures() internal pure override returns (uint256) {
+        return StreamArtistRecoveredHydrationTypes.FIRST_GRAPH_FEATURES;
+    }
+
+    function recoveredAuthorityHydrationState(
+        AH.Query calldata q,
+        StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata p
+    ) external view override returns (bytes memory) {
+        return StreamArtistRecoveredCollectionHydration.exportAttribution(_attestationStore(), q, p);
     }
 
     function attributionDispute(uint256 id, uint64 generation)
@@ -706,17 +728,29 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
     }
 
-    function attributionDisputeWithdrawal(bytes32 opening) external view
-        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory) {
+    function attributionDisputeWithdrawal(bytes32 opening)
+        external
+        view
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory)
+    {
         return StreamArtistDisputeWithdrawalState.outcome(opening);
     }
 
-    function applyDisputeWithdrawal(T.ActionContext calldata c, AD.Filing calldata p,
-        AD.Admission calldata a, uint256 nonce) external returns (bytes32) {
+    function applyDisputeWithdrawal(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        AD.Admission calldata a,
+        uint256 nonce
+    ) external returns (bytes32) {
         _check(c, 61);
-        AD.Mutation memory m = StreamArtistDisputeWithdrawalState.applyEncoded(_attestationStore(), _environment(), msg.data);
-        bytes32 consumed = _consume(keccak256("attribution_lifecycle.replay.dispute_withdrawal_key"),
-            m.replayScope, m.replayCommitment);
+        AD.Mutation memory m = StreamArtistDisputeWithdrawalState.applyEncoded(
+            _attestationStore(), _environment(), msg.data
+        );
+        bytes32 consumed = _consume(
+            keccak256("attribution_lifecycle.replay.dispute_withdrawal_key"),
+            m.replayScope,
+            m.replayCommitment
+        );
         _commit(c, m.action, m.state, consumed, m.record);
         _native(61, m.record, a.binding_.artistId, p.collectionId);
         return m.record;

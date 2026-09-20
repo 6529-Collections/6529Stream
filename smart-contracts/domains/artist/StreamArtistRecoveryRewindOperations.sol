@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredReceiptCount as RecoveredCount
+} from "./StreamArtistRecoveredReceiptCount.sol";
 import { StreamArtistRecoveryRewindPreparation } from "./StreamArtistRecoveryRewindPreparation.sol";
 import {
     StreamArtistRecoveryRewindActionReads as Reads
@@ -247,8 +250,7 @@ library StreamArtistRecoveryRewindOperations {
             revert W.InvalidRecoveryRewindSelection(f.selection.sourceKey);
         }
         f.payout = W.ReceiptPrefix(
-            IStreamArtistOwner(e.payoutOwner).ownerStateSnapshotV2(),
-            IStreamArtistNativeReceipts(e.payoutOwner).artistNativeReceiptCount()
+            IStreamArtistOwner(e.payoutOwner).ownerStateSnapshotV2(), RecoveredCount.count(e, 5)
         );
         f.payoutInventory = Payout(e.payoutOwner).payoutRewindInventoryV3(b.identity.artistId);
         if (

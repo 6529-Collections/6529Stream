@@ -41,6 +41,9 @@ import {
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistSuccessionHashes } from "./StreamArtistSuccessionHashes.sol";
 import { StreamArtistGuardianAppealAuthority } from "./StreamArtistGuardianAppealAuthority.sol";
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
 
 library StreamArtistGuardianAppealReads {
     function requireWitness(
@@ -123,12 +126,21 @@ library StreamArtistGuardianAppealReads {
         if (directive != 0) {
             result.directive = IStreamArtistSuccessionReads(owner).estateDirectiveRecord(directive);
             S.DirectiveRecord memory saved = result.directive;
+            StreamArtistHashes.Environment memory original = e;
+            if (Recovered.active(owner)) {
+                original = Recovered.hashes(
+                    Recovered.nativeFact(
+                        Recovered.load(owner, e.registry, e.chainId), 37, p.artistId, directive
+                    )
+                    .environment
+                );
+            }
             if (
                 saved.recordHash != directive || saved.terms.artistId != p.artistId
                     || saved.authorityClass != 1 || saved.signer == address(0)
                     || saved.signedAt == 0
                     || StreamArtistSuccessionHashes.directiveRecord(
-                            e,
+                            original,
                             saved.terms,
                             T.Authorization(saved.nonce, saved.signedAt, new bytes(0))
                         ) != directive

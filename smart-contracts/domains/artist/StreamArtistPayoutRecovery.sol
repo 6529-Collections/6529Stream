@@ -40,6 +40,12 @@ import {
 import {
     StreamArtistIdentityRecoveryHashes as Hashes
 } from "./StreamArtistIdentityRecoveryHashes.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
 
 /// @notice Fixed Coordinator's Payout portion of one already-authenticated original35.
 /// @dev Reads fixed cross-owner facts before mutation; no cross-owner mutation or synthetic native row.
@@ -90,14 +96,13 @@ library StreamArtistPayoutRecovery {
                 || s.appliedRecoveries[p.recoveryRecordHash] != 0
                 || keccak256(abi.encode(context.expected))
                     != keccak256(abi.encode(p.source.snapshot))
-                || p.source.receiptCount
-                    != IStreamArtistNativeReceipts(address(this)).artistNativeReceiptCount()
+                || p.source.receiptCount != _receiptCount(e)
                 || keccak256(abi.encode(inventory(s, stable, candidate, p.artistId)))
                     != keccak256(abi.encode(p.beforeInventory))
         ) revert W.InvalidRecoveryRewindRecord(p.recoveryRecordHash);
         Checked memory checked = _checked(e, context, p);
         _exclusions(s, records, p, checked.manifest);
-        _selection(s, p, checked.result.payout);
+        _selection(s, e, p, checked.result.payout);
         T.Payout memory selected = _payout(records, p.artistId, p.selected.operative.recordHash);
         T.Payout memory retained =
             _payout(records, p.artistId, p.selected.retainedCandidateRecordHash);
@@ -185,10 +190,35 @@ library StreamArtistPayoutRecovery {
         bytes32 hash = s.continuationHeads[p.artistId];
         if (hash == 0) return 0;
         W.PayoutContinuationV3 memory c = s.continuations[hash];
-        if (
-            c.continuationHash != hash || c.artistId != p.artistId
-                || c.payoutOwnerRevision > ownerRevision || W.payoutContinuationHash(e, c) != hash
-        ) revert W.InvalidRecoveryRewindRecord(record);
+        if (c.continuationHash != hash || c.artistId != p.artistId) {
+            revert W.InvalidRecoveryRewindRecord(record);
+        }
+        if (Imported.commitment() == 0) {
+            if (c.payoutOwnerRevision > ownerRevision || W.payoutContinuationHash(e, c) != hash) {
+                revert W.InvalidRecoveryRewindRecord(record);
+            }
+        } else {
+            Runtime.Context memory clock = Runtime.load(e, 5);
+            Runtime.OriginFact memory original = Runtime.auxiliary(
+                clock, keccak256("payout_lifecycle.hydration.continuation_v3"), hash
+            );
+            Runtime.ReplayFact memory applied = Runtime.replay(
+                clock,
+                original.point.environmentHash,
+                keccak256("payout_lifecycle.replay.recovery_rewind"),
+                c.recoveryRecordHash
+            );
+            if (
+                clock.checkpoint.ownerState.revision != ownerRevision
+                    || original.point.ownerRevision != c.payoutOwnerRevision
+                    || W.payoutContinuationHash(Runtime.rewindEnvironment(original.environment), c)
+                        != hash || applied.cell.kind != 1 || applied.cell.status != 2
+                    || applied.cell.commitment != c.planCommitment
+                    || keccak256(abi.encode(applied.admission.point))
+                        != keccak256(abi.encode(original.point))
+                    || s.appliedRecoveries[c.recoveryRecordHash] == 0
+            ) revert W.InvalidRecoveryRewindRecord(record);
+        }
         if (c.candidate.recordHash != 0 || c.stable.recordHash != p.previousDesignationRecordHash) {
             return 0;
         }
@@ -352,6 +382,7 @@ library StreamArtistPayoutRecovery {
 
     function _selection(
         S.State storage s,
+        W.EnvironmentV3 memory e,
         W.PayoutApplyV3 calldata p,
         W.FamilySelectionV3 memory selected
     ) private view {
@@ -376,8 +407,13 @@ library StreamArtistPayoutRecovery {
             if (selected.operative.nativeIndex >= p.source.receiptCount) {
                 revert W.InvalidRecoveryRewindRecord(target);
             }
-            History.Receipt memory row = IStreamArtistNativeReceipts(address(this))
-                .artistNativeReceiptAt(selected.operative.nativeIndex);
+            History.Receipt memory row;
+            if (Imported.commitment() == 0) {
+                row = IStreamArtistNativeReceipts(address(this))
+                    .artistNativeReceiptAt(selected.operative.nativeIndex);
+            } else {
+                row = Runtime.receiptAt(Runtime.load(e, 5), selected.operative.nativeIndex).receipt;
+            }
             if (
                 row.operation != 18 || row.artistId != p.artistId || row.collectionId != 0
                     || row.recordHash != target || selected.operative.originalDataHash == 0
@@ -389,6 +425,13 @@ library StreamArtistPayoutRecovery {
         // _checked authenticates the fixed worker's completed result and exact captured
         // inventory. Its branch commitment already covers the original predecessor walk;
         // final atomic apply must not traverse a lifetime-sized chain a second time.
+    }
+
+    function _receiptCount(W.EnvironmentV3 memory e) private view returns (uint256) {
+        if (Imported.commitment() == 0) {
+            return IStreamArtistNativeReceipts(address(this)).artistNativeReceiptCount();
+        }
+        return Runtime.logicalCount(Runtime.load(e, 5));
     }
 
     function _payout(

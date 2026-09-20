@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationTypes as Recovered
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
 
 import { StreamArtistRecoveryRewindTransport } from "./StreamArtistRecoveryRewindTransport.sol";
@@ -1081,6 +1084,13 @@ contract StreamArtistOnboardingCoordinator is
 
     function coordinateObserveRegistryCutover(address actor) external operation {
         StreamArtistHistoryOperations.observe(_economicContext(), actor);
+    }
+
+    function coordinateHydrateRecoveredArtistAuthority(address actor, Recovered.Request calldata p)
+        external
+        returns (bytes32)
+    {
+        return _coordinateHydration();
     }
 
     function coordinateHydrateMultipleArtistAuthorityWithRecords(

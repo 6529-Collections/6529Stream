@@ -40,6 +40,16 @@ import {
     StreamArtistIdentityRecoveryHashes as RecoveryHashes
 } from "./StreamArtistIdentityRecoveryHashes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Original admitted vesting prefix for the current contested execution.
 /// @dev Fixed owner state and canonical writer-chain records, never a caller-selected cutoff.
 library StreamArtistGuardianSupersessionCutoff {
@@ -62,7 +72,7 @@ library StreamArtistGuardianSupersessionCutoff {
                 || v.commitment != _hash(e, v) || v.ownerRevision == 0 || v.executedAt == 0
                 || v.oldAddress == address(0) || v.newAddress == address(0)
                 || v.oldAddress == v.newAddress || v.guardians.count > head.count
-                || v.guardians.ownerRevision >= v.ownerRevision
+                || (Imported.commitment() == 0 && v.guardians.ownerRevision >= v.ownerRevision)
         ) {
             revert S.InvalidGuardianSupersession(terminal);
         }
@@ -90,7 +100,7 @@ library StreamArtistGuardianSupersessionCutoff {
                 r.recordHash != terminal || r.terms.artistId != artistId
                     || r.terms.oldAddress != v.oldAddress || r.terms.newAddress != v.newAddress
                     || StreamArtistRotationHashes.rotationRecord(
-                            e,
+                            _original(e, 29, artistId, terminal),
                             r.terms,
                             r.oldNonce,
                             r.transition.stagedAt,
@@ -107,7 +117,11 @@ library StreamArtistGuardianSupersessionCutoff {
                     || r.incumbent != v.oldAddress || r.terms.successor != v.newAddress
                     || x.activationRecordHash != terminal || x.executedAt != v.executedAt
                     || StreamArtistEstateHashes.record(
-                            e, r.terms, r.authorization.nonce, r.requestedAt, r.noticeEndsAt
+                            _original(e, 38, artistId, terminal),
+                            r.terms,
+                            r.authorization.nonce,
+                            r.requestedAt,
+                            r.noticeEndsAt
                         ) != terminal
             ) {
                 revert S.InvalidGuardianSupersession(terminal);
@@ -120,7 +134,9 @@ library StreamArtistGuardianSupersessionCutoff {
                     || r.fields.oldAddress != v.oldAddress || r.fields.newAddress != v.newAddress
                     || r.fields.vestedAuthorityClass != v.authorityClass
                     || r.fields.recoveredAt != v.executedAt
-                    || RecoveryHashes.record(e.chainId, e.registry, r.fields) != terminal
+                    || RecoveryHashes.record(
+                            e.chainId, _original(e, 35, artistId, terminal).registry, r.fields
+                        ) != terminal
                     || IStreamArtistIdentityRecoveryOwner(address(this))
                             .latestIdentityRecovery(artistId) != terminal
             ) {
@@ -144,7 +160,7 @@ library StreamArtistGuardianSupersessionCutoff {
                 prior.artistId != artistId
                     || prior.transitionRecordHash != v.previousTransitionRecordHash
                     || prior.commitment == 0 || prior.commitment != v.previousCommitment
-                    || prior.commitment != _hash(e, prior) || prior.ownerRevision >= v.ownerRevision
+                    || prior.commitment != _hash(e, prior) || !_before(e, prior, v)
                     || prior.executedAt > v.executedAt || prior.newAddress != v.oldAddress
                     || prior.guardians.count > v.guardians.count
                     || (v.operationId == 40 || v.operationId == 43
@@ -161,6 +177,10 @@ library StreamArtistGuardianSupersessionCutoff {
         view
         returns (bytes32)
     {
+        if (Imported.commitment() != 0) {
+            Recovered.vesting(Recovered.load(address(this), e.registry, e.chainId), v);
+            return v.commitment;
+        }
         return keccak256(
             bytes.concat(
                 abi.encode(
@@ -183,6 +203,35 @@ library StreamArtistGuardianSupersessionCutoff {
                     v.previousCommitment
                 )
             )
+        );
+    }
+
+    function _original(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory) {
+        if (Imported.commitment() == 0) return e;
+        return Recovered.hashes(
+            Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+            )
+            .environment
+        );
+    }
+
+    function _before(
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory a,
+        V.Snapshot memory b
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return a.ownerRevision < b.ownerRevision;
+        }
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock, Recovered.vesting(clock, a).point, Recovered.vesting(clock, b).point
         );
     }
 }

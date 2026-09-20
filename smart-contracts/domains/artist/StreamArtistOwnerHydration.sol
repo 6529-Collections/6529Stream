@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredOwnerHydration } from "./StreamArtistRecoveredOwnerHydration.sol";
+import { StreamArtistRecoveredOwnerReads } from "./StreamArtistRecoveredOwnerReads.sol";
+import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
 import { StreamArtistHydrationGuards } from "./StreamArtistHydrationGuards.sol";
 import {
     StreamArtistAuthorityHydrationTypes as AH
@@ -26,6 +29,10 @@ library StreamArtistOwnerHydration {
     ) public returns (bytes32 delta, bytes32 nextState) {
         (, AH.Query memory q, AH.OwnerData memory p, bytes32 value) =
             abi.decode(encoded[4:], (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        uint8 index = StreamArtistRecoveredOwnerReads.ownerIndex(b.domain);
+        if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, index)) {
+            return StreamArtistRecoveredOwnerHydration.applyEncoded(replay, b, index, encoded);
+        }
         delta = StreamArtistHydrationGuards.applyGuards(
             replay, p, b.registry, b.coordinator, b.archive, b.domain, value
         );

@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredHistoryOrder as Order
+} from "./StreamArtistRecoveredHistoryOrder.sol";
 
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
@@ -76,7 +82,7 @@ library StreamArtistRecoveryEstateRotationHistory {
         }
         if (
             previous.transitionRecordHash == head || previous.commitment != v.previousCommitment
-                || previous.newAddress != v.oldAddress || previous.ownerRevision >= v.ownerRevision
+                || previous.newAddress != v.oldAddress || !_before(e, previous, v)
                 || previous.executedAt > r.transition.stagedAt
                 || previous.guardians.count > v.guardians.count
         ) {
@@ -133,8 +139,8 @@ library StreamArtistRecoveryEstateRotationHistory {
             v.artistId != origin.artistId || v.transitionRecordHash == 0
                 || v.transitionRecordHash == origin.transitionRecordHash || v.operationId != 32
                 || v.authorityClass != 3 || v.oldAddress == address(0) || v.newAddress == address(0)
-                || v.oldAddress == v.newAddress || v.ownerRevision <= origin.ownerRevision
-                || v.ownerRevision <= v.guardians.ownerRevision
+                || v.oldAddress == v.newAddress || !_before(e, origin, v)
+                || (Imported.commitment() == 0 && v.ownerRevision <= v.guardians.ownerRevision)
                 || v.guardians.count < origin.guardians.count || v.executedAt < origin.executedAt
                 || v.previousTransitionRecordHash == 0 || v.previousCommitment == 0
                 || v.commitment == 0 || v.commitment != _vesting(e, v)
@@ -149,7 +155,11 @@ library StreamArtistRecoveryEstateRotationHistory {
                 || (t.executedAt < t.contestEndsAt
                     && (r.approvalThreshold == 0 || r.guardianApprovals < r.approvalThreshold))
                 || StreamArtistRotationHashes.rotationRecord(
-                        e, r.terms, r.oldNonce, t.stagedAt, t.contestEndsAt
+                        _recordEnvironment(e, 29, r.terms.artistId, r.recordHash),
+                        r.terms,
+                        r.oldNonce,
+                        t.stagedAt,
+                        t.contestEndsAt
                     ) != r.recordHash
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
@@ -160,11 +170,11 @@ library StreamArtistRecoveryEstateRotationHistory {
                 || parent.transitionRecordHash != v.previousTransitionRecordHash
                 || parent.commitment != v.previousCommitment
                 || parent.commitment != _vesting(e, parent) || parent.newAddress != v.oldAddress
-                || parent.ownerRevision >= v.ownerRevision || parent.executedAt > t.stagedAt
+                || !_before(e, parent, v) || parent.executedAt > t.stagedAt
                 || parent.guardians.count > v.guardians.count || parent.authorityClass != 3
                 || (parent.transitionRecordHash == origin.transitionRecordHash
                         ? keccak256(abi.encode(parent)) != keccak256(abi.encode(origin))
-                        : parent.operationId != 32 || parent.ownerRevision <= origin.ownerRevision
+                        : parent.operationId != 32 || !_before(e, origin, parent)
                         || parent.previousTransitionRecordHash == 0
                         || parent.previousCommitment == 0)
         ) {
@@ -194,6 +204,7 @@ library StreamArtistRecoveryEstateRotationHistory {
         view
         returns (bytes32)
     {
+        if (Imported.commitment() != 0) return Order.vesting(e, v);
         return keccak256(
             bytes.concat(
                 abi.encode(
@@ -217,5 +228,26 @@ library StreamArtistRecoveryEstateRotationHistory {
                 )
             )
         );
+    }
+
+    function _recordEnvironment(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory) {
+        return Imported.commitment() == 0
+            ? e
+            : Order.nativeEnvironment(e, operation, artistId, record);
+    }
+
+    function _before(
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory a,
+        V.Snapshot memory b
+    ) private view returns (bool) {
+        return Imported.commitment() == 0
+            ? a.ownerRevision < b.ownerRevision
+            : Order.before(e, a, b);
     }
 }

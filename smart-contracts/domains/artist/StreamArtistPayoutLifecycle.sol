@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredPayoutTransport } from "./StreamArtistRecoveredPayoutTransport.sol";
+import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
 import "./StreamArtistPayoutHydration.sol";
 import "./StreamArtistAuthorityCheckpoint.sol";
 import {
@@ -52,6 +54,10 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
 
     function payoutAbandonment(bytes32 recordHash) external view returns (bytes32) {
         return _abandonedUnder[recordHash];
+    }
+
+    function payoutRecoveryAppliedCommitmentV3(bytes32 recordHash) external view returns (bytes32) {
+        return _recoveryRewind.appliedRecoveries[recordHash];
     }
 
     function payoutRewindInventoryV3(bytes32 artistId)
@@ -502,7 +508,49 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 5)) {
+            if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            uint256[6] memory roots;
+            assembly ("memory-safe") {
+                mstore(roots, _payouts.slot)
+                mstore(add(roots, 32), _records.slot)
+                mstore(add(roots, 64), _pending.slot)
+                mstore(add(roots, 96), _associations.slot)
+                mstore(add(roots, 128), _abandonedUnder.slot)
+                mstore(add(roots, 160), _recoveryRewind.slot)
+            }
+            StreamArtistRecoveredPayoutTransport.importEncoded(roots, msg.data);
+            return;
+        }
         if (p.nonces.length != 0) revert T.InvalidRecord();
         StreamArtistPayoutHydration.importState(_payouts, _records, q.artistId, p.typedState);
+    }
+
+    function _recoveredHydrationFeatures() internal pure override returns (uint256) {
+        return StreamArtistRecoveredHydrationTypes.FIRST_GRAPH_FEATURES;
+    }
+
+    function recoveredAuthorityHydrationState(
+        AH.Query calldata,
+        StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata
+    ) external view override returns (bytes memory) {
+        return StreamArtistRecoveredPayoutTransport.exportEncoded(msg.data);
+    }
+
+    function recoveredHydrationAuxiliaryPoint(bytes32 kind, bytes32 key)
+        external
+        view
+        override
+        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+    {
+        StreamArtistRecoveredHydrationTypes.OriginEnvironment memory current =
+            StreamArtistRecoveredOwnerReads.environment(
+                StreamArtistOwnerHydration.Binding(
+                    artistRegistry, operationCoordinator, archiveV2, domainId
+                ),
+                5
+            );
+        return
+            StreamArtistRecoveredPayoutTransport.auxiliaryPoint(_recoveryRewind, kind, key, current);
     }
 }

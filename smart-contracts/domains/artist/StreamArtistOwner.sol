@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import { StreamArtistOwnerCheck } from "./StreamArtistOwnerCheck.sol";
+import { StreamArtistRecoveredOwnerReads } from "./StreamArtistRecoveredOwnerReads.sol";
+import {
+    StreamArtistRecoveredHydrationTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import { StreamArtistOwnerCommit } from "./StreamArtistOwnerCommit.sol";
 import "./StreamArtistHydrationGuards.sol";
 import { StreamArtistOwnerHydration } from "./StreamArtistOwnerHydration.sol";
@@ -154,6 +158,71 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         return StreamArtistHydrationGuards.commitment();
     }
 
+    function recoveredAuthorityHydrationCapability()
+        external
+        view
+        returns (StreamArtistRecoveredHydrationTypes.Capability memory)
+    {
+        _forwardRecoveredRead();
+    }
+
+    function recoveredHydrationImportedPrefix()
+        external
+        view
+        returns (StreamArtistRecoveredHydrationTypes.OwnerProvenance memory, bytes32, uint64)
+    {
+        _forwardRecoveredRead();
+    }
+
+    function recoveredHydrationReplayPoint(bytes32)
+        external
+        view
+        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+    {
+        _forwardRecoveredRead();
+    }
+
+    function recoveredHydrationOrigin(bytes32)
+        external
+        view
+        returns (StreamArtistRecoveredHydrationTypes.OriginEnvironment memory)
+    {
+        _forwardRecoveredRead();
+    }
+
+    function recoveredHydrationAuxiliaryPoint(bytes32, bytes32)
+        external
+        view
+        virtual
+        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+    {
+        _forwardRecoveredRead();
+    }
+
+    function recoveredAuthorityHydrationState(
+        AH.Query calldata,
+        StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata
+    ) external view virtual returns (bytes memory) {
+        revert StreamArtistOnboardingTypes.UnsupportedProfile();
+    }
+
+    /// @dev A concrete owner advertises supported features only after its typed importer/exporter is joined.
+    function _recoveredHydrationFeatures() internal pure virtual returns (uint256) {
+        return 0;
+    }
+
+    function _forwardRecoveredRead() private view {
+        bytes memory result = StreamArtistRecoveredOwnerReads.read(
+            _replay,
+            StreamArtistOwnerHydration.Binding(
+                artistRegistry, operationCoordinator, archiveV2, domainId
+            ),
+            _recoveredHydrationFeatures(),
+            msg.data
+        );
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
+    }
+
     function authorityHydrationState(AH.Query calldata)
         external
         view
@@ -288,8 +357,10 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         e.tip = _recordChainTip;
         e.actor = context.actor;
         pair = RecoveryReceipts.append(receipts, e, fields, sortedRecords);
-        _native(35, pair.primaryHash, fields.artistId, 0);
-        _native(35, pair.secondaryHash, fields.artistId, 0);
+        // This paired path appends before the one original commitBatch. Ordinary writers
+        // append after _commit and therefore use the already advanced local revision.
+        StreamArtistNativeReceipts.record(35, pair.primaryHash, fields.artistId, 0, _revision + 1);
+        StreamArtistNativeReceipts.record(35, pair.secondaryHash, fields.artistId, 0, _revision + 1);
         StreamArtistOwnerCommit.commitBatch(
             _commitPrefix(),
             _commitEnvironment(),
@@ -336,7 +407,11 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         return StreamArtistNativeReceipts.at(index);
     }
 
+    function artistNativeReceiptRevisionAt(uint256 index) external view returns (uint64) {
+        return StreamArtistNativeReceipts.revisionAt(index);
+    }
+
     function _native(uint16 op, bytes32 record, bytes32 artistId, uint256 collectionId) internal {
-        StreamArtistNativeReceipts.record(op, record, artistId, collectionId);
+        StreamArtistNativeReceipts.record(op, record, artistId, collectionId, _revision);
     }
 }

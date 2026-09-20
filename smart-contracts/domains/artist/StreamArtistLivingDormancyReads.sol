@@ -30,6 +30,13 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Fixed-owner living recovery ancestry of an original designated dormancy appointment.
 /// @dev The caller authenticates the original notice/completion/snapshot and any required closures.
 /// This reader follows actual vesting links; it does not infer ancestry from mutable retirement.
@@ -38,6 +45,8 @@ library StreamArtistLivingDormancyReads {
         address owner;
         address registry;
         uint256 chainId;
+        bool imported;
+        Runtime.Context clock;
     }
 
     function beforeDormancy(
@@ -78,7 +87,12 @@ library StreamArtistLivingDormancyReads {
         bool includeInitial
     ) private view returns (StreamArtistLivingRecoveryReads.Facts memory living, bytes32 proof) {
         bytes32 artistId = n.terms.artistId;
-        Environment memory e = Environment(owner, registry, chainId);
+        Environment memory e;
+        e.owner = owner;
+        e.registry = registry;
+        e.chainId = chainId;
+        e.imported = Recovered.active(owner);
+        if (e.imported) e.clock = Recovered.load(owner, registry, chainId);
         if (
             chainId != block.chainid || owner.code.length == 0 || registry == address(0)
                 || IStreamArtistOwner(owner).deploymentChainId() != chainId
@@ -130,8 +144,8 @@ library StreamArtistLivingDormancyReads {
             history = keccak256(abi.encode(history, previous, rotation));
             before = rotation.transition.stagedAt;
             child = previous;
-            // _link requires strictly decreasing nonzero revisions, so this owner-authenticated
-            // walk cannot cycle and needs no arbitrary ceiling on legitimate rotation history.
+            // _link requires strictly decreasing authenticated owner points, so this walk
+            // cannot cycle and needs no arbitrary ceiling on legitimate rotation history.
         }
         if (child.previousCommitment != 0 || expectedLatestLiving != 0) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
@@ -154,10 +168,10 @@ library StreamArtistLivingDormancyReads {
                 || previous.oldAddress == address(0) || previous.newAddress != child.oldAddress
                 || previous.oldAddress == previous.newAddress || previous.executedAt == 0
                 || previous.executedAt > before || previous.executedAt > child.executedAt
-                || previous.ownerRevision == 0 || previous.ownerRevision >= child.ownerRevision
-                || previous.ownerRevision <= previous.guardians.ownerRevision
+                || previous.ownerRevision == 0 || !_before(e, previous, child)
+                || (!e.imported && previous.ownerRevision <= previous.guardians.ownerRevision)
                 || previous.guardians.count > child.guardians.count
-                || previous.guardians.ownerRevision > child.guardians.ownerRevision
+                || (!e.imported && previous.guardians.ownerRevision > child.guardians.ownerRevision)
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(child.artistId);
         }
@@ -166,9 +180,20 @@ library StreamArtistLivingDormancyReads {
 
     function _rotation(Environment memory e, V.Snapshot memory v, R.RotationRecord memory r)
         private
-        pure
+        view
     {
         R.TransitionState memory t = r.transition;
+        StreamArtistHashes.Environment memory original =
+            StreamArtistHashes.Environment(e.chainId, e.registry, address(0), address(0));
+        if (e.imported) {
+            Runtime.ReceiptFact memory stage =
+                Recovered.nativeFact(e.clock, 29, v.artistId, r.recordHash);
+            if (!Runtime.before(e.clock, stage.position.point, Recovered.vesting(e.clock, v).point))
+            {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(v.artistId);
+            }
+            original = Recovered.hashes(stage.environment);
+        }
         if (
             r.recordHash != v.transitionRecordHash || r.terms.artistId != v.artistId
                 || r.terms.oldAddress != v.oldAddress || r.terms.newAddress != v.newAddress
@@ -180,13 +205,7 @@ library StreamArtistLivingDormancyReads {
                 || (t.executedAt < t.contestEndsAt
                     && (r.approvalThreshold == 0 || r.guardianApprovals < r.approvalThreshold))
                 || StreamArtistRotationHashes.rotationRecord(
-                        StreamArtistHashes.Environment(
-                            e.chainId, e.registry, address(0), address(0)
-                        ),
-                        r.terms,
-                        r.oldNonce,
-                        t.stagedAt,
-                        t.contestEndsAt
+                        original, r.terms, r.oldNonce, t.stagedAt, t.contestEndsAt
                     ) != r.recordHash
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(v.artistId);
         // An early original compromise is legitimate if later closed. The caller proves that
@@ -206,26 +225,27 @@ library StreamArtistLivingDormancyReads {
             }
         } else if (
             v.guardians.ownerRevision == 0 || v.guardians.commitment == 0
-                || v.guardians.ownerRevision > head.ownerRevision || last.artistId != v.artistId
-                || last.index != v.guardians.count
+                || (!e.imported && v.guardians.ownerRevision > head.ownerRevision)
+                || last.artistId != v.artistId || last.index != v.guardians.count
                 || last.ownerRevision != v.guardians.ownerRevision
                 || last.commitment != v.guardians.commitment || last.recordHash == 0
                 || last.recordDataHash == 0
-                || last.commitment
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
-                            e.chainId,
-                            e.registry,
-                            e.owner,
-                            last.artistId,
-                            last.index,
-                            last.ownerRevision,
-                            last.recordHash,
-                            last.recordDataHash,
-                            last.previousCommitment
-                        )
-                    )
+                || (!e.imported
+                    && last.commitment
+                        != keccak256(
+                            abi.encode(
+                                keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
+                                e.chainId,
+                                e.registry,
+                                e.owner,
+                                last.artistId,
+                                last.index,
+                                last.ownerRevision,
+                                last.recordHash,
+                                last.recordDataHash,
+                                last.previousCommitment
+                            )
+                        ))
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(v.artistId);
         }
@@ -233,9 +253,13 @@ library StreamArtistLivingDormancyReads {
 
     function _vestingHash(Environment memory e, V.Snapshot memory v)
         private
-        pure
+        view
         returns (bytes32)
     {
+        if (e.imported) {
+            Recovered.vesting(e.clock, v);
+            return v.commitment;
+        }
         return keccak256(
             bytes.concat(
                 abi.encode(
@@ -258,6 +282,17 @@ library StreamArtistLivingDormancyReads {
                     v.previousCommitment
                 )
             )
+        );
+    }
+
+    function _before(Environment memory e, V.Snapshot memory a, V.Snapshot memory b)
+        private
+        view
+        returns (bool)
+    {
+        if (!e.imported) return a.ownerRevision < b.ownerRevision;
+        return Runtime.before(
+            e.clock, Recovered.vesting(e.clock, a).point, Recovered.vesting(e.clock, b).point
         );
     }
 }

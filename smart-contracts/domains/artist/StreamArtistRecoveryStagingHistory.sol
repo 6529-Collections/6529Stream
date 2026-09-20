@@ -48,6 +48,16 @@ import {
     StreamArtistGuardianVestingTypes as V
 } from "../../interfaces/stream/artist/StreamArtistGuardianVestingTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationTypes as RH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
+
 /// @notice Exact staging heads from the fixed Identity owner's original native receipt order.
 /// @dev Only operations29/38/35/43 replace latestTransition. Operation35's secondary receipt is
 /// not a second transition. Callers still prove executed ancestry, authority class, closures and
@@ -59,6 +69,8 @@ library StreamArtistRecoveryStagingHistory {
         uint64 ownerRevision;
         uint64 boundaryRevision;
         bytes32 proof;
+        RH.Point point;
+        RH.Point boundaryPoint;
     }
 
     struct EstateFacts {
@@ -67,6 +79,8 @@ library StreamArtistRecoveryStagingHistory {
         T.ReplayCell requestReplay;
         T.ReplayCell cancellationReplay;
         bytes32 proof;
+        RH.Point requestPoint;
+        RH.Point cancellationPoint;
     }
 
     struct Environment {
@@ -77,6 +91,8 @@ library StreamArtistRecoveryStagingHistory {
         address archive;
         bytes32 domain;
         uint64 revision;
+        bool imported;
+        Runtime.Context clock;
     }
 
     /// @notice The actual head immediately before this original operation29 stage.
@@ -98,9 +114,16 @@ library StreamArtistRecoveryStagingHistory {
             _rotation(e, artistId, targetRotationHash);
         if (
             target.terms.expectedPreviousTransitionRecordHash != h.recordHash
-                || (h.recordHash != 0 && h.ownerRevision >= cell.touchedRevision)
+                || (!e.imported && h.recordHash != 0 && h.ownerRevision >= cell.touchedRevision)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         h.boundaryRevision = cell.touchedRevision;
+        if (e.imported) {
+            h.boundaryPoint =
+            Recovered.nativeFact(e.clock, 29, artistId, targetRotationHash).position.point;
+            if (h.recordHash != 0 && !Runtime.before(e.clock, h.point, h.boundaryPoint)) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+        }
         h.proof = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_STAGE_PREDECESSOR_V1"),
@@ -140,6 +163,10 @@ library StreamArtistRecoveryStagingHistory {
             requestHash,
             requestHash
         );
+        if (e.imported) {
+            h.boundaryPoint =
+            Recovered.nativeFact(e.clock, 38, artistId, requestHash).position.point;
+        }
         return _boundary(
             e,
             artistId,
@@ -179,6 +206,9 @@ library StreamArtistRecoveryStagingHistory {
             noticeHash,
             noticeHash
         );
+        if (e.imported) {
+            h.boundaryPoint = Recovered.nativeFact(e.clock, 41, artistId, noticeHash).position.point;
+        }
         return _boundary(
             e,
             artistId,
@@ -202,6 +232,7 @@ library StreamArtistRecoveryStagingHistory {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
         h.boundaryRevision = e.revision;
+        if (e.imported) h.boundaryPoint = RH.Point(RH.originHash(e.clock.current), 2, e.revision);
         h.proof = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_CURRENT_STAGE_V1"),
@@ -235,12 +266,16 @@ library StreamArtistRecoveryStagingHistory {
             .guardianVestingSnapshot(artistId, recoveryHash);
         if (
             v.operationId != 35 || v.transitionRecordHash != recoveryHash || v.artistId != artistId
-                || v.ownerRevision == 0 || v.ownerRevision > e.revision
+                || v.ownerRevision == 0 || (!e.imported && v.ownerRevision > e.revision)
                 || v.commitment != _vestingHash(e, v)
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
         h = _head(e, artistId, _select(e, artistId, recoveryHash, 35));
+        if (e.imported) {
+            h.boundaryPoint =
+            Recovered.nativeFact(e.clock, 35, artistId, recoveryHash).position.point;
+        }
         return _boundary(
             e,
             artistId,
@@ -263,6 +298,34 @@ library StreamArtistRecoveryStagingHistory {
         bytes32 requestHash,
         uint64 boundaryRevision
     ) public view returns (EstateFacts memory f) {
+        RH.Point memory empty;
+        return _cancelledEstate(
+            owner, registry, chainId, artistId, requestHash, boundaryRevision, empty
+        );
+    }
+
+    function cancelledEstateAt(
+        address owner,
+        address registry,
+        uint256 chainId,
+        bytes32 artistId,
+        bytes32 requestHash,
+        RH.Point memory boundary
+    ) public view returns (EstateFacts memory) {
+        return _cancelledEstate(
+            owner, registry, chainId, artistId, requestHash, boundary.ownerRevision, boundary
+        );
+    }
+
+    function _cancelledEstate(
+        address owner,
+        address registry,
+        uint256 chainId,
+        bytes32 artistId,
+        bytes32 requestHash,
+        uint64 boundaryRevision,
+        RH.Point memory boundary
+    ) private view returns (EstateFacts memory f) {
         Environment memory e = _environment(owner, registry, chainId, artistId);
         uint8 phase;
         Estate.ExecutionFacts memory execution;
@@ -292,10 +355,35 @@ library StreamArtistRecoveryStagingHistory {
                 || t.stagedAt != f.request.requestedAt || t.contestEndsAt != f.request.noticeEndsAt
                 || t.executedAt != 0 || t.postWindowEndsAt != 0
                 || (t.contestedAt != 0 && t.contestedAt < t.stagedAt)
-                || f.requestReplay.touchedRevision >= f.cancellationReplay.touchedRevision
-                || boundaryRevision == 0 || boundaryRevision > e.revision
-                || f.cancellationReplay.touchedRevision > boundaryRevision
+                || (!e.imported
+                    && (f.requestReplay.touchedRevision >= f.cancellationReplay.touchedRevision
+                        || boundaryRevision == 0
+                        || boundaryRevision > e.revision
+                        || f.cancellationReplay.touchedRevision > boundaryRevision))
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        if (e.imported) {
+            Runtime.ReplayFact memory requested = _replayAt(
+                e,
+                keccak256("identity_authority.replay.activation_request_key"),
+                requestHash,
+                requestHash
+            );
+            Runtime.ReplayFact memory cancelled = _replayAt(
+                e,
+                keccak256("identity_authority.replay.activation_cancellation_key"),
+                requestHash,
+                requestHash
+            );
+            f.requestPoint = requested.admission.point;
+            f.cancellationPoint = cancelled.admission.point;
+            if (
+                !Runtime.before(e.clock, f.requestPoint, f.cancellationPoint)
+                    || (!Recovered.samePoint(f.cancellationPoint, boundary)
+                        && !Runtime.before(e.clock, f.cancellationPoint, boundary))
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+        }
         f.proof = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_CANCELLED_ESTATE_STAGE_V1"),
@@ -321,6 +409,8 @@ library StreamArtistRecoveryStagingHistory {
         Environment memory e = _environment(owner, registry, chainId, artistId);
         C.Record memory c =
             IStreamArtistIdentityContestOwner(owner).identityContestRecord(contestHash);
+        StreamArtistHashes.Environment memory original =
+            _recordEnvironment(e, artistId, 33, contestHash);
         if (
             contestHash == 0 || c.recordHash != contestHash || c.terms.artistId != artistId
                 || c.contester == address(0) || c.contestedAt == 0
@@ -330,8 +420,8 @@ library StreamArtistRecoveryStagingHistory {
                             bytes32(
                                 0x26a4221cd1625ab88b1ac279e1708a73efa176e486242b26832cdc94fe25e6bb
                             ),
-                            chainId,
-                            registry,
+                            original.chainId,
+                            original.registry,
                             artistId,
                             c.contester,
                             c.terms.subjectRecordHash,
@@ -351,15 +441,39 @@ library StreamArtistRecoveryStagingHistory {
         .touchedRevision;
     }
 
+    function compromisePoint(
+        address owner,
+        address registry,
+        uint256 chainId,
+        bytes32 artistId,
+        bytes32 contestHash
+    ) public view returns (RH.Point memory point) {
+        Environment memory e = _environment(owner, registry, chainId, artistId);
+        uint64 revision = compromiseRevision(owner, registry, chainId, artistId, contestHash);
+        if (!e.imported) return point;
+        point = Recovered.nativeFact(e.clock, 33, artistId, contestHash).position.point;
+        Runtime.ReplayFact memory replay = _replayAt(
+            e,
+            keccak256("identity_authority.replay.contest_record_hash_and_subject_key"),
+            keccak256(abi.encode(keccak256("record"), contestHash)),
+            contestHash
+        );
+        if (point.ownerRevision != revision || !Recovered.samePoint(point, replay.admission.point))
+        {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+    }
+
     function _select(Environment memory e, bytes32 artistId, bytes32 target, uint16 targetOperation)
         private
         view
         returns (H.Receipt memory selected)
     {
         IStreamArtistNativeReceipts source = IStreamArtistNativeReceipts(e.owner);
-        uint256 count = source.artistNativeReceiptCount();
+        uint256 count =
+            e.imported ? Runtime.logicalCount(e.clock) : source.artistNativeReceiptCount();
         for (uint256 i; i < count; ++i) {
-            H.Receipt memory row = source.artistNativeReceiptAt(i);
+            H.Receipt memory row = _row(e, i);
             if (row.artistId != artistId) continue;
             if (target != 0 && row.operation == targetOperation && row.recordHash == target) {
                 if (row.collectionId != 0) {
@@ -372,7 +486,7 @@ library StreamArtistRecoveryStagingHistory {
                     .identityRecoveryRecord(row.recordHash);
                 _recovery(e, artistId, row.recordHash, r);
                 if (++i >= count) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
-                H.Receipt memory secondary = source.artistNativeReceiptAt(i);
+                H.Receipt memory secondary = _row(e, i);
                 if (
                     secondary.operation != 35 || secondary.artistId != artistId
                         || secondary.collectionId != 0
@@ -396,8 +510,13 @@ library StreamArtistRecoveryStagingHistory {
         uint64 revision,
         bytes32 tag,
         bytes32 targetProof
-    ) private pure returns (Head memory) {
-        if (h.recordHash != 0 && h.ownerRevision >= revision) {
+    ) private view returns (Head memory) {
+        if (
+            h.recordHash != 0
+                && (e.imported
+                        ? !Runtime.before(e.clock, h.point, h.boundaryPoint)
+                        : h.ownerRevision >= revision)
+        ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
         h.boundaryRevision = revision;
@@ -426,6 +545,10 @@ library StreamArtistRecoveryStagingHistory {
         h.recordHash = row.recordHash;
         h.operation = row.operation;
         if (h.recordHash == 0) return h;
+        if (e.imported) {
+            h.point =
+            Recovered.nativeFact(e.clock, row.operation, artistId, row.recordHash).position.point;
+        }
         if (row.operation == 29) {
             (, T.ReplayCell memory cell, bytes32 proof) = _rotation(e, artistId, row.recordHash);
             h.ownerRevision = cell.touchedRevision;
@@ -449,8 +572,8 @@ library StreamArtistRecoveryStagingHistory {
             if (
                 (row.operation != 35 && row.operation != 43) || v.artistId != artistId
                     || v.transitionRecordHash != row.recordHash || v.operationId != row.operation
-                    || v.ownerRevision == 0 || v.ownerRevision > e.revision || v.executedAt == 0
-                    || v.commitment == 0 || v.commitment != _vestingHash(e, v)
+                    || v.ownerRevision == 0 || (!e.imported && v.ownerRevision > e.revision)
+                    || v.executedAt == 0 || v.commitment == 0 || v.commitment != _vestingHash(e, v)
             ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             R.TransitionState memory t =
                 IStreamArtistRotationReads(e.owner).artistTransitionState(row.recordHash);
@@ -460,6 +583,9 @@ library StreamArtistRecoveryStagingHistory {
             ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             h.ownerRevision = v.ownerRevision;
             h.proof = keccak256(abi.encode(row, v));
+        }
+        if (e.imported && h.point.ownerRevision != h.ownerRevision) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
     }
 
@@ -478,7 +604,11 @@ library StreamArtistRecoveryStagingHistory {
                 || uint256(t.contestEndsAt) != uint256(t.stagedAt) + r.effectiveWindow
                 || hash
                     != StreamArtistRotationHashes.rotationRecord(
-                        _hashEnvironment(e), r.terms, r.oldNonce, t.stagedAt, t.contestEndsAt
+                        _recordEnvironment(e, artistId, 29, hash),
+                        r.terms,
+                        r.oldNonce,
+                        t.stagedAt,
+                        t.contestEndsAt
                     )
                 || keccak256(abi.encode(t))
                     != keccak256(
@@ -492,6 +622,20 @@ library StreamArtistRecoveryStagingHistory {
             keccak256(abi.encode(artistId, hash)),
             hash
         );
+        if (e.imported) {
+            Runtime.ReplayFact memory admitted = _replayAt(
+                e,
+                keccak256("identity_authority.replay.rotation_key"),
+                keccak256(abi.encode(artistId, hash)),
+                hash
+            );
+            if (!Recovered.samePoint(
+                    admitted.admission.point,
+                    Recovered.nativeFact(e.clock, 29, artistId, hash).position.point
+                )) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+        }
         proof = keccak256(
             abi.encode(
                 r.recordHash,
@@ -515,7 +659,7 @@ library StreamArtistRecoveryStagingHistory {
         bytes32 artistId,
         bytes32 hash,
         Estate.RequestRecord memory r
-    ) private pure {
+    ) private view {
         if (
             hash == 0 || r.recordHash != hash || r.terms.artistId != artistId
                 || r.incumbent == address(0) || r.terms.successor == address(0)
@@ -527,7 +671,7 @@ library StreamArtistRecoveryStagingHistory {
                 || r.terms.selectedCoverageHash == 0 || r.envelopeHash == 0
                 || hash
                     != StreamArtistEstateHashes.record(
-                        _hashEnvironment(e),
+                        _recordEnvironment(e, artistId, 38, hash),
                         r.terms,
                         r.authorization.nonce,
                         r.requestedAt,
@@ -541,11 +685,14 @@ library StreamArtistRecoveryStagingHistory {
         bytes32 artistId,
         bytes32 hash,
         Recovery.Record memory r
-    ) private pure {
+    ) private view {
+        StreamArtistHashes.Environment memory original = _recordEnvironment(e, artistId, 35, hash);
         if (
             hash == 0 || r.recordHash != hash || r.fields.artistId != artistId
                 || hash
-                    != StreamArtistIdentityRecoveryHashes.record(e.chainId, e.registry, r.fields)
+                    != StreamArtistIdentityRecoveryHashes.record(
+                        original.chainId, original.registry, r.fields
+                    )
                 || r.fields.supersededRecordsHash
                     != StreamArtistIdentityRecoveryHashes.supersession(
                         r.terms.supersededRecordHashes
@@ -565,15 +712,15 @@ library StreamArtistRecoveryStagingHistory {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
         IStreamArtistOwner source = IStreamArtistOwner(owner);
-        e = Environment(
-            owner,
-            registry,
-            chainId,
-            source.operationCoordinator(),
-            source.archiveV2(),
-            source.domainId(),
-            source.ownerStateSnapshotV2().revision
-        );
+        e.owner = owner;
+        e.registry = registry;
+        e.chainId = chainId;
+        e.coordinator = source.operationCoordinator();
+        e.archive = source.archiveV2();
+        e.domain = source.domainId();
+        e.revision = source.ownerStateSnapshotV2().revision;
+        e.imported = Recovered.active(owner);
+        if (e.imported) e.clock = Recovered.load(owner, registry, chainId);
         if (
             source.artistRegistry() != registry || source.deploymentChainId() != chainId
                 || e.domain != keccak256("domain:identity_authority") || e.coordinator == address(0)
@@ -588,6 +735,7 @@ library StreamArtistRecoveryStagingHistory {
         bytes32 scope,
         bytes32 commitment
     ) private view returns (T.ReplayCell memory cell) {
+        if (e.imported) return _replayAt(e, surface, scope, commitment).cell;
         bytes32 key = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
@@ -608,6 +756,37 @@ library StreamArtistRecoveryStagingHistory {
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
     }
 
+    function _replayAt(Environment memory e, bytes32 surface, bytes32 scope, bytes32 commitment)
+        private
+        view
+        returns (Runtime.ReplayFact memory f)
+    {
+        f = Runtime.replay(e.clock, RH.originHash(e.clock.current), surface, scope);
+        if (
+            commitment == 0 || f.cell.commitment != commitment || f.cell.kind != 1
+                || f.cell.status != 2
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(commitment);
+        }
+    }
+
+    function _row(Environment memory e, uint256 index) private view returns (H.Receipt memory) {
+        return e.imported
+            ? Runtime.receiptAt(e.clock, index).receipt
+            : IStreamArtistNativeReceipts(e.owner).artistNativeReceiptAt(index);
+    }
+
+    function _recordEnvironment(
+        Environment memory e,
+        bytes32 artistId,
+        uint16 operation,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory) {
+        if (!e.imported) return _hashEnvironment(e);
+        return
+            Recovered.hashes(Recovered.nativeFact(e.clock, operation, artistId, record).environment);
+    }
+
     function _hashEnvironment(Environment memory e)
         private
         pure
@@ -618,9 +797,13 @@ library StreamArtistRecoveryStagingHistory {
 
     function _vestingHash(Environment memory e, V.Snapshot memory v)
         private
-        pure
+        view
         returns (bytes32)
     {
+        if (e.imported) {
+            Runtime.OriginFact memory origin = Recovered.vesting(e.clock, v);
+            return Recovered.vestingHash(origin.environment, v);
+        }
         return keccak256(
             bytes.concat(
                 abi.encode(
@@ -648,15 +831,23 @@ library StreamArtistRecoveryStagingHistory {
 
     function _noticeHash(Environment memory e, Dorm.Notice memory n)
         private
-        pure
+        view
         returns (bytes32)
     {
+        address originalOwner = e.owner;
+        StreamArtistHashes.Environment memory original = _hashEnvironment(e);
+        if (e.imported) {
+            Runtime.ReceiptFact memory row =
+                Recovered.nativeFact(e.clock, 41, n.terms.artistId, n.recordHash);
+            original = Recovered.hashes(row.environment);
+            originalOwner = row.environment.owners[2];
+        }
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_NOTICE_V1"),
-                e.chainId,
-                e.registry,
-                e.owner,
+                original.chainId,
+                original.registry,
+                originalOwner,
                 n.terms,
                 n.incumbent,
                 n.initiatedAt,

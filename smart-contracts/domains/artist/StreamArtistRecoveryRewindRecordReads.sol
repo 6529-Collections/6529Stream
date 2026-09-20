@@ -78,10 +78,23 @@ import {
     StreamArtistRecoveryRewindContinuations as C
 } from "./StreamArtistRecoveryRewindContinuations.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Original six-family admission facts read only from fixed semantic owners.
 /// @dev Complete journal traversal, exclusion policy and selected-branch decisions belong to the
 /// fixed selector. No caller-provided record body or replacement pointer is accepted here.
 library StreamArtistRecoveryRewindRecordReads {
+    struct Source {
+        bool imported;
+        W.EnvironmentV3 original;
+        Runtime.ReceiptFact occurrence;
+    }
+
     struct Facts {
         W.SelectedRecordV3 selected;
         R.ProvisionalAssociation association;
@@ -133,10 +146,22 @@ library StreamArtistRecoveryRewindRecordReads {
             revert W.InvalidRecoveryRewindRecord(artistId);
         }
         address owner = kind == W.RecordKind.PAYOUT_DESIGNATION ? e.payoutOwner : e.identityOwner;
-        if (nativeIndex >= IStreamArtistNativeReceipts(owner).artistNativeReceiptCount()) {
-            revert W.InvalidRecoveryRewindRecord(bytes32(nativeIndex));
+        Source memory source;
+        source.original = e;
+        source.imported = Recovered.active(owner);
+        N.Receipt memory row;
+        if (source.imported) {
+            Runtime.Context memory clock =
+                Runtime.load(e, kind == W.RecordKind.PAYOUT_DESIGNATION ? 5 : 2);
+            source.occurrence = Runtime.receiptAt(clock, nativeIndex);
+            source.original = Runtime.rewindEnvironment(source.occurrence.environment);
+            row = source.occurrence.receipt;
+        } else {
+            if (nativeIndex >= IStreamArtistNativeReceipts(owner).artistNativeReceiptCount()) {
+                revert W.InvalidRecoveryRewindRecord(bytes32(nativeIndex));
+            }
+            row = IStreamArtistNativeReceipts(owner).artistNativeReceiptAt(nativeIndex);
         }
-        N.Receipt memory row = IStreamArtistNativeReceipts(owner).artistNativeReceiptAt(nativeIndex);
         if (
             row.artistId != artistId || row.collectionId != 0 || row.recordHash == 0
                 || row.operation != _operation(kind)
@@ -144,17 +169,21 @@ library StreamArtistRecoveryRewindRecordReads {
             revert W.InvalidRecoveryRewindRecord(row.recordHash);
         }
         if (kind == W.RecordKind.SUCCESSOR_DESIGNATION) {
-            f = _designation(e, artistId, row.recordHash);
+            f = _designation(e, artistId, row.recordHash, source);
         } else if (kind == W.RecordKind.ESTATE_DIRECTIVE) {
-            f = _directive(e, artistId, row.recordHash);
+            f = _directive(e, artistId, row.recordHash, source);
         } else if (kind == W.RecordKind.IDENTITY_REVISION) {
-            f = _revision(e, artistId, row.recordHash, originalContinuation);
+            f = _revision(e, artistId, row.recordHash, originalContinuation, source);
         } else if (kind == W.RecordKind.PAYOUT_DESIGNATION) {
-            f = StreamArtistRecoveryRewindPayoutReads.payout(e, artistId, row.recordHash);
+            f = source.imported
+                ? StreamArtistRecoveryRewindPayoutReads.payoutAt(
+                    e, artistId, row.recordHash, source.occurrence
+                )
+                : StreamArtistRecoveryRewindPayoutReads.payout(e, artistId, row.recordHash);
         } else if (kind == W.RecordKind.STEWARD_SANCTION_GRANT) {
-            f = _grant(e, artistId, row.recordHash);
+            f = _grant(e, artistId, row.recordHash, source);
         } else {
-            f = _standing(e, artistId, row.recordHash);
+            f = _standing(e, artistId, row.recordHash, source);
         }
         f.selected.recordHash = row.recordHash;
         f.selected.nativeIndex = nativeIndex;
@@ -169,15 +198,25 @@ library StreamArtistRecoveryRewindRecordReads {
                 f
             )
         );
+        if (source.imported) {
+            f.selected.admissionProof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERED_REWIND_RECORD_FACTS_V1"),
+                    source.occurrence,
+                    f.selected.admissionProof
+                )
+            );
+        }
     }
 
-    function _designation(W.EnvironmentV3 memory e, bytes32 artistId, bytes32 hash)
-        private
-        view
-        returns (Facts memory f)
-    {
-        S.DesignationRecord memory r =
-            IStreamArtistSuccessionReads(e.identityOwner).successorDesignationRecord(hash);
+    function _designation(
+        W.EnvironmentV3 memory e,
+        bytes32 artistId,
+        bytes32 hash,
+        Source memory source
+    ) private view returns (Facts memory f) {
+        S.DesignationRecord memory r = IStreamArtistSuccessionReads(e.identityOwner)
+            .successorDesignationRecord(hash);
         T.Authorization memory auth = T.Authorization(r.nonce, r.signedAt, new bytes(0));
         if (
             r.recordHash != hash || r.terms.artistId != artistId || r.signer == address(0)
@@ -185,12 +224,18 @@ library StreamArtistRecoveryRewindRecordReads {
                 || r.terms.successor == address(0)
                 || (r.terms.successorKind != 1 && r.terms.successorKind != 2)
                 || r.terms.grantedCapabilities & ~uint32(4095) != 0
-                || SH.designationRecord(A.hashes(e), r.terms, auth) != hash
+                || SH.designationRecord(A.hashes(source.original), r.terms, auth) != hash
         ) revert W.InvalidRecoveryRewindRecord(hash);
-        T.ReplayCell memory n =
-            A.nonce(e, artistId, r.nonce, SH.designationDigest(A.hashes(e), r.terms, auth));
-        T.ReplayCell memory admitted = A.consumed(
+        T.ReplayCell memory n = _nonce(
             e,
+            source,
+            artistId,
+            r.nonce,
+            SH.designationDigest(A.hashes(source.original), r.terms, auth)
+        );
+        T.ReplayCell memory admitted = _consumed(
+            e,
+            source,
             keccak256("identity_authority.replay.succession_chain"),
             keccak256(abi.encode(hash)),
             hash
@@ -204,15 +249,16 @@ library StreamArtistRecoveryRewindRecordReads {
         f.pairedDirective = r.terms.directiveHash;
         f.account = r.terms.successor;
         f.grantedCapabilities = r.terms.grantedCapabilities;
-        _association(e, artistId, r.signer, f);
+        _association(e, source, artistId, r.signer, f);
         f.selected.admissionProof = keccak256(abi.encode(f.selected.admissionProof, n, admitted));
     }
 
-    function _directive(W.EnvironmentV3 memory e, bytes32 artistId, bytes32 hash)
-        private
-        view
-        returns (Facts memory f)
-    {
+    function _directive(
+        W.EnvironmentV3 memory e,
+        bytes32 artistId,
+        bytes32 hash,
+        Source memory source
+    ) private view returns (Facts memory f) {
         S.DirectiveRecord memory r =
             IStreamArtistSuccessionReads(e.identityOwner).estateDirectiveRecord(hash);
         T.Authorization memory auth = T.Authorization(r.nonce, r.signedAt, new bytes(0));
@@ -225,12 +271,18 @@ library StreamArtistRecoveryRewindRecordReads {
                     != 0 || r.terms.grantedCapabilities & r.terms.forbiddenCapabilities != 0
                 || payload.length == 0 || payload.length > 8192
                 || keccak256(payload) != r.terms.directivePayloadHash
-                || SH.directiveRecord(A.hashes(e), r.terms, auth) != hash
+                || SH.directiveRecord(A.hashes(source.original), r.terms, auth) != hash
         ) revert W.InvalidRecoveryRewindRecord(hash);
-        T.ReplayCell memory n =
-            A.nonce(e, artistId, r.nonce, SH.directiveDigest(A.hashes(e), r.terms, auth));
-        T.ReplayCell memory admitted = A.consumed(
+        T.ReplayCell memory n = _nonce(
             e,
+            source,
+            artistId,
+            r.nonce,
+            SH.directiveDigest(A.hashes(source.original), r.terms, auth)
+        );
+        T.ReplayCell memory admitted = _consumed(
+            e,
+            source,
             keccak256("identity_authority.replay.directive_chain"),
             keccak256(abi.encode(hash)),
             hash
@@ -244,11 +296,11 @@ library StreamArtistRecoveryRewindRecordReads {
         f.valueHash = r.terms.directivePayloadHash;
         f.grantedCapabilities = r.terms.grantedCapabilities;
         f.forbiddenCapabilities = r.terms.forbiddenCapabilities;
-        _association(e, artistId, r.signer, f);
+        _association(e, source, artistId, r.signer, f);
         f.selected.admissionProof = keccak256(abi.encode(f.selected.admissionProof, n, admitted));
     }
 
-    function _grant(W.EnvironmentV3 memory e, bytes32 artistId, bytes32 hash)
+    function _grant(W.EnvironmentV3 memory e, bytes32 artistId, bytes32 hash, Source memory source)
         private
         view
         returns (Facts memory f)
@@ -262,8 +314,8 @@ library StreamArtistRecoveryRewindRecordReads {
                     != keccak256(
                         abi.encode(
                             keccak256("6529STREAM_ARTIST_STEWARD_SANCTION_GRANT_RECORD_V1"),
-                            e.chainId,
-                            e.registry,
+                            source.original.chainId,
+                            source.original.registry,
                             artistId,
                             r.terms.granted,
                             r.terms.statementHash,
@@ -275,7 +327,7 @@ library StreamArtistRecoveryRewindRecordReads {
                     )
         ) revert W.InvalidRecoveryRewindRecord(hash);
         bytes32 digest = H.typed(
-            A.hashes(e),
+            A.hashes(source.original),
             keccak256(
                 abi.encode(
                     keccak256(
@@ -289,9 +341,13 @@ library StreamArtistRecoveryRewindRecordReads {
                 )
             )
         );
-        T.ReplayCell memory n = A.nonce(e, artistId, r.nonce, digest);
-        T.ReplayCell memory admitted = A.consumed(
-            e, keccak256("identity_authority.replay.grant_chain"), keccak256(abi.encode(hash)), hash
+        T.ReplayCell memory n = _nonce(e, source, artistId, r.nonce, digest);
+        T.ReplayCell memory admitted = _consumed(
+            e,
+            source,
+            keccak256("identity_authority.replay.grant_chain"),
+            keccak256(abi.encode(hash)),
+            hash
         );
         _sameRevision(hash, n, admitted);
         f.selected.originalDataHash = keccak256(abi.encode(r));
@@ -301,7 +357,7 @@ library StreamArtistRecoveryRewindRecordReads {
         f.authorityClass = 1;
         f.granted = r.terms.granted;
         f.valueHash = r.terms.statementHash;
-        _association(e, artistId, r.signer, f);
+        _association(e, source, artistId, r.signer, f);
         f.selected.admissionProof = keccak256(abi.encode(f.selected.admissionProof, n, admitted));
     }
 
@@ -309,14 +365,15 @@ library StreamArtistRecoveryRewindRecordReads {
         W.EnvironmentV3 memory e,
         bytes32 artistId,
         bytes32 hash,
-        bytes32 originalContinuation
+        bytes32 originalContinuation,
+        Source memory source
     ) private view returns (Facts memory f) {
         Doc.Record memory r = IStreamArtistIdentityRevisionReads(e.identityOwner)
             .identityRevisionRecord(hash);
         bytes memory document = IStreamArtistIdentityRevisionReads(e.identityOwner)
             .identityDocumentBytes(r.revisedRecordHash);
-        bool living = _revisionHash(e, r, 1) == hash;
-        bool estate = _revisionHash(e, r, 3) == hash;
+        bool living = _revisionHash(source.original, r, 1) == hash;
+        bool estate = _revisionHash(source.original, r, 3) == hash;
         if (
             r.recordHash != hash || r.artistId != artistId || r.signer == address(0)
                 || r.signedAt == 0 || r.signedAt > block.timestamp || living == estate
@@ -329,7 +386,7 @@ library StreamArtistRecoveryRewindRecordReads {
         ) revert W.InvalidRecoveryRewindRecord(hash);
         _revisionParent(e, r);
         bytes32 digest = H.typed(
-            A.hashes(e),
+            A.hashes(source.original),
             keccak256(
                 abi.encode(
                     keccak256(
@@ -343,8 +400,16 @@ library StreamArtistRecoveryRewindRecordReads {
                 )
             )
         );
-        T.ReplayCell memory n = A.nonce(e, artistId, r.nonce, digest);
-        bytes32 chainProof = C.revision(e, r, originalContinuation, n);
+        T.ReplayCell memory n = _nonce(e, source, artistId, r.nonce, digest);
+        bytes32 chainProof;
+        if (source.imported) {
+            Runtime.ReplayFact memory nonce = A.nonceAt(
+                e, source.occurrence.position.point.environmentHash, artistId, r.nonce, digest
+            );
+            chainProof = C.revisionAt(e, r, originalContinuation, nonce, source.occurrence);
+        } else {
+            chainProof = C.revision(e, r, originalContinuation, n);
+        }
         f.selected.originalDataHash = keccak256(abi.encode(r, document));
         f.selected.nonce = r.nonce;
         f.association = IStreamArtistRotationReads(e.identityOwner)
@@ -354,27 +419,40 @@ library StreamArtistRecoveryRewindRecordReads {
         f.previousRecordHash = r.previousRevisionRecord;
         f.previousValueHash = r.previousRecordHash;
         f.valueHash = r.revisedRecordHash;
-        _association(e, artistId, r.signer, f);
+        _association(e, source, artistId, r.signer, f);
         f.selected.admissionProof =
             keccak256(abi.encode(f.selected.admissionProof, n, chainProof, f.authorityClass));
     }
 
     function _association(
         W.EnvironmentV3 memory e,
+        Source memory source,
         bytes32 artistId,
         address signer,
         Facts memory f
     ) private view {
+        if (source.imported) {
+            (f.transition, f.eligible, f.selected.admissionProof) = A.associationAt(
+                e,
+                artistId,
+                f.association,
+                signer,
+                f.authorityClass,
+                source.occurrence.position.point
+            );
+            return;
+        }
         (f.transition, f.eligible, f.selected.admissionProof) = A.association(
             e, artistId, f.association, signer, f.authorityClass, f.admissionRevision
         );
     }
 
-    function _standing(W.EnvironmentV3 memory e, bytes32 artistId, bytes32 hash)
-        private
-        view
-        returns (Facts memory f)
-    {
+    function _standing(
+        W.EnvironmentV3 memory e,
+        bytes32 artistId,
+        bytes32 hash,
+        Source memory source
+    ) private view returns (Facts memory f) {
         R.StandingRecord memory r =
             IStreamArtistRotationReads(e.identityOwner).standingRevocationRecord(hash);
         if (
@@ -383,32 +461,67 @@ library StreamArtistRecoveryRewindRecordReads {
                 || r.signedAt > block.timestamp || r.terms.revokedAddress == address(0)
                 || r.terms.retiredTransitionRecordHash == 0
                 || RH.standingRecordForAuthority(
-                        A.hashes(e), r.terms, r.signer, r.authorityClass, r.nonce, r.signedAt
+                        A.hashes(source.original),
+                        r.terms,
+                        r.signer,
+                        r.authorityClass,
+                        r.nonce,
+                        r.signedAt
                     ) != hash
         ) revert W.InvalidRecoveryRewindRecord(hash);
-        (T.ReplayCell memory admitted, bytes32 admission) = C.standing(e, r);
-        // Original51 stores observed inclusion time, not the signed authorization deadline.
-        // Its exact record-scoped cell is the writer certificate. Bind the same original
-        // consumed nonce without inventing a deadline or rechecking today's Safe signers.
-        T.ReplayCell memory n = IStreamArtistOwner(e.identityOwner)
-            .replayCell(
-                A.key(
-                    e,
-                    keccak256("identity_authority.replay.nonce_allocator"),
-                    keccak256(abi.encode(artistId, r.nonce))
-                )
+        T.ReplayCell memory admitted;
+        T.ReplayCell memory n;
+        bytes32 admission;
+        V.Snapshot memory v;
+        R.TransitionState memory t;
+        if (source.imported) {
+            Runtime.ReplayFact memory admittedAt;
+            (admittedAt, admission) = C.standingAt(e, r, source.occurrence);
+            Runtime.Context memory clock = Runtime.load(e, 2);
+            Runtime.ReplayFact memory nonce = Runtime.replay(
+                clock,
+                source.occurrence.position.point.environmentHash,
+                keccak256("identity_authority.replay.nonce_allocator"),
+                keccak256(abi.encode(artistId, r.nonce))
             );
-        if (
-            n.commitment == 0 || n.status != 2 || n.kind != 1
-                || n.touchedRevision != admitted.touchedRevision
-        ) revert W.InvalidRecoveryRewindRecord(hash);
-        (V.Snapshot memory v, R.TransitionState memory t) =
-            A.vesting(e, artistId, r.terms.retiredTransitionRecordHash);
+            if (
+                nonce.cell.commitment == 0 || nonce.cell.status != 2 || nonce.cell.kind != 1
+                    || !Recovered.samePoint(nonce.admission.point, admittedAt.admission.point)
+            ) {
+                revert W.InvalidRecoveryRewindRecord(hash);
+            }
+            Runtime.OriginFact memory vesting;
+            (v, t, vesting) = A.vestingAt(e, artistId, r.terms.retiredTransitionRecordHash);
+            if (!Runtime.before(clock, vesting.point, admittedAt.admission.point)) {
+                revert W.InvalidRecoveryRewindRecord(hash);
+            }
+            admitted = admittedAt.cell;
+            n = nonce.cell;
+            admission = keccak256(abi.encode(admission, admittedAt, nonce, vesting));
+        } else {
+            (admitted, admission) = C.standing(e, r);
+            // Original51 stores inclusion time rather than the signed authorization deadline.
+            n = IStreamArtistOwner(e.identityOwner)
+                .replayCell(
+                    A.key(
+                        e,
+                        keccak256("identity_authority.replay.nonce_allocator"),
+                        keccak256(abi.encode(artistId, r.nonce))
+                    )
+                );
+            if (
+                n.commitment == 0 || n.status != 2 || n.kind != 1
+                    || n.touchedRevision != admitted.touchedRevision
+            ) {
+                revert W.InvalidRecoveryRewindRecord(hash);
+            }
+            (v, t) = A.vesting(e, artistId, r.terms.retiredTransitionRecordHash);
+        }
         (address prior, bytes32 guardian, uint64 tail) = _standingTerms(e, v);
         if (
             prior != r.terms.revokedAddress || v.oldAddress != prior || tail < 30 days
                 || uint256(t.postWindowEndsAt) + tail > r.signedAt
-                || admitted.touchedRevision <= v.ownerRevision
+                || (!source.imported && admitted.touchedRevision <= v.ownerRevision)
         ) revert W.InvalidRecoveryRewindRecord(hash);
         // Later retirements and later compromise markers do not erase this original admission.
         // The selector resolves its exact retirement scope against the current standing inventory.
@@ -450,6 +563,39 @@ library StreamArtistRecoveryRewindRecordReads {
                 .dormancyTransitionStanding(v.transitionRecordHash);
         }
         revert W.InvalidRecoveryRewindRecord(v.transitionRecordHash);
+    }
+
+    function _nonce(
+        W.EnvironmentV3 memory e,
+        Source memory source,
+        bytes32 artistId,
+        uint256 nonce,
+        bytes32 digest
+    ) private view returns (T.ReplayCell memory) {
+        if (!source.imported) return A.nonce(e, artistId, nonce, digest);
+        Runtime.ReplayFact memory f =
+            A.nonceAt(e, source.occurrence.position.point.environmentHash, artistId, nonce, digest);
+        if (!Recovered.samePoint(f.admission.point, source.occurrence.position.point)) {
+            revert W.InvalidRecoveryRewindRecord(source.occurrence.receipt.recordHash);
+        }
+        return f.cell;
+    }
+
+    function _consumed(
+        W.EnvironmentV3 memory e,
+        Source memory source,
+        bytes32 surface,
+        bytes32 scope,
+        bytes32 expected
+    ) private view returns (T.ReplayCell memory) {
+        if (!source.imported) return A.consumed(e, surface, scope, expected);
+        Runtime.ReplayFact memory f = A.consumedAt(
+            e, source.occurrence.position.point.environmentHash, surface, scope, expected
+        );
+        if (!Recovered.samePoint(f.admission.point, source.occurrence.position.point)) {
+            revert W.InvalidRecoveryRewindRecord(expected);
+        }
+        return f.cell;
     }
 
     function _sameRevision(bytes32 hash, T.ReplayCell memory a, T.ReplayCell memory b)

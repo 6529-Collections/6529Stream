@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredContinuationWrites as RecoveredWrites
+} from "./StreamArtistRecoveredContinuationWrites.sol";
 
 import { StreamArtistRecoveryRewindState as Rewind } from "./StreamArtistRecoveryRewindState.sol";
 import {
@@ -81,9 +87,17 @@ library StreamArtistRecoveryRewindContinuationMutation {
                     || dismissed.terms.artistId != p.artistId
                     || consumed.commitment != dismissed.recordHash || consumed.kind != 1
                     || consumed.status != 2 || consumed.touchedRevision == 0
-                    || consumed.touchedRevision > o.revision
             ) revert T.InvalidRecord();
-            if (consumed.touchedRevision > recovery.ownerRevision) delete recovery;
+            if (Imported.commitment() != 0) {
+                if (RecoveredWrites.laterDismissal(
+                        o.environment, o.revision, legacy, dismissed, recovery, consumed
+                    )) {
+                    delete recovery;
+                }
+            } else {
+                if (consumed.touchedRevision > o.revision) revert T.InvalidRecord();
+                if (consumed.touchedRevision > recovery.ownerRevision) delete recovery;
+            }
         }
         m = Revisions.reviseWithRecoveryResolution(
             revisions,
@@ -160,8 +174,12 @@ library StreamArtistRecoveryRewindContinuationMutation {
                 || continuation.retirementHash != p.retiredTransitionRecordHash
                 || continuation.retirementHash != rotations.retirement[p.artistId][p.revokedAddress]
                 || continuation.recoveryRecordHash == 0 || continuation.ownerRevision == 0
-                || continuation.ownerRevision > o.revision
         ) revert T.InvalidRecord();
+        if (Imported.commitment() != 0) {
+            RecoveredWrites.standing(o.environment, o.revision, continuation);
+        } else if (continuation.ownerRevision > o.revision) {
+            revert T.InvalidRecord();
+        }
         (bool revoked,) =
             DismissalState.standingRevoked(resolutions, rotations, p.artistId, p.revokedAddress);
         if (revoked) revert R.InvalidPriorStanding(p.revokedAddress);

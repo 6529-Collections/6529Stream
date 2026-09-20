@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredHistoryOrder as Order
+} from "./StreamArtistRecoveredHistoryOrder.sol";
 
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
@@ -56,8 +62,9 @@ library StreamArtistRecoveryEstateHistory {
                 || prior.newAddress != r.terms.newAddress || prior.newAddress != request.incumbent
                 || prior.executedAt != r.transition.executedAt || prior.executedAt == 0
                 || prior.executedAt > request.requestedAt || prior.ownerRevision == 0
-                || prior.ownerRevision >= estate.ownerRevision
-                || prior.ownerRevision <= prior.guardians.ownerRevision
+                || !_before(e, prior, estate)
+                || (Imported.commitment() == 0
+                    && prior.ownerRevision <= prior.guardians.ownerRevision)
                 || prior.guardians.count > estate.guardians.count || prior.commitment == 0
                 || prior.commitment != estate.previousCommitment
                 || prior.commitment != _vesting(e, prior)
@@ -81,8 +88,7 @@ library StreamArtistRecoveryEstateHistory {
                     || earlier.operationId != 32 || earlier.authorityClass != 1
                     || earlier.commitment == 0 || earlier.commitment != prior.previousCommitment
                     || earlier.commitment != _vesting(e, earlier)
-                    || earlier.newAddress != prior.oldAddress
-                    || earlier.ownerRevision >= prior.ownerRevision
+                    || earlier.newAddress != prior.oldAddress || !_before(e, earlier, prior)
                     || earlier.executedAt > r.transition.stagedAt
             ) {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(estate.artistId);
@@ -145,7 +151,10 @@ library StreamArtistRecoveryEstateHistory {
         R.RotationRecord memory r,
         bytes32 artistId,
         bytes32 hash
-    ) private pure {
+    ) private view {
+        if (Imported.commitment() != 0) {
+            e = Order.nativeEnvironment(e, 29, artistId, hash);
+        }
         if (
             hash == 0 || r.recordHash != hash || r.terms.artistId != artistId
                 || r.terms.oldAddress == address(0) || r.terms.newAddress == address(0)
@@ -167,6 +176,7 @@ library StreamArtistRecoveryEstateHistory {
         view
         returns (bytes32)
     {
+        if (Imported.commitment() != 0) return Order.vesting(e, v);
         return keccak256(
             bytes.concat(
                 abi.encode(
@@ -190,5 +200,15 @@ library StreamArtistRecoveryEstateHistory {
                 )
             )
         );
+    }
+
+    function _before(
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory first,
+        V.Snapshot memory second
+    ) private view returns (bool) {
+        return Imported.commitment() == 0
+            ? first.ownerRevision < second.ownerRevision
+            : Order.before(e, first, second);
     }
 }

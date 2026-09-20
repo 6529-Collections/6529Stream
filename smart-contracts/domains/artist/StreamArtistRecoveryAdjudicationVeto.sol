@@ -27,6 +27,16 @@ import {
     IStreamArtistRecoverySelectionBinding
 } from "../../interfaces/stream/artist/IStreamArtistRecoverySelectionPreparation.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Frozen lifetime membership excludes both prior permanent and current adjudications.
 /// @dev Do not require the live execution anchor here: a scheduled action remains vetoable after
 /// another owner revision. The original action/pending/execution/veto checks still gate mutation.
@@ -50,7 +60,20 @@ library StreamArtistRecoveryAdjudicationVeto {
                 || result.sourceKey == 0 || result.commitment == 0
                 || result.commitment != e.selectionCommitment
         ) revert A.InvalidRecoveryAction(actionId);
-        (address target, bytes32 codeHash) = IStreamArtistRecoverySelectionBinding(address(this))
+        address originalOwner = address(this);
+        bytes32 originalCodeHash = address(this).codehash;
+        if (Imported.commitment() != 0) {
+            Runtime.OriginFact memory source = Recovered.preparation(
+                Recovered.load(address(this), o.environment.registry, o.environment.chainId), a
+            );
+            originalOwner = source.environment.owners[2];
+            originalCodeHash = source.environment.ownerCodeHashes[2];
+            o.environment = Recovered.hashes(source.environment);
+            if (originalOwner.codehash != originalCodeHash || originalOwner.code.length == 0) {
+                revert E.RecoveryEvidenceDependencyChanged(originalOwner);
+            }
+        }
+        (address target, bytes32 codeHash) = IStreamArtistRecoverySelectionBinding(originalOwner)
             .recoverySelectionPreparationBinding();
         if (target.code.length == 0 || codeHash == 0 || target.codehash != codeHash) {
             revert E.RecoveryEvidenceDependencyChanged(target);
@@ -58,14 +81,14 @@ library StreamArtistRecoveryAdjudicationVeto {
         IStreamArtistRecoverySelectionPreparation worker =
             IStreamArtistRecoverySelectionPreparation(target);
         if (
-            worker.owner() != address(this) || worker.artistRegistry() != o.environment.registry
+            worker.owner() != originalOwner || worker.artistRegistry() != o.environment.registry
                 || worker.deploymentChainId() != o.environment.chainId
         ) revert E.RecoveryEvidenceDependencyChanged(target);
         (V2.Basis memory basis, Selection.Progress memory progress) =
             worker.selectionV2(result.sourceKey);
         if (
             basis.artistId != artistId || basis.manifestHash != e.manifestHash
-                || basis.ownerCodeHash != address(this).codehash || !progress.complete
+                || basis.ownerCodeHash != originalCodeHash || !progress.complete
                 || progress.processed != snapshot.count || basis.history.count != snapshot.count
                 || basis.history.commitment != snapshot.historyCommitment
                 || result.sourceKey
@@ -74,7 +97,7 @@ library StreamArtistRecoveryAdjudicationVeto {
                             keccak256("6529STREAM_ARTIST_GUARDIAN_SELECTION_SOURCE_V2"),
                             o.environment.chainId,
                             o.environment.registry,
-                            address(this),
+                            originalOwner,
                             basis
                         )
                     )

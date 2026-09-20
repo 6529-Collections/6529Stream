@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredTimingInventory } from "./StreamArtistRecoveredTimingInventory.sol";
+import {
+    StreamArtistRecoveredTimingTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveredTimingTypes.sol";
 
 import "./StreamArtistEstateState.sol";
 import "./StreamArtistTimingState.sol";
@@ -56,6 +60,20 @@ library StreamArtistEstateTiming {
         s.timingActions[key] = true;
         s.noticeSeconds = value;
         s.noticeRevision = revision + 1;
+        StreamArtistRecoveredTimingInventory.note(
+            StreamArtistRecoveredTimingTypes.Input(
+                parameter,
+                actionId,
+                key,
+                oldHash,
+                newHash,
+                prior,
+                value,
+                floor,
+                revision,
+                revision + 1
+            )
+        );
         emit ArtistWindowChanged(1, parameter, prior, value, floor, revision + 1, actionId);
     }
 }

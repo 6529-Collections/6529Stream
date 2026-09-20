@@ -1,5 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationTypes as RH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
@@ -229,16 +241,8 @@ library StreamArtistRecoveryEstateClosed {
                 || r.cohortHash == 0 || r.governanceWitnessHash == 0
                 || r.recordHash != _dismissalHash(e, r) || cause.causeHash == 0
                 || cause.causeHash != r.terms.expectedCauseHash
-                || cause.causeHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            address(this),
-                            cause.facts
-                        )
-                    ) || cause.facts.artistId != current.artistId
+                || cause.causeHash != _causeHash(e, cause)
+                || cause.facts.artistId != current.artistId
                 || cause.facts.executedTransitionHash != t.recordHash
                 || cause.facts.incumbent != current.incumbent || cause.facts.actor == address(0)
                 || cause.facts.referenceHash == 0 || cause.facts.enteredAt < t.executedAt
@@ -296,12 +300,33 @@ library StreamArtistRecoveryEstateClosed {
         view
         returns (bytes32)
     {
+        address originalOwner = address(this);
+        if (Imported.commitment() != 0) {
+            Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+            Runtime.ReceiptFact memory row =
+                Recovered.nativeFact(clock, 58, r.terms.artistId, r.recordHash);
+            Runtime.ReplayFact memory replay = Runtime.replay(
+                clock,
+                RH.originHash(clock.current),
+                keccak256("identity_authority.replay.contest_resolution"),
+                keccak256(abi.encode(r.terms.artistId, r.terms.expectedCauseHash))
+            );
+            if (
+                replay.cell.kind != 1 || replay.cell.status != 2
+                    || replay.cell.commitment != r.recordHash
+                    || !Recovered.samePoint(replay.admission.point, row.position.point)
+            ) {
+                revert RH.InvalidRecoveredHydrationProvenance();
+            }
+            e = Recovered.hashes(row.environment);
+            originalOwner = row.environment.owners[2];
+        }
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 r.terms,
                 r.executor,
                 r.proposer,
@@ -323,7 +348,18 @@ library StreamArtistRecoveryEstateClosed {
         Recovery.Request memory p,
         Contest.Record memory c,
         bytes32 head
-    ) private pure {
+    ) private view {
+        if (Imported.commitment() != 0) {
+            e = Recovered.hashes(
+                Recovered.nativeFact(
+                    Recovered.load(address(this), e.registry, e.chainId),
+                    33,
+                    c.terms.artistId,
+                    c.recordHash
+                )
+                .environment
+            );
+        }
         if (
             cause.facts.kind != 1 || cause.facts.authorityClass != 3 || cause.facts.priorStatus != 3
                 || c.recordHash == 0 || c.recordHash != cause.facts.referenceHash
@@ -350,5 +386,32 @@ library StreamArtistRecoveryEstateClosed {
                         )
                     )
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+    }
+
+    function _causeHash(StreamArtistHashes.Environment memory e, Dismissal.Cause memory cause)
+        private
+        view
+        returns (bytes32)
+    {
+        address originalOwner = address(this);
+        if (Imported.commitment() != 0) {
+            Runtime.ReceiptFact memory row = Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId),
+                cause.facts.kind == 1 ? 33 : 31,
+                cause.facts.artistId,
+                cause.causeHash
+            );
+            e = Recovered.hashes(row.environment);
+            originalOwner = row.environment.owners[2];
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                e.chainId,
+                e.registry,
+                originalOwner,
+                cause.facts
+            )
+        );
     }
 }

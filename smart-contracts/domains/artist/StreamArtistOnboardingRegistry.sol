@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationTypes as Recovered
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
 
 import {
@@ -2030,6 +2033,13 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function observeRegistryCutover() external override {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateRecoveredArtistAuthority(Recovered.Request calldata p)
+        external
+        returns (bytes32)
+    {
         _forwardRegistryWriter();
     }
 

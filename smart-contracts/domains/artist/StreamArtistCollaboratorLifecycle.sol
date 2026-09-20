@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredSimpleHydration as RecoveredSimple
+} from "./StreamArtistRecoveredSimpleHydration.sol";
+import {
+    StreamArtistRecoveredHydrationCodec as RecoveredCodec
+} from "./StreamArtistRecoveredHydrationCodec.sol";
+import {
+    StreamArtistRecoveredHydrationTypes as RecoveredRH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistCollaboratorHashes.sol";
@@ -162,5 +171,26 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
 
     function identityLinked(bytes32 artistId, address account) external view returns (bool) {
         return _identityLinks[artistId][account];
+    }
+
+    function _recoveredHydrationFeatures() internal pure override returns (uint256) {
+        return RecoveredRH.FIRST_GRAPH_FEATURES;
+    }
+
+    function recoveredAuthorityHydrationState(
+        AH.Query calldata q,
+        RecoveredRH.OwnerProvenance calldata local
+    ) external view override returns (bytes memory) {
+        return RecoveredSimple.exportCollaborator(q, local);
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (RecoveredCodec.isState(p.typedState, 1)) {
+            // All collaborator writes advance this counter even when they create no native row.
+            if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            RecoveredSimple.importCollaborator(q, p.typedState);
+            return;
+        }
+        super._hydrateAuthority(q, p);
     }
 }

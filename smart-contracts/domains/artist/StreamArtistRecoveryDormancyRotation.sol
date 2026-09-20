@@ -56,6 +56,16 @@ import {
     StreamArtistRecoveryDormancyRotationOrigin as RotationOrigin
 } from "./StreamArtistRecoveryDormancyRotationOrigin.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Designated op43 authority followed by admitted class3 rotations and first recovery.
 /// @dev Original appointment remains the capability origin; terminal op32 supplies current authority.
 /// Original op43 and intermediate/terminal op32 closures use their respective original principals
@@ -156,12 +166,14 @@ library StreamArtistRecoveryDormancyRotation {
         Dorm.Terminal memory hashTerminal = f.terminal;
         bytes32 originalRecordHash = hashTerminal.recordHash;
         hashTerminal.recordHash = 0;
+        (StreamArtistHashes.Environment memory completion, address completionOwner) =
+            _original(e, 43, p.artistId, head);
         bytes32 terminalHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_COMPLETION_V1"),
-                e.chainId,
-                e.registry,
-                address(this),
+                completion.chainId,
+                completion.registry,
+                completionOwner,
                 hashTerminal
             )
         );
@@ -208,18 +220,10 @@ library StreamArtistRecoveryDormancyRotation {
                 || f.vesting.oldAddress != f.notice.incumbent
                 || f.vesting.newAddress != f.terminal.plan.authority
                 || f.vesting.executedAt != f.terminal.observedAt || f.vesting.ownerRevision == 0
-                || f.vesting.ownerRevision <= f.vesting.guardians.ownerRevision
+                || (Imported.commitment() == 0
+                    && f.vesting.ownerRevision <= f.vesting.guardians.ownerRevision)
                 || f.vesting.commitment == 0 || f.vesting.commitment != _vestingHash(e, f.vesting)
-                || cause.causeHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            address(this),
-                            cause.facts
-                        )
-                    )
+                || cause.causeHash != _causeHash(e, cause)
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
@@ -288,7 +292,7 @@ library StreamArtistRecoveryDormancyRotation {
                     && f.designation.signer != f.notice.incumbent)
                 || !_eligible(rotations, p.artistId, f.designation.provisional)
                 || StreamArtistSuccessionHashes.designationRecord(
-                        e,
+                        _recordEnvironment(e, 36, p.artistId, f.designation.recordHash),
                         f.designation.terms,
                         T.Authorization(f.designation.nonce, f.designation.signedAt, bytes(""))
                     ) != f.designation.recordHash
@@ -371,12 +375,14 @@ library StreamArtistRecoveryDormancyRotation {
         view
         returns (bytes32)
     {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 41, n.terms.artistId, n.recordHash);
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_NOTICE_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 n.terms,
                 n.incumbent,
                 n.initiatedAt,
@@ -416,10 +422,11 @@ library StreamArtistRecoveryDormancyRotation {
                 || f.previous.authorityClass != 1 || f.previous.newAddress != f.notice.incumbent
                 || f.previous.oldAddress == address(0)
                 || f.previous.oldAddress == f.previous.newAddress
-                || f.previous.ownerRevision >= f.vesting.ownerRevision
+                || !_before(e, f.previous, f.vesting)
                 || f.previous.executedAt > f.notice.initiatedAt
                 || f.previous.guardians.count > f.vesting.guardians.count
-                || f.previous.guardians.ownerRevision > f.vesting.guardians.ownerRevision
+                || (Imported.commitment() == 0
+                    && f.previous.guardians.ownerRevision > f.vesting.guardians.ownerRevision)
                 || old.recordHash != prior || old.terms.artistId != f.vesting.artistId
                 || old.terms.oldAddress != f.previous.oldAddress
                 || old.terms.newAddress != f.previous.newAddress
@@ -431,7 +438,7 @@ library StreamArtistRecoveryDormancyRotation {
                         || (old.transition.contestedAt != 0
                             && old.transition.contestedAt < old.transition.postWindowEndsAt)))
                 || StreamArtistRotationHashes.rotationRecord(
-                        e,
+                        _recordEnvironment(e, 29, f.vesting.artistId, prior),
                         old.terms,
                         old.oldNonce,
                         old.transition.stagedAt,
@@ -472,7 +479,9 @@ library StreamArtistRecoveryDormancyRotation {
                 || d.signedAt > f.notice.initiatedAt
                 || !_eligible(r, f.vesting.artistId, d.provisional)
                 || StreamArtistSuccessionHashes.directiveRecord(
-                        e, d.terms, T.Authorization(d.nonce, d.signedAt, bytes(""))
+                        _recordEnvironment(e, 37, f.notice.terms.artistId, hash),
+                        d.terms,
+                        T.Authorization(d.nonce, d.signedAt, bytes(""))
                     ) != hash
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(f.vesting.artistId);
     }
@@ -483,7 +492,8 @@ library StreamArtistRecoveryDormancyRotation {
         Recovery.Request memory p,
         Contest.Record memory c,
         bytes32 head
-    ) private pure {
+    ) private view {
+        e = _recordEnvironment(e, 33, p.artistId, c.recordHash);
         if (
             cause.facts.kind != 1 || cause.facts.authorityClass != 3 || cause.facts.priorStatus != 3
                 || c.recordHash == 0 || c.recordHash != cause.facts.referenceHash
@@ -517,6 +527,10 @@ library StreamArtistRecoveryDormancyRotation {
         view
         returns (bytes32)
     {
+        if (Imported.commitment() != 0) {
+            Recovered.vesting(Recovered.load(address(this), e.registry, e.chainId), v);
+            return v.commitment;
+        }
         return keccak256(
             bytes.concat(
                 abi.encode(
@@ -539,6 +553,61 @@ library StreamArtistRecoveryDormancyRotation {
                     v.previousCommitment
                 )
             )
+        );
+    }
+
+    function _original(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory, address) {
+        if (Imported.commitment() == 0) return (e, address(this));
+        Runtime.ReceiptFact memory row = Recovered.nativeFact(
+            Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+        );
+        return (Recovered.hashes(row.environment), row.environment.owners[2]);
+    }
+
+    function _recordEnvironment(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory original) {
+        (original,) = _original(e, operation, artistId, record);
+    }
+
+    function _causeHash(StreamArtistHashes.Environment memory e, Dismissal.Cause memory c)
+        private
+        view
+        returns (bytes32)
+    {
+        address originalOwner;
+        (e, originalOwner) =
+            _original(e, c.facts.kind == 1 ? 33 : 31, c.facts.artistId, c.causeHash);
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                e.chainId,
+                e.registry,
+                originalOwner,
+                c.facts
+            )
+        );
+    }
+
+    function _before(
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory a,
+        V.Snapshot memory b
+    ) private view returns (bool) {
+        if (Imported.commitment() == 0) {
+            return a.ownerRevision < b.ownerRevision;
+        }
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock, Recovered.vesting(clock, a).point, Recovered.vesting(clock, b).point
         );
     }
 }

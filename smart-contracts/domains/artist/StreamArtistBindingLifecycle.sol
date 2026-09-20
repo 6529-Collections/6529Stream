@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredSimpleHydration as RecoveredSimple
+} from "./StreamArtistRecoveredSimpleHydration.sol";
+import {
+    StreamArtistRecoveredHydrationCodec as RecoveredCodec
+} from "./StreamArtistRecoveredHydrationCodec.sol";
+import {
+    StreamArtistRecoveredHydrationTypes as RecoveredRH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import "./StreamArtistMultipleDelegationCollectionHydration.sol";
 import "./StreamArtistMultipleCollectionHydration.sol";
 import "./StreamArtistDelegationCollectionHydration.sol";
@@ -355,7 +364,23 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         return abi.encode(AH.Binding(b, terms));
     }
 
+    function _recoveredHydrationFeatures() internal pure override returns (uint256) {
+        return RecoveredRH.FIRST_GRAPH_FEATURES;
+    }
+
+    function recoveredAuthorityHydrationState(
+        AH.Query calldata q,
+        RecoveredRH.OwnerProvenance calldata local
+    ) external view override returns (bytes memory) {
+        return RecoveredSimple.exportBinding(_bindings, _history, _terms, _terminals, q, local);
+    }
+
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (RecoveredCodec.isState(p.typedState, 0)) {
+            if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            RecoveredSimple.importBinding(_bindings, _history, _terms, _terminals, q, p.typedState);
+            return;
+        }
         if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, MD.BINDING)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistMultipleDelegationCollectionHydration.bindings(

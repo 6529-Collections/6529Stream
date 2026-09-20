@@ -54,6 +54,17 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistSuccessionTypes.sol";
 import { StreamArtistSuccessionHashes } from "./StreamArtistSuccessionHashes.sol";
 
+import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 library StreamArtistRecoveryRewindGuardians {
     struct Facts {
         GH.Head history;
@@ -83,7 +94,9 @@ library StreamArtistRecoveryRewindGuardians {
                     != f.history.commitment
         ) revert GH.InvalidGuardianHistory(manifest.artistId);
         f.cutoff = _cutoff(manifest, ancestry);
-        if (f.cutoff.transitionRecordHash != 0) _prefix(s, manifest.artistId, f.cutoff, f.history);
+        if (f.cutoff.transitionRecordHash != 0) {
+            _prefix(s, o.environment, manifest.artistId, f.cutoff, f.history);
+        }
         f.findings = new Appeal.Finding[](exclusions.length);
         uint256 required;
         bool protectedPrefix;
@@ -92,10 +105,24 @@ library StreamArtistRecoveryRewindGuardians {
             bytes32 hash = exclusions[index];
             GH.Entry memory entry = s.guardianHistory.entries[hash];
             R.GuardianRecord memory record = rotations.guardians[hash];
+            Hashes.Environment memory original = o.environment;
+            if (Imported.commitment() != 0) {
+                original = Recovered.hashes(
+                    Recovered.guardian(
+                        Recovered.load(
+                            address(this), o.environment.registry, o.environment.chainId
+                        ),
+                        entry,
+                        record
+                    )
+                    .environment
+                );
+            }
             if (
                 hash <= previous || entry.recordHash != hash || entry.artistId != manifest.artistId
                     || entry.index == 0 || entry.index > f.history.count || entry.ownerRevision == 0
-                    || entry.ownerRevision > f.history.ownerRevision || entry.commitment == 0
+                    || (Imported.commitment() == 0 && entry.ownerRevision > f.history.ownerRevision)
+                    || entry.commitment == 0
                     || s.guardianHistory.records[manifest.artistId][entry.index] != hash
                     || record.recordHash != hash || record.terms.artistId != manifest.artistId
                     || record.signer == address(0)
@@ -103,16 +130,15 @@ library StreamArtistRecoveryRewindGuardians {
                     || entry.recordDataHash != keccak256(abi.encode(record))
                     || s.guardianSupersession.statuses[hash].recoveryRecordHash != 0
                     || StreamArtistRotationHashes.guardianRecord(
-                            o.environment,
+                            original,
                             record.terms,
                             T.Authorization(record.nonce, record.signedAt, new bytes(0))
                         ) != hash
             ) revert E.InvalidRecoveryManifest(manifestHash);
             bool afterCutoff = f.cutoff.transitionRecordHash != 0
-                && entry.index > f.cutoff.guardians.count
-                && entry.ownerRevision > f.cutoff.ownerRevision;
+                && entry.index > f.cutoff.guardians.count && _after(o.environment, f.cutoff, entry);
             if (!afterCutoff) protectedPrefix = true;
-            if (!afterCutoff && !_provisional(record, entry, ancestry)) {
+            if (!afterCutoff && !_provisional(o.environment, record, entry, ancestry)) {
                 if (record.terms.guardians.length == 0) {
                     revert E.InvalidRecoveryManifest(manifestHash);
                 }
@@ -167,11 +193,23 @@ library StreamArtistRecoveryRewindGuardians {
     {
         if (hash == 0) return saved;
         saved = IStreamArtistSuccessionReads(address(this)).estateDirectiveRecord(hash);
+        Hashes.Environment memory original = o.environment;
+        if (Imported.commitment() != 0) {
+            original = Recovered.hashes(
+                Recovered.nativeFact(
+                    Recovered.load(address(this), o.environment.registry, o.environment.chainId),
+                    37,
+                    artistId,
+                    hash
+                )
+                .environment
+            );
+        }
         if (
             saved.recordHash != hash || saved.terms.artistId != artistId
                 || saved.authorityClass != 1 || saved.signer == address(0)
                 || StreamArtistSuccessionHashes.directiveRecord(
-                        o.environment,
+                        original,
                         saved.terms,
                         T.Authorization(saved.nonce, saved.signedAt, new bytes(0))
                     ) != hash
@@ -216,12 +254,19 @@ library StreamArtistRecoveryRewindGuardians {
 
     function _prefix(
         Recovery.State storage s,
+        Hashes.Environment memory e,
         bytes32 artistId,
         V.Snapshot memory cutoff,
         GH.Head memory current
     ) private view {
         GH.Head memory prefix = cutoff.guardians;
-        if (prefix.count > current.count || prefix.ownerRevision >= cutoff.ownerRevision) {
+        if (Imported.commitment() != 0) {
+            Recovered.vesting(Recovered.load(address(this), e.registry, e.chainId), cutoff);
+        }
+        if (
+            prefix.count > current.count
+                || (Imported.commitment() == 0 && prefix.ownerRevision >= cutoff.ownerRevision)
+        ) {
             revert GH.InvalidGuardianHistory(artistId);
         }
         if (prefix.count == 0) {
@@ -240,6 +285,7 @@ library StreamArtistRecoveryRewindGuardians {
     }
 
     function _provisional(
+        Hashes.Environment memory e,
         R.GuardianRecord memory record,
         GH.Entry memory entry,
         Ancestry.Facts memory a
@@ -255,8 +301,8 @@ library StreamArtistRecoveryRewindGuardians {
                     || t.phase != 2 || t.executedAt == 0 || t.executedAt != v.executedAt
                     || record.provisional.windowEndsAt != t.postWindowEndsAt
                     || record.signedAt >= t.postWindowEndsAt || record.signer != v.newAddress
-                    || record.authorityClass != v.authorityClass
-                    || entry.ownerRevision <= v.ownerRevision || entry.index <= v.guardians.count
+                    || record.authorityClass != v.authorityClass || !_after(e, v, entry)
+                    || entry.index <= v.guardians.count
             ) revert E.InvalidRecoveryManifest(v.transitionRecordHash);
             // An explicit adjudicated closure is not an open provisional association.
             if (closed.dismissalRecordHash != 0) return false;
@@ -264,5 +310,17 @@ library StreamArtistRecoveryRewindGuardians {
                 || (t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt);
         }
         revert E.InvalidRecoveryManifest(record.provisional.transitionRecordHash);
+    }
+
+    function _after(Hashes.Environment memory e, V.Snapshot memory v, GH.Entry memory entry)
+        private
+        view
+        returns (bool)
+    {
+        if (Imported.commitment() == 0) return entry.ownerRevision > v.ownerRevision;
+        Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+        return Runtime.before(
+            clock, Recovered.vesting(clock, v).point, Recovered.guardianEntry(clock, entry).point
+        );
     }
 }

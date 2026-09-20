@@ -34,6 +34,13 @@ import {
     StreamArtistGuardianSupersessionTypes as S
 } from "../../interfaces/stream/artist/StreamArtistGuardianSupersessionTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Canonical designated operation43 for a fixed owner's current election cutoff.
 /// @dev This authenticates admitted records, not historical governance. Recovery separately
 /// proves the current epoch, operative plan, full guardian history, cause and original closures.
@@ -89,6 +96,15 @@ library StreamArtistDormancyVestingReads {
                         abi.encode(IStreamArtistRotationReads(owner).artistTransitionState(record))
                     )
         ) revert S.InvalidGuardianSupersession(record);
+        address completionOwner = owner;
+        address completionRegistry = registry;
+        if (Recovered.active(owner)) {
+            Runtime.ReceiptFact memory row = Recovered.nativeFact(
+                Recovered.load(owner, registry, chainId), 43, artistId, record
+            );
+            completionOwner = row.environment.owners[2];
+            completionRegistry = row.environment.registry;
+        }
         t.recordHash = 0;
         if (
             record
@@ -96,8 +112,8 @@ library StreamArtistDormancyVestingReads {
                     abi.encode(
                         keccak256("6529STREAM_ARTIST_DORMANCY_COMPLETION_V1"),
                         chainId,
-                        registry,
-                        owner,
+                        completionRegistry,
+                        completionOwner,
                         t
                     )
                 )
@@ -107,7 +123,8 @@ library StreamArtistDormancyVestingReads {
             v.artistId != artistId || v.transitionRecordHash != record || v.operationId != 43
                 || v.authorityClass != 3 || v.oldAddress != n.incumbent
                 || v.newAddress != t.plan.authority || v.executedAt != t.observedAt
-                || v.ownerRevision == 0 || v.ownerRevision <= v.guardians.ownerRevision
+                || v.ownerRevision == 0
+                || (!Recovered.active(owner) && v.ownerRevision <= v.guardians.ownerRevision)
                 || v.commitment == 0 || v.commitment != _vestingHash(owner, registry, chainId, v)
         ) revert S.InvalidGuardianSupersession(record);
         bytes32 latestLiving =
@@ -122,9 +139,16 @@ library StreamArtistDormancyVestingReads {
 
     function _noticeHash(address owner, address registry, uint256 chainId, Dorm.Notice memory n)
         private
-        pure
+        view
         returns (bytes32)
     {
+        if (Recovered.active(owner)) {
+            Runtime.ReceiptFact memory row = Recovered.nativeFact(
+                Recovered.load(owner, registry, chainId), 41, n.terms.artistId, n.recordHash
+            );
+            owner = row.environment.owners[2];
+            registry = row.environment.registry;
+        }
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_NOTICE_V1"),
@@ -148,9 +172,13 @@ library StreamArtistDormancyVestingReads {
 
     function _vestingHash(address owner, address registry, uint256 chainId, V.Snapshot memory v)
         private
-        pure
+        view
         returns (bytes32)
     {
+        if (Recovered.active(owner)) {
+            Recovered.vesting(Recovered.load(owner, registry, chainId), v);
+            return v.commitment;
+        }
         return keccak256(
             bytes.concat(
                 abi.encode(

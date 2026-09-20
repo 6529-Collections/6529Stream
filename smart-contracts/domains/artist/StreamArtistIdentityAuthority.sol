@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredTimingInventory } from "./StreamArtistRecoveredTimingInventory.sol";
+import {
+    StreamArtistRecoveredIdentityTransport
+} from "./StreamArtistRecoveredIdentityTransport.sol";
+import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
+import {
+    StreamArtistRecoveredIdentityHydrationTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveredIdentityHydrationTypes.sol";
+import {
+    StreamArtistRecoveredTimingTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveredTimingTypes.sol";
 import {
     StreamArtistRecoveryRewindTypes as RewindTypes
 } from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
@@ -1132,6 +1143,7 @@ contract StreamArtistIdentityAuthority is
         )
     {
         artistWindowAuthority = StreamArtistTimingState.canonicalAuthority(core_, manager_);
+        StreamArtistRecoveredTimingInventory.initialize();
         StreamArtistExtensionAdmission.identity(
             extensionFactory_,
             extensions_,
@@ -2005,6 +2017,12 @@ contract StreamArtistIdentityAuthority is
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 2)) {
+            StreamArtistRecoveredIdentityTransport.importEncoded(
+                _recoveredHydrationRoots(), msg.data[4:]
+            );
+            return;
+        }
         _baselineTiming();
         StreamArtistAdditiveIdentityHydration.importEncoded(
             _identity,
@@ -2015,6 +2033,83 @@ contract StreamArtistIdentityAuthority is
             _unavailability,
             msg.data[4:]
         );
+    }
+
+    function recoveredIdentityHydrationRaw(
+        AH.Query calldata,
+        StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata
+    ) external view returns (StreamArtistRecoveredIdentityHydrationTypes.Bundle memory) {
+        _forwardRecoveredIdentityRead();
+    }
+
+    function _recoveredHydrationFeatures() internal pure override returns (uint256) {
+        return StreamArtistRecoveredHydrationTypes.FIRST_GRAPH_FEATURES;
+    }
+
+    function recoveredAuthorityHydrationState(
+        AH.Query calldata,
+        StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata
+    ) external view override returns (bytes memory) {
+        _forwardRecoveredIdentityRead();
+    }
+
+    function recoveredIdentityHydrationActionArtist(bytes32) external view returns (bytes32) {
+        _forwardRecoveredIdentityRead();
+    }
+
+    function recoveredHydrationAuxiliaryPoint(bytes32, bytes32)
+        external
+        view
+        override
+        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+    {
+        _forwardRecoveredIdentityRead();
+    }
+
+    function recoveredTimingCheckpoint()
+        external
+        view
+        returns (StreamArtistRecoveredTimingTypes.Checkpoint memory)
+    {
+        _forwardRecoveredIdentityRead();
+    }
+
+    function recoveredTimingEntryAt(uint256)
+        external
+        view
+        returns (StreamArtistRecoveredTimingTypes.Entry memory)
+    {
+        _forwardRecoveredIdentityRead();
+    }
+
+    function _forwardRecoveredIdentityRead() private view {
+        _returnResolution(
+            StreamArtistRecoveredIdentityTransport.read(
+                _recoveredHydrationRoots(), _ownerContext(), msg.data
+            )
+        );
+    }
+
+    function _recoveredHydrationRoots() private pure returns (uint256[17] memory roots) {
+        assembly ("memory-safe") {
+            mstore(roots, _identity.slot)
+            mstore(add(roots, 32), _delegations.slot)
+            mstore(add(roots, 64), _collaboratorAccounts.slot)
+            mstore(add(roots, 96), _identityRevisions.slot)
+            mstore(add(roots, 128), _rotations.slot)
+            mstore(add(roots, 160), _identityContests.slot)
+            mstore(add(roots, 192), _succession.slot)
+            mstore(add(roots, 224), _resolutions.slot)
+            mstore(add(roots, 256), _estate.slot)
+            mstore(add(roots, 288), _unavailability.slot)
+            mstore(add(roots, 320), _identityRecovery.slot)
+            mstore(add(roots, 352), _dormancy.slot)
+            mstore(add(roots, 384), _stewardGrants.slot)
+            mstore(add(roots, 416), _stewardCapabilityGrants.slot)
+            mstore(add(roots, 448), _recoveryAdjudication.slot)
+            mstore(add(roots, 480), _recoveryRewinds.slot)
+            mstore(add(roots, 512), _replay.slot)
+        }
     }
 
     function _forwardSupplementalRead() private view {

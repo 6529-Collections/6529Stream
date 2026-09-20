@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredHydrationState } from "./StreamArtistRecoveredHydrationState.sol";
 import {
     IStreamArtistAuthorityCheckpoint as GuardCheckpointAPI
 } from "../../interfaces/stream/artist/IStreamArtistAuthorityCheckpoint.sol";
@@ -46,6 +47,7 @@ library StreamArtistAuthorityCheckpoint {
 
     function noteReplay(bytes32 key, T.ReplayCell memory cell) public {
         if (key == 0 || cell.status == 0) revert InvalidAuthorityCheckpoint();
+        StreamArtistRecoveredHydrationState.noteLocalReplay(key);
         State storage s = state();
         if (!s.replaySeen[key]) {
             s.replaySeen[key] = true;
@@ -55,7 +57,9 @@ library StreamArtistAuthorityCheckpoint {
     }
 
     function noteNonce(uint8 kind, bytes32 key, uint256 prefix, bytes32 originalDelta) public {
-        if (kind == 0 || kind > 5 || key == 0 || originalDelta == 0) revert InvalidAuthorityCheckpoint();
+        if (kind == 0 || kind > 5 || key == 0 || originalDelta == 0) {
+            revert InvalidAuthorityCheckpoint();
+        }
         State storage s = state();
         bytes32 id = keccak256(abi.encode(kind, key));
         Index storage n = s.indexes[id];

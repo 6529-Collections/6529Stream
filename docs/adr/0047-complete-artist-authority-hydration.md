@@ -151,6 +151,24 @@ profiles are specified in the [multiplicity guide](../guides/artist-multiple-aut
 No collaborator/delegated, corrected-generation or advanced-history authority
 is inferred from this baseline extension.
 
+## Developing recovered-authority profile
+
+The separate `hydrateRecoveredArtistAuthority(Request)` entry point adds
+operation-60 profile10 for complete recovered class-1/class-3 Identity and
+Payout histories. Its first graph retains one accepted generation-one
+PRIMARY_ONLY collection with base Attribution and direct policy consents.
+It preserves original record domains and local clocks through a flat provenance
+prefix, complete replay/nonce inventories, original publication carriers and
+separately observed timing and external guards. Original owner commits remain
+revision+1; non-native preparations and executions do not become native receipts.
+
+The [recovered-authority guide](../guides/artist-recovered-authority-hydration.md)
+defines the source certificate, repeated-import chronology and remaining scope.
+The implementation is under development: the seven concrete owners advertise
+the first graph's feature mask31, positive execution scenarios are authored,
+and ABI-only checks establish no
+runtime, Safe, capacity or release acceptance. Existing profiles remain strict.
+
 ## Original living delegation profile
 
 The additive `hydrateArtistAuthorityWithDelegations(Request)` selects

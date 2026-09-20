@@ -30,6 +30,14 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
+import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Fixed publisher and policy reads for additive native-cause adjudication.
 library StreamArtistRecoveryEvidenceReads {
     struct AppealEvidence {
@@ -112,12 +120,26 @@ library StreamArtistRecoveryEvidenceReads {
             IStreamArtistSuccessionReads(address(this)).operativeEstateDirective(artistId);
         if (directive != 0) {
             saved = IStreamArtistSuccessionReads(address(this)).estateDirectiveRecord(directive);
+            Hashes.Environment memory original = o.environment;
+            if (Imported.commitment() != 0) {
+                original = Recovered.hashes(
+                    Recovered.nativeFact(
+                        Recovered.load(
+                            address(this), o.environment.registry, o.environment.chainId
+                        ),
+                        37,
+                        artistId,
+                        directive
+                    )
+                    .environment
+                );
+            }
             if (
                 saved.recordHash != directive || saved.terms.artistId != artistId
                     || saved.authorityClass != 1 || saved.signer == address(0)
                     || saved.signedAt == 0
                     || StreamArtistSuccessionHashes.directiveRecord(
-                            o.environment,
+                            original,
                             saved.terms,
                             T.Authorization(saved.nonce, saved.signedAt, new bytes(0))
                         ) != directive

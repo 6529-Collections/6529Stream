@@ -57,6 +57,16 @@ import {
     StreamArtistDormancyTypes as Dorm
 } from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Current estate bounds restored by an actual V3 recovery, with the original origin intact.
 /// @dev The cheap owner read uses its own committed state. The full history proof independently
 /// joins the original35 and its immutable completed plan; it never re-runs a current selection.
@@ -69,6 +79,10 @@ library StreamArtistRecoveryRewindCapabilityReads {
         W.BasisV3 basis;
         W.ProgressV3 progress;
         Living.Facts recovered;
+        Runtime.OriginFact original;
+        Runtime.OriginFact preparation;
+        W.EnvironmentV3 sourceEnvironment;
+        bool imported;
     }
 
     function current(
@@ -117,6 +131,9 @@ library StreamArtistRecoveryRewindCapabilityReads {
         if (head == 0) return f;
         W.CapabilityContinuationV3 memory c = rewind.capabilityContinuations[head];
         W.EnvironmentV3 memory e = _environment();
+        if (Imported.commitment() != 0) {
+            e = Runtime.rewindEnvironment(_origin(e, head).environment);
+        }
         if (
             c.artistId != artistId || c.recoveryRecordHash != head || c.actionId == 0
                 || c.manifestHash == 0 || c.planCommitment == 0 || c.designationRecordHash == 0
@@ -161,6 +178,12 @@ library StreamArtistRecoveryRewindCapabilityReads {
             revert W.InvalidRecoveryRewindRecord(head);
         }
         SavedPlan memory s;
+        s.imported = Imported.commitment() != 0;
+        s.sourceEnvironment = e;
+        if (s.imported) {
+            s.original = _origin(e, head);
+            s.sourceEnvironment = Runtime.rewindEnvironment(s.original.environment);
+        }
         s.continuation = owner.recoveryCapabilityContinuationV3(head);
         W.CapabilityContinuationV3 memory c = s.continuation;
         s.recovered = Living.readFamily(address(this), e.registry, e.chainId, artistId, head);
@@ -171,17 +194,16 @@ library StreamArtistRecoveryRewindCapabilityReads {
                 || c.authorityAddress != s.recovered.record.fields.newAddress
                 || c.actionId != s.recovered.record.fields.governanceActionId
                 || s.recovered.record.fields.vestedAuthorityClass != 3 || c.commitment == 0
-                || c.commitment != W.capabilityContinuationHash(e, c)
+                || c.commitment != W.capabilityContinuationHash(s.sourceEnvironment, c)
                 || c.effectiveCapabilities != live.effectiveCapabilities
-                || c.effectiveCapabilities & ~uint32(4095) != 0
-                || s.recovered.vesting.ownerRevision <= origin.ownerRevision
+                || c.effectiveCapabilities & ~uint32(4095) != 0 || !_afterOrigin(e, s, origin)
                 || keccak256(abi.encode(s.recovered.vesting, s.recovered.transition))
                     != keccak256(abi.encode(members[member].vesting, members[member].transition))
         ) {
             revert W.InvalidRecoveryRewindRecord(head);
         }
         s.evidence = owner.identityRecoveryEvidenceStateV3(artistId, c.actionId);
-        _saved(e, s);
+        _saved(s.sourceEnvironment, s);
         bytes32 selectedProof = _bounds(e, s);
         return keccak256(
             abi.encode(
@@ -257,14 +279,28 @@ library StreamArtistRecoveryRewindCapabilityReads {
                 || executed != c.recoveryRecordHash
                 || evidence.sources.associationHash != evidence.associationHash
         ) revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
+        if (s.imported) {
+            Runtime.Context memory clock =
+                Recovered.load(address(this), _environment().registry, e.chainId);
+            s.preparation = Recovered.preparation(clock, association);
+            if (
+                s.preparation.point.environmentHash != s.original.point.environmentHash
+                    || !Runtime.before(clock, s.preparation.point, s.original.point)
+            ) {
+                revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
+            }
+        }
+        if (e.identityOwner.code.length == 0 || e.identityOwner.codehash != e.identityCodeHash) {
+            revert W.RecoveryRewindDependencyChanged(e.identityOwner);
+        }
         (address target, bytes32 pin) =
-            IStreamArtistIdentityRecoveryOwnerV3(address(this)).recoveryRewindSelectionBinding();
+            IStreamArtistIdentityRecoveryOwnerV3(e.identityOwner).recoveryRewindSelectionBinding();
         if (target.code.length == 0 || pin == 0 || target.codehash != pin) {
             revert W.RecoveryRewindDependencyChanged(target);
         }
         IStreamArtistRecoveryRewindSelection selector = IStreamArtistRecoveryRewindSelection(target);
         if (
-            selector.owner() != address(this) || selector.payoutOwner() != e.payoutOwner
+            selector.owner() != e.identityOwner || selector.payoutOwner() != e.payoutOwner
                 || selector.artistRegistry() != e.registry
                 || selector.deploymentChainId() != e.chainId
                 || selector.coordinator() != e.coordinator
@@ -379,7 +415,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
             f.selected.recordHash != expected.recordHash
                 || f.selected.originalDataHash != expected.originalDataHash
                 || f.selected.nonce != expected.nonce
-                || f.admissionRevision > s.manifest.identity.snapshot.revision
+                || !_admittedBefore(e, s, expected.nativeIndex, f.admissionRevision)
                 || !R.eligible(
                     s.continuation.artistId,
                     f.association,
@@ -396,8 +432,8 @@ library StreamArtistRecoveryRewindCapabilityReads {
         view
         returns (uint32 granted, bytes32 proof_)
     {
-        (address target,) =
-            IStreamArtistIdentityRecoveryOwnerV3(address(this)).recoveryRewindSelectionBinding();
+        (address target,) = IStreamArtistIdentityRecoveryOwnerV3(s.sourceEnvironment.identityOwner)
+            .recoveryRewindSelectionBinding();
         (W.RecordKind kind, W.SelectedRecordV3 memory selected, bool retained, bool eligible) = IStreamArtistRecoveryRewindSelection(
                 target
             ).selectionRecordV3(s.selected.sourceKey, hash);
@@ -407,6 +443,49 @@ library StreamArtistRecoveryRewindCapabilityReads {
         ) revert W.InvalidRecoveryRewindRecord(hash);
         Records.Facts memory f = _selected(e, s, kind, selected);
         return (f.grantedCapabilities, keccak256(abi.encode(kind, selected, retained, eligible)));
+    }
+
+    function _origin(W.EnvironmentV3 memory e, bytes32 head)
+        private
+        view
+        returns (Runtime.OriginFact memory original)
+    {
+        Runtime.Context memory clock = Runtime.load(e, 2);
+        original = Runtime.auxiliary(
+            clock, keccak256("identity_authority.hydration.capability_continuation_v3"), head
+        );
+        Recovery.Record memory r =
+            IStreamArtistIdentityRecoveryOwner(address(this)).identityRecoveryRecord(head);
+        Runtime.ReceiptFact memory receipt =
+            Recovered.nativeFact(clock, 35, r.fields.artistId, head);
+        if (!Recovered.samePoint(receipt.position.point, original.point)) {
+            revert W.InvalidRecoveryRewindRecord(head);
+        }
+    }
+
+    function _afterOrigin(W.EnvironmentV3 memory e, SavedPlan memory s, V.Snapshot memory origin)
+        private
+        view
+        returns (bool)
+    {
+        if (!s.imported) return s.recovered.vesting.ownerRevision > origin.ownerRevision;
+        Runtime.Context memory clock = Runtime.load(e, 2);
+        return Runtime.before(clock, Recovered.vesting(clock, origin).point, s.original.point);
+    }
+
+    function _admittedBefore(
+        W.EnvironmentV3 memory e,
+        SavedPlan memory s,
+        uint256 index,
+        uint64 revision
+    ) private view returns (bool) {
+        if (!s.imported) return revision <= s.manifest.identity.snapshot.revision;
+        // A complete imported prefix keeps every original logical index unchanged.
+        // The original preparation immediately follows its saved before-snapshot.
+        Runtime.Context memory clock = Runtime.load(e, 2);
+        Runtime.ReceiptFact memory receipt = Runtime.receiptAt(clock, index);
+        return receipt.position.point.ownerRevision == revision
+            && Runtime.before(clock, receipt.position.point, s.preparation.point);
     }
 
     function _environment() private view returns (W.EnvironmentV3 memory) {
@@ -426,14 +505,14 @@ library StreamArtistRecoveryRewindCapabilityReads {
         view
         returns (IStreamArtistRecoveryRewindEvidence p)
     {
-        (address target, bytes32 pin) =
-            IStreamArtistIdentityRecoveryOwnerV3(address(this)).recoveryRewindEvidenceBinding();
+        (address target, bytes32 pin) = IStreamArtistIdentityRecoveryOwnerV3(e.identityOwner)
+            .recoveryRewindEvidenceBinding();
         if (target.code.length == 0 || pin == 0 || target.codehash != pin) {
             revert W.RecoveryRewindDependencyChanged(target);
         }
         p = IStreamArtistRecoveryRewindEvidence(target);
         if (
-            p.owner() != address(this) || p.payoutOwner() != e.payoutOwner
+            p.owner() != e.identityOwner || p.payoutOwner() != e.payoutOwner
                 || p.artistRegistry() != e.registry || p.deploymentChainId() != e.chainId
                 || p.coordinator() != e.coordinator || p.archive() != e.archive
                 || p.core() != e.core || p.mintManager() != e.manager

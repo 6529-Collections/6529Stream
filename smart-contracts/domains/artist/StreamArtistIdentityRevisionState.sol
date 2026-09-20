@@ -2,6 +2,12 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredContinuationWrites as RecoveredWrites
+} from "./StreamArtistRecoveredContinuationWrites.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistRotationState.sol";
@@ -180,8 +186,13 @@ library StreamArtistIdentityRevisionState {
         if (recovery.continuationHash != 0) {
             if (
                 recovery.artistId != p.artistId || recovery.recoveryRecordHash == 0
-                    || recovery.ownerRevision == 0 || recovery.ownerRevision > o.revision
+                    || recovery.ownerRevision == 0
             ) revert T.InvalidRecord();
+            if (Imported.commitment() != 0) {
+                RecoveredWrites.revision(o.environment, o.revision, recovery);
+            } else if (recovery.ownerRevision > o.revision) {
+                revert T.InvalidRecord();
+            }
             if (
                 recovery.stableRevisionRecordHash == _selected(s, rotations, p.artistId)
                     && recovery.stableDocumentHash == p.previousRecordHash

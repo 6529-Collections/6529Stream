@@ -9,7 +9,9 @@ import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistRotationAcceptance } from "./StreamArtistRotationAcceptance.sol";
 import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
-import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
+import {
+    StreamArtistRecoveredAuthorityPreimages
+} from "./StreamArtistRecoveredAuthorityPreimages.sol";
 import "./StreamArtistTransitionReads.sol";
 import "./StreamArtistGuardianState.sol";
 
@@ -661,7 +663,7 @@ library StreamArtistRotationState {
         r.transition.postWindowEndsAt = _windowEnd(observed, r.effectiveWindow);
         r.transition.phase = 2;
         s.latestExecution[artistId] = expected;
-        StreamArtistAuthorityPreimages.rotation(o.environment.chainId, o.environment.registry, r);
+        StreamArtistRecoveredAuthorityPreimages.rotation(o.environment, r);
         s.retirement[artistId][r.terms.oldAddress] = expected;
         delete s.pending[artistId];
         delete identity.activeIdentity[r.terms.oldAddress];

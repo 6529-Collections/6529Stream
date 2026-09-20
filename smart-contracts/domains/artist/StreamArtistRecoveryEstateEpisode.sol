@@ -30,6 +30,16 @@ import {
     StreamArtistRotationTypes as R
 } from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice An original ACTIVE1 compromise and dismissal that cancelled a pending estate request.
 /// @dev The caller proves executed ancestry, first execution closure and later staging order.
 /// This authenticates the request's own cancellation and closure without inventing a rotation.
@@ -65,14 +75,25 @@ library StreamArtistRecoveryEstateEpisode {
             address(this), e.registry, e.chainId, artistId, cause.facts.referenceHash
         );
         _contest(resolutions, cause, contest);
-        Stages.EstateFacts memory estate = Stages.cancelledEstate(
-            address(this),
-            e.registry,
-            e.chainId,
-            artistId,
-            cause.facts.pendingTransitionHash,
-            revision
-        );
+        Stages.EstateFacts memory estate = Imported.commitment() != 0
+            ? Stages.cancelledEstateAt(
+                address(this),
+                e.registry,
+                e.chainId,
+                artistId,
+                cause.facts.pendingTransitionHash,
+                Stages.compromisePoint(
+                    address(this), e.registry, e.chainId, artistId, cause.facts.referenceHash
+                )
+            )
+            : Stages.cancelledEstate(
+                address(this),
+                e.registry,
+                e.chainId,
+                artistId,
+                cause.facts.pendingTransitionHash,
+                revision
+            );
         R.TransitionState memory pending = estate.transition;
         D.Closure memory closure = resolutions.closures[pending.recordHash];
         if (
@@ -80,7 +101,17 @@ library StreamArtistRecoveryEstateEpisode {
                 || pending.stagedAt < previous.executedAt
                 || pending.contestedAt != cause.facts.enteredAt
                 || estate.cancellationReplay.touchedRevision != revision
-                || contest.capturedGuardianSetRecordHash != estate.request.guardianRecordHash
+                || (Imported.commitment() != 0
+                    && !Recovered.samePoint(
+                        estate.cancellationPoint,
+                        Stages.compromisePoint(
+                            address(this),
+                            e.registry,
+                            e.chainId,
+                            artistId,
+                            cause.facts.referenceHash
+                        )
+                    )) || contest.capturedGuardianSetRecordHash != estate.request.guardianRecordHash
                 || closure.artistId != artistId
                 || closure.transitionRecordHash != pending.recordHash
                 || closure.dismissalRecordHash != dismissal.recordHash || !closure.abandoned
@@ -130,6 +161,15 @@ library StreamArtistRecoveryEstateEpisode {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
+        Hashes.Environment memory causeEnvironment = e;
+        address causeOwner = address(this);
+        if (Imported.commitment() != 0) {
+            Runtime.ReceiptFact memory source = Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId), 33, artistId, causeHash
+            );
+            causeEnvironment = Recovered.hashes(source.environment);
+            causeOwner = source.environment.owners[2];
+        }
         if (
             artistId == 0 || incumbent == address(0) || causeHash == 0 || resolutionHash == 0
                 || r.recordHash != resolutionHash || r.terms.artistId != artistId
@@ -147,9 +187,9 @@ library StreamArtistRecoveryEstateEpisode {
                     != keccak256(
                         abi.encode(
                             keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            address(this),
+                            causeEnvironment.chainId,
+                            causeEnvironment.registry,
+                            causeOwner,
                             cause.facts
                         )
                     ) || cause.facts.artistId != artistId || cause.facts.kind != 1
@@ -233,12 +273,23 @@ library StreamArtistRecoveryEstateEpisode {
         view
         returns (bytes32)
     {
+        address originalOwner = address(this);
+        if (Imported.commitment() != 0) {
+            Runtime.ReceiptFact memory source = Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId),
+                58,
+                r.terms.artistId,
+                r.recordHash
+            );
+            e = Recovered.hashes(source.environment);
+            originalOwner = source.environment.owners[2];
+        }
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 r.terms,
                 r.executor,
                 r.proposer,

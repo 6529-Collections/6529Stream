@@ -21,6 +21,16 @@ import {
     IStreamArtistRecoveryRewindSelection as Worker
 } from "../../interfaces/stream/artist/IStreamArtistRecoveryRewindSelection.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice A scheduled action stays vetoable after unrelated revisions; membership uses its frozen scan.
 library StreamArtistRecoveryRewindVeto {
     function member(
@@ -42,13 +52,21 @@ library StreamArtistRecoveryRewindVeto {
             revert A.InvalidRecoveryAction(actionId);
         }
         W.EnvironmentV3 memory e = Evidence.environment(o);
+        if (Imported.commitment() != 0) {
+            Runtime.OriginFact memory source = Recovered.preparation(Runtime.load(e, 2), a);
+            e = Runtime.rewindEnvironment(source.environment);
+            if (e.identityOwner.codehash != e.identityCodeHash || e.identityOwner.code.length == 0)
+            {
+                revert W.RecoveryRewindDependencyChanged(e.identityOwner);
+            }
+        }
         Worker worker = Evidence.worker(e);
         (W.BasisV3 memory basis, W.ProgressV3 memory progress) = worker.selectionV3(saved.sourceKey);
         W.ResultV3 memory result = worker.selectionResultV3(saved.sourceKey);
         if (
             !progress.complete || basis.identity.artistId != artistId
                 || basis.identity.manifestHash != saved.manifestHash
-                || basis.identity.ownerCodeHash != address(this).codehash
+                || basis.identity.ownerCodeHash != e.identityCodeHash
                 || result.commitment != saved.selectionCommitment
                 || result.sourceKey != saved.sourceKey
                 || W.selectionKey(e, basis) != saved.sourceKey

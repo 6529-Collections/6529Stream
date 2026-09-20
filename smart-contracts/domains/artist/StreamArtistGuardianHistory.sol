@@ -12,6 +12,12 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
+import {
+    StreamArtistRecoveredHydrationState as Recovered
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredIdentityWriteChronology as Chronology
+} from "./StreamArtistRecoveredIdentityWriteChronology.sol";
 
 /// @notice Bounded admission indexing over storage owned by the fixed Identity host.
 /// @dev Caller must authenticate actual operation28 admission before appending, and actual local recovery association before freezing.
@@ -33,12 +39,13 @@ library StreamArtistGuardianHistory {
     ) public returns (bytes32 commitment) {
         bytes32 artistId = record.terms.artistId;
         H.Head storage prior = s.heads[artistId];
+        bool imported = Recovered.commitment() != 0;
         if (
             artistId == bytes32(0) || environment.chainId != block.chainid
                 || environment.registry == address(0) || record.recordHash == bytes32(0)
                 || record.signer == address(0) || record.authorityClass == 0
                 || prior.count == type(uint64).max || admissionCount != prior.count + 1
-                || successfulOwnerRevision <= prior.ownerRevision
+                || (!imported && successfulOwnerRevision <= prior.ownerRevision)
                 || s.entries[record.recordHash].recordHash != bytes32(0)
                 || (prior.count == 0
                         ? prior.commitment != bytes32(0)
@@ -49,6 +56,18 @@ library StreamArtistGuardianHistory {
                         T.Authorization(record.nonce, record.signedAt, bytes(""))
                     ) != record.recordHash
         ) revert H.InvalidGuardianHistory(artistId);
+        if (imported) {
+            Chronology.next(environment, successfulOwnerRevision);
+            if (prior.count != 0) {
+                H.Entry memory predecessor = s.entries[s.records[artistId][prior.count]];
+                if (
+                    predecessor.ownerRevision != prior.ownerRevision
+                        || predecessor.commitment != prior.commitment
+                        || predecessor.artistId != artistId || predecessor.index != prior.count
+                ) revert H.InvalidGuardianHistory(artistId);
+                Chronology.guardian(environment, predecessor, successfulOwnerRevision);
+            }
+        }
         _shape(record.terms);
         H.Entry memory entry = H.Entry(
             artistId,

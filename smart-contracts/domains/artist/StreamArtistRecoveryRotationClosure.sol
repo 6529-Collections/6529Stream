@@ -29,6 +29,19 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+import {
+    StreamArtistRecoveredHydrationTypes as RH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
+
 /// @notice Original class-1/3 closures for recovery followed by executed rotations.
 /// @dev Fixed-owner records and existing contest getter only; no historical authorization is replayed.
 library StreamArtistRecoveryRotationClosure {
@@ -325,16 +338,8 @@ library StreamArtistRecoveryRotationClosure {
                         : r.terms.expectedRetirementHash != 0)
                 || r.recordHash != _dismissalHash(e, r) || cause.causeHash == 0
                 || cause.causeHash != r.terms.expectedCauseHash
-                || cause.causeHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            address(this),
-                            cause.facts
-                        )
-                    ) || cause.facts.artistId != current.artistId || cause.facts.kind != 1
+                || cause.causeHash != _causeHash(e, cause)
+                || cause.facts.artistId != current.artistId || cause.facts.kind != 1
                 || cause.facts.authorityClass != current.authorityClass
                 || cause.facts.priorStatus != current.authorityClass
                 || cause.facts.executedTransitionHash != t.recordHash
@@ -369,6 +374,7 @@ library StreamArtistRecoveryRotationClosure {
         bytes32 execution,
         bytes32 pending
     ) private view {
+        e = _recordEnvironment(e, c.terms.artistId, 33, c.recordHash);
         if (
             c.recordHash != cause.facts.referenceHash || c.terms.artistId != cause.facts.artistId
                 || c.terms.evidenceHash != cause.facts.evidenceHash
@@ -595,16 +601,8 @@ library StreamArtistRecoveryRotationClosure {
                         : r.terms.expectedRetirementHash != 0)
                 || r.recordHash != _dismissalHash(e, r) || cause.causeHash == 0
                 || cause.causeHash != r.terms.expectedCauseHash
-                || cause.causeHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
-                            e.chainId,
-                            e.registry,
-                            address(this),
-                            cause.facts
-                        )
-                    ) || cause.facts.artistId != current.artistId
+                || cause.causeHash != _causeHash(e, cause)
+                || cause.facts.artistId != current.artistId
                 || cause.facts.executedTransitionHash != t.recordHash
                 || cause.facts.incumbent != current.incumbent || cause.facts.actor == address(0)
                 || cause.facts.referenceHash == 0 || cause.facts.enteredAt < t.executedAt
@@ -657,17 +655,80 @@ library StreamArtistRecoveryRotationClosure {
             _dismissed(rotations, resolutions, e, current.facts, t, r, closed.dismissalRecordHash);
     }
 
+    function _recordEnvironment(
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        uint16 operation,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory) {
+        if (Imported.commitment() == 0) return e;
+        return Recovered.hashes(
+            Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+            )
+            .environment
+        );
+    }
+
+    function _causeHash(StreamArtistHashes.Environment memory e, Dismissal.Cause memory cause)
+        private
+        view
+        returns (bytes32)
+    {
+        address originalOwner = address(this);
+        if (Imported.commitment() != 0) {
+            Runtime.ReceiptFact memory row = Recovered.nativeFact(
+                Recovered.load(address(this), e.registry, e.chainId),
+                cause.facts.kind == 1 ? 33 : 31,
+                cause.facts.artistId,
+                cause.causeHash
+            );
+            e = Recovered.hashes(row.environment);
+            originalOwner = row.environment.owners[2];
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                e.chainId,
+                e.registry,
+                originalOwner,
+                cause.facts
+            )
+        );
+    }
+
     function _dismissalHash(StreamArtistHashes.Environment memory e, Dismissal.Record memory r)
         private
         view
         returns (bytes32)
     {
+        address originalOwner = address(this);
+        if (Imported.commitment() != 0) {
+            Runtime.Context memory clock = Recovered.load(address(this), e.registry, e.chainId);
+            Runtime.ReceiptFact memory row =
+                Recovered.nativeFact(clock, 58, r.terms.artistId, r.recordHash);
+            Runtime.ReplayFact memory replay = Runtime.replay(
+                clock,
+                RH.originHash(clock.current),
+                keccak256("identity_authority.replay.contest_resolution"),
+                keccak256(abi.encode(r.terms.artistId, r.terms.expectedCauseHash))
+            );
+            if (
+                replay.cell.kind != 1 || replay.cell.status != 2
+                    || replay.cell.commitment != r.recordHash
+                    || !Recovered.samePoint(replay.admission.point, row.position.point)
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(r.terms.artistId);
+            }
+            e = Recovered.hashes(row.environment);
+            originalOwner = row.environment.owners[2];
+        }
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 r.terms,
                 r.executor,
                 r.proposer,
@@ -689,7 +750,8 @@ library StreamArtistRecoveryRotationClosure {
         Recovery.Request memory p,
         Contest.Record memory c,
         bytes32 head
-    ) private pure {
+    ) private view {
+        e = _recordEnvironment(e, c.terms.artistId, 33, c.recordHash);
         if (
             cause.facts.kind != 1 || cause.facts.authorityClass != p.vestedAuthorityClass
                 || cause.facts.priorStatus != p.vestedAuthorityClass || c.recordHash == 0
@@ -757,7 +819,8 @@ library StreamArtistRecoveryRotationClosure {
         R.RotationRecord memory r,
         bytes32 artistId,
         bytes32 hash
-    ) private pure {
+    ) private view {
+        e = _recordEnvironment(e, artistId, 29, hash);
         if (
             hash == 0 || r.recordHash != hash || r.terms.artistId != artistId
                 || r.terms.oldAddress == address(0) || r.terms.newAddress == address(0)

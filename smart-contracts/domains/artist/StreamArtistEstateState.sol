@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
-import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
+import {
+    StreamArtistRecoveredAuthorityPreimages
+} from "./StreamArtistRecoveredAuthorityPreimages.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistEstateHashes.sol";
@@ -447,7 +449,7 @@ library StreamArtistEstateState {
         s.phases[record] = 2;
         delete s.pending[p.artistId];
         s.authorityActivation[p.artistId] = record;
-        StreamArtistAuthorityPreimages.estate(o.environment.chainId, o.environment.registry, item);
+        StreamArtistRecoveredAuthorityPreimages.estate(o.environment, item);
         rotations.latestExecution[p.artistId] = record;
         uint64 epoch = ++s.delegationEpoch[p.artistId];
         s.executions[record] = Estate.ExecutionFacts(

@@ -38,6 +38,16 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice Actual compromise and dismissal episodes during one completed dormancy notice.
 /// @dev The caller authenticates the original notice, terminal and vesting snapshot and selects
 /// the saved cause/resolution pair. Reads use the fixed Identity owner and its retained storage;
@@ -242,6 +252,8 @@ library StreamArtistDormancyNoticeHistory {
         D.Cause memory cause,
         bytes32 expected
     ) private view {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 33, cause.facts.artistId, cause.causeHash);
         if (
             expected == 0 || cause.causeHash != expected || cause.facts.artistId != artistId
                 || cause.facts.kind != 1 || cause.facts.authorityClass != 1
@@ -256,7 +268,7 @@ library StreamArtistDormancyNoticeHistory {
                             keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
                             e.chainId,
                             e.registry,
-                            address(this),
+                            originalOwner,
                             cause.facts
                         )
                     )
@@ -270,6 +282,8 @@ library StreamArtistDormancyNoticeHistory {
         bytes32 expected,
         uint64 nextAt
     ) private view {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 58, r.terms.artistId, r.recordHash);
         if (
             expected == 0 || r.recordHash != expected || r.terms.artistId != cause.facts.artistId
                 || r.terms.expectedCauseHash != cause.causeHash
@@ -289,7 +303,7 @@ library StreamArtistDormancyNoticeHistory {
                             keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
                             e.chainId,
                             e.registry,
-                            address(this),
+                            originalOwner,
                             r.terms,
                             r.executor,
                             r.proposer,
@@ -315,6 +329,7 @@ library StreamArtistDormancyNoticeHistory {
     ) private view returns (Cont.Record memory c) {
         c = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
+        (e,) = _original(e, 33, c.terms.artistId, c.recordHash);
         if (
             c.recordHash != cause.facts.referenceHash || c.terms.artistId != cause.facts.artistId
                 || c.terms.evidenceHash != cause.facts.evidenceHash
@@ -439,5 +454,18 @@ library StreamArtistDormancyNoticeHistory {
                 || t.contestedAt != first.facts.enteredAt || t.contestedAt < t.executedAt
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
         return keccak256(abi.encode(closed, t, first, dismissal, firstEpisode));
+    }
+
+    function _original(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory, address) {
+        if (Imported.commitment() == 0) return (e, address(this));
+        Runtime.ReceiptFact memory row = Recovered.nativeFact(
+            Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+        );
+        return (Recovered.hashes(row.environment), row.environment.owners[2]);
     }
 }

@@ -14,6 +14,7 @@ library StreamArtistNativeReceipts {
 
     struct State {
         H.Receipt[] rows;
+        uint64[] admittedRevisions;
     }
 
     function _state() private pure returns (State storage s) {
@@ -21,12 +22,24 @@ library StreamArtistNativeReceipts {
         assembly ("memory-safe") { s.slot := slot }
     }
 
-    function record(uint16 operation, bytes32 hash, bytes32 artistId, uint256 collectionId) public {
+    function record(
+        uint16 operation,
+        bytes32 hash,
+        bytes32 artistId,
+        uint256 collectionId,
+        uint64 admittedRevision
+    ) public {
         if (hash == 0) return;
-        if (operation == 0 || (operation > 59 && operation != 61) || (artistId == 0 && collectionId == 0)) {
+        if (
+            operation == 0 || (operation > 59 && operation != 61)
+                || (artistId == 0 && collectionId == 0) || admittedRevision == 0
+        ) {
             revert T.InvalidRecord();
         }
-        _state().rows.push(H.Receipt(operation, artistId, collectionId, hash));
+        State storage s = _state();
+        if (s.rows.length != s.admittedRevisions.length) revert T.InvalidRecord();
+        s.rows.push(H.Receipt(operation, artistId, collectionId, hash));
+        s.admittedRevisions.push(admittedRevision);
     }
 
     function count() public view returns (uint256) {
@@ -35,5 +48,12 @@ library StreamArtistNativeReceipts {
 
     function at(uint256 index) public view returns (H.Receipt memory) {
         return _state().rows[index];
+    }
+
+    /// @notice The actual original local mutation clock for this exact occurrence.
+    function revisionAt(uint256 index) public view returns (uint64) {
+        State storage s = _state();
+        if (s.rows.length != s.admittedRevisions.length) revert T.InvalidRecord();
+        return s.admittedRevisions[index];
     }
 }

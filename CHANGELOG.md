@@ -11,6 +11,17 @@ the release policy in `docs/release-policy.md`.
   behavior; update all current deployment consumers for the explicit part profile.
   Selected products fit; actual deployment and current-graph execution remain pending.
 
+## Artist recovered authority hydration
+
+- Add operation-60 profile10 for complete recovered class-1/class-3 Identity
+  and Payout histories in the first accepted generation-one PRIMARY_ONLY graph.
+  Retain original hashes, clocks, nonce/replay guards, publication carriers,
+  timing and external observations through bounded repeated imports.
+- Join original-domain readers and current-domain continuations, including
+  pending rotation/estate execution. Add actual-owner/Safe source scenarios
+  and atomic rollback controls. ABI-only checks pass; runtime, gas, deployment
+  size and release acceptance remain pending. Broader graphs remain separate.
+
 ## Artist complete living record combinations
 
 - Add one witness-bearing multiple-Artist operation-60 capability for complete

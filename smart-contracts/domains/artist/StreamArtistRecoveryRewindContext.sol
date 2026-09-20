@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredReceiptCount as RecoveredCount
+} from "./StreamArtistRecoveredReceiptCount.sol";
 import { StreamArtistDormancyState as Dormancy } from "./StreamArtistDormancyState.sol";
 import {
     StreamArtistCurrentNoticeRecoveryReads as CurrentNotice
@@ -333,10 +336,7 @@ library StreamArtistRecoveryRewindContext {
         W.ResolutionManifestV3 memory m
     ) private view {
         T.Snapshot memory current = IStreamArtistOwner(address(this)).ownerStateSnapshotV2();
-        if (
-            IStreamArtistNativeReceipts(address(this)).artistNativeReceiptCount()
-                != m.identity.receiptCount
-        ) {
+        if (RecoveredCount.count(Evidence.environment(o), 2) != m.identity.receiptCount) {
             revert W.InvalidRecoveryRewindManifest(manifestHash);
         }
         bytes32 action = supplemental.manifestActions[manifestHash];

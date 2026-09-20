@@ -499,7 +499,7 @@ library StreamArtistDormancyState {
             s.terminalForNotice[notice] = t.recordHash;
             s.phases[notice] = 2;
             if (i.status == 2) i.status = 1; // A genuine compromise remains contested until its own dismissal.
-            StreamArtistNativeReceipts.record(42, t.recordHash, id, 0);
+            StreamArtistNativeReceipts.record(42, t.recordHash, id, 0, o.revision + 1);
             emit ArtistDormancyCancelled(1, id, notice, signer, class_, t.recordHash);
             StreamArtistDormancyRecordEvents.cancellation(o.environment, id, t, count);
         }

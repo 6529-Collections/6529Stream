@@ -48,14 +48,20 @@ import {
     IStreamArtistRecoveryPayoutOwnerV3
 } from "../../interfaces/stream/artist/IStreamArtistRecoveryPayoutOwnerV3.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+
 /// @notice Bounded original-journal visits and constant/bounded final selection.
 /// @dev Predecessor fallback is accumulated during admission order, avoiding lifetime finish walks.
 library StreamArtistRecoveryRewindSelectionScan {
     function identity(Store.State storage s, bytes32 key, uint256 index) public {
         W.EnvironmentV3 memory e = s.environments[key];
         bytes32 artistId = s.bases[key].identity.artistId;
-        N.Receipt memory row =
-            IStreamArtistNativeReceipts(e.identityOwner).artistNativeReceiptAt(index);
+        N.Receipt memory row = _row(e, 2, index);
         bytes32 facts;
         if (row.artistId == artistId) {
             if (row.operation == 28) {
@@ -94,8 +100,7 @@ library StreamArtistRecoveryRewindSelectionScan {
     function payout(Store.State storage s, bytes32 key, uint256 index) public {
         W.EnvironmentV3 memory e = s.environments[key];
         bytes32 artistId = s.bases[key].identity.artistId;
-        N.Receipt memory row =
-            IStreamArtistNativeReceipts(e.payoutOwner).artistNativeReceiptAt(index);
+        N.Receipt memory row = _row(e, 5, index);
         bytes32 facts;
         if (row.artistId == artistId && row.operation == 18) {
             facts = _record(
@@ -194,7 +199,8 @@ library StreamArtistRecoveryRewindSelectionScan {
         bytes32 hash = f.selected.recordHash;
         if (
             hash == 0 || s.admitted[key][hash] || f.admissionRevision == 0
-                || f.admissionRevision > s.bases[key].identity.identity.snapshot.revision
+                || (!Recovered.active(s.environments[key].identityOwner)
+                    && f.admissionRevision > s.bases[key].identity.identity.snapshot.revision)
         ) {
             revert W.InvalidRecoveryRewindSelection(key);
         }
@@ -231,6 +237,7 @@ library StreamArtistRecoveryRewindSelectionScan {
     ) private returns (bytes32 commitment) {
         W.EnvironmentV3 memory e = s.environments[key];
         W.BasisV3 memory b = s.bases[key];
+        bool imported = Recovered.active(e.identityOwner);
         uint64 index = s.progress[key].guardiansProcessed + 1;
         (GH.Head memory head, GH.Entry memory entry,,) = IStreamArtistGuardianHistory(
                 e.identityOwner
@@ -241,26 +248,48 @@ library StreamArtistRecoveryRewindSelectionScan {
                 || index > head.count || entry.artistId != b.identity.artistId
                 || entry.index != index || entry.recordHash != row.recordHash
                 || entry.previousCommitment != s.guardianTip[key]
-                || entry.ownerRevision <= s.guardianRevision[key]
-                || entry.ownerRevision > b.identity.identity.snapshot.revision
-                || entry.commitment
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
-                            e.chainId,
-                            e.registry,
-                            e.identityOwner,
-                            entry.artistId,
-                            entry.index,
-                            entry.ownerRevision,
-                            entry.recordHash,
-                            entry.recordDataHash,
-                            entry.previousCommitment
-                        )
-                    )
+                || (!imported
+                    && (entry.ownerRevision <= s.guardianRevision[key]
+                        || entry.ownerRevision > b.identity.identity.snapshot.revision))
+                || (!imported
+                    && entry.commitment
+                        != keccak256(
+                            abi.encode(
+                                keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
+                                e.chainId,
+                                e.registry,
+                                e.identityOwner,
+                                entry.artistId,
+                                entry.index,
+                                entry.ownerRevision,
+                                entry.recordHash,
+                                entry.recordDataHash,
+                                entry.previousCommitment
+                            )
+                        ))
         ) revert W.InvalidRecoveryRewindSelection(key);
         R.GuardianRecord memory record =
             IStreamArtistRotationReads(e.identityOwner).guardianSetRecord(row.recordHash);
+        if (imported) {
+            Runtime.Context memory clock = Runtime.load(e, 2);
+            Runtime.OriginFact memory origin = Recovered.guardian(clock, entry, record);
+            Runtime.ReceiptFact memory occurrence = Runtime.receiptAt(clock, nativeIndex);
+            if (!Recovered.samePoint(origin.point, occurrence.position.point)) {
+                revert W.InvalidRecoveryRewindSelection(key);
+            }
+            if (index > 1) {
+                (, GH.Entry memory previous,,) = IStreamArtistGuardianHistory(e.identityOwner)
+                    .guardianHistoryState(b.identity.artistId, index - 1, address(0), 0);
+                Runtime.OriginFact memory earlier = Recovered.guardianEntry(clock, previous);
+                if (
+                    previous.ownerRevision != s.guardianRevision[key]
+                        || previous.commitment != s.guardianTip[key]
+                        || !Runtime.before(clock, earlier.point, origin.point)
+                ) {
+                    revert W.InvalidRecoveryRewindSelection(key);
+                }
+            }
+        }
         Records.Facts memory f;
         if (record.provisional.transitionRecordHash != 0) {
             f.transition = IStreamArtistRotationReads(e.identityOwner)
@@ -316,6 +345,18 @@ library StreamArtistRecoveryRewindSelectionScan {
         s.guardianRevision[key] = entry.ownerRevision;
         s.progress[key].guardiansProcessed = index;
         commitment = keccak256(abi.encode(entry, f, status, retained));
+    }
+
+    function _row(W.EnvironmentV3 memory e, uint8 ownerIndex, uint256 index)
+        private
+        view
+        returns (N.Receipt memory)
+    {
+        address target = ownerIndex == 2 ? e.identityOwner : e.payoutOwner;
+        if (!Recovered.active(target)) {
+            return IStreamArtistNativeReceipts(target).artistNativeReceiptAt(index);
+        }
+        return Runtime.receiptAt(Runtime.load(e, ownerIndex), index).receipt;
     }
 
     function _status(Store.State storage s, bytes32 key, W.RecordKind kind, bytes32 hash)

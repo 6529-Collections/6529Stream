@@ -32,6 +32,16 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
+import {
+    StreamArtistRecoveredIdentityRuntime as Recovered
+} from "./StreamArtistRecoveredIdentityRuntime.sol";
+import {
+    StreamArtistRecoveredRuntimeReads as Runtime
+} from "./StreamArtistRecoveredRuntimeReads.sol";
+import {
+    StreamArtistRecoveredHydrationState as Imported
+} from "./StreamArtistRecoveredHydrationState.sol";
+
 /// @notice One original status-2 compromise and dismissal from a later-cancelled notice.
 /// @dev The caller authenticates currentNotice, selects the saved cause/resolution pair, and
 /// proves its executed-principal ancestry, maturity and ordering between distinct notice groups.
@@ -138,12 +148,14 @@ library StreamArtistCancelledNoticeHistory {
         canonical.actor = t.actor;
         canonical.authorityClass = t.authorityClass;
         canonical.observedAt = t.observedAt;
+        address originalOwner;
+        (e, originalOwner) = _original(e, 42, n.terms.artistId, t.recordHash);
         canonical.recordHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_CANCELLATION_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 canonical,
                 count
             )
@@ -247,12 +259,14 @@ library StreamArtistCancelledNoticeHistory {
         canonical.actor = t.actor;
         canonical.authorityClass = t.authorityClass;
         canonical.observedAt = t.observedAt;
+        address originalOwner;
+        (e, originalOwner) = _original(e, 42, n.terms.artistId, t.recordHash);
         canonical.recordHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_CANCELLATION_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 canonical,
                 count
             )
@@ -268,12 +282,14 @@ library StreamArtistCancelledNoticeHistory {
         view
         returns (bytes32)
     {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 41, n.terms.artistId, n.recordHash);
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DORMANCY_NOTICE_V1"),
                 e.chainId,
                 e.registry,
-                address(this),
+                originalOwner,
                 n.terms,
                 n.incumbent,
                 n.initiatedAt,
@@ -295,6 +311,8 @@ library StreamArtistCancelledNoticeHistory {
         bytes32 artistId,
         bytes32 expected
     ) private view {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 33, cause.facts.artistId, cause.causeHash);
         if (
             expected == 0 || cause.causeHash != expected || cause.facts.artistId != artistId
                 || cause.facts.kind != 1 || cause.facts.authorityClass != 1
@@ -308,7 +326,7 @@ library StreamArtistCancelledNoticeHistory {
                             keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
                             e.chainId,
                             e.registry,
-                            address(this),
+                            originalOwner,
                             cause.facts
                         )
                     )
@@ -322,6 +340,8 @@ library StreamArtistCancelledNoticeHistory {
         bytes32 expected,
         uint64 nextAt
     ) private view {
+        address originalOwner;
+        (e, originalOwner) = _original(e, 58, r.terms.artistId, r.recordHash);
         if (
             expected == 0 || r.recordHash != expected || r.terms.artistId != cause.facts.artistId
                 || r.terms.expectedCauseHash != cause.causeHash
@@ -342,7 +362,7 @@ library StreamArtistCancelledNoticeHistory {
                             keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
                             e.chainId,
                             e.registry,
-                            address(this),
+                            originalOwner,
                             r.terms,
                             r.executor,
                             r.proposer,
@@ -368,6 +388,7 @@ library StreamArtistCancelledNoticeHistory {
     ) private view returns (Cont.Record memory c) {
         c = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
+        (e,) = _original(e, 33, c.terms.artistId, c.recordHash);
         if (
             c.recordHash != cause.facts.referenceHash || c.terms.artistId != cause.facts.artistId
                 || c.terms.evidenceHash != cause.facts.evidenceHash
@@ -442,5 +463,18 @@ library StreamArtistCancelledNoticeHistory {
                 || dismissal.terms.artistId != subject.artistId
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(cause.facts.artistId);
         // A mature standing closure legitimately preserves a zero marker on later filings.
+    }
+
+    function _original(
+        StreamArtistHashes.Environment memory e,
+        uint16 operation,
+        bytes32 artistId,
+        bytes32 record
+    ) private view returns (StreamArtistHashes.Environment memory, address) {
+        if (Imported.commitment() == 0) return (e, address(this));
+        Runtime.ReceiptFact memory row = Recovered.nativeFact(
+            Recovered.load(address(this), e.registry, e.chainId), operation, artistId, record
+        );
+        return (Recovered.hashes(row.environment), row.environment.owners[2]);
     }
 }
