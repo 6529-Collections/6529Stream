@@ -300,6 +300,8 @@ abstract contract ReferenceSourceExportFixture is
         finality.setReadGas(8000000);
         artist.configure(address(router), address(finality));
         core.setPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), address(finality));
+        // Capture the completed original graph before locking the collection's presentation.
+        router.initializeOriginalFinalityAnchor();
         router.lockArtistIdentity(1);
         // Historical Router rendering's original-finality absence is a precise read boundary.
         cheat.mockCall(
@@ -328,6 +330,9 @@ abstract contract ReferenceSourceExportFixture is
         _root();
         snapshots = new StreamCollectionSnapshots(_dependencies(), address(executor), _configs());
     }
+
+    // The base fixture's temporary finality boundary is replaced above.
+    function _initializeOriginalFinalityAnchor() internal override { }
 
     function _native() internal returns (StreamEntropyCoordinator c) {
         if (address(roleRegistry) == address(0)) {
