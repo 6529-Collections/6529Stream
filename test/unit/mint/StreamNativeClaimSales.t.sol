@@ -61,6 +61,11 @@ import {
     IStreamImmediateSaleAuthorizationBinding
 } from "../../../smart-contracts/interfaces/stream/mint/IStreamImmediateSaleAuthorizationBinding.sol";
 import { IERC721Receiver } from "../../../smart-contracts/vendor/openzeppelin/IERC721Receiver.sol";
+import { ReentrancyGuard } from "../../../smart-contracts/vendor/openzeppelin/ReentrancyGuard.sol";
+
+interface ClaimCallbackVm {
+    function expectCall(address target, uint256 value, bytes calldata input, uint64 count) external;
+}
 
 /// @dev Actual Core callback observes pending claim state; no typed Recorder or mint substitution.
 contract ClaimDeliveryObserver is IERC721Receiver {
@@ -72,6 +77,7 @@ contract ClaimDeliveryObserver is IERC721Receiver {
     bool public fail;
     bool public sawPending;
     bool public reentryRejected;
+    bytes public reentryRevertData;
     bytes private retry;
 
     constructor(C c, address core_, IStreamMintManager m) {
@@ -91,6 +97,12 @@ contract ClaimDeliveryObserver is IERC721Receiver {
         fail = f;
     }
 
+    function executeRetry() external returns (S.Receipt memory) {
+        (bool ok, bytes memory result) = address(claims).call(retry);
+        require(ok, "stored receiver purchase succeeds");
+        return abi.decode(result, (S.Receipt));
+    }
+
     function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4) {
         require(msg.sender == core, "actual Core delivery");
         S.Receipt memory r = claims.executionReceipt(executionId);
@@ -106,9 +118,10 @@ contract ClaimDeliveryObserver is IERC721Receiver {
             "free claim has no paid public witness"
         );
         sawPending = true;
-        (bool ok,) = address(claims).call(retry);
+        (bool ok, bytes memory result) = address(claims).call(retry);
         reentryRejected = !ok;
-        require(!ok, "guarded nested purchase");
+        reentryRevertData = result;
+        require(!ok, "nested purchase rejected");
         require(!fail, "claim delivery rejected");
         return IERC721Receiver.onERC721Received.selector;
     }
@@ -136,11 +149,80 @@ contract StreamNativeClaimSalesTest is NativeClaimSalesFixture {
         _assertFreeReceipt(p, c, r, auth, 0);
         require(
             receiver.sawPending() && receiver.reentryRejected() && payer.balance == payerBefore,
-            "real delivery, guarded reentry, no sale payment"
+            "real delivery, nested purchase rejected, no sale payment"
         );
         require(
             _payerCount(payer) == 1 && _payerCount(p.mint.beneficiary) == 0,
             "original PAYER counter"
+        );
+    }
+
+    function testFreshReceiverPurchaseIsGuardedDuringDeliveryAndSucceedsAfterward() public {
+        bytes32 id = _registerClaim(_configuration(2, 12, 0, 0, address(0), 0));
+        ClaimDeliveryObserver receiver = new ClaimDeliveryObserver(
+            C(address(claims)), address(core), IStreamMintManager(address(manager))
+        );
+        C.Purchase memory outer = _purchase(id, payer, 31, 0);
+        outer.mint.initialRecipient = address(receiver);
+        C.Purchase memory nested = _purchase(id, address(receiver), 32, 0);
+        require(
+            nested.mint.payer == address(receiver) && nested.mint.executor == address(receiver)
+                && nested.mint.executionNonce == 1 && _payerCount(address(receiver)) == 0,
+            "nested request has its actual caller and unused payer nonce/counter"
+        );
+        (N.NativeSettlementCandidate memory outerCandidate, bytes32 outerAuth) =
+            claims.previewPublicPurchase(outer);
+        receiver.configure(
+            outerCandidate.executionBinding.executionId,
+            outerAuth,
+            false,
+            abi.encodeCall(claims.purchasePublic, (nested))
+        );
+        // Claim and Manager share the guard error. Exactly two Manager calls distinguish
+        // rejection by Claim from a third nested call rejected later by Manager's guard.
+        ClaimCallbackVm(address(vm))
+            .expectCall(
+                address(manager),
+                0,
+                abi.encodeWithSelector(IStreamMintManager.executeSingleStepMint.selector),
+                2
+            );
+        vm.prank(payer);
+        S.Receipt memory first = claims.purchasePublic(outer);
+        _assertFreeReceipt(outer, outerCandidate, first, outerAuth, 0);
+        require(
+            receiver.sawPending() && receiver.reentryRejected()
+                && keccak256(receiver.reentryRevertData())
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            ReentrancyGuard.ReentrancyGuardReentrantCall.selector
+                        )
+                    ),
+            "actual Core delivery captures exact Claim guard rejection"
+        );
+        // The outer mint advanced the Manager operation nonce. The receiver retains exact calldata;
+        // preview its current operation identity without rebuilding the purchase request.
+        (N.NativeSettlementCandidate memory nestedCandidate, bytes32 nestedAuth) =
+            claims.previewPublicPurchase(nested);
+        require(
+            claims.nextExecutionNonce(id, address(receiver)) == nested.mint.executionNonce
+                && claims.executionStatus(nestedCandidate.executionBinding.executionId) == 0
+                && !manager.isAuthorizationUsed(nestedAuth)
+                && !manager.isOperationRootUsed(nestedCandidate.operationIdentityCommitment)
+                && _payerCount(address(receiver)) == 0 && _payerCount(payer) == 1
+                && claims.saleRecord(id).sale.soldQuantity == 1
+                && claims.saleRecord(id).sale.config.saleSupplyLimit == 8
+                && manager.nextOperationNonce() == 1 && core.collectionMintedEver(1) == 1,
+            "nested rejection preserves fresh replay state and counter/supply headroom"
+        );
+        S.Receipt memory second = receiver.executeRetry();
+        _assertFreeReceipt(nested, nestedCandidate, second, nestedAuth, 0);
+        require(
+            second.tokenId != first.tokenId && claims.nextExecutionNonce(id, address(receiver)) == 2
+                && _payerCount(address(receiver)) == 1 && _payerCount(payer) == 1
+                && claims.saleRecord(id).sale.soldQuantity == 2 && manager.nextOperationNonce() == 2
+                && core.collectionMintedEver(1) == 2,
+            "identical receiver request succeeds once after delivery"
         );
     }
 
@@ -818,6 +900,11 @@ contract StreamNativeClaimSalesTest is NativeClaimSalesFixture {
         require(
             manager.isAuthorizationUsed(auth) && manager.isOperationRootUsed(r.operationRoot),
             "real Ledger replay consumption"
+        );
+        require(
+            core.ownerOf(r.tokenId) == p.mint.initialRecipient
+                && claims.executionStatus(r.executionId) == 2,
+            "paid mint has its final owner and COMPLETED execution status"
         );
         T.PrimarySettlementResult memory result = recorder.settlementResult(r.settlementKey);
         require(
