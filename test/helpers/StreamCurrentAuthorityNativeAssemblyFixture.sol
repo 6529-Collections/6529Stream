@@ -14,6 +14,9 @@ import {
     StreamCurrentAuthorityInventoryTypes as FixtureAuthorityInventory
 } from "../../smart-contracts/interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 import {
+    IStreamCurrentAuthorityInventory
+} from "../../smart-contracts/interfaces/stream/preservation/IStreamCurrentAuthorityInventory.sol";
+import {
     IStreamArtistNativeReceipts,
     StreamArtistHistoryTypes as FixtureHistory
 } from "../../smart-contracts/interfaces/stream/artist/IStreamArtistHistory.sol";
@@ -280,6 +283,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         assemblyEntropy.configureCollectionRevealPolicy(
             1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 100, 0
         );
+        _beforeAssemblyArtistOnboarding();
         _onboardAssemblyArtist();
         _configureAssemblyMintPhase();
         assemblyManager.transferOwnership(address(assemblyExecutor));
@@ -862,6 +866,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
                 && assemblyEntropy.tokenEntropyStatus(tokenId) == StreamEntropyStatus.FINALIZED,
             "actual coordinator retained final seed"
         );
+        _afterAssemblyTokenFinalized(tokenId);
         require(
             keccak256(bytes(assemblyCore.tokenURI(tokenId)))
                 == keccak256(bytes(assemblyRouter.tokenURI(address(assemblyCore), tokenId))),
@@ -1898,7 +1903,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         return StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, bytes32(0));
     }
 
-    function _assemblyHTML(uint256 tokenId) internal view returns (bytes memory) {
+    function _assemblyHTML(uint256 tokenId) internal view virtual returns (bytes memory) {
         (bytes32 seed, bool finalized) = assemblyEntropy.tokenSeed(tokenId);
         require(finalized, "original finalized token");
         return abi.encodePacked(
@@ -1949,7 +1954,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         );
     }
 
-    function _assemblyLockContent() private {
+    function _assemblyLockContent() internal {
         GenesisBatch memory locks;
         locks.actionClass = 1;
         locks.calls = new GovernanceCall[](2);
@@ -3046,7 +3051,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
     }
 
     function _assemblyReferenceObject(string memory json, string memory prefix, bool runtime)
-        private
+        internal
         returns (AxE.Coverage memory)
     {
         AxE.ObjectIdentity memory object = AxE.ObjectIdentity(
@@ -4022,6 +4027,9 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
 
     /// @dev Derived recipes retain genuine Artist signing preimages; this hook changes no authority.
     function _authorityAuthorization(bytes32 digest, uint256 nonce) internal virtual { }
+    /// @dev STATIC activation must happen before the first release ratification and first mint.
+    function _beforeAssemblyArtistOnboarding() internal virtual { }
+    function _afterAssemblyTokenFinalized(uint256) internal virtual { }
     function _afterAssemblyOnboard() internal virtual { }
 
     function _authorityEconomicsConsent(T.EconomicsConsent memory input, bytes32 record)
@@ -4135,8 +4143,22 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         view
         returns (FixtureOrigin.ReceiptWitness memory)
     {
+        return
+            _assemblyReceiptWitnessFor(
+                address(assemblyInventory), id, ownerIndex, operation, record
+            );
+    }
+
+    function _assemblyReceiptWitnessFor(
+        address inventory,
+        bytes32 id,
+        uint8 ownerIndex,
+        uint16 operation,
+        bytes32 record
+    ) internal view returns (FixtureOrigin.ReceiptWitness memory) {
         require(ownerIndex < 7 && record != 0, "exact receipt query");
-        FixtureAuthorityInventory.Capture memory captured = assemblyInventory.authoritySelection(id);
+        FixtureAuthorityInventory.Capture memory captured =
+            IStreamCurrentAuthorityInventory(inventory).authoritySelection(id);
         address owner = captured.selection.origin.environment.owners[ownerIndex];
         uint256 count = IStreamArtistNativeReceipts(owner).artistNativeReceiptCount();
         for (uint256 i; i < count; ++i) {

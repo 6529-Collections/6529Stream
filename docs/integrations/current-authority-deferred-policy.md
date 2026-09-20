@@ -124,3 +124,9 @@ for complete STATIC publication, archival coverage and finality execution. That
 composed validation, the ratification-history integration, and
 the independently tracked sanction/render currentness cycle remain separate
 work until their actual evidence is recorded.
+
+The [scoped STATIC ceremony recipe](current-authority-scoped-static-ceremony.md)
+adds actual full-output roots, current B/C op24 records, scope-specific Rights
+and terminal selection seals, plus fresh export/reference/inventory helpers.
+Its composed cases retain the production succession and byte-correspondence
+requirements; source/type checks do not establish full runtime acceptance.

@@ -181,6 +181,11 @@ abstract contract StreamCurrentAuthorityMigrationRecipe is StreamCurrentAuthorit
             assemblyVm.readFile("test/fixtures/native-assembly/reference-captures.json")
         );
         _assemblyPrepareCeremonyDefinitions();
+        _authorityCaptureOriginalPreservation();
+    }
+
+    /// @dev Other genuine publication profiles retain these same collection selector invariants.
+    function _authorityCaptureOriginalPreservation() internal {
         authorityOriginalSuite = assemblySuite;
         authorityOriginalAnchorsHash = keccak256(abi.encode(assemblyAuthorityResolver.anchors()));
         authorityOriginalSelectionsHash = _authoritySelectionsHash();

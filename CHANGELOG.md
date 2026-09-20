@@ -19,6 +19,17 @@
   old interface identifiers and existing storage. See the
   [integration guide](docs/integrations/published-scope-metadata-subjects.md).
 
+## Current-authority scoped STATIC ceremony source recipe
+
+- Add real pre-mint STATIC activation, TOKEN/RELEASE/SEASON publication and
+  scope-specific B/C op24, Rights and selection-seal regression recipes.
+- Add fresh current-byte export, actual reference publication and dynamic
+  source-inventory helpers. Preserve original hosts, exact receipts and full
+  output currentness; document the remaining production integration joins in
+  the [ceremony guide](docs/integrations/current-authority-scoped-static-ceremony.md).
+- Source/type checks remain separate from native execution, fresh browser
+  observations, complete archival coverage, Finality and gas acceptance.
+
 ## Closed VIEW root history and required consent
 
 - Add an explicit VIEW-only state path sharing the original scoped root history,
