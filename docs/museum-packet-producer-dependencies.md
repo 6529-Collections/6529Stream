@@ -7,6 +7,14 @@ required by the [collection metadata specification](collection-metadata-contract
 especially CMC-MUSEUM-GRADE, CMC-ACQUISITION-PACKET and CMC acceptance case 56.
 These dependencies remain required implementation, not waivable qualifications.
 
+The later [conservation source adapter](museum-conservation-source.md) now
+captures and replays the existing selected intent/interview producers. That
+partial item-13 consumer does not supply the missing tier declaration/default or
+sale-floor inputs in this recorded dependency review. The additive
+[packet V3 schema](museum-acquisition-packet-v3.md) also permits zero optional
+condition captures; canonical condition selection and absence still require
+the authoritative source-set producers below.
+
 Ownership follows [the autonomous run](../ops/AUTONOMOUS_RUN.md): the Metadata
 lead owns native metadata/records/preservation/finality; Root owns Core and
 shared-interface decisions; the Museum lead owns offchain source, schema and

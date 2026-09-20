@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Selected conservation capture](../../docs/museum-conservation-source.md)
+replays the existing selector's separate Artist/estate histories, exact original
+intent/interview records, catalogs and locks. Tier and sale-floor evidence remain
+required. [Packet V3](../../docs/museum-acquisition-packet-v3.md) separately permits
+zero optional condition captures without inferring report selection or absence.
+
 [Canonical packet V2 owner authority](../../docs/museum-acquisition-packet-v2.md)
 adds an explicit native owner-receipt variant for accession and title-binding
 references. The source-replayed partial assembly closes item 9's representation

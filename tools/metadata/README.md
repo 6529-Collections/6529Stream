@@ -11,6 +11,11 @@ Generate/check only its three new definitions with
 `python -m tools.metadata.acquisition_packet_v2` and `--check`; all V1 dossier
 definitions and validators remain unchanged.
 
+The additive [packet V3](../../docs/museum-acquisition-packet-v3.md) changes only
+packet identity and optional condition capture cardinality. Generate/check its
+two new definitions with `python -m tools.metadata.acquisition_packet_v3` and
+`--check`; V1/V2 definitions and native owner authority keep their exact meanings.
+
 Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.

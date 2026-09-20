@@ -59,6 +59,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source capture and offline replay for native conservation selections,
+  original op24 intent/interview evidence, separate Artist/estate histories,
+  complete selected catalogs and intent locks. Keep tier and sale-floor inputs
+  explicitly missing. Add packet V3 support for zero optional condition captures
+  while preserving V1/V2 schemas and unsupported selected-record failures.
+
 - Add durable Core conservation-tier declarations and an exact one-time governed
   condition-source catalog binding. Original interfaces/storage roots remain;
   the new Metadata producer and actual sale-floor acceptance are separate work.
