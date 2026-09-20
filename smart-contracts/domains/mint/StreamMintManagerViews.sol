@@ -7,9 +7,39 @@ import "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
 import "../../interfaces/stream/mint/StreamPreparedNativeContentTypes.sol";
 import "../../interfaces/stream/revenue/StreamPreparedNativeSettlementTypes.sol";
 import "../../interfaces/stream/revenue/StreamPreparedNativeRightsTypes.sol";
+import "../../interfaces/stream/mint/IStreamPreparedNativeMint.sol";
+import "../../interfaces/stream/mint/IStreamPreparedNativeContentMint.sol";
+import "../../interfaces/stream/mint/IStreamPreparedNativeContentPurchaseMint.sol";
+import "../../interfaces/stream/mint/IStreamPreparedNativeOfferMint.sol";
+import "../../interfaces/stream/mint/IStreamPreparedNativeRightsMint.sol";
+import "../../interfaces/stream/mint/IStreamERC20OfferMint.sol";
+import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol";
+import "../../interfaces/stream/mint/IStreamMintAuthorizationRevocation.sol";
+import "../../interfaces/stream/mint/IStreamMintManagerImport.sol";
+import "../../interfaces/stream/mint/IStreamMintPolicyGrace.sol";
+import "../../interfaces/stream/mint/IStreamMintPhaseFreeze.sol";
+import "../../interfaces/stream/mint/IStreamMintPreview.sol";
 
 /// @notice Fixed decoding for retained Manager preview ABIs, outside Manager runtime headroom.
 library StreamMintManagerViews {
+    /// @notice Exact Manager capability table; inherited ERC165/GasHost handling stays in facade.
+    function supportsMintInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == type(IStreamMintManager).interfaceId
+            || interfaceId == type(IStreamPreparedNativeMint).interfaceId
+            || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
+            || interfaceId == type(IStreamPreparedNativeContentPurchaseMint).interfaceId
+            || interfaceId == type(IStreamPreparedNativeOfferMint).interfaceId
+            || interfaceId == type(IStreamERC20OfferMint).interfaceId
+            || interfaceId == type(IStreamMintSaleAuthorizationRevocation).interfaceId
+            || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
+            || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
+            || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
+            || interfaceId == type(IStreamMintManagerImport).interfaceId
+            || interfaceId == type(IStreamMintPolicyGrace).interfaceId
+            || interfaceId == type(IStreamMintPhaseFreeze).interfaceId
+            || interfaceId == type(IStreamMintPreview).interfaceId;
+    }
+
     struct SubjectPreview {
         IStreamMintManager.CounterKeyMode keyMode;
         uint256 collectionId;

@@ -53,6 +53,30 @@ library StreamMintManagerPolicy {
         address admin
     );
 
+    /// @notice Original executable-phase admission in the actual Manager caller context.
+    /// @dev The facade supplies its exact phase storage and caller's authorization bit.
+    function requireExecutable(
+        StreamMintPhaseState.PhaseState storage phase,
+        uint256 collectionId,
+        bytes32 phaseId,
+        bool authorized
+    ) external view {
+        if (collectionId == 0 || phaseId == bytes32(0)) {
+            revert IStreamMintManager.InvalidMintPhase(collectionId, phaseId);
+        }
+        if (!phase.exists) revert IStreamMintManager.MintPhaseDoesNotExist(collectionId, phaseId);
+        if (phase.config.paused) revert IStreamMintManager.MintPhasePaused(collectionId, phaseId);
+        if (phase.config.startTime != 0 && block.timestamp < phase.config.startTime) {
+            revert IStreamMintManager.MintPhaseNotStarted(collectionId, phaseId, block.timestamp);
+        }
+        if (phase.config.endTime != 0 && block.timestamp > phase.config.endTime) {
+            revert IStreamMintManager.MintPhaseEnded(collectionId, phaseId, block.timestamp);
+        }
+        if (!authorized) {
+            revert IStreamMintManager.UnauthorizedMintExecutor(collectionId, phaseId, msg.sender);
+        }
+    }
+
     /// @dev The guarded facade admits an existing phase; no policy hash or grace changes here.
     function pause(
         StreamMintPhaseState.PhaseState storage phase,

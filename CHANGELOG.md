@@ -17,6 +17,10 @@ the release policy in `docs/release-policy.md`.
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
   live provenance semantics, exact analysis and golden-evidence requirements.
+- Add advisory mint eligibility and per-counter diagnostics at the Manager,
+  preserving explicit executor/gate context, aggregate caps and original
+  execution checks. Focused runtime and complete current-stack acceptance remain pending.
+
 - Add one-way governed mint phase freezes with canonical same-Ledger inheritance,
   retained executor ceilings and fresh successor Artist consent. Terminal-freeze
   veto and counter limits remain unchanged; combined native acceptance is pending.

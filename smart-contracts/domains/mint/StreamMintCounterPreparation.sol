@@ -17,6 +17,30 @@ library StreamMintCounterPreparation {
         IStreamMintManager.MintCounterConfig[] memory configs,
         StreamMintOperationIdentity.CounterContext memory context
     ) external view returns (IStreamMintLedger.CounterConsumption[] memory rows) {
+        rows = _resolve(batch, quantity, ids, configs, context);
+        _checkProjectedValues(context.ledger, rows);
+    }
+
+    /// @notice Resolves the identical canonical rows for advisory counter diagnostics.
+    /// @dev Only aggregate cap/uint64 checks are deferred to the preview formatter. Execution
+    /// always uses prepare(), which retains its original strict checks before returning rows.
+    function preview(
+        IStreamMintManager.MintBatch calldata batch,
+        uint256 quantity,
+        bytes32[] memory ids,
+        IStreamMintManager.MintCounterConfig[] memory configs,
+        StreamMintOperationIdentity.CounterContext memory context
+    ) external view returns (IStreamMintLedger.CounterConsumption[] memory rows) {
+        return _resolve(batch, quantity, ids, configs, context);
+    }
+
+    function _resolve(
+        IStreamMintManager.MintBatch calldata batch,
+        uint256 quantity,
+        bytes32[] memory ids,
+        IStreamMintManager.MintCounterConfig[] memory configs,
+        StreamMintOperationIdentity.CounterContext memory context
+    ) private view returns (IStreamMintLedger.CounterConsumption[] memory rows) {
         rows = StreamMintOperationIdentity.deriveCounterConsumptions(
             batch, quantity, ids, configs, context
         );
@@ -63,7 +87,6 @@ library StreamMintCounterPreparation {
             }
             if (merkle) ++proofIndex;
         }
-        _checkProjectedValues(context.ledger, rows);
     }
 
     function _checkProjectedValues(

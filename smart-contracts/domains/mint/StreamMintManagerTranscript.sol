@@ -88,7 +88,7 @@ library StreamMintManagerTranscript {
     function validateMintBatch(
         IStreamMintManager.MintBatch calldata request,
         IStreamMintManager.MintPhaseConfig memory config
-    ) private pure returns (uint256 quantity) {
+    ) internal pure returns (uint256 quantity) {
         quantity = request.initialRecipients.length;
         if (
             quantity == 0 || quantity != request.beneficiaries.length
@@ -115,7 +115,7 @@ library StreamMintManagerTranscript {
         IStreamMintManager.MintBatch calldata batch,
         bytes32 currentPolicyHash,
         IStreamMintLedger ledger
-    ) private view returns (bytes32 boundPolicyHash) {
+    ) internal view returns (bytes32 boundPolicyHash) {
         boundPolicyHash = batch.expectedPolicyHash;
         if (boundPolicyHash == bytes32(0)) {
             revert IStreamMintManager.MintPolicyHashRequired(batch.collectionId, batch.phaseId);

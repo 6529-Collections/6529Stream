@@ -31,6 +31,7 @@ import "./StreamMintManagerExecution.sol";
 import "./StreamMintManagerPolicy.sol";
 import "./StreamMintPhaseFreezeControl.sol";
 import "./StreamMintManagerViews.sol";
+import "./StreamMintPreview.sol";
 import "./StreamMintImport.sol";
 import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
 import {
@@ -54,6 +55,7 @@ contract StreamMintManager is
     IStreamMintManagerImport,
     IStreamMintPolicyGrace,
     IStreamMintPhaseFreeze,
+    IStreamMintPreview,
     Ownable,
     ReentrancyGuard,
     ERC165,
@@ -210,19 +212,7 @@ contract StreamMintManager is
         override(IERC165, ERC165)
         returns (bool)
     {
-        return interfaceId == type(IStreamMintManager).interfaceId
-            || interfaceId == type(IStreamPreparedNativeMint).interfaceId
-            || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
-            || interfaceId == type(IStreamPreparedNativeContentPurchaseMint).interfaceId
-            || interfaceId == type(IStreamPreparedNativeOfferMint).interfaceId
-            || interfaceId == type(IStreamERC20OfferMint).interfaceId
-            || interfaceId == type(IStreamMintSaleAuthorizationRevocation).interfaceId
-            || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
-            || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
-            || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
-            || interfaceId == type(IStreamMintManagerImport).interfaceId
-            || interfaceId == type(IStreamMintPolicyGrace).interfaceId
-            || interfaceId == type(IStreamMintPhaseFreeze).interfaceId
+        return StreamMintManagerViews.supportsMintInterface(interfaceId)
             || super.supportsInterface(interfaceId);
     }
 
@@ -499,6 +489,14 @@ contract StreamMintManager is
         OperationTranscript memory transcript =
             _operationTranscript(batch, gateData, MINT_EXECUTION_PATH_SINGLE_STEP);
         return (transcript.operationRoot, transcript.operationIds);
+    }
+
+    /// @notice Advisory eligibility for an explicit executor; never reserves or authorizes a mint.
+    function canMint(MintBatch calldata batch, address executor, bytes calldata gateData)
+        external view override returns (IStreamMintPreview.MintPreview memory)
+    {
+        bytes memory encoded = StreamMintPreview.read(batch, executor, gateData);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function previewPreparedNativeMintOperation(MintBatch calldata batch, bytes calldata gateData)
@@ -863,20 +861,11 @@ contract StreamMintManager is
         view
         returns (StreamMintPhaseState.PhaseState storage phaseState)
     {
-        _requirePhaseIdentity(request.collectionId, request.phaseId);
-        phaseState = _requireConfiguredPhase(request.collectionId, request.phaseId);
-        if (phaseState.config.paused) {
-            revert MintPhasePaused(request.collectionId, request.phaseId);
-        }
-        if (phaseState.config.startTime != 0 && block.timestamp < phaseState.config.startTime) {
-            revert MintPhaseNotStarted(request.collectionId, request.phaseId, block.timestamp);
-        }
-        if (phaseState.config.endTime != 0 && block.timestamp > phaseState.config.endTime) {
-            revert MintPhaseEnded(request.collectionId, request.phaseId, block.timestamp);
-        }
-        if (!phaseExecutor[request.collectionId][request.phaseId][msg.sender]) {
-            revert UnauthorizedMintExecutor(request.collectionId, request.phaseId, msg.sender);
-        }
+        phaseState = _phases[request.collectionId][request.phaseId];
+        StreamMintManagerPolicy.requireExecutable(
+            phaseState, request.collectionId, request.phaseId,
+            phaseExecutor[request.collectionId][request.phaseId][msg.sender]
+        );
     }
 
     function _operationTranscript(
