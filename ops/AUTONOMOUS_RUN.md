@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `98fcd45f`: official settlement floor, prospective provider, compact metric and joined Router factoring integrated. ABI96: 2,574 sources/zero errors. Root clients1,286; carrier8 passes. Scoped runtime evidence remains source-specific. |
+| Source checkpoint | `014d252c`: Museum floor capture, completed-burn provider fix, direct receipt interfaces and Attribution partial size repair. ABI97: 2,579 sources/zero errors. Museum/Core47 and floor/provider47 pass on separate exact captures; root clients1,286 and Museum floor43 pass. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,48 +29,42 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `98fcd45f`; ABI96 passes all 2,574 sources in 24.593 seconds.
-Root clients pass 1,286 checks at `f5f24974` plus the test-only EOF correction. Native Museum tier/catalog passes 51
-on its original source; 47 master/Core-floor cases are running separately.
-Router 70 passes on its recorded capture but remains 2,178 bytes oversized.
-Native-tier offchain capture passes 38 root cases; positive fixtures are synthetic.
+Latest intake is `014d252c`; ABI97 passes all 2,579 Solidity sources at
+`b82a4bd1` in 24.688 seconds. Later capture code changes no Solidity.
+Museum/Core master47 and floor/provider47 pass on their separate source captures;
+joined Router86 passes but remains oversized. Root clients1,286 and Museum
+floor43 pass. The new independent review task is visible in Stream delivery.
 
-Current ownership supersedes historical next-batch statements below:
+Current ownership supersedes historical assignments below:
 
-- A: creation-carrier8 passes. Corrected inert personhood v3 is in independent
-  review; prepare actual Artist/Safe preflight and an internal Attribution size
-  repair only outside held changes. Burn owns Identity/Coordinator/Owner.
-- B: finish the exact V2 snapshot/reference test-only chunk retry; continue the
-  complete V2 COLLECTION inventory adapter. Source is integrated `4730cf01`.
-- C: finish compact metric native acceptance; build scoped finality and the
-  genuine prospective reference host with the agreed acyclic Floor/source join.
-- Mint: implement the three original direct paid joins (native/ERC20 fixed and
-  English auction settlement) with genuine typed direct receipts, preserving
-  existing APIs/signatures/funding. Coordinate the additive floor capability
-  with its owner. Production AUTH and actual Artist entropy source are integrated.
-- Burn: finish coherent recovered-authority profile10, original chronology and
-  seven-owner atomic import, with actual continuation/Safe test source.
-- Museum: native tier/default capture is integrated `e558addd`; continue one
-  coherent additive native conservation packet shape when the real floor is
-  frozen. Preserve all 19 acquisition requirements and source qualifications.
-- Clients: entropy-succession source is integrated `f5f24974`, root1,286 passes.
-  Build native Museum anchor/master callers on separate `e558addd`/ABI94 profile;
-  pending direct/floor ledger APIs remain outside that frozen client scope.
-- Conservation/native task `01a0be37-2432-7a63-8820-fc42f159eb1d`: finish the
-  47-case test-harness retry and source-integrated optional-preparation floor
-  acceptance. Implement typed direct floor consumer after Mint freezes its API.
-  Master/waiver/SaleRights source is integrated `c1c169d5`; Core floor tests
-  `734775e8`. C owns prospective reference; Museum owns offchain consumers.
-- Testing: continue joined Router internal read/copy factoring without changing
-  external behavior or applying held artifacts. Then refreeze actual terminal10,
-  INSTANT8 and Safe9 on the fitting current graph. Author genuine common
-  floor-binding and explicit WAIVED commerce fixture setup while frozen tests
-  run; complete Museum proof is a separate workflow. No duplicate compiler.
+- A: creation-carrier8 accepted; Attribution read repair integrated `323625be`
+  but still 4,420 bytes over. Refreshed inert admission/codec01/02 packet is in
+  independent review; improve personhood v4 test oracles without applying held code.
+- B: cached V2 snapshot/reference22 retry; finish complete V2 COLLECTION inventory,
+  actual V2 factory and STATIC projection. Original V1 factory/provider unchanged.
+- C: metric immutable-byte32 test retry; finish prospective reference and scoped
+  finality/STATIC worker. Coordinate exact V2 source/factory roles with B.
+- Mint: finish the original three DIRECT products, actual callback cases and
+  shared caller/floor joins. Preserve original APIs, funding and signature domains.
+- Burn: finish recovered-authority profile10 across seven owners, original history
+  and continuation/replay domains. Capability flags remain zero until implemented.
+- Museum: floor capture integrated `014d252c`, root43 passes. Build coherent native
+  tier/floor/intent packet composition, retaining all 19 requirement statuses.
+  Frozen profiles remain unchanged; DIRECT needs distinct typed history support.
+- Clients: entropy package integrated/root1,286. Finish native Museum anchor/master
+  callers on exact `e558addd`/ABI94; later paid-floor/DIRECT is a separate profile.
+- Conservation/native `01a0be37-2432-7a63-8820-fc42f159eb1d`: two separate47 cohorts
+  pass. Finish DIRECT consumer canonical admission correction and 464-byte size
+  excess; finish burn-provider14 retry and actual current6/Artist3 artifact assembly.
+- Testing: finish Router V2 codec capacity repair (isolated candidate 461 bytes
+  over), then current Terminal10/INSTANT8/Safe. Build explicit Core floor binding
+  and genuine WAIVED commerce fixture alongside this work; no global exemption.
+- Independent review `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: personhood v3 and Museum
+  capture reviews complete; review current inert Artist admission/codec packet.
 
-Root owns shared interfaces, architecture, integration and final closure.
-Preparation must remain optional for a normal one-transaction purchase; gas
-acceptance remains open. No new funding or onchain action is needed. Source
-integration, focused runtime, capacity and full release acceptance stay distinct.
+Root owns architecture, shared interfaces, integration and final closure.
+Preparation remains optional; the whole-purchase gas target remains open.
+No funding or onchain action is needed. Held artifacts stay unapplied.
 
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329
