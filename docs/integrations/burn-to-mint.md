@@ -103,8 +103,9 @@ buyer's pull credit in the original adapter; the gate never owns that credit.
 Any callback substitution, replay, rejected signature, failed settlement,
 rejected receiver or Manager failure rolls back sources, payment, counters and
 nullifiers together. Direct `purchase` remains unchanged for ordinary phases.
-This batch does not add an ERC-20 burn consumer or alter ERC-20 native-reveal
-allowance behavior.
+The dedicated [ERC20 paid burn route](erc20-burn-to-mint.md) uses its own typed
+carrier and gate with a zero native reveal fee. It preserves the native route
+and does not implement the held ERC20 native-reveal allowance proposal.
 
 The native adapter links `StreamNativeBurnCallback` for the one-use context
 and `StreamNativeSaleMint` for its unchanged single-token mint-result and
