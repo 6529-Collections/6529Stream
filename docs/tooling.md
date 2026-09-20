@@ -95,7 +95,7 @@ python scripts/dev.py test
 ```
 
 The command selects the actual cached literal creation library, whose compiler
-context owns the embedded creation bytes and immutable references for the 55
+context owns the embedded creation bytes and immutable references for the 68
 required products. Each selected graph or campaign test host is authenticated
 against its own cache-selected native compiler output. Unrelated test changes
 can therefore reuse an unchanged creation library without forcing a full build.

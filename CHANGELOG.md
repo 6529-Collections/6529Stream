@@ -41,6 +41,17 @@
 - New correction-history hydration and later consumed-Platform lineage composition
   remain required follow-ups; native acceptance is separate from source validation.
 
+## Full-policy construction before the first mint
+
+- Add an immutable COLLECTION publication recipe and distinct factory-mode
+  provider/discovery catalogue. Resolve actual per-plan original products after
+  genuine minting without an empty source set or mutable source binding.
+- Add explicit Router capability resolution while retaining existing root
+  encodings, Artist consent and original fixed-output behavior. Reuse the current
+  37-role graph, native runtime predictions and Safe activation helpers.
+- Author actual-current construction, staged-child and focused regressions.
+  Native size, gas and complete publication/finality acceptance remain pending.
+
 ## Added: recovered pending generations with complete delegation histories
 
 - Compose original mode1/mode2 pending generations with full grant, revision, revocation and

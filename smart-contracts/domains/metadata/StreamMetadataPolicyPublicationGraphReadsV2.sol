@@ -1,0 +1,159 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import {
+    IStreamPolicyPublicationGraphBindingV2 as Binding
+} from "../../interfaces/stream/finality/IStreamPolicyPublicationGraphBindingV2.sol";
+import {
+    IStreamPolicyPublicationFactoryV2 as Factory
+} from "../../interfaces/stream/finality/IStreamPolicyPublicationFactoryV2.sol";
+import {
+    StreamPolicyPublicationGraphTypesV2 as Graph
+} from "../../interfaces/stream/finality/StreamPolicyPublicationGraphTypesV2.sol";
+import {
+    IStreamFinalityEntropySourceFactory as Sources
+} from "../../interfaces/stream/finality/IStreamFinalityEntropySourceFactory.sol";
+import {
+    StreamFinalityScope,
+    StreamFinalityScopeType
+} from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+import {
+    StreamFinalityRouterEvidence as Reads
+} from "../finality/StreamFinalityRouterEvidence.sol";
+import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
+
+/// @notice Root-free resolution of the original COLLECTION products of one immutable recipe.
+/// @dev The caller has already authenticated the original provider through actual Finality.
+/// No output address, inventory plan or factory is accepted from the publisher. The ordinary
+/// root path still independently validates the output, checkpoint, artifact and Artist route.
+library StreamMetadataPolicyPublicationGraphReadsV2 {
+    struct Context {
+        address provider;
+        address core;
+        address metadata;
+        address router;
+        address schemas;
+        uint256 collectionId;
+        uint256 readGas;
+    }
+
+    error PolicyPublicationGraphUnavailable(address target);
+
+    function output(Context memory c) public view returns (address host, bytes32 codeHash) {
+        bytes memory raw = Reads.read(
+            c.provider,
+            abi.encodeCall(Binding.collectionPolicyPublicationBinding, ()),
+            192,
+            c.readGas
+        );
+        Binding.CollectionFactoryBinding memory b =
+            abi.decode(raw, (Binding.CollectionFactoryBinding));
+        if (
+            keccak256(raw) != keccak256(abi.encode(b)) || b.recipeHash == 0
+                || b.sourceFactoryDependenciesHash == 0 || b.configurationHash == 0
+                || b.graphGas < 50000 || b.graphGas > type(uint32).max || c.collectionId == 0
+        ) revert PolicyPublicationGraphUnavailable(c.provider);
+        _pin(b.factory, b.factoryCodeHash);
+        if (
+            _word(
+                        b.factory,
+                        abi.encodeCall(IERC165.supportsInterface, (type(Factory).interfaceId)),
+                        c.readGas
+                    ) != bytes32(uint256(1))
+                || _word(
+                        b.factory,
+                        abi.encodeCall(Factory.policyPublicationFactoryProfile, ()),
+                        c.readGas
+                    ) != Graph.PROFILE
+                || _word(b.factory, abi.encodeCall(Factory.recipeHash, ()), c.readGas)
+                    != b.recipeHash
+                || _word(
+                        b.factory,
+                        abi.encodeCall(Factory.sourceFactoryDependenciesHash, ()),
+                        c.readGas
+                    ) != b.sourceFactoryDependenciesHash
+                || _word(b.factory, abi.encodeCall(Factory.core, ()), c.readGas) != _address(c.core)
+                || _word(b.factory, abi.encodeCall(Factory.metadataHost, ()), c.readGas)
+                    != _address(c.metadata)
+        ) revert PolicyPublicationGraphUnavailable(b.factory);
+
+        raw = Reads.dynamicRead(b.factory, abi.encodeCall(Factory.recipe, ()), 24576, c.readGas);
+        Graph.Recipe memory r = abi.decode(raw, (Graph.Recipe));
+        if (
+            keccak256(raw) != keccak256(abi.encode(r))
+                || b.recipeHash != keccak256(abi.encode(Graph.PROFILE, block.chainid, r))
+                || r.inventory.chainId != block.chainid || r.inventory.targets[0] != c.core
+                || r.inventory.targets[1] != c.metadata || r.inventory.targets[2] != c.schemas
+                || r.inventory.targets[4] != c.router || r.factorySourceGas < 50000
+                || r.factorySourceGas > type(uint32).max
+        ) revert PolicyPublicationGraphUnavailable(b.factory);
+        for (uint256 i; i < 5; ++i) {
+            _pin(r.inventory.targets[i], r.inventory.codeHashes[i]);
+        }
+        _pin(r.targets[2], r.codeHashes[2]);
+        StreamFinalityScope memory scope =
+            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, c.collectionId, 0, 0);
+        raw = Reads.read(
+            b.factory, abi.encodeCall(Factory.requireCurrentGraph, (scope)), 736, b.graphGas
+        );
+        Graph.Graph memory g = abi.decode(raw, (Graph.Graph));
+        if (
+            keccak256(raw) != keccak256(abi.encode(g)) || g.preparedChildren != 7
+                || keccak256(abi.encode(g.scope)) != keccak256(abi.encode(scope))
+                || g.inventoryPlan == 0
+                || g.graphId
+                    != keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_POLICY_PUBLICATION_GRAPH_V2"),
+                            block.chainid,
+                            b.factory,
+                            b.recipeHash,
+                            b.sourceFactoryDependenciesHash,
+                            scope,
+                            g.inventoryPlan,
+                            g.sourceSet,
+                            g.sourceSetCodeHash
+                        )
+                    )
+                || _word(
+                        r.targets[2],
+                        abi.encodeCall(Sources.currentInventoryPlan, (scope)),
+                        r.factorySourceGas
+                    ) != g.inventoryPlan
+        ) revert PolicyPublicationGraphUnavailable(b.factory);
+        raw = Reads.read(
+            r.targets[2],
+            abi.encodeCall(Sources.sourceSetForPlan, (g.inventoryPlan)),
+            64,
+            r.factorySourceGas
+        );
+        (address source, bytes32 sourceHash) = abi.decode(raw, (address, bytes32));
+        if (
+            keccak256(raw) != keccak256(abi.encode(source, sourceHash)) || source != g.sourceSet
+                || sourceHash != g.sourceSetCodeHash
+        ) revert PolicyPublicationGraphUnavailable(r.targets[2]);
+        _pin(source, sourceHash);
+        for (uint256 i; i < 7; ++i) {
+            _pin(g.children[i], g.codeHashes[i]);
+        }
+        return (g.children[2], g.codeHashes[2]);
+    }
+
+    function _word(address target, bytes memory input, uint256 gasLimit)
+        private
+        view
+        returns (bytes32)
+    {
+        return abi.decode(Reads.read(target, input, 32, gasLimit), (bytes32));
+    }
+
+    function _address(address target) private pure returns (bytes32) {
+        return bytes32(uint256(uint160(target)));
+    }
+
+    function _pin(address target, bytes32 hash) private view {
+        if (target.code.length == 0 || hash == 0 || target.codehash != hash) {
+            revert PolicyPublicationGraphUnavailable(target);
+        }
+    }
+}

@@ -941,7 +941,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         );
     }
 
-    function _predictAssemblyLateRuntimes() internal {
+    function _predictAssemblyProviderRuntime() internal {
         RuntimeValue[] memory v = new RuntimeValue[](15);
         string memory base = "StreamFinalityRouterEvidenceProvider";
         v[0] = _finalityValue(base, "core", _addressWord(address(assemblyCore)));
@@ -957,7 +957,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         );
         v[8] = _finalityValue(base, "deploymentChainId", bytes32(block.chainid));
         v[9] = _finalityValue(base, "readGas", bytes32(uint256(500000)));
-        v[10] = _finalityValue(base, "sourceGas", bytes32(uint256(4000000)));
+        v[10] = _finalityValue(base, "sourceGas", bytes32(_assemblyComponentSourceGas()));
         v[11] = _finalityValue(base, "routerModuleVersion", assemblyRouter.streamModuleVersion());
         (, bytes32 routerManifest) = assemblyRouter.streamModuleManifest();
         (, bytes32 metadataManifest) = assemblyMetadata.streamModuleManifest();
@@ -970,16 +970,15 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         v[14] = _finalityValue(
             "StreamFinalityNativeEvidenceProvider", "metadataModuleManifestHash", metadataManifest
         );
-        string[] memory parents = new string[](1);
-        parents[0] = base;
         assemblyRuntimes[uint256(Late.PROVIDER)] = _productRuntime(
-            "StreamFinalityNativeEvidenceProvider",
-            parents,
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityNativeEvidenceProvider),
-            v
+            _assemblyProviderName(), _assemblyProviderParents(), _assemblyProviderCreation(), v
         );
-        v = new RuntimeValue[](6);
-        base = "StreamCoreFinalityAdapter";
+    }
+
+    function _predictAssemblyLateRuntimes() internal {
+        _predictAssemblyProviderRuntime();
+        RuntimeValue[] memory v = new RuntimeValue[](6);
+        string memory base = "StreamCoreFinalityAdapter";
         v[0] = _finalityValue(base, "core", _addressWord(address(assemblyCore)));
         v[1] = _finalityValue(base, "collectionMetadata", _addressWord(address(assemblyMetadata)));
         v[2] = _finalityValue(
@@ -996,7 +995,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
             _graphCreation(StreamCurrentGraphCreation.Kind.StreamCoreFinalityAdapter),
             v
         );
-        base = "StreamFinalityCurrentDiscovery";
+        base = _assemblyDiscoveryName();
         v = new RuntimeValue[](4);
         v[0] = _finalityValue(base, "core", _addressWord(address(assemblyCore)));
         v[1] = _finalityValue(base, "metadataHost", _addressWord(address(assemblyMetadata)));
@@ -1004,12 +1003,8 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
             base, "scopeEvidenceProvider", _addressWord(assemblyLate[uint256(Late.PROVIDER)])
         );
         v[3] = _finalityValue(base, "deploymentChainId", bytes32(block.chainid));
-        assemblyRuntimes[uint256(Late.DISCOVERY)] = _productRuntime(
-            base,
-            new string[](0),
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityCurrentDiscovery),
-            v
-        );
+        assemblyRuntimes[uint256(Late.DISCOVERY)] =
+            _productRuntime(base, new string[](0), _assemblyDiscoveryCreation(), v);
         _predictAssemblyRegistryRuntime();
         _predictAssemblyCoordinatorRuntime();
         assemblyRuntimes[uint256(Late.WORK)] = _selectorRuntime(
@@ -1255,7 +1250,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         string[] memory parents,
         bytes memory creation,
         RuntimeValue[] memory values
-    ) private view returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         string[] memory declarations = new string[](parents.length + 1);
         declarations[0] = _artifact(name);
         for (uint256 i; i < parents.length; ++i) {
@@ -1336,7 +1331,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         d.referenceGas = 12000000;
     }
 
-    function _assemblyKnownCodeHash(address target) private view returns (bytes32 hash) {
+    function _assemblyKnownCodeHash(address target) internal view returns (bytes32 hash) {
         require(target != address(0), "no zero assembly dependency");
         if (target == assemblyCoordinatorAddress) {
             require(assemblyCoordinatorRuntime.length != 0, "Coordinator runtime already derived");
@@ -1358,7 +1353,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
     }
 
     function _assemblyProviderConfiguration()
-        private
+        internal
         view
         returns (StreamFinalityNativeProviderReads.Config memory c)
     {
@@ -1391,8 +1386,8 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         }
         c.chainId = block.chainid;
         c.readGas = 500000;
-        c.sourceGas = 16000000;
-        c.componentSourceGas = 4000000;
+        c.sourceGas = _assemblyManifestSourceGas();
+        c.componentSourceGas = _assemblyComponentSourceGas();
         c.inventoryDependencyHash = keccak256(abi.encode(_assemblyInventoryDependencies()));
     }
 
@@ -1407,14 +1402,11 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         returns (StreamFinalityNativeProviderReads.Config memory c)
     {
         _predictAssemblyLateRuntimes();
+        _prepareAssemblyProviderCompanions();
         c = _assemblyProviderConfiguration();
         assemblyProvider = StreamFinalityNativeEvidenceProvider(
             _deployAssemblyLate(
-                Late.PROVIDER,
-                _graphCreation(
-                    StreamCurrentGraphCreation.Kind.StreamFinalityNativeEvidenceProvider
-                ),
-                abi.encode(c)
+                Late.PROVIDER, _assemblyProviderCreation(), _assemblyProviderArguments(c)
             )
         );
         assemblyCoreAdapter = StreamCoreFinalityAdapter(
@@ -1480,9 +1472,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         d.entropyGas = 8000000;
         assemblyDiscovery = StreamFinalityCurrentDiscovery(
             _deployAssemblyLate(
-                Late.DISCOVERY,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityCurrentDiscovery),
-                abi.encode(d)
+                Late.DISCOVERY, _assemblyDiscoveryCreation(), _assemblyDiscoveryArguments(d)
             )
         );
         StreamFinalityDeploymentConfiguration memory deployment =
@@ -1601,10 +1591,61 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         }
     }
 
+    /// @dev Additive profiles select exact creation templates before predicting any late runtime.
+    /// Defaults preserve the original graph and its complete constructor arguments.
+    function _assemblyProviderName() internal pure virtual returns (string memory) {
+        return "StreamFinalityNativeEvidenceProvider";
+    }
+
+    function _assemblyProviderParents() internal pure virtual returns (string[] memory parents) {
+        parents = new string[](1);
+        parents[0] = "StreamFinalityRouterEvidenceProvider";
+    }
+
+    function _assemblyProviderCreation() internal view virtual returns (bytes memory) {
+        return _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityNativeEvidenceProvider);
+    }
+
+    function _assemblyProviderArguments(StreamFinalityNativeProviderReads.Config memory c)
+        internal
+        view
+        virtual
+        returns (bytes memory)
+    {
+        return abi.encode(c);
+    }
+
+    function _assemblyDiscoveryName() internal pure virtual returns (string memory) {
+        return "StreamFinalityCurrentDiscovery";
+    }
+
+    function _assemblyDiscoveryCreation() internal view virtual returns (bytes memory) {
+        return _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityCurrentDiscovery);
+    }
+
+    function _assemblyDiscoveryArguments(StreamFinalityDiscoveryTypes.Configuration memory d)
+        internal
+        view
+        virtual
+        returns (bytes memory)
+    {
+        return abi.encode(d);
+    }
+
+    function _assemblyComponentSourceGas() internal pure virtual returns (uint256) {
+        return 4000000;
+    }
+
+    function _assemblyManifestSourceGas() internal pure virtual returns (uint256) {
+        return 16000000;
+    }
+
+    function _prepareAssemblyProviderCompanions() internal virtual { }
+
     mapping(StreamCurrentGraphCreation.Kind => bool) private assemblyVerifiedTemplates;
 
     function _assemblyCreate(StreamCurrentGraphCreation.Kind kind, bytes memory args)
-        private
+        internal
         returns (address product)
     {
         bytes memory creation = _graphCreation(kind);
@@ -1789,11 +1830,15 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         // The real Identity constructor creates these children in order through fixed
         // delegatecalled deployment libraries. Both CREATEs execute in the new host.
         v[11] = _runtimeValue(
-            "artist", name, "identityAdjudicationExtension",
+            "artist",
+            name,
+            "identityAdjudicationExtension",
             _addressWord(graphVm.computeCreateAddress(slot.product(), 1))
         );
         v[12] = _runtimeValue(
-            "artist", name, "identityRewindExtension",
+            "artist",
+            name,
+            "identityRewindExtension",
             _addressWord(graphVm.computeCreateAddress(slot.product(), 2))
         );
         string[] memory parents = new string[](1);

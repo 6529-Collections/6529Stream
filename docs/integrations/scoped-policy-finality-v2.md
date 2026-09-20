@@ -36,6 +36,11 @@ configuration requirements remain in force. Their expected deployment identities
 must be planned before construction; this addition does not resolve an arbitrary
 deployment topology or provide mutable late binding.
 
+The retained static COLLECTION policy catalogue additionally needs an actual
+minted policy inventory. For construction before the first mint, use the distinct
+[full-policy factory-mode recipe](full-policy-construction-v2.md), which preserves
+this earlier provider and its three-static-profile interface unchanged.
+
 For each scope, create the factory's seven children and complete the publication
 sequence in the preservation guide. The selected provider can resolve the
 genuine snapshot child before a root exists, allowing snapshot publication and

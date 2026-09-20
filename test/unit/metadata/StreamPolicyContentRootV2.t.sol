@@ -9,6 +9,9 @@ import {
     IStreamPolicyOutputEvidenceBindingV2 as PB
 } from "../../../smart-contracts/interfaces/stream/finality/IStreamPolicyOutputEvidenceBindingV2.sol";
 import {
+    IStreamPolicyPublicationGraphBindingV2 as GB
+} from "../../../smart-contracts/interfaces/stream/finality/IStreamPolicyPublicationGraphBindingV2.sol";
+import {
     IStreamPolicyContentRootPublicationV2 as PV
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
 import {
@@ -209,6 +212,39 @@ contract StreamPolicyContentRootV2Test is ContentRootPublicationFixture {
                     )
                 )
         );
+    }
+
+    function testAdvertisedFactoryFailureCannotFallBackToValidStaticOutput() public {
+        IStreamContentRootPublication.Publication memory p = _publication();
+        bytes32 expected = router.previewPolicyContentRootPublication(p, address(this));
+        require(expected != 0, "original fixed output is independently valid");
+        PolicyRootVm(address(vm))
+            .mockCall(
+                provider,
+                abi.encodeCall(IERC165.supportsInterface, (type(GB).interfaceId)),
+                abi.encode(true)
+            );
+        // This original typed provider deliberately has no factory-binding getter.
+        vm.expectRevert();
+        router.previewPolicyContentRootPublication(p, address(this));
+        PolicyRootVm(address(vm)).clearMockedCalls();
+        require(router.previewPolicyContentRootPublication(p, address(this)) == expected);
+        require(router.collectionContentRootHead(1) == 0);
+    }
+
+    function testMalformedFactoryCapabilityCannotFallBackToValidStaticOutput() public {
+        IStreamContentRootPublication.Publication memory p = _publication();
+        require(router.previewPolicyContentRootPublication(p, address(this)) != 0);
+        PolicyRootVm(address(vm))
+            .mockCall(
+                provider,
+                abi.encodeCall(IERC165.supportsInterface, (type(GB).interfaceId)),
+                abi.encode(uint256(2))
+            );
+        vm.expectRevert();
+        router.previewPolicyContentRootPublication(p, address(this));
+        PolicyRootVm(address(vm)).clearMockedCalls();
+        require(router.collectionContentRootHead(1) == 0);
     }
 
     function testPolicyRootOriginalV1AndV2ShareCanonicalLineageAndConsumedMap() public {

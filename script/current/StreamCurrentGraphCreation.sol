@@ -1,5 +1,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamStaticSelectionCheckpoint
+} from "../../smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol";
+import {
+    StreamStaticContentCheckpoint
+} from "../../smart-contracts/domains/finality/StreamStaticContentCheckpoint.sol";
+import {
+    StreamStaticOutputManifest
+} from "../../smart-contracts/domains/finality/StreamStaticOutputManifest.sol";
+import {
+    StreamScopedSnapshotPublication
+} from "../../smart-contracts/domains/metadata/StreamScopedSnapshotPublication.sol";
+import {
+    StreamScopedReferencePublication
+} from "../../smart-contracts/domains/preservation/StreamScopedReferencePublication.sol";
+import {
+    StreamScopedRenderCriticalInventory
+} from "../../smart-contracts/domains/preservation/StreamScopedRenderCriticalInventory.sol";
+import {
+    StreamScopedBundleArchiveCoverage
+} from "../../smart-contracts/domains/preservation/StreamScopedBundleArchiveCoverage.sol";
+import {
+    StreamFinalityEntropyPolicySourceFactoryV2
+} from "../../smart-contracts/domains/finality/StreamFinalityEntropyPolicySourceFactoryV2.sol";
+import {
+    StreamFinalityScopedEntropyPolicySourceFactoryV2
+} from "../../smart-contracts/domains/finality/StreamFinalityScopedEntropyPolicySourceFactoryV2.sol";
+import {
+    StreamPolicyPublicationFactoryV2
+} from "../../smart-contracts/domains/finality/StreamPolicyPublicationFactoryV2.sol";
+import {
+    StreamScopedPolicyPublicationFactoryV2
+} from "../../smart-contracts/domains/finality/StreamScopedPolicyPublicationFactoryV2.sol";
+import {
+    StreamFinalityFullPolicyEvidenceProviderV2
+} from "../../smart-contracts/domains/finality/StreamFinalityFullPolicyEvidenceProviderV2.sol";
+import {
+    StreamFinalityFullPolicyDiscoveryV2
+} from "../../smart-contracts/domains/finality/StreamFinalityFullPolicyDiscoveryV2.sol";
 
 import {
     StreamArchivalCoverage
@@ -200,7 +239,20 @@ library StreamCurrentGraphCreation {
         StreamSchemaRegistry,
         StreamSplitFactory,
         StreamSystemManifest,
-        StreamWorkRecordSelection
+        StreamWorkRecordSelection,
+        StreamStaticSelectionCheckpoint,
+        StreamStaticContentCheckpoint,
+        StreamStaticOutputManifest,
+        StreamScopedSnapshotPublication,
+        StreamScopedReferencePublication,
+        StreamScopedRenderCriticalInventory,
+        StreamScopedBundleArchiveCoverage,
+        StreamFinalityEntropyPolicySourceFactoryV2,
+        StreamFinalityScopedEntropyPolicySourceFactoryV2,
+        StreamPolicyPublicationFactoryV2,
+        StreamScopedPolicyPublicationFactoryV2,
+        StreamFinalityFullPolicyEvidenceProviderV2,
+        StreamFinalityFullPolicyDiscoveryV2
     }
 
     function name(Kind kind) internal pure returns (string memory) {
@@ -279,6 +331,38 @@ library StreamCurrentGraphCreation {
         if (kind == Kind.StreamSplitFactory) return "StreamSplitFactory";
         if (kind == Kind.StreamSystemManifest) return "StreamSystemManifest";
         if (kind == Kind.StreamWorkRecordSelection) return "StreamWorkRecordSelection";
+        if (kind == Kind.StreamStaticSelectionCheckpoint) return "StreamStaticSelectionCheckpoint";
+        if (kind == Kind.StreamStaticContentCheckpoint) return "StreamStaticContentCheckpoint";
+        if (kind == Kind.StreamStaticOutputManifest) return "StreamStaticOutputManifest";
+        if (kind == Kind.StreamScopedSnapshotPublication) return "StreamScopedSnapshotPublication";
+        if (kind == Kind.StreamScopedReferencePublication) {
+            return "StreamScopedReferencePublication";
+        }
+        if (kind == Kind.StreamScopedRenderCriticalInventory) {
+            return "StreamScopedRenderCriticalInventory";
+        }
+        if (kind == Kind.StreamScopedBundleArchiveCoverage) {
+            return "StreamScopedBundleArchiveCoverage";
+        }
+        if (kind == Kind.StreamFinalityEntropyPolicySourceFactoryV2) {
+            return "StreamFinalityEntropyPolicySourceFactoryV2";
+        }
+        if (kind == Kind.StreamFinalityScopedEntropyPolicySourceFactoryV2) {
+            return "StreamFinalityScopedEntropyPolicySourceFactoryV2";
+        }
+        if (kind == Kind.StreamPolicyPublicationFactoryV2) {
+            return "StreamPolicyPublicationFactoryV2";
+        }
+        if (kind == Kind.StreamScopedPolicyPublicationFactoryV2) {
+            return "StreamScopedPolicyPublicationFactoryV2";
+        }
+        if (kind == Kind.StreamFinalityFullPolicyEvidenceProviderV2) {
+            return "StreamFinalityFullPolicyEvidenceProviderV2";
+        }
+        if (kind == Kind.StreamFinalityFullPolicyDiscoveryV2) {
+            return "StreamFinalityFullPolicyDiscoveryV2";
+        }
+
         revert("unknown original product template");
     }
 
@@ -358,6 +442,45 @@ library StreamCurrentGraphCreation {
         if (kind == Kind.StreamSchemaRegistry) return type(StreamSchemaRegistry).creationCode;
         if (kind == Kind.StreamWorkRecordSelection) {
             return type(StreamWorkRecordSelection).creationCode;
+        }
+        if (kind == Kind.StreamStaticSelectionCheckpoint) {
+            return type(StreamStaticSelectionCheckpoint).creationCode;
+        }
+        if (kind == Kind.StreamStaticContentCheckpoint) {
+            return type(StreamStaticContentCheckpoint).creationCode;
+        }
+        if (kind == Kind.StreamStaticOutputManifest) {
+            return type(StreamStaticOutputManifest).creationCode;
+        }
+        if (kind == Kind.StreamScopedSnapshotPublication) {
+            return type(StreamScopedSnapshotPublication).creationCode;
+        }
+        if (kind == Kind.StreamScopedReferencePublication) {
+            return type(StreamScopedReferencePublication).creationCode;
+        }
+        if (kind == Kind.StreamScopedRenderCriticalInventory) {
+            return type(StreamScopedRenderCriticalInventory).creationCode;
+        }
+        if (kind == Kind.StreamScopedBundleArchiveCoverage) {
+            return type(StreamScopedBundleArchiveCoverage).creationCode;
+        }
+        if (kind == Kind.StreamFinalityEntropyPolicySourceFactoryV2) {
+            return type(StreamFinalityEntropyPolicySourceFactoryV2).creationCode;
+        }
+        if (kind == Kind.StreamFinalityScopedEntropyPolicySourceFactoryV2) {
+            return type(StreamFinalityScopedEntropyPolicySourceFactoryV2).creationCode;
+        }
+        if (kind == Kind.StreamPolicyPublicationFactoryV2) {
+            return type(StreamPolicyPublicationFactoryV2).creationCode;
+        }
+        if (kind == Kind.StreamScopedPolicyPublicationFactoryV2) {
+            return type(StreamScopedPolicyPublicationFactoryV2).creationCode;
+        }
+        if (kind == Kind.StreamFinalityFullPolicyEvidenceProviderV2) {
+            return type(StreamFinalityFullPolicyEvidenceProviderV2).creationCode;
+        }
+        if (kind == Kind.StreamFinalityFullPolicyDiscoveryV2) {
+            return type(StreamFinalityFullPolicyDiscoveryV2).creationCode;
         }
         revert("unknown original product template");
     }

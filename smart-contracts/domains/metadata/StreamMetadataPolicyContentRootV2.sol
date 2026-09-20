@@ -39,6 +39,12 @@ import {
     StreamPolicyContentRootSchemasV2 as Schemas
 } from "../finality/StreamPolicyContentRootSchemasV2.sol";
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
+import {
+    IStreamPolicyPublicationGraphBindingV2 as GraphBinding
+} from "../../interfaces/stream/finality/IStreamPolicyPublicationGraphBindingV2.sol";
+import {
+    StreamMetadataPolicyPublicationGraphReadsV2 as PublicationGraph
+} from "./StreamMetadataPolicyPublicationGraphReadsV2.sol";
 import "./StreamMetadataSubjects.sol";
 import "./StreamMetadataRenderer.sol";
 
@@ -87,7 +93,7 @@ library StreamMetadataPolicyContentRootV2 {
         StreamMetadataRenderer.requireValidUtf8ContentUri(
             "contentRootManifestURI", p.manifestURI, 2048, false
         );
-        Route memory route = _route(ctx);
+        Route memory route = _route(ctx, p.collectionId);
         if (
             _word(
                         ctx.core,
@@ -230,7 +236,11 @@ library StreamMetadataPolicyContentRootV2 {
         return Stored.state().bindings[hash];
     }
 
-    function _route(Original.Context memory ctx) private view returns (Route memory r) {
+    function _route(Original.Context memory ctx, uint256 collectionId)
+        private
+        view
+        returns (Route memory r)
+    {
         r.finality = _selected(ctx.core, keccak256("ARTWORK_FINALITY_REGISTRY"), 100_000);
         if (
             _address(
@@ -335,27 +345,50 @@ library StreamMetadataPolicyContentRootV2 {
                         r.readGas
                     ) != r.schemas
         ) revert R.InvalidContentRootPublication();
-        if (
-            _word(
+        uint256 factoryCapability = _word(
+            r.provider,
+            abi.encodeCall(IERC165.supportsInterface, (type(GraphBinding).interfaceId)),
+            r.readGas
+        );
+        if (factoryCapability > 1) revert R.InvalidContentRootPublication();
+        if (factoryCapability == 1) {
+            bytes32 manifestCodeHash;
+            (r.manifest, manifestCodeHash) = PublicationGraph.output(
+                PublicationGraph.Context(
                     r.provider,
-                    abi.encodeCall(IERC165.supportsInterface, (type(Provider).interfaceId)),
-                    r.readGas
-                ) != 1
-        ) {
-            revert R.InvalidContentRootPublication();
-        }
-        r.manifest =
-            _address(r.provider, abi.encodeCall(Provider.policyOutputManifestV2, ()), r.readGas);
-        _pin(
-            r.manifest,
-            bytes32(
-                _word(
-                    r.provider,
-                    abi.encodeCall(Provider.policyOutputManifestV2CodeHash, ()),
+                    ctx.core,
+                    r.metadata,
+                    address(this),
+                    r.schemas,
+                    collectionId,
                     r.readGas
                 )
-            )
-        );
+            );
+            _pin(r.manifest, manifestCodeHash);
+        } else {
+            if (
+                _word(
+                        r.provider,
+                        abi.encodeCall(IERC165.supportsInterface, (type(Provider).interfaceId)),
+                        r.readGas
+                    ) != 1
+            ) {
+                revert R.InvalidContentRootPublication();
+            }
+            r.manifest = _address(
+                r.provider, abi.encodeCall(Provider.policyOutputManifestV2, ()), r.readGas
+            );
+            _pin(
+                r.manifest,
+                bytes32(
+                    _word(
+                        r.provider,
+                        abi.encodeCall(Provider.policyOutputManifestV2CodeHash, ()),
+                        r.readGas
+                    )
+                )
+            );
+        }
         address checkpoint =
             _address(r.manifest, abi.encodeCall(M.contentCheckpoint, ()), r.readGas);
         r.checkpoint = checkpoint;
