@@ -9,6 +9,9 @@ import {
 import {
     StreamSchemaDocumentStore as Store
 } from "../../../smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol";
+import {
+    StreamReferenceModeManifestAdoption as Integrity
+} from "../../../smart-contracts/domains/preservation/StreamReferenceModeManifestAdoption.sol";
 
 interface MetricBytesVm {
     function etch(address, bytes calldata) external;
@@ -49,6 +52,10 @@ contract MetricBytesProbe {
         return Fast.requireIntact(manifests[key]);
     }
 
+    function fixedIntact(bytes32 key) external view returns (bytes32) {
+        return Integrity.requireIntact(manifests[key]);
+    }
+
     function pointer(bytes32 key, uint256 index) external view returns (address) {
         return manifests[key].pointers[index];
     }
@@ -71,7 +78,7 @@ contract MetricBytesProbe {
     }
 
     function readAndMutate(bytes32 key) external returns (bytes32 h) {
-        h = Fast.requireIntact(manifests[key]);
+        h = Integrity.requireIntact(manifests[key]);
         ++attemptedWrites;
     }
 }
@@ -102,6 +109,7 @@ contract StreamReferenceMetricBytesTest {
         require(keccak256(probe.original(key)) == keccak256(expected));
         require(keccak256(probe.current(key)) == keccak256(expected));
         require(probe.intact(key) == keccak256(expected));
+        require(probe.fixedIntact(key) == keccak256(expected));
         require(
             probe.fingerprint(key) == before_ && probe.beforeCanary() == 123
                 && probe.afterCanary() == 456
@@ -113,9 +121,12 @@ contract StreamReferenceMetricBytesTest {
             address(probe).staticcall(abi.encodeCall(probe.original, (key)));
         (bool newOk, bytes memory newError) =
             address(probe).staticcall(abi.encodeCall(probe.current, (key)));
+        (bool fixedOk, bytes memory fixedError) =
+            address(probe).staticcall(abi.encodeCall(probe.fixedIntact, (key)));
         require(
             !oldOk && !newOk && keccak256(oldError) == keccak256(expected)
-                && keccak256(newError) == keccak256(expected)
+                && keccak256(newError) == keccak256(expected) && !fixedOk
+                && keccak256(fixedError) == keccak256(expected)
         );
     }
 
@@ -151,6 +162,8 @@ contract StreamReferenceMetricBytesTest {
                 address(local).staticcall(abi.encodeCall(local.original, (KEY)));
             (bool newOk, bytes memory b) =
                 address(local).staticcall(abi.encodeCall(local.current, (KEY)));
+            (bool fixedOk, bytes memory c) =
+                address(local).staticcall(abi.encodeCall(local.fixedIntact, (KEY)));
             bytes memory expected = kind <= 4 || kind == 8
                 ? abi.encodeWithSelector(Original.InvalidSnapshotManifest.selector)
                 : abi.encodeWithSelector(
@@ -159,7 +172,8 @@ contract StreamReferenceMetricBytesTest {
                 );
             require(
                 !oldOk && !newOk && keccak256(a) == keccak256(expected)
-                    && keccak256(b) == keccak256(expected)
+                    && keccak256(b) == keccak256(expected) && !fixedOk
+                    && keccak256(c) == keccak256(expected)
             );
         }
     }

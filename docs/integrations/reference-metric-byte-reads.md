@@ -69,3 +69,8 @@ as passing. An actual retry needs its own exact predecessor overlay and evidence
 
 The earlier [compact transport](reference-metric-compact.md) evidence is retained
 at its original source boundary.
+
+The later [canonical Publication input](reference-metric-publication-input.md)
+keeps these byte checks while changing the metric-only Current interpretation
+and moving its final integrity check to the existing fixed manifest worker.
+Its separate source, parity and capacity qualifications are recorded there.
