@@ -42,6 +42,8 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
 
     function setUp() public override {
         super.setUp();
+        // This producer explicitly captures current full output; no real Registry proof is claimed here.
+        _optInCurrentCitationAdmissionBoundary();
         inventory = new StreamCollectionTokenInventory(
             address(core), address(executor), _gas("TOKEN_INVENTORY_CORE_READ_GAS", 100000)
         );

@@ -5,6 +5,11 @@ This authored family starts from integration
 the original STATIC renderer. Native execution remains pending; an ABI check
 establishes source compatibility, not a runtime pass or STATIC conformance.
 
+The current source now explicitly admits the separate
+[current citation profile](current-citation-recipe-join.md) after the real mint.
+Original admission and captured evidence at the source above remain historical;
+new current-profile vectors and literal JSON checks do not replace that evidence.
+
 ## Original graph and authority
 
 The [fixture](../../test/helpers/CurrentStaticTokenRenderingFixture.sol) inherits
@@ -85,6 +90,8 @@ URI. Core tokenURI is also checked against the Router JSON envelope; that check
 is surface consistency, not a separate independent serializer oracle. Production
 previews supply signing inputs only. The helper restores the record hash after
 checking its zeroed-field commitment, preserving the caller's in-memory record.
+Current JSON must equal original historical output plus one independently literal
+work citation. HTML and executable context retain their original bytes.
 
 ## Admission caveat and remaining acceptance
 
@@ -96,6 +103,11 @@ corpus or institutional evidence. Existing genesis fixture sources are
 unchanged. See [STATIC routing](static-metadata-routing.md),
 [renderer versions](static-renderer-versions.md) and
 [Artist display](artist-static-display.md) for the relevant source contracts.
+The separate current admission adds three paid-token vectors (compact JSON,
+URI and full JSON), with explicitly synthetic analysis and the original partial
+read list plus the current encoder selector. Pending vectors use the real minted
+token with no seed; direct Renderer mode 2 evidence does not authorize the
+Router's full pending view, which still refuses until entropy is finalized.
 
 A coordinated native capture must include this exact five-case host through
 the existing [acceptance wrapper](../../tools/development/run_current_acceptance.py),

@@ -2,6 +2,12 @@
 pragma solidity ^0.8.19;
 import { StreamRendererV1 } from "../../smart-contracts/domains/metadata/StreamRendererV1.sol";
 import {
+    IStreamCurrentCitationRegistry as TypedCitationRegistry
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRegistry.sol";
+import {
+    IStreamCurrentCitationRenderer as TypedCitationRenderer
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRenderer.sol";
+import {
     IStreamStaticMetadataRouter as S
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
 import {
@@ -129,13 +135,18 @@ contract StaticRouteAttribution {
     }
 }
 
-/// @dev Admitted-version storage boundary only. The actual registry gate has its own tests.
+/// @dev Explicit typed admission boundary, never a real Registry/analysis/golden proof.
+/// Original admission is constructor-bound; current callers must opt in separately.
 contract StaticRouteVersions {
+    address private immutable boundaryController = msg.sender;
     address public governanceAuthority;
     address public schemaRegistry;
     V.Registration private registered;
     V.Version private saved;
     bytes32 public key;
+    bool public currentCitationBoundaryEnabled;
+    address private currentEncoding;
+    bytes32 private currentEncodingHash;
 
     constructor(address executor, address schemas, address renderer) {
         governanceAuthority = executor;
@@ -180,6 +191,48 @@ contract StaticRouteVersions {
     function requireRetained(bytes32 k) external view returns (address, bytes32) {
         require(k == key);
         return (saved.renderer, saved.runtimeHash);
+    }
+
+    function optInCurrentCitationBoundary(bytes32 profile, bytes4 selector, bytes32 runtime)
+        external
+    {
+        require(
+            msg.sender == boundaryController && !currentCitationBoundaryEnabled,
+            "explicit one-time fixture opt-in"
+        );
+        if (
+            profile != keccak256("6529STREAM_CURRENT_BASE_CITATION_V1")
+                || selector != TypedCitationRenderer.renderCurrent.selector
+                || runtime != saved.runtimeHash || runtime != saved.renderer.codehash
+                || !StreamRendererV1(saved.renderer)
+                    .supportsInterface(type(TypedCitationRenderer).interfaceId)
+                || TypedCitationRenderer(saved.renderer).currentCitationProfile() != profile
+        ) revert TypedCitationRegistry.InvalidCurrentCitation();
+        (currentEncoding, currentEncodingHash) =
+            TypedCitationRenderer(saved.renderer).encodingBinding();
+        require(
+            currentEncoding.code.length != 0 && currentEncoding.codehash == currentEncodingHash,
+            "exact fixed encoder boundary"
+        );
+        currentCitationBoundaryEnabled = true;
+    }
+
+    function requireCurrentCitation(bytes32 k)
+        external
+        view
+        returns (address, bytes32, bytes32, bytes4)
+    {
+        if (
+            k != key || !currentCitationBoundaryEnabled
+                || saved.renderer.codehash != saved.runtimeHash
+                || currentEncoding.codehash != currentEncodingHash
+        ) revert TypedCitationRegistry.CurrentCitationUnavailable(k);
+        return (
+            saved.renderer,
+            saved.runtimeHash,
+            keccak256("6529STREAM_CURRENT_BASE_CITATION_V1"),
+            TypedCitationRenderer.renderCurrent.selector
+        );
     }
 
     function deprecate() external {
@@ -309,6 +362,15 @@ abstract contract StaticMetadataRoutingFixture is CharacterizationTestBase, Offi
     function _activate() internal {
         bytes32 key = router.setDefaultMetadataConfig(_input(R.MetadataMode.ONCHAIN, false));
         router.activateStaticMetadata(1, key);
+    }
+
+    /// @dev Opt in only in tests intentionally using current output. No registry evidence is fabricated.
+    function _optInCurrentCitationAdmissionBoundary() internal {
+        versions.optInCurrentCitationBoundary(
+            keccak256("6529STREAM_CURRENT_BASE_CITATION_V1"),
+            TypedCitationRenderer.renderCurrent.selector,
+            address(renderer).codehash
+        );
     }
 
     function _mint() internal {

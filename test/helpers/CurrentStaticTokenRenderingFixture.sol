@@ -32,6 +32,7 @@ import { IStreamCoreMint } from "../../smart-contracts/interfaces/stream/core/IS
 import {
     StreamStaticRenderEncoding
 } from "../../smart-contracts/domains/metadata/StreamStaticRenderEncoding.sol";
+import { StreamRendererV1 } from "../../smart-contracts/domains/metadata/StreamRendererV1.sol";
 
 import {
     IStreamArtistContentAuthority
@@ -41,6 +42,12 @@ import {
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistContentTypes.sol";
 import { Strings } from "../../smart-contracts/vendor/openzeppelin/Strings.sol";
 import { Base64 } from "../../smart-contracts/vendor/openzeppelin/Base64.sol";
+import {
+    IStreamCurrentCitationRegistry as TokenCitationRegistry
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRegistry.sol";
+import {
+    IStreamCurrentCitationRenderer as TokenCitationRenderer
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRenderer.sol";
 
 interface StaticTokenVm {
     function expectCall(address target, bytes calldata data) external;
@@ -102,6 +109,297 @@ abstract contract CurrentStaticTokenRenderingFixture is
     bytes internal constant STATIC_TOKEN_DATA = hex"00ff6529";
     uint256 internal constant PRICE = 1000;
 
+    /// @dev Explicit opt-in: construction remains unadmitted for the citation refusal suite.
+    function _admitStaticTokenCitation(bytes32 seed, bool finalized) internal {
+        _admitTokenCitation(
+            rendering.versions,
+            rendering.renderer,
+            declaredReads,
+            _targets(),
+            _tokenCitationRequest(seed, finalized),
+            _literalContext(seed, initialRecord.recordHash, finalized)
+        );
+    }
+
+    function _tokenCitationRequest(bytes32 seed, bool finalized)
+        internal
+        view
+        returns (Render.RenderRequest memory)
+    {
+        return Render.RenderRequest(
+            address(core),
+            1,
+            2,
+            1,
+            seed,
+            !finalized
+                ? Render.TokenRenderState.PENDING_RANDOMNESS
+                : initialRecord.config.frozen
+                    ? Render.TokenRenderState.FROZEN
+                    : Render.TokenRenderState.ACTIVE,
+            initialRecord.config.mode,
+            0,
+            0,
+            0,
+            0,
+            initialRecord.recordHash
+        );
+    }
+
+    function _installTokenCitationPolicy(address versions) private {
+        GovernanceActionPolicyEntry[] memory rows = new GovernanceActionPolicyEntry[](1);
+        rows[0] = _policy(versions, TokenCitationRegistry.registerCurrentCitation.selector);
+        StreamGovernanceCatalogStagePlan.Inventory memory inventory =
+            StreamGovernanceCatalogStagePlan.inventory(executor, rows);
+        (address payload, StreamSystemManifestUpdate memory update) =
+            _publication("token lifecycle current citation policy");
+        (GenesisBatch memory batch, uint256 count) = StreamGovernanceCatalogStagePlan.nextBatch(
+            inventory,
+            StreamGovernanceCatalogStagePlan.inventoryHash(inventory),
+            0,
+            manifest,
+            payload,
+            update
+        );
+        require(count == 1, "one exact current citation selector policy");
+        _executeStage(batch, keccak256(abi.encode("token citation policy", versions)));
+    }
+
+    /// @dev Real Schema/Executor/Registry join, with explicit synthetic analysis. The three
+    /// new vectors use a real paid token and literal delta on historical output, never renderCurrent.
+    function _admitTokenCitation(
+        StreamRendererRegistryModule versions,
+        StreamRendererV1 renderer,
+        Versions.Read[] memory originalReads,
+        Versions.Target[] memory targets,
+        Render.RenderRequest memory request,
+        string memory literalContext
+    ) internal {
+        require(
+            core.totalSupply() == 1 && core.lastAllocatedTokenId() == 1
+                && request.core == address(core) && request.tokenId == 1
+                && request.collectionId == 2 && request.collectionSerial == 1
+                && request.metadataSnapshotHash == initialRecord.recordHash
+                && keccak256(core.tokenData(1)) == keccak256(STATIC_TOKEN_DATA),
+            "current vectors bind actual paid token, not original empty golden"
+        );
+        _installTokenCitationPolicy(address(versions));
+        bytes32 oldVersion = keccak256(abi.encode(versions.version(versionKey)));
+        bytes32 oldGoldenDocument = versions.registration(versionKey).goldenDocument;
+        bytes32 oldGoldenHash = keccak256(assemblySchemas.documentBytes(oldGoldenDocument));
+        TokenCitationRegistry.CurrentRegistration memory r;
+        r.versionKey = versionKey;
+        r.profile = keccak256("6529STREAM_CURRENT_BASE_CITATION_V1");
+        r.selector = TokenCitationRenderer.renderCurrent.selector;
+        (r.encoding, r.encodingRuntimeHash) = renderer.encodingBinding();
+        Versions.Read[] memory reads_ = new Versions.Read[](originalReads.length + 1);
+        for (uint256 i; i < originalReads.length; ++i) {
+            reads_[i] = originalReads[i];
+        }
+        uint16 encoder;
+        bool found;
+        for (uint16 i; i < targets.length; ++i) {
+            if (targets[i].target == r.encoding) {
+                require(!found, "unique fixed encoder target");
+                found = true;
+                encoder = i;
+            }
+        }
+        require(found, "new selector uses original target roster");
+        reads_[originalReads.length] = Versions.Read(
+            encoder, StreamStaticRenderEncoding.renderCurrent.selector, 16777216, false
+        );
+        for (uint256 i = 1; i < reads_.length; ++i) {
+            for (uint256 j = i; j > 0 && _readOrder(reads_[j - 1]) > _readOrder(reads_[j]); --j) {
+                (reads_[j - 1], reads_[j]) = (reads_[j], reads_[j - 1]);
+            }
+        }
+        bytes32 readHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_RENDERER_READ_SET_V1"), keccak256(abi.encode(targets)), reads_
+            )
+        );
+        TokenCitationRegistry.CurrentAnalysis memory analysis = TokenCitationRegistry.CurrentAnalysis(
+            keccak256("6529STREAM_CURRENT_BASE_CITATION_ANALYSIS_ABI_V1"),
+            r.profile,
+            r.selector,
+            address(renderer),
+            address(renderer).codehash,
+            r.encoding,
+            r.encodingRuntimeHash,
+            readHash,
+            versions.version(versionKey).registrationHash,
+            keccak256("SYNTHETIC FIXTURE: no transitive opcode analysis executed"),
+            keccak256("SYNTHETIC FIXTURE: original partial roster plus current encoding selector"),
+            true
+        );
+        r.analysisDocument = _document(
+            "TOKEN_CURRENT_CITATION_ANALYSIS_FIXTURE",
+            Schema.DocumentKind.CATALOG,
+            abi.encode(analysis)
+        );
+        TokenCitationRegistry.CurrentGoldenVector[] memory vectors =
+            new TokenCitationRegistry.CurrentGoldenVector[](3);
+        string memory oldJSON = renderer.renderView(request, 0);
+        string memory oldFull = renderer.renderView(request, 2);
+        string memory json = _insertTokenCitation(oldJSON, literalContext);
+        string memory full = _insertTokenCitation(oldFull, literalContext);
+        vectors[0] = TokenCitationRegistry.CurrentGoldenVector(request, 0, keccak256(bytes(json)));
+        vectors[1] = TokenCitationRegistry.CurrentGoldenVector(
+            request,
+            1,
+            keccak256(
+                bytes(string.concat("data:application/json;base64,", Base64.encode(bytes(json))))
+            )
+        );
+        vectors[2] = TokenCitationRegistry.CurrentGoldenVector(request, 2, keccak256(bytes(full)));
+        r.goldenDocument = _document(
+            "TOKEN_CURRENT_CITATION_PAID_GOLDEN_FIXTURE",
+            Schema.DocumentKind.CATALOG,
+            abi.encode(vectors)
+        );
+        require(r.goldenDocument != oldGoldenDocument, "separate exact current profile evidence");
+        (bytes32 scope, bytes32 previous, bytes32 next) =
+            versions.currentCitationTransition(r, reads_);
+        bytes memory data =
+            abi.encodeCall(TokenCitationRegistry.registerCurrentCitation, (r, reads_));
+        vm.recordLogs();
+        _executeStage(
+            _single(
+                StreamCurrentStackPlan.call(address(versions), data, scope, previous, next), data
+            ),
+            keccak256(abi.encode("token lifecycle current citation", r, reads_))
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        TokenCitationRegistry.CurrentRecord memory saved =
+            versions.currentCitationRecord(versionKey);
+        bytes32 registrationHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CURRENT_CITATION_REGISTRATION_V1"),
+                block.chainid,
+                address(versions),
+                address(assemblySchemas),
+                address(assemblySchemas).codehash,
+                keccak256(abi.encode(targets)),
+                versions.version(versionKey).registrationHash,
+                r,
+                reads_
+            )
+        );
+        require(
+            saved.registrationHash == registrationHash && saved.readSetHash == readHash
+                && saved.analysisHash == keccak256(abi.encode(analysis))
+                && saved.goldenHash == keccak256(abi.encode(vectors)) && saved.actionId != 0
+                && keccak256(abi.encode(saved.registration)) == keccak256(abi.encode(r))
+                && keccak256(abi.encode(versions.currentCitationReads(versionKey)))
+                    == keccak256(abi.encode(reads_)),
+            "independent complete current citation record and reads"
+        );
+        _oneTokenEvent(
+            logs,
+            address(versions),
+            keccak256(
+                "CurrentCitationRegistered(uint16,bytes32,address,bytes32,bytes32,(bytes32,bytes32,bytes4,address,bytes32,bytes32,bytes32),(uint16,bytes4,uint32,bool)[])"
+            ),
+            versionKey,
+            bytes32(uint256(uint160(address(renderer)))),
+            saved.actionId,
+            abi.encode(uint16(1), registrationHash, r, reads_)
+        );
+        (address selected, bytes32 runtime, bytes32 profile_, bytes4 selector) =
+            versions.requireCurrentCitation(versionKey);
+        require(
+            selected == address(renderer) && runtime == address(renderer).codehash
+                && profile_ == r.profile && selector == r.selector,
+            "exact current route admitted"
+        );
+        require(
+            oldVersion == keccak256(abi.encode(versions.version(versionKey)))
+                && oldGoldenDocument == versions.registration(versionKey).goldenDocument
+                && oldGoldenHash == keccak256(assemblySchemas.documentBytes(oldGoldenDocument))
+                && keccak256(bytes(renderer.renderView(request, 0))) == keccak256(bytes(oldJSON))
+                && keccak256(bytes(renderer.renderView(request, 2))) == keccak256(bytes(oldFull)),
+            "historical original admission, golden bytes and outputs preserved"
+        );
+    }
+
+    function _tokenWorkCitation() internal view returns (string memory) {
+        return string.concat(
+            "eip155:",
+            block.chainid.toString(),
+            "/erc721:",
+            uint256(uint160(address(core))).toHexString(20),
+            "/1"
+        );
+    }
+
+    function _literalCurrentTokenContext(string memory historical)
+        internal
+        view
+        returns (string memory)
+    {
+        bytes memory source = bytes(historical);
+        require(
+            source.length != 0 && source[source.length - 1] == bytes1("}"), "literal context object"
+        );
+        bytes memory prefix = new bytes(source.length - 1);
+        for (uint256 i; i < prefix.length; ++i) {
+            prefix[i] = source[i];
+        }
+        return string.concat(string(prefix), ',"citation":"', _tokenWorkCitation(), '"}');
+    }
+
+    /// @dev Test-only byte insertion. Never calls the production citation helper/current renderer.
+    function _insertTokenCitation(string memory historical, string memory literalContext)
+        internal
+        view
+        returns (string memory)
+    {
+        require(!_has(historical, '"citation"'), "historical entry has no current disclosure");
+        bytes memory source = bytes(historical);
+        bytes memory needle = bytes(literalContext);
+        bytes memory replacement = bytes(_literalCurrentTokenContext(literalContext));
+        uint256 at;
+        uint256 matches;
+        for (uint256 i; i + needle.length <= source.length; ++i) {
+            bool same = true;
+            for (uint256 j; j < needle.length; ++j) {
+                if (source[i + j] != needle[j]) {
+                    same = false;
+                    break;
+                }
+            }
+            if (same) {
+                at = i;
+                ++matches;
+            }
+        }
+        require(matches == 1, "one independently literal historical context");
+        bytes memory result = new bytes(source.length + replacement.length - needle.length);
+        for (uint256 i; i < at; ++i) {
+            result[i] = source[i];
+        }
+        for (uint256 i; i < replacement.length; ++i) {
+            result[at + i] = replacement[i];
+        }
+        for (uint256 i = at + needle.length; i < source.length; ++i) {
+            result[i + replacement.length - needle.length] = source[i];
+        }
+        return string(result);
+    }
+
+    function _assertTokenCitationDelta(string memory json, string memory literalContext)
+        internal
+        view
+    {
+        string memory historical = router.historicalFullTokenMetadataJSON(address(core), 1);
+        require(
+            keccak256(bytes(json))
+                == keccak256(bytes(_insertTokenCitation(historical, literalContext))),
+            "current full JSON differs from original historical output only by literal citation"
+        );
+    }
+
     function _constructStaticTokenRendering() internal {
         keys.push(0x652901);
         keys.push(0x652902);
@@ -146,7 +444,7 @@ abstract contract CurrentStaticTokenRenderingFixture is
             address(router),
             abi.encodeCall(
                 router.setCollectionMetadata,
-                (2, "STATIC Study", "Exact current token", "ipfs://static-image", "")
+                (2, "STATIC Study", "Exact current token", _staticTokenImageURI(), "")
             )
         );
         _governToken(address(router), abi.encodeCall(router.setCollectionScript, (2, PROGRAM)));
@@ -218,6 +516,10 @@ abstract contract CurrentStaticTokenRenderingFixture is
             ),
             keccak256(data)
         );
+    }
+
+    function _staticTokenImageURI() internal pure virtual returns (string memory) {
+        return "ipfs://static-image";
     }
 
     function _raiseTokenGas(address target, bytes32 id, uint256 next) internal {
@@ -876,6 +1178,7 @@ abstract contract CurrentStaticTokenRenderingFixture is
             "independent complete literal HTML"
         );
         string memory json = router.tokenJSON(1);
+        _assertTokenCitationDelta(json, _literalContext(seed, config, true));
         require(
             _has(
                 json,
@@ -890,7 +1193,7 @@ abstract contract CurrentStaticTokenRenderingFixture is
             "independent output header and full animation bytes"
         );
         require(
-            _has(json, _literalContext(seed, config, true))
+            _has(json, _literalCurrentTokenContext(_literalContext(seed, config, true)))
                 && _has(json, '"token_data_base64":"AP9lKQ=="')
                 && _has(json, '"render_mode":"full"') && _has(json, '"state":"artist_accepted"')
                 && _has(json, '"artist_display_name":"STATIC Artist"')

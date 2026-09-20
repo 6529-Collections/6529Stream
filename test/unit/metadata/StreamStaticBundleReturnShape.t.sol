@@ -21,6 +21,11 @@ contract StaticBundleDependencyAdmin {
 /// @notice Actual Metadata/bundle store/DependencyRegistry/Renderer. The inherited Core, Artist,
 /// version admission and governance boundaries remain explicit; this is not current-stack acceptance.
 contract StreamStaticBundleReturnShapeTest is StaticMetadataRoutingFixture {
+    function setUp() public override {
+        super.setUp();
+        _optInCurrentCitationAdmissionBoundary();
+    }
+
     DependencyRegistry private dependency;
     bytes32 private constant KEY = keccak256("static bundle return-shape library");
 
@@ -153,6 +158,7 @@ contract StreamStaticBundleReturnShapeTest is StaticMetadataRoutingFixture {
         );
         renderer = new StreamRendererV1(d);
         versions = new StaticRouteVersions(address(executor), address(schemas), address(renderer));
+        _optInCurrentCitationAdmissionBoundary();
         modules = new StaticRouteModules(address(metadata), address(versions));
         core.setPointer(keccak256("MODULE_REGISTRY"), address(modules));
         string[] memory chunks = new string[](2);

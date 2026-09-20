@@ -65,6 +65,11 @@ contract C2PARenderSourceBoundary {
 /// @notice Actual Renderer/Encoding/Router/Metadata with explicit inherited Core, Artist,
 /// governance and version-admission boundaries. No C2PA cryptographic validation is claimed.
 contract StreamStaticC2PARenderingTest is StaticMetadataRoutingFixture {
+    function setUp() public override {
+        super.setUp();
+        _optInCurrentCitationAdmissionBoundary();
+    }
+
     function testOriginalCompanionNeverAddsC2PAFields() public {
         require(!renderer.c2paAttributionEnabled());
         _activate();
@@ -183,6 +188,7 @@ contract StreamStaticC2PARenderingTest is StaticMetadataRoutingFixture {
         renderer = new StreamRendererV1(d);
         require(renderer.c2paAttributionEnabled());
         versions = new StaticRouteVersions(address(executor), address(schemas), address(renderer));
+        _optInCurrentCitationAdmissionBoundary();
         modules = new StaticRouteModules(address(metadata), address(versions));
         core.setPointer(keccak256("MODULE_REGISTRY"), address(modules));
     }

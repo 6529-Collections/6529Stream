@@ -10,6 +10,11 @@ import {
 
 /// @dev Uses actual fixed formatter and renderer; shared governance/Core/Artist boundaries remain explicit.
 contract StreamStaticFormattingTransportTest is StaticMetadataRoutingFixture {
+    function setUp() public override {
+        super.setUp();
+        _optInCurrentCitationAdmissionBoundary();
+    }
+
     function testPureFormatterRuntimePinAndExactRestoration() public {
         _activate();
         _mint();

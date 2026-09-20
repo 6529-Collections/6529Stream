@@ -11,13 +11,29 @@ contract StreamCurrentStaticTokenRenderingTest is CurrentStaticTokenRenderingFix
 
     function testActualSafeMintPendingThenLiteralFinalizedOutputAndWrongCoreRefusal() public {
         _mintToken();
+        _admitStaticTokenCitation(0, false);
         string memory pending = router.tokenMetadataJSON(address(core), 1);
         require(
             _has(pending, '"metadata_state":"pending"') && _has(pending, '"animation_url":""')
                 && _has(pending, '"token_data_base64":"AP9lKQ=="') && !_has(pending, '"seed":')
                 && !_has(pending, '"hash":')
-                && _has(pending, _literalContext(0, initialRecord.recordHash, false)),
+                && _has(
+                    pending,
+                    _literalCurrentTokenContext(_literalContext(0, initialRecord.recordHash, false))
+                ),
             "literal pending output never invents seed"
+        );
+        require(
+            keccak256(bytes(pending))
+                == keccak256(
+                    bytes(
+                        _insertTokenCitation(
+                            rendering.renderer.renderView(_tokenCitationRequest(0, false), 0),
+                            _literalContext(0, initialRecord.recordHash, false)
+                        )
+                    )
+                ),
+            "pending current JSON adds only original-work citation"
         );
         vm.expectRevert(abi.encodeWithSignature("TokenEntropyNotFinalized(uint256)", 1));
         router.tokenHTML(1);
@@ -35,10 +51,24 @@ contract StreamCurrentStaticTokenRenderingTest is CurrentStaticTokenRenderingFix
         _assertOutput(seed, initialRecord.recordHash, "active");
         string memory market = router.tokenMetadataJSON(address(core), 1);
         require(
-            _has(market, _literalContext(seed, initialRecord.recordHash, true))
-                && _has(market, '"render_mode":"marketplace"')
-                && _has(market, '"state":"artist_accepted"'),
+            _has(
+                market,
+                _literalCurrentTokenContext(_literalContext(seed, initialRecord.recordHash, true))
+            ) && _has(market, '"render_mode":"marketplace"')
+            && _has(market, '"state":"artist_accepted"'),
             "actual marketplace uses original STATIC output"
+        );
+        require(
+            keccak256(bytes(market))
+                == keccak256(
+                    bytes(
+                        _insertTokenCitation(
+                            router.historicalTokenMetadataJSON(address(core), 1),
+                            _literalContext(seed, initialRecord.recordHash, true)
+                        )
+                    )
+                ),
+            "finalized current marketplace adds only original-work citation"
         );
         require(
             keccak256(bytes(core.tokenURI(1)))
@@ -54,6 +84,7 @@ contract StreamCurrentStaticTokenRenderingTest is CurrentStaticTokenRenderingFix
     function testCapturedDefaultPreservesMintedTokenWhileFreshCollectionGetsNewDefault() public {
         _mintToken();
         bytes32 seed = _revealToken();
+        _admitStaticTokenCitation(seed, true);
         StaticRouter.ConfigInput memory next = _input();
         next.config.mode = Render.MetadataMode.OFFCHAIN;
         next.config.baseURI = "https://static.example/new/";
@@ -99,6 +130,7 @@ contract StreamCurrentStaticTokenRenderingTest is CurrentStaticTokenRenderingFix
     function testActualArtistConsentWrongAuthorityWrongModuleStaleInputAndExactRetry() public {
         _mintToken();
         bytes32 seed = _revealToken();
+        _admitStaticTokenCitation(seed, true);
         StaticRouter.ConfigInput memory next = _input();
         next.config.mode = Render.MetadataMode.HYBRID;
         next.config.baseURI = "https://static.example/token/";
@@ -194,6 +226,7 @@ contract StreamCurrentStaticTokenRenderingTest is CurrentStaticTokenRenderingFix
     function testOriginalBurnKeepsFullStaticIdentityAndRefusesERC721Output() public {
         _mintToken();
         bytes32 seed = _revealToken();
+        _admitStaticTokenCitation(seed, true);
         vm.recordLogs();
         _tokenSafe(tokenBuyer, address(core), 0, abi.encodeCall(core.burn, (uint256(1))));
         Vm.Log[] memory logs = vm.getRecordedLogs();
@@ -283,6 +316,7 @@ contract StreamCurrentStaticTokenRenderingTest is CurrentStaticTokenRenderingFix
             "one original callback and sale consumption"
         );
         bytes32 seed = _revealToken();
+        _admitStaticTokenCitation(seed, true);
         _assertOutput(seed, initialRecord.recordHash, "active");
     }
 }

@@ -133,6 +133,14 @@ abstract contract CurrentC2PATokenLifecycleFixture is CurrentStaticTokenRenderin
             assemblyMetadata.registerTokenSubject(1) == tokenSubject,
             "literal original token subject"
         );
+        _admitTokenCitation(
+            c2paVersions,
+            c2pa.renderer,
+            c2paReads,
+            _c2paTargets(),
+            _tokenCitationRequest(seed, true),
+            _c2paContext()
+        );
     }
 
     function _c2paTargets() internal view returns (Versions.Target[] memory targets) {
@@ -1251,8 +1259,10 @@ abstract contract CurrentC2PATokenLifecycleFixture is CurrentStaticTokenRenderin
             "independent full C2PA token HTML"
         );
         string memory json = router.tokenJSON(1);
+        _assertTokenCitationDelta(json, _c2paContext());
         require(
-            _has(json, _c2paContext()) && _has(json, '"artist_display_name":"STATIC Artist"')
+            _has(json, _literalCurrentTokenContext(_c2paContext()))
+                && _has(json, '"artist_display_name":"STATIC Artist"')
                 && _has(json, '"state":"artist_accepted"')
                 && _has(json, '"token_data_base64":"AP9lKQ=="')
                 && _has(

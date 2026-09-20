@@ -3,6 +3,11 @@ pragma solidity ^0.8.19;
 import "../../helpers/StaticMetadataRoutingFixture.sol";
 
 contract StreamStaticMetadataRoutingTest is StaticMetadataRoutingFixture {
+    function setUp() public override {
+        super.setUp();
+        _optInCurrentCitationAdmissionBoundary();
+    }
+
     function testFrozenDefaultCannotChangeButCapturesEachNewActivation() public {
         S.ConfigInput memory input = _input(R.MetadataMode.ONCHAIN, true);
         input.config.frozen = true;

@@ -7,6 +7,11 @@ credentials, selected-verifier records, report adoption and standing-conflict
 disposition to a paid, revealed current Core token. **Native execution is
 pending.** ABI compatibility does not establish a runtime or capacity pass.
 
+The current-source [citation follow-up](current-citation-recipe-join.md) adds
+explicit admission for this family's own C2PA Renderer/Registry after mint and
+reveal. Its three new paid-token output vectors remain separate from the original
+empty golden and from the immutable source capture above.
+
 ## Actual producers and explicit evidence limits
 
 The [new fixture](../../test/helpers/CurrentC2PATokenLifecycleFixture.sol) keeps
@@ -107,6 +112,9 @@ Expected JSON distinguishes current validity/authorship, stale reports,
 standing adverse evidence and acknowledged history, while retaining the actual
 Artist attribution. Production previews are used for signing or governance
 inputs; they do not supply expected output strings or record commitments.
+Each current full JSON result must also equal the corresponding historical full
+JSON plus one literal original-work citation. Original HTML/context bytes and
+every existing C2PA validity, authorship and standing-conflict assertion remain.
 
 The inherited fixture uses explicit governed Router/Core frames of 16/24 million
 gas and an 8-million optional renderer attribution frame. This successor adds
