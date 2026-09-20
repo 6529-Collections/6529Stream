@@ -145,6 +145,16 @@ the release policy in `docs/release-policy.md`.
   cross-slice and rollback regressions. Native execution, current-stack
   composition, gas checks and release evidence remain pending.
 
+## Additive ERC20 commerce deployment plans
+
+- Add ordinary construction and read-only activation helpers for Payment,
+  Universal fixed, same-leaf Price and canonical Dutch, preserving the original
+  37-product genesis. Retain exact constructor/runtime/dependency metadata.
+- Plan original Registry/catalog admission and actual phase policy consent with
+  explicit Manager owner/Safe versus Executor routing. No broadcasts performed.
+- Author thirteen focused product/Registry/Manager/Safe cases; the 517-source
+  ABI/type check passes. Focused runtime and full activation remain pending.
+
 ## Standard ERC20 Dutch sales
 
 - Add a separate fixed-schedule Dutch carrier using the original 24-field Sales
