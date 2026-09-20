@@ -9,6 +9,9 @@ the release policy in `docs/release-policy.md`.
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
   live provenance semantics, exact analysis and golden-evidence requirements.
+- Accept original mode-2 Artist policy consent during Manager registration and
+  executor grace rotation, retaining exact recorded evidence and current mint
+  authority checks. Delegated Safe regression recipes await native execution.
 
 - Add consent-gated mint executor policy rotations with bounded predecessor
   grace through an additive Manager capability. Preserve current authority,

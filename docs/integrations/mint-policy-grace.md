@@ -42,6 +42,13 @@ The original method still supplies zero grace on a real executor change.
    original emitters and meanings. Failure rolls back the executor set,
    Manager hash, Ledger registration and events together.
 
+For mode-2 bindings, the original
+[delegated policy-consent ceremony](artist-delegated-consent.md) can supply the
+exact record. Revoking or exhausting that grant stops new records; it does not
+erase an already-recorded exact consent. Manager still checks current Artist
+mint authority at registration and execution. Modes 1 and 2 use recorded
+consent; mode 3 retains its separate platform declaration checks.
+
 Supply an absolute Unix timestamp in seconds. Ledger enforces
 `graceUntil <= block.timestamp + 2_592_000` at execution. Account for the
 governance delay when choosing it. A nonzero deadline in the past is accepted
@@ -89,7 +96,9 @@ actual Manager, Ledger and ticket gate with explicit typed Core, Artist and
 governance boundaries. [Current Safe cases](../../test/current/StreamCurrentMintPolicyGrace.t.sol)
 join the original Core, Artist, Ledger, gate and governance products, including
 two delayed Governor updates, old ticket expiry and exact failed-batch retry.
-These cases are authored and ABI/type checked; native execution, Manager and
-fallback runtime size, gas measurements and complete candidate acceptance
-remain pending the coordinator's matched-source run. See the
-[batch evidence note](../../ops/MINT_POLICY_GRACE_ACCEPTANCE.md).
+These cases are authored and ABI/type checked. The bounded size repair and its
+exact source are recorded in the [batch evidence note](../../ops/MINT_POLICY_GRACE_ACCEPTANCE.md).
+The separate [mode-2 batch](../../ops/MINT_MODE2_CONSENT_ACCEPTANCE.md) adds actual
+delegated registration/grace, stale-policy rejection and durable-consent retry
+cases. Native test execution, gas measurements and complete candidate acceptance
+remain pending the coordinator's matched-source run.

@@ -86,9 +86,9 @@ abstract contract CurrentMintPolicyGraceFixture is StreamCurrentSafeGovernanceFi
             bytes32[] memory ids,
             IStreamMintManager.MintCounterConfig[] memory counters
         ) = _graceTerms();
-        _recordFixturePolicy(GRACE_PHASE, _gracePolicy(new address[](0)));
+        _recordGracePolicy(_gracePolicy(new address[](0)));
         manager.configurePhase(1, GRACE_PHASE, config, gate, ids, counters);
-        _recordFixturePolicy(GRACE_PHASE, _gracePolicy(_graceExecutors(1)));
+        _recordGracePolicy(_gracePolicy(_graceExecutors(1)));
         manager.setPhaseExecutor(1, GRACE_PHASE, address(graceMintSafe), true);
     }
 
@@ -198,6 +198,11 @@ abstract contract CurrentMintPolicyGraceFixture is StreamCurrentSafeGovernanceFi
         return manager.previewPhasePolicyHash(1, GRACE_PHASE, config, gate, ids, counters, enabled);
     }
 
+    /// @dev Derived scenarios choose an original direct or delegated Artist producer.
+    function _recordGracePolicy(bytes32 policy) internal virtual {
+        _recordFixturePolicy(GRACE_PHASE, policy);
+    }
+
     function _rotationRequest(address changed, bool allowed, uint64 deadline)
         internal
         view
@@ -221,7 +226,7 @@ abstract contract CurrentMintPolicyGraceFixture is StreamCurrentSafeGovernanceFi
         returns (bytes32 policy)
     {
         policy = _gracePolicy(enabled);
-        _recordFixturePolicy(GRACE_PHASE, policy);
+        _recordGracePolicy(policy);
         _govern(_rotationRequest(changed, allowed, deadline));
         require(manager.phasePolicyHash(1, GRACE_PHASE) == policy, "consented exact rotated policy");
         artists.requireMintConsent(1, GRACE_PHASE, policy);

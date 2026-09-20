@@ -56,8 +56,10 @@ library StreamMintArtistConsent {
             ),
             (uint8)
         );
-        // Mode3 supplies the immutable declaration as evidence; it does not fabricate an Artist signature.
-        if (mode != 1 && mode != 3) revert UnsupportedArtistConsentMode(collectionId, mode);
+        // Modes1/2 require the exact recorded consent; Mode3 supplies its immutable declaration.
+        if (mode != 1 && mode != 2 && mode != 3) {
+            revert UnsupportedArtistConsentMode(collectionId, mode);
+        }
         if (
             mode == 3
                 && !abi.decode(
