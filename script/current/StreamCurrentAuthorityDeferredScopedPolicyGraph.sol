@@ -114,6 +114,7 @@ abstract contract StreamCurrentAuthorityDeferredScopedPolicyGraph is
         returns (bytes memory)
     {
         require(scopedGraphFactory == address(0), "fresh deferred original graph");
+        bytes32 originalHash = keccak256(abi.encode(original));
         _deployCurrentAuthorityScopedSourcePrefix();
         scopedGraphOriginal = original;
         string[2] memory names = [
@@ -127,8 +128,12 @@ abstract contract StreamCurrentAuthorityDeferredScopedPolicyGraph is
             );
         }
         ScopedConfig.Config memory scoped;
-        scoped.targets = original.targets;
-        scoped.codeHashes = original.codeHashes;
+        // Memory-to-memory fixed arrays alias. Populate the fresh scoped arrays before
+        // replacing scoped roles so the original tuple and native inventory hash stay paired.
+        for (uint256 i; i < 22; ++i) {
+            scoped.targets[i] = original.targets[i];
+            scoped.codeHashes[i] = original.codeHashes[i];
+        }
         scoped.targets[8] = sourceScopedSnapshots;
         scoped.targets[9] = sourceScopedReference;
         scoped.targets[18] = scopedSourceLate[0];
@@ -163,6 +168,10 @@ abstract contract StreamCurrentAuthorityDeferredScopedPolicyGraph is
             graphGas: _scopedPolicyGraphGas().graphGas,
             configurationHash: bytes32(0)
         });
+        require(
+            keccak256(abi.encode(original)) == originalHash,
+            "scoped preparation preserves complete native constructor tuple"
+        );
         return abi.encode(original, scoped, scopedGraphBinding);
     }
 

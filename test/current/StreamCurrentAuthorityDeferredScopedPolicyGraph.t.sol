@@ -41,6 +41,27 @@ contract StreamCurrentAuthorityDeferredScopedPolicyGraphTest is
                 && capability.scopedHash == keccak256(abi.encode(scopedGraphV1)),
             "fixed original profile capabilities"
         );
+        DeferredNativeConfig.Config memory native = assemblyProvider.nativeConfiguration();
+        require(
+            keccak256(abi.encode(native)) == keccak256(abi.encode(scopedGraphOriginal))
+                && native.targets[8] == address(assemblySnapshots)
+                && native.targets[9] == address(assemblyReference)
+                && native.targets[18] == address(assemblyInventory)
+                && native.targets[19] == address(assemblyBundle),
+            "native provider retains its original hosts and exact inventory dependency hash"
+        );
+        uint256[4] memory scopedRoles = [uint256(8), 9, 18, 19];
+        for (uint256 i; i < scopedRoles.length; ++i) {
+            uint256 role = scopedRoles[i];
+            require(
+                native.targets[role] != scopedGraphV1.targets[role], "distinct native/scoped hosts"
+            );
+            require(
+                native.codeHashes[role] == native.targets[role].codehash
+                    && scopedGraphV1.codeHashes[role] == scopedGraphV1.targets[role].codehash,
+                "independent exact native/scoped runtime pins"
+            );
+        }
         _activateAssemblyArtwork();
         _pending(provider);
         require(
@@ -121,10 +142,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyGraphTest is
         require(
             sources.finalitySourceConfigurationHash() == fixedHash
                 && keccak256(
-                        abi.encode(
-                            sources.finalitySourceProfile(0), sources.finalitySourceProfile(1)
-                        )
-                    ) == firstTwo,
+                    abi.encode(sources.finalitySourceProfile(0), sources.finalitySourceProfile(1))
+                ) == firstTwo,
             "fixed capability and unrelated catalogue profiles remain exact"
         );
         (bool ok, bytes memory data) = address(provider)
