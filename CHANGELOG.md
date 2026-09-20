@@ -15,6 +15,19 @@
   consumption maps. Typed writer/producer and full publication acceptance remain
   separate; see the [state boundary](docs/integrations/view-content-root-state.md).
 
+## Explicit preservation checkpoint and output evidence
+
+- Add separate COLLECTION and TOKEN/RELEASE/SEASON checkpoints for admitted
+  non-sanction preservation output, with complete original membership and policy
+  checks, exact producer bindings and governed admission retained per token.
+- Add covered manifests and new byte definitions without changing existing
+  full-output profiles. Every member retains its actual admitted producer and
+  selected renderer, supporting complete heterogeneous scopes without sampling.
+- The [consumer guide](docs/integrations/preservation-policy-consumers-v1.md)
+  records the new ABI and remaining root, snapshot, reference, inventory and
+  provider joins. ABI-only checks pass; native, capacity and actual ceremony
+  acceptance remain pending.
+
 ## Metric context hashing without the full temporary copy
 
 - Reserve a bounded prefix beside the original immutable publication bytes and
