@@ -1,7 +1,8 @@
 import type { Address, Hex } from "../src/generated/contracts.js";
 import { currentArtistOperationTypedData, normalizeCurrentArtistAction, normalizeCurrentArtistOperationRequest,
   prepareCurrentArtistAction, type CurrentArtistOperationRequest, type CurrentArtistContentFreeze,
-  type CurrentArtistSaleConsent, type PreparedCurrentArtistAction } from "../src/current-artist-operation.js";
+  type CurrentArtistSaleConsent, type PreparedCurrentArtistAction, type CurrentArtistIdentityRevision,
+  type CurrentArtistDelegationGrant, type CurrentArtistDelegationRevocation } from "../src/current-artist-operation.js";
 
 declare const address: Address;
 declare const hash: Hex;
@@ -46,3 +47,37 @@ plan.call.data = hash;
 // @ts-expect-error full requests retain the discriminator/message association
 const wrong: CurrentArtistOperationRequest = { ...request, message: sale };
 void wrong;
+
+declare const revision: CurrentArtistIdentityRevision;
+declare const grant: CurrentArtistDelegationGrant;
+declare const revocation: CurrentArtistDelegationRevocation;
+const revisionRequest: CurrentArtistOperationRequest<"identityRevision"> = {
+  ...request, kind: "identityRevision", message: revision,
+  details: { identityRecordURI: "ipfs://identity", document: hash, displayName: "Artist" },
+};
+const revisionPlan = prepareCurrentArtistAction(revisionRequest);
+const signedAt: bigint = revisionPlan.payload.message.signedAt;
+const grantPlan = prepareCurrentArtistAction({ ...request, kind: "delegationGrant", message: grant });
+const maximum: bigint = grantPlan.payload.message.maxUses;
+prepareCurrentArtistAction({ ...request, kind: "delegationRevocation", message: revocation });
+void signedAt; void maximum;
+// @ts-expect-error revision uses signedAt, never an added signed deadline
+currentArtistOperationTypedData("identityRevision", 1n, address, { ...revision, deadline: 1n });
+// @ts-expect-error revision uint64 signedAt remains bigint
+currentArtistOperationTypedData("identityRevision", 1n, address, { ...revision, signedAt: 1 });
+// @ts-expect-error grant's artist locator is not an original signed field
+currentArtistOperationTypedData("delegationGrant", 1n, address, { ...grant, artistId: hash });
+// @ts-expect-error grant's forced authorization time is not a signed field
+currentArtistOperationTypedData("delegationGrant", 1n, address, { ...grant, time: 0n });
+// @ts-expect-error original grant capabilities are exact uint32 bigint
+currentArtistOperationTypedData("delegationGrant", 1n, address, { ...grant, capabilities: 117 });
+// @ts-expect-error revision requires original document/URI/name supplemental data
+prepareCurrentArtistAction({ ...revisionRequest, details: {} });
+// @ts-expect-error document bytes are hex, not an uncommitted JavaScript byte array
+prepareCurrentArtistAction({ ...revisionRequest, details: { ...revisionRequest.details, document: new Uint8Array() } });
+// @ts-expect-error grant cannot carry a caller-supplied authorization time
+prepareCurrentArtistAction({ ...request, kind: "delegationGrant", message: grant, details: { time: 1n } });
+// @ts-expect-error revised supplementary text is immutable after preparation
+revisionPlan.request.details.displayName = "changed";
+// @ts-expect-error revocation's message differs from the three-field authorization revocation target
+currentArtistOperationTypedData("delegationRevocation", 1n, address, { artistId: hash, revokedDigest: hash, revokedNonce: 0n, nonce: 1n, deadline: 1n });

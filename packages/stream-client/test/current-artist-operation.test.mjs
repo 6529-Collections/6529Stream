@@ -206,3 +206,158 @@ test('existing scalar Artist acceptance payload retains its independent original
     ['address','uint256','uint64','bytes32','bytes32','uint256','uint64'], [core,collectionId,2n,h(201),h(300),nonce,deadline]);
   assert.equal(currentArtistTypedData('artistAcceptance', chainId, registry, message).digest, typed(structHash));
 });
+
+const identityDocument = '0x7b226e616d65223a22417274697374227d';
+const identityMessages = {
+  identityRevision: { artistId, previousRecordHash: h(401), revisedRecordHash: keccak256(identityDocument), nonce, signedAt: (1n << 63n) + 1n },
+  delegationGrant: { core, delegate: a(405), collectionId: 0n, capabilities: 117n, notBefore: 0n,
+    expiresAt: (1n << 64n) - 1n, maxUses: 0n, constraintsHash: ZeroHash, nonce },
+  delegationRevocation: { artistId, delegate: a(405), delegationRecordHash: h(406), reasonHash: ZeroHash, nonce, deadline },
+};
+function identityRequest(kind, changes = {}) {
+  return { kind, chainId, registry, caller, signer, artistId, mode: 'signature', signature: '0x4321',
+    message: structuredClone(identityMessages[kind]), details: kind === 'identityRevision'
+      ? { identityRecordURI: 'ipfs://identity-🖼', document: identityDocument, displayName: 'Artist' } : {}, ...changes };
+}
+
+test('identity revision, grant and revocation reproduce the original scalar preimages independently', () => {
+  const revision = identityMessages.identityRevision, grant = identityMessages.delegationGrant, revoke = identityMessages.delegationRevocation;
+  const expected = {
+    identityRevision: body('StreamArtistIdentityRevision(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,uint256 nonce,uint64 signedAt)',
+      ['bytes32','bytes32','bytes32','uint256','uint64'], [artistId,revision.previousRecordHash,revision.revisedRecordHash,nonce,revision.signedAt],
+      '0xbfb7a5d3bc248c8eefbe4f8dfc2ea7d75d18c5cb3f2ab0d56000fd87f4b58603'),
+    delegationGrant: body('StreamArtistDelegation(address core,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash,uint256 nonce)',
+      ['address','address','uint256','uint32','uint64','uint64','uint64','bytes32','uint256'],
+      [core,grant.delegate,0n,117n,0n,grant.expiresAt,0n,ZeroHash,nonce],
+      '0x259b01d4bf9aa04d6f900a2f85548eebdbb07661fdf1eac68031895cadae6d0d'),
+    delegationRevocation: body('StreamArtistDelegationRevocation(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash,uint256 nonce,uint64 deadline)',
+      ['bytes32','address','bytes32','bytes32','uint256','uint64'], [artistId,revoke.delegate,revoke.delegationRecordHash,ZeroHash,nonce,deadline]),
+  };
+  for (const [kind, structHash] of Object.entries(expected)) {
+    const payload = currentArtistOperationTypedData(kind, chainId, registry, identityMessages[kind]);
+    assert.equal(payload.digest, typed(structHash));
+    assert.notEqual(payload.digest, typed(structHash, chainId + 1n));
+    assert.notEqual(payload.digest, typed(structHash, chainId, signer));
+    assert.equal(payload.domain.name, '6529StreamArtistRegistry');
+    assert.equal(payload.domain.version, '1');
+  }
+});
+
+test('three identity calls retain compiler tuples, grant time zero and supplemental revision arguments', () => {
+  const revision = identityMessages.identityRevision, grant = identityMessages.delegationGrant, revoke = identityMessages.delegationRevocation;
+  const details = identityRequest('identityRevision').details;
+  const rows = [
+    ['identityRevision', 25n, 'recordIdentityRevision', 'identityRevisionDigest', [artistId,revision.previousRecordHash,revision.revisedRecordHash,details.identityRecordURI], revision.signedAt, [identityDocument,details.displayName]],
+    ['delegationGrant', 26n, 'grantArtistDelegation', 'delegationGrantDigest', [artistId,grant.delegate,0n,117n,0n,grant.expiresAt,0n,ZeroHash], 0n, []],
+    ['delegationRevocation', 27n, 'revokeArtistDelegation', 'delegationRevocationDigest', [artistId,revoke.delegate,revoke.delegationRecordHash,ZeroHash], deadline, []],
+  ];
+  const local = new Interface(CURRENT_ARTIST_OPERATION_ABI);
+  for (const [kind, operationId, method, digestMethod, terms, time, tail] of rows) {
+    const plan = prepareCurrentArtistAction(identityRequest(kind));
+    assert.equal(plan.operationId, operationId); assert.equal(plan.method, method); assert.equal(plan.digestMethod, digestMethod);
+    assert.deepEqual(plan.call, { to: registry, value: 0n, data: compiled.encodeFunctionData(method, [terms,[nonce,time,'0x4321'],...tail]) });
+    assert.deepEqual(plan.digestCall, { to: registry, value: 0n, data: compiled.encodeFunctionData(digestMethod, [terms,[nonce,time,'0x']]) });
+    assert.equal(local.getFunction(method).format('minimal'), compiled.getFunction(method).format('minimal'));
+    assert.equal(local.getFunction(digestMethod).format('minimal'), compiled.getFunction(digestMethod).format('minimal'));
+  }
+});
+
+test('direct revision zero stays a submitted sentinel and never claims an observed execution digest', () => {
+  const message = { ...identityMessages.identityRevision, signedAt: 0n };
+  const direct = prepareCurrentArtistAction(identityRequest('identityRevision', { caller: signer, mode: 'direct', signature: '0x', message }));
+  assert.equal(direct.payload.message.signedAt, 0n);
+  assert.equal(compiled.decodeFunctionData(direct.method, direct.call.data)[1].time, 0n);
+  assert.equal(compiled.decodeFunctionData(direct.digestMethod, direct.digestCall.data)[1].time, 0n);
+  const observed = currentArtistOperationTypedData('identityRevision', chainId, registry, { ...message, signedAt: 123n });
+  assert.notEqual(observed.digest, direct.payload.digest);
+  assert.throws(() => prepareCurrentArtistAction(identityRequest('identityRevision', { message })), /positive signedAt/);
+  assert.throws(() => prepareCurrentArtistAction(identityRequest('identityRevision', { message, signature: '0x' })), /positive signedAt/);
+  const explicitDirect = prepareCurrentArtistAction(identityRequest('identityRevision', { caller: signer, mode: 'direct', signature: '0x', message: { ...message, signedAt: 123n } }));
+  assert.equal(explicitDirect.payload.digest, observed.digest); // Actual block-time equality belongs to workflow/simulation.
+  const empty1271 = prepareCurrentArtistAction(identityRequest('identityRevision', { signature: '0x' }));
+  assert.equal(empty1271.request.mode, 'signature');
+});
+
+test('revision document is committed while URI and display name remain original supplemental text', () => {
+  const first = prepareCurrentArtistAction(identityRequest('identityRevision'));
+  const changed = prepareCurrentArtistAction(identityRequest('identityRevision', {
+    details: { identityRecordURI: '', document: identityDocument, displayName: 'Other display' },
+  }));
+  assert.equal(first.payload.digest, changed.payload.digest); assert.notEqual(first.call.data, changed.call.data);
+  const changedNameOnly = prepareCurrentArtistAction(identityRequest('identityRevision', {
+    details: { ...first.request.details, displayName: 'Other display' },
+  }));
+  assert.equal(first.digestCall.data, changedNameOnly.digestCall.data);
+  assert.notEqual(first.call.data, changedNameOnly.call.data);
+  const make = (document, details = {}) => prepareCurrentArtistAction(identityRequest('identityRevision', {
+    message: { ...identityMessages.identityRevision, revisedRecordHash: keccak256(document) },
+    details: { identityRecordURI: '', document, displayName: 'x', ...details },
+  }));
+  make('0xff'); make(`0x${'01'.repeat(8192)}`, { identityRecordURI: 'é'.repeat(1024), displayName: 'é'.repeat(128) });
+  for (const document of ['0x', `0x${'01'.repeat(8193)}`]) assert.throws(() => make(document), /1\.\.8192/);
+  assert.throws(() => prepareCurrentArtistAction(identityRequest('identityRevision', { details: { ...first.request.details, document: '0xff' } })), /revisedRecordHash/);
+  for (const details of [{ identityRecordURI: 'é'.repeat(1025) }, { displayName: '' }, { displayName: 'é'.repeat(129) }, { displayName: '\udc00' }, { identityRecordURI: '\ud800' }]) assert.throws(() => make('0xff', details));
+  assert.throws(() => currentArtistOperationTypedData('identityRevision', chainId, registry, {
+    ...identityMessages.identityRevision, previousRecordHash: identityMessages.identityRevision.revisedRecordHash,
+  }), /change the document/);
+});
+
+test('grant artist locator is call-bound outside the permanent digest and cannot smuggle a deadline', () => {
+  const first = prepareCurrentArtistAction(identityRequest('delegationGrant'));
+  const other = prepareCurrentArtistAction(identityRequest('delegationGrant', { artistId: h(499) }));
+  assert.equal(first.payload.digest, other.payload.digest);
+  assert.notEqual(first.call.data, other.call.data);
+  assert.notEqual(first.digestCall.data, other.digestCall.data);
+  assert.equal(compiled.decodeFunctionData(other.method, other.call.data)[0].artistId, h(499));
+  assert.equal(compiled.decodeFunctionData(first.method, first.call.data)[1].time, 0n);
+  for (const field of ['artistId','deadline','signedAt','time']) assert.throws(() => currentArtistOperationTypedData('delegationGrant', chainId, registry, {
+    ...identityMessages.delegationGrant, [field]: field === 'artistId' ? artistId : 1n,
+  }), /unexpected fields/);
+  assert.throws(() => prepareCurrentArtistAction(identityRequest('delegationGrant', { details: { deadline: 1n } })), /unexpected fields/);
+});
+
+test('grant accepts original global, unlimited and zero constraints cases while enforcing capability and window widths', () => {
+  const make = overrides => prepareCurrentArtistAction(identityRequest('delegationGrant', { message: { ...identityMessages.delegationGrant, ...overrides } }));
+  for (const capabilities of [1n,4n,16n,32n,64n,117n]) make({ capabilities });
+  make({ collectionId: (1n << 256n) - 1n, maxUses: (1n << 64n) - 1n, nonce: (1n << 256n) - 1n });
+  make({ collectionId: 0n, maxUses: 0n, constraintsHash: ZeroHash, nonce: 0n });
+  for (const capabilities of [0n,2n,8n,128n,1n << 32n,117]) assert.throws(() => make({ capabilities }));
+  for (const changes of [{ notBefore: 10n, expiresAt: 10n }, { notBefore: 11n, expiresAt: 10n }, { maxUses: 1n << 64n },
+    { notBefore: 1n << 64n }, { expiresAt: 1n << 64n }, { expiresAt: 4 }, { collectionId: 1 }, { delegate: ZeroAddress }, { delegate: signer }]) assert.throws(() => make(changes));
+  make({ notBefore: 0n, expiresAt: 1n }); // Expiry relative to now is a live guard, not a local clock guess.
+});
+
+test('delegation revocation retains stored-grantor execution claim and admits a zero reason hash', () => {
+  const formerGrantor = a(900), direct = prepareCurrentArtistAction(identityRequest('delegationRevocation', {
+    signer: formerGrantor, caller: formerGrantor, mode: 'direct', signature: '0x',
+  }));
+  assert.equal(direct.request.signer, formerGrantor); assert.equal(direct.payload.message.reasonHash, ZeroHash);
+  assert.equal(compiled.decodeFunctionData(direct.method, direct.call.data)[0].delegationRecordHash, h(406));
+  assert.equal(compiled.decodeFunctionData(direct.method, direct.call.data)[1].time, deadline);
+  // The pure packet does not replace the stored grantor with an assumed current authority.
+  prepareCurrentArtistAction(identityRequest('delegationRevocation', { signer: formerGrantor, signature: '0x' }));
+  assert.throws(() => prepareCurrentArtistAction(identityRequest('delegationRevocation', { artistId: h(499) })), /locator/);
+  assert.throws(() => prepareCurrentArtistAction(identityRequest('identityRevision', { artistId: h(499) })), /locator/);
+  for (const key of ['artistId','delegationRecordHash']) assert.throws(() => currentArtistOperationTypedData('delegationRevocation', chainId, registry, { ...identityMessages.delegationRevocation, [key]: ZeroHash }), /nonzero/);
+});
+
+test('three identity families snapshot all inputs and reject altered plans or lossy integer coercion', () => {
+  for (const kind of Object.keys(identityMessages)) {
+    const input = identityRequest(kind), plan = prepareCurrentArtistAction(input);
+    assert.deepEqual(normalizeCurrentArtistAction(plan), plan);
+    input.message.nonce = 0n; input.signer = a(901);
+    assert.equal(plan.request.message.nonce, nonce);
+    assert.throws(() => { plan.request.message.nonce = 0n; }, TypeError);
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan, operationId: 54n }), /reconstruction/);
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan, call: { ...plan.call, data: plan.digestCall.data } }), /reconstruction/);
+    for (const value of [1,-1n,1n << 256n]) assert.throws(() => currentArtistOperationTypedData(kind, chainId, registry, { ...identityMessages[kind], nonce: value }));
+  }
+  for (const signedAt of [1,-1n,1n << 64n]) assert.throws(() => currentArtistOperationTypedData('identityRevision', chainId, registry, { ...identityMessages.identityRevision, signedAt }));
+  for (const value of [1,-1n,1n << 64n]) assert.throws(() => currentArtistOperationTypedData('delegationRevocation', chainId, registry, { ...identityMessages.delegationRevocation, deadline: value }));
+  const input = identityRequest('identityRevision'), plan = prepareCurrentArtistAction(input);
+  input.details.displayName = 'mutated'; input.details.document = '0xff';
+  assert.equal(plan.request.details.document, identityDocument); assert.equal(plan.request.details.displayName, 'Artist');
+  assert.throws(() => { plan.request.details.displayName = 'mutated'; }, TypeError);
+  const detached = structuredClone(plan), fresh = normalizeCurrentArtistAction(detached);
+  detached.request.details.identityRecordURI = 'changed'; assert.notEqual(fresh.request.details.identityRecordURI, detached.request.details.identityRecordURI);
+});

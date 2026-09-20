@@ -40,3 +40,19 @@ capture.action.request.caller = address;
 capture.replay.nonceConsumed = false;
 // @ts-expect-error receipt event references are immutable
 receipt.events.push({ address, event: "fake", logIndex: 0, transactionHash: hash, blockHash: hash });
+
+// The dated effective digest is block-specific, separate from the submitted payload.
+const effectiveTime: bigint = capture.timing.effectiveTime;
+const effectiveDigest: Hex = receipt.effectiveDigest;
+const timeKind: "deadline" | "dated" | "nonce-only" = capture.timing.kind;
+const operativeDocument: Hex | undefined = capture.revision?.operativeDocumentHash;
+const grantor: Address | undefined = capture.delegation?.grantor;
+const grantUses: bigint | undefined = capture.delegation?.uses;
+void effectiveTime; void effectiveDigest; void timeKind; void operativeDocument; void grantor; void grantUses;
+// @ts-expect-error observed effective timing is immutable
+capture.timing.effectiveTime = 1n;
+// @ts-expect-error retained delegation terms are immutable
+capture.delegation!.grant.maxUses = 99n;
+// @ts-expect-error a prepared capture cannot promise signing-time zero is the mined digest
+const guaranteed: "submitted-digest-always-executed" = capture.timing.kind;
+void guaranteed;

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { AbiCoder, Interface, ZeroHash, concat, getAddress, id, keccak256 } from "ethers";
+import { AbiCoder, Interface, ZeroHash, concat, getAddress, hexlify, id, keccak256, toUtf8Bytes } from "ethers";
 import { currentArtistOperationTypedData, prepareCurrentArtistAction, CURRENT_ARTIST_OPERATION_ABI } from "../dist/current-artist-operation.js";
 
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/current-artist-operation-current-abi.json", import.meta.url), "utf8"));
@@ -57,7 +57,7 @@ test("Artist operation fixture retains exact ABI49 provenance and original sourc
   assert.equal(fixture.inputSha256, "d72aaf4b8dd4af5db39420038b0c0655a85161071d11a8dc8c9e00f9bc372b64");
   assert.equal(fixture.outputSha256, "e21d5c31e1e10904cacc6577f27c3e036ac25d7c1999f8817d0b9cc6549fe15d");
   assert.equal(Object.keys(fixture.sourceHashes).length, 298);
-  assert.equal(Object.keys(fixture.sourceTexts).length, 6);
+  assert.equal(Object.keys(fixture.sourceTexts).length, 11);
   for (const [path, literal] of Object.entries(fixture.sourceTexts)) {
     assert.equal(createHash("sha256").update(literal).digest("hex"), fixture.sourceHashes[path]);
   }
@@ -146,4 +146,76 @@ test("unsigned refusal URI stays in reviewed calldata while locks are hashed as 
   const reversed = { ...samples.contentFreeze, lockClasses: [...samples.contentFreeze.lockClasses].reverse() };
   assert.notEqual(originalDigest(originals.contentFreeze[1], reversed), freeze.payload.digest);
   assert.throws(() => currentArtistOperationTypedData("contentFreeze", chainId, registry, reversed), /strictly increasing/);
+});
+
+const identityDocument = hexlify(toUtf8Bytes('{"artist":"original","version":2}'));
+const identitySamples = {
+  identityRevision: { artistId, previousRecordHash: id("operative original document"), revisedRecordHash: keccak256(identityDocument), nonce, signedAt: (1n << 63n) + 31n },
+  delegationGrant: { core, delegate: address(51), collectionId: 0n, capabilities: 117n, notBefore: 1n, expiresAt: deadline, maxUses: 0n, constraintsHash: ZeroHash, nonce },
+  delegationRevocation: { artistId, delegate: address(51), delegationRecordHash: id("original grant"), reasonHash: ZeroHash, nonce, deadline },
+};
+const identityOriginals = {
+  identityRevision: [25n, "StreamArtistIdentityRevision(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,uint256 nonce,uint64 signedAt)", "recordIdentityRevision", "identityRevisionDigest"],
+  delegationGrant: [26n, "StreamArtistDelegation(address core,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash,uint256 nonce)", "grantArtistDelegation", "delegationGrantDigest"],
+  delegationRevocation: [27n, "StreamArtistDelegationRevocation(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash,uint256 nonce,uint64 deadline)", "revokeArtistDelegation", "delegationRevocationDigest"],
+};
+function identityRequest(kind) {
+  return { kind, chainId, registry, caller: address(40), signer: address(41), artistId, mode: "signature", signature: "0x123456",
+    message: identitySamples[kind], details: kind === "identityRevision"
+      ? { identityRecordURI: "ipfs://original/identity/é", document: identityDocument, displayName: "Original Artist — 二" } : {} };
+}
+function identityTerms(kind, input) {
+  const m = input.message;
+  switch (kind) {
+    case "identityRevision": return [m.artistId, m.previousRecordHash, m.revisedRecordHash, input.details.identityRecordURI];
+    case "delegationGrant": return [input.artistId, m.delegate, m.collectionId, m.capabilities, m.notBefore, m.expiresAt, m.maxUses, m.constraintsHash];
+    case "delegationRevocation": return [m.artistId, m.delegate, m.delegationRecordHash, m.reasonHash];
+    default: throw Error("Unknown independent identity oracle kind");
+  }
+}
+
+test("identity and delegation schemas match original literal typehashes and source declarations", () => {
+  const texts = Object.values(fixture.sourceTexts).join("\n");
+  for (const [kind, [, declaration]] of Object.entries(identityOriginals)) {
+    if (kind === "identityRevision") assert.ok(texts.includes(`bytes32(${id(declaration)})`));
+    else assert.ok(texts.includes(`"${declaration}"`), declaration);
+    const payload = currentArtistOperationTypedData(kind, chainId, registry, identitySamples[kind]);
+    assert.equal(payload.digest, originalDigest(declaration, identitySamples[kind]));
+    assert.notEqual(payload.digest, originalDigest(declaration, identitySamples[kind], address(99)));
+  }
+});
+
+test("three identity writes retain exact compiler tuples, supplemental bytes and nonce-only grant time", () => {
+  for (const [kind, [operationId, , method, digestMethod]] of Object.entries(identityOriginals)) {
+    const input = identityRequest(kind), prepared = prepareCurrentArtistAction(input), terms = identityTerms(kind, input);
+    const time = kind === "delegationGrant" ? 0n : kind === "identityRevision" ? input.message.signedAt : input.message.deadline;
+    const args = [terms, [nonce, time, input.signature]];
+    if (kind === "identityRevision") args.push(identityDocument, input.details.displayName);
+    assert.equal(prepared.operationId, operationId);
+    assert.deepEqual(prepared.call, { to: registry, value: 0n, data: abi.registry.encodeFunctionData(method, args) });
+    assert.deepEqual(prepared.digestCall, { to: registry, value: 0n,
+      data: abi.registry.encodeFunctionData(digestMethod, [terms, [nonce, time, "0x"]]) });
+  }
+});
+
+test("grant authority locator remains outside its permanent signature while original zero-valued permissions remain exact", () => {
+  const input = identityRequest("delegationGrant"), first = prepareCurrentArtistAction(input);
+  const second = prepareCurrentArtistAction({ ...input, artistId: id("another original identity") });
+  assert.equal(first.payload.digest, second.payload.digest); assert.notEqual(first.call.data, second.call.data);
+  const [terms, authorization] = abi.registry.decodeFunctionData("grantArtistDelegation", first.call.data);
+  assert.equal(terms.artistId, artistId); assert.equal(terms.collectionId, 0n); assert.equal(terms.maxUses, 0n);
+  assert.equal(terms.constraintsHash, ZeroHash); assert.equal(terms.capabilities, 117n); assert.equal(authorization.time, 0n);
+  assert.equal(Object.hasOwn(first.payload.message, "artistId"), false);
+  assert.equal(Object.hasOwn(first.payload.message, "deadline"), false);
+});
+
+test("revision supplements are retained outside signing and submitted zero time is distinct from effective time", () => {
+  const input = identityRequest("identityRevision"), first = prepareCurrentArtistAction(input);
+  const changed = prepareCurrentArtistAction({ ...input, details: { ...input.details, identityRecordURI: "ipfs://other", displayName: "Other label" } });
+  assert.equal(changed.payload.digest, first.payload.digest); assert.notEqual(changed.call.data, first.call.data);
+  const direct = prepareCurrentArtistAction({ ...input, mode: "direct", caller: input.signer, signature: "0x", message: { ...input.message, signedAt: 0n } });
+  assert.equal(direct.payload.digest, originalDigest(identityOriginals.identityRevision[1], direct.request.message));
+  assert.notEqual(direct.payload.digest, originalDigest(identityOriginals.identityRevision[1], { ...direct.request.message, signedAt: 1010n }));
+  assert.equal(abi.registry.decodeFunctionData("recordIdentityRevision", direct.call.data)[1].time, 0n);
+  assert.throws(() => prepareCurrentArtistAction({ ...input, details: { ...input.details, document: "0x01" } }), /document|hash/i);
 });

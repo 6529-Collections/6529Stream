@@ -25,7 +25,17 @@ function request(kind, change = {}) {
   const base = {
     core: A(10), collectionId: 7n, nonce: 1n, deadline: 9999n
   };
+  const document = '0x7b22617274697374223a226e6577227d';
   const messages = {
+    identityRevision: {
+      artistId: artist, previousRecordHash: id('identity'), revisedRecordHash: keccak256(document), nonce: 1n, signedAt: 0n
+    },
+    delegationGrant: {
+      core: A(10), delegate: A(111), collectionId: 0n, capabilities: 117n, notBefore: 1100n, expiresAt: 2000n, maxUses: 0n, constraintsHash: ZeroHash, nonce: 1n
+    },
+    delegationRevocation: {
+      artistId: artist, delegate: A(111), delegationRecordHash: grantHash(defaultGrant()), reasonHash: ZeroHash, nonce: 1n, deadline: 9999n
+    },
     bindingRefusal: {
       ...base, bindingGeneration: 2n, bindingHash: id('binding'), reasonHash: id('reason')
     }, saleConsent: {
@@ -39,11 +49,35 @@ function request(kind, change = {}) {
     }
   };
   return {
-    kind, chainId: d.chainId, registry: d.registry.address, caller: signer, signer, artistId: artist, mode: 'direct', signature: '0x', message: messages[kind], details: kind === 'bindingRefusal' ? { reasonURI: 'ipfs://reviewed-but-not-signed' } : {}, ...change
+    kind, chainId: d.chainId, registry: d.registry.address, caller: signer, signer, artistId: artist, mode: 'direct', signature: '0x', message: messages[kind], details: kind === 'bindingRefusal' ? { reasonURI: 'ipfs://reviewed-but-not-signed' } : kind === 'identityRevision' ? {
+      identityRecordURI: 'ipfs://unsigned-revision-uri', document, displayName: 'Updated Artist'
+    } : {}, ...change
   };
 }
 function binding(q) {
   return [q.artistId, A(101), id('identity'), id('binding'), 2n, 1n, 1n, 0n, A(102), q.kind !== 'bindingRefusal'];
+}
+function defaultGrant() {
+  return {
+    grant: {
+      artistId: artist, delegate: A(111), collectionId: 7n, capabilities: 117n,
+      notBefore: 100n, expiresAt: 900n, maxUses: 2n, constraintsHash: ZeroHash
+    },
+    grantor: signer, nonce: 6n, uses: 2n, revoked: false, revocationRecordHash: ZeroHash
+  };
+}
+function grantHash(record) {
+  const g = record.grant;
+  return keccak256(coder.encode(['bytes32', 'uint256', 'address', 'bytes32', 'address', 'uint256', 'uint32', 'uint64', 'uint64', 'uint64', 'bytes32', 'uint256'], [id('6529STREAM_ARTIST_DELEGATION_RECORD_V1'), d.chainId, A(8), g.artistId, g.delegate, g.collectionId,
+    g.capabilities, g.notBefore, g.expiresAt, g.maxUses, g.constraintsHash, record.nonce]));
+}
+function effectiveDigest(q, time) {
+  if (q.kind !== 'identityRevision' || q.message.signedAt !== 0n) {
+    return pure.prepareCurrentArtistAction(q).payload.digest;
+  }
+  return pure.currentArtistOperationTypedData('identityRevision', q.chainId, q.registry, {
+    ...q.message, signedAt: time
+  }).digest;
 }
 function provider(q, opt = {}) {
   const action = pure.prepareCurrentArtistAction(q);
@@ -129,6 +163,12 @@ function provider(q, opt = {}) {
         case 'acceptedCount':
           value = [0];
           break;
+        case 'operativeIdentityRecord':
+          value = [id('identity')];
+          break;
+        case 'delegationRecord':
+          value = [defaultGrant()];
+          break;
         case 'authorityState':
           value = [q.signer, 1, 1, id('identity')];
           break;
@@ -139,7 +179,11 @@ function provider(q, opt = {}) {
           value = [[false, false, false, false, 1]];
           break;
         default: if (name === action.digestMethod) {
-          value = [action.payload.digest];
+          value = [q.kind === 'identityRevision'
+              ? pure.currentArtistOperationTypedData(q.kind, q.chainId, q.registry, {
+                ...q.message, signedAt: args[1].time
+              }).digest
+              : action.payload.digest];
         }
         else {
           if (name === action.method) {
@@ -167,7 +211,22 @@ function record(c, time) {
   const cl = c.authority.authorityClass;
   const n = m.nonce;
   const common = [d.chainId, A(8)];
+  if (q.kind === 'delegationGrant') {
+    const [grant] = abi.decodeFunctionData(c.action.method, c.action.call.data);
+    return grantHash({
+      grant, nonce: n
+    });
+  }
   const maps = {
+    identityRevision: [
+      ['bytes32', 'uint256', 'address', 'bytes32', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'],
+      ['0x1b7518e9d16da358d15957ec43218eb0b017fbd017e60c75b3126110006034a4', ...common,
+        q.artistId, m.previousRecordHash, m.revisedRecordHash, q.signer, cl, n, m.signedAt === 0n ? time : m.signedAt]
+    ],
+    delegationRevocation: [
+      ['bytes32', 'uint256', 'address', 'bytes32', 'address', 'bytes32', 'address', 'uint8', 'bytes32', 'uint256', 'uint64'],
+      [id('6529STREAM_ARTIST_DELEGATION_REVOCATION_RECORD_V1'), ...common, q.artistId, m.delegate, m.delegationRecordHash, q.signer, 1, m.reasonHash, n, time]
+    ],
     bindingRefusal: [['bytes32', 'uint256', 'address', 'address', 'uint256', 'uint64', 'bytes32', 'bytes32', 'address', 'uint8', 'bytes32', 'uint256', 'uint64'], ['0x61e2c527c98d65328522fa0ac36862f52a59a2035e3e2ca4a0bfd5da13ee95ed', ...common, core, m.collectionId, m.bindingGeneration, m.bindingHash, artist, q.signer, cl, m.reasonHash, n, time]],
     saleConsent: [['bytes32', 'uint256', 'address', 'address', 'address', 'uint256', 'bytes32', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'], [id('6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1'), ...common, m.saleAdapter, core, m.collectionId, m.saleId, m.saleConfigHash, artist, q.signer, cl, n, time]],
     royaltyFreeze: [['bytes32', 'uint256', 'address', 'address', 'uint256', 'bytes32', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'], [id('6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1'), ...common, m.resolver, m.collectionId, m.revenueClass, m.expectedAssignmentHash, artist, q.signer, cl, n, time]],
@@ -185,8 +244,27 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
   const rh = record(c, time);
   const fn = abi.getFunction(c.action.method);
   const [t, auth] = abi.decodeFunctionData(fn, c.action.call.data);
-  const types = q.kind === 'authorizationRevocation' ? [fn.inputs[0], fn.inputs[1], P] : [B, fn.inputs[0], fn.inputs[1], P];
-  const values = q.kind === 'authorizationRevocation' ? [t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']] : [binding(q), t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']];
+  let types = q.kind === 'authorizationRevocation' ? [fn.inputs[0], fn.inputs[1], P] : [B, fn.inputs[0], fn.inputs[1], P];
+  let values = q.kind === 'authorizationRevocation' ? [t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']] : [binding(q), t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']];
+  const effectiveTime = q.kind === 'identityRevision' ? (m.signedAt === 0n ? time : m.signedAt) : time;
+  const digest = effectiveDigest(q, time);
+  const proof = [q.signer, digest, q.mode === 'direct'];
+  if (q.kind === 'identityRevision') {
+    types = [fn.inputs[0], fn.inputs[1], 'bytes', 'string', P, fn.inputs[1]];
+    values = [t, auth, q.details.document, q.details.displayName, proof, [auth.nonce, effectiveTime, auth.signature]];
+  }
+  else {
+    if (q.kind === 'delegationGrant') {
+      types = [fn.inputs[0], fn.inputs[1], P];
+      values = [t, auth, proof];
+    }
+    else {
+      if (q.kind === 'delegationRevocation') {
+        types = [abi.getFunction('delegationRecord').outputs[0], fn.inputs[0], fn.inputs[1], P];
+        values = [c.delegation, t, auth, proof];
+      }
+    }
+  }
   if (['bindingRefusal', 'saleConsent'].includes(q.kind)) {
     types.push(F);
     values.push([artist, q.signer, cl, c.authority.status]);
@@ -195,8 +273,9 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
     types.push('bytes');
     values.push(coder.encode(['address', 'bytes32', 'bytes32', 'bytes32', 'bytes4', 'uint256', 'bytes32'], [A(80), id('registrycode'), id('adaptercode'), id('kind'), '0x12345678', m.collectionId, m.saleConfigHash]));
   }
-  const mask = q.kind === 'authorizationRevocation' ? 4 : q.kind === 'bindingRefusal' ? 21 : 87;
-  const writeMask = q.kind === 'authorizationRevocation' ? 4 : q.kind === 'bindingRefusal' ? 21 : 68;
+  const identityOnly = ['authorizationRevocation', 'identityRevision', 'delegationGrant', 'delegationRevocation'].includes(q.kind);
+  const mask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : 87;
+  const writeMask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : 68;
   const snap = after => domains.map((domain, i) => {
     const written = Boolean(after && (writeMask & (1 << i)));
     return mask & (1 << i) ? [domain, written ? 2 : 1, id('state' + i + written), id('tip' + i + written)] : [ZeroHash, 0, ZeroHash, ZeroHash];
@@ -207,6 +286,15 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
   const eid = keccak256(coder.encode(['bytes32', 'uint256', 'address', 'address', 'uint16', 'address', 'bytes32'], [id('6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1'), d.chainId, A(8), A(20), c.action.operationId, q.caller, rh]));
   const specs = [];
   switch (q.kind) {
+    case 'identityRevision':
+      specs.push([A(3), 'ArtistIdentityRevisionRecorded', [1, q.artistId, q.signer, m.previousRecordHash, m.revisedRecordHash, q.details.identityRecordURI, cl, m.nonce, effectiveTime, rh]], [A(3), 'ArtistIdentityDisplayNameStored', [q.artistId, m.revisedRecordHash, q.details.displayName]]);
+      break;
+    case 'delegationGrant':
+      specs.push([A(3), 'ArtistDelegationGranted', [1, q.artistId, m.delegate, m.collectionId, m.capabilities, m.notBefore, m.expiresAt, m.maxUses, m.constraintsHash, m.nonce, rh]]);
+      break;
+    case 'delegationRevocation':
+      specs.push([A(3), 'ArtistDelegationRevoked', [1, q.artistId, m.delegate, m.delegationRecordHash, m.reasonHash, q.signer, 1, m.nonce, time]]);
+      break;
     case 'bindingRefusal':
       specs.push([A(5), 'ArtistAttributionStateChanged', [1, m.collectionId, 5, 2, 1, q.caller, cl, rh, m.reasonHash, q.details.reasonURI]], [A(5), 'ArtistBindingTerminationContext', [1, m.collectionId, 2, rh, m.bindingHash, artist, q.signer, m.nonce, time]]);
       break;
@@ -241,11 +329,17 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
   const rpc = provider(q, {
     authorityClass: cl, read(name, args, call) {
       if (call.blockTag !== tag) {
+        if (name === 'delegationRecord' && c.delegation) {
+          return [c.delegation];
+        }
+        if (name === 'operativeIdentityRecord' && c.revision) {
+          return [c.revision.operativeDocumentHash];
+        }
         if (name === 'authorityState') {
-          return [q.signer, cl, c.authority.status, c.authority.identityRecordHash];
+          return [c.authority.address, cl, c.authority.status, c.authority.identityRecordHash];
         }
         if (name === 'currentAuthorityCapabilities') {
-          return [[q.signer, cl, c.authority.status, 2047, id('activation')]];
+          return [[c.authority.address, cl, c.authority.status, 2047, id('activation')]];
         }
         return;
       }
@@ -254,9 +348,20 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
         return replacement;
       }
       switch (name) {
+        case 'identityRevisionRecord':
+          return [[rh, q.artistId, m.previousRecordHash, m.revisedRecordHash, ZeroHash, q.signer, 1, m.nonce, effectiveTime, q.details.identityRecordURI, q.details.displayName]];
+        case 'identityDocumentBytes':
+          return [q.details.document];
+        case 'delegationRecord':
+          return q.kind === 'delegationGrant' ? [{
+              grant: t, grantor: q.signer, nonce: m.nonce, uses: 0n, revoked: false, revocationRecordHash: ZeroHash
+            }]
+            : [{
+                ...c.delegation, revoked: true, revocationRecordHash: rh
+              }];
         case 'artistEvidenceMetadataV2': return [keccak256(raw), A(201), BigInt((raw.length - 2) / 2), 11n];
         case 'artistEvidenceBytesV2': return [raw];
-        case 'artistAuthorizationState': return [[args[1] === c.action.payload.digest, args[1] === m.revokedDigest && m.revokedDigest !== ZeroHash, true, args[2] === m.revokedNonce, 10n]];
+        case 'artistAuthorizationState': return [[args[1] === digest, args[1] === m.revokedDigest && m.revokedDigest !== ZeroHash, true, args[2] === m.revokedNonce, 10n]];
         case 'bindingTermination': return [[1, m.reasonHash, rh]];
         case 'royaltyFreezeRecord': return [[rh, artist, 2]];
         case 'saleConsentRecord': return [[rh, t, artist, q.signer, cl, m.nonce, time, 2, id('binding')]];
@@ -340,8 +445,12 @@ test('ordinary Safe plans preserve independent identity calls and reject unsuppo
   const captures = [];
   for (const [index, kind] of kinds.entries()) {
     const q = request(kind, { artistId: id('independent-artist-' + index) });
-    if (kind === 'authorizationRevocation') q.message.artistId = q.artistId;
-    else q.message.collectionId = BigInt(100 + index);
+    if (kind === 'authorizationRevocation') {
+      q.message.artistId = q.artistId;
+    }
+    else {
+      q.message.collectionId = BigInt(100 + index);
+    }
     captures.push(await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 }));
   }
   const safe = flow.createCurrentArtistSafePlan(captures, 'Five independent Artist calls');
@@ -579,7 +688,6 @@ test('capture reconstruction preserves scalar types instead of string-coercing b
   assert.throws(() => flow.createCurrentArtistSafePlan([forged], 'Forged evidence'), /facts changed/);
   await assert.rejects(flow.simulateCurrentArtistCall(provider(q), forged, { blockTag: 10 }), /facts changed/);
 });
-
 test('Safe plans reject shared authorization nonces and deterministic revocation conflicts', async () => {
   const captured = q => flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
   const sale = request('saleConsent');
@@ -588,7 +696,9 @@ test('Safe plans reject shared authorization nonces and deterministic revocation
   const second = await captured(royalty);
   assert.throws(() => flow.createCurrentArtistSafePlan([first, second], 'Same identity lane'), /Duplicate.*nonce/);
   const revoke = nonce => {
-    const q = request('authorizationRevocation', { caller: A(110), mode: 'signature' });
+    const q = request('authorizationRevocation', {
+      caller: A(110), mode: 'signature'
+    });
     q.message.nonce = nonce;
     return q;
   };
@@ -606,7 +716,8 @@ test('Safe plans reject shared authorization nonces and deterministic revocation
     if (digestTarget) {
       conflict.message.revokedDigest = first.action.payload.digest;
       conflict.message.revokedNonce = 0n;
-    } else {
+    }
+    else {
       conflict.message.revokedNonce = first.action.request.message.nonce;
     }
     const cc = await captured(conflict);
@@ -614,4 +725,298 @@ test('Safe plans reject shared authorization nonces and deterministic revocation
       assert.throws(() => flow.createCurrentArtistSafePlan(order, 'Revoked listed authorization'), /Conflicting.*revocation/);
     }
   }
+});
+test('identity revision and grant/revocation capture their original time and replay semantics', async () => {
+  for (const kind of ['identityRevision', 'delegationGrant', 'delegationRevocation']) {
+    const q = request(kind);
+    const rpc = provider(q);
+    const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+    assert.equal(c.action.operationId, {
+      identityRevision: 25n, delegationGrant: 26n, delegationRevocation: 27n
+    }[kind]);
+    const simulation = await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+    assert.equal(simulation.recordHash, record(c, 1010n));
+    assert.equal(rpc.calls.at(-1).from, q.caller);
+    assert.equal(c.timing.kind, kind === 'identityRevision' ? 'dated' : kind === 'delegationGrant' ? 'nonce-only' : 'deadline');
+    if (kind === 'delegationGrant') {
+      assert.equal(abi.decodeFunctionData(c.action.method, c.action.call.data)[1].time, 0n);
+    }
+  }
+});
+test('direct revision zero keeps submitted payload while replay and mined proof use effective timestamps', async () => {
+  const q = request('identityRevision');
+  const rpc = provider(q);
+  const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+  assert.equal(c.action.request.message.signedAt, 0n);
+  assert.equal(c.timing.effectiveTime, 1010n);
+  assert.notEqual(c.timing.effectiveDigest, c.action.payload.digest);
+  const digestTimes = rpc.calls.filter(x => abi.parseTransaction({ data: x.data }).name === 'identityRevisionDigest')
+    .map(x => abi.decodeFunctionData('identityRevisionDigest', x.data)[1].time);
+  assert.deepEqual(digestTimes, [0n, 1010n]);
+  const replayCalls = rpc.calls.filter(x => abi.parseTransaction({ data: x.data }).name === 'artistAuthorizationState');
+  assert.equal(abi.decodeFunctionData('artistAuthorizationState', replayCalls[0].data)[1], c.timing.effectiveDigest);
+  const simulated = await flow.simulateCurrentArtistCall(provider(q), c, { blockTag: 11 });
+  assert.equal(simulated.observation.timing.effectiveTime, 1011n);
+  assert.notEqual(simulated.observation.timing.effectiveDigest, c.timing.effectiveDigest);
+  const r = mined(c);
+  const result = await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'direct'
+  });
+  assert.equal(result.effectiveDigest, effectiveDigest(q, 1011n));
+  assert.notEqual(result.effectiveDigest, c.action.payload.digest);
+  assert.notEqual(result.effectiveDigest, c.timing.effectiveDigest);
+  const revokedZero = provider(q, { read: (name, args) => name === 'artistAuthorizationState' && args[1] === c.action.payload.digest
+      ? [[false, true, false, false, 1n]] : undefined });
+  await flow.captureCurrentArtistOperation(revokedZero, d, q, { blockTag: 10 });
+  const revokedEffective = provider(q, { read: (name, args) => name === 'artistAuthorizationState' && args[1] === c.timing.effectiveDigest
+      ? [[false, true, false, false, 1n]] : undefined });
+  await assert.rejects(flow.captureCurrentArtistOperation(revokedEffective, d, q, { blockTag: 10 }), /revoked/);
+});
+test('revision relays preserve signedAt and explicit direct dates require the exact execution time', async () => {
+  const q = request('identityRevision', {
+    caller: A(110), mode: 'signature'
+  });
+  q.message.signedAt = 900n;
+  q.message.nonce = 88n;
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  assert.equal(c.timing.effectiveTime, 900n);
+  const r = mined(c, { safe: true });
+  const result = await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'safe'
+  });
+  assert.equal(result.recordHash, record(c, 900n));
+  const future = structuredClone(q);
+  future.message.signedAt = 1011n;
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(future), d, future, { blockTag: 10 }), /timing/);
+  const direct = request('identityRevision');
+  direct.message.signedAt = 1010n;
+  const dc = await flow.captureCurrentArtistOperation(provider(direct), d, direct, { blockTag: 10 });
+  await flow.simulateCurrentArtistCall(provider(direct), dc, { blockTag: 10 });
+  await assert.rejects(flow.simulateCurrentArtistCall(provider(direct), dc, { blockTag: 11 }), /timing/);
+  const dr = mined(dc);
+  await assert.rejects(flow.inspectCurrentArtistReceipt(dr.rpc, dc, {
+    transactionHash: dr.txHash, execution: 'direct'
+  }), /timing/);
+});
+test('revision current document and successor capability are separate from signature validity', async () => {
+  const q = request('identityRevision');
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: name => name === 'operativeIdentityRecord' ? [id('changed')] : undefined }), d, q, { blockTag: 10 }), /Operative/);
+  const policy = capability => ({
+    authorityClass: 3n, read: name => name === 'authorityState'
+      ? [signer, 3, 3, id('identity')]
+      : name === 'currentAuthorityCapabilities' ? [[signer, 3, 3, capability, id('activation')]] : undefined
+  });
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, policy(0n)), d, q, { blockTag: 10 }), /capability/);
+  const rpc = provider(q, policy(512n));
+  const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+  const r = mined(c);
+  await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'direct'
+  });
+  assert.equal(c.authority.authorityClass, 3n);
+});
+test('grant admission supports global and future scopes, strict expiry, and original living-artist class only', async () => {
+  const q = request('delegationGrant');
+  const rpc = provider(q);
+  await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+  assert(!rpc.calls.some(x => abi.parseTransaction({ data: x.data }).name === 'binding'));
+  const scoped = structuredClone(q);
+  scoped.message.collectionId = 7n;
+  const c = await flow.captureCurrentArtistOperation(provider(scoped), d, scoped, { blockTag: 10 });
+  assert(c.binding);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(scoped, { read: name => name === 'attributionState' ? [4, 2] : undefined }), d, scoped, { blockTag: 10 }), /eligible/);
+  const expired = structuredClone(q);
+  expired.message.notBefore = 900n;
+  expired.message.expiresAt = 1010n;
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(expired), d, expired, { blockTag: 10 }), /expired/);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: name => name === 'authorityState' ? [signer, 3, 3, id('identity')] : undefined }), d, q, { blockTag: 10 }), /authority/);
+  const global = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const rejected = provider(q, { read(name) {
+      if (name === 'grantArtistDelegation') {
+        throw Error('onchain conflicting delegation or forbidden capability');
+      }
+    } });
+  await assert.rejects(flow.simulateCurrentArtistCall(rejected, global, { blockTag: 10 }), /onchain conflicting/);
+});
+test('revocation signs with the stored grantor after rotation while checking current defensive authority separately', async () => {
+  const q = request('delegationRevocation');
+  const opt = {
+    authorityClass: 4n, read: name => name === 'authorityState'
+      ? [A(300), 4, 4, id('identity')]
+      : name === 'currentAuthorityCapabilities' ? [[A(300), 4, 4, 0, id('activation')]] : undefined
+  };
+  const rpc = provider(q, opt);
+  const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+  assert.equal(c.authority.address, A(300));
+  assert.equal(c.delegation.grantor, q.signer);
+  assert(c.delegation.grant.expiresAt < c.timestamp);
+  assert.equal(c.delegation.uses, c.delegation.grant.maxUses);
+  await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+  const r = mined(c, {
+    safe: true, indexed: true
+  });
+  await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'safe'
+  });
+  const wrong = {
+    ...q, signer: A(300), caller: A(300)
+  };
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(wrong, opt), d, wrong, { blockTag: 10 }), /grantor/);
+  const revoked = {
+    ...defaultGrant(), revoked: true, revocationRecordHash: id('previous-revocation')
+  };
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: name => name === 'delegationRecord' ? [revoked] : undefined }), d, q, { blockTag: 10 }), /grantor|target/);
+  const contradictory = {
+    ...defaultGrant(), nonce: 100n
+  };
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: name => name === 'delegationRecord' ? [contradictory] : undefined }), d, q, { blockTag: 10 }), /record differs/);
+});
+test('all three new receipt families join exact Identity events, Archive payloads, and immutable records for direct and Safe calls', async () => {
+  for (const kind of ['identityRevision', 'delegationGrant', 'delegationRevocation']) {
+    const q = request(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+    for (const mode of ['direct', 'safe0', 'safe1']) {
+      const r = mined(c, {
+        safe: mode !== 'direct', indexed: mode === 'safe1'
+      });
+      const out = await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+        transactionHash: r.txHash, execution: mode === 'direct' ? 'direct' : 'safe'
+      });
+      assert.equal(out.recordHash, r.rh);
+      assert.equal(out.events[0].address, A(3));
+      assert.equal(out.effectiveDigest, effectiveDigest(q, 1011n));
+    }
+  }
+});
+test('revision receipts tolerate later operative changes but bind original document, URI and predecessor facts', async () => {
+  const q = request('identityRevision');
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  let r = mined(c, { afterRead: name => name === 'operativeIdentityRecord' ? [id('later-operative')] : undefined });
+  await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'direct'
+  });
+  r = mined(c, { afterRead: name => name === 'identityDocumentBytes' ? ['0x01'] : undefined });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'direct'
+  }), /document/);
+  const later = structuredClone(q);
+  later.message.previousRecordHash = id('prior-revised-document');
+  const lc = await flow.captureCurrentArtistOperation(provider(later, { read: name => name === 'operativeIdentityRecord' ? [later.message.previousRecordHash] : undefined }), d, later, { blockTag: 10 });
+  r = mined(lc);
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, lc, {
+    transactionHash: r.txHash, execution: 'direct'
+  }), /Zero revision predecessor/);
+  const predecessor = id('prior-revision');
+  const readback = (name, args) => name !== 'identityRevisionRecord' ? undefined : args[0] === predecessor
+    ? [[predecessor, artist, id('identity'), later.message.previousRecordHash, ZeroHash, signer, 1, 99, 900, '', 'prior']]
+    : [[record(lc, 1011n), artist, later.message.previousRecordHash, later.message.revisedRecordHash, predecessor, signer, 1, 1, 1011, later.details.identityRecordURI, later.details.displayName]];
+  r = mined(lc, { afterRead: readback });
+  await flow.inspectCurrentArtistReceipt(r.rpc, lc, {
+    transactionHash: r.txHash, execution: 'direct'
+  });
+  r = mined(lc, { afterRead: (name, args) => {
+      const result = readback(name, args);
+      if (result && args[0] === predecessor) {
+        result[0][3] = id('wrong-predecessor-document');
+      }
+      return result;
+    } });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, lc, {
+    transactionHash: r.txHash, execution: 'direct'
+  }), /predecessor/);
+});
+test('grant receipts allow later same-block use and revocation without changing the original grant evidence', async () => {
+  const q = request('delegationGrant');
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const [grant] = abi.decodeFunctionData(c.action.method, c.action.call.data);
+  const r = mined(c, { afterRead: name => name === 'delegationRecord' ? [{
+        grant, grantor: signer, nonce: 1n, uses: 55n, revoked: true, revocationRecordHash: id('later-revocation')
+      }] : undefined });
+  await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'direct'
+  });
+  const bad = mined(c, { afterRead: name => name === 'delegationRecord' ? [{
+        grant, grantor: A(400), nonce: 1n, uses: 0n, revoked: false, revocationRecordHash: ZeroHash
+      }] : undefined });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(bad.rpc, c, {
+    transactionHash: bad.txHash, execution: 'direct'
+  }), /grant differs/);
+});
+test('Safe replay checks distinguish the direct-zero submitted digest from its unknown future effective digest', async () => {
+  const q = request('identityRevision');
+  const revision = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const rq = request('authorizationRevocation', {
+    caller: A(110), mode: 'signature'
+  });
+  rq.message.nonce = 2n;
+  rq.message.revokedNonce = 0n;
+  rq.message.revokedDigest = revision.action.payload.digest;
+  const revoke = await flow.captureCurrentArtistOperation(provider(rq), d, rq, { blockTag: 10 });
+  assert.equal(flow.createCurrentArtistSafePlan([revision, revoke], 'Distinct nonce lanes').steps.length, 2);
+  const grant = request('delegationGrant');
+  const grantCapture = await flow.captureCurrentArtistOperation(provider(grant), d, grant, { blockTag: 10 });
+  assert.throws(() => flow.createCurrentArtistSafePlan([revision, grantCapture], 'Same nonce lane'), /Duplicate/);
+});
+test('Safe plans reject duplicate permanent delegation revocation targets across distinct authorization nonces', async () => {
+  const first = request('delegationRevocation', {
+    caller: A(110), mode: 'signature'
+  });
+  const second = structuredClone(first);
+  second.message.nonce = 2n;
+  const captures = await Promise.all([first, second].map(q => flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 })));
+  assert.throws(() => flow.createCurrentArtistSafePlan(captures, 'Duplicate grant revocation'), /Repeated delegation/);
+});
+test('revocation receipt joins actual pre-revocation uses without attributing prior same-block uses to this call', async () => {
+  const prior = defaultGrant();
+  prior.grant.maxUses = 0n;
+  prior.uses = 1n;
+  const q = request('delegationRevocation');
+  q.message.delegationRecordHash = grantHash(prior);
+  const c = await flow.captureCurrentArtistOperation(provider(q, { read: name => name === 'delegationRecord' ? [prior] : undefined }), d, q, { blockTag: 10 });
+  const type = abi.getFunction('delegationRecord').outputs[0];
+  const fn = abi.getFunction('revokeArtistDelegation');
+  const layout = [type, fn.inputs[0], fn.inputs[1], P];
+  const modify = v => {
+    const decoded = coder.decode(layout, v[7]);
+    v[7] = coder.encode(layout, [{
+        ...prior, uses: 2n
+      }, decoded[1], decoded[2], decoded[3]]);
+  };
+  const r = mined(c, {
+    mutateArchive: modify, afterRead: name => name === 'delegationRecord'
+      ? [{
+          ...prior, uses: 2n, revoked: true, revocationRecordHash: record(c, 1011n)
+        }] : undefined
+  });
+  await flow.inspectCurrentArtistReceipt(r.rpc, c, {
+    transactionHash: r.txHash, execution: 'direct'
+  });
+  const bad = mined(c, { mutateArchive: modify });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(bad.rpc, c, {
+    transactionHash: bad.txHash, execution: 'direct'
+  }), /prior delegation/);
+  const changed = provider(q, { read: (name, args, tx) => name === 'delegationRecord'
+      ? [{
+          ...prior, uses: tx.blockTag === 10 ? 1n : 2n
+        }] : undefined });
+  await assert.rejects(flow.simulateCurrentArtistCall(changed, c, { blockTag: 11 }), /Delegation state changed/);
+});
+test('new timing and delegation snapshots are copied before awaits and reject contradictory RPC or forged capture labels', async () => {
+  const original = request('identityRevision');
+  const mutable = structuredClone(original);
+  const c = await flow.captureCurrentArtistOperation(provider(original, { mutate: () => {
+      mutable.message.signedAt = 123n;
+      mutable.details.displayName = 'changed after entry';
+    } }), d, mutable, { blockTag: 10 });
+  assert.equal(c.action.request.message.signedAt, 0n);
+  assert.equal(c.action.request.details.displayName, original.details.displayName);
+  assert(Object.isFrozen(c.timing));
+  assert(Object.isFrozen(c.revision));
+  const forged = structuredClone(c);
+  forged.timing.effectiveTime = '1010n';
+  await assert.rejects(flow.simulateCurrentArtistCall(provider(original), forged, { blockTag: 10 }), /facts changed/);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(original, { read: (name, args) => name === 'identityRevisionDigest' && args[1].time === 1010n ? [id('wrong-effective')] : undefined }), d, original, { blockTag: 10 }), /Effective.*digest/);
+  const revoke = request('delegationRevocation');
+  const encoded = abi.encodeFunctionResult('delegationRecord', [defaultGrant()]);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(revoke, { read: name => name === 'delegationRecord' ? { raw: encoded + '00' } : undefined }), d, revoke, { blockTag: 10 }), /Noncanonical|invalid length/);
 });

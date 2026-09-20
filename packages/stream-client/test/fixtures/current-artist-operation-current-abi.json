@@ -314,7 +314,12 @@
     "smart-contracts/domains/artist/StreamArtistSaleHashes.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"./StreamArtistHashes.sol\";\nimport {\n    StreamArtistSaleTypes as Sale\n} from \"../../interfaces/stream/artist/StreamArtistSaleTypes.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Exact AA-SALE-CONSENT digest and record preimages; owns no authority or sale facts.\nlibrary StreamArtistSaleHashes {\n    bytes32 internal constant TYPEHASH = keccak256(\n        \"StreamArtistSaleConsent(address core,address saleAdapter,uint256 collectionId,bytes32 saleId,bytes32 saleConfigHash,uint256 nonce,uint64 deadline)\"\n    );\n    bytes32 internal constant RECORD_DOMAIN = keccak256(\"6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1\");\n\n    function digest(\n        StreamArtistHashes.Environment memory e,\n        Sale.Consent memory p,\n        T.Authorization memory a\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    TYPEHASH,\n                    e.core,\n                    p.saleAdapter,\n                    p.collectionId,\n                    p.saleId,\n                    p.saleConfigHash,\n                    a.nonce,\n                    a.time\n                )\n            )\n        );\n    }\n\n    function record(\n        StreamArtistHashes.Environment memory e,\n        Sale.Consent memory p,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                RECORD_DOMAIN,\n                e.chainId,\n                e.registry,\n                p.saleAdapter,\n                e.core,\n                p.collectionId,\n                p.saleId,\n                p.saleConfigHash,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                signedAt\n            )\n        );\n    }\n\n    function lookup(uint256 collectionId, bytes32 saleId, bytes32 saleConfigHash)\n        internal\n        pure\n        returns (bytes32)\n    {\n        return keccak256(abi.encode(collectionId, saleId, saleConfigHash));\n    }\n}\n",
     "smart-contracts/domains/artist/StreamArtistContentHashes.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"./StreamArtistHashes.sol\";\nimport {\n    StreamArtistContentTypes as Content\n} from \"../../interfaces/stream/artist/StreamArtistContentTypes.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Permanent content preimages; the environment is always the actual immutable artist facade.\nlibrary StreamArtistContentHashes {\n    function consentDigest(\n        StreamArtistHashes.Environment memory e,\n        Content.Consent memory p,\n        T.Authorization memory a\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    keccak256(\n                        \"StreamArtistContentConsent(address core,address metadataContract,uint256 collectionId,bytes32 familyId,bytes32 newStateHash,uint256 nonce,uint64 deadline)\"\n                    ),\n                    e.core,\n                    p.metadataContract,\n                    p.collectionId,\n                    p.familyId,\n                    p.newStateHash,\n                    a.nonce,\n                    a.time\n                )\n            )\n        );\n    }\n\n    function freezeDigest(\n        StreamArtistHashes.Environment memory e,\n        Content.Freeze memory p,\n        T.Authorization memory a\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    keccak256(\n                        \"StreamArtistContentFreeze(address core,address metadataContract,uint256 collectionId,bytes32[] lockClasses,bytes32 expectedStateHash,uint256 nonce,uint64 deadline)\"\n                    ),\n                    e.core,\n                    p.metadataContract,\n                    p.collectionId,\n                    keccak256(abi.encodePacked(p.lockClasses)),\n                    p.expectedStateHash,\n                    a.nonce,\n                    a.time\n                )\n            )\n        );\n    }\n\n    function consentRecord(\n        StreamArtistHashes.Environment memory e,\n        Content.Consent memory p,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 observedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_CONTENT_CONSENT_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.metadataContract,\n                e.core,\n                p.collectionId,\n                p.familyId,\n                p.newStateHash,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                observedAt\n            )\n        );\n    }\n\n    function freezeRecord(\n        StreamArtistHashes.Environment memory e,\n        Content.Freeze memory p,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 observedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_CONTENT_FREEZE_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.metadataContract,\n                e.core,\n                p.collectionId,\n                p.lockClasses,\n                p.expectedStateHash,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                observedAt\n            )\n        );\n    }\n\n    function validateConsent(Content.Consent memory p) internal pure {\n        if (\n            p.collectionId == 0 || p.metadataContract == address(0) || p.familyId == bytes32(0)\n                || p.newStateHash == bytes32(0)\n        ) revert T.InvalidRecord();\n    }\n\n    function validateFreeze(Content.Freeze memory p) internal pure {\n        uint256 count = p.lockClasses.length;\n        if (count == 0 || count > 16) revert T.BoundExceeded(count, 16);\n        if (\n            p.collectionId == 0 || p.metadataContract == address(0)\n                || p.expectedStateHash == bytes32(0)\n        ) {\n            revert T.InvalidRecord();\n        }\n        bytes32 prior;\n        for (uint256 i; i < count; ++i) {\n            bytes32 lockClass = p.lockClasses[i];\n            if (lockClass <= prior) revert T.InvalidRecord();\n            prior = lockClass;\n        }\n    }\n}\n",
     "smart-contracts/domains/artist/StreamArtistAuthorizationState.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistAuthorityCheckpoint.sol\";\n\nimport \"./StreamArtistIdentityState.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAuthorizationRevocation.sol\";\n\n/// @notice Linked operation-54 mechanics; Identity retains the typed guard and single semantic commit.\nlibrary StreamArtistAuthorizationState {\n    using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;\n\n    event ArtistAuthorizationRevoked(\n        uint16 schemaVersion,\n        bytes32 indexed artistId,\n        bytes32 revokedDigest,\n        uint256 revokedNonce,\n        uint256 nonce,\n        uint64 revokedAt,\n        bytes32 revocationRecordHash\n    );\n\n    function digest(\n        StreamArtistHashes.Environment memory e,\n        StreamArtistAuthorizationTypes.Revocation memory p,\n        T.Authorization memory a\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    keccak256(\n                        \"StreamArtistAuthorizationRevocation(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce,uint256 nonce,uint64 deadline)\"\n                    ),\n                    p.artistId,\n                    p.revokedDigest,\n                    p.revokedNonce,\n                    a.nonce,\n                    a.time\n                )\n            )\n        );\n    }\n\n    function authorizationState(\n        StreamArtistIdentityState.State storage identity,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistIdentityState.OwnerContext memory o,\n        bytes32 artistId,\n        bytes32 actionDigest,\n        uint256 nonce\n    ) public view returns (StreamArtistAuthorizationTypes.State memory result) {\n        result.digestObserved = replay[_key(\n                    o,\n                    keccak256(\"identity_authority.replay.authorization_consumed_digest\"),\n                    keccak256(abi.encode(artistId, actionDigest))\n                )].status != 0;\n        result.digestRevoked = replay[_key(\n                    o,\n                    keccak256(\"identity_authority.replay.digest_revocation\"),\n                    keccak256(abi.encode(artistId, actionDigest))\n                )].status != 0;\n        result.nonceConsumed = replay[_key(\n                    o,\n                    keccak256(\"identity_authority.replay.nonce_allocator\"),\n                    keccak256(abi.encode(artistId, nonce))\n                )].status != 0;\n        result.nonceRevoked = replay[_targetKey(o, artistId, bytes32(0), nonce)].status != 0;\n        result.nextUnusedNonce = identity.identities[artistId].nonceHint;\n    }\n\n    function revoke(\n        StreamArtistIdentityState.State storage identity,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistIdentityState.OwnerContext memory o,\n        T.ActionContext memory c,\n        StreamArtistAuthorizationTypes.Revocation memory p,\n        T.Authorization memory a,\n        T.SignerApproval memory proof\n    ) public returns (StreamArtistIdentityState.Mutation memory m) {\n        if (p.artistId == bytes32(0) || (p.revokedDigest == bytes32(0)) == (p.revokedNonce == 0)) {\n            revert T.InvalidRecord();\n        }\n        if (block.timestamp > a.time) revert T.ExpiredAuthorization(a.time);\n        if (block.timestamp > type(uint64).max) revert T.InvalidRecord();\n        bytes32 actionDigest = digest(o.environment, p, a);\n        if (\n            p.revokedDigest == actionDigest\n                || (p.revokedDigest == bytes32(0) && p.revokedNonce == a.nonce)\n        ) revert T.InvalidRecord();\n        bytes32 target = _targetKey(o, p.artistId, p.revokedDigest, p.revokedNonce);\n        if (replay[target].status != 0) revert T.Replay(target);\n        bytes32 denyKey;\n        if (p.revokedDigest != bytes32(0)) {\n            bytes32 used = _key(\n                o,\n                keccak256(\"identity_authority.replay.authorization_consumed_digest\"),\n                keccak256(abi.encode(p.artistId, p.revokedDigest))\n            );\n            if (replay[used].status != 0) revert T.Replay(used);\n            denyKey = _key(\n                o,\n                keccak256(\"identity_authority.replay.digest_revocation\"),\n                keccak256(abi.encode(p.artistId, p.revokedDigest))\n            );\n        } else {\n            denyKey = _key(\n                o,\n                keccak256(\"identity_authority.replay.nonce_allocator\"),\n                keccak256(abi.encode(p.artistId, p.revokedNonce))\n            );\n        }\n        if (replay[denyKey].status != 0) revert T.Replay(denyKey);\n        uint64 observed = uint64(block.timestamp);\n        bytes32 record = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_AUTH_REVOCATION_RECORD_V1\"),\n                o.environment.chainId,\n                o.environment.registry,\n                p.artistId,\n                p.revokedDigest,\n                p.revokedNonce,\n                a.nonce,\n                observed\n            )\n        );\n        m = StreamArtistIdentityState.authorize(\n            identity,\n            replay,\n            o,\n            c,\n            p.artistId,\n            a,\n            proof,\n            actionDigest,\n            record,\n            identity.identities[p.artistId].authorityAddress\n        );\n        replay[denyKey] = T.ReplayCell(record, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(denyKey, replay[denyKey]);\n        replay[target] = T.ReplayCell(record, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(target, replay[target]);\n        bytes32 availability;\n        if (p.revokedDigest == bytes32(0)) {\n            availability =\n                identity.nonceAvailability[p.artistId].consumeTagged(p.revokedNonce, 1, p.artistId);\n            if (identity.identities[p.artistId].nonceHint == p.revokedNonce) {\n                (, identity.identities[p.artistId].nonceHint) =\n                    identity.nonceAvailability[p.artistId].firstUnused();\n            }\n        }\n        m.action = keccak256(abi.encode(m.action, p, record));\n        m.state = keccak256(\n            abi.encode(\n                m.state, p.artistId, identity.identities[p.artistId].nonceHint, target, record\n            )\n        );\n        m.replay = keccak256(abi.encode(m.replay, denyKey, target, record, availability));\n        m.record = record;\n        emit ArtistAuthorizationRevoked(\n            1, p.artistId, p.revokedDigest, p.revokedNonce, a.nonce, observed, record\n        );\n    }\n\n    function _targetKey(\n        StreamArtistIdentityState.OwnerContext memory o,\n        bytes32 artistId,\n        bytes32 targetDigest,\n        uint256 nonce\n    ) private view returns (bytes32) {\n        return _key(\n            o,\n            keccak256(\"identity_authority.replay.target_authorization_revocation\"),\n            keccak256(abi.encode(artistId, targetDigest, nonce))\n        );\n    }\n\n    function _key(StreamArtistIdentityState.OwnerContext memory o, bytes32 surface, bytes32 scope)\n        private\n        view\n        returns (bytes32)\n    {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2\"),\n                o.environment.chainId,\n                o.environment.registry,\n                o.coordinator,\n                o.archive,\n                address(this),\n                o.domain,\n                surface,\n                scope\n            )\n        );\n    }\n}\n",
-    "smart-contracts/domains/artist/StreamArtistEconomicsHashes.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"./StreamArtistHashes.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Stateless typed AA economics hashing shared by ingress, orchestration and record owners.\n/// @dev The explicit environment is the pinned registry identity, never this linked library.\n///      No authorization, nonce, owner storage or caller-dependent behavior lives here.\nlibrary StreamArtistEconomicsHashes {\n    function economicsRecordForAuthority(\n        StreamArtistHashes.Environment memory e,\n        T.EconomicsConsent memory p,\n        bytes32 designation,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.resolver,\n                p.revenueClass,\n                p.scope,\n                p.scopeId,\n                p.assignmentHash,\n                designation,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                signedAt\n            )\n        );\n    }\n\n    function royaltyFreezeRecordForAuthority(\n        StreamArtistHashes.Environment memory e,\n        T.RoyaltyFreeze memory p,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.resolver,\n                p.collectionId,\n                p.revenueClass,\n                p.expectedAssignmentHash,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                signedAt\n            )\n        );\n    }\n\n    function economicsDigest(\n        StreamArtistHashes.Environment memory e,\n        T.EconomicsConsent memory p,\n        uint256 nonce,\n        uint64 deadline\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.economicsDigest(e, p, T.Authorization(nonce, deadline, \"\"));\n    }\n\n    function economicsRecord(\n        StreamArtistHashes.Environment memory e,\n        T.EconomicsConsent memory p,\n        bytes32 designation,\n        bytes32 artistId,\n        address signer,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.economicsRecord(\n            e, p, designation, artistId, signer, nonce, signedAt\n        );\n    }\n\n    function royaltyFreezeDigest(\n        StreamArtistHashes.Environment memory e,\n        T.RoyaltyFreeze memory p,\n        uint256 nonce,\n        uint64 deadline\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.royaltyFreezeDigest(e, p, T.Authorization(nonce, deadline, \"\"));\n    }\n\n    function royaltyFreezeRecord(\n        StreamArtistHashes.Environment memory e,\n        T.RoyaltyFreeze memory p,\n        bytes32 artistId,\n        address signer,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.royaltyFreezeRecord(e, p, artistId, signer, nonce, signedAt);\n    }\n}\n"
+    "smart-contracts/domains/artist/StreamArtistEconomicsHashes.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"./StreamArtistHashes.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Stateless typed AA economics hashing shared by ingress, orchestration and record owners.\n/// @dev The explicit environment is the pinned registry identity, never this linked library.\n///      No authorization, nonce, owner storage or caller-dependent behavior lives here.\nlibrary StreamArtistEconomicsHashes {\n    function economicsRecordForAuthority(\n        StreamArtistHashes.Environment memory e,\n        T.EconomicsConsent memory p,\n        bytes32 designation,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.resolver,\n                p.revenueClass,\n                p.scope,\n                p.scopeId,\n                p.assignmentHash,\n                designation,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                signedAt\n            )\n        );\n    }\n\n    function royaltyFreezeRecordForAuthority(\n        StreamArtistHashes.Environment memory e,\n        T.RoyaltyFreeze memory p,\n        bytes32 artistId,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.resolver,\n                p.collectionId,\n                p.revenueClass,\n                p.expectedAssignmentHash,\n                artistId,\n                signer,\n                authorityClass,\n                nonce,\n                signedAt\n            )\n        );\n    }\n\n    function economicsDigest(\n        StreamArtistHashes.Environment memory e,\n        T.EconomicsConsent memory p,\n        uint256 nonce,\n        uint64 deadline\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.economicsDigest(e, p, T.Authorization(nonce, deadline, \"\"));\n    }\n\n    function economicsRecord(\n        StreamArtistHashes.Environment memory e,\n        T.EconomicsConsent memory p,\n        bytes32 designation,\n        bytes32 artistId,\n        address signer,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.economicsRecord(\n            e, p, designation, artistId, signer, nonce, signedAt\n        );\n    }\n\n    function royaltyFreezeDigest(\n        StreamArtistHashes.Environment memory e,\n        T.RoyaltyFreeze memory p,\n        uint256 nonce,\n        uint64 deadline\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.royaltyFreezeDigest(e, p, T.Authorization(nonce, deadline, \"\"));\n    }\n\n    function royaltyFreezeRecord(\n        StreamArtistHashes.Environment memory e,\n        T.RoyaltyFreeze memory p,\n        bytes32 artistId,\n        address signer,\n        uint256 nonce,\n        uint64 signedAt\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.royaltyFreezeRecord(e, p, artistId, signer, nonce, signedAt);\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistIdentityRevisionState.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistAuthorityCheckpoint.sol\";\nimport { StreamArtistPayloadStore } from \"./StreamArtistPayloadStore.sol\";\n\nimport \"./StreamArtistIdentityState.sol\";\nimport \"./StreamArtistRotationState.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol\";\n\n/// @notice Linked operation-25 mechanics over the sole Identity owner's storage.\nlibrary StreamArtistIdentityRevisionState {\n    struct State {\n        mapping(bytes32 => bytes32) latestRecord;\n        mapping(bytes32 => StreamArtistIdentityRevisionTypes.Record) records;\n        mapping(bytes32 => bytes32) pendingRecord;\n        mapping(bytes32 => R.ProvisionalAssociation) associations;\n    }\n\n    event ArtistIdentityRevisionRecorded(\n        uint16 schemaVersion,\n        bytes32 indexed artistId,\n        address indexed signer,\n        bytes32 previousRecordHash,\n        bytes32 revisedRecordHash,\n        string identityRecordURI,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 revisionRecordHash\n    );\n    event ArtistIdentityDisplayNameStored(\n        bytes32 indexed artistId, bytes32 indexed identityRecordHash, string displayName\n    );\n\n    function digest(\n        StreamArtistHashes.Environment memory e,\n        StreamArtistIdentityRevisionTypes.Revision memory p,\n        T.Authorization memory a\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    bytes32(0xbfb7a5d3bc248c8eefbe4f8dfc2ea7d75d18c5cb3f2ab0d56000fd87f4b58603),\n                    p.artistId,\n                    p.previousRecordHash,\n                    p.revisedRecordHash,\n                    a.nonce,\n                    a.time\n                )\n            )\n        );\n    }\n\n    function operative(\n        State storage s,\n        StreamArtistIdentityState.State storage identity,\n        StreamArtistRotationState.State storage rotations,\n        bytes32 artistId\n    ) internal view returns (bytes32) {\n        bytes32 registration = identity.identities[artistId].identityRecordHash;\n        if (registration == bytes32(0)) revert T.InvalidIdentity(artistId);\n        bytes32 latest = _selected(s, rotations, artistId);\n        return latest == bytes32(0) ? registration : s.records[latest].revisedRecordHash;\n    }\n\n    function metadata(\n        State storage s,\n        StreamArtistIdentityState.State storage identity,\n        StreamArtistRotationState.State storage rotations,\n        bytes32 artistId\n    ) public view returns (bytes32 documentHash, string memory uri, string memory displayName) {\n        documentHash = operative(s, identity, rotations, artistId);\n        bytes32 latest = _selected(s, rotations, artistId);\n        if (latest == bytes32(0)) {\n            T.Identity storage original = identity.identities[artistId];\n            return (documentHash, original.identityRecordURI, original.displayName);\n        }\n        StreamArtistIdentityRevisionTypes.Record storage r = s.records[latest];\n        return (documentHash, r.identityRecordURI, r.displayName);\n    }\n\n    function revise(\n        State storage s,\n        StreamArtistIdentityState.State storage identity,\n        StreamArtistRotationState.State storage rotations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistIdentityState.OwnerContext memory o,\n        T.ActionContext memory c,\n        StreamArtistIdentityRevisionTypes.Revision memory p,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes memory document,\n        string memory displayName\n    ) public returns (StreamArtistIdentityState.Mutation memory m) {\n        Dismissal.Closure memory empty;\n        Dismissal.RevisionContinuation memory none;\n        return _revise(\n            s, identity, rotations, replay, o, c, p, a, proof, document, displayName, empty, none\n        );\n    }\n\n    function reviseWithResolution(\n        State storage s,\n        StreamArtistIdentityState.State storage identity,\n        StreamArtistRotationState.State storage rotations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistIdentityState.OwnerContext memory o,\n        T.ActionContext memory c,\n        StreamArtistIdentityRevisionTypes.Revision memory p,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes memory document,\n        string memory displayName,\n        Dismissal.Closure memory closure,\n        Dismissal.RevisionContinuation memory continuation\n    ) public returns (StreamArtistIdentityState.Mutation memory m) {\n        return _revise(\n            s,\n            identity,\n            rotations,\n            replay,\n            o,\n            c,\n            p,\n            a,\n            proof,\n            document,\n            displayName,\n            closure,\n            continuation\n        );\n    }\n\n    function _revise(\n        State storage s,\n        StreamArtistIdentityState.State storage identity,\n        StreamArtistRotationState.State storage rotations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistIdentityState.OwnerContext memory o,\n        T.ActionContext memory c,\n        StreamArtistIdentityRevisionTypes.Revision memory p,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes memory document,\n        string memory displayName,\n        Dismissal.Closure memory closure,\n        Dismissal.RevisionContinuation memory continuation\n    ) private returns (StreamArtistIdentityState.Mutation memory m) {\n        if (\n            p.previousRecordHash != operative(s, identity, rotations, p.artistId)\n                || p.revisedRecordHash == bytes32(0) || p.revisedRecordHash == p.previousRecordHash\n                || document.length == 0 || keccak256(document) != p.revisedRecordHash\n                || bytes(displayName).length == 0 || a.time == 0 || a.time > block.timestamp\n                || (proof.direct && a.time != block.timestamp)\n        ) revert T.InvalidRecord();\n        if (document.length > 8192) revert T.BoundExceeded(document.length, 8192);\n        if (bytes(p.identityRecordURI).length > 2048) {\n            revert T.BoundExceeded(bytes(p.identityRecordURI).length, 2048);\n        }\n        if (bytes(displayName).length > 256) {\n            revert T.BoundExceeded(bytes(displayName).length, 256);\n        }\n        bytes32 pending_ = s.pendingRecord[p.artistId];\n        if (\n            pending_ != bytes32(0)\n                && !StreamArtistRotationState.eligible(\n                    rotations, p.artistId, s.associations[pending_]\n                )\n        ) {\n            revert R.ProvisionalChainOccupied(pending_);\n        }\n        bytes32 previousRevision = _selected(s, rotations, p.artistId);\n        bytes32 record = keccak256(\n            abi.encode(\n                bytes32(0x1b7518e9d16da358d15957ec43218eb0b017fbd017e60c75b3126110006034a4),\n                o.environment.chainId,\n                o.environment.registry,\n                p.artistId,\n                p.previousRecordHash,\n                p.revisedRecordHash,\n                proof.signer,\n                identity.identities[p.artistId].authorityClass,\n                a.nonce,\n                a.time\n            )\n        );\n        if (continuation.continuationHash != bytes32(0) && continuation.artistId != p.artistId) {\n            revert T.InvalidRecord();\n        }\n        bool continuing = continuation.continuationHash != bytes32(0)\n            && continuation.stableRevisionRecordHash == previousRevision\n            && continuation.stableDocumentHash == p.previousRecordHash;\n        bytes32 chainSurface = continuing\n            ? keccak256(\"identity_authority.replay.identity_revision_continuation\")\n            : keccak256(\"identity_authority.replay.identity_revision_chain\");\n        bytes32 chainScope = continuing\n            ? keccak256(\n                abi.encode(\n                    p.artistId,\n                    previousRevision,\n                    p.previousRecordHash,\n                    continuation.continuationHash\n                )\n            )\n            : keccak256(abi.encode(p.artistId, previousRevision, p.previousRecordHash));\n        bytes32 chainKey = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2\"),\n                o.environment.chainId,\n                o.environment.registry,\n                o.coordinator,\n                o.archive,\n                address(this),\n                o.domain,\n                chainSurface,\n                chainScope\n            )\n        );\n        if (replay[chainKey].status != 0) revert T.Replay(chainKey);\n        if (s.records[record].recordHash != bytes32(0)) revert T.InvalidRecord();\n        m = StreamArtistIdentityState.authorize(\n            identity,\n            replay,\n            o,\n            c,\n            p.artistId,\n            a,\n            proof,\n            digest(o.environment, p, a),\n            record,\n            identity.identities[p.artistId].authorityAddress\n        );\n        StreamArtistIdentityRevisionTypes.Record memory item =\n            StreamArtistIdentityRevisionTypes.Record(\n                record,\n                p.artistId,\n                p.previousRecordHash,\n                p.revisedRecordHash,\n                previousRevision,\n                proof.signer,\n                1,\n                a.nonce,\n                a.time,\n                p.identityRecordURI,\n                displayName\n            );\n        s.records[record] = item;\n        R.ProvisionalAssociation memory association_ =\n            StreamArtistRotationState.associationWithResolution(rotations, p.artistId, closure);\n        s.associations[record] = association_;\n        if (association_.transitionRecordHash == bytes32(0)) {\n            s.latestRecord[p.artistId] = record;\n            delete s.pendingRecord[p.artistId];\n        } else {\n            s.latestRecord[p.artistId] = previousRevision;\n            s.pendingRecord[p.artistId] = record;\n        }\n        if (identity.documents[p.revisedRecordHash].length == 0) {\n            identity.documents[p.revisedRecordHash] = document;\n            StreamArtistPayloadStore.store(keccak256(\"ARTIST_IDENTITY_DOCUMENT\"), document);\n        }\n        replay[chainKey] = T.ReplayCell(record, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(chainKey, replay[chainKey]);\n        m.record = record;\n        m.action = keccak256(abi.encode(p, a, proof, keccak256(document), displayName));\n        m.state = keccak256(\n            abi.encode(\n                m.state,\n                previousRevision,\n                item,\n                association_,\n                s.latestRecord[p.artistId],\n                s.pendingRecord[p.artistId]\n            )\n        );\n        m.replay = keccak256(abi.encode(m.replay, chainKey, record));\n        emit ArtistIdentityRevisionRecorded(\n            1,\n            p.artistId,\n            proof.signer,\n            p.previousRecordHash,\n            p.revisedRecordHash,\n            p.identityRecordURI,\n            identity.identities[p.artistId].authorityClass,\n            a.nonce,\n            a.time,\n            record\n        );\n        emit ArtistIdentityDisplayNameStored(p.artistId, p.revisedRecordHash, displayName);\n\n        if (\n            closure.dismissalRecordHash != bytes32(0) || continuation.continuationHash != bytes32(0)\n        ) {\n            m.state = keccak256(abi.encode(m.state, closure, continuation, continuing));\n        }\n    }\n\n    function _selected(\n        State storage s,\n        StreamArtistRotationState.State storage rotations,\n        bytes32 artistId\n    ) private view returns (bytes32) {\n        bytes32 candidate = s.pendingRecord[artistId];\n        return candidate != bytes32(0)\n            && StreamArtistRotationState.eligible(rotations, artistId, s.associations[candidate])\n            ? candidate\n            : s.latestRecord[artistId];\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistDelegationState.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"./StreamArtistHashes.sol\";\nimport \"./StreamArtistNonceAvailability.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\nimport {\n    StreamArtistDelegationTypes as D\n} from \"../../interfaces/stream/artist/StreamArtistDelegationTypes.sol\";\n\n/// @notice Linked implementation operating only on Identity's appended delegation storage.\n/// @dev No independent authority or record store. Identity checks Coordinator/snapshot and commits every returned delta.\nlibrary StreamArtistDelegationState {\n    using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;\n\n    struct State {\n        mapping(bytes32 => D.Record) records;\n        mapping(bytes32 => bytes32) current;\n        mapping(bytes32 => StreamArtistNonceAvailability.Index) availability;\n        mapping(bytes32 => uint256) hints;\n    }\n\n    function grantDigest(StreamArtistHashes.Environment memory e, D.Grant memory p, uint256 nonce)\n        public\n        pure\n        returns (bytes32)\n    {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    keccak256(\n                        \"StreamArtistDelegation(address core,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash,uint256 nonce)\"\n                    ),\n                    e.core,\n                    p.delegate,\n                    p.collectionId,\n                    p.capabilities,\n                    p.notBefore,\n                    p.expiresAt,\n                    p.maxUses,\n                    p.constraintsHash,\n                    nonce\n                )\n            )\n        );\n    }\n\n    function revokeDigest(\n        StreamArtistHashes.Environment memory e,\n        D.Revocation memory p,\n        uint256 nonce,\n        uint64 deadline\n    ) public pure returns (bytes32) {\n        return StreamArtistHashes.typed(\n            e,\n            keccak256(\n                abi.encode(\n                    keccak256(\n                        \"StreamArtistDelegationRevocation(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash,uint256 nonce,uint64 deadline)\"\n                    ),\n                    p.artistId,\n                    p.delegate,\n                    p.delegationRecordHash,\n                    p.reasonHash,\n                    nonce,\n                    deadline\n                )\n            )\n        );\n    }\n\n    function grant(\n        State storage s,\n        StreamArtistHashes.Environment memory e,\n        D.Grant memory p,\n        address grantor,\n        uint256 nonce\n    ) public returns (bytes32 record, bytes32 delta) {\n        if (\n            p.artistId == bytes32(0) || p.delegate == address(0) || p.delegate == grantor\n                || p.capabilities == 0 || (p.capabilities & ~uint32(117)) != 0\n                || p.expiresAt <= p.notBefore || block.timestamp >= p.expiresAt\n        ) revert T.UnsupportedProfile();\n        bytes32 scope = keccak256(abi.encode(p.artistId, p.delegate));\n        bytes32 prior = s.current[scope];\n        D.Record storage old = s.records[prior];\n        // Future grants reserve the key too. A revoked/expired/exhausted grant can be replaced.\n        if (\n            old.grantor != address(0) && !old.revoked && block.timestamp < old.grant.expiresAt\n                && (old.grant.maxUses == 0 || old.uses < old.grant.maxUses)\n        ) revert D.ConflictingDelegation(prior);\n        record = _grantRecord(e, p, nonce);\n        if (s.records[record].grantor != address(0)) revert D.InvalidDelegation(record);\n        s.records[record] = D.Record(p, grantor, nonce, 0, false, bytes32(0));\n        s.current[scope] = record;\n        delta = keccak256(abi.encode(scope, prior, record, s.records[record]));\n    }\n\n    function _grantRecord(StreamArtistHashes.Environment memory e, D.Grant memory p, uint256 nonce)\n        private\n        pure\n        returns (bytes32)\n    {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_DELEGATION_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.artistId,\n                p.delegate,\n                p.collectionId,\n                p.capabilities,\n                p.notBefore,\n                p.expiresAt,\n                p.maxUses,\n                p.constraintsHash,\n                nonce\n            )\n        );\n    }\n\n    function revoke(\n        State storage s,\n        StreamArtistHashes.Environment memory e,\n        D.Revocation memory p,\n        address signer,\n        uint256 nonce,\n        uint64 time\n    ) public returns (bytes32 record, bytes32 delta) {\n        D.Record storage item = s.records[p.delegationRecordHash];\n        if (\n            item.grantor == address(0) || item.revoked || item.grantor != signer\n                || item.grant.artistId != p.artistId || item.grant.delegate != p.delegate\n        ) revert D.InvalidDelegation(p.delegationRecordHash);\n        record = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_DELEGATION_REVOCATION_RECORD_V1\"),\n                e.chainId,\n                e.registry,\n                p.artistId,\n                p.delegate,\n                p.delegationRecordHash,\n                signer,\n                uint8(1),\n                p.reasonHash,\n                nonce,\n                time\n            )\n        );\n        item.revoked = true;\n        item.revocationRecordHash = record;\n        delta = keccak256(abi.encode(p.delegationRecordHash, item));\n    }\n\n    function lane(bytes32 artistId, address delegate) public pure returns (bytes32) {\n        return keccak256(\n            abi.encode(keccak256(\"6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1\"), artistId, delegate)\n        );\n    }\n\n    function active(D.Record memory item) public view returns (bool) {\n        return item.grantor != address(0) && !item.revoked\n            && block.timestamp >= item.grant.notBefore && block.timestamp < item.grant.expiresAt\n            && (item.grant.maxUses == 0 || item.uses < item.grant.maxUses);\n    }\n\n    function consume(\n        State storage s,\n        bytes32 record,\n        bytes32 artistId,\n        uint256 collectionId,\n        uint32 capability,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        address actor,\n        bytes32 digest\n    ) public returns (bytes32 replayLane, bytes32 delta) {\n        D.Record storage item = s.records[record];\n        if (!active(item)) revert D.DelegationUnavailable(record);\n        if (\n            item.grant.artistId != artistId\n                || (item.grant.collectionId != 0 && item.grant.collectionId != collectionId)\n        ) revert D.DelegationScope(record);\n        if ((item.grant.capabilities & capability) == 0) {\n            revert D.DelegationCapability(record, capability);\n        }\n        if (\n            proof.signer != item.grant.delegate || proof.digest != digest\n                || (proof.direct && (actor != proof.signer || a.signature.length != 0))\n                || (!proof.direct && a.signature.length == 0 && proof.signer.code.length == 0)\n        ) revert T.InvalidSignature();\n        if (a.signature.length > 4096) revert T.BoundExceeded(a.signature.length, 4096);\n        replayLane = lane(artistId, proof.signer);\n        delta = _consume(s, record, replayLane, a.nonce, proof.direct);\n    }\n\n    function _consume(\n        State storage s,\n        bytes32 record,\n        bytes32 replayLane,\n        uint256 nonce,\n        bool direct\n    ) private returns (bytes32 delta) {\n        if (direct && nonce != s.hints[replayLane]) revert T.InvalidRecord();\n        bytes32 availabilityDelta = s.availability[replayLane].consumeTagged(nonce, 2, replayLane);\n        if (nonce == s.hints[replayLane]) {\n            (, s.hints[replayLane]) = s.availability[replayLane].firstUnused();\n        }\n        D.Record storage item = s.records[record];\n        ++item.uses;\n        delta = keccak256(\n            abi.encode(record, item, replayLane, nonce, s.hints[replayLane], availabilityDelta)\n        );\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistIdentityState.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistAuthorityCheckpoint.sol\";\nimport { StreamArtistPayloadStore } from \"./StreamArtistPayloadStore.sol\";\n\nimport \"./StreamArtistDelegationState.sol\";\nimport \"./StreamArtistAuthorityPolicy.sol\";\n\n/// @notice Linked mechanics over Identity's original storage prefix and replay map.\n/// @dev Typed owner guards and one semantic commit remain in Identity. This library owns no separate state.\nlibrary StreamArtistIdentityState {\n    using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;\n\n    struct State {\n        uint256 nextRegistrationNonce;\n        mapping(bytes32 => T.Identity) identities;\n        mapping(address => bytes32) activeIdentity;\n        mapping(bytes32 => bytes) documents;\n        mapping(bytes32 => bytes) signatures;\n        mapping(bytes32 => StreamArtistNonceAvailability.Index) nonceAvailability;\n    }\n\n    struct OwnerContext {\n        StreamArtistHashes.Environment environment;\n        address coordinator;\n        address archive;\n        bytes32 domain;\n        uint64 revision;\n    }\n\n    struct Mutation {\n        bytes32 record;\n        bytes32 action;\n        bytes32 state;\n        bytes32 replay;\n    }\n    event ArtistDelegationGranted(\n        uint16 schemaVersion,\n        bytes32 indexed artistId,\n        address indexed delegate,\n        uint256 indexed collectionId,\n        uint32 capabilities,\n        uint64 notBefore,\n        uint64 expiresAt,\n        uint64 maxUses,\n        bytes32 constraintsHash,\n        uint256 nonce,\n        bytes32 delegationRecordHash\n    );\n    event ArtistDelegationRevoked(\n        uint16 schemaVersion,\n        bytes32 indexed artistId,\n        address indexed delegate,\n        bytes32 indexed delegationRecordHash,\n        bytes32 reasonHash,\n        address signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt\n    );\n\n    function grantDelegation(\n        State storage identity,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistDelegationState.State storage delegations,\n        OwnerContext memory o,\n        T.ActionContext memory c,\n        D.Grant memory p,\n        T.Authorization memory a,\n        T.SignerApproval memory proof\n    ) public returns (Mutation memory m) {\n        (bytes32 record, bytes32 delta) = StreamArtistDelegationState.grant(\n            delegations, o.environment, p, proof.signer, a.nonce\n        );\n        bytes32 digest = StreamArtistDelegationState.grantDigest(o.environment, p, a.nonce);\n        Mutation memory authorization = authorize(\n            identity,\n            replay,\n            o,\n            c,\n            p.artistId,\n            a,\n            proof,\n            digest,\n            record,\n            identity.identities[p.artistId].authorityAddress\n        );\n        bytes32 key = _consume(\n            replay, o, keccak256(\"identity_authority.replay.delegation_key\"), record, record\n        );\n        m = Mutation(\n            record,\n            keccak256(abi.encode(p, a, proof)),\n            keccak256(abi.encode(delta, identity.identities[p.artistId])),\n            keccak256(abi.encode(authorization.replay, key, record))\n        );\n        emit ArtistDelegationGranted(\n            1,\n            p.artistId,\n            p.delegate,\n            p.collectionId,\n            p.capabilities,\n            p.notBefore,\n            p.expiresAt,\n            p.maxUses,\n            p.constraintsHash,\n            a.nonce,\n            record\n        );\n    }\n\n    function revokeDelegation(\n        State storage identity,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistDelegationState.State storage delegations,\n        OwnerContext memory o,\n        T.ActionContext memory c,\n        D.Revocation memory p,\n        T.Authorization memory a,\n        T.SignerApproval memory proof\n    ) public returns (Mutation memory m) {\n        address grantor = delegations.records[p.delegationRecordHash].grantor;\n        (bytes32 record, bytes32 delta) = StreamArtistDelegationState.revoke(\n            delegations, o.environment, p, proof.signer, a.nonce, _now()\n        );\n        bytes32 digest = StreamArtistDelegationState.revokeDigest(o.environment, p, a.nonce, a.time);\n        Mutation memory authorization =\n            authorize(identity, replay, o, c, p.artistId, a, proof, digest, record, grantor);\n        bytes32 key = _consume(\n            replay,\n            o,\n            keccak256(\"identity_authority.replay.one_way_delegation_revocation\"),\n            p.delegationRecordHash,\n            record\n        );\n        m = Mutation(\n            record,\n            keccak256(abi.encode(p, a, proof)),\n            keccak256(abi.encode(delta, identity.identities[p.artistId])),\n            keccak256(abi.encode(authorization.replay, key, record))\n        );\n        emit ArtistDelegationRevoked(\n            1,\n            p.artistId,\n            p.delegate,\n            p.delegationRecordHash,\n            p.reasonHash,\n            proof.signer,\n            1,\n            a.nonce,\n            _now()\n        );\n    }\n    event ArtistIdentityRegistered(\n        uint16 schemaVersion,\n        bytes32 indexed artistId,\n        address indexed authorityAddress,\n        bytes32 identityRecordHash,\n        string identityRecordURI,\n        uint256 registrationNonce\n    );\n    /// @notice Supplementary mirror evidence; the canonical identity document remains authoritative.\n    event ArtistIdentityDisplayNameStored(\n        bytes32 indexed artistId, bytes32 indexed identityRecordHash, string displayName\n    );\n\n    function payoutProof(\n        StreamArtistHashes.Environment memory e,\n        T.PayoutDesignation memory p,\n        address signer,\n        T.Authorization memory a\n    ) public pure returns (bytes32 record, bytes32 digest) {\n        return (\n            StreamArtistHashes.payoutRecord(e, p, signer, a.nonce, a.time),\n            StreamArtistHashes.payoutDigest(e, p, a)\n        );\n    }\n\n    function attestationProof(\n        StreamArtistHashes.Environment memory e,\n        T.Binding memory b,\n        T.Attestation memory p,\n        address signer,\n        T.Authorization memory a\n    ) public pure returns (bytes32 record, bytes32 digest) {\n        return (\n            StreamArtistHashes.attestationRecord(e, p, b.artistId, signer, a.nonce, a.time),\n            StreamArtistHashes.attestationDigest(e, p, a)\n        );\n    }\n\n    function ratificationProof(\n        StreamArtistHashes.Environment memory e,\n        T.Binding memory b,\n        T.Ratification memory p,\n        address signer,\n        T.Authorization memory a,\n        uint64 observed\n    ) public pure returns (bytes32 record, bytes32 digest) {\n        return (\n            StreamArtistHashes.ratificationRecord(e, p, b.artistId, signer, a.nonce, observed),\n            StreamArtistHashes.ratificationDigest(e, p, a)\n        );\n    }\n\n    function register(\n        State storage state,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        OwnerContext memory o,\n        address artist,\n        bytes32 documentHash,\n        string memory uri,\n        bytes memory document,\n        string memory displayName\n    ) public returns (Mutation memory) {\n        if (\n            artist == address(0) || documentHash == bytes32(0) || document.length == 0\n                || keccak256(document) != documentHash || bytes(displayName).length == 0\n        ) revert T.InvalidRecord();\n        if (document.length > 8192) revert T.BoundExceeded(document.length, 8192);\n        if (bytes(uri).length > 2048) revert T.BoundExceeded(bytes(uri).length, 2048);\n        if (bytes(displayName).length > 256) {\n            revert T.BoundExceeded(bytes(displayName).length, 256);\n        }\n        if (state.activeIdentity[artist] != bytes32(0)) revert T.AddressAlreadyRegistered(artist);\n        uint256 registrationNonce = state.nextRegistrationNonce++;\n        bytes32 artistId =\n            StreamArtistHashes.identity(o.environment, artist, documentHash, registrationNonce);\n        uint64 now_ = _now();\n        state.identities[artistId] =\n            T.Identity(artist, 1, 1, now_, now_, documentHash, uri, displayName, 0);\n        state.activeIdentity[artist] = artistId;\n        if (state.documents[documentHash].length == 0) state.documents[documentHash] = document;\n        StreamArtistPayloadStore.store(keccak256(\"ARTIST_IDENTITY_DOCUMENT\"), document);\n        // Zero identity namespaces registration allocation; actual artist IDs are nonzero.\n        if (artistId == bytes32(0)) revert T.InvalidIdentity(artistId);\n        bytes32 key = _consume(\n            replay,\n            o,\n            keccak256(\"identity_authority.replay.nonce_allocator\"),\n            keccak256(abi.encode(bytes32(0), registrationNonce)),\n            artistId\n        );\n        Mutation memory mutation = Mutation(\n            artistId,\n            keccak256(abi.encode(artist, documentHash, uri, displayName, registrationNonce)),\n            keccak256(\n                abi.encode(artistId, state.identities[artistId], state.nextRegistrationNonce)\n            ),\n            keccak256(abi.encode(key, artistId))\n        );\n        emit ArtistIdentityRegistered(1, artistId, artist, documentHash, uri, registrationNonce);\n        emit ArtistIdentityDisplayNameStored(artistId, documentHash, displayName);\n\n        return mutation;\n    }\n\n    function authorize(\n        State storage state,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        OwnerContext memory o,\n        T.ActionContext memory c,\n        bytes32 artistId,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes32 digest,\n        bytes32 record,\n        address expectedSigner\n    ) public returns (Mutation memory) {\n        T.Identity storage item = state.identities[artistId];\n        StreamArtistAuthorityPolicy.requireOperation(item, artistId, c.operationId);\n        return _authorize(state, replay, o, c, artistId, a, proof, digest, record, expectedSigner);\n    }\n\n    function authorizeIntentAttestation(\n        State storage state,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        OwnerContext memory o,\n        T.ActionContext memory c,\n        bytes32 artistId,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes32 digest,\n        bytes32 record,\n        address expectedSigner\n    ) public returns (Mutation memory) {\n        if (c.operationId != 24) revert T.InvalidRecord();\n        StreamArtistAuthorityPolicy.requireIntentAttestation(state.identities[artistId], artistId);\n        return _authorize(state, replay, o, c, artistId, a, proof, digest, record, expectedSigner);\n    }\n\n    function _authorize(\n        State storage state,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        OwnerContext memory o,\n        T.ActionContext memory c,\n        bytes32 artistId,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes32 digest,\n        bytes32 record,\n        address expectedSigner\n    ) private returns (Mutation memory) {\n        T.Identity storage item = state.identities[artistId];\n        if (\n            proof.signer != expectedSigner || expectedSigner == address(0) || proof.digest != digest\n                || (proof.direct && (c.actor != proof.signer || a.signature.length != 0))\n                || (!proof.direct && a.signature.length == 0 && proof.signer.code.length == 0)\n        ) revert T.InvalidSignature();\n        if (\n            proof.direct\n                && (a.nonce != item.nonceHint\n                    || ((c.operationId == 18 || c.operationId == 24) && a.time != _now()))\n        ) revert T.InvalidRecord();\n        if (a.signature.length > 4096) revert T.BoundExceeded(a.signature.length, 4096);\n        bytes32 digestKey = _key(\n            o,\n            keccak256(\"identity_authority.replay.digest_revocation\"),\n            keccak256(abi.encode(artistId, digest))\n        );\n        if (replay[digestKey].status != 0) revert T.Replay(digestKey);\n        bytes32 observation = _observeDigest(replay, o, artistId, digest);\n        bytes32 nonceKey = _consume(\n            replay,\n            o,\n            keccak256(\"identity_authority.replay.nonce_allocator\"),\n            keccak256(abi.encode(artistId, a.nonce)),\n            digest\n        );\n        bytes32 availabilityDelta =\n            state.nonceAvailability[artistId].consumeTagged(a.nonce, 1, artistId);\n        bytes32 attestationKey;\n        if (c.operationId == 24) {\n            attestationKey = _consume(\n                replay,\n                o,\n                keccak256(\"identity_authority.replay.attestation_key\"),\n                keccak256(abi.encode(record)),\n                record\n            );\n        }\n        if (proof.signer == item.authorityAddress) item.lastAuthorityActionAt = _now();\n        // Relayed nonce validity is independent of the allocator. Updating the hint\n        // uses a fixed-depth index, never a scan across earlier signed submissions.\n        if (a.nonce == item.nonceHint) {\n            (, item.nonceHint) = state.nonceAvailability[artistId].firstUnused();\n        }\n        state.signatures[record] = a.signature;\n        StreamArtistPayloadStore.store(keccak256(\"ARTIST_SIGNATURE_BUNDLE\"), a.signature);\n        bytes32 replayDelta = keccak256(\n            abi.encode(\n                nonceKey,\n                digest,\n                availabilityDelta,\n                attestationKey,\n                attestationKey == bytes32(0) ? bytes32(0) : record,\n                observation\n            )\n        );\n\n        return Mutation(\n            bytes32(0),\n            keccak256(abi.encode(artistId, digest, a, proof, record)),\n            keccak256(abi.encode(artistId, item, record, keccak256(a.signature))),\n            replayDelta\n        );\n    }\n\n    function authorizeDelegate(\n        State storage state,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistDelegationState.State storage delegations,\n        OwnerContext memory o,\n        T.ActionContext memory c,\n        T.Binding memory b,\n        uint256 collectionId,\n        uint32 capability,\n        bytes32 grant,\n        T.Authorization memory a,\n        T.SignerApproval memory proof,\n        bytes32 digest,\n        bytes32 record\n    ) public returns (Mutation memory) {\n        T.Identity storage item = state.identities[b.artistId];\n        if (\n            !b.accepted || b.consentMode != 1\n                || (item.status != 1\n                    && item.status != 2\n                    && !((c.operationId == 20 || c.operationId == 44 || c.operationId == 45 || c.operationId == 61)\n                        && item.status == 4)) || item.authorityClass != 1\n                || item.authorityAddress == address(0)\n        ) revert T.InvalidIdentity(b.artistId);\n        bytes32 lane = StreamArtistDelegationState.lane(b.artistId, proof.signer);\n        bytes32 identityDeny = _key(\n            o,\n            keccak256(\"identity_authority.replay.digest_revocation\"),\n            keccak256(abi.encode(b.artistId, digest))\n        );\n        if (replay[identityDeny].status != 0) revert T.Replay(identityDeny);\n        bytes32 observation = _observeDigest(replay, o, b.artistId, digest);\n        bytes32 digestKey = _key(\n            o,\n            keccak256(\"identity_authority.replay.delegated_digest_revocation\"),\n            keccak256(abi.encode(lane, digest))\n        );\n        if (replay[digestKey].status != 0) revert T.Replay(digestKey);\n        bytes32 key = _consume(\n            replay,\n            o,\n            keccak256(\"identity_authority.replay.delegated_nonce\"),\n            keccak256(abi.encode(lane, a.nonce)),\n            digest\n        );\n        (, bytes32 delta) = StreamArtistDelegationState.consume(\n            delegations, grant, b.artistId, collectionId, capability, a, proof, c.actor, digest\n        );\n        state.signatures[record] = a.signature;\n        StreamArtistPayloadStore.store(keccak256(\"ARTIST_SIGNATURE_BUNDLE\"), a.signature);\n        return Mutation(\n            bytes32(0),\n            keccak256(abi.encode(b, grant, a, proof, record)),\n            keccak256(abi.encode(delta, record, keccak256(a.signature))),\n            keccak256(abi.encode(key, digest, delta, observation))\n        );\n    }\n\n    // Observation is distinct from revocation: two existing delegate lanes may\n    // execute the same digest, but a previously executed digest cannot be revoked.\n    function _observeDigest(\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        OwnerContext memory o,\n        bytes32 artistId,\n        bytes32 digest\n    ) private returns (bytes32) {\n        bytes32 key = _key(\n            o,\n            keccak256(\"identity_authority.replay.authorization_consumed_digest\"),\n            keccak256(abi.encode(artistId, digest))\n        );\n        if (replay[key].status == 0) {\n            replay[key] = T.ReplayCell(digest, o.revision + 1, 1, 2);\n            StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);\n        }\n        return keccak256(abi.encode(key, replay[key]));\n    }\n\n    function _key(OwnerContext memory o, bytes32 surface, bytes32 scope)\n        private\n        view\n        returns (bytes32)\n    {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2\"),\n                o.environment.chainId,\n                o.environment.registry,\n                o.coordinator,\n                o.archive,\n                address(this),\n                o.domain,\n                surface,\n                scope\n            )\n        );\n    }\n\n    function _consume(\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        OwnerContext memory o,\n        bytes32 surface,\n        bytes32 scope,\n        bytes32 commitment\n    ) private returns (bytes32 key) {\n        key = _key(o, surface, scope);\n        if (replay[key].status != 0) revert T.Replay(key);\n        replay[key] = T.ReplayCell(commitment, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);\n    }\n\n    function _now() private view returns (uint64) {\n        if (block.timestamp > type(uint64).max) revert T.InvalidRecord();\n        return uint64(block.timestamp);\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistIdentityOperations.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"./StreamArtistEconomicOperations.sol\";\nimport \"./StreamArtistAttestationOperations.sol\";\nimport \"./StreamArtistIdentityRevisionState.sol\";\nimport \"./StreamArtistRecordPublicationReads.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCurrentBindingOwner.sol\";\n\n/// @notice Typed identity recipes in the guarded Coordinator's delegatecall context.\nlibrary StreamArtistIdentityOperations {\n    function revise(\n        D.CoordinatorContext memory x,\n        address actor,\n        StreamArtistIdentityRevisionTypes.Revision memory p,\n        T.Authorization memory submitted,\n        bytes memory document,\n        string memory displayName\n    ) public returns (bytes32 record) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 25);\n        (address signer, uint8 class_, uint8 status,) =\n            IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);\n        if (!StreamArtistAuthorityPolicy.ordinary(class_, status, false)) {\n            revert T.InvalidIdentity(p.artistId);\n        }\n        T.Authorization memory effective = _directTime(actor, signer, submitted);\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            signer,\n            StreamArtistIdentityRevisionState.digest(_environment(x), p, effective),\n            effective.signature\n        );\n        record = IStreamArtistIdentityRevisionOwner(x.suite.owners[2])\n            .recordIdentityRevision(\n                T.ActionContext(25, actor, before_[2]), p, effective, proof, document, displayName\n            );\n        _archive(\n            x,\n            25,\n            actor,\n            record,\n            before_,\n            abi.encode(p, submitted, document, displayName, proof, effective)\n        );\n    }\n\n    function validateProposalIdentity(\n        address owner,\n        T.BindingProposal memory p,\n        bytes memory document,\n        string memory displayName\n    ) public view {\n        IStreamArtistIdentityOwner identity = IStreamArtistIdentityOwner(owner);\n        (address authority, uint8 class_, uint8 status,) = identity.authorityState(p.artistId);\n        (bytes32 hash, string memory uri, string memory name) =\n            IStreamArtistIdentityRevisionOwner(owner).operativeIdentityMetadata(p.artistId);\n        if (\n            !StreamArtistAuthorityPolicy.ordinary(class_, status, false)\n                || authority != p.artistAddress || hash != p.identityRecordHash\n                || identity.activeIdentity(p.artistAddress) != p.artistId\n                || keccak256(document) != hash\n                || keccak256(bytes(displayName)) != keccak256(bytes(name))\n                || keccak256(bytes(p.identityRecordURI)) != keccak256(bytes(uri))\n        ) {\n            revert T.InvalidIdentity(p.artistId);\n        }\n    }\n\n    function attest(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.Attestation memory p,\n        T.Authorization memory submitted,\n        bytes memory statement\n    ) public returns (bytes32 record) {\n        if (p.subjectKind >= 1 && p.subjectKind <= 6) {\n            Attest.Subject memory subject;\n            return StreamArtistAttestationOperations.attest(\n                x, actor, p, subject, false, 0, submitted, statement\n            );\n        }\n        if (p.subjectKind == 7 || p.subjectKind == 8) {\n            return _publicationAttestation(x, actor, p, submitted, statement);\n        }\n        T.Snapshot[7] memory before_ = _snapshots(x, 24);\n        T.Binding memory b = StreamArtistOnboardingReads(x.reads).acceptedBinding(p.collectionId);\n        if (!IStreamCoreCollectionView(x.suite.core).collectionExists(p.collectionId)) {\n            revert T.InvalidAttribution(p.collectionId);\n        }\n        R.AuthorityFact memory authority =\n            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);\n        T.Authorization memory effective = _directTime(actor, authority.authorityAddress, submitted);\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            authority.authorityAddress,\n            StreamArtistHashes.attestationDigest(_environment(x), p, effective),\n            effective.signature\n        );\n        bytes32 operative;\n        if (p.subjectKind == 10) {\n            operative = IStreamArtistIdentityRevisionReads(x.suite.owners[2])\n                .operativeIdentityRecord(b.artistId);\n        }\n        record = IStreamArtistIdentityOwner(x.suite.owners[2])\n            .consumeAttestation(T.ActionContext(24, actor, before_[2]), b, p, effective, proof);\n        bytes32 actual = IStreamArtistCurrentAttributionOwner(x.suite.owners[4])\n            .recordAttestationWithAuthority(\n                T.ActionContext(24, actor, before_[4]),\n                b,\n                p,\n                operative,\n                authority,\n                proof.signer,\n                effective.nonce,\n                effective.time,\n                statement\n            );\n        if (actual != record) revert T.InvalidRecord();\n        bytes memory payload = submitted.time == effective.time\n            ? abi.encode(b, p, submitted, statement, proof)\n            : abi.encode(b, p, submitted, statement, proof, effective);\n        if (p.subjectKind == 10) payload = abi.encode(payload, operative);\n        payload = abi.encode(payload, authority);\n        _archive(x, 24, actor, record, before_, payload);\n    }\n\n    function _publicationAttestation(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.Attestation memory p,\n        T.Authorization memory submitted,\n        bytes memory statement\n    ) private returns (bytes32 record) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 24);\n        T.Binding memory b = StreamArtistRecordPublicationReads.binding(x.suite, p.collectionId);\n        (P.Publication memory publication,) =\n            StreamArtistRecordPublicationRules.decode(p, statement);\n        R.AuthorityFact memory authority =\n            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);\n        if (publication.recorder != authority.authorityAddress) revert T.InvalidRecord();\n        bytes32 hostCodeHash = StreamArtistRecordPublicationReads.candidate(x.suite, publication);\n        T.Authorization memory effective = _directTime(actor, authority.authorityAddress, submitted);\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            authority.authorityAddress,\n            StreamArtistHashes.attestationDigest(_environment(x), p, effective),\n            effective.signature\n        );\n        record = IStreamArtistIdentityOwner(x.suite.owners[2])\n            .consumeAttestation(T.ActionContext(24, actor, before_[2]), b, p, effective, proof);\n        bytes32 actual = IStreamArtistRecordPublicationOwner(x.suite.owners[4])\n            .recordPublicationAttestation(\n                T.ActionContext(24, actor, before_[4]),\n                b,\n                p,\n                authority,\n                effective.nonce,\n                effective.time,\n                statement,\n                hostCodeHash\n            );\n        if (actual != record) revert T.InvalidRecord();\n        _archive(\n            x,\n            24,\n            actor,\n            record,\n            before_,\n            abi.encode(\n                b, p, submitted, statement, proof, effective, authority, publication, hostCodeHash\n            )\n        );\n    }\n\n    function _directTime(address actor, address signer, T.Authorization memory submitted)\n        private\n        view\n        returns (T.Authorization memory effective)\n    {\n        effective = T.Authorization(submitted.nonce, submitted.time, submitted.signature);\n        if (\n            actor == signer && actor != address(0) && submitted.signature.length == 0\n                && submitted.time == 0\n        ) {\n            if (block.timestamp > type(uint64).max) revert T.InvalidRecord();\n            effective.time = uint64(block.timestamp);\n        }\n    }\n\n    function _verify(\n        D.CoordinatorContext memory x,\n        address actor,\n        address signer,\n        bytes32 digest,\n        bytes memory signature\n    ) private view returns (T.SignerApproval memory) {\n        if (actor == address(0) || signer == address(0)) {\n            revert T.InvalidSignature();\n        }\n        bool direct = actor == signer && signature.length == 0;\n        if (!direct) {\n            (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(\n                    x.suite.registry\n                ).gasParameterInfo(keccak256(\"6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS\"));\n            if (\n                failure != 2 || revision == 0\n                    || !StreamArtistRegistryValidatorBase(x.suite.validator)\n                        .validateSignerProof(signer, digest, signature, cap)\n            ) revert T.InvalidSignature();\n        }\n        return T.SignerApproval(signer, digest, direct);\n    }\n\n    function _environment(D.CoordinatorContext memory x)\n        private\n        view\n        returns (StreamArtistHashes.Environment memory)\n    {\n        return StreamArtistHashes.Environment(\n            block.chainid, x.suite.registry, x.suite.core, x.suite.mintManager\n        );\n    }\n\n    function _snapshots(D.CoordinatorContext memory x, uint16 op)\n        private\n        view\n        returns (T.Snapshot[7] memory result)\n    {\n        uint256 mask = op == 25 ? 0x04 : 0x17;\n        for (uint256 i; i < 7; ++i) {\n            if ((mask & (1 << i)) != 0) {\n                result[i] = IStreamArtistOwner(x.suite.owners[i]).ownerStateSnapshotV2();\n            }\n        }\n    }\n\n    function _archive(\n        D.CoordinatorContext memory x,\n        uint16 op,\n        address actor,\n        bytes32 record,\n        T.Snapshot[7] memory before_,\n        bytes memory payload\n    ) private {\n        bytes32 id = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1\"),\n                block.chainid,\n                x.suite.registry,\n                address(this),\n                op,\n                actor,\n                record\n            )\n        );\n        bytes memory evidence = abi.encode(\n            uint16(1), x.configurationHash, op, actor, record, before_, _snapshots(x, op), payload\n        );\n        (bytes32 hash,, bool appended) =\n            IStreamArtistArchiveV2(x.suite.archive).appendArtistEvidenceV2(id, 1, evidence);\n        if (!appended || hash != keccak256(evidence)) revert T.InvalidRecord();\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistEconomicOperations.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistDisputeAdmission.sol\";\nimport \"./StreamArtistAuthorizationState.sol\";\nimport \"./StreamArtistCurrentAuthorityFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCurrentConsentOwner.sol\";\nimport {\n    IStreamArtistEconomicsEvidence\n} from \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\n\nimport \"./StreamArtistOnboardingReads.sol\";\nimport \"./StreamArtistEconomicsHashes.sol\";\nimport \"./StreamArtistRegistryValidatorBase.sol\";\nimport \"./StreamArtistDelegationState.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistDelegationOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistDelegatedConsentOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistArchiveV2.sol\";\nimport \"../../interfaces/stream/parameters/IStreamGasParameterHost.sol\";\nimport \"../../interfaces/stream/core/IStreamCoreCollectionView.sol\";\n\n/// @notice Linked typed economic/delegation recipes in the Coordinator's guarded execution context.\n/// @dev No semantic state. Facade authentication, immutable code checks and the operation lock stay on Coordinator.\nlibrary StreamArtistEconomicOperations {\n    function grant(\n        D.CoordinatorContext memory x,\n        address actor,\n        D.Grant memory p,\n        T.Authorization memory a\n    ) public returns (bytes32 record) {\n        StreamArtistDisputeAdmission.requireGrant(x.suite, p);\n        T.Snapshot[7] memory before_ = _snapshots(x, 26);\n        (address signer, uint8 class_, uint8 status,) =\n            IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);\n        if (class_ != 1 || (status != 1 && status != 2)) revert T.InvalidIdentity(p.artistId);\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            signer,\n            StreamArtistDelegationState.grantDigest(_environment(x), p, a.nonce),\n            a.signature\n        );\n        record = IStreamArtistDelegationOwner(x.suite.owners[2])\n            .grantDelegation(T.ActionContext(26, actor, before_[2]), p, a, proof);\n        _archive(x, 26, actor, record, before_, abi.encode(p, a, proof));\n    }\n\n    function revoke(\n        D.CoordinatorContext memory x,\n        address actor,\n        D.Revocation memory p,\n        T.Authorization memory a\n    ) public returns (bytes32 record) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 27);\n        D.Record memory prior = IStreamArtistDelegationOwner(x.suite.owners[2])\n            .delegationRecord(p.delegationRecordHash);\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            prior.grantor,\n            StreamArtistDelegationState.revokeDigest(_environment(x), p, a.nonce, a.time),\n            a.signature\n        );\n        record = IStreamArtistDelegationOwner(x.suite.owners[2])\n            .revokeDelegation(T.ActionContext(27, actor, before_[2]), p, a, proof);\n        _archive(x, 27, actor, record, before_, abi.encode(prior, p, a, proof));\n    }\n\n    function economicsCurrent(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.EconomicsConsent memory p,\n        bytes32 delegation,\n        T.Authorization memory a\n    ) public returns (bytes32) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 15);\n        StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);\n        T.Binding memory b = reads.acceptedBinding(p.collectionId);\n        _collection(x, p.collectionId);\n        T.Payout memory payout = _payout(x, b.artistId);\n        bytes memory currentEvidence = reads.requireCurrentEconomics(p, payout.account);\n        return _economics(x, actor, b, p, payout, delegation, a, before_, currentEvidence);\n    }\n\n    function economicsProspective(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.EconomicsConsent memory p,\n        T.FixedEconomicsCandidate memory candidate,\n        bytes32 delegation,\n        T.Authorization memory a\n    ) public returns (bytes32) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 15);\n        StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);\n        T.Binding memory b = reads.acceptedBinding(p.collectionId);\n        _collection(x, p.collectionId);\n        T.Payout memory payout = _payout(x, b.artistId);\n        (T.AssignmentFact memory actual, bytes32 previousHash) =\n            reads.requireProspectiveEconomicsWithEvidence(p, candidate, payout.account);\n        return _economics(\n            x,\n            actor,\n            b,\n            p,\n            payout,\n            delegation,\n            a,\n            before_,\n            abi.encode(candidate, actual, previousHash)\n        );\n    }\n\n    function economicsProspectiveTemplateFreeze(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.EconomicsConsent memory p,\n        T.Authorization memory a\n    ) public returns (bytes32) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 15);\n        StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);\n        T.Binding memory b = reads.acceptedBinding(p.collectionId);\n        _collection(x, p.collectionId);\n        T.Payout memory payout = _payout(x, b.artistId);\n        bytes memory evidence = reads.requireProspectiveTemplateFreezeEconomics(p, payout.account);\n        return _economics(x, actor, b, p, payout, bytes32(0), a, before_, evidence);\n    }\n\n    function economicsProspectiveTemplate(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.EconomicsConsent memory p,\n        bytes32 templateId,\n        T.Authorization memory a\n    ) public returns (bytes32) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 15);\n        StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);\n        T.Binding memory b = reads.acceptedBinding(p.collectionId);\n        _collection(x, p.collectionId);\n        T.Payout memory payout = _payout(x, b.artistId);\n        bytes memory evidence =\n            reads.requireProspectiveTemplateEconomics(p, templateId, payout.account);\n        return _economics(x, actor, b, p, payout, bytes32(0), a, before_, evidence);\n    }\n\n    function _economics(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.Binding memory b,\n        T.EconomicsConsent memory p,\n        T.Payout memory payout,\n        bytes32 delegation,\n        T.Authorization memory a,\n        T.Snapshot[7] memory before_,\n        bytes memory candidateEvidence\n    ) private returns (bytes32 record) {\n        D.Record memory prior;\n        R.AuthorityFact memory authority =\n            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);\n        address signer = authority.authorityAddress;\n        if (delegation != bytes32(0)) {\n            prior = IStreamArtistDelegationOwner(x.suite.owners[2]).delegationRecord(delegation);\n            signer = prior.grant.delegate;\n        }\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            signer,\n            StreamArtistEconomicsHashes.economicsDigest(_environment(x), p, a.nonce, a.time),\n            a.signature\n        );\n        bytes32 actual;\n        if (delegation == bytes32(0)) {\n            record = IStreamArtistIdentityOwner(x.suite.owners[2])\n                .consumeEconomics(\n                    T.ActionContext(15, actor, before_[2]), b, p, payout.recordHash, a, proof\n                );\n            actual = IStreamArtistCurrentConsentOwner(x.suite.owners[6])\n                .recordEconomicsWithAuthority(\n                    T.ActionContext(15, actor, before_[6]),\n                    b,\n                    p,\n                    payout,\n                    proof.signer,\n                    a.nonce,\n                    authority\n                );\n        } else {\n            record = IStreamArtistDelegationOwner(x.suite.owners[2])\n                .consumeDelegatedEconomics(\n                    T.ActionContext(15, actor, before_[2]),\n                    b,\n                    p,\n                    payout.recordHash,\n                    delegation,\n                    a,\n                    proof\n                );\n            actual = IStreamArtistDelegatedConsentOwner(x.suite.owners[6])\n                .recordDelegatedEconomics(\n                    T.ActionContext(15, actor, before_[6]),\n                    b,\n                    p,\n                    payout,\n                    proof.signer,\n                    a.nonce,\n                    delegation\n                );\n        }\n        if (actual != record) revert T.InvalidRecord();\n        IStreamArtistEconomicsEvidence.Association memory association =\n            IStreamArtistEconomicsEvidence(x.suite.owners[6]).economicsRecordAssociation(record);\n        bytes memory payload = abi.encode(b, p, payout, a, proof, candidateEvidence, association);\n        if (delegation != bytes32(0)) payload = abi.encode(payload, delegation, prior);\n        _archive(x, 15, actor, record, before_, payload);\n    }\n\n    function freeze(\n        D.CoordinatorContext memory x,\n        address actor,\n        T.RoyaltyFreeze memory p,\n        bytes32 delegation,\n        T.Authorization memory a\n    ) public returns (bytes32 record) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 20);\n        StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);\n        T.Binding memory b = reads.defensiveBinding(p.collectionId);\n        _collection(x, p.collectionId);\n        reads.requireRoyaltyFreezeProposal(p);\n        D.Record memory prior;\n        R.AuthorityFact memory authority =\n            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, true);\n        address signer = authority.authorityAddress;\n        if (delegation != bytes32(0)) {\n            prior = IStreamArtistDelegationOwner(x.suite.owners[2]).delegationRecord(delegation);\n            signer = prior.grant.delegate;\n        }\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            signer,\n            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(x), p, a.nonce, a.time),\n            a.signature\n        );\n        bytes32 actual;\n        if (delegation == bytes32(0)) {\n            record = IStreamArtistIdentityOwner(x.suite.owners[2])\n                .consumeRoyaltyFreeze(T.ActionContext(20, actor, before_[2]), b, p, a, proof);\n            actual = IStreamArtistCurrentConsentOwner(x.suite.owners[6])\n                .authorizeRoyaltyFreezeWithAuthority(\n                    T.ActionContext(20, actor, before_[6]), b, p, proof.signer, a.nonce, authority\n                );\n        } else {\n            record = IStreamArtistDelegationOwner(x.suite.owners[2])\n                .consumeDelegatedRoyaltyFreeze(\n                    T.ActionContext(20, actor, before_[2]), b, p, delegation, a, proof\n                );\n            actual = IStreamArtistDelegatedConsentOwner(x.suite.owners[6])\n                .authorizeDelegatedRoyaltyFreeze(\n                    T.ActionContext(20, actor, before_[6]), b, p, proof.signer, a.nonce, delegation\n                );\n        }\n        if (actual != record) revert T.InvalidRecord();\n        bytes memory payload = abi.encode(b, p, a, proof);\n        if (delegation != bytes32(0)) payload = abi.encode(payload, delegation, prior);\n        _archive(x, 20, actor, record, before_, payload);\n    }\n\n    function _payout(D.CoordinatorContext memory x, bytes32 artistId)\n        private\n        view\n        returns (T.Payout memory payout)\n    {\n        (payout.account, payout.recordHash) =\n            StreamArtistOnboardingReads(x.reads).artistPayoutAccount(artistId);\n        if (payout.account == address(0) || payout.recordHash == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        }\n    }\n\n    function revokeAuthorization(\n        D.CoordinatorContext memory x,\n        address actor,\n        StreamArtistAuthorizationTypes.Revocation memory p,\n        T.Authorization memory a\n    ) public returns (bytes32 record) {\n        T.Snapshot[7] memory before_ = _snapshots(x, 54);\n        (address signer,,,) =\n            IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);\n        T.SignerApproval memory proof = _verify(\n            x,\n            actor,\n            signer,\n            StreamArtistAuthorizationState.digest(_environment(x), p, a),\n            a.signature\n        );\n        record = IStreamArtistAuthorizationOwner(x.suite.owners[2])\n            .revokeAuthorization(T.ActionContext(54, actor, before_[2]), p, a, proof);\n        _archive(x, 54, actor, record, before_, abi.encode(p, a, proof));\n    }\n\n    function _verify(\n        D.CoordinatorContext memory x,\n        address actor,\n        address signer,\n        bytes32 digest,\n        bytes memory signature\n    ) private view returns (T.SignerApproval memory) {\n        if (actor == address(0) || signer == address(0)) {\n            revert T.InvalidSignature();\n        }\n        bool direct = actor == signer && signature.length == 0;\n        if (!direct) {\n            (uint256 cap,, uint8 failureClass, uint64 revision) = IStreamGasParameterHost(\n                    x.suite.registry\n                ).gasParameterInfo(keccak256(\"6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS\"));\n            if (\n                revision == 0 || failureClass != 2\n                    || !StreamArtistRegistryValidatorBase(x.suite.validator)\n                        .validateSignerProof(signer, digest, signature, cap)\n            ) revert T.InvalidSignature();\n        }\n        return T.SignerApproval(signer, digest, direct);\n    }\n\n    function _collection(D.CoordinatorContext memory x, uint256 collectionId) private view {\n        if (!IStreamCoreCollectionView(x.suite.core).collectionExists(collectionId)) {\n            revert T.InvalidAttribution(collectionId);\n        }\n    }\n\n    function _environment(D.CoordinatorContext memory x)\n        private\n        view\n        returns (StreamArtistHashes.Environment memory)\n    {\n        return StreamArtistHashes.Environment(\n            block.chainid, x.suite.registry, x.suite.core, x.suite.mintManager\n        );\n    }\n\n    function _snapshots(D.CoordinatorContext memory x, uint16 op)\n        private\n        view\n        returns (T.Snapshot[7] memory result)\n    {\n        uint256 mask = op == 26 || op == 27 || op == 54 ? 4 : op == 15 ? 0x77 : 0x57;\n        for (uint256 i; i < 7; ++i) {\n            if ((mask & (1 << i)) != 0) {\n                result[i] = IStreamArtistOwner(x.suite.owners[i]).ownerStateSnapshotV2();\n            }\n        }\n    }\n\n    function _archive(\n        D.CoordinatorContext memory x,\n        uint16 op,\n        address actor,\n        bytes32 record,\n        T.Snapshot[7] memory prior,\n        bytes memory payload\n    ) private {\n        T.Snapshot[7] memory after_ = _snapshots(x, op);\n        bytes32 id = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1\"),\n                block.chainid,\n                x.suite.registry,\n                address(this),\n                op,\n                actor,\n                record\n            )\n        );\n        bytes memory evidence =\n            abi.encode(uint16(1), x.configurationHash, op, actor, record, prior, after_, payload);\n        (bytes32 hash,, bool appended) =\n            IStreamArtistArchiveV2(x.suite.archive).appendArtistEvidenceV2(id, 1, evidence);\n        if (!appended || hash != keccak256(evidence)) revert T.InvalidRecord();\n    }\n}\n"
   },
   "selections": {
     "registry": {
@@ -341,7 +346,26 @@
         "bindingTermination",
         "saleConsentRecord",
         "contentFreezeAuthorization",
-        "isRoyaltyFreezeAuthorized"
+        "isRoyaltyFreezeAuthorized",
+        "recordIdentityRevision",
+        "grantArtistDelegation",
+        "revokeArtistDelegation",
+        "identityRevisionDigest",
+        "delegationGrantDigest",
+        "delegationRevocationDigest",
+        "operativeIdentityRecord",
+        "identityRecordBytes",
+        "identityDocumentBytes",
+        "artistDisplayName",
+        "identityRevisionRecord",
+        "identityRevisionProvisionalAssociation",
+        "delegationRecord",
+        "delegationState",
+        "delegatedNonceState",
+        "recordDelegation",
+        "operativeEstateDirective",
+        "estateDirectiveRecord",
+        "activeAuthorityWindow"
       ]
     },
     "coordinator": {
@@ -373,10 +397,25 @@
       "methods": [
         "authorityState",
         "artistAuthorizationState",
-        "currentAuthorityCapabilities"
+        "currentAuthorityCapabilities",
+        "delegationEpochState",
+        "signatureBundle",
+        "identity",
+        "operativeIdentityRecord",
+        "identityRecordBytes",
+        "identityDocumentBytes",
+        "artistDisplayName",
+        "identityRevisionRecord",
+        "identityRevisionProvisionalAssociation",
+        "delegationRecord",
+        "activeAuthorityWindow"
       ],
       "events": [
-        "ArtistAuthorizationRevoked"
+        "ArtistAuthorizationRevoked",
+        "ArtistIdentityRevisionRecorded",
+        "ArtistIdentityDisplayNameStored",
+        "ArtistDelegationGranted",
+        "ArtistDelegationRevoked"
       ]
     },
     "binding": {
@@ -2189,6 +2228,35 @@
             "internalType": "bytes32",
             "name": "artistId",
             "type": "bytes32"
+          }
+        ],
+        "name": "activeAuthorityWindow",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          },
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
           },
           {
             "internalType": "bytes32",
@@ -2234,6 +2302,30 @@
             "internalType": "struct StreamArtistAuthorizationTypes.State",
             "name": "",
             "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "artistDisplayName",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
           }
         ],
         "stateMutability": "view",
@@ -2737,6 +2829,418 @@
         "inputs": [
           {
             "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          }
+        ],
+        "name": "delegatedNonceState",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint32",
+                "name": "capabilities",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "notBefore",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "expiresAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "maxUses",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "constraintsHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistDelegationTypes.Grant",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "delegationGrantDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          }
+        ],
+        "name": "delegationRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "artistId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "delegate",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "capabilities",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "notBefore",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "expiresAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "maxUses",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "constraintsHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamArtistDelegationTypes.Grant",
+                "name": "grant",
+                "type": "tuple"
+              },
+              {
+                "internalType": "address",
+                "name": "grantor",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "uses",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "revoked",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revocationRecordHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistDelegationTypes.Record",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "delegationRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "reasonHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistDelegationTypes.Revocation",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "delegationRevocationDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          }
+        ],
+        "name": "delegationState",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "estateDirectiveRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "recordHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "artistId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "grantedCapabilities",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "forbiddenCapabilities",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "directivePayloadHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamArtistSuccessionTypes.Directive",
+                "name": "terms",
+                "type": "tuple"
+              },
+              {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "authorityClass",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "signedAt",
+                "type": "uint64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "transitionRecordHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "windowEndsAt",
+                    "type": "uint64"
+                  }
+                ],
+                "internalType": "struct StreamArtistRotationTypes.ProvisionalAssociation",
+                "name": "provisional",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct StreamArtistSuccessionTypes.DirectiveRecord",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
             "name": "parameterId",
             "type": "bytes32"
           }
@@ -2762,6 +3266,297 @@
             "internalType": "uint64",
             "name": "revision",
             "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint32",
+                "name": "capabilities",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "notBefore",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "expiresAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "maxUses",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "constraintsHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistDelegationTypes.Grant",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "grantArtistDelegation",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityDocumentBytes",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityRecordBytes",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revisedRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "identityRecordURI",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamArtistIdentityRevisionTypes.Revision",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "identityRevisionDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityRevisionProvisionalAssociation",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "transitionRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "windowEndsAt",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamArtistRotationTypes.ProvisionalAssociation",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityRevisionRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "recordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revisedRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousRevisionRecord",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "authorityClass",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "signedAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "string",
+                "name": "identityRecordURI",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "displayName",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamArtistIdentityRevisionTypes.Record",
+            "name": "",
+            "type": "tuple"
           }
         ],
         "stateMutability": "view",
@@ -2815,6 +3610,136 @@
           }
         ],
         "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "operativeEstateDirective",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "operativeIdentityRecord",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "recordDelegation",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revisedRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "identityRecordURI",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamArtistIdentityRevisionTypes.Revision",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "document",
+            "type": "bytes"
+          },
+          {
+            "internalType": "string",
+            "name": "displayName",
+            "type": "string"
+          }
+        ],
+        "name": "recordIdentityRevision",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
         "type": "function"
       },
       {
@@ -2996,6 +3921,69 @@
           }
         ],
         "name": "revokeArtistAuthorization",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "delegationRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "reasonHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistDelegationTypes.Revocation",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "revokeArtistDelegation",
         "outputs": [
           {
             "internalType": "bytes32",
@@ -3498,6 +4486,261 @@
         "type": "event"
       },
       {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "capabilities",
+            "type": "uint32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "notBefore",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "expiresAt",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "maxUses",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "constraintsHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "delegationRecordHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "ArtistDelegationGranted",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "delegationRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "reasonHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "signer",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "authorityClass",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "signedAt",
+            "type": "uint64"
+          }
+        ],
+        "name": "ArtistDelegationRevoked",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "identityRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "displayName",
+            "type": "string"
+          }
+        ],
+        "name": "ArtistIdentityDisplayNameStored",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "signer",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "previousRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "revisedRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "identityRecordURI",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "authorityClass",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "signedAt",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "revisionRecordHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "ArtistIdentityRevisionRecorded",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "activeAuthorityWindow",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          },
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
         "inputs": [
           {
             "internalType": "bytes32",
@@ -3548,6 +4791,30 @@
             "internalType": "struct StreamArtistAuthorizationTypes.State",
             "name": "",
             "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "artistDisplayName",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
           }
         ],
         "stateMutability": "view",
@@ -3628,6 +4895,377 @@
             "internalType": "struct StreamArtistEstateTypes.AuthorityCapabilities",
             "name": "",
             "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          }
+        ],
+        "name": "delegationEpochState",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint64",
+            "name": "recorded",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "current",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          }
+        ],
+        "name": "delegationRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "artistId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "delegate",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "capabilities",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "notBefore",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "expiresAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "maxUses",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "constraintsHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamArtistDelegationTypes.Grant",
+                "name": "grant",
+                "type": "tuple"
+              },
+              {
+                "internalType": "address",
+                "name": "grantor",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "uses",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "revoked",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revocationRecordHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistDelegationTypes.Record",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identity",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "authorityAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "authorityClass",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "status",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint64",
+                "name": "registeredAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "lastAuthorityActionAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "identityRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "identityRecordURI",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "displayName",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nonceHint",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Identity",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "documentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityDocumentBytes",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityRecordBytes",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityRevisionProvisionalAssociation",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "transitionRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "windowEndsAt",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamArtistRotationTypes.ProvisionalAssociation",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "identityRevisionRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "recordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revisedRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousRevisionRecord",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "authorityClass",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "signedAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "string",
+                "name": "identityRecordURI",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "displayName",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamArtistIdentityRevisionTypes.Record",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "operativeIdentityRecord",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "recordHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "signatureBundle",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
           }
         ],
         "stateMutability": "view",

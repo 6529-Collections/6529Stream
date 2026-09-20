@@ -1,4 +1,4 @@
-import { Interface, ZeroAddress, ZeroHash, getAddress, id, isHexString, toUtf8Bytes } from "ethers";
+import { Interface, ZeroAddress, ZeroHash, getAddress, id, isHexString, keccak256, toUtf8Bytes } from "ethers";
 import type { Address, Hex } from "./generated/contracts.js";
 import type { UnsignedCall } from "./binding.js";
 import type { SigningPayload } from "./signing.js";
@@ -24,12 +24,34 @@ export interface CurrentArtistContentFreeze extends DeadlineAuthorization {
 export interface CurrentArtistAuthorizationRevocation extends DeadlineAuthorization {
   readonly artistId: Hex; readonly revokedDigest: Hex; readonly revokedNonce: bigint;
 }
+export interface CurrentArtistIdentityRevision {
+  readonly artistId: Hex; readonly previousRecordHash: Hex; readonly revisedRecordHash: Hex;
+  readonly nonce: bigint;
+  /** Direct zero is an execution-time sentinel; positive values are the original signedAt. */
+  readonly signedAt: bigint;
+}
+export interface CurrentArtistDelegationGrant {
+  readonly core: Address; readonly delegate: Address;
+  /** Zero grants global collection scope. */
+  readonly collectionId: bigint;
+  readonly capabilities: bigint; readonly notBefore: bigint; readonly expiresAt: bigint;
+  /** Zero means unlimited uses. */
+  readonly maxUses: bigint;
+  readonly constraintsHash: Hex; readonly nonce: bigint;
+}
+export interface CurrentArtistDelegationRevocation extends DeadlineAuthorization {
+  readonly artistId: Hex; readonly delegate: Address; readonly delegationRecordHash: Hex;
+  readonly reasonHash: Hex;
+}
 export interface CurrentArtistOperationMessages {
   bindingRefusal: CurrentArtistBindingRefusal;
   saleConsent: CurrentArtistSaleConsent;
   royaltyFreeze: CurrentArtistRoyaltyFreeze;
   contentFreeze: CurrentArtistContentFreeze;
   authorizationRevocation: CurrentArtistAuthorizationRevocation;
+  identityRevision: CurrentArtistIdentityRevision;
+  delegationGrant: CurrentArtistDelegationGrant;
+  delegationRevocation: CurrentArtistDelegationRevocation;
 }
 export type CurrentArtistOperationKind = keyof CurrentArtistOperationMessages;
 export interface CurrentArtistOperationDetails {
@@ -39,15 +61,19 @@ export interface CurrentArtistOperationDetails {
   royaltyFreeze: Readonly<Record<string, never>>;
   contentFreeze: Readonly<Record<string, never>>;
   authorizationRevocation: Readonly<Record<string, never>>;
+  /** The original signature binds the document hash, not its URI or display name. */
+  identityRevision: { readonly identityRecordURI: string; readonly document: Hex; readonly displayName: string };
+  delegationGrant: Readonly<Record<string, never>>;
+  delegationRevocation: Readonly<Record<string, never>>;
 }
 interface OperationContext {
   readonly chainId: bigint;
   /** Actual immutable Onboarding Registry facade, never an owner or coordinator. */
   readonly registry: Address;
   readonly caller: Address;
-  /** Supplied authority claim; the pure codec does not establish current authority. */
+  /** Supplied signer claim. Delegation revocation uses the stored grantor; live reads establish authority. */
   readonly signer: Address;
-  /** Supplied authority/replay locator, outside the signed schema except for operation 54. */
+  /** Supplied authority/replay locator; delegation grant keeps this outside its original signed schema. */
   readonly artistId: Hex;
   readonly mode: "direct" | "signature";
   /** Opaque EOA/ERC-1271 proof; an empty contract proof can be valid for a distinct caller. */
@@ -76,11 +102,14 @@ const schemes = {
   royaltyFreeze: ["StreamArtistRoyaltyFreeze", "address core,address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash,uint256 nonce,uint64 deadline", 20n, "authorizeArtistRoyaltyFreeze", "royaltyFreezeDigest", "(address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash)"],
   contentFreeze: ["StreamArtistContentFreeze", "address core,address metadataContract,uint256 collectionId,bytes32[] lockClasses,bytes32 expectedStateHash,uint256 nonce,uint64 deadline", 21n, "authorizeArtistContentFreeze", "contentFreezeDigest", "(uint256 collectionId,address metadataContract,bytes32[] lockClasses,bytes32 expectedStateHash)"],
   authorizationRevocation: ["StreamArtistAuthorizationRevocation", "bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce,uint256 nonce,uint64 deadline", 54n, "revokeArtistAuthorization", "authorizationRevocationDigest", "(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce)"],
+  identityRevision: ["StreamArtistIdentityRevision", "bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,uint256 nonce,uint64 signedAt", 25n, "recordIdentityRevision", "identityRevisionDigest", "(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,string identityRecordURI)"],
+  delegationGrant: ["StreamArtistDelegation", "address core,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash,uint256 nonce", 26n, "grantArtistDelegation", "delegationGrantDigest", "(bytes32 artistId,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash)"],
+  delegationRevocation: ["StreamArtistDelegationRevocation", "bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash,uint256 nonce,uint64 deadline", 27n, "revokeArtistDelegation", "delegationRevocationDigest", "(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash)"],
 } as const;
 const authorization = "(uint256 nonce,uint64 time,bytes signature)";
-/** Original principal write and getter variants for operations 3, 16, 20, 21 and 54. */
+/** Original principal write and getter variants for operations 3, 16, 20, 21, 25–27 and 54. */
 export const CURRENT_ARTIST_OPERATION_ABI: readonly string[] = Object.freeze(Object.values(schemes).flatMap(([, , , method, getter, tuple]) => [
-  `function ${method}(${tuple},${authorization}) returns (bytes32)`,
+  `function ${method}(${tuple},${authorization}${method === "recordIdentityRevision" ? ",bytes document,string displayName" : ""}) returns (bytes32)`,
   `function ${getter}(${tuple},${authorization}) view returns (bytes32)`,
 ]));
 const operations = new Interface(CURRENT_ARTIST_OPERATION_ABI);
@@ -100,6 +129,17 @@ function address(input: unknown, label: string): Address {
 function nonzeroHash(input: unknown, label: string): Hex {
   if (typeof input !== "string" || !isHexString(input, 32) || input.toLowerCase() === ZeroHash) throw new Error(`${label} must be nonzero bytes32`);
   return input.toLowerCase() as Hex;
+}
+function text(input: unknown, label: string, minimum: number, maximum: number): string {
+  if (typeof input !== "string") throw new Error(`${label} must be text`);
+  // This API accepts Unicode text. Solidity strings can also hold arbitrary non-UTF-8 bytes.
+  for (const character of input) {
+    const point = character.codePointAt(0)!;
+    if (point >= 0xd800 && point <= 0xdfff) throw new Error(`${label} must contain valid Unicode scalars`);
+  }
+  const length = toUtf8Bytes(input).length;
+  if (length < minimum || length > maximum) throw new Error(`${label} must contain ${minimum}..${maximum} UTF-8 bytes`);
+  return input;
 }
 function selected(kind: CurrentArtistOperationKind) {
   if (typeof kind !== "string" || !Object.hasOwn(schemes, kind)) throw new Error("Unknown current Artist operation kind");
@@ -121,9 +161,11 @@ export function currentArtistOperationTypedData<K extends CurrentArtistOperation
   const m = payload.message as unknown as Record<string, unknown>;
   for (const field of scheme.fields) {
     if (field.type === "address") address(m[field.name], field.name);
-    if (field.type === "bytes32" && field.name !== "revokedDigest") nonzeroHash(m[field.name], field.name);
+    const zeroAllowed = field.name === "revokedDigest" || (kind === "delegationGrant" && field.name === "constraintsHash")
+      || (kind === "delegationRevocation" && field.name === "reasonHash");
+    if (field.type === "bytes32" && !zeroAllowed) nonzeroHash(m[field.name], field.name);
   }
-  if ("collectionId" in m && (m.collectionId as bigint) === 0n) throw new Error("collectionId must be positive");
+  if (kind !== "delegationGrant" && "collectionId" in m && (m.collectionId as bigint) === 0n) throw new Error("collectionId must be positive");
   if (kind === "bindingRefusal" && m.bindingGeneration === 0n) throw new Error("bindingGeneration must be positive");
   if (kind === "royaltyFreeze" && String(m.revenueClass).toLowerCase() !== royaltyClass) throw new Error("Royalty freeze requires ROYALTY_ERC2981");
   if (kind === "contentFreeze") {
@@ -138,6 +180,11 @@ export function currentArtistOperationTypedData<K extends CurrentArtistOperation
     const zeroDigest = String(m.revokedDigest).toLowerCase() === ZeroHash;
     if (zeroDigest === (m.revokedNonce === 0n)) throw new Error("Revocation requires exactly one digest or nonzero nonce target");
     if (String(m.revokedDigest).toLowerCase() === payload.digest || (zeroDigest && m.revokedNonce === m.nonce)) throw new Error("Authorization cannot revoke itself");
+  }
+  if (kind === "identityRevision" && String(m.previousRecordHash).toLowerCase() === String(m.revisedRecordHash).toLowerCase()) throw new Error("Identity revision must change the document hash");
+  if (kind === "delegationGrant") {
+    if (m.capabilities === 0n || ((m.capabilities as bigint) & ~117n) !== 0n) throw new Error("Delegation capabilities must be a nonzero subset of 117");
+    if ((m.expiresAt as bigint) <= (m.notBefore as bigint)) throw new Error("Delegation expiresAt must follow notBefore");
   }
   return payload;
 }
@@ -154,25 +201,33 @@ export function normalizeCurrentArtistOperationRequest<K extends CurrentArtistOp
   if (input.mode !== "direct" && input.mode !== "signature") throw new Error("Unknown Artist authorization mode");
   const direct = caller === signer && signature === "0x";
   if ((input.mode === "direct") !== direct) throw new Error("Authorization mode differs from the actual caller/signature predicate");
-  exact(input.details, input.kind === "bindingRefusal" ? ["reasonURI"] : [], "Artist operation details");
+  exact(input.details, input.kind === "bindingRefusal" ? ["reasonURI"]
+    : input.kind === "identityRevision" ? ["identityRecordURI", "document", "displayName"] : [], "Artist operation details");
   let details: CurrentArtistOperationDetails[CurrentArtistOperationKind] = Object.freeze({});
   if (input.kind === "bindingRefusal") {
-    const reasonURI = (input.details as CurrentArtistOperationDetails["bindingRefusal"]).reasonURI;
-    if (typeof reasonURI !== "string") throw new Error("reasonURI must be text");
-    // This API accepts Unicode text. Solidity strings can also hold arbitrary non-UTF-8 bytes.
-    for (const character of reasonURI) {
-      const point = character.codePointAt(0)!;
-      if (point >= 0xd800 && point <= 0xdfff) throw new Error("reasonURI must contain valid Unicode scalars");
-    }
-    if (toUtf8Bytes(reasonURI).length > 2048) throw new Error("reasonURI must be at most 2048 UTF-8 bytes");
+    const reasonURI = text((input.details as CurrentArtistOperationDetails["bindingRefusal"]).reasonURI, "reasonURI", 0, 2048);
     details = Object.freeze({ reasonURI });
   }
-  if (input.kind === "authorizationRevocation" && (payload.message as CurrentArtistAuthorizationRevocation).artistId.toLowerCase() !== artistId) throw new Error("Revocation artistId differs from the authority/replay locator");
+  if (input.kind === "identityRevision") {
+    const original = input.details as CurrentArtistOperationDetails["identityRevision"];
+    const identityRecordURI = text(original.identityRecordURI, "identityRecordURI", 0, 2048), displayName = text(original.displayName, "displayName", 1, 256);
+    if (typeof original.document !== "string" || !isHexString(original.document, true) || original.document.length <= 2 || original.document.length > 2 + 8192 * 2) throw new Error("Identity document must contain 1..8192 complete hex bytes");
+    const document = original.document.toLowerCase() as Hex, m = payload.message as CurrentArtistIdentityRevision;
+    if (keccak256(document) !== m.revisedRecordHash.toLowerCase()) throw new Error("Identity document differs from revisedRecordHash");
+    if (!direct && m.signedAt === 0n) throw new Error("Signed identity revision requires positive signedAt");
+    details = Object.freeze({ identityRecordURI, document, displayName });
+  }
+  if ("artistId" in payload.message && payload.message.artistId.toLowerCase() !== artistId) throw new Error("Signed artistId differs from the authority/replay locator");
+  if (input.kind === "delegationGrant" && (payload.message as CurrentArtistDelegationGrant).delegate === signer) throw new Error("Artist cannot delegate to its own grantor address");
   return Object.freeze({ kind: input.kind, chainId: input.chainId, registry: payload.domain.verifyingContract as Address,
     caller, signer, artistId, mode: input.mode, signature, message: payload.message, details }) as CurrentArtistOperationRequest<K>;
 }
 
-/** No transaction or authorization is performed; both calls target the actual signing facade. */
+/**
+ * No transaction or authorization is performed; both calls target the actual signing facade.
+ * A direct revision with signedAt zero retains that submitted sentinel in its payload/getter;
+ * its effective execution digest requires the eventual block timestamp and is not asserted here.
+ */
 export function prepareCurrentArtistAction<K extends CurrentArtistOperationKind>(input: CurrentArtistOperationRequest<K>): PreparedCurrentArtistAction<K> {
   const request = normalizeCurrentArtistOperationRequest(input), scheme = selected(request.kind);
   const payload = currentArtistOperationTypedData(request.kind, request.chainId, request.registry, request.message);
@@ -184,10 +239,20 @@ export function prepareCurrentArtistAction<K extends CurrentArtistOperationKind>
     case "royaltyFreeze": terms = [m.resolver, m.collectionId, m.revenueClass, m.expectedAssignmentHash]; break;
     case "contentFreeze": terms = [m.collectionId, m.metadataContract, m.lockClasses, m.expectedStateHash]; break;
     case "authorizationRevocation": terms = [m.artistId, m.revokedDigest, m.revokedNonce]; break;
+    case "identityRevision": terms = [m.artistId, m.previousRecordHash, m.revisedRecordHash, (request.details as CurrentArtistOperationDetails["identityRevision"]).identityRecordURI]; break;
+    case "delegationGrant": terms = [request.artistId, m.delegate, m.collectionId, m.capabilities, m.notBefore, m.expiresAt, m.maxUses, m.constraintsHash]; break;
+    case "delegationRevocation": terms = [m.artistId, m.delegate, m.delegationRecordHash, m.reasonHash]; break;
     default: throw new Error("Unknown current Artist operation kind");
   }
-  const call = (method: string, signature: Hex): UnsignedCall => Object.freeze({ to: request.registry, value: 0n,
-    data: operations.encodeFunctionData(method, [terms, [m.nonce, m.deadline, signature]]) as Hex });
+  const time = request.kind === "delegationGrant" ? 0n : request.kind === "identityRevision" ? m.signedAt : m.deadline;
+  const call = (method: string, signature: Hex): UnsignedCall => {
+    const args: unknown[] = [terms, [m.nonce, time, signature]];
+    if (request.kind === "identityRevision" && method === scheme.method) {
+      const details = request.details as CurrentArtistOperationDetails["identityRevision"];
+      args.push(details.document, details.displayName);
+    }
+    return Object.freeze({ to: request.registry, value: 0n, data: operations.encodeFunctionData(method, args) as Hex });
+  };
   return Object.freeze({ request, payload, operationId: scheme.operationId, method: scheme.method, digestMethod: scheme.digestMethod,
     call: call(scheme.method, request.signature), digestCall: call(scheme.digestMethod, "0x") });
 }

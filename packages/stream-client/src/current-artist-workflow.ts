@@ -1,6 +1,6 @@
 import { AbiCoder, Interface, ZeroAddress, ZeroHash, getAddress, id, isHexString, keccak256, type Provider } from "ethers";
 import type { Address, Hex } from "./generated/contracts.js";
-import { prepareCurrentArtistAction, normalizeCurrentArtistAction } from "./current-artist-operation.js";
+import { prepareCurrentArtistAction, normalizeCurrentArtistAction, currentArtistOperationTypedData, CURRENT_ARTIST_OPERATION_ABI } from "./current-artist-operation.js";
 import type { CurrentArtistOperationRequest } from "./current-artist-operation.js";
 import { createSafeCallPlan, type SafeCallPlan } from "./safe-plan.js";
 export interface CurrentArtistCodePin {
@@ -40,6 +40,30 @@ export interface CurrentArtistBinding {
   readonly proposer: Address;
   readonly accepted: boolean;
 }
+export interface CurrentArtistTiming {
+  readonly kind: "deadline" | "dated" | "nonce-only";
+  readonly submittedTime: bigint;
+  readonly effectiveTime: bigint;
+  /** For direct dated time zero, this digest belongs only to the captured block. */
+  readonly effectiveDigest: Hex;
+}
+export interface CurrentArtistDelegationRecord {
+  readonly grant: {
+    readonly artistId: Hex;
+    readonly delegate: Address;
+    readonly collectionId: bigint;
+    readonly capabilities: bigint;
+    readonly notBefore: bigint;
+    readonly expiresAt: bigint;
+    readonly maxUses: bigint;
+    readonly constraintsHash: Hex;
+  };
+  readonly grantor: Address;
+  readonly nonce: bigint;
+  readonly uses: bigint;
+  readonly revoked: boolean;
+  readonly revocationRecordHash: Hex;
+}
 export interface CurrentArtistCapture {
   readonly deployment: CurrentArtistDeployment;
   readonly action: Action;
@@ -51,6 +75,11 @@ export interface CurrentArtistCapture {
   readonly binding: CurrentArtistBinding | null;
   readonly replay: CurrentArtistReplay;
   readonly revocationTarget: CurrentArtistReplay | null;
+  readonly timing: CurrentArtistTiming;
+  readonly revision: {
+    readonly operativeDocumentHash: Hex;
+  } | null;
+  readonly delegation: CurrentArtistDelegationRecord | null;
   /** Authority/replay observation only; exact write simulation performs operation-specific admission. */
   readonly simulationRequired: true;
   readonly captureHash: Hex;
@@ -71,6 +100,7 @@ export interface CurrentArtistReceipt {
   readonly evidenceId: Hex;
   readonly events: readonly CurrentArtistEventReference[];
   readonly observedReplay: CurrentArtistReplay;
+  readonly effectiveDigest: Hex;
 }
 type Reader = Pick<Provider, "getNetwork" | "getBlock" | "getCode" | "call">;
 type ReceiptReader = Reader & Pick<Provider, "getTransaction" | "getTransactionReceipt">;
@@ -81,17 +111,27 @@ const S = "(bytes32 domainId,uint64 revision,bytes32 stateRoot,bytes32 recordCha
 const P = "(address signer,bytes32 digest,bool direct)";
 const F = "(bytes32 artistId,address authorityAddress,uint8 authorityClass,uint8 status)";
 const R = "(bool digestObserved,bool digestRevoked,bool nonceConsumed,bool nonceRevoked,uint256 nextUnusedNonce)";
+const G = "(bytes32 artistId,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash)";
+const D = `(${G} grant,address grantor,uint256 nonce,uint256 uses,bool revoked,bytes32 revocationRecordHash)`;
 const terms = {
-  bindingRefusal: "(uint256 collectionId,uint64 generation,bytes32 bindingHash,bytes32 reasonHash,string reasonURI)", saleConsent: "(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash)", royaltyFreeze: "(address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash)", contentFreeze: "(uint256 collectionId,address metadataContract,bytes32[] lockClasses,bytes32 expectedStateHash)", authorizationRevocation: "(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce)"
+  bindingRefusal: "(uint256 collectionId,uint64 generation,bytes32 bindingHash,bytes32 reasonHash,string reasonURI)",
+  saleConsent: "(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash)",
+  royaltyFreeze: "(address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash)",
+  contentFreeze: "(uint256 collectionId,address metadataContract,bytes32[] lockClasses,bytes32 expectedStateHash)",
+  authorizationRevocation: "(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce)",
+  identityRevision: "(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,string identityRecordURI)",
+  delegationGrant: G,
+  delegationRevocation: "(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash)"
 } as const;
-const methods = {
-  bindingRefusal: ["refuseArtistBinding", "bindingRefusalDigest"], saleConsent: ["recordSaleConsent", "saleConsentDigest"], royaltyFreeze: ["authorizeArtistRoyaltyFreeze", "royaltyFreezeDigest"], contentFreeze: ["authorizeArtistContentFreeze", "contentFreezeDigest"], authorizationRevocation: ["revokeArtistAuthorization", "authorizationRevocationDigest"]
-} as const;
-const writes = Object.entries(terms).flatMap(([k, t]) => {
-  const names = methods[k as keyof typeof methods];
-  return [`function ${names[0]}(${t},${A}) returns(bytes32)`, `function ${names[1]}(${t},${A}) view returns(bytes32)`];
-});
-const abi = new Interface([...writes,
+const abi = new Interface([...CURRENT_ARTIST_OPERATION_ABI,
+  "function operativeIdentityRecord(bytes32) view returns(bytes32)",
+  "function identityDocumentBytes(bytes32) view returns(bytes)",
+  "function identityRevisionRecord(bytes32) view returns((bytes32 recordHash,bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,bytes32 previousRevisionRecord,address signer,uint8 authorityClass,uint256 nonce,uint64 signedAt,string identityRecordURI,string displayName))",
+  `function delegationRecord(bytes32) view returns(${D})`,
+  "event ArtistIdentityRevisionRecorded(uint16 schemaVersion,bytes32 indexed artistId,address indexed signer,bytes32 previousRecordHash,bytes32 revisedRecordHash,string identityRecordURI,uint8 authorityClass,uint256 nonce,uint64 signedAt,bytes32 revisionRecordHash)",
+  "event ArtistIdentityDisplayNameStored(bytes32 indexed artistId,bytes32 indexed identityRecordHash,string displayName)",
+  "event ArtistDelegationGranted(uint16 schemaVersion,bytes32 indexed artistId,address indexed delegate,uint256 indexed collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash,uint256 nonce,bytes32 delegationRecordHash)",
+  "event ArtistDelegationRevoked(uint16 schemaVersion,bytes32 indexed artistId,address indexed delegate,bytes32 indexed delegationRecordHash,bytes32 reasonHash,address signer,uint8 authorityClass,uint256 nonce,uint64 signedAt)",
   "function core() view returns(address)", "function mintManager() view returns(address)", "function operationCoordinator() view returns(address)", "function artistRegistry() view returns(address)", "function archiveV2() view returns(address)", "function deploymentChainId() view returns(uint256)", "function domainId() view returns(bytes32)", "function configurationHash() view returns(bytes32)",
   "function suiteConfiguration() view returns((address registry,address archive,address[7] owners,address core,address mintManager,address roleRegistry,address metadata,address primaryResolver,address royaltyResolver,bytes32 primaryRevenueClass,address validator))",
   `function binding(uint256) view returns(${B})`, "function attributionState(uint256) view returns(uint8,uint64)", "function bindingTerms(uint256,uint64) view returns((bytes32 collaboratorSetHash,bytes32 capabilityPolicySetHash,uint8 mode,uint32 threshold,uint32 count))", "function acceptedCount(bytes32) view returns(uint32)",
@@ -311,7 +351,7 @@ function captureHash(v: unknown): Hex {
   return keccak256(new TextEncoder().encode(stable(v))) as Hex;
 }
 function saved(v: CurrentArtistCapture): CurrentArtistCapture {
-  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "simulationRequired", "captureHash"]);
+  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "simulationRequired", "captureHash"]);
   const d = deployment(v.deployment);
   const a = normalizeCurrentArtistAction(v.action);
   const c = copy(v);
@@ -322,6 +362,67 @@ function saved(v: CurrentArtistCapture): CurrentArtistCapture {
     throw Error("Captured Artist facts changed");
   }
   return freeze(c);
+}
+function timing(action: Action, timestamp: bigint): CurrentArtistTiming {
+  const q = action.request;
+  if (timestamp > (1n << 64n) - 1n) {
+    throw Error("Artist timestamp exceeds uint64");
+  }
+  if (q.kind === "delegationGrant") {
+    if (timestamp >= q.message.expiresAt || same(q.message.delegate, q.signer)) {
+      throw Error("Delegation grant expired or self-directed");
+    }
+    return {
+      kind: "nonce-only", submittedTime: 0n, effectiveTime: 0n, effectiveDigest: action.payload.digest
+    };
+  }
+  if (q.kind === "identityRevision") {
+    const submittedTime = q.message.signedAt;
+    const effectiveTime = q.mode === "direct" && submittedTime === 0n ? timestamp : submittedTime;
+    if (effectiveTime === 0n || effectiveTime > timestamp || (q.mode === "direct" && effectiveTime !== timestamp)) {
+      throw Error("Identity revision signedAt differs from execution timing");
+    }
+    const effectiveDigest = currentArtistOperationTypedData("identityRevision", q.chainId, q.registry, {
+      ...q.message, signedAt: effectiveTime
+    }).digest;
+    return {
+      kind: "dated", submittedTime, effectiveTime, effectiveDigest
+    };
+  }
+  if (q.message.deadline < timestamp) {
+    throw Error("Artist authorization exceeded deadline");
+  }
+  return {
+    kind: "deadline", submittedTime: q.message.deadline, effectiveTime: q.message.deadline, effectiveDigest: action.payload.digest
+  };
+}
+function delegationRecord(v: any): CurrentArtistDelegationRecord {
+  return {
+    grant: {
+      artistId: v.grant.artistId, delegate: v.grant.delegate, collectionId: v.grant.collectionId,
+      capabilities: v.grant.capabilities, notBefore: v.grant.notBefore, expiresAt: v.grant.expiresAt,
+      maxUses: v.grant.maxUses, constraintsHash: v.grant.constraintsHash
+    },
+    grantor: v.grantor, nonce: v.nonce, uses: v.uses, revoked: v.revoked,
+    revocationRecordHash: v.revocationRecordHash
+  };
+}
+function delegationHash(d: CurrentArtistDeployment, grant: CurrentArtistDelegationRecord["grant"], nonce: bigint): Hex {
+  return keccak256(coder.encode(["bytes32", "uint256", "address", "bytes32", "address", "uint256", "uint32", "uint64", "uint64", "uint64", "bytes32", "uint256"], [id("6529STREAM_ARTIST_DELEGATION_RECORD_V1"), d.chainId, d.registry.address, grant.artistId,
+    grant.delegate, grant.collectionId, grant.capabilities, grant.notBefore, grant.expiresAt,
+    grant.maxUses, grant.constraintsHash, nonce])) as Hex;
+}
+function validateDelegation(d: CurrentArtistDeployment, record: CurrentArtistDelegationRecord, expected: Hex): void {
+  address(record.grantor);
+  address(record.grant.delegate);
+  hash(record.grant.artistId);
+  if (!same(delegationHash(d, record.grant, record.nonce), expected)
+    || record.grant.capabilities === 0n || (record.grant.capabilities & ~117n) !== 0n
+    || record.grant.expiresAt <= record.grant.notBefore || same(record.grant.delegate, record.grantor)
+    || (record.grant.maxUses !== 0n && record.uses > record.grant.maxUses)
+    || record.revoked !== (record.revocationRecordHash !== ZeroHash)) {
+    throw Error("Original delegation record differs");
+  }
 }
 /** Pinned authority/replay/digest observation; adapter, content and royalty admission is established by exact-call simulation. */
 export async function captureCurrentArtistOperation(p: Reader, input: CurrentArtistDeployment, request: CurrentArtistOperationRequest, options: {
@@ -340,11 +441,9 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   if (m.core !== undefined && !same(m.core, d.components[9]!.address)) {
     throw Error("Signed Core differs");
   }
-  if (m.deadline < h.timestamp) {
-    throw Error("Artist authorization expired");
-  }
+  const observedTiming = timing(action, h.timestamp);
   let b: CurrentArtistBinding | null = null;
-  if (q.kind !== "authorizationRevocation") {
+  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze"].includes(q.kind) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
     if ((await read(p, d.components[9]!.address, "collectionExists", [m.collectionId], tag))[0] !== true) {
       throw Error("Unknown collection");
     }
@@ -363,7 +462,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
       }
     }
     else {
-      if (!b.accepted || !([2n, 3n].includes(state) || q.kind !== "saleConsent" && state === 4n)) {
+      if (!b.accepted || !([2n, 3n].includes(state) || ["royaltyFreeze", "contentFreeze"].includes(q.kind) && state === 4n)) {
         throw Error("Binding is not eligible");
       }
     }
@@ -378,12 +477,31 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   const authority = {
     address: address(raw[0]), authorityClass: raw[1] as bigint, status: raw[2] as bigint, identityRecordHash: hash(raw[3])
   };
-  if (!same(authority.address, q.signer) || !ordinary(authority, [20, 21, 54].includes(Number(action.operationId)))) {
+  let revision: CurrentArtistCapture["revision"] = null;
+  let delegation: CurrentArtistDelegationRecord | null = null;
+  if (q.kind === "identityRevision") {
+    const operativeDocumentHash = hash((await read(p, d.components[2]!.address, "operativeIdentityRecord", [q.artistId], tag))[0]);
+    if (!same(operativeDocumentHash, q.message.previousRecordHash)) {
+      throw Error("Operative identity document changed");
+    }
+    revision = { operativeDocumentHash };
+  }
+  if (q.kind === "delegationRevocation") {
+    delegation = delegationRecord((await read(p, d.components[2]!.address, "delegationRecord", [q.message.delegationRecordHash], tag))[0]);
+    validateDelegation(d, delegation, q.message.delegationRecordHash);
+    if (delegation.revoked || !same(delegation.grant.artistId, q.artistId)
+      || !same(delegation.grant.delegate, q.message.delegate) || !same(delegation.grantor, q.signer)) {
+      throw Error("Stored delegation grantor or target differs");
+    }
+  }
+  const expectedSigner = delegation?.grantor ?? authority.address;
+  if (!same(expectedSigner, q.signer) || !ordinary(authority, [20, 21, 27, 54].includes(Number(action.operationId)))
+    || (q.kind === "delegationGrant" && authority.authorityClass !== 1n)) {
     throw Error("Current Artist authority differs");
   }
   if (authority.authorityClass !== 1n) {
     const [caps] = await read(p, d.registry.address, "currentAuthorityCapabilities", [q.artistId], tag);
-    const required = action.operationId === 16n ? 1024n : action.operationId === 20n ? 32n : action.operationId === 21n ? 128n : 0n;
+    const required = action.operationId === 16n ? 1024n : action.operationId === 20n ? 32n : action.operationId === 21n ? 128n : action.operationId === 25n ? 512n : 0n;
     if (!same(caps.authorityAddress, authority.address) || caps.authorityClass !== authority.authorityClass || caps.status !== authority.status || caps.activationRecordHash === ZeroHash || (caps.effectiveCapabilities & required) !== required) {
       throw Error("Artist capability unavailable");
     }
@@ -394,7 +512,15 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   if (!isHexString(actual, 32) || !same(actual, action.payload.digest)) {
     throw Error("Original facade digest differs");
   }
-  const state = await replayRead(p, d, q.artistId, action.payload.digest, m.nonce, tag);
+  if (!same(observedTiming.effectiveDigest, action.payload.digest)) {
+    const [term, auth] = abi.decodeFunctionData(action.digestMethod, action.digestCall.data);
+    const effective = [auth.nonce, observedTiming.effectiveTime, auth.signature];
+    const value = await read(p, d.registry.address, action.digestMethod, [term, effective], tag);
+    if (!same(value[0], observedTiming.effectiveDigest)) {
+      throw Error("Effective identity revision digest differs");
+    }
+  }
+  const state = await replayRead(p, d, q.artistId, observedTiming.effectiveDigest, m.nonce, tag);
   if (state.nonceConsumed || state.nonceRevoked || state.digestRevoked) {
     throw Error("Artist authorization consumed/revoked");
   }
@@ -416,7 +542,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   }
   await unchanged(p, h);
   const body = {
-    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, simulationRequired: true as const
+    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, simulationRequired: true as const
   };
   return freeze({
     ...body, captureHash: captureHash(body)
@@ -440,6 +566,8 @@ export async function simulateCurrentArtistCall(p: Reader, input: CurrentArtistC
   const fresh = await captureCurrentArtistOperation(p, c.deployment, c.action.request, { blockTag: tag });
   equal(fresh.binding, c.binding, "Binding changed; capture again");
   equal(fresh.authority, c.authority, "Authority changed; capture again");
+  equal(fresh.revision, c.revision, "Identity revision state changed; capture again");
+  equal(fresh.delegation, c.delegation, "Delegation state changed; capture again");
   const raw = await p.call({
     ...c.action.call, from: c.action.request.caller, blockTag: tag
   });
@@ -452,7 +580,11 @@ export async function simulateCurrentArtistCall(p: Reader, input: CurrentArtistC
     capture: c, observation: fresh, recordHash: result
   });
 }
-/** Independent ordered ordinary CALLs; dependent state must be mined and recaptured between steps. */
+/**
+* Independent ordered ordinary CALLs; dependent state must be mined and recaptured between steps.
+* Direct dated-zero calls have no fixed future digest. Only known nonce/digest conflicts are checked;
+* their effective digest and full admission must be revalidated at the execution block.
+*/
 export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapture[], title: string): SafeCallPlan {
   if (!Array.isArray(captures) || !captures.length || captures.length > 256) {
     throw Error("Expected 1..256 Artist calls");
@@ -465,17 +597,29 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
   const authorizations = new Set<string>();
   const authorizationDigests = new Set<string>();
   const revocationTargets = new Set<string>();
-  const lane = (c: CurrentArtistCapture) =>     c.action.request.registry.toLowerCase() + ":" + c.action.request.artistId.toLowerCase();
+  const delegationRevocations = new Set<string>();
+  const lane = (c: CurrentArtistCapture) => c.action.request.registry.toLowerCase() + ":" + c.action.request.artistId.toLowerCase();
   for (const c of items) {
     const nonceKey = lane(c) + ":nonce:" + c.action.request.message.nonce.toString();
     if (authorizations.has(nonceKey)) {
       throw Error("Duplicate Artist authorization nonce in Safe plan");
     }
     authorizations.add(nonceKey);
-    authorizationDigests.add(lane(c) + ":digest:" + c.action.payload.digest.toLowerCase());
+    if (c.action.request.kind === "identityRevision" && c.action.request.mode === "direct" && c.action.request.message.signedAt === 0n) {
+    }
+    else {
+      authorizationDigests.add(lane(c) + ":digest:" + c.action.payload.digest.toLowerCase());
+    }
   }
   for (const c of items) {
     const q = c.action.request;
+    if (q.kind === "delegationRevocation") {
+      const target = q.registry.toLowerCase() + ":" + q.message.delegationRecordHash.toLowerCase();
+      if (delegationRevocations.has(target)) {
+        throw Error("Repeated delegation revocation target in Safe plan");
+      }
+      delegationRevocations.add(target);
+    }
     if (q.kind !== "authorizationRevocation") {
       continue;
     }
@@ -521,6 +665,20 @@ function originalRecord(c: CurrentArtistCapture, time: bigint): Hex {
     case "contentFreeze":
       types = ["bytes32", "uint256", "address", "address", "address", "uint256", "bytes32[]", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
       values = [id("6529STREAM_ARTIST_CONTENT_FREEZE_RECORD_V1"), ...common, t.metadataContract, core, t.collectionId, t.lockClasses, t.expectedStateHash, artist, signer, cl, n, time];
+      break;
+    case "identityRevision": {
+      const effective = timing(c.action, time);
+      types = ["bytes32", "uint256", "address", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
+      values = ["0x1b7518e9d16da358d15957ec43218eb0b017fbd017e60c75b3126110006034a4", ...common,
+        artist, t.previousRecordHash, t.revisedRecordHash, signer, cl, n, effective.effectiveTime];
+      break;
+    }
+    case "delegationGrant":
+      return delegationHash(c.deployment, t, n);
+    case "delegationRevocation":
+      types = ["bytes32", "uint256", "address", "bytes32", "address", "bytes32", "address", "uint8", "bytes32", "uint256", "uint64"];
+      values = [id("6529STREAM_ARTIST_DELEGATION_REVOCATION_RECORD_V1"), ...common, artist, t.delegate,
+        t.delegationRecordHash, signer, 1, t.reasonHash, n, time];
       break;
     case "authorizationRevocation":
       types = ["bytes32", "uint256", "address", "bytes32", "bytes32", "uint256", "uint256", "uint64"];
@@ -579,9 +737,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     }
   }
   const h = await context(p, d, tag, false);
-  if (h.timestamp > m.deadline) {
-    throw Error("Receipt execution exceeded authorization deadline");
-  }
+  const executedTiming = timing(a, h.timestamp);
   if (!same(h.blockHash, blockHash) || !same(h.configurationHash, c.configurationHash)) {
     throw Error("Receipt block/configuration differs");
   }
@@ -622,7 +778,66 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   const n = m.nonce;
   const at = h.timestamp;
   const owner = d.components[6]!.address;
+  const identityOwner = d.components[2]!.address;
+  let revokedReadback: CurrentArtistDelegationRecord | null = null;
   switch (q.kind) {
+    case "identityRevision": {
+      const first = event(identityOwner, "ArtistIdentityRevisionRecorded", [1, q.artistId, q.signer,
+        t.previousRecordHash, t.revisedRecordHash, t.identityRecordURI, cl, n, executedTiming.effectiveTime, recordHash]);
+      const last = event(identityOwner, "ArtistIdentityDisplayNameStored", [q.artistId, t.revisedRecordHash, q.details.displayName]);
+      if (first >= last) {
+        throw Error("Identity revision event order differs");
+      }
+      const [record] = await read(p, identityOwner, "identityRevisionRecord", [recordHash], tag);
+      const expected = [recordHash, q.artistId, t.previousRecordHash, t.revisedRecordHash,
+        record.previousRevisionRecord, q.signer, 1n, n, executedTiming.effectiveTime,
+        t.identityRecordURI, q.details.displayName];
+      const type = abi.getFunction("identityRevisionRecord")!.outputs![0]!;
+      if (!same(coder.encode([type], [record]), coder.encode([type], [expected]))) {
+        throw Error("Historical identity revision differs");
+      }
+      if (record.previousRevisionRecord === ZeroHash && !same(t.previousRecordHash, c.authority.identityRecordHash)) {
+        throw Error("Zero revision predecessor differs from original registration");
+      }
+      if (record.previousRevisionRecord !== ZeroHash) {
+        if (same(record.previousRevisionRecord, recordHash)) {
+          throw Error("Identity revision cannot precede itself");
+        }
+        const [prior] = await read(p, identityOwner, "identityRevisionRecord", [record.previousRevisionRecord], tag);
+        if (!same(prior.recordHash, record.previousRevisionRecord) || !same(prior.artistId, q.artistId)
+          || !same(prior.revisedRecordHash, t.previousRecordHash)) {
+          throw Error("Historical revision predecessor differs");
+        }
+      }
+      const [document] = await read(p, identityOwner, "identityDocumentBytes", [t.revisedRecordHash], tag);
+      if (!same(bytes(document, 8192), q.details.document)) {
+        throw Error("Historical identity document differs");
+      }
+      break;
+    }
+    case "delegationGrant": {
+      event(identityOwner, "ArtistDelegationGranted", [1, q.artistId, t.delegate, t.collectionId,
+        t.capabilities, t.notBefore, t.expiresAt, t.maxUses, t.constraintsHash, n, recordHash]);
+      const record = delegationRecord((await read(p, identityOwner, "delegationRecord", [recordHash], tag))[0]);
+      validateDelegation(d, record, recordHash);
+      if (!same(coder.encode([G], [record.grant]), coder.encode([G], [t]))
+        || !same(record.grantor, q.signer) || record.nonce !== n) {
+        throw Error("Historical delegation grant differs");
+      }
+      break;
+    }
+    case "delegationRevocation": {
+      event(identityOwner, "ArtistDelegationRevoked", [1, q.artistId, t.delegate, t.delegationRecordHash,
+        t.reasonHash, q.signer, 1, n, at]);
+      revokedReadback = delegationRecord((await read(p, identityOwner, "delegationRecord", [t.delegationRecordHash], tag))[0]);
+      validateDelegation(d, revokedReadback, t.delegationRecordHash);
+      if (!revokedReadback.revoked || !same(revokedReadback.revocationRecordHash, recordHash)
+        || !same(revokedReadback.grantor, q.signer) || !same(revokedReadback.grant.artistId, q.artistId)
+        || !same(revokedReadback.grant.delegate, t.delegate)) {
+        throw Error("Historical delegation revocation differs");
+      }
+      break;
+    }
     case "bindingRefusal": {
       const first = event(d.components[4]!.address, "ArtistAttributionStateChanged", [1, t.collectionId, 5, t.generation, 1, q.caller, cl, recordHash, t.reasonHash, t.reasonURI]);
       const last = event(d.components[4]!.address, "ArtistBindingTerminationContext", [1, t.collectionId, t.generation, recordHash, t.bindingHash, q.artistId, q.signer, n, at]);
@@ -681,8 +896,9 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   if (v[0] !== 1n || !same(v[1], c.configurationHash) || v[2] !== a.operationId || !same(v[3], q.caller) || !same(v[4], recordHash)) {
     throw Error("Archive operation envelope differs");
   }
-  const mask = q.kind === "authorizationRevocation" ? 4 : q.kind === "bindingRefusal" ? 21 : 87;
-  const writeMask = q.kind === "authorizationRevocation" ? 4 : q.kind === "bindingRefusal" ? 21 : 68;
+  const identityOnly = ["identityRevision", "delegationGrant", "delegationRevocation", "authorizationRevocation"].includes(q.kind);
+  const mask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : 87;
+  const writeMask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : 68;
   for (let i = 0; i < 7; i++) {
     const before = v[5][i];
     const after = v[6][i];
@@ -707,39 +923,60 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
       }
     }
   }
-  const proof = [q.signer, a.payload.digest, q.mode === "direct"];
+  const proof = [q.signer, executedTiming.effectiveDigest, q.mode === "direct"];
   const authority = [q.artistId, q.signer, cl, c.authority.status];
   let payloadTypes: string[];
   let payloadValues: unknown[];
-  if (q.kind === "authorizationRevocation") {
-    payloadTypes = [terms[q.kind], A, P];
-    payloadValues = [t, auth, proof];
+  if (q.kind === "identityRevision") {
+    payloadTypes = [terms.identityRevision, A, "bytes", "string", P, A];
+    payloadValues = [t, auth, q.details.document, q.details.displayName, proof,
+      [auth.nonce, executedTiming.effectiveTime, auth.signature]];
   }
   else {
-    payloadTypes = [B, terms[q.kind], A, P];
-    payloadValues = [bindingArray(c.binding!), t, auth, proof];
-    if (q.kind === "bindingRefusal" || q.kind === "saleConsent") {
-      payloadTypes.push(F);
-      payloadValues.push(authority);
-    }
-    if (q.kind === "saleConsent") {
-      payloadTypes.push("bytes");
+    if (q.kind === "delegationRevocation") {
+      payloadTypes = [D, terms.delegationRevocation, A, P];
       const decoded = decode(payloadTypes, v[7]);
-      const facts = decode(["address", "bytes32", "bytes32", "bytes32", "bytes4", "uint256", "bytes32"], decoded[5]);
-      if (facts[5] !== t.collectionId || !same(facts[6], t.saleConfigHash) || facts[4] === "0x00000000" || facts[4] === "0xffffffff") {
-        throw Error("Archive sale facts differ");
+      const prior = delegationRecord(decoded[0]);
+      validateDelegation(d, prior, t.delegationRecordHash);
+      if (prior.revoked || prior.uses < c.delegation!.uses || prior.uses !== revokedReadback!.uses
+        || !same(prior.grantor, c.delegation!.grantor) || prior.nonce !== c.delegation!.nonce
+        || !same(coder.encode([G], [prior.grant]), coder.encode([G], [c.delegation!.grant]))) {
+        throw Error("Archive prior delegation differs");
       }
-      address(facts[0]);
-      hash(facts[1]);
-      hash(facts[2]);
-      hash(facts[3]);
-      payloadValues.push(decoded[5]);
+      payloadValues = [prior, t, auth, proof];
+    }
+    else {
+      if (q.kind === "authorizationRevocation" || q.kind === "delegationGrant") {
+        payloadTypes = [terms[q.kind], A, P];
+        payloadValues = [t, auth, proof];
+      }
+      else {
+        payloadTypes = [B, terms[q.kind], A, P];
+        payloadValues = [bindingArray(c.binding!), t, auth, proof];
+        if (q.kind === "bindingRefusal" || q.kind === "saleConsent") {
+          payloadTypes.push(F);
+          payloadValues.push(authority);
+        }
+        if (q.kind === "saleConsent") {
+          payloadTypes.push("bytes");
+          const decoded = decode(payloadTypes, v[7]);
+          const facts = decode(["address", "bytes32", "bytes32", "bytes32", "bytes4", "uint256", "bytes32"], decoded[5]);
+          if (facts[5] !== t.collectionId || !same(facts[6], t.saleConfigHash) || facts[4] === "0x00000000" || facts[4] === "0xffffffff") {
+            throw Error("Archive sale facts differ");
+          }
+          address(facts[0]);
+          hash(facts[1]);
+          hash(facts[2]);
+          hash(facts[3]);
+          payloadValues.push(decoded[5]);
+        }
+      }
     }
   }
   if (!same(coder.encode(payloadTypes, payloadValues), v[7])) {
     throw Error("Archive request/authority/proof differs");
   }
-  const observedReplay = await replayRead(p, d, q.artistId, a.payload.digest, m.nonce, tag);
+  const observedReplay = await replayRead(p, d, q.artistId, executedTiming.effectiveDigest, m.nonce, tag);
   if (!observedReplay.digestObserved || !observedReplay.nonceConsumed || observedReplay.digestRevoked || observedReplay.nonceRevoked) {
     throw Error("Executed Artist authorization not consumed");
   }
@@ -766,6 +1003,6 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   }
   await unchanged(p, h);
   return freeze({
-    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay
+    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, effectiveDigest: executedTiming.effectiveDigest
   });
 }

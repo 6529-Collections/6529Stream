@@ -17,12 +17,19 @@ const selections = {
     "bindingRefusalDigest", "saleConsentDigest", "royaltyFreezeDigest", "contentFreezeDigest", "authorizationRevocationDigest",
     "core", "mintManager", "operationCoordinator", "currentAuthorityCapabilities", "artistRegistryCutover", "gasParameterInfo",
     "artistAuthorizationState", "bindingTermination", "saleConsentRecord", "contentFreezeAuthorization", "isRoyaltyFreezeAuthorized",
+    "recordIdentityRevision", "grantArtistDelegation", "revokeArtistDelegation", "identityRevisionDigest", "delegationGrantDigest", "delegationRevocationDigest",
+    "operativeIdentityRecord", "identityRecordBytes", "identityDocumentBytes", "artistDisplayName", "identityRevisionRecord",
+    "identityRevisionProvisionalAssociation", "delegationRecord", "delegationState", "delegatedNonceState", "recordDelegation",
+    "operativeEstateDirective", "estateDirectiveRecord", "activeAuthorityWindow",
   ] },
   coordinator: { source: base + "StreamArtistOnboardingCoordinator.sol", contract: "StreamArtistOnboardingCoordinator",
     methods: ["suiteConfiguration", "deploymentChainId", "configurationHash"] },
   owner: { source: base + "StreamArtistOwner.sol", contract: "StreamArtistOwner", methods: sharedOwner },
   identity: { source: base + "StreamArtistIdentityAuthority.sol", contract: "StreamArtistIdentityAuthority",
-    methods: ["authorityState", "artistAuthorizationState", "currentAuthorityCapabilities"], events: ["ArtistAuthorizationRevoked"] },
+    methods: ["authorityState", "artistAuthorizationState", "currentAuthorityCapabilities", "delegationEpochState", "signatureBundle",
+      "identity", "operativeIdentityRecord", "identityRecordBytes", "identityDocumentBytes", "artistDisplayName", "identityRevisionRecord",
+      "identityRevisionProvisionalAssociation", "delegationRecord", "activeAuthorityWindow"],
+    events: ["ArtistAuthorizationRevoked", "ArtistIdentityRevisionRecorded", "ArtistIdentityDisplayNameStored", "ArtistDelegationGranted", "ArtistDelegationRevoked"] },
   binding: { source: base + "StreamArtistBindingLifecycle.sol", contract: "StreamArtistBindingLifecycle", methods: ["binding", "bindingTerms", "bindingTermination"] },
   attribution: { source: base + "StreamArtistAttributionLifecycle.sol", contract: "StreamArtistAttributionLifecycle",
     methods: ["attributionState"], events: ["ArtistAttributionStateChanged", "ArtistBindingTerminationContext"] },
@@ -36,7 +43,9 @@ const selections = {
   collection: { source: "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol", contract: "IStreamCoreCollectionView", methods: ["collectionExists"] },
 };
 const oracleSources = ["StreamArtistHashes.sol", "StreamArtistBindingOperations.sol", "StreamArtistSaleHashes.sol",
-  "StreamArtistContentHashes.sol", "StreamArtistAuthorizationState.sol", "StreamArtistEconomicsHashes.sol"].map(name => base + name);
+  "StreamArtistContentHashes.sol", "StreamArtistAuthorizationState.sol", "StreamArtistEconomicsHashes.sol",
+  "StreamArtistIdentityRevisionState.sol", "StreamArtistDelegationState.sol", "StreamArtistIdentityState.sol",
+  "StreamArtistIdentityOperations.sol", "StreamArtistEconomicOperations.sol"].map(name => base + name);
 
 export function artistOperationFixture(inputBytes, outputBytes) {
   if (sha(inputBytes) !== INPUT_SHA || sha(outputBytes) !== OUTPUT_SHA) throw Error("Expected exact frozen Artist ABI49 compiler capture");

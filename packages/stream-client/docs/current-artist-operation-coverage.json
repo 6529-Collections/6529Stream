@@ -245,7 +245,9 @@
       "methods": [
         "recordIdentityRevision"
       ],
-      "coverage": "pending"
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "recordIdentityRevision",
+      "pendingMethods": []
     },
     {
       "id": 26,
@@ -253,7 +255,9 @@
       "methods": [
         "grantArtistDelegation"
       ],
-      "coverage": "pending"
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "grantArtistDelegation",
+      "pendingMethods": []
     },
     {
       "id": 27,
@@ -261,7 +265,9 @@
       "methods": [
         "revokeArtistDelegation"
       ],
-      "coverage": "pending"
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "revokeArtistDelegation",
+      "pendingMethods": []
     },
     {
       "id": 28,
@@ -565,9 +571,9 @@
     }
   ],
   "validation": {
-    "scope": "First five principal methods and old ceremony empty ERC-1271 proof correction",
-    "packageTestsPassed": 694,
-    "independentlyObservedFocusedTestsPassed": 51,
+    "scope": "Eight principal methods:3,16,20,21,25,26,27,54; old ceremony empty ERC-1271 proof correction",
+    "packageTestsPassed": 719,
+    "independentlyObservedFocusedTestsPassed": 76,
     "contractRuntimeAcceptance": false
   }
 }

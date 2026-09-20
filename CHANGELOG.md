@@ -49,6 +49,10 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+
+- Add original Artist identity revision and delegation callers, preserving dated
+  authorization, nonce-only grants and stored-grantor revocation evidence.
+
 - Add original Artist refusal, sale-consent, freeze-authorization and revocation
   callers with pinned authority/replay review and explicit remaining operation coverage.
 
