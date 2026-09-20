@@ -594,11 +594,8 @@ contract StreamCore is ERC721, IStreamCore {
         delete _tokenIdentities[tokenId];
         delete _tokenData[tokenId];
         delete _coordinatorAtMint[tokenId];
-        CollectionState storage collection = _collections[collectionId];
-        unchecked {
-            --_lastTokenId;
-            --collection.nextSerial;
-        }
+        // An incident can leave durable external evidence for this identity.
+        // Keep both allocation high-water marks; the abandoned ID is never reused.
         emit TokenCollectionRegistrationReverted(_SCHEMA_VERSION, tokenId, collectionId);
     }
 

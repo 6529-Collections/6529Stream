@@ -586,11 +586,24 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         );
     }
 
-    function testPreparedMintAbortByReplacementManagerRestoresDenseAllocation() public {
+    function testPreparedMintAbortByReplacementManagerPreservesAllocationGaps() public {
+        _assertIncidentAbortPreservesAllocation(0);
+    }
+
+    function testFuzzPreparedMintAbortPreservesPriorMintHistory(uint8 priorMints) public {
+        _assertIncidentAbortPreservesAllocation(uint256(priorMints) % 8 + 1);
+    }
+
+    function _assertIncidentAbortPreservesAllocation(uint256 priorMints) private {
+        for (uint256 i; i < priorMints; ++i) {
+            _manager.mint(_core, 1, address(0xBEEF), bytes("prior"), bytes32(i + 1));
+        }
         bytes32 operationId = keccak256("prepared operation");
         (uint256 tokenId, uint256 serial) =
             _manager.prepare(_core, 1, bytes("prepared"), operationId);
-        require(tokenId == 1 && serial == 1, "prepared identity");
+        require(tokenId == priorMints + 1 && serial == priorMints + 1, "prepared identity");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAbortNotReplacement.selector));
+        _manager.abort(_core, tokenId, operationId);
 
         PermanentTargetMintManager replacement = new PermanentTargetMintManager();
         PermanentTargetMintContinuityLedger ledger =
@@ -619,11 +632,47 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         replacement.complete(
             _core, tokenId, address(0xBEEF), operationId, keccak256("replacement cannot complete")
         );
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintMismatch.selector));
+        replacement.abort(_core, tokenId + 1, operationId);
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintMismatch.selector));
+        replacement.abort(_core, tokenId, keccak256("wrong operation"));
+        require(_core.pendingPreparedMintTokenId() == tokenId, "failed abort changed pending");
+
+        vm.recordLogs();
         replacement.abort(_core, tokenId, operationId);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        require(logs.length == 1 && logs[0].emitter == address(_core), "abort event source");
+        require(
+            logs[0].topics.length == 3
+                && logs[0].topics[0] == keccak256("TokenCollectionRegistrationReverted(uint16,uint256,uint256)")
+                && logs[0].topics[1] == bytes32(tokenId) && logs[0].topics[2] == bytes32(uint256(1))
+                && abi.decode(logs[0].data, (uint16)) == 1,
+            "abort event identity"
+        );
         require(_core.pendingPreparedMintTokenId() == 0, "pending identity");
-        require(_core.lastAllocatedTokenId() == 0, "dense token allocation");
-        require(_core.collectionNextSerial(1) == 1, "dense collection serial");
+        require(_core.lastAllocatedTokenId() == tokenId, "abandoned token id remains consumed");
+        require(_core.collectionNextSerial(1) == serial + 1, "abandoned serial remains consumed");
+        require(_core.collectionMintedEver(1) == priorMints, "abort changed mint history");
+        require(_core.totalSupply() == priorMints && _core.totalSupplyOfCollection(1) == priorMints, "abort changed supply");
         require(_core.tokenLifecycle(tokenId) == uint8(StreamTokenLifecycle.UNKNOWN), "lifecycle");
+        (bool exists, uint256 collectionId, uint256 recoveredSerial, bool burned) =
+            _core.tokenCollectionIdentity(tokenId);
+        require(!exists && collectionId == 0 && recoveredSerial == 0 && !burned, "identity not cleared");
+        StreamPreparedMintRecord memory record = _core.preparedMint(tokenId);
+        require(!record.exists && record.operationId == bytes32(0) && record.collectionId == 0, "record not cleared");
+        require(_core.tokenData(tokenId).length == 0 && _core.coordinatorAtMint(tokenId) == address(0), "retained data not cleared");
+        for (uint256 i; i < priorMints; ++i) {
+            require(_core.ownerOf(i + 1) == address(0xBEEF), "prior owner changed");
+        }
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintNotFound.selector));
+        replacement.abort(_core, tokenId, operationId);
+
+        (uint256 nextToken, uint256 nextSerial) =
+            replacement.mint(_core, 1, address(0xCAFE), bytes("after recovery"), keccak256("after recovery"));
+        require(nextToken == tokenId + 1 && nextSerial == serial + 1, "abandoned identity reused");
+        require(_core.ownerOf(nextToken) == address(0xCAFE), "next mint failed");
+        require(_core.collectionMintedEver(1) == priorMints + 1 && _core.totalSupply() == priorMints + 1, "next mint accounting");
+        require(_core.tokenLifecycle(tokenId) == uint8(StreamTokenLifecycle.UNKNOWN), "abandoned lifecycle reused");
     }
 
     function testMetadataRouterSuccessAndEveryFailureFallsBack() public {

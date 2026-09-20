@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Preserve consumed token IDs and collection serials when a replacement Manager
+  aborts a stranded prepared mint; ordinary transaction rollback is unchanged.
+
 - Add dedicated ERC20 paid burn-to-mint clients, original universal signing,
   independent source approvals, four funding routes and ordinary Safe CALL plans.
 
