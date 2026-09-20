@@ -447,22 +447,39 @@ contract StreamArtistRecoveredEconomicsHydrationTest {
         f.terms = new T.EconomicsConsent[](2);
         f.terms[0] = _terms(0);
         f.terms[1] = _terms(1);
-        f.source.economics(f.terms[0], 1, 10, false);
-        f.source
-            .policy(
-                T.PolicyConsent(9, f.query.policies[0].phaseId, f.query.policies[0].policyHash),
-                1,
-                11
-            );
-        f.source.economics(f.terms[1], 3, 12, false);
-        f.source
-            .policy(
-                T.PolicyConsent(9, f.query.policies[1].phaseId, f.query.policies[1].policyHash),
-                3,
-                13
-            );
-        f.provenance = _local(f.source);
-        f.bundle = f.target.collect(address(f.source.consent()), f.query, f.provenance, f.terms);
+        this.writeEconomicsFixtureRows(f.source, f.query, f.terms);
+        (f.provenance, f.bundle) =
+            this.collectEconomicsFixture(f.source, f.target, f.query, f.terms);
+    }
+
+    /// @dev Explicit compiler boundary for the fixture's ordered original writes. The self-call
+    /// keeps the same test-contract caller at each source owner fixture; no authority changes.
+    function writeEconomicsFixtureRows(
+        RecoveredEconomicsCoordinatorFixture source,
+        AH.Query memory query,
+        T.EconomicsConsent[] memory terms
+    ) external {
+        require(msg.sender == address(this), "fixture self-call");
+        source.economics(terms[0], 1, 10, false);
+        source.policy(
+            T.PolicyConsent(9, query.policies[0].phaseId, query.policies[0].policyHash), 1, 11
+        );
+        source.economics(terms[1], 3, 12, false);
+        source.policy(
+            T.PolicyConsent(9, query.policies[1].phaseId, query.policies[1].policyHash), 3, 13
+        );
+    }
+
+    /// @dev Keep the large provenance/codec read outside the writer frame for native via-IR.
+    function collectEconomicsFixture(
+        RecoveredEconomicsCoordinatorFixture source,
+        RecoveredEconomicsHarness target,
+        AH.Query memory query,
+        T.EconomicsConsent[] memory terms
+    ) external view returns (RH.OwnerProvenance memory provenance, Economics.Bundle memory bundle) {
+        require(msg.sender == address(this), "fixture self-call");
+        provenance = _local(source);
+        bundle = target.collect(address(source.consent()), query, provenance, terms);
     }
 
     function _query(RecoveredEconomicsCoordinatorFixture source)
