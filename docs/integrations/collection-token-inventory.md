@@ -16,14 +16,31 @@ floor. This is a dependency-call allowance, not a measured transaction ceiling.
 
 1. Discover candidate token IDs from Core events or a local index.
 2. Read `collectionInventoryState(collectionId)` to obtain the indexed count.
-3. Submit the next 1 to 256 token IDs through `appendCollectionTokens`.
+3. Submit the next 1 to 256 token IDs through `appendCollectionTokens` when their
+   actual serials immediately follow the last indexed serial. To cross an aborted
+   allocation gap, call `scanCollectionTokens(collectionId, maxScan)` instead.
 4. Call `requireCompleteCollection` at the state being committed.
 
 The contract checks each token against Core's permanent collection mapping and
-requires collection serials exactly `count + 1`, `count + 2`, and so on. Global
-token IDs must increase, but may have gaps because other collections mint
-between them. Both minted and burned lifecycles are accepted; prepared or
-unknown identities are rejected. A failed element reverts the complete batch.
+requires actual collection serials exactly one above the last indexed serial
+for the fast append path. Global token IDs must increase, but may have gaps
+because other collections mint between them. Both minted and burned lifecycles
+are accepted; prepared or unknown identities cannot be appended. A failed
+element reverts the complete batch, including serial lookups and scan progress.
+
+An incident abort consumes its token ID and serial permanently without increasing
+`mintedEver`. For example, aborting serial 1 then completing serial 2 produces one
+inventory entry at ordinal 0. Arbitrary increasing serials are insufficient:
+they would let a submitter omit an earlier completed mint and poison the prefix.
+
+The bounded scan authenticates each global ID after `collectionScanThrough` up
+to Core's `lastAllocatedTokenId`, examining at most `maxScan` IDs (1 to 256).
+It skips canonical unknown abort gaps and identities belonging to other
+collections, and automatically indexes every completed target mint, including
+burned history. It reverts the whole scan at a prepared target identity, because
+that identity may still complete. Repeat bounded calls for sparse collections.
+The returned cursor never crosses the current allocation frontier, so future
+mints remain discoverable. Fast appends and scans share one monotonic cursor.
 
 Anyone can append, including a Safe. An earlier transaction can only append an
 authentic next prefix. If another submitter has already indexed overlapping
@@ -59,6 +76,14 @@ keccak256(abi.encode(
 
 All numeric fields are `uint256`. `CollectionTokenIndexed` records the exact
 serial, token and resulting prefix. `collectionTokenAt` uses a zero-based index.
+The index is a completed-mint ordinal, not `collectionSerial - 1`. The additive
+[serial lookup interface](../../smart-contracts/interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol)
+provides `collectionTokenBySerial(collectionId, actualSerial)`: zero means that
+serial has not been indexed, including consumed abort gaps. The original
+inventory ERC165 interface ID, hash domains and valid no-gap preimages are
+unchanged. Consumers of a retained historical prefix must also bound membership
+to that prefix's last ordinal; current serial membership alone includes later
+appends.
 History reads retain their values if Core code or the current chain changes;
 new indexing and current completeness checks reject that changed binding.
 An empty history read for an unknown collection asserts no existence.
@@ -67,9 +92,10 @@ An empty history read for an unknown collection asserts no existence.
 
 The focused suite executes actual Core minting, preparation, replacement-Manager
 abort, burning and callbacks. It checks interleaved collections, atomic rejection,
-cross-collection reuse after abort, exact event/hash preimages and 256 randomized
-batch partitions. An actual threshold Safe 1.4.1 executes the append operation
-and all twenty public read selectors. Gas-parameter writes remain Executor-only;
+consumed gaps before the first mint and between mints, bounded scan progress,
+late-failure rollback, exact event/hash preimages and randomized batch partitions.
+An actual threshold Safe 1.4.1 executes indexing operations and public reads.
+Gas-parameter writes remain Executor-only;
 the fixture checks rejection of a Safe acting directly as that authority.
 
 The fixture uses explicit governance, module-registry, Manager and entropy

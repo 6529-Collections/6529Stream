@@ -4,14 +4,17 @@ pragma solidity ^0.8.19;
 import "../../vendor/openzeppelin/IERC165.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import "../../interfaces/stream/core/IStreamCoreCollectionView.sol";
+import "../../interfaces/stream/core/IStreamCoreEnumeration.sol";
 import "../../interfaces/stream/finality/IStreamCollectionTokenInventory.sol";
+import "../../interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol";
 import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Permissionless, serial-checked collection membership for content-root production.
-/// @dev Core allocates dense collection serials and retains identity after burning. Prepared
-///      identities are excluded because abort can erase/reuse them. No Core mint-hook change.
+/// @dev Incident aborts leave consumed allocation gaps; burning retains completed identity.
+///      Ordinals count completed mints. A bounded Core scan authenticates gaps before indexing.
 contract StreamCollectionTokenInventory is
     IStreamCollectionTokenInventory,
+    IStreamCollectionTokenInventorySerialLookup,
     StreamGasParameterHost,
     IERC165
 {
@@ -26,6 +29,11 @@ contract StreamCollectionTokenInventory is
 
     mapping(uint256 => uint256[]) private _tokens;
     mapping(uint256 => bytes32) private _prefixHashes;
+    mapping(uint256 => mapping(uint256 => uint256)) private _tokensBySerial;
+    mapping(uint256 => uint256) private _lastIndexedSerial;
+    mapping(uint256 => uint256) private _scanThrough;
+
+    error InventoryScanPrepared(uint256 tokenId);
 
     constructor(address core_, address executor, GasParameterConfig memory coreReadGas)
         StreamGasParameterHost(executor)
@@ -48,6 +56,7 @@ contract StreamCollectionTokenInventory is
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IERC165).interfaceId
             || id == type(IStreamCollectionTokenInventory).interfaceId
+            || id == type(IStreamCollectionTokenInventorySerialLookup).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId;
     }
 
@@ -61,9 +70,9 @@ contract StreamCollectionTokenInventory is
         uint256 size = tokenIds.length;
         if (size == 0 || size > MAX_INDEX_BATCH) revert InventoryBatchSize(size);
         uint256[] storage tokens = _tokens[collectionId];
-        uint256 serial = tokens.length;
-        uint256 previousTokenId = serial == 0 ? 0 : tokens[serial - 1];
-        bytes32 prefix = _prefix(collectionId, serial);
+        uint256 serial = _lastIndexedSerial[collectionId];
+        uint256 previousTokenId = _scanThrough[collectionId];
+        bytes32 prefix = _prefix(collectionId, tokens.length);
         for (uint256 i; i < size; ++i) {
             uint256 tokenId = tokenIds[i];
             ++serial;
@@ -71,10 +80,68 @@ contract StreamCollectionTokenInventory is
             _requireCompletedToken(collectionId, tokenId, serial);
             prefix = keccak256(abi.encode(APPEND_DOMAIN, prefix, serial, tokenId));
             tokens.push(tokenId);
+            _tokensBySerial[collectionId][serial] = tokenId;
             emit CollectionTokenIndexed(collectionId, tokenId, serial, prefix);
             previousTokenId = tokenId;
         }
         _prefixHashes[collectionId] = prefix;
+        _lastIndexedSerial[collectionId] = serial;
+        _scanThrough[collectionId] = previousTokenId;
+    }
+
+    /// @notice Scan up to 1..256 allocated global IDs and index every completed target mint.
+    /// @dev Starts after the retained cursor and stops at Core's allocation frontier. Unknown
+    ///      IDs below that frontier are consumed abort gaps. Other collections may be skipped;
+    ///      a prepared target token reverts the whole batch because it could still complete.
+    ///      Call repeatedly for sparse collections. Appends and cursor progress are atomic.
+    function scanCollectionTokens(uint256 collectionId, uint256 maxScan)
+        external
+        returns (uint256 scannedThrough, uint256 indexedCount, bytes32 prefixHash)
+    {
+        _requireCore();
+        _requireCollection(collectionId);
+        if (maxScan == 0 || maxScan > MAX_INDEX_BATCH) revert InventoryBatchSize(maxScan);
+        uint256 frontier = abi.decode(
+            _read(abi.encodeCall(IStreamCoreEnumeration.lastAllocatedTokenId, ()), 32), (uint256)
+        );
+        scannedThrough = _scanThrough[collectionId];
+        uint256 serial = _lastIndexedSerial[collectionId];
+        uint256[] storage tokens = _tokens[collectionId];
+        prefixHash = _prefix(collectionId, tokens.length);
+        for (uint256 i; i < maxScan && scannedThrough < frontier; ++i) {
+            ++scannedThrough;
+            (uint256 actualCollection, uint256 actualSerial, uint256 lifecycle) =
+                _identity(scannedThrough, serial + 1);
+            if (actualCollection != collectionId) continue;
+            if (lifecycle == 1) revert InventoryScanPrepared(scannedThrough);
+            if (actualSerial <= serial) {
+                revert InventoryTokenMismatch(scannedThrough, serial + 1);
+            }
+            serial = actualSerial;
+            prefixHash = keccak256(abi.encode(APPEND_DOMAIN, prefixHash, serial, scannedThrough));
+            tokens.push(scannedThrough);
+            _tokensBySerial[collectionId][serial] = scannedThrough;
+            emit CollectionTokenIndexed(collectionId, scannedThrough, serial, prefixHash);
+        }
+        _scanThrough[collectionId] = scannedThrough;
+        _lastIndexedSerial[collectionId] = serial;
+        _prefixHashes[collectionId] = prefixHash;
+        indexedCount = tokens.length;
+    }
+
+    /// @notice Highest global ID verified to contain no unindexed completed target mint.
+    function collectionScanThrough(uint256 collectionId) external view returns (uint256 tokenId) {
+        return _scanThrough[collectionId];
+    }
+
+    /// @inheritdoc IStreamCollectionTokenInventorySerialLookup
+    function collectionTokenBySerial(uint256 collectionId, uint256 collectionSerial)
+        external
+        view
+        override
+        returns (uint256 tokenId)
+    {
+        return _tokensBySerial[collectionId][collectionSerial];
     }
 
     /// @inheritdoc IStreamCollectionTokenInventory
@@ -156,17 +223,39 @@ contract StreamCollectionTokenInventory is
         private
         view
     {
-        (uint256 exists, uint256 actualCollection, uint256 actualSerial, uint256 burned) = abi.decode(
+        (uint256 actualCollection, uint256 actualSerial, uint256 lifecycle) =
+            _identity(tokenId, serial);
+        if (actualCollection != collectionId || actualSerial != serial || lifecycle < 2) {
+            revert InventoryTokenMismatch(tokenId, serial);
+        }
+    }
+
+    /// @dev Validate the complete Core identity/lifecycle tuple before accepting or skipping it.
+    function _identity(uint256 tokenId, uint256 expectedSerial)
+        private
+        view
+        returns (uint256 actualCollection, uint256 actualSerial, uint256 lifecycle)
+    {
+        uint256 exists;
+        uint256 burned;
+        (exists, actualCollection, actualSerial, burned) = abi.decode(
             _read(abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (tokenId)), 128),
             (uint256, uint256, uint256, uint256)
         );
-        uint256 lifecycle = abi.decode(
+        lifecycle = abi.decode(
             _read(abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (tokenId)), 32), (uint256)
         );
         if (
-            exists != 1 || actualCollection != collectionId || actualSerial != serial
-                || !((lifecycle == 2 && burned == 0) || (lifecycle == 3 && burned == 1))
-        ) revert InventoryTokenMismatch(tokenId, serial);
+            exists == 0 && actualCollection == 0 && actualSerial == 0 && burned == 0
+                && lifecycle == 0
+        ) {
+            return (0, 0, 0);
+        }
+        if (
+            exists != 1 || actualCollection == 0 || actualSerial == 0
+                || !(((lifecycle == 1 || lifecycle == 2) && burned == 0)
+                    || (lifecycle == 3 && burned == 1))
+        ) revert InventoryTokenMismatch(tokenId, expectedSerial);
     }
 
     /// @dev Fixed-size output prevents an unexpected dependency from allocating arbitrary memory.

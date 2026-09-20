@@ -22,8 +22,9 @@ interface IStreamCollectionTokenInventory {
 
     function core() external view returns (address);
 
-    /// @notice Index the next consecutive collection serials from the actual Core.
+    /// @notice Index completed mints with the next consecutive actual Core collection serials.
     /// @dev Anyone, including a Safe, may submit 1..256 token IDs. The complete batch is atomic.
+    ///      Use the inventory's bounded global-ID scan to cross consumed incident-abort gaps.
     function appendCollectionTokens(uint256 collectionId, uint256[] calldata tokenIds) external;
 
     /// @notice Retained prefix length and hash; does not read current Core state.
@@ -32,7 +33,7 @@ interface IStreamCollectionTokenInventory {
         view
         returns (uint256 indexedCount, bytes32 prefixHash);
 
-    /// @notice Token ID at a zero-based index; collection serial is index + 1.
+    /// @notice Token ID at a zero-based completed-mint ordinal; actual serials may have gaps.
     function collectionTokenAt(uint256 collectionId, uint256 index)
         external
         view

@@ -6,7 +6,7 @@ interface IStreamCoreEnumeration {
     /// @notice Returns the live ERC-721 supply, excluding prepared and burned tokens.
     function totalSupply() external view returns (uint256);
 
-    /// @notice Returns the current token allocation frontier; aborting a preparation can rewind it.
+    /// @notice Returns the token allocation high-water mark; incident-aborted IDs stay consumed.
     function lastAllocatedTokenId() external view returns (uint256);
 
     /// @notice Returns the highest collection identifier allocated by Core.

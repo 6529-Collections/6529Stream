@@ -181,7 +181,7 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
         require(count == 2, "hostile attempts cannot poison honest prefix");
     }
 
-    function testPreparedMintExcludedAbortAndReuseCannotPoisonInventory() public {
+    function testPreparedMintExcludedAndAbortedGapBeforeFirstCompletedMint() public {
         bytes32 operation = keccak256("inventory preparation");
         (uint256 prepared,) = _manager.prepare(_core, 1, hex"1234", operation);
         require(_core.tokenLifecycle(prepared) == 1, "actual prepared identity");
@@ -190,11 +190,17 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
         require(count == 0, "prepared does not count as completed");
         _replaceManagerAndAbort(prepared, operation);
         _reject(1, _one(prepared));
-        uint256 reused = _mint(1);
-        require(reused == prepared, "actual abort reuses allocation");
-        inventory.appendCollectionTokens(1, _one(reused));
+        uint256 completed = _mint(1);
+        require(completed == prepared + 1, "incident allocation remains consumed");
+        _reject(1, _one(completed));
+        (uint256 through, uint256 indexedCount,) = inventory.scanCollectionTokens(1, 1);
+        require(through == prepared && indexedCount == 0, "verified abort gap");
+        inventory.scanCollectionTokens(1, 1);
         (count,) = inventory.requireCompleteCollection(1);
-        require(count == 1, "completed reused identity indexed once");
+        require(count == 1 && inventory.collectionTokenAt(1, 0) == completed, "completed ordinal");
+        require(inventory.collectionTokenBySerial(1, 1) == 0, "aborted serial excluded");
+        require(inventory.collectionTokenBySerial(1, 2) == completed, "actual serial retained");
+        require(inventory.collectionScanThrough(1) == completed, "scan cursor");
     }
 
     function testPreparedMintBecomesEligibleOnlyAfterCompletion() public {
@@ -207,19 +213,138 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
         require(count == 1, "completed actual prepared mint");
     }
 
-    function testAbortedGlobalIdCanBeReusedByDifferentCollection() public {
+    function testAbortedGlobalIdRemainsConsumedAcrossDifferentCollections() public {
         bytes32 operation = keccak256("cross collection abort");
         (uint256 prepared,) = _manager.prepare(_core, 1, hex"1234", operation);
         _reject(1, _one(prepared));
         _replaceManagerAndAbort(prepared, operation);
-        uint256 reused = _mint(2);
-        require(reused == prepared, "global allocation reused by collection two");
-        _reject(1, _one(reused));
-        inventory.appendCollectionTokens(2, _one(reused));
+        uint256 completed = _mint(2);
+        require(completed == prepared + 1, "global allocation remains consumed");
+        _reject(1, _one(completed));
+        inventory.appendCollectionTokens(2, _one(completed));
+        inventory.scanCollectionTokens(1, 256);
         (uint256 count,) = inventory.requireCompleteCollection(1);
         require(count == 0, "original collection remains empty");
         (count,) = inventory.requireCompleteCollection(2);
         require(count == 1, "actual new membership");
+    }
+
+    function testScannedGapsInterleavedCollectionsAndBurnedHistoryKeepActualSerialHash() public {
+        uint256 first = _mint(1);
+        inventory.appendCollectionTokens(1, _one(first));
+        bytes32 operation = keccak256("interior gap");
+        (uint256 aborted,) = _manager.prepare(_core, 1, hex"12", operation);
+        _replaceManagerAndAbort(aborted, operation);
+        uint256 other = _mint(2);
+        uint256 thirdSerial = _mint(1);
+        vm.prank(OWNER);
+        _core.burn(thirdSerial);
+        uint256 fourthSerial = _mint(1);
+        _reject(1, _one(fourthSerial));
+        _reject(1, _pair(thirdSerial, fourthSerial));
+        inventory.scanCollectionTokens(1, 1);
+        require(inventory.collectionScanThrough(1) == aborted, "first bounded progress");
+        inventory.scanCollectionTokens(1, 1);
+        require(inventory.collectionScanThrough(1) == other, "other collection authenticated");
+        vm.recordLogs();
+        inventory.scanCollectionTokens(1, 1);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 prefix = keccak256(abi.encode(inventory.APPEND_DOMAIN(), _emptyPrefix(1), 1, first));
+        prefix = keccak256(abi.encode(inventory.APPEND_DOMAIN(), prefix, 3, thirdSerial));
+        require(
+            logs.length == 1 && keccak256(logs[0].data) == keccak256(abi.encode(3, prefix)),
+            "actual serial event"
+        );
+        require(inventory.collectionTokenBySerial(1, 2) == 0, "gap lookup");
+        require(inventory.collectionTokenBySerial(1, 3) == thirdSerial, "burned lookup");
+        _reject(1, _pair(fourthSerial, fourthSerial));
+        require(inventory.collectionScanThrough(1) == thirdSerial, "late failure cursor rollback");
+        require(inventory.collectionTokenBySerial(1, 4) == 0, "late failure lookup rollback");
+        (uint256 count, bytes32 actual) = inventory.collectionInventoryState(1);
+        require(count == 2 && actual == prefix, "late failure prefix rollback");
+        inventory.appendCollectionTokens(1, _one(fourthSerial));
+        prefix = keccak256(abi.encode(inventory.APPEND_DOMAIN(), prefix, 4, fourthSerial));
+        (count, actual) = inventory.requireCompleteCollection(1);
+        require(count == 3 && actual == prefix, "complete actual serial prefix");
+        require(inventory.collectionTokenAt(1, 1) == thirdSerial, "burned ordinal retained");
+        require(inventory.collectionTokenAt(1, 2) == fourthSerial, "last completed ordinal");
+        require(
+            _core.collectionMintedEver(1) == 3 && _core.totalSupplyOfCollection(1) == 2,
+            "history versus live supply"
+        );
+    }
+
+    function testLatePreparedTargetScanFailureRollsBackEveryEarlierIndexedToken() public {
+        uint256 first = _mint(1);
+        _mint(2);
+        bytes32 operation = keccak256("late prepared target");
+        (uint256 prepared,) = _manager.prepare(_core, 1, hex"abcd", operation);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCollectionTokenInventory.InventoryScanPrepared.selector, prepared
+            )
+        );
+        inventory.scanCollectionTokens(1, 256);
+        (uint256 count, bytes32 prefix) = inventory.collectionInventoryState(1);
+        require(count == 0 && prefix == _emptyPrefix(1), "scan atomic prefix");
+        require(inventory.collectionScanThrough(1) == 0, "scan atomic cursor");
+        require(inventory.collectionTokenBySerial(1, 1) == 0, "scan atomic lookup");
+        _manager.complete(_core, prepared, OWNER, operation, keccak256("complete"));
+        inventory.scanCollectionTokens(1, 256);
+        (count,) = inventory.requireCompleteCollection(1);
+        require(
+            count == 2 && inventory.collectionTokenAt(1, 0) == first
+                && inventory.collectionTokenAt(1, 1) == prepared,
+            "completion resumes honest prefix"
+        );
+    }
+
+    function testScanStopsAtFrontierThenIndexesNextMintAndNeverSkipsCompletedSuffix() public {
+        _mint(2);
+        inventory.scanCollectionTokens(1, 256);
+        require(inventory.collectionScanThrough(1) == 1, "bounded by real frontier");
+        inventory.scanCollectionTokens(1, 256);
+        require(inventory.collectionScanThrough(1) == 1, "does not scan future unknown IDs");
+        uint256 first = _mint(1);
+        uint256 second = _mint(1);
+        _reject(1, _one(second));
+        inventory.scanCollectionTokens(1, 1);
+        require(inventory.collectionTokenAt(1, 0) == first, "earliest completed token forced");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionTokenInventory.InventoryIncomplete.selector, 1, 1, 2
+            )
+        );
+        inventory.requireCompleteCollection(1);
+        inventory.appendCollectionTokens(1, _one(second));
+        (uint256 count,) = inventory.requireCompleteCollection(1);
+        require(count == 2, "scan and append join");
+    }
+
+    function testScanAndAppendHaveIdenticalNoGapRootsEventsAndMembership() public {
+        uint256 first = _mint(1);
+        _mint(2);
+        uint256 second = _mint(1);
+        inventory.scanCollectionTokens(1, 256);
+        bytes32 prefix = keccak256(abi.encode(inventory.APPEND_DOMAIN(), _emptyPrefix(1), 1, first));
+        prefix = keccak256(abi.encode(inventory.APPEND_DOMAIN(), prefix, 2, second));
+        (uint256 count, bytes32 actual) = inventory.requireCompleteCollection(1);
+        require(count == 2 && actual == prefix, "unchanged no-gap root bytes");
+        require(
+            inventory.collectionTokenBySerial(1, 1) == first
+                && inventory.collectionTokenBySerial(1, 2) == second,
+            "same no-gap membership"
+        );
+        require(
+            inventory.supportsInterface(type(IStreamCollectionTokenInventory).interfaceId),
+            "legacy interface retained"
+        );
+        require(
+            inventory.supportsInterface(
+                type(IStreamCollectionTokenInventorySerialLookup).interfaceId
+            ),
+            "companion interface"
+        );
     }
 
     function testEntropyAndReceiverCallbacksUseActualCompletionAndAtomicRollback() public {
@@ -299,6 +424,14 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
             abi.encodeWithSelector(IStreamCollectionTokenInventory.InventoryBatchSize.selector, 257)
         );
         inventory.appendCollectionTokens(1, new uint256[](257));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamCollectionTokenInventory.InventoryBatchSize.selector, 0)
+        );
+        inventory.scanCollectionTokens(1, 0);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamCollectionTokenInventory.InventoryBatchSize.selector, 257)
+        );
+        inventory.scanCollectionTokens(1, 257);
         IStreamGasParameterHost.GasParameterConfig memory config = _config();
         config.failureClass = 2;
         vm.expectRevert(
@@ -352,7 +485,18 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
             ),
             "Safe permissionless append"
         );
-        bytes[] memory reads = new bytes[](20);
+        require(
+            executeSafe(
+                account,
+                signers,
+                address(inventory),
+                0,
+                abi.encodeCall(inventory.scanCollectionTokens, (1, 256)),
+                0
+            ),
+            "Safe permissionless scan"
+        );
+        bytes[] memory reads = new bytes[](23);
         reads[0] = abi.encodeCall(inventory.core, ());
         reads[1] = abi.encodeCall(inventory.coreCodeHash, ());
         reads[2] = abi.encodeCall(inventory.deploymentChainId, ());
@@ -375,6 +519,12 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
         reads[17] = abi.encodeCall(inventory.FAILURE_CLASS_FORWARDING_CAP, ());
         reads[18] = abi.encodeCall(inventory.FAILURE_CLASS_FAIL_CLOSED_PRECHECK, ());
         reads[19] = abi.encodeCall(inventory.FAILURE_CLASS_MIN_GAS_GATE, ());
+        reads[20] = abi.encodeCall(inventory.collectionScanThrough, (1));
+        reads[21] = abi.encodeCall(inventory.collectionTokenBySerial, (1, 1));
+        reads[22] = abi.encodeCall(
+            inventory.supportsInterface,
+            (type(IStreamCollectionTokenInventorySerialLookup).interfaceId)
+        );
         for (uint256 i; i < reads.length; ++i) {
             require(
                 executeSafe(account, signers, address(inventory), 0, reads[i], 0),
@@ -403,7 +553,19 @@ contract StreamCollectionTokenInventoryTest is CharacterizationTestBase, Officia
     }
 
     function _replaceManagerAndAbort(uint256 tokenId, bytes32 operation) private {
-        _manager = new PermanentTargetMintManager();
+        PermanentTargetMintManager replacement = new PermanentTargetMintManager();
+        PermanentTargetMintContinuityLedger ledger =
+            new PermanentTargetMintContinuityLedger(address(_manager), address(replacement));
+        _manager.configureContinuity(address(_core), address(ledger));
+        replacement.configureContinuity(address(_core), address(ledger));
+        _registry.setRecord(
+            address(ledger),
+            keccak256("MINT_LEDGER"),
+            type(IStreamMintLedger).interfaceId,
+            keccak256("ledger module"),
+            keccak256("ledger deployment")
+        );
+        _manager = replacement;
         _installPointer(
             _POINTER_MINT_MANAGER,
             address(_manager),
