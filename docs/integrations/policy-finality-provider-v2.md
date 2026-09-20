@@ -113,12 +113,17 @@ both retained copies, independent definitions/status, all policy identities,
 canonical components/scope, parent-gas refusal and exact retry. Their large
 fixture gas envelope is not a production-cap acceptance claim.
 
-Seven provider graph tests and three actual-reference component tests are authored
-and type-checked. The former use typed fact tables to challenge exact source and
-configuration joins. The latter use the actual V2 reference/snapshot and retained
-record contracts with the inherited explicit typed source boundaries. They have
-not been executed in this batch. The earlier 22-case snapshot/reference run is
-separate evidence and predates the added COLLECTION component entry.
+Seven provider graph tests also pass against the frozen source. They use typed
+fact tables to challenge exact source and configuration joins, including policy
+chain, factory/current route, both receipt profiles, complete bundle count and
+Registry-first refusal. This is separate from the manifest run: 24 distinct
+focused cases pass across the two captures.
+
+Three actual-reference component tests are authored and type-checked. They use
+the actual V2 reference/snapshot and retained record contracts with the inherited
+explicit typed source boundaries, but have not been executed in this batch. The
+earlier 22-case snapshot/reference run is separate evidence and predates the
+added COLLECTION component entry.
 
 Complete combined-provider dispatch, multi-profile Discovery, current component
 evaluation, full inventory materialization and finality acceptance remain joined
