@@ -1,4 +1,4 @@
-# Required packet producers: conservation and condition
+# Required packet producers: conservation, condition and personhood
 
 Source review: integration `e0eb03c38fefab405a3b14f259c0b75de2994a05`,
 20 September 2026. Relevant producers were unchanged from `7d20df15`; later
@@ -8,6 +8,20 @@ especially CMC-MUSEUM-GRADE, CMC-ACQUISITION-PACKET and CMC acceptance case 56.
 These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
+
+The [native personhood source and join](museum-personhood-source.md) follows
+source `68498f8d8fc95d9a96324426bf7c1e50976b8405`. It retains the current native
+head, original operation-24 statement/signing domain and General documentary
+proof, including imported provenance and same-recorder supersession. The
+additive assembly reconciles six actual capture transcripts and original
+provider targets 0, 1 and 8 before comparing the current waiver or summary hash
+with saved first-sale facts. Changed current evidence leaves a historical
+commitment unidentified; it does not invalidate the sale. Items 6 and 13 remain
+partial, and synthetic replay is separate from actual native acceptance,
+institutional standing and full packet evidence. A separate native personhood
+fragment preserves General authority fields and the original notarization scope;
+V4's legacy authority field and target-collection constraint cannot substitute
+for those facts. Its supplied-data validation does not replace source replay.
 
 The [original provider configuration profile](museum-conservation-provider-source.md)
 uses the additive getter at source `36c871f44636837bdc5504e6aaeafe54e14dcb98`.

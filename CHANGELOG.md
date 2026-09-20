@@ -144,6 +144,15 @@ the release policy in `docs/release-policy.md`.
 
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
+- Add native Artist personhood capture, offline replay and acquisition
+  correspondence with saved first-sale commitments and original provider pins.
+  Reconstruct original operation-24 and General documentary evidence, distinguish
+  waiver and proof-summary hashes, and retain same-recorder supersession,
+  imported signing domains and separate identity records. A separate native
+  fragment preserves General authority and its original subject. Earlier captures
+  stay unchanged; synthetic evidence does not establish legal personhood or a
+  complete acquisition packet.
+
 - Add an explicitly admitted native-provider configuration capture and historical
   RIGHTS binding. Recompute the original ten target/code pins and three gas
   configurations, retain current gas separately, and match the saved floor

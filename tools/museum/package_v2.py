@@ -218,6 +218,14 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
+    if isinstance(value, dict) and value.get("mode") == "acquisition_native_personhood_assembly":
+        from .acquisition_personhood import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "public_personhood_capture":
+        from .public_personhood_capture import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "conservation_original_provider_binding":
         from .conservation_provider_binding import verify
         from .bagit import read_tree

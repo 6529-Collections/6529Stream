@@ -1,5 +1,12 @@
 # Museum offline tooling
 
+[Native Artist personhood](../../docs/museum-personhood-source.md) captures the
+current schema-specific head, original operation-24 statement and signing domain,
+retained General notarization and same-recorder supersession. Its acquisition
+join compares the current waiver or proof-summary hash with saved first-sale
+facts and original provider pins. Three identity domains remain separate;
+historical sale execution and complete packet conformance remain unproved.
+
 [Original provider configuration](../../docs/museum-conservation-provider-source.md)
 captures the new getter's complete constructor preimage and separates original
 gas from governed values. Its additive binding joins the saved floor provider

@@ -23,6 +23,14 @@ floor receipts. Generate/check its two definitions with
 supplied fields and their relationships; the separate Museum composer replays
 the original captures. V1–V3 definitions remain unchanged.
 
+The additive [native personhood fragment](../../docs/museum-personhood-source.md)
+retains original Artist and General authority separately, including the General
+report's actual subject when its collection differs from the Artist collection.
+Generate/check its single definition with
+`python -m tools.metadata.acquisition_personhood_v1` and `--check`. It represents
+supplied native evidence; source replay remains the Museum assembler's job.
+It does not replace V4's personhood field or constitute a complete packet.
+
 Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.
