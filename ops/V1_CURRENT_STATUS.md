@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `29cd8b2d`. All 2,251 sources pass the combined
-ABI/type/storage check in 20.391 seconds. This does not generate bytecode or
+Latest Solidity source checkpoint: `22e90a3b`. All 2,279 sources pass the combined
+ABI/type/storage check in 20.906 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
@@ -50,7 +50,10 @@ establish complete-system acceptance. Original RC1 remains unchanged.
 - Living recovery followed by designated dormancy (`ed4d5572`) preserves the
   original recovery, authority epoch, guardians, receipts and cause/resolution
   history. Seventeen new actual-owner recipes are authored and source-reviewed.
-  Active-notice dismissal histories remain a separate required build.
+  Active-notice dismissal (`9ff19e55`,14 cases) and cancelled-notice histories
+  (`ff60c308`,15 cases) are now source-integrated and independently reviewed.
+  Complete repeated-living histories (`22e90a3b`,18 cases) are also integrated;
+  current-cause aborted-pending rotation joins and native acceptance remain.
 - Direct retained-file PREMIS projection (`a69c377e`) passes 53 root cases and
   its exact profile check. Missing or mismatched files cannot produce a positive
   subset. Supplied bytes and current local measurements do not invent historical
@@ -64,9 +67,15 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   two 256-input fuzz properties. The 1,048/102-row package prepares in transactions
   costing 12,915,482 and 13,461,538 gas including intrinsic cost, below the original
   16,777,216 limit. All five selected products fit. This uses a minimal host and
-  real Store/workers with named cooling; the actual publication/Safe/lock retry
-  is running on its exact predecessor graph. Full latest-stack capacity remains
-  open, and the original failed captures are preserved.
+  real Store/workers with named cooling. The actual publisher retry completed
+  with five passes and four failures on its exact predecessor graph. Actual-host
+  preparation fits at 13,014,534/13,677,086 gas including intrinsic cost, but full
+  publication runs out of gas while rereading the complete payload. Fixed-worker
+  immutable-manifest adoption is now integrated (`717968e7`): 14 focused cases
+  and two 256-input fuzz properties pass, all five selected products fit, and
+  minimal-host mutation costs 11,284,045 gas including intrinsic cost. Root
+  verifies all 39 sources/41 artifacts/420 source hashes. The same actual-publisher
+  fixture is running as native10 with the reviewed repair; full latest-stack capacity remains open.
 - Museum Standing V2 (`3f0967f`) consumes original unresolved conflict history
   and historical acknowledgement guards without altering V1. Root passes 27
   consumer cases plus 17 documentation cases; both profiles and all seven source
@@ -75,6 +84,33 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   documents and 78 chunks through original delayed governance and current Safe
   recipes. All source hashes, dependencies and ordered chunk identities are
   independently checked; eleven cases are authored, with native execution pending.
+- Original delegated attestation24 clients (`122d2288`) cover all ten subject
+  families, original signatures and durable receipts. Root passes all 836 package
+  tests in 37.913 seconds, generation/build/strict types and exact ABI56 fixture
+  checks. This is client and simulated-RPC evidence, not actual Safe execution.
+- One-way phase FreezePolicy (`0ab60204`) now preserves canonical Ledger
+  restrictions and executor ceilings across same-Ledger succession. All 23
+  focused Ledger/configuration cases pass on exact builder source `8f2e9157`;
+  root independently checks 159 sources, 178 metadata artifacts and 3,374 source
+  hashes. All 72 nonempty captured production products fit. The separate final
+  selected Manager/fallback sizes are 24,396/24,513 bytes. The full-current cohort of
+  eleven governance and eleven continuity cases (three newly added) remains
+  unexecuted.
+- Original-living multiple-Artist/multiple-collection hydration (`8cc47857`)
+  has ten independently reviewed actual-owner/Safe cases authored. Selected
+  sizing exposes new Identity/Coordinator overruns at 25,254/24,698 bytes; the
+  builder owns those repairs separately from older held Artist blockers.
+  Delegated and other advanced migration profiles remain in progress.
+- Current Allowlist/Delegate gates and Merkle counter accounting (`f1acffbe`)
+  add fourteen reviewed actual-contract/Safe recipes. Eight independently
+  reviewed stateful campaign cases (`f8f78e99`) now add independent accounting,
+  forced coverage, randomized actions and oracle-corruption controls. Native
+  campaign execution remains pending; abort/fallback actions are being added.
+- Complete PREMIS authority-field accounting (`53aae1b0`) passes 62 root
+  new/compatibility/documentation cases and exact profile/example checks. All
+  69 retained inputs match Git bytes. Its example explicitly reports 17 bound,
+  eight local and ten unresolved fields; it does not claim external authority
+  authentication or complete Museum conformance.
 - Seven inactive worktrees were removed after exact cleanliness and process
   checks. Every named branch and commit was retained. Active tasks, evidence,
   dirty worktrees and the Museum runtime were preserved; no tasks were archived.
