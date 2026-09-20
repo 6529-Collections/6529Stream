@@ -90,7 +90,7 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
             oldNonce.signatures.length == 195, "stale nonce retains sufficient three-owner quorum"
         );
         _threshold(configurationBuyer, _first(buyerOwners, 2), 3);
-        _refuse(configurationBuyer, oldNonce);
+        _refuseSignature(configurationBuyer, oldNonce, "GS026");
         _unminted(a);
         SignedCall memory oldQuorum =
             _flatCall(configurationBuyer, _first(buyerOwners, 2), address(sale), a.price, data);
@@ -98,7 +98,7 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
             oldQuorum.nonce == configurationBuyer.nonce(),
             "fresh nonce isolates insufficient threshold"
         );
-        _refuse(configurationBuyer, oldQuorum);
+        _refuseSignature(configurationBuyer, oldQuorum, "GS020");
         _unminted(a);
 
         _threshold(configurationArtist, _first(artistOwners, 2), 3);
@@ -142,14 +142,15 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
         );
         artistOwners[0] = REPLACEMENT_KEY;
         buyerOwners[0] = REPLACEMENT_KEY;
-        _refuse(configurationBuyer, oldNonce);
-        _refuse(
+        bytes memory data = _purchaseData(a, _first(artistOwners, 2));
+        _refuseSignature(configurationBuyer, oldNonce, "GS026");
+        _refuseSignature(
             configurationBuyer,
-            _flatCall(configurationBuyer, staleBuyerKeys, address(sale), a.price, staleData)
+            _flatCall(configurationBuyer, staleBuyerKeys, address(sale), a.price, data),
+            "GS026"
         );
         _refuse(configurationBuyer, _buyerCall(address(sale), a.price, staleData));
         _unminted(a);
-        bytes memory data = _purchaseData(a, _first(artistOwners, 2));
         SignedCall memory current = _buyerCall(address(sale), a.price, data);
         _fieldDenials(current, a);
         _purchaseSuccess(current, a);
@@ -163,7 +164,7 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
         bytes memory data = _purchaseData(a, _first(artistOwners, 2));
         SignedCall memory exact = _buyerCall(address(sale), a.price, data);
         SignedCall memory wrong = _nestedCall(address(sale), a.price, data, true);
-        _refuse(configurationBuyer, wrong);
+        _refuseSignature(configurationBuyer, wrong, "GS026");
         _unminted(a);
         bytes32 saved = keccak256(_envelope(exact));
         address removed = vm.addr(innerOwners[0]);
@@ -188,7 +189,7 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
                 && contractOwner.getThreshold() == 2,
             "actual nested signer revoked"
         );
-        _refuse(configurationBuyer, exact);
+        _refuseSignature(configurationBuyer, exact, "GS026");
         _unminted(a);
         uint256[] memory remaining = new uint256[](2);
         remaining[0] = innerOwners[1];
@@ -464,12 +465,16 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
         );
     }
 
-    function _refuse(OfficialSafe account, SignedCall memory c) private {
+    function _refuse(OfficialSafe account, SignedCall memory c)
+        private
+        returns (bytes memory reason)
+    {
         uint256 nonce = account.nonce();
         uint256 balance = address(account).balance;
         bytes32 owners = keccak256(abi.encode(account.getOwners(), account.getThreshold()));
         bytes32 artistState = _artistOwnerState();
-        (bool ok,) = address(account).call(_envelope(c));
+        bool ok;
+        (ok, reason) = address(account).call(_envelope(c));
         require(
             !ok && account.nonce() == nonce && address(account).balance == balance,
             "failed original Safe restores nonce and value"
@@ -478,6 +483,16 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
             owners == keccak256(abi.encode(account.getOwners(), account.getThreshold()))
                 && artistState == _artistOwnerState(),
             "failure preserves actual owner configurations and all Artist states"
+        );
+    }
+
+    function _refuseSignature(OfficialSafe account, SignedCall memory c, string memory code)
+        private
+    {
+        require(
+            keccak256(_refuse(account, c))
+                == keccak256(abi.encodeWithSignature("Error(string)", code)),
+            "original Safe signature refusal before target execution"
         );
     }
 
@@ -526,15 +541,15 @@ abstract contract CurrentSafeOwnerConfigurationFixture is
     ) private {
         SignedCall memory changed = abi.decode(abi.encode(original), (SignedCall));
         changed.value = 0;
-        _refuse(configurationBuyer, changed);
+        _refuseSignature(configurationBuyer, changed, "GS026");
         _unminted(a);
         changed = abi.decode(abi.encode(original), (SignedCall));
         changed.operation = 1;
-        _refuse(configurationBuyer, changed);
+        _refuseSignature(configurationBuyer, changed, "GS026");
         _unminted(a);
         changed = abi.decode(abi.encode(original), (SignedCall));
         changed.data = bytes.concat(changed.data, hex"00");
-        _refuse(configurationBuyer, changed);
+        _refuseSignature(configurationBuyer, changed, "GS026");
         _unminted(a);
     }
 

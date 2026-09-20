@@ -9,8 +9,10 @@ They deploy the pinned upstream Safe 1.3.0, 1.4.1 and 1.5.0 creation bytecodes,
 check their runtimes and initialize actual proxies through the original factory.
 See the [fixture provenance](../../test/fixtures/safe/README.md).
 
-These are source-reviewed, ABI-checked recipes. Native execution, gas acceptance
-and joined release validation remain pending. The source base is
+The initial recipes have source review and an ABI-only capture. The subsequent
+independent-review correction isolates signer failures and requires exact Safe
+signature errors; its joined compiler check remains pending. Native execution,
+gas acceptance and joined release validation remain pending. The source base is
 `e7b509ca524578da5e3a43db8acab228f720833b`. No production code, shared fixture,
 runner, acceptance catalog, deployment guard or release artifact changes here.
 
@@ -39,14 +41,17 @@ Public deterministic test keys have no real funds or operational authority.
 | Family | Actual transitions and negative cases | Successful continuation |
 | --- | --- | --- |
 | Threshold change | Buyer changes two-of-three to three-of-three by authorized self-CALL. Its old-nonce payload retains three signatures, isolating stale-nonce refusal. A fresh-nonce two-signature payload is also refused. Artist changes two-of-three to three-of-three, invalidating its unused two-signature sale proof. | Artist changes back by a three-signature self-CALL. The byte-identical saved buyer transaction succeeds with its original nonce and original sale proof. |
-| Owner replacement | Artist and buyer each execute `swapOwner`; both actually remove the old owner and admit the replacement. Old-nonce, fresh-nonce removed-buyer signatures, and current-buyer signatures carrying the removed-Artist proof are refused. | Current owners sign the same sale authorization, then execute paid mint and custody transfer. The removed Artist's separately saved payout proof is refused; new owners sign the same payout fields and original unused Artist nonce, producing the original record and receipt. |
+| Owner replacement | Artist and buyer each execute `swapOwner`; both actually remove the old owner and admit the replacement. Old-nonce, fresh-nonce removed-buyer signatures carrying a valid current Artist proof, and current-buyer signatures carrying the removed-Artist proof are refused. | Current owners sign the same sale authorization, then execute paid mint and custody transfer. The removed Artist's separately saved payout proof is refused; new owners sign the same payout fields and original unused Artist nonce, producing the original record and receipt. |
 | Nested owner revocation | Buyer is two-of-two: one EOA plus an actual two-of-three Safe. A signature using the other version's contract-owner wrapper is refused. Inner Safe executes `removeOwner`, invalidating the saved outer proof without consuming its outer nonce. | Remaining inner owners execute `addOwnerWithThreshold`. The byte-identical saved outer transaction succeeds. The inner nonce remains at two through paid mint and custody transfer; contract-signature validation does not execute an inner transaction. |
 
 Every family uses an original payable `sale.buy` CALL for 0.01 ETH and an
 original zero-value `safeTransferFrom` CALL from buyer to Artist. Both use
 operation zero. Before purchase, independent attempts change value to zero,
 operation to one, or append a byte to calldata without replacing signatures;
-each must revert. Completed purchase and transfer payloads cannot replay.
+each must return the original `Error(string)` with `GS026`, before executing the
+target. Stale-nonce, removed-signer and wrong nested-wrapper probes require the
+same error; insufficient quorum requires `GS020`. Completed purchase and
+transfer payloads cannot replay.
 
 ## Original encoding and independent assertions
 
@@ -55,8 +60,10 @@ The helper independently constructs the literal Safe EIP-712 domain and full
 that digest against the original Safe getter, signs sorted owner signatures and
 calls the original `execTransaction` ABI. Safe transaction gas, base gas, gas
 price, gas token and refund receiver are zero. Under that envelope an inner
-failure must revert the outer transaction, restoring its nonce and value; this
-does not describe envelopes with a nonzero `safeTxGas`.
+failure must revert the outer transaction, restoring its nonce and value.
+Versions 1.3.0 and 1.4.1 wrap target failure as `GS013`; 1.5.0 propagates target
+revert data. Neither substitutes for signature-error assertions. These rollback
+claims do not describe envelopes with a nonzero `safeTxGas`.
 
 Nested signatures use the original contract-signature header, sorted with the
 EOA signature, with dynamic inner signatures at byte offset 130. For 1.3.0 and
