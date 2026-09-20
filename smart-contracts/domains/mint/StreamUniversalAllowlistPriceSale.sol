@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamSaleArtist.sol";
 import "./StreamUniversalAllowlistPrice.sol";
 import "./StreamUniversalAllowlistPriceRead.sol";
+import "./StreamUniversalSaleExecution.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import "./StreamSaleConsent.sol";
@@ -37,6 +38,14 @@ contract StreamUniversalAllowlistPriceSale is
     ReentrancyGuard,
     ERC165
 {
+    // Preserve decoding of the original admission errors from the fixed linked worker.
+    error SaleLifecycleMismatch(address saleAdapter, bytes32 saleId);
+    error SaleLifecycleReadFailed(address saleAdapter);
+    error SaleLifecycleReadMalformed(address saleAdapter, uint256 length);
+    error SettlementModuleNotAdmitted(address module);
+    error SettlementModuleReadFailed(address module);
+    error SettlementModuleReadMalformed(address module, uint256 length);
+
     bytes32 public constant REVEAL_ATTEMPT_GAS_LIMIT = keccak256("6529STREAM_GGP_REVEAL_ATTEMPT_GAS_LIMIT");
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
         "UniversalSaleAuthorization(bytes32 saleId,bytes32 saleConfigHash,address payer,address executor,address recipient,address artist,bytes32 tokenDataHash,bytes32 mintCommitment,uint256 executionNonce,bytes32 nonce,uint64 deadline)"
@@ -274,7 +283,7 @@ contract StreamUniversalAllowlistPriceSale is
     {
         (StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c, IStreamMintManager.MintBatch memory batch) = _candidate(e,resolverData);
         if (msg.sender != c.executor || c.sale.amount != 0) revert InvalidUniversalPriceProfile();
-        StreamSettlementAdmission.requireAdmission(moduleRegistry,c.lifecycleBinding.paymentAdapter,c);
+        StreamUniversalSaleExecution.requireAdmission(moduleRegistry,c.lifecycleBinding.paymentAdapter,c);
         uint256 originalNativeBalance = address(this).balance - msg.value;
         if (originalNativeBalance < refundLiability) revert SaleRevealAccountingMismatch();
         IStreamImmediateSaleReveal.RevealQuote memory reveal = StreamImmediateSaleReveal.quote(core,c.sale.collectionId);
@@ -314,7 +323,7 @@ contract StreamUniversalAllowlistPriceSale is
             msg.sender != c.lifecycleBinding.paymentAdapter
                 || keccak256(abi.encode(c)) != keccak256(abi.encode(candidate))
         ) revert F.UniversalCandidateMismatch();
-        StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
+        StreamUniversalSaleExecution.requireAdmission(moduleRegistry, msg.sender, c);
         uint256 originalNativeBalance = address(this).balance - msg.value;
         if (originalNativeBalance < refundLiability) revert SaleRevealAccountingMismatch();
         IStreamImmediateSaleReveal.RevealQuote memory reveal = StreamImmediateSaleReveal.quote(core,c.sale.collectionId);

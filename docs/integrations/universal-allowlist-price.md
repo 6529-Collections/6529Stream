@@ -3,7 +3,7 @@
 This additive ADR0019 carrier was applied after renewed review of the exact v8
 packet on 20 September 2026 (approval tool165646). Earlier denied proposals and
 review evidence remain preserved. The 42 tests are authored and typechecked;
-size, runtime, current-stack and launch acceptance remain pending. Existing
+runtime, current-stack and launch acceptance remain pending. Existing
 Universal and Payment contracts are unchanged.
 
 `StreamUniversalAllowlistPriceSale` uses the existing one-token, order-1,
@@ -64,7 +64,13 @@ WAIVED conservation setup; external entropy and ERC20 are explicit fixtures.
 Those seven current recipes retain zero-native execution; native fees and refunds
 are covered by the separate authored unit-boundary cases. Inherited fixture gas
 settings do not establish production cap acceptance. All 42 remain unexecuted.
-Bytecode size, actual deployment and linked artifacts must be checked first.
+The selected five-product capture passes Solidity 0.8.19 via-IR, 200 runs, Paris
+with no CBOR metadata: this carrier is 22,005 runtime / 27,506 creation bytes.
+Its original 121 ABI entries and recursive storage layout are unchanged. The
+two admission calls use the already accepted fixed SaleExecution worker; its
+original checks and caller context are retained. Actual deployment, linked
+artifact execution and runtime acceptance remain pending. The unit run awaits
+the shared genuine conservation-floor fixture correction.
 
 This profile does not implement the separate `6529Stream Sales` signing family,
 public unsigned sales, Dutch/PWYW/clearing programs, multi-token/prepared batches,

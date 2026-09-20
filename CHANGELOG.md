@@ -12,7 +12,9 @@ the release policy in `docs/release-policy.md`.
   executor owns excess pull refunds. Existing Universal/Payment source is unchanged.
 - Apply the exact reviewed v8 packet; ABI/type and recursive layouts pass.
   Author 35 focused unit cases and seven zero-native current-stack recipes;
-  selected size and runtime acceptance remain pending.
+  selected five-product sizes fit after using the accepted fixed admission worker.
+  The new carrier is 22,005 runtime bytes with its original ABI/storage retained;
+  runtime acceptance remains pending.
 
 ## Bounded repeated Artist selection for original Metadata
 
