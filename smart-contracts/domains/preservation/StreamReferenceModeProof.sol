@@ -14,6 +14,7 @@ import { StreamMetadataRenderer } from "../metadata/StreamMetadataRenderer.sol";
 import { StreamReferenceModeDefinitions } from "../records/StreamReferenceModeDefinitions.sol";
 import { StreamReferenceModeCurated } from "./StreamReferenceModeCurated.sol";
 import { StreamReferenceModeDefinitionsRead } from "./StreamReferenceModeDefinitionsRead.sol";
+import { StreamReferenceModeInput as Input } from "./StreamReferenceModeInput.sol";
 
 /// @notice Complete source-bound evidence for the two explicit non-byte-exact acceptance modes.
 /// @dev The EVM validates original evidence and thresholds, not offchain browser/metric execution.
@@ -23,27 +24,28 @@ library StreamReferenceModeProof {
         view
         returns (bytes32)
     {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_REFERENCE_MODE_CONTEXT_V1"),
-                d.chainId,
-                address(this),
-                d.targets,
-                d.codeHashes,
-                p.collectionId,
-                p.referenceId,
-                p.snapshotRecordHash,
-                p.snapshotRevision,
-                p.captures,
-                p.environment
-            )
-        );
+        return Input.contextHash(d, p);
     }
 
     function requireEvidence(
         R.Dependencies memory d,
         M.Dependencies memory bindings,
         R.Publication memory p,
+        R.SourceFacts memory source,
+        M.Evidence memory w,
+        bool current
+    ) public view returns (M.Facts memory f) {
+        return requireEvidenceProjected(
+            d, bindings, Input.project(p, Input.contextHash(d, p)), source, w, current
+        );
+    }
+
+    /// @dev The fixed preparation worker derives this projection from its one full decode.
+    /// No publication authority or current-source check is cached or supplied by a new caller.
+    function requireEvidenceProjected(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        Input.EvidenceInput memory p,
         R.SourceFacts memory source,
         M.Evidence memory w,
         bool current
@@ -64,11 +66,11 @@ library StreamReferenceModeProof {
                 d, w.repeats[i].coverageHash, source.artistId, w.repeats[i].objectHash, current
             );
             StreamReferenceRenderSourceReads.requireCaptureObject(d, f.repeats[i]);
-            if (f.repeats[i].sha256Digest != p.captures[i].repeatCaptureSha256[1]) {
+            if (f.repeats[i].sha256Digest != p.captures[i].repeatSha256) {
                 revert M.InvalidModeEvidence();
             }
         }
-        bytes32 context = contextHash(d, p);
+        bytes32 context = p.contextHash;
         if (w.mode == M.Mode.PERCEPTUAL_TOLERANCE) {
             M.Curated memory empty;
             if (keccak256(abi.encode(w.curated)) != keccak256(abi.encode(empty))) {
@@ -113,8 +115,8 @@ library StreamReferenceModeProof {
                 revert M.InvalidModeEvidence();
             }
             (f.intentSelectionHash, f.conditionReceiptHash) =
-                StreamReferenceModeCurated.requireEvidence(
-                    d, bindings, p, source, w.curated, context
+                StreamReferenceModeCurated.requireEvidenceProjected(
+                    d, bindings, p, source, w.curated
                 );
             f.conditionRecordHash = w.curated.conditionRecordHash;
             f.interpretationHash = keccak256(
@@ -157,31 +159,6 @@ library StreamReferenceModeProof {
         M.Facts memory facts,
         bytes memory environment
     ) public pure returns (bytes memory out) {
-        if (
-            keccak256(environment) != p.environment.manifestHash
-                || environment.length != p.environment.manifestBytes
-        ) {
-            revert M.InvalidModeEvidence();
-        }
-        for (uint256 i; i < p.captures.length; ++i) {
-            if (p.captures[i].environmentManifestHash != p.environment.manifestHash) {
-                revert M.InvalidModeEvidence();
-            }
-        }
-        receipt.recordHash = 0;
-        receipt.recordChainHash = 0;
-        receipt.payloadHash = 0;
-        receipt.payloadBytes = 0;
-        receipt.recordedAt = 0;
-        out = abi.encode(
-            keccak256("6529STREAM_REFERENCE_MODE_PAYLOAD_V1"),
-            p,
-            receipt,
-            source,
-            evidence,
-            facts,
-            environment
-        );
-        if (out.length == 0 || out.length > 524288) revert M.InvalidModeEvidence();
+        return Input.payload(p, receipt, source, evidence, facts, environment);
     }
 }

@@ -22,6 +22,7 @@ import { StreamReferenceModeReads as Read } from "./StreamReferenceModeReads.sol
 import { StreamReferenceModeDefinitions as D } from "../records/StreamReferenceModeDefinitions.sol";
 import "../records/StreamArtistIntentJson.sol";
 import { StreamCollectionRecordHashes } from "../records/StreamCollectionRecordHashes.sol";
+import { StreamReferenceModeInput as Input } from "./StreamReferenceModeInput.sol";
 
 /// @notice Exact selected Artist voice plus an actual original independent signed examination.
 /// @dev Credentials are referenced statements. No institutional qualification or present Safe-owner
@@ -34,6 +35,16 @@ library StreamReferenceModeCurated {
         R.SourceFacts memory source,
         M.Curated memory w,
         bytes32 contextHash
+    ) public view returns (bytes32 selectionHash, bytes32 receiptHash) {
+        return requireEvidenceProjected(d, bindings, Input.project(p, contextHash), source, w);
+    }
+
+    function requireEvidenceProjected(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        Input.EvidenceInput memory p,
+        R.SourceFacts memory source,
+        M.Curated memory w
     ) public view returns (bytes32 selectionHash, bytes32 receiptHash) {
         Read.pin(bindings.conservation, bindings.conservationCodeHash);
         Read.pin(bindings.attestations, bindings.attestationsCodeHash);
@@ -75,12 +86,12 @@ library StreamReferenceModeCurated {
             revert M.InvalidModeEvidence();
         }
         selectionHash = selected.selectionHash;
-        _assess(p, w, contextHash, selectionHash);
+        _assess(p, w, p.contextHash, selectionHash);
         receiptHash = _condition(d, bindings.attestations, p, source.subject, w);
     }
 
     function _assess(
-        R.Publication memory p,
+        Input.EvidenceInput memory p,
         M.Curated memory w,
         bytes32 contextHash,
         bytes32 selected
@@ -135,7 +146,7 @@ library StreamReferenceModeCurated {
     function _condition(
         R.Dependencies memory d,
         address host,
-        R.Publication memory p,
+        Input.EvidenceInput memory p,
         bytes32 subject,
         M.Curated memory w
     ) private view returns (bytes32) {

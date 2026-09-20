@@ -3,6 +3,10 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
 import { StreamReferenceModePreparation } from "./StreamReferenceModePreparation.sol";
+import { StreamReferenceModePayloadPreparation } from "./StreamReferenceModePayloadPreparation.sol";
+import {
+    IStreamReferenceModePayloadPreparation
+} from "../../interfaces/stream/preservation/IStreamReferenceModePayloadPreparation.sol";
 import { StreamReferenceMetricStorage } from "./StreamReferenceMetricStorage.sol";
 import { StreamReferenceModeStateReads } from "./StreamReferenceModeStateReads.sol";
 import {
@@ -39,6 +43,7 @@ contract StreamReferenceModePublication is
     IStreamReferenceModePublication,
     IStreamReferenceInventoryPreparation,
     IStreamReferenceEnvironmentPreparation,
+    IStreamReferenceModePayloadPreparation,
     IStreamReferenceMetricSupplement,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
@@ -71,6 +76,7 @@ contract StreamReferenceModePublication is
     StreamReferenceModeTypes.Dependencies private _modeBindings;
     mapping(bytes32 => StreamReferenceModeTypes.Facts) private _modeFacts;
     StreamReferenceMetricStorage.State private _metricSupplements;
+    StreamReferenceModePayloadPreparation.State private _preparedModePayloads;
 
     constructor(
         StreamReferenceRenderTypes.Dependencies memory d,
@@ -136,6 +142,7 @@ contract StreamReferenceModePublication is
             || id == type(IStreamReferenceModePublication).interfaceId
             || id == type(IStreamReferenceInventoryPreparation).interfaceId
             || id == type(IStreamReferenceEnvironmentPreparation).interfaceId
+            || id == type(IStreamReferenceModePayloadPreparation).interfaceId
             || id == type(IStreamReferenceMetricSupplement).interfaceId
             || id == type(IStreamArtworkFinalityComponent).interfaceId
             || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
@@ -248,8 +255,8 @@ contract StreamReferenceModePublication is
         StreamReferenceRenderTypes.Receipt memory r = _receipt(p, recorder);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         StreamReferenceModePreparation.Prepared memory result =
-            StreamReferenceModePreparation.prepare(
-                d, _modeBindings, r, _fileInventories, msg.data, false
+            StreamReferenceModePreparation.prepareStaged(
+                d, _modeBindings, r, _fileInventories, _preparedModePayloads, msg.data, false
             );
         return (result.sourcesHash, result.canonical);
     }
@@ -264,8 +271,8 @@ contract StreamReferenceModePublication is
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         _definitions(d);
         StreamReferenceModePreparation.Prepared memory result =
-            StreamReferenceModePreparation.prepare(
-                d, _modeBindings, r, _fileInventories, msg.data, true
+            StreamReferenceModePreparation.prepareStaged(
+                d, _modeBindings, r, _fileInventories, _preparedModePayloads, msg.data, true
             );
         StreamReferenceModeTypes.Facts memory mode = result.mode;
         r.sourcesHash = result.sourcesHash;
@@ -376,6 +383,53 @@ contract StreamReferenceModePublication is
         bytes memory raw =
             StreamReferenceRenderRecordReads.recordBytes(_publications[hash], _receipts[hash]);
         assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function prepareModePublication(StreamReferenceRenderTypes.Publication calldata)
+        external
+        override
+        guarded
+        returns (bytes32)
+    {
+        return StreamReferenceModePayloadPreparation.preparePublication(
+            _preparedModePayloads,
+            _fileInventories,
+            _fixed.targets[3],
+            _fixed.codeHashes[3],
+            msg.data
+        );
+    }
+
+    function prepareModePayload(
+        bytes32,
+        StreamReferenceRenderTypes.Receipt calldata,
+        StreamReferenceRenderTypes.SourceFacts calldata,
+        StreamReferenceModeTypes.Evidence calldata,
+        StreamReferenceModeTypes.Facts calldata
+    ) external override guarded returns (bytes32) {
+        return StreamReferenceModePayloadPreparation.preparePayload(
+                _preparedModePayloads,
+                _fileInventories,
+                _fixed.targets[3],
+                _fixed.codeHashes[3],
+                msg.data
+            );
+    }
+
+    function preparedModePublication(bytes32 id)
+        external
+        view
+        override
+        returns (PublicationDescriptor memory, bytes memory)
+    {
+        bytes memory raw = StreamReferenceModePayloadPreparation.publicationEncoded(
+            _preparedModePayloads, id
+        );
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function preparedModePayload(bytes32 id) external view override returns (bytes memory) {
+        return StreamReferenceModePayloadPreparation.payload(_preparedModePayloads, id);
     }
 
     function referencePayload(bytes32 hash) external view override returns (bytes memory) {

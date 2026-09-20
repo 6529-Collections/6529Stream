@@ -458,8 +458,18 @@ contract StreamReferenceMetricPublicationTest is
         _upload(canonical);
         _upload(abi.encode(terms));
         _upload(abi.encode(modeEvidence));
+        _prepareModePayload(canonical);
         bytes memory input = abi.encodeCall(modes.publishModeReference, (terms, modeEvidence));
         uint256 intrinsic = _intrinsic(input);
+        _cool();
+        StreamReferenceRenderTypes.Dependencies memory dependencies_ = modes.dependencies();
+        for (uint256 i; i < 7; ++i) {
+            safeVm.cool(dependencies_.targets[i]);
+        }
+        _coolPayload(canonical);
+        _coolPayload(abi.encode(terms));
+        safeVm.cool(address(store));
+        safeVm.cool(address(modes));
         uint256 before = gasleft();
         (bool ok, bytes memory returned) =
             address(modes).call{ gas: TX_CAP - intrinsic - 5000 }(input);
@@ -468,6 +478,74 @@ contract StreamReferenceMetricPublicationTest is
         require(total <= TX_CAP);
         hash = abi.decode(returned, (bytes32));
         emit log_named_uint("combinedModePublicationWithIntrinsic", total);
+    }
+
+    function _prepareModePayload(bytes memory canonical) private {
+        (
+            bytes32 domain,
+            StreamReferenceRenderTypes.Publication memory publication,
+            StreamReferenceRenderTypes.Receipt memory receipt,
+            StreamReferenceRenderTypes.SourceFacts memory source,
+            Mode.Evidence memory evidence,
+            Mode.Facts memory facts,
+            bytes memory environment
+        ) = abi.decode(
+            canonical,
+            (
+                bytes32,
+                StreamReferenceRenderTypes.Publication,
+                StreamReferenceRenderTypes.Receipt,
+                StreamReferenceRenderTypes.SourceFacts,
+                Mode.Evidence,
+                Mode.Facts,
+                bytes
+            )
+        );
+        require(domain == keccak256("6529STREAM_REFERENCE_MODE_PAYLOAD_V1"));
+        require(keccak256(abi.encode(publication)) == keccak256(abi.encode(terms)));
+        require(keccak256(abi.encode(evidence)) == keccak256(abi.encode(modeEvidence)));
+        require(keccak256(environment) == terms.environment.manifestHash);
+        bytes memory originalPublication = abi.encode(terms);
+        (bytes32 publicationId, uint256 publicationGas) = _prepareModeBounded(
+            abi.encodeCall(modes.prepareModePublication, (terms)), originalPublication, true
+        );
+        (, uint256 payloadGas) = _prepareModeBounded(
+            abi.encodeCall(
+                modes.prepareModePayload, (publicationId, receipt, source, evidence, facts)
+            ),
+            canonical,
+            false
+        );
+        emit log_named_uint("actualHostPublicationStageWithIntrinsic", publicationGas);
+        emit log_named_uint("actualHostPayloadAssemblyWithIntrinsic", payloadGas);
+    }
+
+    function _prepareModeBounded(bytes memory input, bytes memory raw, bool publication)
+        private
+        returns (bytes32 id, uint256 total)
+    {
+        uint256 intrinsic = _intrinsic(input);
+        _coolPayload(raw);
+        safeVm.cool(address(store));
+        safeVm.cool(address(modes));
+        uint256 before = gasleft();
+        (bool ok, bytes memory returned) =
+            address(modes).call{ gas: TX_CAP - intrinsic - 5000 }(input);
+        total = before - gasleft() + intrinsic;
+        if (!ok) assembly ("memory-safe") { revert(add(returned, 32), mload(returned)) }
+        require(total <= TX_CAP);
+        id = abi.decode(returned, (bytes32));
+        bytes memory saved;
+        if (publication) (, saved) = modes.preparedModePublication(id);
+        else saved = modes.preparedModePayload(id);
+        require(keccak256(saved) == keccak256(raw));
+    }
+
+    function _coolPayload(bytes memory raw) private {
+        for (uint256 i; i < (raw.length + 8191) / 8192; ++i) {
+            (address pointer,) = store.chunk(keccak256(_part(raw, i)));
+            safeVm.cool(pointer);
+        }
     }
 
     function _supplement() private view returns (Metric.Supplement memory s, bytes memory raw) {

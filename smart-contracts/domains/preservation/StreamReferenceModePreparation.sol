@@ -10,6 +10,10 @@ import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceRenderSourceReads } from "./StreamReferenceRenderSourceReads.sol";
 import { StreamReferenceRenderPreparation } from "./StreamReferenceRenderPreparation.sol";
 import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
+import { StreamReferenceModeInput as Input } from "./StreamReferenceModeInput.sol";
+import {
+    StreamReferenceModePayloadPreparation as Payload
+} from "./StreamReferenceModePayloadPreparation.sol";
 
 /// @notice Fixed mode tuple decoding; the host retains candidate/authority checks and all writes.
 library StreamReferenceModePreparation {
@@ -28,15 +32,72 @@ library StreamReferenceModePreparation {
         bytes calldata original,
         bool writing
     ) public view returns (Prepared memory result) {
+        R.Publication memory p;
+        M.Evidence memory evidence;
+        R.SourceFacts memory source;
+        (result, p, evidence, source) = _validate(d, bindings, receipt, original, writing);
+        result.canonical = StreamReferenceModeProof.payload(
+            p, receipt, source, evidence, result.mode, _environment(inventories, p.environment)
+        );
+    }
+
+    function prepareStaged(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        R.Receipt memory receipt,
+        mapping(bytes32 => Bytes.Manifest) storage inventories,
+        Payload.State storage preparedPayloads,
+        bytes calldata original,
+        bool writing
+    ) public view returns (Prepared memory result) {
+        R.Publication memory p;
+        M.Evidence memory evidence;
+        R.SourceFacts memory source;
+        (result, p, evidence, source) = _validate(d, bindings, receipt, original, writing);
+        bytes memory encoded = abi.encode(p);
+        if (encoded.length > 524288) revert M.InvalidModeEvidence();
+        result.canonical = Payload.lookup(
+            preparedPayloads,
+            inventories,
+            keccak256(encoded),
+            uint32(encoded.length),
+            receipt,
+            source,
+            evidence,
+            result.mode
+        );
+        if (result.canonical.length == 0) {
+            result.canonical = StreamReferenceModeProof.payload(
+                p, receipt, source, evidence, result.mode, _environment(inventories, p.environment)
+            );
+        }
+    }
+
+    function _validate(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        R.Receipt memory receipt,
+        bytes calldata original,
+        bool writing
+    )
+        private
+        view
+        returns (
+            Prepared memory result,
+            R.Publication memory p,
+            M.Evidence memory evidence,
+            R.SourceFacts memory source
+        )
+    {
         // Both original mode write/preview selectors begin with this exact pair. Preview's
         // trailing recorder is consumed by the host before this fixed decoder is called.
-        (R.Publication memory p, M.Evidence memory evidence) =
-            abi.decode(original[4:], (R.Publication, M.Evidence));
-        R.SourceFacts memory source = StreamReferenceRenderSourceReads.requireModeSourceInputs(
+        (p, evidence) = abi.decode(original[4:], (R.Publication, M.Evidence));
+        source = StreamReferenceRenderSourceReads.requireModeSourceInputs(
             d, StreamReferenceRenderSourceReads.project(p), false
         );
-        result.mode =
-            StreamReferenceModeProof.requireEvidence(d, bindings, p, source, evidence, false);
+        result.mode = StreamReferenceModeProof.requireEvidenceProjected(
+            d, bindings, Input.project(p, Input.contextHash(d, p)), source, evidence, false
+        );
         result.sourcesHash = StreamReferenceModeProof.sourceHash(d, bindings, source, result.mode);
         if (writing && (p.expectedSourcesHash == 0 || p.expectedSourcesHash != result.sourcesHash))
         {
@@ -44,9 +105,6 @@ library StreamReferenceModePreparation {
         }
         p.expectedSourcesHash = result.sourcesHash;
         receipt.sourcesHash = result.sourcesHash;
-        result.canonical = StreamReferenceModeProof.payload(
-            p, receipt, source, evidence, result.mode, _environment(inventories, p.environment)
-        );
         result.evidence = abi.encode(evidence);
     }
 
@@ -73,7 +131,9 @@ library StreamReferenceModePreparation {
         R.SourceFacts memory source = StreamReferenceRenderSourceReads.requireModeSourceInputs(
             d, StreamReferenceRenderSourceReads.project(p), true
         );
-        facts = StreamReferenceModeProof.requireEvidence(d, bindings, p, source, evidence, true);
+        facts = StreamReferenceModeProof.requireEvidenceProjected(
+            d, bindings, Input.project(p, Input.contextHash(d, p)), source, evidence, true
+        );
         sourcesHash = StreamReferenceModeProof.sourceHash(d, bindings, source, facts);
     }
 
