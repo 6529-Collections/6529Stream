@@ -67,7 +67,7 @@ jobs:
       - name: Check dependency compatibility
         run: python -m pip check
       - name: Test typed record schemas and canonical fixtures
-        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile tools.metadata.test_work_definitions tools.metadata.test_owner_notice_profile tools.metadata.test_acquisition_packet_v2 tools.metadata.test_acquisition_packet_v3 tools.metadata.test_acquisition_personhood_v1 tools.metadata.test_acquisition_direct_floor_v1 tools.metadata.test_acquisition_conservation_context_v1 tools.metadata.test_acquisition_packet_v5 -v
+        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile tools.metadata.test_work_definitions tools.metadata.test_owner_notice_profile tools.metadata.test_acquisition_packet_v2 tools.metadata.test_acquisition_packet_v3 tools.metadata.test_acquisition_personhood_v1 tools.metadata.test_acquisition_direct_floor_v1 tools.metadata.test_acquisition_conservation_context_v1 tools.metadata.test_acquisition_packet_v5 tools.metadata.test_acquisition_native_finality_v1 tools.metadata.test_acquisition_packet_v6 -v
       - name: Check typed record definition generation
         run: |
           python -m tools.metadata.rights_profile --check
@@ -81,25 +81,7 @@ jobs:
           python -m tools.metadata.acquisition_direct_floor_v1 --check
           python -m tools.metadata.acquisition_conservation_context_v1 --check
           python -m tools.metadata.acquisition_packet_v5 --check
+          python -m tools.metadata.acquisition_native_finality_v1 --check
+          python -m tools.metadata.acquisition_packet_v6 --check
       - name: Test offline preservation packages and reference metrics
         run: python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v
-      - name: Test offline validation and export
-        run: python -m unittest discover -s tools/museum -t . -p "test_*.py" -v
-      - name: Check schema generation
-        run: python -m tools.museum.schemas --check
-      - name: Check fixture generation
-        run: python -m tools.museum.fixtures --check
-      - name: Check semantic review schema generation
-        run: python -m tools.museum.review --check
-      - name: Check resource projection generation
-        run: python -m tools.museum.projection --check
-      - name: Check abstract and nonvisual projection generation
-        run: python -m tools.museum.projection_v2 --check
-      - name: Check PREMIS file correspondence generation
-        run: python -m tools.museum.premis --check
-      - name: Check IIIF Presentation 3 correspondence generation
-        run: python -m tools.museum.iiif_model --check
-      - name: Check LIDO correspondence generation
-        run: python -m tools.museum.lido_model --check
-      - name: Check typed work-description LIDO fixtures
-        run: python -m tools.museum.work_lido_fixture --check

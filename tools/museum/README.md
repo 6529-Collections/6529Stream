@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Original native finality and token proof V6](../../docs/museum-acquisition-finality-v6.md)
+captures the original collection receipt, typed manifest, complete preserved
+leaf bytes and ordered Merkle proof. The V6 export preserves every title V5
+input and reconciles twelve sources. Historical Core facts remain hash-only;
+complete batch governance authority and acquisition coverage remain unresolved.
+
 [Native accession and title V5 export](../../docs/museum-acquisition-title-v5.md)
 derives the selected legal instrument, complete captured Core transfers,
 supported title bindings and owner heads in a new validated packet. Its

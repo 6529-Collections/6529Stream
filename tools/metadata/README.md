@@ -5,6 +5,14 @@ independent JSON fixtures for the developing typed record consumers. The
 definitions are proposed registration inputs; generated files are not evidence
 of onchain registration or accepted finality.
 
+[Packet V6 and its native finality fragment](../../docs/museum-acquisition-finality-v6.md)
+add paired native collection finality and token-content proof branches while
+preserving all nineteen groups and the frozen V5 definition. Generate/check
+only the new definitions with `python -m tools.metadata.acquisition_native_finality_v1`
+and `python -m tools.metadata.acquisition_packet_v6`, each supporting `--check`.
+Supplied native commitments and source capture replay remain separate; historical
+Core facts and complete batch authority stay explicitly unresolved.
+
 The additive [acquisition packet V2](../../docs/museum-acquisition-packet-v2.md)
 supports exact native OwnerRecords authority in accession/title-binding slots.
 Generate/check only its three new definitions with
