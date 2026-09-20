@@ -5,7 +5,8 @@ collection policies of its predecessor. The two additive contracts are
 [`IStreamEntropyPolicyContinuity`](../../smart-contracts/interfaces/stream/entropy/IStreamEntropyPolicyContinuity.sol)
 and [`IStreamEntropyOriginRelay`](../../smart-contracts/interfaces/stream/entropy/IStreamEntropyOriginRelay.sol).
 The focused 210-test suite passes and all 38 compiled entropy products fit their
-deployment-size limits. Complete current-stack acceptance remains pending.
+deployment-size limits. A separate 16-test actual governance-foundation suite
+also passes. Complete current-stack acceptance remains pending.
 This is a new-deployment profile, with no upgrade or migration of an existing
 Coordinator's storage.
 
@@ -130,17 +131,72 @@ Three distinct Coordinator parameters govern relay authentication reads, the
 outer INSTANT read, and asynchronous delivery. Every capped call checks full
 EIP-150 availability and a parent reserve; it never silently reduces the cap.
 Current implementation values/floors are provisional pending measured release
-evidence: AUTH 100,000 (class 2), INSTANT relay 750,000 (class 2), delivery 500,000
-(class 1). They use the existing delayed monotone at-most-2x raise mechanism.
+evidence: AUTH 100,000 (failure class 2), INSTANT relay 750,000 (failure class 2),
+delivery 500,000 (failure class 1). Failure classes describe the call budget;
+they are not the governance action class. These parameters use the existing
+delayed monotone at-most-2x raise mechanism.
 
-A measured cold 32-step recovery export fails at the default 100,000 AUTH cap.
-The focused import test raises the candidate cap through 200,000 to 400,000 and
-then imports, seals and activates the same session. Its successful 5,696-byte
-export consumes 249,442 caller gas; the failed attempt leaves the session and
-next index unchanged. This is evidence that the default cap does not cover the
-maximum recovery export, not a release gas-floor calibration. Each participating
-host needs its own suitable cap; the full Core/Artist/origin route remains to be
-measured.
+The earlier typed-source diagnostic fails at the default 100,000 AUTH cap and
+imports after raising the candidate through 200,000 to 400,000. Its 5,696-byte
+export consumes 249,442 caller gas, including 247,531 inside the fixture getter.
+That getter uses ordinary Solidity encoding. These retained measurements are
+not a gas minimum for the production Coordinator's direct encoder, and that
+fixture does not prove production origin-route admission.
+
+### Supported maximum-recovery read configuration
+
+The production
+[`StreamEntropyRecoveryAuthCapacityTest`](../../test/unit/entropy/StreamEntropyRecoveryAuthCapacity.t.sol)
+passes with one configured collection containing **32 recovery steps**. This is
+not a 32-collection inventory limit. The complete definition is exported,
+including any unused suffix, in 5,696 bytes. Genuine public calls configure,
+freeze and bind the definition; both exporting hosts are production Coordinators.
+
+| Production getter branch | Minimum successful forwarded gas in this capture | One gas less |
+| --- | ---: | --- |
+| Original recovery definition | 258,900 | Fails with empty return data |
+| Imported recovery definition | 263,001 | Fails with empty return data |
+
+These are exact thresholds for the captured runtime and state after storage
+access warmth is reset inside one test transaction. They are not an entirely
+cold fresh-transaction measurement or a universal release floor. Both branches
+return byte-identical complete definitions at 400,000. The real import and
+origin-admission paths fail atomically at 100,000 and 200,000, then succeed at
+400,000 without replacing the import session, index or admission commitments.
+Core, Artist, module eligibility and executing governance remain typed boundaries
+in this gas test; the full Artist/Safe deployment is a separate acceptance path.
+
+For this supported maximum-step read profile, configure **AUTH = 400,000** on
+each importing candidate and on the ultimate origin that admits its route:
+
+1. Read that host's `gasParameterInfo` for
+   `keccak256("6529STREAM_GGP_ENTROPY_RELAY_AUTH_READ_GAS_LIMIT")`.
+2. For an untouched row, derive its exact `gasParameterTransition(id, 200000)`
+   and execute `raiseGasParameter(id, 200000)` through an admitted, delayed
+   class-1 governance action.
+3. Derive the next transition and execute `raiseGasParameter(id, 400000)` under
+   a distinct class-1 action. Observe the Executor's current minimum delay and
+   execute the increases in order. One action cannot change the same row twice.
+4. Verify `(value, floor, failureClass, revision) == (400000, 100000, 2, 3)` for
+   each previously untouched host before retrying copy or route admission.
+
+The importing candidate's row funds its recovery-export read. The ultimate
+origin has a separate row for admission reads of the immediate predecessor's
+definition. Raising one does not raise the other. An exporting predecessor's
+own cap does not fund a call into its call-free getter; when that predecessor
+also acts as the admitting origin, its caller role still needs the increase.
+Every later candidate needs its own configuration. The original 100,000 default
+and immutable floor are unchanged.
+
+At a bounded read site, the implementation requires
+`floor((available - reserve) / 64) * 63 >= cap`. A 400,000 cap therefore requires
+at least **416,400** parent gas at the import read site (10,000 reserve), or
+**421,400** at the origin authentication read site (15,000 reserve). Earlier
+work, subsequent storage writes and transaction intrinsic gas are additional.
+The measured caller costs for the complete one-policy import and origin
+admission were respectively **3,992,505** and **4,002,278** gas under the stated
+storage-cooled test boundaries; neither the 400,000 cap nor those read-site
+requirements are total transaction gas budgets.
 
 A provider's callback budget need not fit the whole second-host delivery.
 Capture first and a separate retry preserve output when the nested delivery
@@ -177,7 +233,25 @@ entries match the earlier INSTANT profile. The INSTANT runtime checker passes
 against the genuine Foundry artifact, cache and build-info dependency set.
 
 Typed Core, Artist, module eligibility, governance and upstream-provider
-fixtures remain explicit boundaries. These results do not prove the complete
-Core/Artist/Safe deployment graph, release gas floors, full CI or deployment
-readiness. The integrator retains the source captures, complete test inventory,
-fixture hashes, artifact provenance and the original failed harness run.
+fixtures remain explicit boundaries of that 210-test capture.
+
+The separate
+[`StreamCurrentEntropyPolicySuccessionTest`](../../test/current/StreamCurrentEntropyPolicySuccession.t.sol)
+capture at `18c42131be84070641d071005b94abfbd73d23cc` passes nine new cutover cases
+and seven inherited governance cases. It uses actual Core, Executor,
+ModuleRegistry, RoleRegistry, SystemManifest, Coordinators and pinned 2-of-3
+Safe 1.4.1. It covers empty and complete LEGACY inventories, source mutation,
+exact pointer revision, route confirmation, required manifest publication and
+whole-batch rollback. Activation and manifest faults preserve the original
+scheduled action and Safe nonce; the identical signed transaction then succeeds.
+All 180 captured sources and 201 artifacts were independently verified, and all
+76 nonempty production products fit their runtime and creation limits.
+
+That foundation capture uses a test provider and does not deploy Artist, perform
+paid minting or exercise the full renderer graph. The new
+[`StreamCurrentExplicitEntropySuccessionTest`](../../test/current/StreamCurrentExplicitEntropySuccession.t.sol)
+authors those actual Artist/paid-mint/request joins; its source review and ABI
+compilation are complete, while native execution waits for the exact deployment
+graph's size checks. None of these scoped results establishes release gas floors,
+full CI or deployment readiness. The integrator retains source captures,
+complete test inventories, fixture hashes, artifact provenance and failed runs.
