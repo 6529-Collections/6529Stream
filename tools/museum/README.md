@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Canonical packet V2 owner authority](../../docs/museum-acquisition-packet-v2.md)
+adds an explicit native owner-receipt variant for accession and title-binding
+references. The source-replayed partial assembly closes item 9's representation
+gap while retaining all 19 requirements and unchanged V1 packages.
+
 [Acquisition ACCESSION and title history](../../docs/museum-acquisition-accession.md)
 gathers all native owner lanes, joins an explicitly selected original ACCESSION
 to exact Core transfer chronology, and retains supplied instrument bytes for

@@ -290,6 +290,12 @@ the release policy in `docs/release-policy.md`.
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
 
+- Add canonical acquisition packet V2 owner-receipt references and an exact
+  source-replayed item-9 assembly. Bind historical receipts, Core ownership,
+  publication order and original signature bytes without numeric authority
+  substitution. Preserve V1 definitions and keep missing packet requirements
+  and conservation/condition producer dependencies explicit.
+
 - Add an acquisition ACCESSION/instrument and native token-history join with
   historical owner reconciliation, exact same-block publication order, retained
   instrument bytes and offline reconstruction. Add a separate public owner

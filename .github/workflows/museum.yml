@@ -67,7 +67,7 @@ jobs:
       - name: Check dependency compatibility
         run: python -m pip check
       - name: Test typed record schemas and canonical fixtures
-        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile tools.metadata.test_work_definitions tools.metadata.test_owner_notice_profile -v
+        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile tools.metadata.test_work_definitions tools.metadata.test_owner_notice_profile tools.metadata.test_acquisition_packet_v2 -v
       - name: Check typed record definition generation
         run: |
           python -m tools.metadata.rights_profile --check
@@ -75,6 +75,7 @@ jobs:
           python -m tools.metadata.rights_definitions --check
           python -m tools.metadata.work_definitions --check
           python -m tools.metadata.owner_notice_profile --check
+          python -m tools.metadata.acquisition_packet_v2 --check
       - name: Test offline preservation packages and reference metrics
         run: python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v
       - name: Test offline validation and export

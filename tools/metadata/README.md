@@ -5,6 +5,12 @@ independent JSON fixtures for the developing typed record consumers. The
 definitions are proposed registration inputs; generated files are not evidence
 of onchain registration or accepted finality.
 
+The additive [acquisition packet V2](../../docs/museum-acquisition-packet-v2.md)
+supports exact native OwnerRecords authority in accession/title-binding slots.
+Generate/check only its three new definitions with
+`python -m tools.metadata.acquisition_packet_v2` and `--check`; all V1 dossier
+definitions and validators remain unchanged.
+
 Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.

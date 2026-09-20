@@ -6,6 +6,11 @@ and retains public instrument bytes when supplied. The selected record is an
 explicit choice for this acquisition. It is not a new native “current accession”
 rule, a legal-title determination or an institutional acceptance report.
 
+The additive [canonical packet V2 adapter](museum-acquisition-packet-v2.md)
+consumes this unchanged package and represents its native owner authority in an
+item-9 fragment. This original acquisition profile retains its V1 compatibility
+boundary below; only the explicitly selected V2 assembly closes that schema gap.
+
 The [19-item examination](museum-dossier-gather.md) still needs evidence for
 its other requirements. Item 9 now has a source-backed documentary join. Item 10
 remains partial because a full protocol event archive and the universe of prior
