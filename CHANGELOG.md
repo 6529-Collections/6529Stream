@@ -174,6 +174,9 @@ the release policy in `docs/release-policy.md`.
   unsupported newest records as unresolved. Keep examination joins and complete
   acquisition packet requirements explicit.
 
+- Add a source-bound whole-v1 Safe caller inventory and canonical Artist personhood
+  reference callers, documentary reads and original operation-24 receipt checks.
+
 - Complete original DIRECT product control callers and receipt checks, with
   source-bound coverage of all 29 mutable selectors through direct and Safe calls.
 

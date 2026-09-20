@@ -337,6 +337,15 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
+  canonical genesis roles, current Artist operations and source-level caller
+  restrictions. ABI encoding, reviewed workflows and runtime acceptance remain
+  separate stages; unresolved mappings and caller gaps remain explicit.
+
+- [Artist personhood evidence](docs/current-artist-personhood.md) prepares the
+  canonical documentary reference through original principal operation 24,
+  reads retained proof/currentness and reconciles original and Safe receipts.
+
 - [Original DIRECT sales and conservation history](docs/current-direct-conservation.md)
   preserves native and ERC20 purchases, English auctions, original signing domains,
   paid receipts and immutable floor evidence with exact Safe calls. Its

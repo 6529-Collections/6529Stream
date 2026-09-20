@@ -81,3 +81,5 @@ export * from "./current-museum-anchor-master.js";
 export * from "./current-museum-anchor-master-workflow.js";
 export * from "./current-direct-conservation.js";
 export * from "./current-direct-conservation-workflow.js";
+export * from "./current-artist-personhood.js";
+export * from "./current-artist-personhood-workflow.js";
