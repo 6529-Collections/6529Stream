@@ -102,3 +102,18 @@ CURATED_EQUIVALENCE need their own full scope-bound mode/context/evidence
 admission; this BYTE_EXACT producer does not promote collection mode evidence.
 VIEW remains a distinct required profile with exact selected view payload,
 Renderer and Artist adoption authority. Membership alone cannot authorize it.
+
+## Exact full-output selector
+
+The scoped sample reader uses the same `tokenJSON(tokenId)` Router endpoint as
+`StreamStaticContentCheckpoint`. Its original 65,536-byte supported JSON bound,
+canonical return check, complete hash and embedded-animation checks remain.
+Compact historical JSON cannot substitute for a full-output leaf. Changes to a
+current full output invalidate currentness even if compact output is unchanged;
+the original saved publication bytes remain historical facts.
+
+The eighth authored regression makes the full and compact outputs different,
+checks publication against the full producer output, rejects subsequent full
+output drift, retains the historical payload, and accepts exact restoration.
+This is a typed source-boundary regression with a clean ABI check; native
+execution of this scoped family remains pending.

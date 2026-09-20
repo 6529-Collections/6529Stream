@@ -241,11 +241,7 @@ contract StreamScopedReferencePublicationTest is ScopedReferenceSnapshotFixture 
             abi.encode(bytes(hex"1234"))
         );
         svm.mockCall(
-            address(route),
-            abi.encodeWithSignature(
-                "historicalTokenMetadataJSON(address,uint256)", address(core), token
-            ),
-            abi.encode(json)
+            address(route), abi.encodeWithSignature("tokenJSON(uint256)", token), abi.encode(json)
         );
         _archive(c.objectHash, c.coverageHash, c.repeatCaptureSha256[0], false);
     }
@@ -404,6 +400,51 @@ contract StreamScopedReferencePublicationTest is ScopedReferenceSnapshotFixture 
                 && keccak256(abi.encode(r)) == keccak256(abi.encode(receipt))
         );
         require(keccak256(referenceHost.referencePayload(hash)) == keccak256(raw));
+    }
+
+    function testFullCheckpointJSONNeverBorrowsCompactHistoricalOutput() public {
+        _reference(1);
+        uint256 token = referenceInput.scope.tokenId;
+        bytes memory full = abi.encodePacked(
+            "{\"animation_url\":\"data:text/html;base64,",
+            Base64.encode(referenceInput.observation.captures[0].animationHTML),
+            "\"}"
+        );
+        bytes memory compact = bytes("{\"animation_url\":\"ipfs://compact-pointer\"}");
+        require(
+            keccak256(full) == referenceInput.observation.captures[0].metadataJSONHash
+                && keccak256(compact) != keccak256(full),
+            "distinct full and compact fixture outputs"
+        );
+        svm.mockCall(
+            address(route),
+            abi.encodeWithSignature(
+                "historicalTokenMetadataJSON(address,uint256)", address(core), token
+            ),
+            abi.encode(compact)
+        );
+        bytes32 record = _publishReference();
+        bytes32 payload = keccak256(referenceHost.referencePayload(record));
+        // Even an unchanged compact endpoint cannot make a drifted full checkpoint current.
+        svm.mockCall(
+            address(route),
+            abi.encodeWithSignature("tokenJSON(uint256)", token),
+            abi.encode(compact)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidScopedReference.selector));
+        referenceHost.requireCurrent(referenceInput.scope, record, 1);
+        require(
+            keccak256(referenceHost.referencePayload(record)) == payload,
+            "original payload remains historical"
+        );
+        svm.mockCall(
+            address(route), abi.encodeWithSignature("tokenJSON(uint256)", token), abi.encode(full)
+        );
+        require(
+            referenceHost.requireCurrent(referenceInput.scope, record, 1).observation.recordHash
+                == record,
+            "exact producer output restored"
+        );
     }
 
     function testReleaseCompleteMembershipAndFirstLastOrder() public {

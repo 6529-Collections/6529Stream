@@ -22,8 +22,8 @@ import {
     IStreamRendererRegistry as Registry
 } from "../../interfaces/stream/metadata/IStreamRendererRegistry.sol";
 import {
-    IStreamMetadataServingFacts as Router
-} from "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
+    IStreamMetadataFullViews as Router
+} from "../../interfaces/stream/metadata/IStreamMetadataFullViews.sol";
 import { IStreamCoreIdentity as Core } from "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import { IStreamCoreMint } from "../../interfaces/stream/core/IStreamCoreMint.sol";
 import {
@@ -153,10 +153,7 @@ library StreamScopedReferenceSampleReads {
         f.tokenDataHash = output.leaf.tokenDataHash;
         f.tokenDataBytes = uint32(data.length);
         raw = Reads.dynamicRead(
-            d.targets[4],
-            abi.encodeCall(Router.historicalTokenMetadataJSON, (d.targets[0], token)),
-            65600,
-            d.sourceGas
+            d.targets[4], abi.encodeCall(Router.tokenJSON, (token)), 65600, d.sourceGas
         );
         bytes memory json = abi.decode(raw, (bytes));
         _canonical(d.targets[4], raw, abi.encode(json));
