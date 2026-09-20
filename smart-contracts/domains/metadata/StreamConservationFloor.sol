@@ -417,7 +417,22 @@ contract StreamConservationFloor is
         key = _preparationHash(p);
         if (_salePreparations[key].exists) return key;
         _persistEvidence(p.collectionEvidence, p.releaseEvidence, collection_, release_);
-        _salePreparations[key] = p;
+        // This key has never been persisted: preparations are append-only and the
+        // sole producer leaves computed receipt links/hash/time at their zero defaults.
+        // Preserve the same stored seed without touching those empty slots.
+        SalePreparation storage saved = _salePreparations[key];
+        saved.exists = true;
+        saved.seed.recorder = p.seed.recorder;
+        saved.seed.recorderCodeHash = p.seed.recorderCodeHash;
+        saved.seed.settlementKey = p.seed.settlementKey;
+        saved.seed.candidatePayloadHash = p.seed.candidatePayloadHash;
+        saved.seed.candidateCommitment = p.seed.candidateCommitment;
+        saved.seed.resultHash = p.seed.resultHash;
+        saved.seed.collectionId = p.seed.collectionId;
+        if (p.seed.tokenId != 0) saved.seed.tokenId = p.seed.tokenId;
+        saved.seed.effectiveTier = p.seed.effectiveTier;
+        saved.collectionEvidence = p.collectionEvidence;
+        if (p.releaseEvidence != 0) saved.releaseEvidence = p.releaseEvidence;
         emit ConservationPrimarySalePrepared(
             key, p.seed.recorder, p.seed.settlementKey, p.collectionEvidence, p.releaseEvidence, 1
         );
@@ -430,7 +445,17 @@ contract StreamConservationFloor is
         ReleasePreparation memory release_
     ) private {
         if (!_collectionPreparations[collectionKey].exists) {
-            _collectionPreparations[collectionKey] = collection_;
+            CollectionPreparation storage saved = _collectionPreparations[collectionKey];
+            saved.exists = true;
+            saved.collectionId = collection_.collectionId;
+            saved.tier = collection_.tier;
+            saved.sourceSetHash = collection_.sourceSetHash;
+            // _evidence returns before selecting a source for genuine WAIVED facts.
+            // This fresh row therefore already has their exact zero source/fact words.
+            if (collection_.tier != WAIVED) {
+                saved.sourceId = collection_.sourceId;
+                saved.facts = collection_.facts;
+            }
         }
         if (release_.exists && !_releasePreparations[releaseKey].exists) {
             _releasePreparations[releaseKey] = release_;

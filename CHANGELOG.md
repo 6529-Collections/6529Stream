@@ -1,5 +1,14 @@
 # Changelog
 
+## Fresh conservation-floor preparation storage
+
+- Avoid zero-to-zero writes in append-only native floor preparations while
+  preserving original keys, full receipts, storage layout and event order.
+- Add literal receipt/event, rollback, optional-field and history parity tests;
+  document the separate warmed Dutch profile and unresolved cold collector-gas
+  requirement in the [integration guide](docs/integrations/conservation-floor-persistence-gas.md).
+
+
 ## Metric currentness temporary memory
 
 - Reclaim dead canonical evidence and complete context-preimage buffers after
