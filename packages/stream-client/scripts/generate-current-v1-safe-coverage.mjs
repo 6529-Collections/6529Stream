@@ -281,9 +281,13 @@ export async function buildCurrentV1SafeCoverage(inputBytes, outputBytes) {
   }
   const clientFiles = [];
   const clientEvidence = {};
-  for (const name of (await readdir(resolve(packageRoot, "src"))).sort()) {
-    if (!name.endsWith(".ts")) continue;
-    const path = `src/${name}`;
+  const clientPaths = [
+    ...(await readdir(resolve(packageRoot, "src"))).filter(name => name.endsWith(".ts"))
+      .map(name => `src/${name}`),
+    "src/internal/artist-recovered-hydration-codec.ts",
+    "src/internal/artist-recovered-hydration-workflow.ts"
+  ].sort();
+  for (const path of clientPaths) {
     const bytes = await readFile(resolve(packageRoot, path));
     clientEvidence[path] = sha(bytes);
     clientFiles.push({ path, text: bytes.toString("utf8") });
