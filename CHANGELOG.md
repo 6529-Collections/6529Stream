@@ -116,6 +116,19 @@
   consumption maps. Typed writer/producer and full publication acceptance remain
   separate; see the [state boundary](docs/integrations/view-content-root-state.md).
 
+## Actual preservation ceremony and governed VIEW source binding
+
+- Add separate current-stack construction and publication fixtures using the
+  actual admitted preservation producer, original Safes and governance, complete
+  inventory/archive coverage and sanction/finalization/confirmation assertions.
+- Add a one-time class-2 VIEW snapshot-source binding on the same provider,
+  allowing actual VIEW products to be deployed after Finality. Pending reads
+  fail closed; receipts retain the exact initial sources and worker pins.
+- Thirty-one new cases and combined ABI compilation accompany source review.
+  Execution, gas, product size and fresh captured ceremony evidence remain
+  pending. The [source checkpoint](artifacts/preservation-policy-current-ceremony-source.md)
+  records the separate prerequisites for actual VIEW publication.
+
 ## Preservation graph factories and evidence providers
 
 - Add separate fixed COLLECTION and scoped preservation publication factories,

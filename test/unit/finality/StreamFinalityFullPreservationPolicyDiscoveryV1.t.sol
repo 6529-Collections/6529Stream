@@ -133,7 +133,7 @@ contract StreamFinalityFullPreservationPolicyDiscoveryV1Test is
 {
     Factory private preservationFactory;
     Graph.Graph private preservationGraph;
-    Provider private fullProvider;
+    Provider internal fullProvider;
     Discovery private discovery;
     CollectionEntropy private collectionEntropy;
     CollectionFactory private collectionFactory;
@@ -143,7 +143,7 @@ contract StreamFinalityFullPreservationPolicyDiscoveryV1Test is
     D.Configuration private dc;
     P.Profile[2] private originalProfiles;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         _providerSetup(1, false);
         // The source fixture retains old published capabilities; new root authority is a named

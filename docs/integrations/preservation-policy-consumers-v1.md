@@ -170,6 +170,82 @@ occurrence coverage. Shared archive correspondence must include the exact new
 snapshot and reference schema/canonicalization tuples. Construction and typed
 boundary tests do not establish actual full-ceremony acceptance.
 
+## One-time VIEW source binding
+
+The same provider starts with VIEW pending. Its original COLLECTION and scoped
+configuration stays fixed. After Finality and the actual preservation renderer,
+VIEW checkpoint, covered manifest and root-free snapshot exist, the original
+governance authority can bind that VIEW source exactly once through class-2
+governance. This ordering avoids a constructor cycle between provider, Finality
+and attribution without changing the original constructors.
+
+The binding commits the snapshot, checkpoint and manifest addresses and runtime
+hashes, a validation budget, the exact initial snapshot dependencies and the
+executed action receipt. Validation checks all ten snapshot sources, their
+runtime pins, common Core/Metadata/Router/schema/store/membership/coverage and
+original authority. It does not require an existing current snapshot.
+
+The three VIEW source getters fail while pending. Once bound, they authenticate
+the bound capability, runtime pins and source identity. They are not complete
+currentness verdicts. The source cannot be replaced.
+Original governed snapshot gas increases remain bounded by the admitted
+validation budget; they do not replace the recorded initial dependency tuple.
+The independent COLLECTION/scoped source-configuration hash does not change.
+
+Validation rejects nested caps that cannot satisfy the original strict call
+forwarding margin (`outer > inner + inner / 63 + 10000`). This is a necessary
+configuration check; repeated reads, return data and complete scope capacity
+still require execution measurements. The three source getters themselves
+retain their admission-specific checks and need measured caller read budgets.
+
+The same governed proposal also commits the original six-word declaration
+binding: Views, Membership, their runtime hashes and read/source budgets.
+`viewSourceBinding()` returns that authenticated immutable roster with immediate
+runtime pins; original adoption and current readers revalidate the selected
+routes, module eligibility and complete source reciprocities before use. Views
+is an eligible module selected by this binding, not a Core satellite pointer.
+The VIEW policy factory is the exact constructor-pinned scoped factory from the
+preservation recipe, with its original dependency commitment.
+
+The advertised `IStreamViewRouteReadBudgetV1` profile returns the declaration's
+signed read budget directly after binding. The integrator's fixed route readers
+validate its exact profile, range, equality to the declaration and original
+global Finality upper bound. An advertised pending or invalid capability fails.
+Existing providers without the new capability retain their original budget.
+This separates the VIEW route's scalar budget from the larger COLLECTION
+component budget without weakening either scope's source checks.
+
+### Capability checks and complete currentness
+
+The provider validates the entire source graph when governance binds it. Its
+three snapshot capability getters retain the exact receipt, original authority,
+chain, initial dependency identity, bounded monotonic gas policy, five worker
+pins, canonical configurations and configuration hashes. The fixed consumers
+perform the following source checks before using the capability:
+
+| Check | Required current consumer |
+| --- | --- |
+| Selected Metadata/Router, schema/store/membership/coverage reciprocities, checkpoint and serving identity, manifest profile | `Snapshot.requireCurrent` calls its source reconstruction, then `StreamViewPreservationSnapshotSourceReadsV1.current` calls `bindings` before reading evidence. |
+| Manifest runtime, coverage/schema pins, checkpoint configuration | `Sources.current` calls `Manifest.requireCurrentManifest`; that method calls `_fresh`, which calls `StreamViewPreservationManifestReadsV1.pins`. |
+| Original declared VIEW, adopted head, selected provider, full declaration binding, eligibility and policy source | Snapshot source reconstruction and manifest verification use `Checkpoint.currentSource`; its original policy reader reconstructs the actual adopted route and compares the complete source. |
+
+The capability getters retain immediate declaration source runtime pins rather
+than rerunning `Declaration.validate`. The actual constructor-fixed source
+contracts retain their reciprocal identities; the original current route
+rechecks mutable module selection and eligibility and the complete declaration
+before use. Complete declaration validation remains mandatory at binding.
+
+The duplicate `Sources.bindings` and `ManifestReads.pins` graph validations are
+also extracted from the capability getter path; complete bind validation remains. A getter result must
+not be treated as evidence that an adopted VIEW, output, snapshot or root is
+current. No mutable currentness result is cached.
+
+The actual recipe must declare and adopt the VIEW and publish its snapshot/root
+before the original Artist STATIC lock and Core freeze. A separate genuinely
+admitted renderer Registry can include the late VIEW serving contract in its
+fixed roster; an earlier Registry's roster is not rewritten. Completed VIEW
+adoption, reference, inventory, finality and gas acceptance remain separate work.
+
 The original full-output ceremony remains intact as the sanction-cycle
 regression. A new ceremony must separately prove unchanged preservation
 commitments through actual sanction, its exact archive join, original
