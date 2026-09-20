@@ -1,5 +1,13 @@
 # Changelog
 
+## Closed VIEW root history and required consent
+
+- Add an explicit VIEW-only state path sharing the original scoped root history,
+  event and collection aggregate. Preserve all original scope admission and bytes.
+- Add a required CONTENT_ROOT authorization entry through the existing Artist
+  consumption maps. Typed writer/producer and full publication acceptance remain
+  separate; see the [state boundary](docs/integrations/view-content-root-state.md).
+
 ## Metric context hashing without the full temporary copy
 
 - Reserve a bounded prefix beside the original immutable publication bytes and

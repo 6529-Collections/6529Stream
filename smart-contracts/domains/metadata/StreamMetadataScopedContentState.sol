@@ -172,4 +172,82 @@ library StreamMetadataScopedContentState {
             1, record.publication.scope.collectionId, id, hash, record, aggregate
         );
     }
+
+    /// @notice Closed VIEW path; the original subject/next/commit keep their scope admission.
+    /// @dev Shape validation only. The fixed typed writer must authenticate the producer,
+    /// original CONTENT_ROOT consent and current source before sharing this history.
+    function viewSubject(address core, StreamFinalityScope memory scope)
+        internal
+        view
+        returns (bytes32)
+    {
+        if (scope.scopeType != StreamFinalityScopeType.VIEW) {
+            revert R.InvalidScopedContentRoot();
+        }
+        return StreamMetadataSubjects.scopeSubject(block.chainid, core, scope);
+    }
+
+    function nextView(State storage state, address core, R.Record memory record)
+        internal
+        view
+        returns (R.Aggregate memory result)
+    {
+        bytes32 id = viewSubject(core, record.publication.scope);
+        bytes32 oldHead = state.heads[id];
+        if (record.publication.expectedPredecessor != oldHead) {
+            revert R.ScopedContentRootLineage(record.publication.expectedPredecessor, oldHead);
+        }
+        if (record.stateHash == 0) revert R.InvalidScopedContentRoot();
+        R.Aggregate memory prior = state.aggregates[record.publication.scope.collectionId];
+        if (prior.revision == type(uint64).max) revert R.InvalidScopedContentRoot();
+        result.revision = prior.revision + 1;
+        result.transitionChain = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_SCOPED_CONTENT_ROOT_APPEND_V1"),
+                block.chainid,
+                address(this),
+                core,
+                record.publication.scope.collectionId,
+                prior.transitionChain,
+                result.revision,
+                id,
+                oldHead,
+                record.stateHash
+            )
+        );
+    }
+
+    function commitView(State storage state, address core, R.Record memory record, bytes32 consent)
+        public
+        returns (bytes32 hash)
+    {
+        if (
+            consent == 0 || record.publisher == address(0) || record.artistConsent != 0
+                || record.publishedAt != 0 || block.timestamp == 0
+                || block.timestamp > type(uint64).max
+        ) {
+            revert R.InvalidScopedContentRoot();
+        }
+        R.Aggregate memory aggregate = nextView(state, core, record);
+        record.artistConsent = consent;
+        record.publishedAt = uint64(block.timestamp);
+        hash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_SCOPED_CONTENT_ROOT_RECORD_V1"),
+                block.chainid,
+                address(this),
+                core,
+                record,
+                aggregate
+            )
+        );
+        if (state.records[hash].publisher != address(0)) revert R.InvalidScopedContentRoot();
+        bytes32 id = viewSubject(core, record.publication.scope);
+        state.records[hash] = record;
+        state.heads[id] = hash;
+        state.aggregates[record.publication.scope.collectionId] = aggregate;
+        emit ScopedContentRootPublished(
+            1, record.publication.scope.collectionId, id, hash, record, aggregate
+        );
+    }
 }

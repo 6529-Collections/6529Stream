@@ -311,6 +311,25 @@ library StreamMetadataRouterContent {
         );
     }
 
+    /// @notice VIEW artwork roots require their own original CONTENT_ROOT consent.
+    /// @dev Renderer adoption is a distinct family and cannot authorize a root publication.
+    function authorizeViewContentRoot(Layout memory l, Context memory e, uint256 cid, bytes32 nextFamily)
+        public
+        returns (bytes32, bytes32)
+    {
+        _requireSelectedArtistRegistry(l, e);
+        return StreamMetadataContentAuthorization.authorizeRequired(
+            consumedArtistContentConsent(l),
+            _evolutionRatification(l),
+            _evolutionContent(l),
+            StreamMetadataContentAuthorization.Context(
+                e.core, e.artist, cid, _contentState(l, e, cid)
+            ),
+            CONTENT_ROOT,
+            nextFamily
+        );
+    }
+
     function recordApplication(
         Layout memory l,
         Context memory e,
