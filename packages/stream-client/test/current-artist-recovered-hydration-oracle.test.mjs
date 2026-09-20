@@ -106,7 +106,7 @@ test("Registry caller and original nominal preparation-library selector have dis
 });
 
 test("workflow protocol ABI literals independently match complete compiler fragments", () => {
-  const text = readFileSync(new URL("../src/current-artist-recovered-hydration-workflow.ts", import.meta.url), "utf8");
+  const text = readFileSync(new URL("../src/internal/artist-recovered-hydration-workflow.ts", import.meta.url), "utf8");
   const tree = ts.createSourceFile("workflow.ts", text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const declarations = new Map();
   for (const node of tree.statements) if (ts.isVariableStatement(node)) {

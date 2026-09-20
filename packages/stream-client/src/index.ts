@@ -85,3 +85,5 @@ export * from "./current-artist-personhood.js";
 export * from "./current-artist-personhood-workflow.js";
 export * from "./current-artist-recovered-hydration.js";
 export * from "./current-artist-recovered-hydration-workflow.js";
+export * from "./current-artist-recovered-consent-hydration.js";
+export * from "./current-artist-recovered-consent-hydration-workflow.js";

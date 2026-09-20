@@ -31,7 +31,8 @@ mask, including zero.
 
 Class 4, multiple Artists or collections, collaborators, corrected generations,
 and recovered content/freeze composition require separate admitted profiles.
-Future feature bit 256 and its separate entry point are outside this caller.
+Feature bit 256 and its separate entry point are covered by the separately pinned
+[ART36 consent client](current-artist-recovered-consent-hydration.md).
 
 ## Complete request and witnesses
 

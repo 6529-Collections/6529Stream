@@ -56,7 +56,10 @@ The first added caller from this audit is the
 original principal Artist operation 24. A later
 [recovered-history operation-60 caller](current-artist-recovered-hydration.md)
 is qualified separately against ABI104, including its reviewed delegation and
-attestation compositions. This machine inventory retains its ABI102 snapshot
+attestation compositions. The additive
+[recovered content and freeze consent caller](current-artist-recovered-consent-hydration.md)
+is qualified against ABI106 and its explicit 511 feature profile. This machine
+inventory retains its ABI102 snapshot
 and original client evidence. ABI102 supports the class-1/class-3 singleton
 profile and direct-economics extension; recovered personhood and delegation
 feature bit 64 remain excluded at that earlier source.

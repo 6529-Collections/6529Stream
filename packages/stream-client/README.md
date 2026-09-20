@@ -341,6 +341,10 @@ contract profiles and outstanding larger-script work.
   the complete original operation-60 profile-10 request and certificate, retains
   original domains and provenance, and inspects paged Archive and Safe receipts.
 
+- [Recovered content and freeze consents](docs/current-artist-recovered-consent-hydration.md)
+  adds the separately qualified ART36 caller, complete ordered royalty witnesses
+  and historical content records with direct and Safe receipt checks.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain
