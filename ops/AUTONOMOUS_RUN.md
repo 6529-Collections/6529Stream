@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `22e90a3b`: phase freezes, multiple original-living hydration, active/cancelled-notice recovery, current gate recipes and PREMIS authority coverage are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `bee91ae5`: phase freezes, multiple original-living hydration, active/cancelled-notice recovery, current gate recipes and PREMIS authority coverage are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns architecture, integration and delivery. ABI62 covers all 2,279
-  sources at `22e90a3b`; clients retain explicit historical ABI52 and mode-2 ABI56.
+- Root owns architecture, integration and delivery. ABI63 covers all 2,282
+  sources at `bee91ae5`; clients retain explicit historical ABI52 and mode-2 ABI56.
   Source integration remains separate from native acceptance.
 - Artist delivered C2PA credentials/standing conflicts (`142a3cdb`, `22095475`)
   and independently reviewed the genuine composition/recovery joins. It also
@@ -55,7 +55,9 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   24,331/24,452. All eleven scoped boundary tests pass. One-way phase FreezePolicy
   is now integrated (`0ab60204`), with 23 focused cases passing and final selected
   sizes 24,396/24,513. Current governance/continuity execution remains pending.
-  Next is the original advisory canMint read API; held Artist freeze is separate.
+  Advisory canMint (`dc0122af`) now passes 21 focused cases with selected sizes
+  24,359/24,476. Remaining original counter-read helpers are being built;
+  held Artist freeze is separate.
 - Burn delivered living35-to43 histories (`ed4d5572`,17 cases authored) after
   repeated recovery (`0c5de0d9`) and retained test corrections (`78735c45`). It also
   delivered active-notice (`9ff19e55`) and cancelled-notice (`ff60c308`) histories.
@@ -67,13 +69,16 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   snapshot is integrated (`e290dc4a`,37 root tests and profile/example checks),
   followed by Standing V2 (`3f0967f`,27 consumer plus17 docs tests) and complete
   authority-field accounting (`53aae1b0`,62 new/compatibility/docs cases). It now
-  builds explicit-version repository export/import with semantic replay.
+  delivered explicit-version repository export/import (`bee91ae5`), with eleven
+  new root cases passing and independent source/oracle review clear. The next
+  complete adopted source-family/export flow is being selected.
   Current-chain authentication remains distinct from supplied-byte agreement.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
   (`9ac63a11`), economics15/royalty-freeze20 (`6b71507e`) and mode-2 grace
   (`e5ec5fae`), followed by original delegated attestation24 (`122d2288`):
-  root836 tests and exact ABI56 checks pass. Mode payload callers are next,
-  followed by phase-freeze workflows and remaining original families.
+  Mode payload preparation (`da72af19`) brings the root package run to 872 passes
+  with exact ABI57 checks. Phase-freeze workflows and remaining original
+  families are being built.
   Simulated Safe plans do not prove actual Safe execution.
 - Testing delivered full37 construction/activation and genuine C2PA composition
   (`2aed78f5`, `a86febaa`); Registry13 scoped native cases pass. It now fills

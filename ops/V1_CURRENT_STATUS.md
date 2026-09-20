@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `22e90a3b`. All 2,279 sources pass the combined
-ABI/type/storage check in 20.906 seconds. This does not generate bytecode or
+Latest Solidity source checkpoint: `bee91ae5`. All 2,282 sources pass the combined
+ABI/type/storage check in 21.344 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
@@ -88,6 +88,17 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   families, original signatures and durable receipts. Root passes all 836 package
   tests in 37.913 seconds, generation/build/strict types and exact ABI56 fixture
   checks. This is client and simulated-RPC evidence, not actual Safe execution.
+- Mode payload preparation clients (`da72af19`) preserve complete original
+  bytes, separate uploader/preparer authority, prior-block prerequisites and
+  ordinary Safe calls. Root passes all 872 package tests in 38.214 seconds,
+  generation/build/strict types and exact ABI57 fixture checks. That fixture
+  retains its historical publisher and does not adopt later repair evidence.
+- Advisory mint eligibility (`dc0122af`) passes all 21 focused cases on exact
+  `b7378eeb`. Root verifies 191 sources, 218 artifacts and 4,249 source hashes;
+  all 89 nonempty captured production products fit. Selected Manager/fallback
+  runtimes are 24,359/24,476. This uses actual Manager/Ledger/Registry/gates with
+  typed Core/Artist/governance; full-current acceptance and the remaining original
+  counter-read API are separate.
 - One-way phase FreezePolicy (`0ab60204`) now preserves canonical Ledger
   restrictions and executor ceilings across same-Ledger succession. All 23
   focused Ledger/configuration cases pass on exact builder source `8f2e9157`;
@@ -111,6 +122,11 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   69 retained inputs match Git bytes. Its example explicitly reports 17 bound,
   eight local and ten unresolved fields; it does not claim external authority
   authentication or complete Museum conformance.
+- Explicit-version Museum repository export/import (`bee91ae5`) passes all
+  eleven new root cases in 245.834 seconds. Full-history semantic replay and
+  externally pinned byte-exact restoration precede atomic no-overwrite output.
+  B independently reviewed source and failure/race oracles. Original profiles
+  stay unchanged; Linux publication and institutional ingestion remain separate.
 - Seven inactive worktrees were removed after exact cleanliness and process
   checks. Every named branch and commit was retained. Active tasks, evidence,
   dirty worktrees and the Museum runtime were preserved; no tasks were archived.
