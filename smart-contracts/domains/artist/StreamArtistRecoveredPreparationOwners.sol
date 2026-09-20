@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredBindingCorrectionHydration as Corrections
+} from "./StreamArtistRecoveredBindingCorrectionHydration.sol";
+import {
     StreamArtistRecoveredPayloadHydration as Publications
 } from "./StreamArtistRecoveredPayloadHydration.sol";
 
@@ -81,8 +84,11 @@ library StreamArtistRecoveredPreparationOwners {
             payload.publications = Publications.collect(c.source.owners[i], i);
             (data[i], payload.nonces) = Guards.collect(c.provenance, i, c.replayOrigins[i]);
             if (i == 0 && c.hasGenerations) {
-                payload.semanticState =
-                    GenerationStage.encode(c.generations, c.query, payload.provenance);
+                payload.semanticState = (c.features & RH.BINDING_CORRECTIONS) != 0
+                    ? Corrections.encodeCollected(
+                        c.source.owners[0], c.generations, c.query, payload.provenance
+                    )
+                    : GenerationStage.encode(c.generations, c.query, payload.provenance);
             } else if (i == 2) {
                 payload.semanticState =
                     IdentityEncode.encode(c.identity, payload.provenance, payload.nonces);

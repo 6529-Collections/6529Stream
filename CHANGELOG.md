@@ -645,6 +645,11 @@ the release policy in `docs/release-policy.md`.
 - Add source-qualified split-wallet, ClaimRouter and Escrow pull/recovery callers
   with exact authorization, governance stages and direct/Safe receipt checks.
 
+- Add complete original class2 pending-binding correction approvals and replay
+  history to recovered Artist operation60; existing generation codecs remain
+  unchanged. Authored Safe/recovery tests and source/type checks do not imply
+  native or full-history acceptance.
+
 - Add an explicit recovered content/freeze consent caller with ordered royalty
   witnesses, historical record checks and original Safe/Archive receipt evidence.
 

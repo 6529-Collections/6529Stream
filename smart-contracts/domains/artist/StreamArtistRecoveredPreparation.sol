@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredBindingCorrectionHydration as Corrections
+} from "./StreamArtistRecoveredBindingCorrectionHydration.sol";
+import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import {
@@ -112,6 +115,10 @@ library StreamArtistRecoveredPreparation {
             royaltyFreezes.length
         );
         if (context.hasGenerations) context.features |= RH.BINDING_GENERATIONS;
+        if (Corrections.selected(RH.ownerProvenance(c.provenance, 0))) {
+            if (!context.hasGenerations) revert T.UnsupportedProfile();
+            context.features |= RH.BINDING_CORRECTIONS;
+        }
         if (context.economics.length != 0) context.features |= RH.DIRECT_ECONOMICS;
         bytes memory attestationRecords = AttestationStage.emptyRecords();
         if (context.hasAttestations) {

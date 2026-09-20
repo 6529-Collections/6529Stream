@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredBindingCorrectionHydration as Corrections
+} from "./StreamArtistRecoveredBindingCorrectionHydration.sol";
+import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import {
@@ -98,7 +101,7 @@ library StreamArtistRecoveredPreparationGenerations {
             revert T.UnsupportedProfile();
         }
         Generations.Bundle memory generations =
-            Modes.collect(source.owners[0], query, RH.ownerProvenance(provenance, 0));
+            Corrections.collectBindings(source.owners[0], query, RH.ownerProvenance(provenance, 0));
         encoded = abi.encode(generations);
         if (address(Facts).code.length == 0) assembly ("memory-safe") { revert(0, 0) }
         (bool ok, bytes memory result) = address(Facts)
