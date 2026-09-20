@@ -156,6 +156,13 @@ burn-compatible open supply or scoped finality; closing their mint path ends
 the program. Core remains the enforcing authority. No gate exemption changes
 Core's burn block, freeze, supply or finality checks.
 
+A source collection being `CLOSED` alone does not block burning its existing
+tokens. A separate governed burn block does. Conversely, pausing or closing the
+target prevents the target mint even when the source remains burnable. A failed
+paid attempt must restore the source, settlement, counters and replay state;
+resuming a paused target or phase can permit the original signed Safe envelope
+to be retried. Terminal collection closure has no reopen path.
+
 ## Validation boundaries
 
 The focused [gate suite](../../test/unit/mint/StreamBurnMintGate.t.sol) uses the
@@ -173,6 +180,17 @@ RoleRegistry while a buyer Safe retains its free-burn credit. They cover
 liability-preserving recovery, a callback donation, the exact shared-guard
 failure, a rejected recipient with byte-identical signed Safe retry, and the
 buyer's later refund even after the emergency recipient role is cleared.
+
+The separate [current Burn policy host](../../test/current/StreamCurrentBurnPolicy.t.sol)
+authors seven cases with genuinely distinct source and target collections,
+actual delayed Core and Manager policy changes, admitted settlement recording,
+and separate Artist, buyer and governor threshold Safes. The cases distinguish
+source closure from a burn block and assert rollback after native settlement
+reaches a paused or closed target's Core mint. Free and native phase-pause cases
+retain byte-identical Safe retries. The [source handoff](../../artifacts/current-burn-policy.md)
+records ABI/source checks; native execution remains pending. These cases do not
+execute a complete scoped artwork-finality ceremony.
+
 Release manifests,
 genesis wiring, combined validation and testnet delivery remain integration
 work; these sources do not establish production readiness.

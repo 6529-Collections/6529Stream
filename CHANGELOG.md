@@ -13,6 +13,15 @@ the release policy in `docs/release-policy.md`.
   Add exact-signature underfunding/retry and proof regressions; full-current
   execution remains separate from the source batch.
 
+## Current burn policy acceptance recipes
+
+- Add seven actual-current Burn cases with independently created source and
+  target collections, genuine settlement admission and separate threshold Safes.
+  Cover source closure versus burn block, late target pause/closure rollback,
+  phase pause and byte-identical Safe retry.
+- Preserve production behavior and shared fixtures. ABI/source review is
+  separate from pending native execution and complete scoped-finality acceptance.
+
 ## Current burn-redemption acceptance recipes
 
 - Add actual current Core, Manager, Artist, registry and delayed-governance
