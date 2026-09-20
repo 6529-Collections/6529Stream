@@ -64,8 +64,12 @@ and original client evidence. ABI102 supports the class-1/class-3 singleton
 profile and direct-economics extension; recovered personhood and delegation
 feature bit 64 remain excluded at that earlier source.
 
-The inventory also retains gaps for governance/control families, clone claims
-and escrow, original records/read surfaces, Core/mint controls, and broader
+The later [revenue pull and recovery client](current-revenue-pull.md) is qualified
+separately against ABI107 for initialized clone claims, Router batches and
+Escrow flush/recovery, including the required Executor stages.
+
+This retained inventory still records gaps for governance/control families,
+clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a
 whole-v1 completion or release-readiness claim.
 

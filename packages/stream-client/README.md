@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Revenue pulls and escrow recovery](docs/current-revenue-pull.md) covers
+  initialized clone claims, ordered Router batches and original Escrow recovery,
+  including direct, Safe and genuine Executor stages.
+
 - [Recovered Artist authority](docs/current-artist-recovered-hydration.md) collects
   the complete original operation-60 profile-10 request and certificate, retains
   original domains and provenance, and inspects paged Archive and Safe receipts.

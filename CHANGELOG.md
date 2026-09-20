@@ -255,6 +255,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified split-wallet, ClaimRouter and Escrow pull/recovery callers
+  with exact authorization, governance stages and direct/Safe receipt checks.
+
 - Add an explicit recovered content/freeze consent caller with ordered royalty
   witnesses, historical record checks and original Safe/Archive receipt evidence.
 
