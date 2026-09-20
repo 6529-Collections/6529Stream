@@ -2,9 +2,9 @@
 
 The Router retains its original public signatures and storage while fixed
 workers handle selected input decoding and complete collection-return encoding.
-This experimental branch targets facade bytecode size. The first native
-checkpoint fails the production size gate and the initial exact-error corpus;
-it is not an accepted integration candidate. Native results below belong to
+This experimental branch targets facade bytecode size. Both native checkpoints
+fail the production size gate; the revised focused cohort passes 70 cases.
+This does not establish deployment acceptance. Native results below belong to
 their exact captured source and do not establish current-stack acceptance.
 
 ## Boundaries
@@ -43,6 +43,15 @@ unchanged. Configuration getters used by current STATIC selection/content
 checkpoints are not moved into delegated read workers. The constructor,
 storage declarations, namespaced state, serving anchors, self-only attribution
 frame, original scope membership and derived preparation hook are retained.
+
+The six token-serving entry points package their existing burned-token and
+output-mode choices into a memory-only `TokenViewOptions` struct. The shared
+internal serving function reads those two values before its original body.
+This prevents the optimizer from emitting six specialized copies of that
+body, including its STATIC selection. It adds no external call or storage
+field. The existing mode mappings and serving body remain unchanged. The
+focused regression cohort below covers selected behavior; it does not establish
+complete mode/state or worst-case gas coverage.
 
 This batch does not contain the separately developed V2 CONTENT_ROOT entries.
 Any joined version needs its own compiler and size evidence.
@@ -103,4 +112,35 @@ come from source comparison and native failure traces; no baseline native run
 has been claimed. Test-only corrections use exact citation goldens with an
 explicit fixture context, compare the same historical method before and after
 facade loss, and independently check the burned JSON state and citation. The
-revised tests require a new native result; the recorded 58/9 result is unchanged.
+revised tests pass at the later checkpoint; the recorded 58/9 result is unchanged.
+
+## Native checkpoint: `28f46de8`
+
+The immutable 257-source capture at
+`28f46de88b7850d572932c2abb522e40f93a289f` compiled successfully with the
+same compiler, optimizer and EVM settings. Optimized IR contains one shared
+serving implementation instead of six. The original public ABI and method
+identifiers match exactly; normalized storage matches the frozen reference.
+All captured input hashes remain unchanged after compilation.
+
+Router runtime is 26,754 bytes, a reduction of 11,551 bytes from the previous
+checkpoint. It remains 2,178 bytes above the original 24,576-byte cap. Creation
+code is 32,345 bytes; the current graph's 288-byte constructor arguments bring
+initcode to 32,633 bytes, below the original 49,152-byte cap. All other nonempty
+production artifacts in this capture fit the runtime cap and the creation-code
+cap before constructor arguments.
+
+The cached six-host cohort passes all 70 cases, including the revised decoder
+oracles and rendering assertions: legacy roots 13, scoped roots seven, STATIC
+11, serving 15, bundles 13 and codec parity 11. Five fuzz cases each run 256
+times with seed `0x6529`. The run took 6.452 seconds and changed no native
+artifact or cache hashes. The integrator explicitly authorized this functional
+regression run despite the known size failure; the existing fixture profile
+and production limits remain unchanged. It is not deployment acceptance.
+
+A comparison of 54 unchanged, successful unit cases outside the revised parity
+host shows a largest execution-gas increase of 2,128 gas (0.0254%) in the real
+STATIC renderer/context/dispute case. Some cases deploy contracts or make
+multiple calls, so these totals are not per-call or worst-case gas evidence.
+Actual-current Terminal10/Instant8, the separately developed V2 CONTENT_ROOT
+join, full CI and release evidence remain pending.
