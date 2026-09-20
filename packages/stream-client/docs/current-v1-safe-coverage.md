@@ -95,6 +95,11 @@ extends that same ABI129 profile with original checkpoint, covered-output and
 root-free snapshot calls. Snapshot writer grants, Artist root consent and
 governance/finality authority remain separate requirements.
 
+The [scoped full-policy root client](current-scoped-policy-root-v2.md) retains
+the same original source profile for Artist operation-17 consent and Router
+root adoption. The signed collection-wide family, historical aggregate and
+actual consent consumption remain distinct commitments.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

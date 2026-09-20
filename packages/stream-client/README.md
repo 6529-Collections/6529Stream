@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Scoped full-policy root adoption](docs/current-scoped-policy-root-v2.md)
+  covers original Router roots and exact Artist operation-17 consent under
+  ABI129, with collection-wide family and historical aggregate commitments.
+
 - [Scoped full-policy publication](docs/current-scoped-policy-publication-v2.md)
   covers genuine content checkpoints, covered-output verification and root-free
   snapshot publication under ABI129, with original writer-grant boundaries.

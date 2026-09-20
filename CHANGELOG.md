@@ -647,6 +647,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add scoped-policy Router root adoption and original Artist content-consent
+  clients with exact family, replay and historical aggregate commitments.
+
 - Add source-qualified scoped-policy checkpoint, covered-output and root-free
   snapshot publication clients with original authority and receipt boundaries.
 
