@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `905bbe2a`: canonical native sales, recovered source/preparation capacity, metadata cold-read fix, 511 clients and native DIRECT tier/selection are integrated. ABI110: 2,908 sources / zero errors. Root clients 1,525; Museum30; scoped native results remain source-qualified. |
+| Source checkpoint | `c6528fcf`: generation history, current redemption and attestation capacity source joined. ABI112: 2,921 sources / zero errors. ERC20 native93 passes with independent readback; generation stage19 passes. Root clients1,525/Museum30 unchanged; each result retains its source boundary. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -33,17 +33,21 @@ Current source and scoped outcomes are in [V1_CURRENT_STATUS.md](V1_CURRENT_STAT
 Root owns integration; builders continue coherent features while frozen tests run.
 
 - A: metadata optimization/fidelity is integrated with 46 retained passes.
-  Repair AttestationHydration capacity and independently review C's VIEW seams.
+  Attestation capacity is source-integrated; its frozen19-case run is active.
+  Build the next unheld Artist history composition and review C's VIEW seams.
 - B: external guards and price capacity are integrated; price35 is running.
   Build canonical ERC20 standard Dutch, coordinating Payment/admission and the
   original Sales signature domain with Mint. Existing Payment entries remain.
 - C: prospective native11 is complete. Finish canonical VIEW adoption/STATIC
-  routing/rendering; reduce the new Router transport to fit before source intake.
+  routing/rendering. Selected Router21,320 and fixed read facade7,693 fit;
+  finish the corrected real-STATIC test before source handoff.
 - Mint: canonical signed/public native sales are integrated; frozen unit45 is
-  running and actual-current3 joins the shared plan. Build native ZERO_PRICE_CLAIM
+  being rebuilt after a reviewed test-only IR stack repair. Actual-current3 joins
+  the shared plan. Build native ZERO_PRICE_CLAIM
   and PWYW, including explicitly coordinated historical kind3/12/13 revocation.
-- Burn: finish the frozen content35 run and build actual-current redemption/Safe
-  acceptance source. Generation composition belongs to the Prepared lead. The
+- Burn: content35 passes and actual-current redemption12 is integrated. Build
+  recipient MERKLE_STATIC distribution with an additive publication-bound phase
+  hash. Generation composition belongs to the Prepared lead. The
   separate held burn-fee extension remains unapplied.
 - Museum: DIRECT floor/personhood and tier/selection are integrated, root35/30
   pass. Build a separate complete-packet native authority/scope and DIRECT
@@ -51,25 +55,29 @@ Root owns integration; builders continue coherent features while frozen tests ru
 - Clients: recovered 511 is integrated. Build missing clone-wallet release,
   ClaimRouter and Escrow flush/recovery workflows, preserving genuine governance
   boundaries and all previous source snapshots.
-- Testing: run the approved bounded Artist linked-size discovery on pinned
-  `1fcbb349`: 112 initial outputs, fixed 710-source input, at most four native
-  invocations/1,200 seconds and only genuinely reached reserve outputs. This is
-  historical discovery, not current fit evidence. Then join the exact final
-  sources for current47 and the three stateful hosts; do not substitute stubs.
+- Testing: bounded historical discovery is complete at its time cap. Prepare
+  the expanded exact-source current/Safe and stateful campaign with canonical
+  Sales3 and Burn12. Burn source review is clear; do not substitute stubs or
+  repeat discovery while the assigned dependency repairs are in flight.
 - Conservation/native task `01a0be37-2432-7a63-8820-fc42f159eb1d`: independent
   ERC20 fixture, Prepared and complete Identity source reviews are clear. Own
   isolated HydrationCommit and RegistryWriterDeployment/WriterExtension capacity
   repairs; preserve mutation/order/ABI/storage and obtain independent review.
-- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: own the frozen repaired
-  93-case capture at `5df9808e`; preserve older failures. Unit9 already passes.
+- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: completed the repaired
+  93-case capture at `5df9808e`, independently verified. Build the additive full-current
+  two-Safe/nonzero-fee/ASYNC_REQUIRED Universal tests; preserve older failures.
 - Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: first preparation and
-  record/delegation and complete source decoder repairs are integrated. Deliver
-  coherent binding-generation512 composition with Burn's source, then repair
-  the newly measured IdentityTransport with the same source-bound storage roots.
+  record/delegation and complete source decoder repairs are integrated. Binding
+  generation composition is integrated and stage19 passes. Repair
+  IdentityTransport and its oversized export worker with the same source-bound
+  storage roots; include Import/Continuations in bounded dependency measurements.
 
 Root's combined client run completed: 1,525 passed, zero failed/skipped.
-The source-specific content35 and corrected metadata46 runs pass. No root
-native compiler is running. Remaining linked discovery runs in Testing's task.
+The source-specific content35 and corrected metadata46 runs pass. Root metric
+native17 is building the accepted parser optimization against the
+original native16 fixture. Testing's bounded historical discovery ended at its
+1,200-second limit with 112 measurements and 125 reached products unmeasured;
+no automatic retries. It now maintains the expanded current-contract source plan.
 No funding or onchain action is needed. RC1 remains immutable. Full actual
 current/Safe/fuzz/capacity/CI, final source freeze and matching testnet remain.
 

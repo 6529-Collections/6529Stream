@@ -18,9 +18,9 @@ Other held proposals remain separate.
 
 ## 20 September integrated batch
 
-Latest integrated source: `905bbe2a`. ABI110 checks all 2,908 Solidity
+Latest integrated source: `c6528fcf`. ABI112 checks all 2,921 Solidity
 sources at this snapshot, including method identifiers and storage layouts,
-with zero errors in 29.844 seconds. These are source checks, not combined
+with zero errors in 30.250 seconds. These are source checks, not combined
 runtime acceptance.
 
 - Recovered Artist preparation is integrated (`dc3d3e9b`). The former oversized
@@ -32,9 +32,19 @@ runtime acceptance.
   Identity source decoding (`45088f22`) fits all 25 selected products and passes
   eight differential cases, including four 256-input fuzz properties. Content
   components pass 35 cases at their recorded earlier source (`16ff1ecf`).
-  Discovery found four remaining oversized dependencies: AttestationHydration,
-  IdentityTransport, HydrationCommit and RegistryWriterDeployment. All have
-  assigned repairs; selected fits do not establish whole-system deployability.
+  Bounded dependency discovery measured 112 products at its recorded older source:
+  109 fit and three oversizes have assigned repairs. It stopped at its time cap;
+  125 reached dependencies remain unmeasured. The changed Identity export worker
+  is also oversized and belongs to the Transport repair. Selected fits do not
+  establish whole-system deployability.
+  AttestationHydration is now source-integrated (`c6528fcf`): original import
+  writes remain intact, and the selected hydration, collection and validation
+  workers fit. Its unchanged 19-case native suite is pending.
+- Recovered pending binding generations are integrated (`05e3f402`), preserving
+  complete proposal/refusal/withdrawal history and the final accepted binding.
+  Eight selected products fit. The 19 focused preparation-stage cases pass,
+  including eight 256-input fuzz properties; source/owner proof boundaries remain
+  explicit. Actual complete migration execution is still pending.
 - Metadata's real Owner cold-read recipe now passes under the original 400,000
   callback and single 150,000 dependency-frame limits (`d88ee108`): measured
   324,595 and 147,146 gas respectively. Seven focused tests pass. The corrected
@@ -46,13 +56,21 @@ runtime acceptance.
   source integrated. The price carrier fits at 22,005 bytes (`ad623ed8`). Missing
   conservation-floor bindings caused the traced older ERC20 fixture failures;
   the seven-fixture repair is integrated (`7b78943d`) and nine genuine-floor unit
-  cases pass. The full 93-case repaired run and separate 35-case price run are
-  active. Earlier failures are retained; no full ERC20 pass is claimed yet.
+  cases pass. The repaired 93-case native run now passes all 12 hosts with zero
+  failures/skips (`dd47441d` evidence), including actual Coordinator modes, Safe,
+  permits, refunds and genuine conservation accounting. Independent readback
+  verifies all 553 sources and 316 production size records. This remains the
+  exact `5df9808e` test graph; the separate 35-case price run is active.
 - Canonical signed/public native fixed and open sales are integrated
   (`b4d07ed0`), with original Sales-v1 signatures, an additive public recorder
   and full-payload historical revocation. Nine selected products fit; 45 unit
-  and three actual-current cases are authored. The focused run is active.
-  ZERO_PRICE_CLAIM/PWYW and ERC20 standard Dutch are separate active builds.
+  and three actual-current cases are authored. The first focused compile failed
+  before execution in a wide test snapshot; a reviewed test-only split is being
+  rerun. ZERO_PRICE_CLAIM/PWYW and ERC20 standard Dutch are separate active builds.
+- Actual-current burn redemption adds 12 independently reviewed source cases
+  (`452d0f17`) with separate threshold Safes, governed admission, retained identity,
+  exact signed retry and real Core burn-block rollback. Joined ABI passes;
+  runtime acceptance awaits the combined current-contract campaign.
 - Prospective COLLECTION references pass all 11 focused native cases, including
   256 fuzz inputs (`1dff3bea`), after the genuine inventory fixture repair.
   Required VIEW adoption, rendering and preservation remain an active build.
@@ -72,7 +90,9 @@ runtime acceptance.
   joins do not establish live complete-packet or institutional conformance.
 - Distribution's recorded 27-case run with 256 fuzz inputs and prospective,
   Payout and earlier provider passes retain their exact source qualifications.
-  Actual metric publication remains 7 pass / 2 fail. The shared current-contract
+  Actual metric publication remains 7 pass / 2 fail at its older source. A frozen
+  successor with the already integrated exact-input optimization is building;
+  original test bodies, gas caps and fixture inputs remain. The shared current-contract
   and three stateful campaigns await the genuine deployable linked graph.
 
 Still to finish: canonical sales families, required VIEW/finality behavior,
