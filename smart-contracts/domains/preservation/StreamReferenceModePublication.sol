@@ -238,13 +238,13 @@ contract StreamReferenceModePublication is
         StreamReferenceModeTypes.Evidence calldata originalEvidence,
         address recorder
     ) external view override returns (bytes32 sourceHash, bytes memory canonical) {
-        StreamReferenceRenderTypes.Publication memory p = original;
+        StreamReferenceRenderTypes.Publication calldata p = original;
         _candidate(p);
         StreamReferenceRenderTypes.Receipt memory r = _receipt(p, recorder);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         StreamReferenceModePreparation.Prepared memory result =
             StreamReferenceModePreparation.prepare(
-                d, _modeBindings, p, r, _fileInventories, msg.data, false
+                d, _modeBindings, r, _fileInventories, msg.data, false
             );
         return (result.sourcesHash, result.canonical);
     }
@@ -253,14 +253,14 @@ contract StreamReferenceModePublication is
         StreamReferenceRenderTypes.Publication calldata original,
         StreamReferenceModeTypes.Evidence calldata originalEvidence
     ) external override guarded returns (bytes32 hash) {
-        StreamReferenceRenderTypes.Publication memory p = original;
+        StreamReferenceRenderTypes.Publication calldata p = original;
         _candidate(p);
         StreamReferenceRenderTypes.Receipt memory r = _receipt(p, msg.sender);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         _definitions(d);
         StreamReferenceModePreparation.Prepared memory result =
             StreamReferenceModePreparation.prepare(
-                d, _modeBindings, p, r, _fileInventories, msg.data, true
+                d, _modeBindings, r, _fileInventories, msg.data, true
             );
         StreamReferenceModeTypes.Facts memory mode = result.mode;
         r.sourcesHash = result.sourcesHash;
@@ -541,7 +541,7 @@ contract StreamReferenceModePublication is
         return ("", StreamReferenceModeDefinitions.PROFILE_HASH);
     }
 
-    function _receipt(StreamReferenceRenderTypes.Publication memory p, address recorder)
+    function _receipt(StreamReferenceRenderTypes.Publication calldata p, address recorder)
         private
         view
         returns (StreamReferenceRenderTypes.Receipt memory r)
@@ -569,8 +569,21 @@ contract StreamReferenceModePublication is
             );
     }
 
-    function _candidate(StreamReferenceRenderTypes.Publication memory p) private view {
-        StreamReferenceModeStateReads.candidate(p, _ids, _history, _locks);
+    function _candidate(StreamReferenceRenderTypes.Publication calldata p) private view {
+        StreamReferenceModeStateReads.candidateHeader(
+            StreamReferenceModeStateReads.Candidate(
+                p.collectionId,
+                p.referenceId,
+                p.reasonHash,
+                p.effectiveAt,
+                p.expectedRevision,
+                p.expectedHead,
+                p.manifestURI
+            ),
+            _ids,
+            _history,
+            _locks
+        );
     }
 
     function _definitions(StreamReferenceRenderTypes.Dependencies memory d) private view {

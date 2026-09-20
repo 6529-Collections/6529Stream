@@ -136,8 +136,11 @@ The same cached setup trace measures the 1,048-member package's
 `prepareFileInventory` call at 38,710,093 gas before calldata intrinsic cost.
 That preparation exceeds the 16,777,216 transaction cap. The 102-member platform
 preparation uses 4,630,128 gas. The fixture therefore does not establish a usable
-transaction sequence for this complete combined environment; a bounded
-preparation implementation remains required. Final-binding measurements below
+transaction sequence for this complete combined environment. The subsequent
+[staged inventory companion](reference-inventory-preparation.md) preserves the
+original full inventory identity and measures bounded parts and finalization
+against the real 1,048-row corpus; its guarded probe remains separate from this
+whole publisher acceptance run. Final-binding measurements below
 cannot close that separate preparation-capacity limitation, and no production
 gas cap has been raised to hide it.
 
@@ -166,3 +169,18 @@ The earlier `0a72dec4` two-suite capture failed Solidity code generation with a
 Yul stack-layout error before any tests executed. Its production size preflight
 passed. That failure is retained separately; it is not a runtime failure or a
 passing acceptance result for this supplement.
+
+The subsequent publication transport repair keeps the original request in
+calldata until the fixed preparation worker decodes the complete publication
+and evidence pair once. The host's candidate check transports only its seven
+original fields; receipt construction, current-source checks, record and chain
+preimages, retained bytes and mutation order remain unchanged. A focused
+31-source capture passes three transport tests, including 256 fuzz cases and
+the exact original record and pair encodings over the 1,048-row package and
+102-row platform declarations. The candidate probe measures 1,873,517 gas for
+the original full-tuple path and 6,123 for the projected header. These are
+sequential probe measurements, not a cold publisher transaction. All three
+changed production products fit; whole-publication gas acceptance remains
+pending. Malformed nested ABI rejection is still required before writes, but
+this transport capture does not claim identical error precedence between
+malformed nested data and an invalid header.

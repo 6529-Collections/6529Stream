@@ -23,6 +23,39 @@ import { StreamMetadataRenderer } from "../metadata/StreamMetadataRenderer.sol";
 /// @notice Fixed original writer and finality encodings; the host retains all mutation/currentness guards.
 /// @dev Delegate context is the actual original producer, including address(this) and its code hash.
 library StreamReferenceModeStateReads {
+    struct Candidate {
+        uint256 collectionId;
+        bytes32 referenceId;
+        bytes32 reasonHash;
+        uint64 effectiveAt;
+        uint64 expectedRevision;
+        bytes32 expectedHead;
+        string manifestURI;
+    }
+
+    /// @dev Exact original candidate fields; the complete environment is not read by this check.
+    function candidateHeader(
+        Candidate memory p,
+        mapping(uint256 => mapping(bytes32 => bool)) storage ids,
+        mapping(uint256 => bytes32[]) storage history,
+        mapping(uint256 => R.Lock) storage locks
+    ) public view {
+        if (
+            p.collectionId == 0 || p.referenceId == 0 || p.reasonHash == 0 || p.effectiveAt == 0
+                || p.effectiveAt > block.timestamp || block.timestamp > type(uint64).max
+                || p.expectedRevision == type(uint64).max || ids[p.collectionId][p.referenceId]
+        ) revert R.InvalidReferenceRender();
+        uint256 count = history[p.collectionId].length;
+        bytes32 head = count == 0 ? bytes32(0) : history[p.collectionId][count - 1];
+        if (head != p.expectedHead || count != p.expectedRevision) {
+            revert R.ReferenceLineage(p.expectedHead, head);
+        }
+        if (locks[p.collectionId].actionId != 0) revert R.ReferenceLocked();
+        StreamMetadataRenderer.requireValidUtf8ContentUri(
+            "referenceManifestURI", p.manifestURI, 2048, true
+        );
+    }
+
     function candidate(
         R.Publication memory p,
         mapping(uint256 => mapping(bytes32 => bool)) storage ids,

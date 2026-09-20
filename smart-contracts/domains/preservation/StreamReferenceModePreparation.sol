@@ -23,7 +23,6 @@ library StreamReferenceModePreparation {
     function prepare(
         R.Dependencies memory d,
         M.Dependencies memory bindings,
-        R.Publication memory p,
         R.Receipt memory receipt,
         mapping(bytes32 => Bytes.Manifest) storage inventories,
         bytes calldata original,
@@ -31,7 +30,8 @@ library StreamReferenceModePreparation {
     ) public view returns (Prepared memory result) {
         // Both original mode write/preview selectors begin with this exact pair. Preview's
         // trailing recorder is consumed by the host before this fixed decoder is called.
-        (, M.Evidence memory evidence) = abi.decode(original[4:], (R.Publication, M.Evidence));
+        (R.Publication memory p, M.Evidence memory evidence) =
+            abi.decode(original[4:], (R.Publication, M.Evidence));
         R.SourceFacts memory source = StreamReferenceRenderSourceReads.requireModeSourceInputs(
             d, StreamReferenceRenderSourceReads.project(p), false
         );
