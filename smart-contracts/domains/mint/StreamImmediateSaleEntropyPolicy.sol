@@ -10,7 +10,7 @@ import {
     IStreamImmediateSaleReveal as Reveal
 } from "../../interfaces/stream/mint/IStreamImmediateSaleReveal.sol";
 
-/// @notice Fixed read boundary for explicit terminal-token policy in immediate sale paths.
+/// @notice Fixed read boundary for explicit entropy policy in mint completion paths.
 /// @dev A missing legacy capability is not an entropy exemption. No token is represented as finalized.
 library StreamImmediateSaleEntropyPolicy {
     function terminalStatus(address coordinator, uint256 collectionId)
@@ -24,8 +24,32 @@ library StreamImmediateSaleEntropyPolicy {
         if (p.renderRequirement == Policy.RenderRequirement.NOT_REQUIRED) return 2;
     }
 
-    /// @notice Validate the completed original token before skipping its reveal request.
-    /// @dev Receiver callbacks may already have burned it; permanent identity remains authoritative.
+    /// @notice Whether this explicit mode has no asynchronous reveal promise or fee.
+    function noRevealPolicy(address coordinator, uint256 collectionId) public view returns (bool) {
+        Policy.PolicyRecord memory p = _policy(coordinator, collectionId);
+        return p.explicitPolicy && p.mode != Policy.Mode.ASYNC;
+    }
+
+    /// @notice Validate a terminal token or a newly registered INSTANT token before skipping AT_MINT.
+    /// @dev Required INSTANT entropy is requested in a later block; it is not terminal or finalized.
+    function requireNoMintRequestToken(
+        address core,
+        address coordinator,
+        uint256 collectionId,
+        uint256 tokenId
+    ) public view returns (bool) {
+        Policy.PolicyRecord memory p = _policy(coordinator, collectionId);
+        if (
+            !p.explicitPolicy
+                || (p.mode == Policy.Mode.ASYNC
+                    && p.renderRequirement == Policy.RenderRequirement.REQUIRED)
+        ) return false;
+        _requireToken(core, coordinator, collectionId, tokenId, p);
+        return true;
+    }
+
+    /// @notice Validate a completed terminal token using permanent identity, including after burn.
+    /// @dev Core itself prevents burning during its mint receiver callback.
     function requireTerminalToken(
         address core,
         address coordinator,
@@ -36,7 +60,20 @@ library StreamImmediateSaleEntropyPolicy {
         if (!p.explicitPolicy || p.renderRequirement != Policy.RenderRequirement.NOT_REQUIRED) {
             return false;
         }
-        uint8 expected = p.mode == Policy.Mode.DISABLED ? 1 : 2;
+        _requireToken(core, coordinator, collectionId, tokenId, p);
+        return true;
+    }
+
+    function _requireToken(
+        address core,
+        address coordinator,
+        uint256 collectionId,
+        uint256 tokenId,
+        Policy.PolicyRecord memory p
+    ) private view {
+        uint8 expected = p.mode == Policy.Mode.DISABLED
+            ? 1
+            : p.renderRequirement == Policy.RenderRequirement.NOT_REQUIRED ? 2 : 3;
         if (!p.frozen) revert Reveal.SaleRevealDependencyInvalid(coordinator);
         uint256[4] memory identity = abi.decode(
             _read(
@@ -79,7 +116,6 @@ library StreamImmediateSaleEntropyPolicy {
         ) {
             revert Reveal.SaleRevealDependencyInvalid(coordinator);
         }
-        return true;
     }
 
     function _policy(address target, uint256 collectionId)

@@ -13,6 +13,9 @@ import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../revenue/StreamDeferredNativeSettlementHash.sol";
 import "./StreamSaleConsent.sol";
+import {
+    StreamImmediateSaleEntropyPolicy as EntropyPolicy
+} from "./StreamImmediateSaleEntropyPolicy.sol";
 import "./StreamRefundWindowPriceStore.sol";
 import "./StreamMintSaleAllowlist.sol";
 import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
@@ -400,6 +403,14 @@ library StreamRefundWindowSupport {
             0
         );
         uint256[5] memory words = abi.decode(raw, (uint256[5]));
+        if (EntropyPolicy.noRevealPolicy(address(x.entropy), collectionId)) {
+            if (words[0] != 0 || words[1] != 0 || words[2] != 0 || words[3] != 0 || words[4] != 0) {
+                revert IStreamNativeRefundWindowSale.RefundDependencyReadMalformed(
+                    address(x.entropy), 160
+                );
+            }
+            return p;
+        }
         if (words[0] != 1 || words[1] > 1 || words[3] > type(uint64).max) {
             revert IStreamNativeRefundWindowSale.RefundDependencyReadMalformed(
                 address(x.entropy), 160
@@ -531,7 +542,8 @@ library StreamRefundWindowSupport {
         public
         view
     {
-        if (revealPolicy(x, collectionId).requestMode == 0) _requireGas(attemptGas);
+        IStreamRevealFeeEscrow.CollectionRevealPolicy memory p = revealPolicy(x, collectionId);
+        if (p.declared && p.requestMode == 0) _requireGas(attemptGas);
     }
 
     /// @notice Funds only the actual collection escrow; the independent AT_MINT attempt may fail.
@@ -546,6 +558,14 @@ library StreamRefundWindowSupport {
         forwarded = savedFee < policy.revealFeePerTokenWei ? savedFee : policy.revealFeePerTokenWei;
         remainder = savedFee - forwarded;
         address target = address(x.entropy);
+        bool skipRequest =
+            EntropyPolicy.requireNoMintRequestToken(x.core, target, collectionId, tokenId);
+        if (
+            !policy.declared
+                && (!skipRequest || !EntropyPolicy.noRevealPolicy(target, collectionId))
+        ) {
+            revert IStreamNativeRefundWindowSale.RefundDependencyInvalid(target);
+        }
         if (forwarded != 0) {
             uint256 beforeEscrow = abi.decode(
                 _read(
@@ -582,7 +602,9 @@ library StreamRefundWindowSupport {
         }
         // Funding and requesting are separate. The pinned coordinator owns permissionless
         // recovery/retry; an external provider failure never classifies the purchase refundable.
-        if (policy.requestMode == 0) _attempt(target, collectionId, tokenId, attemptGas);
+        if (!skipRequest && policy.requestMode == 0) {
+            _attempt(target, collectionId, tokenId, attemptGas);
+        }
     }
 
     function _attempt(address target, uint256 collectionId, uint256 tokenId, uint256 cap) private {

@@ -12,6 +12,9 @@ import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../revenue/StreamNativeSettlementHash.sol";
 import "./StreamDutchPricing.sol";
+import {
+    StreamImmediateSaleEntropyPolicy as EntropyPolicy
+} from "./StreamImmediateSaleEntropyPolicy.sol";
 import "./StreamMintSaleAllowlist.sol";
 import "../../interfaces/stream/mint/IStreamNativeAllowlistDutchSale.sol";
 
@@ -360,6 +363,14 @@ library StreamDutchSaleSupport {
         if (capturedMode == 0) _requireGas(cap);
     }
 
+    /// @notice Full captured policy preserves undeclared zero-fee modes without inventing a request.
+    function preflightReveal(
+        IStreamRevealFeeEscrow.CollectionRevealPolicy memory captured,
+        uint256 cap
+    ) public view {
+        if (captured.declared && captured.requestMode == 0) _requireGas(cap);
+    }
+
     /// @notice Immediate sales fund their one captured fee quote exactly, without re-pricing.
     function fundCapturedReveal(
         Context memory x,
@@ -370,6 +381,14 @@ library StreamDutchSaleSupport {
     ) public {
         address target = address(x.entropy);
         _requireSelected(x.core, target, x.entropyHash, keccak256("ENTROPY_COORDINATOR"));
+        bool skipRequest =
+            EntropyPolicy.requireNoMintRequestToken(x.core, target, collectionId, tokenId);
+        if (
+            !captured.declared
+                && (!skipRequest || !EntropyPolicy.noRevealPolicy(target, collectionId))
+        ) {
+            revert IStreamNativeDutchSale.DutchDependencyInvalid(target);
+        }
         uint256 fee = captured.revealFeePerTokenWei;
         if (fee != 0) {
             uint256 beforeEscrow = abi.decode(
@@ -403,7 +422,7 @@ library StreamDutchSaleSupport {
                 revert IStreamNativeDutchSale.DutchAccountingMismatch();
             }
         }
-        if (captured.requestMode == 0) {
+        if (!skipRequest && captured.requestMode == 0) {
             _requireGas(cap);
             bytes memory data = abi.encodeCall(IStreamEntropyCoordinator.requestEntropy, (tokenId));
             uint256[2] memory result;
@@ -503,6 +522,12 @@ library StreamDutchSaleSupport {
             0
         );
         uint256[5] memory words = abi.decode(raw, (uint256[5]));
+        if (EntropyPolicy.noRevealPolicy(address(x.entropy), collectionId)) {
+            if (words[0] != 0 || words[1] != 0 || words[2] != 0 || words[3] != 0 || words[4] != 0) {
+                revert IStreamNativeDutchSale.DutchDependencyReadMalformed(address(x.entropy), 160);
+            }
+            return p;
+        }
         if (words[0] != 1 || words[1] > 1 || words[3] > type(uint64).max) {
             revert IStreamNativeDutchSale.DutchDependencyReadMalformed(address(x.entropy), 160);
         }

@@ -47,9 +47,8 @@ library StreamImmediateSaleReveal {
             ),
             (uint256[5])
         );
-        uint8 terminal = EntropyPolicy.terminalStatus(q.coordinator, collectionId);
-        if (terminal == 1) {
-            // The canonical DISABLED policy has no reveal promise or fee. Do not invent one.
+        if (EntropyPolicy.noRevealPolicy(q.coordinator, collectionId)) {
+            // DISABLED and INSTANT have no asynchronous reveal promise or fee.
             if (words[0] != 0 || words[1] != 0 || words[2] != 0 || words[3] != 0 || words[4] != 0) {
                 revert IStreamImmediateSaleReveal.SaleRevealDependencyInvalid(q.coordinator);
             }
@@ -87,10 +86,11 @@ library StreamImmediateSaleReveal {
     ) public {
         _requireSelected(core, q);
         address target = q.coordinator;
-        bool terminal = EntropyPolicy.requireTerminalToken(core, target, collectionId, tokenId);
+        bool skipRequest =
+            EntropyPolicy.requireNoMintRequestToken(core, target, collectionId, tokenId);
         if (
             !q.policy.declared
-                && (!terminal || EntropyPolicy.terminalStatus(target, collectionId) != 1)
+                && (!skipRequest || !EntropyPolicy.noRevealPolicy(target, collectionId))
         ) {
             revert IStreamImmediateSaleReveal.SaleRevealDependencyInvalid(target);
         }
@@ -115,7 +115,7 @@ library StreamImmediateSaleReveal {
                 revert IStreamImmediateSaleReveal.SaleRevealAccountingMismatch();
             }
         }
-        if (!terminal && q.policy.requestMode == 0) {
+        if (!skipRequest && q.policy.requestMode == 0) {
             _requireGas(cap);
             bytes memory data = abi.encodeCall(IStreamEntropyCoordinator.requestEntropy, (tokenId));
             uint256[2] memory result;

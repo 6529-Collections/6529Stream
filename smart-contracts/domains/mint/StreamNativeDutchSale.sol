@@ -338,7 +338,7 @@ contract StreamNativeDutchSale is
         if (original < refundLiability) revert DutchAccountingMismatch();
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
         uint256 revealCap = gasParameter(_REVEAL_GAS);
-        StreamDutchSaleSupport.preflightReveal(captured.reveal.requestMode, revealCap);
+        StreamDutchSaleSupport.preflightReveal(captured.reveal, revealCap);
         authorizationUsed[d.authorization.artist][d.authorization.nonce] = true;
         executionIdByNonce[d.authorization.saleId][d.authorization.executionNonce] =
         c.executionBinding.executionId;

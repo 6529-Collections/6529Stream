@@ -45,6 +45,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Connect explicit INSTANT and terminal entropy modes to immediate, Dutch,
+  clearing and deferred sale completion, preserving original ASYNC fees,
+  credits, request events and public sale signatures.
+
 - Support explicit terminal non-random tokens in shared immediate sale reveal
   handling, retaining ASYNC fee accounting and original token identity. Add
   focused rollback, malformed-evidence and fee/refund fuzz coverage.

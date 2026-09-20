@@ -97,7 +97,7 @@ library StreamClearingSaleExecution {
         }
         StreamNativeSettlementAdmission.requireAdmission(x.registry, p.floor);
         uint256 revealCap = x.revealCap;
-        StreamDutchSaleSupport.preflightReveal(p.captured.reveal.requestMode, revealCap);
+        StreamDutchSaleSupport.preflightReveal(p.captured.reveal, revealCap);
         result.purchaseId = _purchaseId(a.saleId, a.payer, a.purchaseNonce);
         result.chargedAmount = p.chargedPrice;
         result.floorRevenue = p.floor.sale.amount;
