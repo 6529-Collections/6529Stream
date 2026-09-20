@@ -79,3 +79,5 @@ export * from "./current-entropy-policy-succession.js";
 export * from "./current-entropy-policy-succession-workflow.js";
 export * from "./current-museum-anchor-master.js";
 export * from "./current-museum-anchor-master-workflow.js";
+export * from "./current-direct-conservation.js";
+export * from "./current-direct-conservation-workflow.js";

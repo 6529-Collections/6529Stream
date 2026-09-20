@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Original DIRECT sales and conservation history](docs/current-direct-conservation.md)
+  preserves native and ERC20 purchases, English auctions, original signing domains,
+  paid receipts and immutable floor evidence with exact Safe calls.
+
 - [Native Museum anchors, tiers and media masters](docs/current-museum-anchor-master.md)
   adds permanent governance bindings, durable tier reads and original master or
   Artist waiver publication/adoption with ordinary Safe calls and receipts.

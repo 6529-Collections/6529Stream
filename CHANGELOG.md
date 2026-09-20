@@ -120,6 +120,9 @@ the release policy in `docs/release-policy.md`.
   unsupported newest records as unresolved. Keep examination joins and complete
   acquisition packet requirements explicit.
 
+- Add original DIRECT sale and auction callers with separate payer consent,
+  typed paid receipts, immutable conservation history and Safe verification.
+
 - Add native Museum anchor, tier and media-master clients with original Artist
   waiver evidence, permanent governance bindings and Safe receipt verification.
 
