@@ -91,6 +91,22 @@ the missing-sale-consent case retries the identical signed buyer transaction.
 Successful purchases assert the original payment-before-mint token-zero floor
 receipt. Native execution of these four recipes remains pending.
 
+## Typed curated-purchase fixture
+
+The four `StreamCurrentCuratedPurchaseSettlementTest` recipes separately opt in
+through `NativeCuratedCommerceConservationFixture`. That helper retains the
+existing typed governance, Artist and entropy boundaries and explicitly adds a
+selected Metadata-writer boundary. It binds the actual floor to the actual Core
+and declares WAIVED before any mint. It does not establish actual Metadata
+class-7/8 authorization or Artist onboarding.
+
+Successful prepared purchases check their original token IDs in actual floor
+receipts. Duplicate content attempts preserve the prior receipt, and late
+delivery/authority failures roll back the first-sale receipt before the identical
+signed Safe transaction retries. The shared native-English fixture and the
+separate conservation acceptance suite retain their previous setup. Native
+execution and gas acceptance remain pending.
+
 ## Evidence and limits
 
 The Terminal/INSTANT source passed a 1,315-source ABI/type check before

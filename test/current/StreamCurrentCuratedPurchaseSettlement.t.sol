@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "./helpers/NativeCuratedSaleFixture.sol";
+import "../helpers/NativeCuratedCommerceConservationFixture.sol";
 
 /// @dev Late callback actor only. It checks actual Core ownership and recorder payment before acting.
 contract CuratedSettlementReceiver {
@@ -52,7 +52,12 @@ contract CuratedSettlementReceiver {
 
 /// @notice Actual current Core/Manager/Ledger/recorder, split wallet and Safe composition.
 /// @dev Inherited explicit Artist/entropy/governance boundaries remain; this is not full onboarding.
-contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture {
+contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedCommerceConservationFixture {
+    function setUp() public override {
+        super.setUp();
+        _enableNativeCommerceFloor();
+    }
+
     function _purchase(CuratedPlan memory p, address buyer, uint256 nonce)
         private
         view
@@ -176,6 +181,7 @@ contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture 
             }
         }
         require(originals == 1 && purchases == 1, "one original and one purchase record");
+        _assertNativeCommerceReceipt(e.settlementKey, e.tokenId);
     }
 
     function testOneImmutableManifestRecordsTwoPurchasesWithoutConsumingWholeSale() public {
@@ -231,6 +237,9 @@ contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture 
         vm.prank(payer);
         Curated.ExecutionRecord memory first =
             fixedSale.purchaseSelectedContent{ value: payment }(p.saleId, chosen);
+        _assertNativeCommerceReceipt(first.settlementKey, first.tokenId);
+        bytes32 floorReceiptHash =
+            nativeCommerceFloor.settlementReceipt(first.settlementKey).receiptHash;
         bytes32 receiptHash = keccak256(abi.encode(recorder.settlementResult(first.settlementKey)));
         chosen.purchaseNonce = 2;
         bytes memory data = abi.encodeCall(fixedSale.purchaseSelectedContent, (p.saleId, chosen));
@@ -258,6 +267,11 @@ contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture 
                 && wallet.balance == p.config.price
                 && recorder.totalOfficialSettled(address(0)) == p.config.price,
             "prior exact paid receipt retained"
+        );
+        require(
+            nativeCommerceFloor.settlementReceipt(first.settlementKey).receiptHash
+                == floorReceiptHash,
+            "prior exact floor receipt retained"
         );
     }
 
@@ -313,6 +327,7 @@ contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture 
                 "official funds/counters/replay rollback"
             );
             require(entropy.revealFeeEscrow(1) == 0, "funded fee also rolls back");
+            require(nativeCommerceFloor.firstSale(1).receiptHash == 0, "floor also rolls back");
             require(
                 NativeCuratedArtistBoundary(address(artists)).consent()
                     && manager.preparedNativeContentAdmission() == 0
@@ -328,6 +343,7 @@ contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture 
         );
         Curated.ExecutionRecord memory e = fixedSale.executionRecord(purchase);
         _assertCuratedExecution(p, 1, e);
+        _assertNativeCommerceReceipt(e.settlementKey, e.tokenId);
         require(
             buyer.nonce() == nonce + 1 && recipient.observed()
                 && core.ownerOf(e.tokenId) == address(recipient),
