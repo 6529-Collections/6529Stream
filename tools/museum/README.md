@@ -1,5 +1,12 @@
 # Museum offline tooling
 
+[Native accession and title V5 export](../../docs/museum-acquisition-title-v5.md)
+derives the selected legal instrument, complete captured Core transfers,
+supported title bindings and owner heads in a new validated packet. Its
+eleven-source join preserves both original packages and distinguishes the
+explicit historical accession choice from any canonical current selection.
+Legal title, institutional identity and complete source coverage remain unproved.
+
 [Historical preservation capture](../../docs/museum-historical-preservation-capture.md)
 retains native media-master revisions and original pre-sale simulation records.
 Its V5 join reconciles nine captures and compares saved release hashes with

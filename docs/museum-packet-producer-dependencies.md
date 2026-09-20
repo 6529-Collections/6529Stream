@@ -151,6 +151,17 @@ shared-interface decisions; the Museum lead owns offchain source, schema and
 assembly work. Root coordinates settlement ownership where a sale gate joins
 these components.
 
+## Native accession and title consumer
+
+The [native title V5 assembly](museum-acquisition-title-v5.md) uses existing
+public owner-catalog and Core ownership producers to derive a new packet's
+legal instrument, transfer history, supported title bindings and owner heads.
+It reconciles eleven captured sources and preserves both original packages.
+V5 already accepts the original native owner authority; no schema conversion
+to a numeric authority class or new producer is required. Global accession-host
+enumeration, canonical current selection, institutional identity and complete
+protocol event archival evidence remain separate gaps.
+
 ## Historical preservation consumer
 
 The [historical preservation capture](museum-historical-preservation-capture.md)

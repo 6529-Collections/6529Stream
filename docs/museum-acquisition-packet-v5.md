@@ -86,6 +86,13 @@ acquisition conformance.
 
 ## Commands
 
+The additive [native accession and title assembly](museum-acquisition-title-v5.md)
+replays the preservation packet and existing accession history, reconciles
+eleven sources, and exports a new V5 packet with native legal-instrument,
+transfer, title-binding and owner-head fields. It retains the original packet
+and every earlier report. Explicit original selection, legal title and
+institutional identity remain distinct from the native evidence.
+
 The additive [historical preservation assembly](museum-historical-preservation-capture.md)
 accepts the attribution-enriched packet and adds native master and pre-sale
 reference evidence. It preserves the original packet bytes and compares saved
