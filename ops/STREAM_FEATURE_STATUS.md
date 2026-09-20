@@ -30,8 +30,9 @@ root tests and exact fixture checks. Both new batches have independent source
 review; the native Museum demonstration needs refreshed contract products.
 ERC20 offer acceptance is 71 shared and 42 carrier checks across independently
 verified original/retry source unions; the original failures remain retained.
-The deployment-artifact fixture pilot is source-integrated with runtime/timing
-pending. Paid ERC20 burn is source-integrated as c717a3e1: 21 focused gate tests
+The deployment-artifact fixture pilot passes 40 tests and three 256-input fuzz
+properties; production artifacts and ordinary CREATE behavior are preserved.
+It reduces test-host size but has not established a compile speedup. Paid ERC20 burn is source-integrated as c717a3e1: 21 focused gate tests
 pass, eighteen current-stack cases await execution, and all four measured
 production products fit. The combined 2,108-source ABI/type/storage check passes.
 The populated native museum recipe is source-integrated as ace7eb95; its actual

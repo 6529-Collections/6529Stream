@@ -48,8 +48,12 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 - Test-only `5ae32cdf` replaces eleven inline production constructors in the
   shared sale fixture with the existing ordinary-CREATE artifact helper.
   Constructor inputs/order, actual contracts and assertions are preserved.
-  The 413-source ABI check passes; a matched-source 40-case runtime/timing pilot
-  is pending. Compact artifact metadata is not relabeled as full AST evidence.
+  The matched-source pilot passes all 40 cases and three 256-input fuzz
+  properties. Trace review authenticates all eleven artifact loads and ordinary
+  CREATE calls, with unchanged production artifacts. The test host shrank by
+  66.6%, but no compile speedup was established: the migration build took 934
+  seconds versus 899 for a different prior invalidation. Compact artifact
+  metadata is not relabeled as full AST evidence.
 - The dedicated ERC20 paid-burn batch is source-integrated as `c717a3e1` after
   independent review. All 21 focused gate tests pass; eighteen current-stack
   tests are authored and pending execution. Four selected production products

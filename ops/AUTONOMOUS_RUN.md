@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `12f6d341`: paid burn c717a3e1, Museum recipe ace7eb95 and burn/finality clients integrated; root150 Museum/463 client tests pass. Whole2,108-source ABI clean; focused burn21 accepted, current18 pending. Artifact-based fixture pilot runtime/timing pending. See the [20 September batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); immutable RC1 remains unchanged. |
+| Source checkpoint | `12f6d341`: paid burn c717a3e1, Museum recipe ace7eb95 and burn/finality clients integrated; root150 Museum/463 client tests pass. Whole2,108-source ABI clean; focused burn21 accepted, current18 pending. Artifact-based fixture pilot40 passes; no compile speedup established. See the [20 September batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); immutable RC1 remains unchanged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,11 +30,13 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 20 September
 
 Both payment retry captures are complete and independently verified. Testing
-owns the one warmed receipt-fixture artifact pilot; no duplicate broad compiler
-is needed. Paid burn source is integrated as c717a3e1, with 21 focused gate
+completed the warmed receipt-fixture artifact pilot: 40 tests pass, with no
+compile speedup established. It now verifies the prepared burn closure and
+prepares the agreed current/Safe/fuzz group without launching another compiler. Paid burn source is integrated as c717a3e1, with 21 focused gate
 tests passing and eighteen current-stack cases pending. Root's combined
 2,108-source ABI/type/storage check passes. Burn prepares the one current-stack
-successor after the fixture pilot; original capture inputs remain immutable.
+successor, now authorized after the passing fixture pilot; original capture
+inputs remain immutable.
 Clients finished offer calls and prefreeze/finality warnings; they now build
 ERC20 paid-burn callers and Safe plans from frozen batch38 ABI. Museum's
 populated six-source recipe is integrated, with 150 root tests and independent
