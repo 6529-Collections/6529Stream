@@ -28,6 +28,8 @@ observed runtime passes.
   the real Coordinator and enters ACTIVE through the original class-1 lifecycle
   action executed by the governor Safe. The inherited ASYNC service double is
   present during shared setup but receives no request or value in these flows.
+  The original zero-fee ASYNC bootstrap reveal policy permits sale registration;
+  subsequent explicit INSTANT configuration clears it before any mint.
 - Policy configuration and its separate freeze use actual Artist operation-17
   consent and executing governance actions. The provider change increments the
   inherited collection epoch. LOW_SECURITY and REQUIRED or NOT_REQUIRED are

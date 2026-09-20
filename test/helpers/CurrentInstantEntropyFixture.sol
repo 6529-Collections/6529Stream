@@ -154,9 +154,6 @@ abstract contract CurrentInstantEntropyFixture is StreamCurrentSafeGovernanceFix
         );
     }
 
-    // The collection is explicitly configured after real Artist onboarding.
-    function _configureInitialRevealPolicy() internal override { }
-
     function _deployAdditionalProducts() internal override {
         recorder = StreamPrimarySaleSettlement(
             payable(_artistArtifactCreate(
