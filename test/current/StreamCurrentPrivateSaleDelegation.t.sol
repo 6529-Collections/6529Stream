@@ -169,7 +169,7 @@ contract StreamCurrentPrivateSaleDelegationTest is StreamCurrentSecondaryInvento
         bytes memory read = abi.encodeCall(registry.moduleRecord, (address(inventory)));
         claimVm.mockCall(address(registry), read, abi.encode(wrong));
         uint256 nonce = inventory.nextSaleNonce();
-        Inventory.Config memory c = _inventoryConfig(0);
+        SecondaryInventory.Config memory c = _inventoryConfig(0);
         vm.expectRevert(abi.encodeWithSelector(Delegation.DelegationManifestMismatch.selector));
         inventory.registerInventory(c, ids);
         Private.SaleConfig memory privateConfig = Private.SaleConfig(
