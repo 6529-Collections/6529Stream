@@ -6,25 +6,42 @@ from unittest.mock import patch
 
 from . import native_scoped_policy_finality_wire_v2 as wire
 from . import public_scoped_policy_finality_source_v2 as source
-from .canonical import MuseumError, dumps, schema_id
+from .canonical import MuseumError, dumps, hex_bytes, keccak256, schema_id
 from .conservation_capture_join import COMMON
 from .scoped_policy_finality_fixture_provider_v2 import provider_evidence, install_provider_reads
 from .scoped_policy_finality_fixture_v2 import ScopedPolicyFinalityFixtureV2
 
 
-class _ProviderFixture(ScopedPolicyFinalityFixtureV2):
-    # This cohort exercises the constructor catalogue and actual binding reads;
-    # finality/action construction is independently tested by the full fixture.
-    def _complete_bundle(self, artist, adapters, originals):
-        pass
-
-
 class ProviderFixtureTests(unittest.TestCase):
     def fixture(self):
-        fixture = _ProviderFixture()
+        fixture = ScopedPolicyFinalityFixtureV2()
         x, g, factory = fixture.policy_context, fixture.policy_graph, fixture.scoped_policy_factory
         p = provider_evidence(x, g, factory, fixture=fixture)
         return fixture, x, g, factory, p
+
+    def test_completed_constructor_keeps_provider_pins_and_carriers_coherent(self):
+        # The provider catalogue is consumed after the real constructor has
+        # built finality and relocated carriers into its shared source map.
+        with patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')):
+            fixture = ScopedPolicyFinalityFixtureV2(scope_type=2, count=3)
+            bundle = fixture.policy_bundle
+            self.assertIn('finality', bundle)
+            self.assertIn('execution', bundle)
+            self.assertEqual(bundle['provider'], fixture.scoped_policy_provider)
+            carriers = (*bundle['membership']['parts'], *bundle['content']['manifest']['chunks'])
+            self.assertTrue(bundle['membership']['parts'])
+            self.assertTrue(bundle['content']['manifest']['chunks'])
+            for row in carriers:
+                runtime = hex_bytes(row['runtime'])
+                self.assertEqual(fixture.codes[row['pointer']], runtime)
+                self.assertEqual(keccak256(runtime), row['codeHash'])
+            observed = fixture.policy_source()
+            observed._bindings()
+            expected = deepcopy(bundle['provider'])
+            expected['configuration'].pop('selectedConfiguration')
+            self.assertEqual(observed.provider_evidence, expected)
+            for row in bundle['provider']['adapters']:
+                self.assertEqual(keccak256(fixture.codes[row['address']]), row['runtimeHash'])
 
     def test_original_catalogues_and_factory_selected_roles_stay_distinct(self):
         f, x, g, factory, p = self.fixture(); c = p['configuration']
