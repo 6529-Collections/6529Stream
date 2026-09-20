@@ -37,6 +37,76 @@ linked artifact and constructor-inclusive initcode against the chain's limits.
 It continues to check the saved graph, runtime pins and original configuration
 metadata. Every owner plan reads the target's actual current owner.
 
+## Runnable script and interrupted deployment
+
+[DeployCanonicalNativeSales](../../script/current/DeployCanonicalNativeSales.s.sol)
+exposes `run(StreamCanonicalNativeSalesDeployment.Configuration)`. It uses the
+same exact three constructors, dependencies, manifests, read budgets and initial
+ownership handoff as the construction library. It accepts only Anvil chain
+`31337` or Sepolia `11155111`. `STREAM_DEPLOYER` is a public, nonzero sender
+address. Provide Foundry's signer independently through the existing signer
+workflow; the script never reads a private key, seed, keystore password or RPC
+credential. It supplies no default gas settings, funding, registrations or
+governance grants.
+
+ABI-encode the complete `run(Configuration)` call using this script's compiled
+ABI and the reviewed typed configuration. Preserve that exact calldata with the
+compiler input, linked artifacts and intended sender before simulation. Supply
+the raw calldata to Foundry's `--sig` argument. For example, with the public
+sender, reviewed calldata file and intended RPC already supplied:
+
+```powershell
+$env:FOUNDRY_PROFILE = 'current'
+$runCalldata = (Get-Content -Raw -Encoding UTF8 $reviewedCalldataPath).Trim()
+forge script script/current/DeployCanonicalNativeSales.s.sol:DeployCanonicalNativeSales --sig $runCalldata --via-ir --build-info --isolate --skip test --rpc-url $targetRpc --sender $env:STREAM_DEPLOYER
+```
+
+This command simulates; it does not include `--broadcast`. The wrapper is a
+Foundry script, not an onchain factory to deploy as a protocol product. Each
+actual product and linked library still needs its own genuine runtime and
+constructor-inclusive creation-size validation, and every eventual transaction
+needs a checked gas limit. The profile's large local harness limits are not
+production contract or transaction allowances. This source batch did not run
+that simulation or broadcast a transaction.
+
+An eventual broadcast contains three CREATE transactions followed by three
+ownership transfers, plus any linked-library deployment transactions. Those
+transactions are not atomic as a group. If execution stops early, confirmed
+products and transfers remain onchain. A product whose transfer has not confirmed
+is still owned by the original deployer. Capture transaction hashes, receipts,
+nonces, product addresses, runtime hashes and each actual owner, even if `run`
+did not return a complete `Products` value.
+
+Keep the original Foundry broadcast journal, source commit, compiler outputs,
+linked library addresses, exact configuration/calldata, chain, sender and
+independent signer. Reconcile its confirmed and pending transactions before
+using Foundry's `--resume` route for that same attempt. Resume skips script
+simulation and expects the original pending sender nonce; it does not rerun
+current-state validation. Keep unrelated transactions off that sender's nonce
+sequence. If a receipt, nonce, dependency or ownership state conflicts, stop
+and reconcile the original attempt instead of starting a fresh `run` or
+reconstructing an assumed journal. A fresh run creates different products.
+
+After construction completes, assemble `ActivationPlan.Context` from the saved
+configuration and confirmed `Products`. `verifyConstruction` rechecks the
+construction inventory and returns its hash; because legitimate later owner
+transfers are allowed, it does not prove all initial handoffs completed. Read
+back each owner independently. The typed read-only entrypoints are:
+
+| Script entry | Existing planner result |
+| --- | --- |
+| `pendingRegistrations`, `prepareAdmission` | Exact remaining registrations and catalog intents |
+| `prepareCatalogAdditions` | Compatible additions against retained catalog history |
+| `prepareRecorderCredit`, `verifySettlementReady` | Existing Recorder admission and escrow credit |
+| `preparePhase`, `preparePhaseExecutor` | Prospective Artist policy hash and actual owner call |
+| `prepareSigner` | Collection signer configuration for the chosen companion |
+| `prepareImmediate`, `prepareClaim`, `prepareDutch` | Exact typed sale-registration owner call |
+| `verifyOwnerCall`, `prepareGoverned` | Saved-state comparison and Executor-only batch wrapping |
+
+These methods also reject other chains. They do not read environment variables,
+start broadcasts, sign, schedule or execute the returned calls. The staged
+consent, Safe/Executor routing and readback requirements below remain unchanged.
+
 ## Observe each stage before planning its successor
 
 1. **Catalog authority.** Compare `policies(context)` with the verified retained

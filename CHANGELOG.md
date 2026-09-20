@@ -12,6 +12,16 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Runnable canonical native companion entrypoint
+
+- Add an Anvil/Sepolia script calling the existing typed construction planner
+  for canonical fixed/open, claim/PWYW and Dutch companions. Read only a public
+  deployer address and keep the Foundry signer independent.
+- Expose typed read-only activation planning, retain actual Safe/Executor owner
+  routing, and document separate CREATE/handoff receipts and original-journal
+  recovery. Add source-focused entrypoint cases; simulation and broadcast
+  acceptance remain pending.
+
 ## Current record selectors after Artist succession
 
 - Resolve the authenticated current Artist through the existing complete

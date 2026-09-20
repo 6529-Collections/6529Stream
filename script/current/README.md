@@ -468,6 +468,22 @@ pwsh -NoProfile -File scripts/test_current_stack_launch_status.ps1
 ```
 
 
+## Canonical native companion entrypoint
+
+`DeployCanonicalNativeSales.s.sol` adds the canonical fixed/open, claim/PWYW and
+Dutch products against an existing Recorder. Its typed configuration requires
+explicit constructor gas settings, manifests and read budgets. It reads only the
+public `STREAM_DEPLOYER` address; supply the Foundry signer independently.
+Construction and all read-only activation entrypoints permit Anvil or Sepolia.
+
+Follow the [companion deployment guide](../../docs/integrations/canonical-native-sales-deployment.md#runnable-script-and-interrupted-deployment)
+for exact calldata, separate CREATE/ownership transactions, original-journal
+resumption and actual Safe-owner versus Executor routing. This entrypoint does
+not extend the original 37-role inventory or execute activation merely by
+preparing its calldata. Its source-focused cases are in
+`test/current/StreamCanonicalNativeSalesEntrypoint.t.sol`; runtime/script
+simulation and transaction-capacity evidence remain separate.
+
 ## Separate Artist extension deployments
 
 The new Artist constructor candidate predeploys the facade and Identity children
