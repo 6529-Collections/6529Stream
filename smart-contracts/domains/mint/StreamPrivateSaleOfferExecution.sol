@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamPrivateSaleAccounting.sol";
 import "./StreamPrivateSaleCustody.sol";
+import "./StreamPrivateSaleOfferDelegation.sol";
 import { StreamNativeAuctionDelegation as D } from "../auctions/StreamNativeAuctionDelegation.sol";
 import {
     IStreamGasParameterHost
@@ -146,7 +147,7 @@ library StreamPrivateSaleOfferExecution {
             q.ownerSignature,
             signatureGas
         );
-        if (delegated) _delegation(x.delegation, q);
+        if (delegated) _delegation(x, q);
         _settle(money, salePaused, x, sale, id, authDigest, q, delegated);
         emit OfferAccepted(1, id, sale.config.buyer, buyerDigest, sale.config.price, address(0));
     }
@@ -170,19 +171,21 @@ library StreamPrivateSaleOfferExecution {
                 || offer.deadline > config.deadline || offer.finalizeBy != 0
                 || digest != config.offerDigest
         ) revert P.InvalidPrivateSale();
-        _delegation(x.delegation, q);
+        _delegation(x, q);
         if (!StreamPrivateSaleSupport.validSignature(
                 q.buyerProof.authorizer, q.buyerProof.kind, digest, q.buyerProof.signature, cap
             )) {
             revert P.PrivateSaleAuthorityInvalid(q.buyerProof.authorizer);
         }
-        _delegation(x.delegation, q);
+        _delegation(x, q);
     }
 
-    function _delegation(D.Configuration memory c, Request memory q) private view {
+    function _delegation(Runtime memory x, Request memory q) private view {
         uint256 cap = _gas(D.GAS_PARAMETER);
-        D.requireManifest(c, cap);
-        D.requireDelegated(c, q.offer.buyer, q.buyerProof.authorizer, q.witness, cap);
+        StreamPrivateSaleOfferDelegation.requireRetained(
+            x.context, x.delegation, q.authorization.saleId, cap
+        );
+        D.requireDelegated(x.delegation, q.offer.buyer, q.buyerProof.authorizer, q.witness, cap);
     }
 
     function _settle(
@@ -213,14 +216,14 @@ library StreamPrivateSaleOfferExecution {
         sale.nftClaim = 1;
         StreamPrivateSaleAccounting.settleRoyalty(money, context, sale, id, royaltyGas);
         _admit(salePaused, context, sale);
-        if (delegated) _delegation(x.delegation, q);
+        if (delegated) _delegation(x, q);
         bool deliveredNft = StreamPrivateSaleSupport.deliverNft(
             context, sale.config.tokenId, sale.config.buyer, nftGas
         );
         if (deliveredNft) sale.nftClaim = 0;
         emit PrivateSaleNftDelivery(1, id, sale.config.tokenId, sale.config.buyer, deliveredNft);
         _admit(salePaused, context, sale);
-        if (delegated) _delegation(x.delegation, q);
+        if (delegated) _delegation(x, q);
         if (address(this).balance != money.totalLiabilities + oldSurplus) {
             revert P.PrivateSaleBalanceMismatch();
         }

@@ -169,8 +169,9 @@ creation-time and revision checks remain required. The original full live grant
 row is checked after the manifest, including identity, scope, index, validity
 times, all-token flag and token ID. New registration and other generic manifest
 callers remain ACTIVE-only. Direct payer plus direct buyer signer keeps its
-existing delegation bypass. Earned refunds, saved native-auction delivery and
-secondary custody-offer admission are unchanged.
+existing delegation bypass. This primary helper leaves earned refunds, saved
+native-auction delivery and the separate secondary admission described below
+unchanged.
 
 Manifest failures at the new shared boundary use `DelegationManifestMismatch`,
 `DelegationReadFailed`, `DelegationReadMalformed` or `DelegationReadGas`; typed
@@ -192,6 +193,45 @@ An approved ERC20 offer or PaymentIntent is not pre-funded custody: its original
 Recorder funding callback still follows candidate validation. Native offer funds
 arrive during acceptance. The new linked helper and tests have source/type
 validation; native execution, codegen size and gas evidence remain pending.
+
+### Retained secondary-offer buyer signatures
+
+Delegated secondary-offer execution uses a distinct stateless linked helper,
+`StreamPrivateSaleOfferDelegation`. The actual private-sale host reads its
+original sale's exact two-word custody lifecycle. Nonzero canonical creation
+time and revision are mandatory: the original admission helper's zero-value
+new-registration sentinel cannot stand in for a retained sale. The helper then
+reuses the unchanged `PRIVATE_SALE_ADAPTER` / native-consignment admission,
+including the original Core pointer, registry/code pins, module interface and
+strict creation-time and revision predicates for DEPRECATED records. Prepared
+native and fixed-price primary roles cannot authorize this secondary path.
+
+Only after that retained admission does the governed, bounded compact manifest
+read accept ACTIVE or eligible DEPRECATED status. The declaration names the
+actual custody adapter and original chain, Core, NFTDelegation provider/code,
+use case and base manifest. Original registration remains ACTIVE-only. All five
+existing live buyer-signer grant checkpoints remain, including those after
+signature checks, custody, royalty delivery and NFT delivery. An incident,
+changed declaration or invalid grant still refuses the transaction atomically.
+
+The buyer remains the executor and native payer. NFTDelegation changes only
+the buyer's signer; it does not grant permission to execute or pay for the buyer.
+The owner must separately authorize the original token and offer custody grant.
+At acceptance the sale is still registered and the owner still holds the NFT;
+custody and payment happen atomically during that transaction. A prior offer
+registration is not funded or NFT custody. Seller, buyer and custody-grant
+replay stores, current royalty settlement, pull proceeds, buyer excess credit
+and original NFT receipt behavior retain their existing boundaries.
+
+Current-stack regressions acquire the resale token through a real primary
+auction and verify its original Recorder/floor evidence survives secondary
+settlement unchanged. Separate typed tests exercise malformed self-lifecycle
+reads and wrong primary roles without claiming a current deployment. Grant
+repair consumes the buyer Safe nonce, so its next acceptance uses a fresh outer
+Safe envelope with the original commercial proofs. Independent Governor status
+repair can retry the exact buyer envelope. Earned claims retain their existing
+status-independent behavior. Native execution, codegen size and gas validation
+for the new secondary helper remain pending.
 
 ## Funding phase and rollback
 

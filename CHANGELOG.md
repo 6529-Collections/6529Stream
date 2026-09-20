@@ -1,5 +1,16 @@
 # Changelog
 
+## Retained secondary-offer delegation
+
+- Bind delegated secondary-offer buyer signatures to the original private
+  consignment lifecycle and compact NFTDelegation declaration, allowing eligible
+  original offers to close after the adapter is deprecated.
+- Keep the buyer as executor and payer, the owner's independent custody grant,
+  ACTIVE-only new registration, live grant rechecks and earned claims unchanged.
+- Add actual-current Safe flows and typed boundary regressions for retirement,
+  authority repair, original custody and accounting. Native execution, linked
+  library size and gas validation remain pending.
+
 ## Retained primary-offer delegation
 
 - Bind delegated native and ERC20 primary-offer execution to each original
