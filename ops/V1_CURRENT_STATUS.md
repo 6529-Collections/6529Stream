@@ -29,14 +29,19 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   cases pass with actual Core/Ledger/fallback and typed surrounding boundaries.
   Nine current-contract Safe recipes, including stale-supply and late manifest
   rollback cases (`a575d215`), are authored and await joined execution.
+  The current acceptance map (`262cc158`) adds six genuine Artist/ticket/Safe
+  cases and an ordinary-profile settlement rollback/retry. Four remaining
+  mint-entrypoint families still use typed Artist boundaries and are assigned.
+  A later source review corrects the PROFILE test call-count oracle to include
+  its final escrow flush; production is unchanged and native remains pending.
 - Core incident abort preserves consumed token IDs and collection serials.
   Fourteen focused actual-Core cases pass, including fuzzing and capped supply.
   Gap-aware inventory and four finality/preservation readers are integrated
-  through `5f233476`. The inventory has 18 focused passes. Consumer execution found fixture setup
-  omissions; reviewed test-only corrections74f91719 are in a cached retry.
-  Scope/entropy consumers now pass 44 cases including two 256-input fuzz
-  properties; five preservation bodies remain blocked by fixture setup.
-  No complete consumer pass is claimed. Root passes all 63 affected offchain reference/snapshot tests.
+  through `5f233476`. The inventory has 18 focused passes. Reviewed fixture
+  corrections (`74f91719`, `235387fa`) close the setup failures: 44 scope/entropy
+  and five preservation cases pass on their recorded source closures, including
+  two 256-input fuzz properties. The unchanged Router size blocker remains.
+  Root passes all 63 affected offchain reference/snapshot tests.
   These captures exclude later entropy changes unless explicitly recorded.
 - Frozen entropy successor policies and the configured ordinary backup are
   source-integrated as `cf57de5e`, independently reviewed. Eleven focused
@@ -61,6 +66,11 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   readback are not actual joined Safe execution. The later gap-aware inventory
   clients (`613d3750`) pass all 558 root package tests, generation/build/types;
   their exact serial lookup, bounded scans and receipt checks retain that scope.
+  Fallback lifecycle and recovery callers (`8de82694`) pass all 594 root package
+  tests, generation/build/strict types and both exact frozen ABI fixture checks.
+  Clone-factory callers (`22913693`) then pass all 627 root package checks
+  and their exact retained ABI fixture. These are client and simulated-RPC
+  results; joined Safe execution is pending.
 - Publication header/single-decode transport (`23e45d78`) passes three focused
   parity cases, including 256 fuzz inputs; all three selected products fit.
   Independent source review is clear. Further payload/environment transport
@@ -70,7 +80,10 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   256-input parity fuzzing. The original 1,048/102-row environment prepares at
   13,936,415 gas including intrinsic; prepared-read callee cost is 7,749,281.
   These are minimal guarded-host/worker/Store measurements. The real publisher
-  successor is being prepared; complete publication capacity is still open.
+  successor compiles with all 12 selected products within size limits. Its
+  first run exhausted the aggregate one-billion-gas test setup before any test
+  body; a cached retry increases only that harness allowance. Explicit per-call
+  transaction limits remain unchanged. Complete publication capacity is open.
 - Six genuine missing genesis products are composed in `a960a5b1`, with five
   actual-current/Safe tests authored. Remaining role composition includes the
   final role assembly and activation. The narrow
@@ -79,23 +92,37 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   The new full-byte preservation producer is integrated as `09fd273d`: nine
   focused cases pass, including 256-input fuzz, full 24,576-byte/three-chunk
   reconstruction and threshold Safe, with typed surrounding boundaries.
-  All 35 captured production products fit. MetadataV1 still supports 8,192
-  against the specified 24,576; its capacity repair remains assigned.
-  Source composition alone does not close all 37 genesis roles.
+  All 35 captured production products fit. MetadataV1 now retains complete
+  24,576-byte records (`a7c984bf`), preserving old small-record bytes, pointers,
+  ABI entries and storage roots. All 23 focused cases pass, including two
+  256-input properties; all 34 captured production products fit. Five actual
+  Artist publication cases are authored and await native execution. This does
+  not lift the separate native Artist statement bound.
+  Record-product composition (`6292287b`) joins the genuine preservation and
+  general hosts to the original Artist/Metadata/Store/Executor, with eight
+  current/Safe cases authored. Full 37-role activation remains outstanding.
 - General attestations, native Artist evidence and typed identity notarization
   are integrated as `9677f5bf`. Root passes 86 affected checks (63 functional
   and 23 documentation); fixture semantics and offline reconstruction do not
   establish actual institutional facts. The exact accepted-profile 15-case
-  native run passes all 15 cases; source/size attestation is being recorded.
+  native run passes all 15 cases, with 63 exact source files and verified
+  compiler/artifact bindings. The host runtime is 21,650 bytes; all captured
+  production products fit. These tests retain synthetic dependency boundaries.
   Provisional no-IR codegen remains separate from accepted-profile evidence.
-  This host also has an 8,192-byte payload bound with full 24,576 support queued.
+  The successor (`2e0c3443`) now supports complete 24,576-byte general
+  claims with ordered chunks and explicit V2 Museum replay; root passes 64
+  affected reader/dossier/Linked Art checks. Its own frozen 66-source native
+  cohort passes all 25 cases with a 23,179-byte host runtime; final artifact
+  inventory is being recorded. This is separate from the preceding 15-case
+  capture. Native Artist statements and typed notarizations retain separate
+  8,192-byte bounds; complete current-graph and gas acceptance remain open.
 - Original STATIC renderer/companion/registry composition is integrated as
   `8d1672ac`, independently source-reviewed. Six current/Safe cases are authored;
   fixture analysis and partial direct read rosters are explicitly synthetic.
   Complete transitive analysis, goldens and joined runtime remain required.
 
-The latest complete-source ABI/type/storage pass at `5066ef97` covers 2,159
-sources in 18.625 seconds with no errors. It does not generate bytecode or
+The latest complete-source ABI/type/storage pass at `2e0c3443` covers 2,168
+sources in 19.953 seconds with no errors. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different

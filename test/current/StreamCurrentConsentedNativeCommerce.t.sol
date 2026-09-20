@@ -345,7 +345,8 @@ contract StreamCurrentConsentedNativeCommerceTest is
             bytes(""),
             abi.encodeWithSignature("Error(string)", "injected deposit failure")
         );
-        fault.expectCall(wallet, PRICE, bytes(""), 2);
+        // Failed settlement, escrowed retry, then the successful escrow flush.
+        fault.expectCall(wallet, PRICE, bytes(""), 3);
         fault.expectCall(
             address(revenueEscrow),
             PRICE,

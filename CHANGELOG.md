@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Retain complete 24,576-byte Metadata records through ordered immutable chunks,
+  preserving original small-record bytes, signatures, pointers and storage roots.
+- Compose the full-byte preservation and general attestation products with the
+  original Artist/Metadata graph and explicit current Safe test recipes.
+
 - Add full-byte preservation records with original family authority, immutable
   record history and enumerable ordered chunk retention up to24,576 bytes.
 - Compose original STATIC renderer products with explicit retained-document

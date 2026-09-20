@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `5066ef97`: clone wallets, incident-gap consumers, entropy and mint fallbacks, six genesis products, staged inventory clients and publication transport are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
+| Source checkpoint | `2e0c3443`: clone wallets, incident-gap consumers, entropy and mint fallbacks, full-byte records, current mint/Safe recipes, record-product composition and client fallback workflows are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,32 +30,39 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 20 September
 
 - Root owns shared architecture, integration and final candidate delivery.
-  All 2,159 sources pass the ABI/type/storage check at `5066ef97`; complete
+  All 2,168 sources pass the ABI/type/storage check at `2e0c3443`; complete
   native acceptance remains separate from focused and historical evidence.
 - The protocol lead is implementing C2PA credential/key-history reconciliation
   in an isolated Artist branch. Actual launch-budget entropy registration,
   receiver rollback and low-budget rejection pass three cases. The observed
   hook cost is 131,789 gas; final EC-REGGAS floor calibration remains required.
-- The revenue lead completed clone wallets and full-byte preservation records,
-  with 84 and nine scoped passes respectively. It now extends MetadataV1 to
-  the specified 24,576-byte payload capacity while preserving old pointers.
+- The revenue lead completed clone wallets, preservation records and
+  MetadataV1 capacity, with 84, nine and 23 scoped passes respectively. It now
+  implements delegated Artist policy/sale consent (ART42), preserving original
+  signing domains and the permanent effect of already-recorded exact consents.
 - The metadata lead completed staged inventories, publication transport and
   exact environment preparation (`5066ef97`). It owns the frozen actual
   publisher capacity run and then remaining noncollection preservation scopes.
 - The mint task completed 13 focused recovery cases and nine authored current
-  Safe recipes. It now checks mint-entrypoint coverage and current-fixture
-  readiness with Testing; it owns no duplicate deployment or client work.
-- The burn task has Core14, Inventory18 and 44 scope/entropy consumer passes
-  on recorded sources. Five preservation cases are in a corrected fixture
-  retry (`235387fa`); the original Router size blocker remains separate.
+  Safe recipes. Six actual Artist ticket cases and ordinary-profile rollback
+  are integrated in `262cc158`; runtime is pending. It now replaces typed Artist
+  boundaries in the remaining curated/content/native and ERC20 offer joins.
+- The burn task has 14 Core, 18 inventory and 49 finality/preservation
+  consumer passes across recorded source closures. The original Router size
+  blocker remains. It now implements missing ART25 recovery histories after
+  confirming that the alleged owed-export gap already has a client producer.
 - The Museum task delivered general/native Artist/notarization records and
   offline dossiers (`9677f5bf`), passing 86 root checks. Its accepted-profile
-  15-case native cohort passes; final source/size attestation is being recorded.
-  General payload capacity still needs its separate 24,576-byte extension.
-- The client task completed gap-aware inventory with 558 root package passes,
-  then builds fallback, clone and staged environment caller workflows.
-- The testing task composes the genuine role27/28 records, fallback and clone
-  products into the full 37-role candidate. STATIC composition (`8d1672ac`)
+  15-case native cohort passes with exact source/artifact evidence recorded.
+  General capacity is now source-integrated (`2e0c3443`), with 64 affected
+  root replay checks and 25 passes from its own frozen native successor. Museum now
+  builds the complete 29-name genesis schema catalog and worked examples.
+- The client task completed fallback and clone workflows, with 627 root
+  package passes and all three frozen ABI checks. Staged-environment callers
+  are next; no duplicate owed-export implementation is needed.
+- The testing task composed genuine role27/28 records (`6292287b`) with
+  eight current/Safe cases authored. It now assembles the full 37-role candidate
+  with genuine clone and fallback products. STATIC composition (`8d1672ac`)
   adds six authored current/Safe cases; the narrow legacy-admin compatibility
   adapter (`0125573d`) remains distinct from the full-byte preservation host.
 
