@@ -1847,8 +1847,8 @@ Actual pre-notice class1 cause/dismissal pairs must terminate at the exact pair
 recorded in living35. Each pair uses its own executed ancestor and incumbent;
 first closures, independent intermediate closures and abandoned pending staging
 predecessors remain separately authenticated. No cause or resolution is cleared
-or synthesized. Dismissed prior-status2 contests during an active notice remain
-outside this bounded profile.
+or synthesized. Dismissed prior-status2 contests during an active notice use
+the additional historical proof below.
 
 Context and preparation consume the same new tagged proof. Earlier zero/32
 first-dormancy and ordinary living/estate context bytes remain unchanged. Direct43
@@ -1859,3 +1859,30 @@ operation35 mutation, acceptance/replay, election or typed receipt producer chan
 Class4/steward-to-living and expanded hydration are excluded. The source scenarios
 and validation limits are in the [caller guide](../guides/artist-dormancy-recovery.md);
 native, current-stack, linked size and capacity acceptance remain pending.
+
+### Dismissed challenges during the original dormancy notice
+
+AA-DORMANCY requirement2 requires dismissal to restore the active notice and its
+original deadline. After designated43 completes, recovery authenticates the actual
+contiguous prior-status2 cause/dismissal history under a separate read proof.
+Each canonical operation33 and dismissal retains its original class1 incumbent,
+executed predecessor, evidence, chronology and saved links. The fixed owner's
+existing cause-to-notice getter must name the exact original notice, completed
+phase3 and original43 terminal. The resulting pre-notice pair feeds the earlier
+ancestry proof; the original pre43 pair still anchors later class3 closures.
+
+A notice-era first closure is distinguished by its authenticated cause membership,
+including when initiation, contest and dismissal share a timestamp. That closure
+is proved as a later event, while the preceding execution's maturity at initiation
+is proved separately. Historical subjects marked by an actual notice contest use
+that exact original contest as evidence for the later marker; their own earlier
+rotation boundaries must still have matured. This does not forgive unresolved
+early contests or invent a closure. Multiple notice dismissals preserve the first
+closure and original deadline, including episodes after the deadline but before
+completion. Cancellation cannot satisfy the completed-notice join.
+
+Empty notice history preserves prior context bytes. Owner API/storage, original
+notice/completion/contest/dismissal/recovery domains, live authority checks,
+status mutation, acceptance/replay, elections and typed receipt producers remain
+unchanged. Source scenarios are in the [caller guide](../guides/artist-dormancy-recovery.md).
+Native and complete current-stack acceptance remain separately pending.

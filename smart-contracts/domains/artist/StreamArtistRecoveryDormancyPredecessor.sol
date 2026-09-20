@@ -178,7 +178,7 @@ library StreamArtistRecoveryDormancyPredecessor {
                 boundary.cause,
                 boundary.resolution
             );
-        if (boundary.proof == 0) {
+        if (recovery.latest[p.artistId] == 0) {
             _previous(recovery, rotations, e, f);
         } else {
             f.previous = recovery.vestingHistory.snapshots[f.vesting.previousTransitionRecordHash];
@@ -254,7 +254,9 @@ library StreamArtistRecoveryDormancyPredecessor {
         if (boundary.proof != 0) {
             proof = keccak256(
                 abi.encode(
-                    keccak256("6529STREAM_ARTIST_RECOVERED_LIVING_DORMANCY_FACTS_V1"),
+                    recovery.latest[p.artistId] == 0
+                        ? keccak256("6529STREAM_ARTIST_RESOLVED_NOTICE_DORMANCY_FACTS_V1")
+                        : keccak256("6529STREAM_ARTIST_RECOVERED_LIVING_DORMANCY_FACTS_V1"),
                     proof,
                     boundary.proof
                 )

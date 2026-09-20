@@ -12,6 +12,9 @@ import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistLivingRecoveryReads as Living } from "./StreamArtistLivingRecoveryReads.sol";
 import { StreamArtistLivingDormancyReads as Ancestry } from "./StreamArtistLivingDormancyReads.sol";
 import {
+    StreamArtistDormancyNoticeHistory as NoticeHistory
+} from "./StreamArtistDormancyNoticeHistory.sol";
+import {
     StreamArtistRecoveryRotationClosure as Closed
 } from "./StreamArtistRecoveryRotationClosure.sol";
 import {
@@ -51,17 +54,50 @@ library StreamArtistLivingDormancyBoundary {
         D.Cause memory current
     ) public view returns (Facts memory f) {
         bytes32 latest = recovery.latest[origin.artistId];
-        if (latest == 0) return f;
+        D.Cause memory first = _first(resolutions, e, terminal, current);
+        NoticeHistory.Facts memory noticeHistory = NoticeHistory.read(
+            resolutions,
+            e,
+            notice,
+            terminal,
+            origin,
+            first.facts.previousCauseHash,
+            first.facts.previousResolutionHash
+        );
+        if (latest == 0) {
+            // Retain the original zero/rotation-only boundary when there was no notice episode.
+            if (noticeHistory.proof == 0) return f;
+            if (
+                noticeHistory.previousCause != 0 || noticeHistory.previousResolution != 0
+                    || (origin.previousTransitionRecordHash != 0 && noticeHistory.closureProof == 0)
+            ) {
+                revert I.UnsupportedIdentityRecoveryProfile(origin.artistId);
+            }
+            return Facts(
+                noticeHistory.proof,
+                first.facts.previousCauseHash,
+                first.facts.previousResolutionHash
+            );
+        }
         (Living.Facts memory living, bytes32 ancestry) = Ancestry.beforeDormancy(
             address(this), e.registry, e.chainId, notice, terminal, origin, latest
         );
         if (ancestry == 0) revert I.UnsupportedIdentityRecoveryProfile(origin.artistId);
-        D.Cause memory first = _first(resolutions, e, terminal, current);
-        f.cause = first.facts.previousCauseHash;
-        f.resolution = first.facts.previousResolutionHash;
+        f.cause = noticeHistory.previousCause;
+        f.resolution = noticeHistory.previousResolution;
         bytes32 episodes = _episodes(recovery, rotations, resolutions, e, notice, origin, living, f);
-        bytes32 closures =
-            _closures(recovery, rotations, resolutions, e, notice, origin, living, f.resolution);
+        bytes32 closures = _closures(
+            recovery,
+            rotations,
+            resolutions,
+            e,
+            notice,
+            origin,
+            living,
+            f.resolution,
+            noticeHistory,
+            first.facts.previousCauseHash
+        );
         f.proof = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_LIVING_DORMANCY_BOUNDARY_V1"),
@@ -72,6 +108,19 @@ library StreamArtistLivingDormancyBoundary {
                 f.resolution
             )
         );
+        if (noticeHistory.proof != 0) {
+            f.cause = first.facts.previousCauseHash;
+            f.resolution = first.facts.previousResolutionHash;
+            f.proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RESOLVED_NOTICE_LIVING_BOUNDARY_V1"),
+                    f.proof,
+                    noticeHistory.proof,
+                    f.cause,
+                    f.resolution
+                )
+            );
+        }
     }
 
     function _first(
@@ -110,7 +159,9 @@ library StreamArtistLivingDormancyBoundary {
         Dorm.Notice memory notice,
         V.Snapshot memory origin,
         Living.Facts memory living,
-        bytes32 boundaryResolution
+        bytes32 boundaryResolution,
+        NoticeHistory.Facts memory noticeHistory,
+        bytes32 noticeEntryCause
     ) private view returns (bytes32 proof) {
         bytes32 cursor = origin.previousTransitionRecordHash;
         uint64 nextAt = notice.initiatedAt;
@@ -120,9 +171,34 @@ library StreamArtistLivingDormancyBoundary {
             R.TransitionState memory t = cursor == living.record.recordHash
                 ? recovery.transitions[cursor]
                 : rotations.rotations[cursor].transition;
-            bytes32 closure =
-                Closed.beforeNext(rotations, resolutions, e, t, v.newAddress, nextAt, 1);
-            if (closure != 0) {
+            bytes32 closure;
+            bool closedDuringNotice =
+                cursor == origin.previousTransitionRecordHash && noticeHistory.closureProof != 0;
+            if (closedDuringNotice) {
+                // This original closure was created during the notice. The historical reader
+                // independently proves that the execution was already mature at initiation.
+                closure = noticeHistory.closureProof;
+            } else if (
+                noticeHistory.proof != 0 && resolutions.closures[cursor].dismissalRecordHash == 0
+                    && t.contestedAt >= notice.initiatedAt
+            ) {
+                // An actual notice contest can name an older historical subject. Its later
+                // marker must not be treated as an unresolved contest at an earlier32 stage.
+                bytes32 subject = NoticeHistory.lateSubject(
+                    resolutions, noticeEntryCause, cursor, t.contestedAt
+                );
+                if (subject == 0 || t.executedAt > nextAt || t.postWindowEndsAt > nextAt) {
+                    revert I.UnsupportedIdentityRecoveryProfile(origin.artistId);
+                }
+                closure = keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_NOTICE_LATE_SUBJECT_V1"), t, subject, nextAt
+                    )
+                );
+            } else {
+                closure = Closed.beforeNext(rotations, resolutions, e, t, v.newAddress, nextAt, 1);
+            }
+            if (!closedDuringNotice && resolutions.closures[cursor].dismissalRecordHash != 0) {
                 bytes32 selected = boundaryResolution;
                 bytes32 first = resolutions.closures[cursor].dismissalRecordHash;
                 // _episodes already authenticated every selected link. Each original closure
@@ -141,7 +217,9 @@ library StreamArtistLivingDormancyBoundary {
                 pendingProof = Closed.pendingBeforeNext(
                     rotations, resolutions, e, t, stagedPrevious, v.newAddress, nextAt, 1
                 );
-                if (closure == 0) revert I.UnsupportedIdentityRecoveryProfile(origin.artistId);
+                if (resolutions.closures[cursor].dismissalRecordHash == 0 || closedDuringNotice) {
+                    revert I.UnsupportedIdentityRecoveryProfile(origin.artistId);
+                }
             }
             proof = keccak256(abi.encode(proof, cursor, closure, pendingProof));
             if (cursor == living.record.recordHash) return proof;

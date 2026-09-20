@@ -333,8 +333,8 @@ dismissals intervene. Any pre-notice class1 dismissals must link back to the
 exact pair saved in living35. Each episode joins its own executed ancestor and
 original incumbent, first closure, actual dismissal and compromise or pending
 standing veto. Independent intermediate and pending closures remain bound.
-Early unresolved contests cannot become valid merely by waiting. Contests and
-dismissals during an active notice (prior status2) remain unsupported here.
+Early unresolved contests cannot become valid merely by waiting. Contests
+dismissed during the active notice use the additional historical proof below.
 
 Only this new history adds the living-dormancy proof wrapper. Earlier zero/32
 first-dormancy contexts and ordinary living/estate recovery contexts retain
@@ -351,6 +351,40 @@ closed living35 and independent later closures, adjudication/election, retained
 veto, repeated class3 recovery, corrupted history refusal/restoration and atomic
 Archive retry. Source review and ABI/type checks are distinct from native,
 complete current-stack, linked size and transaction-capacity acceptance.
+
+## Contests dismissed during the original notice
+
+AA-DORMANCY requirement2 permits a challenge during the active notice and a
+dismissal that restores status2 with the original notice deadline. The recovery
+reader now authenticates those admitted episodes after completion43, including
+zero execution, a living rotation, or a prior living recovery. It does not replay
+the live dismissal check against a notice that has since completed.
+
+Each original status2 cause joins the canonical operation33 contest, its exact
+incumbent and executed predecessor, canonical dismissal restoring status2, and
+saved cause/resolution pointers. The fixed owner must retain that cause's link
+to the exact original notice, completed phase3 and original43 terminal. Multiple
+episodes are followed back to the pre-notice boundary. Their times are bounded
+by initiation and completion; the original deadline need not be an upper bound,
+since a notice remains active after its deadline until completion or cancellation.
+The notice-era entry pair remains the boundary for later class3 closures.
+
+A dismissal during the notice can create the preceding32/35 execution's first
+closure. That actual closure is authenticated separately from initiation
+eligibility: its original execution must already have matured when notice began.
+Earlier closures remain immutable. A contest may also name a historical subject,
+leaving that earlier transition with a later marker and no closure. Only the
+exact authenticated notice contest can explain that marker, and the earlier
+execution must have matured at its actual subsequent rotation boundary. Waiting
+or an unrelated cause cannot substitute for this evidence.
+
+Empty notice history retains prior valid context encodings. New history adds
+only tagged read proofs; original mutation, status restoration, notice deadline,
+owner API/storage, acceptance, adjudication/election and receipt domains remain.
+An unresolved contest still blocks completion; a cancelled notice cannot stand
+in for the completed original notice. The actual-host source scenarios are in
+`StreamArtistDormancyNoticeRecoveryActual.t.sol`; native execution and the
+combined current-stack validation remain pending.
 
 ## Validation
 
@@ -397,6 +431,8 @@ For subsequent recoveries with the original dormancy origin use
 `--match-path test/unit/artist/StreamArtistDormancyRepeatedRecoveryActual.t.sol --match-test '^testRepeatedDormancy'`.
 For living recovery before dormancy use
 `--match-path test/unit/artist/StreamArtistRecoveredLivingDormancyActual.t.sol --match-test '^testRecoveredLivingDormancy'`.
+For dismissed challenges during the original notice use
+`--match-path test/unit/artist/StreamArtistDormancyNoticeRecoveryActual.t.sol --match-test '^testDormancyNotice'`.
 These authored ART27 cohorts still await native execution.
 
 Include all reached fixture JSON data in frozen captures. The aggregate fixture's
