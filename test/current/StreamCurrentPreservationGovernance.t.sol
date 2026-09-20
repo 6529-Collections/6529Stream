@@ -638,8 +638,9 @@ contract StreamCurrentPreservationGovernanceTest is StreamCurrentStackFixture, O
         }
         require(action != 0, "actual receipt action ID");
         if (ready > block.timestamp) {
-            vm.expectRevert();
-            this.executeSaved(plan, action, saved);
+            (bool early,) =
+                address(this).call(abi.encodeCall(this.executeSaved, (plan, action, saved)));
+            require(!early, "execution before delay rejected");
             vm.warp(ready);
         }
         require(
