@@ -165,7 +165,7 @@ revision+1; non-native preparations and executions do not become native receipts
 The [recovered-authority guide](../guides/artist-recovered-authority-hydration.md)
 defines the source certificate, repeated-import chronology and remaining scope.
 The implementation is under development: the seven concrete owners advertise
-feature mask 63 for the first graph and direct economics composition below.
+feature mask 127 for the first graph, economics and delegation compositions below.
 Positive execution scenarios are authored, and ABI-only checks establish no
 runtime, Safe, capacity or release acceptance. Existing profiles remain strict.
 
@@ -175,8 +175,21 @@ the caller supplies every original economics term in order. A fixed typed worker
 retains payload and binding-association maps, original occurrence/replay points
 and all consumed guards through repeated imports. Current payout or assignment
 eligibility is not reapplied to historical approvals. Existing direct-policy
-encoding remains unchanged when no economics history exists. Delegated economics,
-corrections, broader collections and class 4 remain separate full-v1 work.
+encoding remains unchanged when no economics history exists. Corrections, broader
+collections and class 4 remain separate full-v1 work.
+
+The delegated-consent composition adds bit 64 when actual source history contains
+grants, consent mode 2 or sale consent 16. Complete mixed direct/delegated 14/15/16
+maps, every original grant/revocation/version/current head/epoch and all principal
+and delegate nonce/replay state are carried through repeated imports. Identity
+grant use totals reconcile against the complete collection journal. Original
+grant domains and sale authorization admission points remain distinct from current
+signing domains and from Consent's native clock. Historical policy/economics
+associations use the authenticated fixed-source model where preimages are not
+retained. Fresh class-1 eligibility, epoch invalidation, replacement and signature
+rules remain unchanged; retained class-3 history grants no new delegation powers.
+Recovered attestation/personhood/C2PA, corrected generations, multiplicity and
+collaborators remain required composition work.
 
 ## Original living delegation profile
 

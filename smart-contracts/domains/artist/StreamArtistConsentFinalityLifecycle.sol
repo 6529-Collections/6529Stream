@@ -7,6 +7,9 @@ import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydr
 import {
     StreamArtistRecoveredEconomicsHydration
 } from "./StreamArtistRecoveredEconomicsHydration.sol";
+import {
+    StreamArtistRecoveredDelegatedConsentHydration
+} from "./StreamArtistRecoveredDelegatedConsentHydration.sol";
 import "./StreamArtistMultipleRecordsConsentImport.sol";
 import "./StreamArtistMultipleDelegationCollectionHydration.sol";
 import "./StreamArtistMultipleCollectionHydration.sol";
@@ -566,7 +569,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.ECONOMICS_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.DELEGATION_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -581,6 +584,20 @@ contract StreamArtistConsentFinalityLifecycle is
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 6)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (StreamArtistRecoveredDelegatedConsentHydration.selected(p.typedState)) {
+                StreamArtistRecoveredDelegatedConsentHydration.importState(
+                    _policies,
+                    _economics,
+                    _associatedEconomicsRecords,
+                    _economicsAssociations,
+                    _recordDelegation,
+                    _saleRecords,
+                    _latestSaleConsents,
+                    q,
+                    p.typedState
+                );
+                return;
+            }
             StreamArtistRecoveredEconomicsHydration.importEither(
                 _policies,
                 _economics,

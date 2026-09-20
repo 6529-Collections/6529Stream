@@ -21,12 +21,15 @@ library StreamArtistRecoveredHydrationTypes {
     uint256 internal constant REWINDS_V3 = 8;
     uint256 internal constant REPEATED_IMPORT = 16;
     uint256 internal constant DIRECT_ECONOMICS = 32;
-    uint256 internal constant KNOWN_FEATURES = 63;
+    uint256 internal constant DELEGATED_CONSENT = 64;
+    uint256 internal constant KNOWN_FEATURES = 127;
     // Reviewed recovered graph only; typed exporters still reject broader collection profiles.
     // Keep this explicit so adding a future known feature does not advertise it automatically.
     uint256 internal constant FIRST_GRAPH_FEATURES =
         CLASS_ONE | CLASS_THREE | ADJUDICATION_V2 | REWINDS_V3 | REPEATED_IMPORT;
     uint256 internal constant ECONOMICS_GRAPH_FEATURES = FIRST_GRAPH_FEATURES | DIRECT_ECONOMICS;
+    uint256 internal constant DELEGATION_GRAPH_FEATURES =
+        ECONOMICS_GRAPH_FEATURES | DELEGATED_CONSENT;
     // Finite transport-profile limits, not limits on validity of original lifetime history.
     uint256 internal constant MAX_ERAS = 16;
     uint256 internal constant MAX_JOURNAL_ENTRIES = 4096;

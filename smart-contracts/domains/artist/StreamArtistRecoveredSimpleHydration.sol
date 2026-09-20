@@ -63,8 +63,11 @@ library StreamArtistRecoveredSimpleHydration {
         AH.Query memory q,
         bytes memory raw
     ) public {
-        (, Payload.Payload memory p) = Payload.decode(raw, 0);
+        (RH.ExportHeader memory header, Payload.Payload memory p) = Payload.decode(raw, 0);
         S.Binding memory b = decodeBinding(q, p.provenance, p.semanticState);
+        if (b.item.consentMode == 2 && (header.requiredFeatures & RH.DELEGATED_CONSENT) == 0) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
         T.Binding memory emptyBinding;
         C.BindingTerms memory emptyTerms;
         L.Terminal memory emptyTerminal;
@@ -176,8 +179,8 @@ library StreamArtistRecoveredSimpleHydration {
             b.item.artistId != q.artistId || b.item.bindingHash != q.bindingHash
                 || b.item.artistAddress == address(0) || b.item.identityRecordHash == 0
                 || b.item.proposer == address(0) || b.item.generation != 1 || !b.item.accepted
-                || b.item.consentMode != 1 || b.item.saleConsentScope > 1
-                || b.item.registryImmutabilityElection > 1
+                || (b.item.consentMode != 1 && b.item.consentMode != 2)
+                || b.item.saleConsentScope > 1 || b.item.registryImmutabilityElection > 1
                 || keccak256(abi.encode(b.item)) != keccak256(abi.encode(b.history))
                 || keccak256(abi.encode(b.terminal)) != keccak256(abi.encode(emptyTerminal))
                 || b.terms.count != 0 || b.terms.mode != 0 || b.terms.threshold != 0

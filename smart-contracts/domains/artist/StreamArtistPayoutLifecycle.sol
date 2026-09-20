@@ -527,7 +527,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.ECONOMICS_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.DELEGATION_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(

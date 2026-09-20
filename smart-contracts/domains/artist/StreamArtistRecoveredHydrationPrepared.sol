@@ -52,9 +52,18 @@ import {
 import {
     StreamArtistRecoveredEconomicsHydration as Economics
 } from "./StreamArtistRecoveredEconomicsHydration.sol";
+import {
+    StreamArtistRecoveredDelegatedConsentHydration as Delegated
+} from "./StreamArtistRecoveredDelegatedConsentHydration.sol";
+import {
+    StreamArtistRecoveredDelegationConsentFacts as DelegationFacts
+} from "./StreamArtistRecoveredDelegationConsentFacts.sol";
+import {
+    IStreamArtistBindingOwner as Binding
+} from "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 
 /// @notice Complete seven-owner certificate for the admitted recovered-authority graphs.
-/// @dev One recovered class1/class3 subject and one accepted generation-one PRIMARY_ONLY binding.
+/// @dev One recovered class1/class3 subject and one accepted generation-one binding without collaborators.
 /// Fixed typed exporters reject unsupported histories; every native occurrence, replay cell and
 /// nonce tree must be accounted for. No request witness can replace original producer state.
 library StreamArtistRecoveredHydrationPrepared {
@@ -110,6 +119,17 @@ library StreamArtistRecoveredHydrationPrepared {
         ) revert RH.InvalidRecoveredHydrationProvenance();
         uint256 features = requiredFeatures(identity, payout, c.provenance.eras.length);
         if (economics.length != 0) features |= RH.DIRECT_ECONOMICS;
+        uint8 consentMode =
+            Binding(c.source.owners[0]).binding(prepared.query.collectionId).consentMode;
+        bool hasDelegation = _delegation(identity, c.provenance, consentMode);
+        Delegated.Bundle memory delegated;
+        if (hasDelegation) {
+            features |= RH.DELEGATED_CONSENT;
+            delegated = Delegated.collect(
+                c.source.owners[6], prepared.query, RH.ownerProvenance(c.provenance, 6), economics
+            );
+            DelegationFacts.validate(identity, delegated, prepared.query, c.provenance, consentMode);
+        }
         for (uint8 i; i < 7; ++i) {
             _capabilities(
                 c.source.owners[i],
@@ -130,6 +150,9 @@ library StreamArtistRecoveredHydrationPrepared {
                 // The joined validator binds original Identity35/nonce admission and retained
                 // Payout continuations; an owner-local export alone is insufficient here.
                 payload.semanticState = Payout.encode(payout, c.provenance);
+            } else if (i == 6 && hasDelegation) {
+                payload.semanticState =
+                    Delegated.encode(delegated, prepared.query, payload.provenance);
             } else if (i == 6 && economics.length != 0) {
                 payload.semanticState = Economics.encode(
                     Economics.collect(
@@ -144,6 +167,20 @@ library StreamArtistRecoveredHydrationPrepared {
             }
             prepared.data[i].typedState = Payload.encode(i, _header(i, features, payload), payload);
         }
+    }
+
+    /// @dev Actual source history and immutable binding mode select the complete extension.
+    /// Grants remain relevant even when expired, revoked, unused or invalidated by recovery.
+    function _delegation(IH.Bundle memory identity, RH.Provenance memory p, uint8 mode)
+        private
+        pure
+        returns (bool)
+    {
+        if (identity.delegations.length != 0 || mode == 2) return true;
+        for (uint256 i; i < p.journals[6].length; ++i) {
+            if (p.journals[6][i].receipt.operation == 16) return true;
+        }
+        return false;
     }
 
     /// @dev Native history selects the extension. Witnesses supply exact retained terms,

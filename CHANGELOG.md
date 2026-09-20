@@ -30,6 +30,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Artist recovered authority hydration
 
+- Carry complete recovered delegation and mixed policy/economics/sale consent
+  history through repeated imports, preserving grant versions, revocations, uses,
+  epochs and tagged delegate nonce lanes. Add an explicit capability and retain
+  original current-authority restrictions. Runtime and capacity remain pending.
 - Extend the recovered profile with complete direct economics history and exact
   original binding associations, signatures and replay origins. Add class-3 V3
   and repeated V3 import/continuation scenarios. Execution and capacity evidence

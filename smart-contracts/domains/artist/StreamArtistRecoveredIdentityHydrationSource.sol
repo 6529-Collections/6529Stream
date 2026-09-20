@@ -32,6 +32,9 @@ import {
     StreamArtistRecoveredIdentityHydrationRecords as Records
 } from "./StreamArtistRecoveredIdentityHydrationRecords.sol";
 import {
+    StreamArtistRecoveredDelegationHydration as Delegations
+} from "./StreamArtistRecoveredDelegationHydration.sol";
+import {
     StreamArtistIdentityDismissalTypes as D
 } from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
 
@@ -125,6 +128,7 @@ library StreamArtistRecoveredIdentityHydrationSource {
         }
         Timing.validate(b.timing);
         _nativeRows(b, p);
+        Delegations.validate(b, p);
         _causes(b, p);
         _vestings(b, p);
         _guardians(b, p);

@@ -707,7 +707,14 @@ library StreamArtistRecoveredIdentityHydrationExportRows {
         if (kind == 2) {
             for (uint256 i; i < b.delegations.length; ++i) {
                 if (
-                    key == keccak256(abi.encode(b.artistId, b.delegations[i].record.grant.delegate))
+                    key
+                        == keccak256(
+                            abi.encode(
+                                keccak256("6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1"),
+                                b.artistId,
+                                b.delegations[i].record.grant.delegate
+                            )
+                        )
                 ) {
                     return true;
                 }

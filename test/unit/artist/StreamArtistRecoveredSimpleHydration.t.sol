@@ -102,10 +102,14 @@ contract RecoveredSimpleCoordinatorFixture {
     }
 
     function propose(uint256 collection) public returns (T.Binding memory b) {
+        return proposeWithMode(collection, 1);
+    }
+
+    function proposeWithMode(uint256 collection, uint8 mode) public returns (T.Binding memory b) {
         T.BindingProposal memory p;
         p.artistAddress = address(1001);
         p.identityRecordHash = keccak256("original identity genesis document");
-        p.consentMode = 1;
+        p.consentMode = mode;
         p.reasonHash = keccak256("proposal reason");
         return bindingOwner().propose(_context(0, 1), collection, bytes32(uint256(1002)), p);
     }
@@ -206,6 +210,35 @@ contract RecoveredSimpleDecodeBoundary {
 }
 
 contract StreamArtistRecoveredSimpleHydrationTest {
+    function testModeTwoBindingRequiresDelegationFeatureAndAllowsRestoredRetry() external {
+        RecoveredSimpleCoordinatorFixture source =
+            new RecoveredSimpleCoordinatorFixture(address(501));
+        source.proposeWithMode(7, 2);
+        source.accept(7);
+        RecoveredSimpleCoordinatorFixture target =
+            new RecoveredSimpleCoordinatorFixture(address(502));
+        AH.Query memory q = _query(source);
+        AH.OwnerData[3] memory data = _data(source, q);
+        bytes32 before_ = _snapshot(target);
+        bytes32 admission = keccak256("mode two complete certificate fixture");
+        _revert(
+            address(target),
+            abi.encodeCall(target.importThree, (q, data, admission)),
+            abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)
+        );
+        assert(_snapshot(target) == before_);
+        for (uint256 i; i < 3; ++i) {
+            uint8 index = i == 2 ? 3 : uint8(i);
+            (RH.ExportHeader memory header, Payload.Payload memory payload) =
+                Payload.decode(data[i].typedState, index);
+            header.requiredFeatures |= RH.DELEGATED_CONSENT;
+            data[i].typedState = Payload.encode(index, header, payload);
+        }
+        target.importThree(q, data, admission);
+        _retained(source, target, q);
+        assert(target.bindingOwner().binding(7).consentMode == 2);
+    }
+
     function testSimpleExportsExactOriginalBindingAcceptanceAndNonemptyEmptyCertificate() external {
         RecoveredSimpleCoordinatorFixture source = _source();
         AH.Query memory q = _query(source);
@@ -241,14 +274,15 @@ contract StreamArtistRecoveredSimpleHydrationTest {
         Adapter.decodeCollaborator(q, c, empty);
         assert(source.collaboratorOwner().authorityHydrationState(q).length == 0);
         assert(
-            source.bindingOwner().recoveredAuthorityHydrationCapability().supportedFeatures == 63
+            source.bindingOwner().recoveredAuthorityHydrationCapability().supportedFeatures == 127
         );
         assert(
             source.collaboratorOwner().recoveredAuthorityHydrationCapability().supportedFeatures
-                == 63
+                == 127
         );
         assert(
-            source.acceptanceOwner().recoveredAuthorityHydrationCapability().supportedFeatures == 63
+            source.acceptanceOwner().recoveredAuthorityHydrationCapability().supportedFeatures
+                == 127
         );
         // These are actual post-commit native writers, not a synthetic _native ordering.
         assert(source.bindingOwner().artistNativeReceiptRevisionAt(0) == 1);
