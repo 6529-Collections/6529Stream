@@ -12,6 +12,7 @@ import "./StreamConservationTiers.sol";
 import "./StreamConservationFloorReads.sol";
 import "./StreamConservationFloorSupplemental.sol";
 import "./StreamConservationDirectReads.sol";
+import "./StreamConservationDirectHistory.sol";
 
 /// @notice Permanent owner of successful first-sale and release-floor receipts.
 /// @dev The current native source graph is admitted by exact delayed governance, never selected by
@@ -72,12 +73,6 @@ contract StreamConservationFloor is
         uint8 family;
     }
 
-    struct DirectPreparation {
-        bool exists;
-        StreamDirectPrimaryConservationTypes.Receipt seed;
-        bytes32 collectionEvidence;
-        bytes32 releaseEvidence;
-    }
     mapping(bytes32 => CollectionPreparation) private _collectionPreparations;
     mapping(bytes32 => ReleasePreparation) private _releasePreparations;
     mapping(bytes32 => SalePreparation) private _salePreparations;
@@ -85,7 +80,7 @@ contract StreamConservationFloor is
     mapping(uint256 => bytes32) private _first;
     mapping(bytes32 => bytes32) private _release;
     bool private _entered;
-    mapping(bytes32 => DirectPreparation) private _directPreparations;
+    mapping(bytes32 => StreamConservationDirectHistory.Preparation) private _directPreparations;
 
     constructor(
         address core_,
@@ -317,7 +312,7 @@ contract StreamConservationFloor is
             ),
             tier
         );
-        DirectPreparation memory p;
+        StreamConservationDirectHistory.Preparation memory p;
         p.exists = true;
         p.collectionEvidence = keccak256(abi.encode(collection_));
         p.releaseEvidence = release_.exists ? keccak256(abi.encode(release_)) : bytes32(0);
@@ -329,17 +324,10 @@ contract StreamConservationFloor is
         p.seed.bindings = bindings;
         p.seed.sale = sale;
         p.seed.effectiveTier = tier;
-        bytes32 preparation = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_CONSERVATION_DIRECT_PREPARED_V1"),
-                deploymentChainId,
-                core,
-                address(this),
-                p
-            )
-        );
         _persistEvidence(p.collectionEvidence, p.releaseEvidence, collection_, release_);
-        _directPreparations[preparation] = p;
+        bytes32 preparation = StreamConservationDirectHistory.persist(
+            _directPreparations, p, deploymentChainId, core
+        );
         _linkSale(directKey, preparation, DIRECT, sale.collectionId, release_);
         StreamDirectPrimaryConservationTypes.Receipt memory r = _directReceipt(directKey);
         emit ConservationDirectPrimarySaleRecorded(directKey, r.receiptHash, r, 1);
@@ -665,22 +653,20 @@ contract StreamConservationFloor is
     {
         SaleLink memory link = _saleLinks[key];
         if (link.preparation == 0 || link.family != DIRECT) return r;
-        DirectPreparation storage p = _directPreparations[link.preparation];
-        r = p.seed;
-        r.recordedAt = link.recordedAt;
-        r.firstSaleReceiptHash = _firstReceipt(r.sale.collectionId).receiptHash;
+        StreamConservationDirectHistory.Preparation storage p =
+            _directPreparations[link.preparation];
+        bytes32 releaseReceiptHash;
         if (p.releaseEvidence != 0) {
-            r.releaseReceiptHash =
+            releaseReceiptHash =
             _releaseReceipt(_releasePreparations[p.releaseEvidence].releaseKey).receiptHash;
         }
-        r.receiptHash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_CONSERVATION_DIRECT_RECEIPT_V1"),
-                deploymentChainId,
-                core,
-                address(this),
-                r
-            )
+        return StreamConservationDirectHistory.receipt(
+            p,
+            link.recordedAt,
+            _firstReceipt(p.seed.sale.collectionId).receiptHash,
+            releaseReceiptHash,
+            deploymentChainId,
+            core
         );
     }
 
