@@ -63,6 +63,15 @@
   reads and original receipts. Source/type checks pass; native execution,
   linked-library size and gas validation remain pending.
 
+## Fixed: recovered generation grant validation routing
+
+- Route the explicit grant-bearing generation profile through additive grant-capable
+  leaf validators. Its previous calls reached older no-grant entrypoints and refused
+  all nonempty grant histories before the original use-count reconciliation.
+- Preserve the older no-grant entrypoints and every row, chronology and aggregate-use
+  check. Add four pure multi-era parity/refusal oracles; runtime acceptance remains
+  separate from source/type validation.
+
 ## Added: continued Platform correction generations
 
 - Append fresh class2-authorized lineage after consumed Platform proposals are

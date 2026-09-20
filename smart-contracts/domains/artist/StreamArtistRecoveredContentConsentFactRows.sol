@@ -71,6 +71,20 @@ library StreamArtistRecoveredContentConsentFactRows {
         return _validateRows(identity, consent, q, p, generation);
     }
 
+    /// @notice Explicit grant-bearing generation profile; original no-grant entry stays strict.
+    /// @dev Complete grant hashes/nonces and exact aggregate uses are checked by the paired
+    /// authenticated generation-delegation caller. Every original row check remains below.
+    function validateGenerationRowsWithGrants(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory uses) {
+        if (generation < 2 || generation > 128) _invalid();
+        return _validateRows(identity, consent, q, p, generation);
+    }
+
     function _validateRows(
         IdentityRows memory identity,
         ConsentRows memory consent,

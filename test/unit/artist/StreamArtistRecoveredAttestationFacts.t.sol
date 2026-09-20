@@ -47,6 +47,10 @@ import {
     StreamArtistDelegationState as Delegation
 } from "../../../smart-contracts/domains/artist/StreamArtistDelegationState.sol";
 
+import {
+    StreamArtistRecoveredAttestationFactRows as Leaf
+} from "../../../smart-contracts/domains/artist/StreamArtistRecoveredAttestationFactRows.sol";
+
 /// @notice Pure component vectors for the cross-owner op24 join, not source certificates or
 /// actual Artist/Safe admission. The outer codecs separately authenticate source maps, original
 /// grant hashes/epochs, complete nonce words, and publication/personhood semantics.
@@ -74,6 +78,66 @@ contract StreamArtistRecoveredAttestationFactsTest {
     {
         if (added) Combined.validate(f.identity, consent, f.query, f.provenance, mode, f.rows);
         else Combined.validate(f.identity, consent, f.query, f.provenance, mode);
+    }
+
+    function generationLeaf(Fixture memory f, uint64 generation, bool grants)
+        external
+        pure
+        returns (uint256[] memory)
+    {
+        if (grants) {
+            return Leaf.validateGenerationRowsWithGrants(
+                Leaf.IdentityRows(
+                    f.identity.artistId, f.identity.signatures, f.identity.delegations
+                ),
+                f.rows,
+                Leaf.Scope(f.query.artistId, f.query.collectionId, f.query.bindingHash),
+                f.provenance,
+                generation
+            );
+        }
+        return Leaf.validateGenerationRows(
+            Leaf.IdentityRows(f.identity.artistId, f.identity.signatures, f.identity.delegations),
+            f.rows,
+            Leaf.Scope(f.query.artistId, f.query.collectionId, f.query.bindingHash),
+            f.provenance,
+            generation
+        );
+    }
+
+    function testGenerationGrantEntryPreservesUseTotalsAndOldProfileRefusal() external view {
+        Fixture memory f = _fixture();
+        uint256[] memory original = Facts.validate(f.identity, f.rows, f.query, f.provenance);
+        for (uint256 i; i < f.rows.length; ++i) {
+            f.rows[i].attestation.record.generation = 2;
+            f.rows[i].attestation.association.generation = 2;
+        }
+        uint256[] memory actual = this.generationLeaf(f, 2, true);
+        assert(keccak256(abi.encode(actual)) == keccak256(abi.encode(original)));
+        assert(actual.length != 0 && actual[0] == 1);
+        (bool ok, bytes memory reason) =
+            address(this).staticcall(abi.encodeCall(this.generationLeaf, (f, uint64(2), false)));
+        assert(!ok && bytes4(reason) == RH.InvalidRecoveredHydrationProfile.selector);
+        this.generationLeaf(f, 2, true);
+    }
+
+    function testGenerationGrantEntryRetainsGenerationAndCapabilityRefusals() external view {
+        Fixture memory f = _fixture();
+        for (uint256 i; i < f.rows.length; ++i) {
+            f.rows[i].attestation.record.generation = 2;
+            f.rows[i].attestation.association.generation = 2;
+        }
+        this.generationLeaf(f, 2, true);
+        for (uint64 generation = 1; generation < 4; ++generation) {
+            if (generation == 2) continue;
+            (bool ok, bytes memory reason) =
+                address(this).staticcall(abi.encodeCall(this.generationLeaf, (f, generation, true)));
+            assert(!ok && bytes4(reason) == RH.InvalidRecoveredHydrationProfile.selector);
+        }
+        f.identity.delegations[0].record.grant.capabilities = 0;
+        (bool ok, bytes memory reason) =
+            address(this).staticcall(abi.encodeCall(this.generationLeaf, (f, uint64(2), true)));
+        assert(!ok && bytes4(reason) == RH.InvalidRecoveredHydrationProfile.selector);
     }
 
     function testAttestationFactsPreserveOriginalClassesBackdatedTimeAndSeparateClocks()

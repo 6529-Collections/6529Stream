@@ -45,7 +45,7 @@ library StreamArtistRecoveredGenerationDelegatedConsentFacts {
         if (mode != expectedMode || (mode == 1 && identity.delegations.length == 0)) {
             revert RH.InvalidRecoveredHydrationProfile();
         }
-        uint256[] memory uses = ContentRows.validateGenerationRows(
+        uint256[] memory uses = ContentRows.validateGenerationRowsWithGrants(
             ContentRows.IdentityRows(identity.artistId, identity.signatures, identity.delegations),
             ContentRows.ConsentRows(
                 consent.original.artistId,
@@ -59,7 +59,7 @@ library StreamArtistRecoveredGenerationDelegatedConsentFacts {
             p,
             generation
         );
-        uint256[] memory attestations = AttestationRows.validateGenerationRows(
+        uint256[] memory attestations = AttestationRows.validateGenerationRowsWithGrants(
             AttestationRows.IdentityRows(
                 identity.artistId, identity.signatures, identity.delegations
             ),
