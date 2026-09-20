@@ -9,6 +9,9 @@ import {
     StreamPrimarySaleSettlement
 } from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import {
+    IStreamPrimarySaleSettlement
+} from "../../smart-contracts/interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
+import {
     IStreamPrivateSaleAdapter
 } from "../../smart-contracts/interfaces/stream/mint/IStreamPrivateSaleAdapter.sol";
 import {
@@ -181,7 +184,7 @@ contract CurrentNativeImmediateSalesTest is CurrentCommerceConservationFixture {
 
     function admitImmediate() external {
         require(msg.sender == address(this), "fixture caller");
-        StreamModuleRegistration[] memory records = new StreamModuleRegistration[](1);
+        StreamModuleRegistration[] memory records = new StreamModuleRegistration[](2);
         records[0] = StreamModuleRegistration(
             address(immediate),
             keccak256("NATIVE_PRIMARY_SALE_ADAPTER"),
@@ -192,6 +195,18 @@ contract CurrentNativeImmediateSalesTest is CurrentCommerceConservationFixture {
             DEPLOYMENT_HASH,
             keccak256("current canonical immediate module"),
             "urn:stream:current:canonical-immediate"
+        );
+        // Escrow producer permission does not admit a recorder to the permanent Core Floor.
+        records[1] = StreamModuleRegistration(
+            address(recorder),
+            keccak256("PRIMARY_SALE_SETTLEMENT"),
+            keccak256("6529STREAM_UNIVERSAL_SETTLEMENT_V1"),
+            type(IStreamPrimarySaleSettlement).interfaceId,
+            500_000,
+            address(recorder).codehash,
+            DEPLOYMENT_HASH,
+            keccak256("current canonical immediate recorder"),
+            "urn:stream:current:immediate-recorder"
         );
         (GovernanceCall[] memory calls, bytes[] memory data) =
             StreamCurrentStackPlan.registrationCalls(registry, records);
@@ -226,6 +241,15 @@ contract CurrentNativeImmediateSalesTest is CurrentCommerceConservationFixture {
             record.status == ModuleRegistryStatus.ACTIVE
                 && record.runtimeCodeHash == address(immediate).codehash,
             "actual delayed module admission"
+        );
+        record = registry.moduleRecord(address(recorder));
+        require(
+            record.status == ModuleRegistryStatus.ACTIVE
+                && record.runtimeCodeHash == address(recorder).codehash
+                && record.moduleType == keccak256("PRIMARY_SALE_SETTLEMENT")
+                && record.moduleVersion == keccak256("6529STREAM_UNIVERSAL_SETTLEMENT_V1")
+                && record.interfaceId == type(IStreamPrimarySaleSettlement).interfaceId,
+            "actual delayed recorder admission required by permanent Floor"
         );
     }
 
