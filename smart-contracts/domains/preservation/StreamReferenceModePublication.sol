@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
 import { StreamReferenceModePreparation } from "./StreamReferenceModePreparation.sol";
+import { StreamReferenceModeWritePreparation } from "./StreamReferenceModeWritePreparation.sol";
 import { StreamReferenceModePayloadPreparation } from "./StreamReferenceModePayloadPreparation.sol";
 import {
     IStreamReferenceModePayloadPreparation
@@ -270,15 +271,18 @@ contract StreamReferenceModePublication is
         StreamReferenceRenderTypes.Receipt memory r = _receipt(p, msg.sender);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         _definitions(d);
-        StreamReferenceModePreparation.Prepared memory result =
-            StreamReferenceModePreparation.prepareStaged(
-                d, _modeBindings, r, _fileInventories, _preparedModePayloads, msg.data, true
+        StreamReferenceModeWritePreparation.Prepared memory result =
+            StreamReferenceModeWritePreparation.prepare(
+                d, _modeBindings, r, _fileInventories, _preparedModePayloads, msg.data
             );
         StreamReferenceModeTypes.Facts memory mode = result.mode;
         r.sourcesHash = result.sourcesHash;
         bytes memory canonical = result.canonical;
-        r.payloadHash = keccak256(canonical);
-        r.payloadBytes = uint32(canonical.length);
+        r.payloadHash =
+            result.selected.payloadId == 0 ? keccak256(canonical) : result.selected.payloadHash;
+        r.payloadBytes = result.selected.payloadId == 0
+            ? uint32(canonical.length)
+            : result.selected.payloadBytes;
         r.recordedAt = uint64(block.timestamp);
         hash = keccak256(
             abi.encode(
@@ -304,8 +308,20 @@ contract StreamReferenceModePublication is
                 hash
             )
         );
-        StreamSnapshotManifestBytes.retain(_payloads[hash], d.targets[3], canonical);
-        StreamSnapshotManifestBytes.retain(_publications[hash], d.targets[3], abi.encode(p));
+        if (result.selected.payloadId == 0) {
+            StreamSnapshotManifestBytes.retain(_payloads[hash], d.targets[3], canonical);
+            StreamSnapshotManifestBytes.retain(_publications[hash], d.targets[3], abi.encode(p));
+        } else {
+            StreamReferenceModePayloadPreparation.adopt(
+                _preparedModePayloads,
+                _fileInventories,
+                _payloads[hash],
+                _publications[hash],
+                d.targets[3],
+                d.codeHashes[3],
+                result.selected
+            );
+        }
         StreamSnapshotManifestBytes.retain(_modeEvidence[hash], d.targets[3], result.evidence);
         _modeFacts[hash] = mode;
         _receipts[hash] = r;

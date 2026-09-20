@@ -53,6 +53,8 @@ interface PayloadPreparationVm {
 contract ModePayloadPreparationHost {
     mapping(bytes32 => Bytes.Manifest) private inventories;
     Preparation.State private prepared;
+    Bytes.Manifest private adoptedPayload;
+    Bytes.Manifest private adoptedPublication;
     address public immutable store;
     bytes32 private immutable storeHash;
     bool private entered;
@@ -137,6 +139,52 @@ contract ModePayloadPreparationHost {
     function payloadState(bytes32 id) external view returns (bytes32, uint32, uint256) {
         Bytes.Manifest storage m = prepared.payloads[id];
         return (m.contentHash, m.byteLength, m.pointers.length);
+    }
+
+    /// @dev Test-only state host: no writer/source authority is claimed by this bounded worker recipe.
+    function adoptByInput(
+        R.Publication memory p,
+        R.Receipt memory r,
+        R.SourceFacts memory s,
+        M.Evidence memory e,
+        M.Facts memory f
+    ) external guarded returns (bytes32) {
+        bytes memory raw = abi.encode(p);
+        Preparation.Selection memory selected =
+            Preparation.selectForWrite(prepared, keccak256(raw), uint32(raw.length), r, s, e, f);
+        require(selected.payloadId != 0, "no exact validated-input descriptor");
+        Preparation.adopt(
+            prepared, inventories, adoptedPayload, adoptedPublication, store, storeHash, selected
+        );
+        return selected.payloadHash;
+    }
+
+    function adoptedBytes() external view returns (bytes memory, bytes memory) {
+        return (Bytes.read(adoptedPayload), Bytes.read(adoptedPublication));
+    }
+
+    function adoptedState() external view returns (bytes32, uint32, uint256, bytes32) {
+        return (
+            adoptedPayload.contentHash,
+            adoptedPayload.byteLength,
+            adoptedPayload.pointers.length,
+            adoptedPublication.contentHash
+        );
+    }
+
+    function swapPreparedChunks(bytes32 id) external {
+        Bytes.Manifest storage m = prepared.payloads[id];
+        (m.pointers[0], m.pointers[1]) = (m.pointers[1], m.pointers[0]);
+        (m.chunkHashes[0], m.chunkHashes[1]) = (m.chunkHashes[1], m.chunkHashes[0]);
+    }
+
+    function corruptPayloadHash(bytes32 id, bytes32 value) external {
+        prepared.payloads[id].contentHash = value;
+    }
+
+    function occupiedPublication(bool occupied) external {
+        // Force a late destination guard after payload adoption to observe outer rollback.
+        adoptedPublication.byteLength = occupied ? 1 : 0;
     }
 }
 
@@ -560,5 +608,161 @@ contract StreamReferenceModePayloadPreparationTest {
         emit log_named_uint("exactPayloadBytes", canonical.length);
         // Host/Store/output carriers cooled. Not a fresh RPC transaction, complete transitive
         // cold-access proof, real publisher writer/source acceptance, or unlimited-scope claim.
+    }
+
+    function _readyAdoption(bool corpus)
+        private
+        returns (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+            bytes32 id
+        )
+    {
+        p = _publication(corpus);
+        p.manifestURI = string(new bytes(13000)); // Exercise complete and final-short carriers.
+        bytes memory environment = _prepareEnvironment(p.environment);
+        _upload(abi.encode(p), false);
+        bytes32 publicationId = host.prepareModePublication(p);
+        (r, s, e, f) = _fields();
+        canonical = encoding.original(p, r, s, e, f, environment);
+        _upload(canonical, false);
+        id = host.prepareModePayload(publicationId, r, s, e, f);
+    }
+
+    function _emptyAdoption() private view {
+        (bytes32 hash, uint32 length, uint256 count, bytes32 publicationHash) = host.adoptedState();
+        require(hash == 0 && length == 0 && count == 0 && publicationHash == 0);
+    }
+
+    function testAdoptionExactOriginalBytesAndDescriptorSubstitutions() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+        ) = _readyAdoption(false);
+        bytes32 subject = s.subject;
+        s.subject = keccak256("changed fresh source");
+        (bool ok,) = address(host).call(abi.encodeCall(host.adoptByInput, (p, r, s, e, f)));
+        require(!ok);
+        _emptyAdoption();
+        s.subject = subject;
+        address recorder = r.recorder;
+        r.recorder = address(99);
+        (ok,) = address(host).call(abi.encodeCall(host.adoptByInput, (p, r, s, e, f)));
+        require(!ok);
+        _emptyAdoption();
+        r.recorder = recorder;
+        bytes32 report = e.perceptual.reportHash;
+        e.perceptual.reportHash = bytes32(uint256(44));
+        (ok,) = address(host).call(abi.encodeCall(host.adoptByInput, (p, r, s, e, f)));
+        require(!ok);
+        _emptyAdoption();
+        e.perceptual.reportHash = report;
+        vm.chainId(originalChain + 1);
+        (ok,) = address(host).call(abi.encodeCall(host.adoptByInput, (p, r, s, e, f)));
+        require(!ok);
+        vm.chainId(originalChain);
+        _emptyAdoption();
+        ModePayloadPreparationHost other = new ModePayloadPreparationHost(address(store));
+        (ok,) = address(other).call(abi.encodeCall(other.adoptByInput, (p, r, s, e, f)));
+        require(!ok);
+        require(host.adoptByInput(p, r, s, e, f) == keccak256(canonical));
+        (bytes memory payload, bytes memory publication) = host.adoptedBytes();
+        require(keccak256(payload) == keccak256(canonical));
+        require(keccak256(publication) == keccak256(abi.encode(p)));
+        (ok,) = address(host).call(abi.encodeCall(host.adoptByInput, (p, r, s, e, f)));
+        require(!ok, "cannot replace original destination");
+    }
+
+    function testAdoptionRejectsOrderedWholeCommitmentAndCorruptedCodeThenRetry() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+            bytes32 id
+        ) = _readyAdoption(false);
+        bytes memory call_ = abi.encodeCall(host.adoptByInput, (p, r, s, e, f));
+        host.swapPreparedChunks(id);
+        (bool ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyAdoption();
+        host.swapPreparedChunks(id);
+        host.corruptPayloadHash(id, keccak256("forged full-byte hash"));
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyAdoption();
+        host.corruptPayloadHash(id, keccak256(canonical));
+        (address pointer,) = store.chunk(keccak256(_part(canonical, 0)));
+        bytes memory original = pointer.code;
+        vm.etch(pointer, hex"00");
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyAdoption();
+        bytes memory changed = abi.encodePacked(original);
+        changed[0] = bytes1(uint8(1));
+        vm.etch(pointer, changed);
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyAdoption();
+        changed[0] = 0;
+        changed[2] = bytes1(uint8(changed[2]) ^ 1);
+        vm.etch(pointer, changed);
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyAdoption();
+        vm.etch(pointer, original);
+        require(host.adoptByInput(p, r, s, e, f) == keccak256(canonical));
+    }
+
+    function testAdoptionLateDestinationFailureRollsBackPayloadAndIdenticalRetry() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+        ) = _readyAdoption(false);
+        bytes memory call_ = abi.encodeCall(host.adoptByInput, (p, r, s, e, f));
+        host.occupiedPublication(true);
+        (bool ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyAdoption();
+        host.occupiedPublication(false);
+        (ok,) = address(host).call(call_);
+        require(ok);
+        (bytes memory payload, bytes memory publication) = host.adoptedBytes();
+        require(
+            keccak256(payload) == keccak256(canonical)
+                && keccak256(publication) == keccak256(abi.encode(p))
+        );
+    }
+
+    function testAdoption1048CorpusMutationEnvelope() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+        ) = _readyAdoption(true);
+        bytes memory call_ = abi.encodeCall(host.adoptByInput, (p, r, s, e, f));
+        (bytes32 hash, uint256 total) = _bounded(call_, canonical);
+        require(hash == keccak256(canonical));
+        (bytes memory payload, bytes memory publication) = host.adoptedBytes();
+        require(keccak256(payload) == hash && keccak256(publication) == keccak256(abi.encode(p)));
+        emit log_named_uint("adoptionWorkerWithIntrinsic", total);
+        // This host demonstrates exact data transport only; real source/writer admission is separate.
     }
 }

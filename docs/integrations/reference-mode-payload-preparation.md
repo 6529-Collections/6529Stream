@@ -131,3 +131,64 @@ publication and final supplement calls. That retry retains the exact native8
 dependency graph and genuine metric context, overlaying only this reviewed Mode
 batch. It is not current-head or full-genesis acceptance. No passing formatter
 or preparation test alone establishes that full flow.
+
+## Authenticated carrier adoption
+
+Native9 completed five cases and failed the four publication-dependent cases.
+The actual host's publication and payload preparation calls fit their bounded
+envelopes at 13,014,534 and 13,677,086 gas including intrinsic gas. Final
+publication still exhausted its call budget while reading the already prepared
+439,872-byte payload after fresh source and evidence validation. The trace's
+selector decoration was an out-of-gas failure, not a missing interface. The
+failed capture remains evidence of that unresolved complete-flow boundary.
+
+The successor preserves the unchanged public workflow above. A fixed write
+worker performs the original current source and evidence checks, then derives
+the preparation IDs from the actual full Publication and newly validated
+receipt, source, evidence and mode facts. A match yields an internal descriptor;
+the external publication call still accepts no descriptor or preparation ID.
+The old preview, currentness and complete-byte readers remain unchanged. A miss
+still uses the original monolithic formatter and retention path.
+
+For a match, the mutation path verifies the saved publication, environment and
+payload in that order. It checks every ordered pointer's exact byte length,
+STOP prefix and chunk hash, and recomputes each complete byte commitment. Both
+adopted manifests additionally require the original pinned Store's exact
+pointer and length for each chunk. Only then are the original pointers and
+chunk hashes copied into the original record's compiler-owned manifests. The
+payload bytes are never returned through the worker/host ABI or retained a
+second time. Original public getters still reconstruct the same complete
+bytes; receipt, record, chain, history and event preimages remain unchanged.
+
+The carrier verifier performs all checks before copying a destination manifest,
+instead of interleaving each original Store check with a pointer push. The
+Store lookup is read-only, and the publication guard remains held throughout.
+A later failure rolls back both manifests and every record mutation. Existing
+destinations cannot be replaced. No authority, live dependency or currentness
+fact is cached, and neither a claimed ID nor a whole-byte hash alone suffices.
+
+The 132-source ABI check preserves all 98 public host ABI entries and all 16
+recursive storage rows exactly, with no appended state. The original complete
+Preparation worker is byte-identical to the preceding commit. Five selected
+production products fit: manifest adoption 1,793 bytes, payload preparation
+17,854, original preparation 23,760, write preparation 18,925 and publication
+24,562. The publisher has only 14 bytes of measured runtime headroom; this is
+not an allowance for further unmeasured host features. The first experiment
+placed both output codecs in one worker and exceeded its size limit; it was
+retained as a failed measurement and replaced by the separate fixed writer.
+
+The frozen focused successor passes 14 tests, including two 256-input fuzz
+cases. The four new tests cover exact original payload/publication bytes,
+changed source/recorder/report/host/chain inputs, ordered chunk and whole-hash
+substitution, length/STOP/byte corruption, and late failure followed by the
+identical retry. For the 1,048/102 corpus plus a 13,000-byte URI used to exercise
+full and short carriers, minimal-host adoption consumes 11,284,045 gas including
+calldata and transaction intrinsic gas under the unchanged 16,777,216 envelope.
+The retained original stage tests also pass at 12,915,523 and 13,461,574 gas.
+
+Those measurements cool the named host, Store and payload carriers. They do not
+prove every transitive dependency is cold. Actual-publisher successor results
+remain separate: minimal-host adoption does not itself establish the complete
+writer/source, supplement, Safe retry, lock or inventory flow, nor current-head
+deployment capacity. The large aggregate harness gas includes many individual
+uploads and preparatory calls; it is not a single proposed transaction.

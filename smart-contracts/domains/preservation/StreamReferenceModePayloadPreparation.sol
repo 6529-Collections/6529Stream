@@ -17,6 +17,9 @@ import {
 } from "./StreamReferenceRenderPreparation.sol";
 import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
 import { StreamSchemaDocumentStore as Store } from "../metadata/StreamSchemaDocumentStore.sol";
+import {
+    StreamReferenceModeManifestAdoption as Adoption
+} from "./StreamReferenceModeManifestAdoption.sol";
 
 /// @notice Permissionless immutable preparation. Final publication still performs every live check.
 library StreamReferenceModePayloadPreparation {
@@ -28,6 +31,14 @@ library StreamReferenceModePayloadPreparation {
     struct State {
         mapping(bytes32 => PublicationCarrier) publications;
         mapping(bytes32 => Bytes.Manifest) payloads;
+    }
+
+    /// @dev Internal transport only; not a caller-selected publication argument.
+    struct Selection {
+        bytes32 publicationId;
+        bytes32 payloadId;
+        bytes32 payloadHash;
+        uint32 payloadBytes;
     }
 
     event ReferenceModePublicationPrepared(
@@ -152,6 +163,74 @@ library StreamReferenceModePayloadPreparation {
         Bytes.requireIntact(saved.canonical);
         _environment(inventories, saved.descriptor);
         return Bytes.read(state.payloads[id]);
+    }
+
+    /// @dev Fresh original source/evidence checks precede this lookup in the writer. Only
+    /// exact internally derived IDs are returned; adoption below verifies every retained byte.
+    function selectForWrite(
+        State storage state,
+        bytes32 publicationHash,
+        uint32 publicationBytes,
+        R.Receipt memory receipt,
+        R.SourceFacts memory source,
+        M.Evidence memory evidence,
+        M.Facts memory facts
+    ) public view returns (Selection memory selected) {
+        bytes32 publicationId = Encoding.publicationId(publicationHash, publicationBytes);
+        PublicationCarrier storage saved = state.publications[publicationId];
+        if (saved.canonical.contentHash == 0) return selected;
+        _publication(saved, publicationHash, publicationBytes);
+        Encoding.normalize(receipt);
+        bytes32 id = Encoding.payloadId(
+            Encoding.components(
+                saved.descriptor,
+                abi.encode(receipt),
+                abi.encode(source),
+                abi.encode(evidence),
+                abi.encode(facts)
+            )
+        );
+        if (state.payloads[id].contentHash == 0) return selected;
+        selected = Selection(
+            publicationId, id, state.payloads[id].contentHash, state.payloads[id].byteLength
+        );
+    }
+
+    /// @notice Final mutation consumes only a descriptor derived from actual validated input.
+    /// @dev Original lookup order is publication integrity, environment integrity, payload
+    /// integrity. No large byte arrays cross the worker/host ABI or enter a second retention.
+    function adopt(
+        State storage state,
+        mapping(bytes32 => Bytes.Manifest) storage inventories,
+        Bytes.Manifest storage payloadDestination,
+        Bytes.Manifest storage publicationDestination,
+        address store,
+        bytes32 storeHash,
+        Selection memory selected
+    ) public {
+        _pin(store, storeHash);
+        PublicationCarrier storage saved = state.publications[selected.publicationId];
+        P.PublicationDescriptor memory descriptor = saved.descriptor;
+        if (
+            selected.publicationId
+                    != Encoding.publicationId(
+                        descriptor.publicationHash, descriptor.publicationBytes
+                    ) || selected.payloadId == 0 || selected.payloadHash == 0
+                || selected.payloadBytes == 0
+                || state.payloads[selected.payloadId].contentHash != selected.payloadHash
+                || state.payloads[selected.payloadId].byteLength != selected.payloadBytes
+        ) revert M.InvalidModeEvidence();
+        _publication(saved, descriptor.publicationHash, descriptor.publicationBytes);
+        Adoption.requireIntact(saved.canonical);
+        Bytes.Manifest storage environment = inventories[descriptor.environmentId];
+        if (
+            descriptor.environmentHash == 0 || descriptor.environmentBytes == 0
+                || environment.contentHash != descriptor.environmentHash
+                || environment.byteLength != descriptor.environmentBytes
+        ) revert M.InvalidModeEvidence();
+        Adoption.requireIntact(environment);
+        Adoption.adopt(payloadDestination, state.payloads[selected.payloadId], store);
+        Adoption.adopt(publicationDestination, saved.canonical, store);
     }
 
     function publicationEncoded(State storage state, bytes32 id)
