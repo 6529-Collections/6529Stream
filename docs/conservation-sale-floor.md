@@ -179,5 +179,21 @@ origins, currentness, malformed responses and changed dependency pins. They do
 not exercise actual operation-24 recording, its documentary proof producer or a
 complete paid Artist transaction. The configuration tests independently rebuild
 the original hash preimage and check all three gas configurations after actual
-governed increases. These source cases are separate from the earlier frozen
-native results; runtime and complete current-graph acceptance remain pending.
+governed increases. Separate Solidity 0.8.19 captures pass all 16 helper cases
+and 19 provider cases at `36c871f4` plus the test-only `fbff83a3` correction.
+All emitted production contracts in those captures fit the checked size limits.
+These results remain separate from actual Artist recording and paid execution.
+
+Additional source regressions join genuine Safe-authorized operation-24 records
+and operation-25 identity revisions to the actual Metadata, RIGHTS, conservation
+and provider contracts. They cover explicit waiver selection, opaque-head
+replacement without fallback, and stale operative identity with fresh waiver
+recovery. The documentary extension uses actual signed General COLLECTION
+notarizations, the exact General v2 registry admission, original op24 references
+and independently reconstructed retained summary hashes. A newer original
+recorder-scoped report invalidates current acceptance until fresh op24 selection.
+Core, governance and the original suite Router remain explicit typed boundaries;
+documentary references are fixture data, not assertions of external truth.
+These additional actual-owner cases have not been executed. Actual Artist
+deployment size, complete current-graph execution, paid transactions and gas
+acceptance remain pending.
