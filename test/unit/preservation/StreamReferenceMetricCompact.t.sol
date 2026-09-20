@@ -62,6 +62,30 @@ contract CompactMetricProbe {
         return Proof.requireCompact(Proof.compact(p, e, context), s);
     }
 
+    function compactWithMemoryReuse(
+        R.Publication memory p,
+        M.Evidence memory e,
+        bytes32 context,
+        T.Supplement memory s
+    ) external view returns (bytes32 runtime, bytes32 replay) {
+        Proof.CompactInput memory input = Proof.compact(p, e, context);
+        bytes32 originalInputs = keccak256(abi.encode(input, s));
+        (runtime, replay) = Proof.requireCompact(input, s);
+        uint256[7] memory lengths = [uint256(1), 31, 32, 33, 8191, 28096, 65536];
+        for (uint256 i; i < lengths.length; ++i) {
+            bytes memory overwritten = new bytes(lengths[i]);
+            for (uint256 j; j < overwritten.length; ++j) {
+                require(overwritten[j] == 0, "fresh memory remains zero initialized");
+                overwritten[j] = bytes1(uint8(j + i));
+            }
+            bytes32 saved = keccak256(overwritten);
+            (bytes32 a, bytes32 b) = Proof.requireCompact(input, s);
+            require(a == runtime && b == replay, "repeated compact proof digests");
+            require(keccak256(overwritten) == saved, "live caller memory retained");
+            require(keccak256(abi.encode(input, s)) == originalInputs, "live inputs retained");
+        }
+    }
+
     function prefix(R.PackageFile[] memory rows) external pure returns (uint256, bytes32) {
         return Proof.prefixCommitment(rows);
     }
@@ -171,6 +195,13 @@ contract StreamReferenceMetricCompactTest {
 
     function _guard() private view returns (Encoded.Guard memory) {
         return Encoded.Guard(KEY, 0, address(this), 3, 1);
+    }
+
+    function testCompactScratchReuseRetainsInputsAndCallerAllocations() public view {
+        (bytes32 a, bytes32 b) = probe.full(publication, evidence, context, supplement);
+        (bytes32 c, bytes32 d) =
+            probe.compactWithMemoryReuse(publication, evidence, context, supplement);
+        require(a == c && b == d, "unchanged full-proof oracle");
     }
 
     function testFullCorpusOriginalProjectedCompactAndEncodedParity() public view {

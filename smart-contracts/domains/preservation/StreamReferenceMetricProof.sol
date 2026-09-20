@@ -124,8 +124,7 @@ library StreamReferenceMetricProof {
                 || r.inputManifest.length > 65536 || r.inputsHash != keccak256(manifest)
                 || keccak256(r.inputManifest) != r.inputsHash
         ) revert T.InvalidMetricSupplement();
-        _transcript(r);
-        replayHash = keccak256(abi.encode(keccak256("6529STREAM_METRIC_REPLAY_V1"), r));
+        replayHash = _compactReplayHash(r);
     }
 
     function _compactInputManifest(CompactInput memory input) private pure returns (bytes memory) {
@@ -214,7 +213,33 @@ library StreamReferenceMetricProof {
         );
         _sortedMember(r.members, r.interpreter, 0, 0, false);
         _sortedMember(r.members, r.launcher, 0, 0, false);
-        return keccak256(abi.encode(keccak256("6529STREAM_METRIC_RUNTIME_V1"), r));
+        return _compactRuntimeHash(r);
+    }
+
+    /// @dev Inputs precede this scratch region. Only the digest escapes; the temporary ABI
+    /// bytes are dead before the allocator is restored. Preserve the full proof's original
+    /// allocation path as the independent byte/hash oracle.
+    function _compactRuntimeHash(T.Runtime memory r) private pure returns (bytes32 result) {
+        uint256 scratch;
+        assembly ("memory-safe") { scratch := mload(0x40) }
+        bytes memory encoded = abi.encode(keccak256("6529STREAM_METRIC_RUNTIME_V1"), r);
+        assembly ("memory-safe") {
+            result := keccak256(add(encoded, 32), mload(encoded))
+            mstore(0x40, scratch)
+        }
+    }
+
+    /// @dev Transcript decoding and canonicalization return no memory references. Their
+    /// allocations and this replay preimage are temporary; all original checks run first.
+    function _compactReplayHash(T.Replay memory r) private pure returns (bytes32 result) {
+        uint256 scratch;
+        assembly ("memory-safe") { scratch := mload(0x40) }
+        _transcript(r);
+        bytes memory encoded = abi.encode(keccak256("6529STREAM_METRIC_REPLAY_V1"), r);
+        assembly ("memory-safe") {
+            result := keccak256(add(encoded, 32), mload(encoded))
+            mstore(0x40, scratch)
+        }
     }
 
     /// @dev Compact runtime has already checked strict lexicographic order and the

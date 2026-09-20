@@ -32,6 +32,15 @@ the release policy in `docs/release-policy.md`.
 - Add an actual-current Safe configuration recipe. Native execution and
   release evidence for these helpers remain separate from this source batch.
 
+## Compact metric temporary-memory lifetime
+
+- Reclaim temporary runtime and replay hash buffers after their digests are
+  computed. Preserve the full proof, transcript checks, canonical encodings,
+  inputs and transaction limits.
+- Add complete-corpus repeated-allocation and live-memory regression coverage.
+  Independent source review and ABI checks pass; native gas acceptance remains
+  pending. The preceding native18 transaction failure remains recorded.
+
 ## Compact metric runtime proof
 
 - Reuse the exact four-word runtime prefix preimage and search required members
