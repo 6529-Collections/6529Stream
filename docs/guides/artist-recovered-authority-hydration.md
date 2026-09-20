@@ -468,3 +468,12 @@ requires512 on every owner while preserving old511 support. Runtime is pending.
 ABI-only compilation establishes source and type compatibility. It does not
 establish that these transactions execute, fit deployment limits or meet the
 protocol's gas and security acceptance criteria.
+
+## Pending-generation direct content composition
+
+The [generation-consent guide](artist-generation-consents.md) describes the explicit
+new owner6 codec for complete direct14/15/16/17/20/21 with at least one content or
+freeze record, optional original24, and an authenticated final generation2–128.
+Original generation1 and generation-only14/24 bytes remain unchanged. Delegations,
+economics/sale-only generations, corrected accepted bindings and wider graphs remain
+separate required work; authored source is not runtime or full-graph acceptance.

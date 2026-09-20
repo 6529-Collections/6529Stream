@@ -60,6 +60,27 @@ library StreamArtistRecoveredContentConsentValidation {
         public
         pure
     {
+        _validate(b, q, p, 1);
+    }
+
+    function validateAt(
+        ContentH.Bundle memory b,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        uint64 generation
+    ) public pure {
+        if (generation < 2 || generation > 128) {
+            revert T.UnsupportedProfile();
+        }
+        _validate(b, q, p, generation);
+    }
+
+    function _validate(
+        ContentH.Bundle memory b,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        uint64 generation
+    ) private pure {
         Provenance.validateOwner(p, 6);
         Base.Bundle memory old = b.original;
         if (
@@ -78,18 +99,19 @@ library StreamArtistRecoveredContentConsentValidation {
                     != old.policies.length + old.economics.length + old.sales.length
                         + b.consents.length + b.royalties.length + b.freezes.length
         ) _invalid();
-        _baseRows(old);
-        _contentRows(b);
-        (bytes32[] memory surfaces, bytes32[] memory scopes) = _journal(b, p);
+        _baseRows(old, generation);
+        _contentRows(b, generation);
+        (bytes32[] memory surfaces, bytes32[] memory scopes) = _journal(b, p, generation);
         _eras(p);
         _aliases(p, surfaces, scopes);
     }
 
-    function _contentRows(ContentH.Bundle memory b) private pure {
+    function _contentRows(ContentH.Bundle memory b, uint64 generation) private pure {
         for (uint256 i; i < b.consents.length; ++i) {
             ContentOwner.ConsentRecord memory r = b.consents[i];
             if (
-                r.recordHash == 0 || r.artistId != b.original.artistId || r.bindingGeneration != 1
+                r.recordHash == 0 || r.artistId != b.original.artistId
+                    || r.bindingGeneration != generation
                     || (r.authorityClass != 1 && r.authorityClass != 3)
                     || r.terms.collectionId != b.original.collectionId
                     || r.terms.metadataContract == address(0) || r.terms.familyId == 0
@@ -100,22 +122,23 @@ library StreamArtistRecoveredContentConsentValidation {
             ContentH.Royalty memory r = b.royalties[i];
             if (
                 r.item.recordHash == 0 || r.item.artistId != b.original.artistId
-                    || r.item.bindingGeneration != 1 || r.terms.resolver == address(0)
+                    || r.item.bindingGeneration != generation || r.terms.resolver == address(0)
                     || r.terms.collectionId != b.original.collectionId
                     || r.terms.revenueClass != keccak256("ROYALTY_ERC2981")
                     || r.terms.expectedAssignmentHash == 0
             ) _invalid();
             for (uint256 j; j < i; ++j) {
                 if (
-                    _royaltyScope(b.royalties[j].terms, b.original.artistId)
-                        == _royaltyScope(r.terms, b.original.artistId)
+                    _royaltyScope(b.royalties[j].terms, b.original.artistId, generation)
+                        == _royaltyScope(r.terms, b.original.artistId, generation)
                 ) _invalid();
             }
         }
         for (uint256 i; i < b.freezes.length; ++i) {
             Content.FreezeRecord memory r = b.freezes[i];
             if (
-                r.recordHash == 0 || r.artistId != b.original.artistId || r.bindingGeneration != 1
+                r.recordHash == 0 || r.artistId != b.original.artistId
+                    || r.bindingGeneration != generation
                     || (r.authorityClass != 1 && r.authorityClass != 3)
                     || r.metadataContract == address(0) || r.expectedStateHash == 0
                     || r.lockClasses.length == 0 || r.lockClasses.length > 16
@@ -128,7 +151,7 @@ library StreamArtistRecoveredContentConsentValidation {
         }
     }
 
-    function _journal(ContentH.Bundle memory b, RH.OwnerProvenance memory p)
+    function _journal(ContentH.Bundle memory b, RH.OwnerProvenance memory p, uint64 generation)
         private
         pure
         returns (bytes32[] memory surfaces, bytes32[] memory scopes)
@@ -186,13 +209,13 @@ library StreamArtistRecoveredContentConsentValidation {
                 ContentOwner.ConsentRecord memory r = b.consents[consents++];
                 if (r.recordHash != row.receipt.recordHash) _invalid();
                 surfaces[i] = CONTENT;
-                scopes[i] = keccak256(abi.encode(_contentScope(r.terms), r.recordHash));
+                scopes[i] = keccak256(abi.encode(_contentScope(r.terms, generation), r.recordHash));
             } else if (row.receipt.operation == 20) {
                 if (royalties >= b.royalties.length) _invalid();
                 ContentH.Royalty memory r = b.royalties[royalties++];
                 if (r.item.recordHash != row.receipt.recordHash) _invalid();
                 surfaces[i] = FREEZE;
-                scopes[i] = _royaltyScope(r.terms, b.original.artistId);
+                scopes[i] = _royaltyScope(r.terms, b.original.artistId, generation);
             } else if (row.receipt.operation == 21) {
                 if (freezes >= b.freezes.length) _invalid();
                 Content.FreezeRecord memory r = b.freezes[freezes++];
@@ -200,7 +223,7 @@ library StreamArtistRecoveredContentConsentValidation {
                 surfaces[i] = FREEZE;
                 scopes[i] = keccak256(
                     abi.encode(
-                        keccak256("CONTENT"), b.original.collectionId, uint64(1), r.recordHash
+                        keccak256("CONTENT"), b.original.collectionId, generation, r.recordHash
                     )
                 );
             } else {
@@ -214,7 +237,7 @@ library StreamArtistRecoveredContentConsentValidation {
         ) _invalid();
     }
 
-    function _baseRows(Base.Bundle memory b) private pure {
+    function _baseRows(Base.Bundle memory b, uint64 generation) private pure {
         for (uint256 i; i < b.policies.length; ++i) {
             if (
                 b.policies[i].recordHash == 0 || b.keys[i].phaseId == 0 || b.keys[i].policyHash == 0
@@ -237,7 +260,7 @@ library StreamArtistRecoveredContentConsentValidation {
                     || (t.scope == 0 && (t.scopeId != 0 || t.assignmentHash == 0))
                     || (t.scope == 1 && t.scopeId != b.collectionId)
                     || (t.scope == 2 && t.scopeId == 0) || a.artistId != b.artistId
-                    || a.bindingGeneration != 1 || a.bindingHash != b.bindingHash
+                    || a.bindingGeneration != generation || a.bindingHash != b.bindingHash
                     || a.payloadHash != keccak256(abi.encode(t)) || a.originalRecord != r.recordHash
             ) _invalid();
             for (uint256 j; j < i; ++j) {
@@ -254,7 +277,8 @@ library StreamArtistRecoveredContentConsentValidation {
                 r.recordHash == 0 || r.artistId != b.artistId
                     || r.terms.collectionId != b.collectionId || r.terms.saleAdapter == address(0)
                     || r.terms.saleId == 0 || r.terms.saleConfigHash == 0 || r.signer == address(0)
-                    || r.signedAt == 0 || r.bindingGeneration != 1 || r.bindingHash != b.bindingHash
+                    || r.signedAt == 0 || r.bindingGeneration != generation
+                    || r.bindingHash != b.bindingHash
                     || (row.grant == 0
                             ? (r.authorityClass != 1 && r.authorityClass != 3)
                             : r.authorityClass != 2)
@@ -340,16 +364,20 @@ library StreamArtistRecoveredContentConsentValidation {
         _invalid();
     }
 
-    function _contentScope(Content.Consent memory terms) private pure returns (bytes32) {
-        return keccak256(abi.encode(terms, uint64(1)));
-    }
-
-    function _royaltyScope(T.RoyaltyFreeze memory terms, bytes32 artist)
+    function _contentScope(Content.Consent memory terms, uint64 generation)
         private
         pure
         returns (bytes32)
     {
-        return keccak256(abi.encode(terms, artist, uint64(1)));
+        return keccak256(abi.encode(terms, generation));
+    }
+
+    function _royaltyScope(T.RoyaltyFreeze memory terms, bytes32 artist, uint64 generation)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(terms, artist, generation));
     }
 
     function _policyScope(uint256 collectionId, AH.PolicyKey memory key)

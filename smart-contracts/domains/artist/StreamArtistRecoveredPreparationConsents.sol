@@ -16,6 +16,10 @@ import {
     StreamArtistRecoveredContentConsentHydration as ContentConsents
 } from "./StreamArtistRecoveredContentConsentHydration.sol";
 
+import {
+    StreamArtistRecoveredGenerationConsents as Generation
+} from "./StreamArtistRecoveredGenerationConsents.sol";
+
 /// @notice Fixed typed stage of recovered-authority preparation.
 /// @dev Intermediate bytes are ABI encodings of the named complete bundle, never caller-selected calls.
 library StreamArtistRecoveredPreparationConsents {
@@ -47,9 +51,10 @@ library StreamArtistRecoveredPreparationConsents {
         RH.OwnerProvenance memory provenance
     ) public pure returns (bytes memory) {
         if (hasContent) {
-            return ContentConsents.encode(
-                abi.decode(raw, (ContentConsents.Bundle)), query, provenance
-            );
+            ContentConsents.Bundle memory b = abi.decode(raw, (ContentConsents.Bundle));
+            uint64 generation = Generation.generation(b);
+            if (generation > 1) return Generation.encode(b, query, provenance, generation);
+            return ContentConsents.encode(b, query, provenance);
         }
         return Delegated.encode(abi.decode(raw, (Delegated.Bundle)), query, provenance);
     }

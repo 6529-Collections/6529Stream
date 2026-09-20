@@ -42,6 +42,14 @@ the release policy in `docs/release-policy.md`.
 - Preserve production behavior and shared fixtures. ABI/source review is
   separate from pending native execution and complete scoped-finality acceptance.
 
+
+## Recovered pending-generation content consents
+
+- Added an explicit recovered pending-generation content-consent codec retaining
+  complete direct14/15/16/17/20/21 and optional24 histories through the original
+  seven-owner operation60 path. Original generation1 and prior generation-only
+  profiles remain unchanged; new cases are authored/typechecked, with runtime pending.
+
 ## Recovered pending-generation attestation composition
 
 - Compose complete original operation24 history with original refused/withdrawn

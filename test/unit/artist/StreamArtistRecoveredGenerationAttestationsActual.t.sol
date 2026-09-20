@@ -72,7 +72,7 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
         GenerationAttestationVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     T.Binding[] private originals;
     L.Terminal[] private terminals;
-    uint64 private finalGeneration;
+    uint64 internal finalGeneration;
 
     function testGenerationAttestationsRefusedWithdrawnThirdAndAllOriginalHeads() external {
         _gaBaseline(2);
@@ -233,7 +233,7 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
         Attestations.validate(b, q, p);
     }
 
-    function _gaBaseline(uint8 transitions) private {
+    function _gaBaseline(uint8 transitions) internal {
         require(transitions == 1 || transitions == 2);
         for (uint256 i; i < transitions; ++i) {
             T.Binding memory b = Binding(suite.owners[0]).binding(1);
@@ -283,7 +283,7 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
         terminals.push(Terminal(suite.owners[0]).bindingTermination(1, finalGeneration));
     }
 
-    function _gaRecords() private {
+    function _gaRecords() internal {
         _raPrimary(0, 0);
         _raDeployment();
         bytes memory waiver = bytes("explicit original personhood waiver");
@@ -328,7 +328,7 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
         _raAssert(next.coordinator.suiteConfiguration(), raRows.length);
     }
 
-    function _gaBinding(T.SuiteConfiguration memory target) private view {
+    function _gaBinding(T.SuiteConfiguration memory target) internal view {
         require(
             Binding(target.owners[0]).binding(1).generation == finalGeneration,
             "selected final generation"
@@ -343,8 +343,8 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
             );
             require(
                 keccak256(
-                        abi.encode(Terminal(target.owners[0]).bindingTermination(1, uint64(i + 1)))
-                    ) == keccak256(abi.encode(terminals[i])),
+                    abi.encode(Terminal(target.owners[0]).bindingTermination(1, uint64(i + 1)))
+                ) == keccak256(abi.encode(terminals[i])),
                 "every original refusal/withdrawal remains exact"
             );
         }
@@ -354,7 +354,7 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
         Successor memory next,
         RH.Request memory request,
         Commit.Prepared memory p
-    ) private view returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         bytes32 value = keccak256(
             abi.encode(
                 RH.PROFILE,
@@ -388,8 +388,9 @@ contract StreamArtistRecoveredGenerationAttestationsActualTest is
             p.externalGuards
         );
         Evidence.Descriptor memory descriptor = Evidence.describe(profile);
-        bytes32 id =
-            Evidence.pageId(address(next.registry), address(next.coordinator), value, descriptor, 0);
+        bytes32 id = Evidence.pageId(
+            address(next.registry), address(next.coordinator), value, descriptor, 0
+        );
         return abi.encodePacked(Archive.appendArtistEvidenceV2.selector, id);
     }
 }

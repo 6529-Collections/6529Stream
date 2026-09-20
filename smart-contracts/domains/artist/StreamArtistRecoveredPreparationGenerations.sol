@@ -33,6 +33,16 @@ import {
     StreamArtistRecoveredAttestationHydration as Attestations
 } from "./StreamArtistRecoveredAttestationHydration.sol";
 
+import {
+    StreamArtistRecoveredGenerationConsents as GenerationConsents
+} from "./StreamArtistRecoveredGenerationConsents.sol";
+import {
+    StreamArtistRecoveredGenerationConsentFacts as ConsentFacts
+} from "./StreamArtistRecoveredGenerationConsentFacts.sol";
+import {
+    StreamArtistRecoveredContentConsentHydration as ContentH
+} from "./StreamArtistRecoveredContentConsentHydration.sol";
+
 /// @notice Original bounded generation selection and complete source joins before attestations.
 library StreamArtistRecoveredPreparationGenerations {
     function collect(
@@ -48,20 +58,32 @@ library StreamArtistRecoveredPreparationGenerations {
         consentMode = current.consentMode;
         hasGenerations = current.generation > 1;
         if (!hasGenerations) return (encoded, consentMode, false);
-        if (consentMode != 1 || hasIdentityDelegations || royaltyFreezeCount != 0) {
+        if (consentMode != 1 || hasIdentityDelegations) {
             revert T.UnsupportedProfile();
         }
-        // Witnesses.collect already proves exact counts and source subjects. This stage
-        // admits only the single exhaustive op24 witness, never economics or an empty extra.
-        if (witnessCount != (provenance.journals[4].length == 0 ? 0 : 1)) {
-            revert T.UnsupportedProfile();
-        }
+        // The earlier witness collector authenticates exact original15/24 counts. Royalty
+        // witnesses must separately match every original20 occurrence, never a projection.
+        bool needsWitness = provenance.journals[4].length != 0;
+        uint256 royalties;
+        bool content;
+        bool extraConsent;
         for (uint256 i; i < provenance.journals[4].length; ++i) {
             if (provenance.journals[4][i].receipt.operation != 24) revert T.UnsupportedProfile();
         }
         for (uint256 i; i < provenance.journals[6].length; ++i) {
-            if (provenance.journals[6][i].receipt.operation != 14) revert T.UnsupportedProfile();
+            uint16 op = provenance.journals[6][i].receipt.operation;
+            if (op == 15) needsWitness = true;
+            if (op == 20) ++royalties;
+            if (op == 17 || op == 20 || op == 21) content = true;
+            if (op == 15 || op == 16) extraConsent = true;
+            if (op != 14 && op != 15 && op != 16 && op != 17 && op != 20 && op != 21) {
+                revert T.UnsupportedProfile();
+            }
         }
+        if (
+            witnessCount != (needsWitness ? 1 : 0) || royaltyFreezeCount != royalties
+                || (extraConsent && !content)
+        ) revert T.UnsupportedProfile();
         Generations.Bundle memory generations =
             Generations.collect(source.owners[0], query, RH.ownerProvenance(provenance, 0));
         encoded = abi.encode(generations);
@@ -112,6 +134,59 @@ library StreamArtistRecoveredPreparationGenerations {
                 )
             );
         abi.decode(Tuple.result(ok, result), (uint256[]));
+    }
+
+    function content(
+        address source,
+        AH.Query memory query,
+        RH.OwnerProvenance memory provenance,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        bytes memory rawGenerations
+    ) public view returns (bytes memory) {
+        Generations.Bundle memory b = abi.decode(rawGenerations, (Generations.Bundle));
+        // Complete generation validation has already occurred before this fixed collector.
+        // The resulting current generation is embedded in the separately validated content rows.
+        if (
+            b.bindingHash != query.bindingHash || b.current.bindingHash != query.bindingHash
+                || b.current.generation != b.rows.length || !b.current.accepted
+                || b.current.consentMode != 1
+        ) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
+        return abi.encode(
+            GenerationConsents.collect(
+                source, query, provenance, economics, royalties, b.current.generation
+            )
+        );
+    }
+
+    function contentFacts(
+        bytes memory identity,
+        bytes memory consent,
+        AH.Query memory query,
+        RH.Provenance memory provenance,
+        bytes memory records
+    ) public view {
+        ContentH.Bundle memory b = abi.decode(consent, (ContentH.Bundle));
+        uint64 generation = GenerationConsents.generation(b);
+        if (generation < 2 || generation > 128) revert RH.InvalidRecoveredHydrationProfile();
+        if (address(ConsentFacts).code.length == 0) assembly ("memory-safe") { revert(0, 0) }
+        (bool ok, bytes memory result) = address(ConsentFacts)
+            .staticcall(
+                bytes.concat(
+                    ConsentFacts.validate.selector,
+                    Tuple.fourModeAndRows(
+                        identity,
+                        consent,
+                        abi.encode(query),
+                        abi.encode(provenance),
+                        uint8(generation),
+                        records
+                    )
+                )
+            );
+        Tuple.result(ok, result);
     }
 
     /// @dev Called only at owner0's semantic step after its original capability and guard checks.

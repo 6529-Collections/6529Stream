@@ -147,11 +147,14 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         _reject(f, false, 0, count, abi.encodeWithSelector(T.UnsupportedProfile.selector));
     }
 
-    function testFuzzGenerationRejectsEveryNonPolicyOperationBeforeCollector(
+    function testFuzzGenerationRejectsEveryUnsupportedConsentOperationBeforeCollector(
         uint16 operation,
         uint8 position
     ) public {
-        if (operation == 14) operation = 15;
+        if (
+            operation == 14 || operation == 15 || operation == 16 || operation == 17
+                || operation == 20 || operation == 21
+        ) operation = 18;
         Fixture memory f = _fixture(2, 1);
         f.provenance.journals[6] = new RH.JournalEntry[](4);
         for (uint256 i; i < 4; ++i) {
@@ -174,6 +177,36 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         _reject(f, false, 0, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
         _reject(f, false, 2, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
         f.provenance.journals[4][1].receipt.operation = 44;
+        _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+    }
+
+    function testGenerationContentCountsOriginal15WitnessAnd20TermsExactly() public {
+        Fixture memory f = _fixture(2, 1);
+        f.provenance.journals[6] = new RH.JournalEntry[](6);
+        uint16[6] memory operations = [uint16(14), 15, 16, 17, 20, 21];
+        for (uint256 i; i < 6; ++i) {
+            f.provenance.journals[6][i].receipt.operation = operations[i];
+        }
+        _mockProofWorkers(f);
+        (bytes memory raw, uint8 mode, bool selected) =
+            Stage.collect(f.source, f.query, f.provenance, f.identity, false, 1, 1);
+        assert(selected && mode == 1 && keccak256(raw) == keccak256(abi.encode(f.generations)));
+        _reject(f, false, 0, 1, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        _reject(f, false, 2, 1, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        _reject(f, false, 1, 2, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        _reject(f, true, 1, 1, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+    }
+
+    function testGenerationContentWithoutEconomicsOrAttestationsNeedsNoExtraWitness() public {
+        Fixture memory f = _fixture(2, 1);
+        f.provenance.journals[6][0].receipt.operation = 17;
+        _mockProofWorkers(f);
+        (bytes memory raw,, bool selected) =
+            Stage.collect(f.source, f.query, f.provenance, f.identity, false, 0, 0);
+        assert(selected && keccak256(raw) == keccak256(abi.encode(f.generations)));
+        _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        f.provenance.journals[6][0].receipt.operation = 15;
         _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
     }
 

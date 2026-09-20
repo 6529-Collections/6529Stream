@@ -62,6 +62,29 @@ library StreamArtistRecoveredContentConsentReads {
         T.EconomicsConsent[] memory economics,
         T.RoyaltyFreeze[] memory royalties
     ) public view returns (ContentH.Bundle memory b) {
+        return _collectRows(source, q, p, economics, royalties, 1);
+    }
+
+    function collectRowsAt(
+        address source,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        uint64 generation
+    ) public view returns (ContentH.Bundle memory b) {
+        if (generation < 2 || generation > 128) revert T.UnsupportedProfile();
+        return _collectRows(source, q, p, economics, royalties, generation);
+    }
+
+    function _collectRows(
+        address source,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        uint64 generation
+    ) private view returns (ContentH.Bundle memory b) {
         Provenance.validateOwnerSource(p, 6, source);
         uint256 cc;
         uint256 rc;
@@ -76,7 +99,7 @@ library StreamArtistRecoveredContentConsentReads {
         if (cc > MAX_ROWS || rc > MAX_ROWS || fc > MAX_ROWS || royalties.length != rc) {
             revert T.UnsupportedProfile();
         }
-        b.original = _base(source, q, p, economics);
+        b.original = _base(source, q, p, economics, generation);
         b.consents = new ContentOwner.ConsentRecord[](cc);
         b.royalties = new ContentH.Royalty[](rc);
         b.freezes = new Content.FreezeRecord[](fc);
@@ -91,7 +114,7 @@ library StreamArtistRecoveredContentConsentReads {
             } else if (n.receipt.operation == 20) {
                 T.RoyaltyFreeze memory terms = royalties[rc];
                 T.RoyaltyFreezeRecord memory item =
-                    Consent(source).royaltyFreezeRecord(terms, q.artistId, 1);
+                    Consent(source).royaltyFreezeRecord(terms, q.artistId, generation);
                 if (item.recordHash != n.receipt.recordHash) _invalid();
                 b.royalties[rc++] = ContentH.Royalty(
                     terms, item, Delegated(source).recordDelegation(item.recordHash)
@@ -104,14 +127,32 @@ library StreamArtistRecoveredContentConsentReads {
     }
 
     function requireHeads(address source, ContentH.Bundle memory b) public view {
+        _requireHeads(source, b, 1);
+    }
+
+    function requireHeadsAt(address source, ContentH.Bundle memory b, uint64 generation)
+        public
+        view
+    {
+        if (generation < 2 || generation > 128) revert T.UnsupportedProfile();
+        _requireHeads(source, b, generation);
+    }
+
+    function _requireHeads(address source, ContentH.Bundle memory b, uint64 generation)
+        private
+        view
+    {
         for (uint256 i; i < b.consents.length; ++i) {
             ContentOwner.ConsentRecord memory r = b.consents[i];
             uint256 last = i;
             for (uint256 j = i + 1; j < b.consents.length; ++j) {
-                if (_contentScope(b.consents[j].terms) == _contentScope(r.terms)) last = j;
+                if (
+                    _contentScope(b.consents[j].terms, generation)
+                        == _contentScope(r.terms, generation)
+                ) last = j;
             }
             if (
-                keccak256(abi.encode(ContentOwner(source).contentConsentAt(r.terms, 1)))
+                keccak256(abi.encode(ContentOwner(source).contentConsentAt(r.terms, generation)))
                     != keccak256(abi.encode(b.consents[last]))
             ) _invalid();
         }
@@ -131,7 +172,7 @@ library StreamArtistRecoveredContentConsentReads {
                                 ContentOwner(source)
                                     .contentFreezeAt(
                                         b.original.collectionId,
-                                        1,
+                                        generation,
                                         r.metadataContract,
                                         r.lockClasses[k]
                                     )
@@ -146,9 +187,12 @@ library StreamArtistRecoveredContentConsentReads {
         address source,
         AH.Query memory q,
         RH.OwnerProvenance memory p,
-        T.EconomicsConsent[] memory terms
+        T.EconomicsConsent[] memory terms,
+        uint64 generation
     ) private view returns (Base.Bundle memory b) {
-        if (q.policies.length > MAX_ROWS || terms.length > MAX_ROWS) revert T.UnsupportedProfile();
+        if (q.policies.length > MAX_ROWS || terms.length > MAX_ROWS) {
+            revert T.UnsupportedProfile();
+        }
         b.provenance = RH.ownerProvenanceHash(p, 6);
         b.artistId = q.artistId;
         b.collectionId = q.collectionId;
@@ -164,7 +208,8 @@ library StreamArtistRecoveredContentConsentReads {
         for (uint256 i; i < terms.length; ++i) {
             bytes32 record = Consent(source).economicsRecord(terms[i]);
             if (
-                Evidence(source).economicsRecordForBinding(terms[i], q.artistId, 1, q.bindingHash)
+                Evidence(source)
+                        .economicsRecordForBinding(terms[i], q.artistId, generation, q.bindingHash)
                     != record
             ) _invalid();
             b.economics[i] = Base.Economics(
@@ -199,8 +244,12 @@ library StreamArtistRecoveredContentConsentReads {
         }
     }
 
-    function _contentScope(Content.Consent memory terms) private pure returns (bytes32) {
-        return keccak256(abi.encode(terms, uint64(1)));
+    function _contentScope(Content.Consent memory terms, uint64 generation)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(terms, generation));
     }
 
     function _invalid() private pure {

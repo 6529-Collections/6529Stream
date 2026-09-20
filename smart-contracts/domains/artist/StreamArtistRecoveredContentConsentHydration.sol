@@ -49,6 +49,10 @@ import {
     StreamArtistRecoveredContentConsentValidation as Validation
 } from "./StreamArtistRecoveredContentConsentValidation.sol";
 
+import {
+    StreamArtistRecoveredGenerationConsents as Generation
+} from "./StreamArtistRecoveredGenerationConsents.sol";
+
 /// @notice Complete recovered singleton Consent14/15/16/17/20/21 history.
 /// @dev Original17/20/21 records omit signer/nonce/time. Their fixed-owner maps, native entries
 /// and replay admissions are retained without inventing missing preimages or current eligibility.
@@ -125,7 +129,13 @@ library StreamArtistRecoveredContentConsentHydration {
         if (payload.nonces.length != 0 || (header.requiredFeatures & RH.CONTENT_CONSENTS) == 0) {
             _invalid();
         }
-        result = decode(q, payload.provenance, payload.semanticState);
+        uint64 generation = 1;
+        if (Generation.tagged(payload.semanticState)) {
+            if ((header.requiredFeatures & RH.BINDING_GENERATIONS) == 0) _invalid();
+            (result, generation) = Generation.decode(q, payload.provenance, payload.semanticState);
+        } else {
+            result = decode(q, payload.provenance, payload.semanticState);
+        }
         Base.Bundle memory b = result.original;
         if (((header.requiredFeatures & RH.DIRECT_ECONOMICS) != 0) != (b.economics.length != 0)) {
             _invalid();
@@ -141,7 +151,7 @@ library StreamArtistRecoveredContentConsentHydration {
         for (uint256 i; i < b.economics.length; ++i) {
             Base.Economics memory row = b.economics[i];
             EH.Row memory r = row.item;
-            bytes32 key = Association.key(r.terms, q.artistId, 1, q.bindingHash);
+            bytes32 key = Association.key(r.terms, q.artistId, generation, q.bindingHash);
             if (
                 economics[r.association.payloadHash] != 0 || associated[key] != 0
                     || delegations[r.recordHash] != 0
@@ -180,6 +190,7 @@ library StreamArtistRecoveredContentConsentHydration {
         mapping(bytes32 => bytes32) storage delegations,
         Bundle memory b
     ) public {
+        uint64 generation = Generation.generation(b);
         ContentOwner.ConsentRecord memory emptyConsent;
         T.RoyaltyFreezeRecord memory emptyRoyalty;
         Content.FreezeRecord memory emptyFreeze;
@@ -189,14 +200,18 @@ library StreamArtistRecoveredContentConsentHydration {
             ContentOwner.ConsentRecord memory r = b.consents[i];
             if (
                 keccak256(abi.encode(consents[r.recordHash])) != keccak256(abi.encode(emptyConsent))
-                    || latestConsents[_contentScope(r.terms)] != 0 || delegations[r.recordHash] != 0
+                    || latestConsents[_contentScope(r.terms, generation)] != 0
+                    || delegations[r.recordHash] != 0
             ) _invalid();
         }
         for (uint256 i; i < b.royalties.length; ++i) {
             Royalty memory r = b.royalties[i];
             if (
-                keccak256(abi.encode(royalties[_royaltyScope(r.terms, b.original.artistId)]))
-                        != keccak256(abi.encode(emptyRoyalty))
+                keccak256(
+                            abi.encode(
+                                royalties[_royaltyScope(r.terms, b.original.artistId, generation)]
+                            )
+                        ) != keccak256(abi.encode(emptyRoyalty))
                     || delegations[r.item.recordHash] != 0
             ) _invalid();
         }
@@ -210,7 +225,10 @@ library StreamArtistRecoveredContentConsentHydration {
                 if (
                     latestFreezes[
                             _freezeLookup(
-                                b.original.collectionId, r.metadataContract, r.lockClasses[j]
+                                b.original.collectionId,
+                                generation,
+                                r.metadataContract,
+                                r.lockClasses[j]
                             )
                         ] != 0
                 ) _invalid();
@@ -219,11 +237,11 @@ library StreamArtistRecoveredContentConsentHydration {
         for (uint256 i; i < b.consents.length; ++i) {
             ContentOwner.ConsentRecord memory r = b.consents[i];
             consents[r.recordHash] = r;
-            latestConsents[_contentScope(r.terms)] = r.recordHash;
+            latestConsents[_contentScope(r.terms, generation)] = r.recordHash;
         }
         for (uint256 i; i < b.royalties.length; ++i) {
             Royalty memory r = b.royalties[i];
-            royalties[_royaltyScope(r.terms, b.original.artistId)] = r.item;
+            royalties[_royaltyScope(r.terms, b.original.artistId, generation)] = r.item;
             delegations[r.item.recordHash] = r.grant;
         }
         for (uint256 i; i < b.freezes.length; ++i) {
@@ -231,7 +249,9 @@ library StreamArtistRecoveredContentConsentHydration {
             freezes[r.recordHash] = r;
             for (uint256 j; j < r.lockClasses.length; ++j) {
                 latestFreezes[
-                    _freezeLookup(b.original.collectionId, r.metadataContract, r.lockClasses[j])
+                    _freezeLookup(
+                        b.original.collectionId, generation, r.metadataContract, r.lockClasses[j]
+                    )
                 ] = r.recordHash;
             }
         }
@@ -241,24 +261,29 @@ library StreamArtistRecoveredContentConsentHydration {
         Validation.validate(b, q, p);
     }
 
-    function _contentScope(Content.Consent memory terms) private pure returns (bytes32) {
-        return keccak256(abi.encode(terms, uint64(1)));
-    }
-
-    function _royaltyScope(T.RoyaltyFreeze memory terms, bytes32 artist)
+    function _contentScope(Content.Consent memory terms, uint64 generation)
         private
         pure
         returns (bytes32)
     {
-        return keccak256(abi.encode(terms, artist, uint64(1)));
+        return keccak256(abi.encode(terms, generation));
     }
 
-    function _freezeLookup(uint256 collection, address metadata, bytes32 lockClass)
+    function _royaltyScope(T.RoyaltyFreeze memory terms, bytes32 artist, uint64 generation)
         private
         pure
         returns (bytes32)
     {
-        return keccak256(abi.encode(collection, uint64(1), metadata, lockClass));
+        return keccak256(abi.encode(terms, artist, generation));
+    }
+
+    function _freezeLookup(
+        uint256 collection,
+        uint64 generation,
+        address metadata,
+        bytes32 lockClass
+    ) private pure returns (bytes32) {
+        return keccak256(abi.encode(collection, generation, metadata, lockClass));
     }
 
     function _policyScope(uint256 collectionId, AH.PolicyKey memory key)

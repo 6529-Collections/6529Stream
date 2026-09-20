@@ -57,6 +57,27 @@ library StreamArtistRecoveredContentConsentFactRows {
         Scope memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
+        return _validateRows(identity, consent, q, p, 1);
+    }
+
+    function validateGenerationRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory uses) {
+        if (generation < 2 || generation > 128 || identity.delegations.length != 0) _invalid();
+        return _validateRows(identity, consent, q, p, generation);
+    }
+
+    function _validateRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) private pure returns (uint256[] memory uses) {
         if (
             q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0
                 || identity.artistId != q.artistId || consent.artistId != q.artistId
@@ -86,7 +107,8 @@ library StreamArtistRecoveredContentConsentFactRows {
                 ContentOwner.ConsentRecord memory row = consent.consents[contents++];
                 if (
                     row.recordHash != native_.receipt.recordHash || row.artistId != q.artistId
-                        || row.bindingGeneration != 1 || row.terms.collectionId != q.collectionId
+                        || row.bindingGeneration != generation
+                        || row.terms.collectionId != q.collectionId
                         || (row.authorityClass != 1 && row.authorityClass != 3)
                 ) _invalid();
             } else if (op == 21) {
@@ -94,7 +116,7 @@ library StreamArtistRecoveredContentConsentFactRows {
                 Content.FreezeRecord memory row = consent.freezes[freezes++];
                 if (
                     row.recordHash != native_.receipt.recordHash || row.artistId != q.artistId
-                        || row.bindingGeneration != 1
+                        || row.bindingGeneration != generation
                         || (row.authorityClass != 1 && row.authorityClass != 3)
                 ) _invalid();
             } else {
@@ -102,7 +124,8 @@ library StreamArtistRecoveredContentConsentFactRows {
                 ContentH.Royalty memory row = consent.royalties[royalties++];
                 if (
                     row.item.recordHash != native_.receipt.recordHash
-                        || row.item.artistId != q.artistId || row.item.bindingGeneration != 1
+                        || row.item.artistId != q.artistId
+                        || row.item.bindingGeneration != generation
                         || row.terms.collectionId != q.collectionId
                 ) _invalid();
                 if (row.grant != 0) {

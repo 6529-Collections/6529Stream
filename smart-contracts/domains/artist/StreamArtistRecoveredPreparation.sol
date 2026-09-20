@@ -120,21 +120,39 @@ library StreamArtistRecoveredPreparation {
         if (context.hasDelegation) context.features |= RH.DELEGATED_CONSENT;
         if (context.hasContent) {
             context.features |= RH.CONTENT_CONSENTS;
-            context.consent = ConsentStage.content(
-                c.source.owners[6],
-                prepared.query,
-                RH.ownerProvenance(c.provenance, 6),
-                context.economics,
-                royaltyFreezes
-            );
-            Joins.content(
-                context.identity,
-                context.consent,
-                prepared.query,
-                c.provenance,
-                consentMode,
-                attestationRecords
-            );
+            if (context.hasGenerations) {
+                context.consent = GenerationStage.content(
+                    c.source.owners[6],
+                    prepared.query,
+                    RH.ownerProvenance(c.provenance, 6),
+                    context.economics,
+                    royaltyFreezes,
+                    context.generations
+                );
+                GenerationStage.contentFacts(
+                    context.identity,
+                    context.consent,
+                    prepared.query,
+                    c.provenance,
+                    attestationRecords
+                );
+            } else {
+                context.consent = ConsentStage.content(
+                    c.source.owners[6],
+                    prepared.query,
+                    RH.ownerProvenance(c.provenance, 6),
+                    context.economics,
+                    royaltyFreezes
+                );
+                Joins.content(
+                    context.identity,
+                    context.consent,
+                    prepared.query,
+                    c.provenance,
+                    consentMode,
+                    attestationRecords
+                );
+            }
         } else if (royaltyFreezes.length != 0) {
             revert T.UnsupportedProfile();
         } else if (context.hasDelegation) {
