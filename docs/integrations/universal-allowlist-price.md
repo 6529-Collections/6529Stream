@@ -70,18 +70,19 @@ with no CBOR metadata: this carrier is 22,005 runtime / 27,506 creation bytes.
 Its original 121 ABI entries and recursive storage layout are unchanged. The
 two admission calls use the already accepted fixed SaleExecution worker; its
 original checks and caller context are retained. The isolated 302-source unit graph includes the reviewed genuine conservation
-floor fixture correction. Its 102 artifacts (100 concrete production products)
-pass exact source/compiler/link/metadata verification and the original production
-code limits before tests. The second frozen run passed 34 of 35 unit cases. Its
-sole remaining failure was an obsolete string-error assertion: the unchanged
-recipient callback correctly reverted with `ReentrancyGuardReentrantCall()`.
-The assertion now names that exact original custom error, preserving the outer
-refund accounting checks. Earlier corrections evaluate the same public-library
-encoding before one-shot Foundry prank/revert expectations and use the same
-custom error for the token callback. All production bytes are unchanged.
-A final single changed-test cached run remains pending; the original failed
-captures are retained. No current-stack or launch acceptance follows from this
-bounded fixture evidence.
+floor fixture correction. All **35 bounded unit cases pass** on Solidity0.8.19,
+via-IR200/Paris/no-CBOR. Its102 artifacts (100 concrete production products) pass
+exact source/compiler/link/metadata verification and the original production code
+limits before tests. All302 source files match the committed corrected recipe.
+The cached tests invoked no compiler and left every artifact unchanged.
+
+Earlier negative captures remain retained. The fixture corrections evaluate the
+same public-library encoding before one-shot Foundry prank/revert expectations,
+and expect the original `ReentrancyGuardReentrantCall()` custom error for token
+and refund callbacks. They change no production byte or accounting assertion.
+The positive scope is the35 typed-boundary unit cases described above. It does
+not include the seven current-stack recipes, the later Dutch Payment changes,
+or launch acceptance.
 
 This profile does not implement the separate `6529Stream Sales` signing family,
 public unsigned sales, Dutch/PWYW/clearing programs, multi-token/prepared batches,
