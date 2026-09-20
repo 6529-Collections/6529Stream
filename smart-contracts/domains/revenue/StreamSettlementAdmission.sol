@@ -128,6 +128,38 @@ library StreamSettlementAdmission {
         );
     }
 
+    /// @notice Original fixed-role sale/Payment facts for retained primary-offer delegation.
+    /// @dev The Payment comes only from the exact-code sale's immutable lifecycle read. Existing
+    /// candidate admission still separately compares every supplied lifecycle field and Payment.
+    function requireStoredAdmission(address registry, address saleAdapter, bytes32 saleId)
+        internal
+        view
+        returns (StreamPrimarySettlementTypes.SaleLifecycleBinding memory stored)
+    {
+        ModuleFacts memory sale = _record(
+            registry, saleAdapter, SALE_ROLE, type(IStreamERC20SaleExecution).interfaceId
+        );
+        stored = _lifecycle(saleAdapter, saleId);
+        if (stored.saleCreatedAt == 0 || stored.saleCreatedAt > block.timestamp) {
+            revert SaleLifecycleMismatch(saleAdapter, saleId);
+        }
+        ModuleFacts memory payment = _record(
+            registry,
+            stored.paymentAdapter,
+            PAYMENT_ROLE,
+            type(IStreamERC20PrimarySettlementAdapter).interfaceId
+        );
+        _requireLifecycle(
+            sale, saleAdapter, stored.saleCreatedAt, stored.saleAdapterRegistryRevision
+        );
+        _requireLifecycle(
+            payment,
+            stored.paymentAdapter,
+            stored.saleCreatedAt,
+            stored.paymentAdapterRegistryRevision
+        );
+    }
+
     /// @notice Closed standard-Dutch admission; legacy fixed-price admission is unchanged.
     function captureDutch(address registry, address saleAdapter, address paymentAdapter)
         public

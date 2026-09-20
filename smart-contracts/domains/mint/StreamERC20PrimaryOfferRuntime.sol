@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamPrimaryOfferDelegationManifest.sol";
+
 import "./StreamERC20PrimaryOfferExecution.sol";
 import "./StreamImmediateSaleReveal.sol";
 import { StreamNativeAuctionDelegation as D } from "../auctions/StreamNativeAuctionDelegation.sol";
@@ -241,7 +243,9 @@ library StreamERC20PrimaryOfferRuntime {
             dc.moduleRegistryCodeHash
         );
         uint256 cap = _gas(D.GAS_PARAMETER);
-        D.requireManifest(c, cap);
+        StreamPrimaryOfferDelegationManifest.requireERC20(
+            c, address(this), q.authorization.saleId, cap
+        );
         if (q.authorization.executor != buyer) {
             D.requireDelegated(
                 c,

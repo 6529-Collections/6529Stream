@@ -1,5 +1,17 @@
 # Changelog
 
+## Retained primary-offer delegation
+
+- Bind delegated native and ERC20 primary-offer execution to each original
+  sale lifecycle and compact NFTDelegation declaration, including the actual
+  house identity when checked inside the Manager or selected content gate.
+- Preserve ACTIVE-only new admission, live complete grant checks, original
+  ERC20 Payment binding, proof domains, replay stores and atomic funding.
+- Add sixteen actual-current Safe cases and ten typed-reader cases covering
+  retirement, grant and incident repair, strict lifecycle refusals, malformed
+  reads and original receipts. Source/type checks pass; native execution,
+  linked-library size and gas validation remain pending.
+
 ## Added: recovered pending generations with complete delegation histories
 
 - Compose original mode1/mode2 pending generations with full grant, revision, revocation and

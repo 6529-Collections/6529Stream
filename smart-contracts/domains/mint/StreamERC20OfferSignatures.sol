@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamPrimaryOfferDelegationManifest.sol";
+
 import { StreamERC20OfferHash } from "./StreamERC20OfferHash.sol";
 import { StreamPrivateSaleSupport } from "./StreamPrivateSaleSupport.sol";
 import {
@@ -91,7 +93,9 @@ library StreamERC20OfferSignatures {
         );
         Delegation.validateConfiguration(config);
         uint256 readGas = _gas(house, Delegation.GAS_PARAMETER);
-        _requireManifest(house, config, readGas);
+        StreamPrimaryOfferDelegationManifest.requireERC20(
+            config, house, d.authorization.saleId, readGas
+        );
         if (d.buyerSignature.authorizer != d.offer.buyer) {
             Delegation.requireDelegated(
                 config,
@@ -110,50 +114,6 @@ library StreamERC20OfferSignatures {
                 readGas
             );
         }
-    }
-
-    /// @dev Delegation.requireManifest names address(this), while this linked worker can execute
-    /// from the gate or Manager. The registered declaration must always name the actual house.
-    function _requireManifest(address house, Delegation.Configuration memory c, uint256 cap)
-        private
-        view
-    {
-        bytes memory input = abi.encodeCall(IStreamModuleRegistry.moduleRecord, (house));
-        uint256[14] memory words;
-        bool ok;
-        uint256 size;
-        address target = c.moduleRegistry;
-        uint256 available = gasleft();
-        if (cap > available || available - cap < (cap + 62) / 63 + 30000) {
-            revert InvalidERC20OfferSignatures();
-        }
-        assembly ("memory-safe") {
-            ok := staticcall(cap, target, add(input, 32), mload(input), words, 448)
-            size := returndatasize()
-        }
-        if (
-            !ok || size < 448 || words[0] != 32 || words[1] > 3 || words[5] > type(uint32).max
-                || words[9] != 384 || words[10] > type(uint64).max || words[11] > type(uint64).max
-                || words[12] > type(uint64).max || words[13] > size - 448
-                || size - 448 != ((words[13] + 31) / 32) * 32
-        ) revert InvalidERC20OfferSignatures();
-        bytes32 manifest = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_AUCTION_NFTDELEGATION_MANIFEST_V1"),
-                c.chainId,
-                house,
-                c.baseManifestHash,
-                c.core,
-                c.delegateRegistry,
-                c.delegateRegistryCodeHash,
-                c.delegationUsecase
-            )
-        );
-        if (
-            words[1] != 1 || bytes32(words[6]) != house.codehash || words[7] == 0
-                || bytes32(words[8]) != manifest || words[10] == 0 || words[10] > block.timestamp
-                || words[11] < words[10] || words[11] > block.timestamp || words[12] == 0
-        ) revert InvalidERC20OfferSignatures();
     }
 
     function _gas(address house, bytes32 id) private view returns (uint256 cap) {

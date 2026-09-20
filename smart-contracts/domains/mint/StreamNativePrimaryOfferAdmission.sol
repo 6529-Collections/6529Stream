@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
+import "./StreamPrimaryOfferDelegationManifest.sol";
 import "./StreamNativePrimaryOfferSupport.sol";
 import "./StreamNativePrimaryOfferAuthorization.sol";
 import "./StreamNativePrimaryOfferExecution.sol";
@@ -94,15 +96,18 @@ library StreamNativePrimaryOfferAdmission {
         view
     {
         if (buyer == address(0) || buyer == address(this)) revert InvalidPrimaryOffer();
-        if (msg.sender != buyer) _delegate(buyer, msg.sender, q.executorDelegation);
+        if (msg.sender != buyer) {
+            _delegate(buyer, msg.sender, q.authorization.saleId, q.executorDelegation);
+        }
         if (q.buyerProof.authorizer != buyer) {
-            _delegate(buyer, q.buyerProof.authorizer, q.signerDelegation);
+            _delegate(buyer, q.buyerProof.authorizer, q.authorization.saleId, q.signerDelegation);
         }
     }
 
     function _delegate(
         address buyer,
         address signer,
+        bytes32 saleId,
         IStreamNativeRefundDelegatedClaims.DelegationWitness calldata witness
     ) private view {
         IStreamNativeRefundDelegatedClaims.DelegationConfiguration memory
@@ -118,7 +123,7 @@ library StreamNativePrimaryOfferAdmission {
             dc.moduleRegistryCodeHash
         );
         uint256 cap = StreamNativeCuratedSaleRuntime.gasParameter(D.GAS_PARAMETER);
-        D.requireManifest(d, cap);
+        StreamPrimaryOfferDelegationManifest.requireNative(d, address(this), saleId, cap);
         D.requireDelegated(d, buyer, signer, D.Witness(witness.walletWide, witness.index), cap);
     }
 

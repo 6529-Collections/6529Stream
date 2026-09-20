@@ -143,11 +143,55 @@ fixed header and validates its URI-tail shape without allocating that tail.
 
 New `record()` and `saleFacts()` admission remains ACTIVE-only. Retained consent
 does not replace the sale, Recorder or Payment's independent original creation
-and revision checks, or relax delegation-manifest admission. The six cases in
+and revision checks, or replace the separate delegation checks below. The six cases in
 `StreamCurrentSettlementContinuity.t.sol` join these rules to actual current
 Artist, governed registry transitions, original threshold Safes, prepared native
 and ERC20 settlement, and conservation receipts. Source/ABI validation is
 available; native execution, gas and deployment capacity remain pending.
+
+### Retained primary-offer delegation
+
+Delegated execution of an original native or ERC20 primary offer checks its
+stored lifecycle before accepting a DEPRECATED sale's compact NFTDelegation
+manifest. The stateless linked `StreamPrimaryOfferDelegationManifest` has
+distinct native and ERC20 entry points with explicit actual house and sale ID.
+The native entry reuses prepared-native admission; the ERC20 entry reuses the
+original fixed-role predicates and reads the original Payment from the exact-code
+sale's stored four-field lifecycle. Neither caller-supplied timestamps nor a
+replacement Payment can create retained admission. The existing fixed and Dutch
+candidate admission paths are unchanged and still check the complete candidate.
+
+Both carriers and their Manager/gate signature workers use the typed entry
+points. The compact manifest still names the original house, chain, Core,
+NFTDelegation provider/code hash, use case and base manifest. Fixed header reads,
+current delegation caps, exact registry and module code, role/version/interface,
+creation-time and revision checks remain required. The original full live grant
+row is checked after the manifest, including identity, scope, index, validity
+times, all-token flag and token ID. New registration and other generic manifest
+callers remain ACTIVE-only. Direct payer plus direct buyer signer keeps its
+existing delegation bypass. Earned refunds, saved native-auction delivery and
+secondary custody-offer admission are unchanged.
+
+Manifest failures at the new shared boundary use `DelegationManifestMismatch`,
+`DelegationReadFailed`, `DelegationReadMalformed` or `DelegationReadGas`; typed
+lifecycle failures remain attributable to their native/ERC20 admission helpers.
+Original signature failures retain the signature workers' existing errors.
+
+The ten current ERC20 and six current native regression cases use actual Artist,
+governance and commercial Safes, original settlement identities and real Recorder
+and floor receipts. Separate ERC20 read controls expose the carrier, Manager and
+selected gate. Native offers have no pre-sale Manager preview; complete current
+executions exercise the worker and gate with their genuine active intent. Ten
+unit cases use explicitly adversarial readers for impossible lifecycle, registry
+and interface shapes; those do not establish a real current deployment.
+
+Grant repair spends the payer Safe's transaction nonce. Exact-envelope retry
+therefore uses a distinct delegated executor Safe; payer execution signs a fresh
+transaction envelope while retaining original commercial proofs and inputs.
+An approved ERC20 offer or PaymentIntent is not pre-funded custody: its original
+Recorder funding callback still follows candidate validation. Native offer funds
+arrive during acceptance. The new linked helper and tests have source/type
+validation; native execution, codegen size and gas evidence remain pending.
 
 ## Funding phase and rollback
 
