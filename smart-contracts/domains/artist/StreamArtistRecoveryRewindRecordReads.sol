@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveryRewindRevisionReads
+} from "./StreamArtistRecoveryRewindRevisionReads.sol";
+import {
+    StreamArtistRecoveryRewindStandingReads
+} from "./StreamArtistRecoveryRewindStandingReads.sol";
 import { StreamArtistRecoveryRewindPayoutReads } from "./StreamArtistRecoveryRewindPayoutReads.sol";
 
 import {
@@ -173,7 +179,9 @@ library StreamArtistRecoveryRewindRecordReads {
         } else if (kind == W.RecordKind.ESTATE_DIRECTIVE) {
             f = _directive(e, artistId, row.recordHash, source);
         } else if (kind == W.RecordKind.IDENTITY_REVISION) {
-            f = _revision(e, artistId, row.recordHash, originalContinuation, source);
+            f = StreamArtistRecoveryRewindRevisionReads.revision(
+                e, artistId, row.recordHash, originalContinuation, source
+            );
         } else if (kind == W.RecordKind.PAYOUT_DESIGNATION) {
             f = source.imported
                 ? StreamArtistRecoveryRewindPayoutReads.payoutAt(
@@ -183,7 +191,9 @@ library StreamArtistRecoveryRewindRecordReads {
         } else if (kind == W.RecordKind.STEWARD_SANCTION_GRANT) {
             f = _grant(e, artistId, row.recordHash, source);
         } else {
-            f = _standing(e, artistId, row.recordHash, source);
+            f = StreamArtistRecoveryRewindStandingReads.standing(
+                e, artistId, row.recordHash, source
+            );
         }
         f.selected.recordHash = row.recordHash;
         f.selected.nativeIndex = nativeIndex;
@@ -361,69 +371,6 @@ library StreamArtistRecoveryRewindRecordReads {
         f.selected.admissionProof = keccak256(abi.encode(f.selected.admissionProof, n, admitted));
     }
 
-    function _revision(
-        W.EnvironmentV3 memory e,
-        bytes32 artistId,
-        bytes32 hash,
-        bytes32 originalContinuation,
-        Source memory source
-    ) private view returns (Facts memory f) {
-        Doc.Record memory r = IStreamArtistIdentityRevisionReads(e.identityOwner)
-            .identityRevisionRecord(hash);
-        bytes memory document = IStreamArtistIdentityRevisionReads(e.identityOwner)
-            .identityDocumentBytes(r.revisedRecordHash);
-        bool living = _revisionHash(source.original, r, 1) == hash;
-        bool estate = _revisionHash(source.original, r, 3) == hash;
-        if (
-            r.recordHash != hash || r.artistId != artistId || r.signer == address(0)
-                || r.signedAt == 0 || r.signedAt > block.timestamp || living == estate
-                || (r.authorityClass != 1 && r.authorityClass != 3)
-                || (living && r.authorityClass != 1) || r.previousRecordHash == 0
-                || r.revisedRecordHash == r.previousRecordHash || document.length == 0
-                || document.length > 8192 || keccak256(document) != r.revisedRecordHash
-                || bytes(r.displayName).length == 0 || bytes(r.displayName).length > 256
-                || bytes(r.identityRecordURI).length > 2048
-        ) revert W.InvalidRecoveryRewindRecord(hash);
-        _revisionParent(e, r);
-        bytes32 digest = H.typed(
-            A.hashes(source.original),
-            keccak256(
-                abi.encode(
-                    keccak256(
-                        "StreamArtistIdentityRevision(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,uint256 nonce,uint64 signedAt)"
-                    ),
-                    artistId,
-                    r.previousRecordHash,
-                    r.revisedRecordHash,
-                    r.nonce,
-                    r.signedAt
-                )
-            )
-        );
-        T.ReplayCell memory n = _nonce(e, source, artistId, r.nonce, digest);
-        bytes32 chainProof;
-        if (source.imported) {
-            Runtime.ReplayFact memory nonce = A.nonceAt(
-                e, source.occurrence.position.point.environmentHash, artistId, r.nonce, digest
-            );
-            chainProof = C.revisionAt(e, r, originalContinuation, nonce, source.occurrence);
-        } else {
-            chainProof = C.revision(e, r, originalContinuation, n);
-        }
-        f.selected.originalDataHash = keccak256(abi.encode(r, document));
-        f.selected.nonce = r.nonce;
-        f.association = IStreamArtistRotationReads(e.identityOwner)
-            .identityRevisionProvisionalAssociation(hash);
-        f.admissionRevision = n.touchedRevision;
-        f.authorityClass = living ? 1 : 3;
-        f.previousRecordHash = r.previousRevisionRecord;
-        f.previousValueHash = r.previousRecordHash;
-        f.valueHash = r.revisedRecordHash;
-        _association(e, source, artistId, r.signer, f);
-        f.selected.admissionProof =
-            keccak256(abi.encode(f.selected.admissionProof, n, chainProof, f.authorityClass));
-    }
-
     function _association(
         W.EnvironmentV3 memory e,
         Source memory source,
@@ -445,124 +392,6 @@ library StreamArtistRecoveryRewindRecordReads {
         (f.transition, f.eligible, f.selected.admissionProof) = A.association(
             e, artistId, f.association, signer, f.authorityClass, f.admissionRevision
         );
-    }
-
-    function _standing(
-        W.EnvironmentV3 memory e,
-        bytes32 artistId,
-        bytes32 hash,
-        Source memory source
-    ) private view returns (Facts memory f) {
-        R.StandingRecord memory r =
-            IStreamArtistRotationReads(e.identityOwner).standingRevocationRecord(hash);
-        if (
-            r.recordHash != hash || r.terms.artistId != artistId || r.signer == address(0)
-                || (r.authorityClass != 1 && r.authorityClass != 3) || r.signedAt == 0
-                || r.signedAt > block.timestamp || r.terms.revokedAddress == address(0)
-                || r.terms.retiredTransitionRecordHash == 0
-                || RH.standingRecordForAuthority(
-                        A.hashes(source.original),
-                        r.terms,
-                        r.signer,
-                        r.authorityClass,
-                        r.nonce,
-                        r.signedAt
-                    ) != hash
-        ) revert W.InvalidRecoveryRewindRecord(hash);
-        T.ReplayCell memory admitted;
-        T.ReplayCell memory n;
-        bytes32 admission;
-        V.Snapshot memory v;
-        R.TransitionState memory t;
-        if (source.imported) {
-            Runtime.ReplayFact memory admittedAt;
-            (admittedAt, admission) = C.standingAt(e, r, source.occurrence);
-            Runtime.Context memory clock = Runtime.load(e, 2);
-            Runtime.ReplayFact memory nonce = Runtime.replay(
-                clock,
-                source.occurrence.position.point.environmentHash,
-                keccak256("identity_authority.replay.nonce_allocator"),
-                keccak256(abi.encode(artistId, r.nonce))
-            );
-            if (
-                nonce.cell.commitment == 0 || nonce.cell.status != 2 || nonce.cell.kind != 1
-                    || !Recovered.samePoint(nonce.admission.point, admittedAt.admission.point)
-            ) {
-                revert W.InvalidRecoveryRewindRecord(hash);
-            }
-            Runtime.OriginFact memory vesting;
-            (v, t, vesting) = A.vestingAt(e, artistId, r.terms.retiredTransitionRecordHash);
-            if (!Runtime.before(clock, vesting.point, admittedAt.admission.point)) {
-                revert W.InvalidRecoveryRewindRecord(hash);
-            }
-            admitted = admittedAt.cell;
-            n = nonce.cell;
-            admission = keccak256(abi.encode(admission, admittedAt, nonce, vesting));
-        } else {
-            (admitted, admission) = C.standing(e, r);
-            // Original51 stores inclusion time rather than the signed authorization deadline.
-            n = IStreamArtistOwner(e.identityOwner)
-                .replayCell(
-                    A.key(
-                        e,
-                        keccak256("identity_authority.replay.nonce_allocator"),
-                        keccak256(abi.encode(artistId, r.nonce))
-                    )
-                );
-            if (
-                n.commitment == 0 || n.status != 2 || n.kind != 1
-                    || n.touchedRevision != admitted.touchedRevision
-            ) {
-                revert W.InvalidRecoveryRewindRecord(hash);
-            }
-            (v, t) = A.vesting(e, artistId, r.terms.retiredTransitionRecordHash);
-        }
-        (address prior, bytes32 guardian, uint64 tail) = _standingTerms(e, v);
-        if (
-            prior != r.terms.revokedAddress || v.oldAddress != prior || tail < 30 days
-                || uint256(t.postWindowEndsAt) + tail > r.signedAt
-                || (!source.imported && admitted.touchedRevision <= v.ownerRevision)
-        ) revert W.InvalidRecoveryRewindRecord(hash);
-        // Later retirements and later compromise markers do not erase this original admission.
-        // The selector resolves its exact retirement scope against the current standing inventory.
-        f.selected.originalDataHash = keccak256(abi.encode(r));
-        f.selected.nonce = r.nonce;
-        f.selected.admissionProof = keccak256(abi.encode(admission, n, v, t, prior, guardian, tail));
-        f.transition = t;
-        f.admissionRevision = admitted.touchedRevision;
-        f.authorityClass = r.authorityClass;
-        f.eligible = true;
-        f.account = r.terms.revokedAddress;
-        f.retirementHash = r.terms.retiredTransitionRecordHash;
-        f.valueHash = r.terms.reasonHash;
-    }
-
-    function _standingTerms(W.EnvironmentV3 memory e, V.Snapshot memory v)
-        private
-        view
-        returns (address prior, bytes32 guardian, uint64 tail)
-    {
-        if (v.operationId == 32) {
-            R.RotationRecord memory r =
-                IStreamArtistRotationReads(e.identityOwner).rotationRecord(v.transitionRecordHash);
-            if (r.recordHash != v.transitionRecordHash || r.terms.artistId != v.artistId) {
-                revert W.InvalidRecoveryRewindRecord(v.transitionRecordHash);
-            }
-            return (r.terms.oldAddress, r.guardianSetRecordHash, r.standingTail);
-        }
-        if (v.operationId == 35) {
-            return IStreamArtistIdentityRecoveryOwner(e.identityOwner)
-                .recoveryTransitionStanding(v.transitionRecordHash);
-        }
-        if (v.operationId == 40) {
-            return IStreamArtistEstateOwner(e.identityOwner)
-                .estateTransitionStanding(v.transitionRecordHash);
-        }
-        if (v.operationId == 43) {
-            return IStreamArtistDormancyOwner(e.identityOwner)
-                .dormancyTransitionStanding(v.transitionRecordHash);
-        }
-        revert W.InvalidRecoveryRewindRecord(v.transitionRecordHash);
     }
 
     function _nonce(
@@ -603,43 +432,6 @@ library StreamArtistRecoveryRewindRecordReads {
         pure
     {
         if (a.touchedRevision != b.touchedRevision) revert W.InvalidRecoveryRewindRecord(hash);
-    }
-
-    function _revisionHash(W.EnvironmentV3 memory e, Doc.Record memory r, uint8 class_)
-        private
-        pure
-        returns (bytes32)
-    {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_IDENTITY_REVISION_RECORD_V1"),
-                e.chainId,
-                e.registry,
-                r.artistId,
-                r.previousRecordHash,
-                r.revisedRecordHash,
-                r.signer,
-                class_,
-                r.nonce,
-                r.signedAt
-            )
-        );
-    }
-
-    function _revisionParent(W.EnvironmentV3 memory e, Doc.Record memory r) private view {
-        if (r.previousRevisionRecord == 0) {
-            if (
-                IStreamArtistIdentityOwner(e.identityOwner).identity(r.artistId).identityRecordHash
-                    != r.previousRecordHash
-            ) revert W.InvalidRecoveryRewindRecord(r.recordHash);
-        } else {
-            Doc.Record memory p = IStreamArtistIdentityRevisionReads(e.identityOwner)
-                .identityRevisionRecord(r.previousRevisionRecord);
-            if (
-                p.recordHash != r.previousRevisionRecord || p.artistId != r.artistId
-                    || p.revisedRecordHash != r.previousRecordHash || p.recordHash == r.recordHash
-            ) revert W.InvalidRecoveryRewindRecord(r.recordHash);
-        }
     }
 
     function _operation(W.RecordKind kind) private pure returns (uint16) {

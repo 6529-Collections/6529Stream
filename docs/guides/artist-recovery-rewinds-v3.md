@@ -74,6 +74,24 @@ writes store the actual class already used by the record hash. A separate
 frozen-original-writer fixture documents this compatibility boundary; it is
 not evidence of a deployed historical instance.
 
+The fixed [record reader](../../smart-contracts/domains/artist/StreamArtistRecoveryRewindRecordReads.sol)
+retains environment and receipt admission, the original `Source`/`Facts` types,
+and final record-facts proof wrapping. Its revision and standing branches call
+the compiler-linked [revision reader](../../smart-contracts/domains/artist/StreamArtistRecoveryRewindRevisionReads.sol)
+and [standing reader](../../smart-contracts/domains/artist/StreamArtistRecoveryRewindStandingReads.sol).
+These helpers contain the original complete read/validation bodies, including
+native and recovered continuation checks. Revision association updates remain
+private memory mutations inside the revision helper before it returns the
+complete facts tuple. The standing helper preserves retirement terms, original
+nonce admission and vesting chronology checks in their original order.
+
+Neither helper owns state or accepts a replacement implementation. Direct helper
+reads are fragments of admission; they do not perform the outer reader's
+environment/receipt checks or final proof wrapping. Deployment tooling must
+include their fixed compiler links. The additional library calls require their
+own runtime and gas validation; source parity and size measurements do not
+establish that acceptance.
+
 ## Shared policy and source freshness
 
 The declared earliest vesting, NONE, provisional and hostile-guardian APPEAL
