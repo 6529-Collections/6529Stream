@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `ea92b7d4`. All 2,309 sources pass the combined
-ABI/type/storage check in 21.563 seconds. This does not generate bytecode or
+Latest Solidity source checkpoint: `6187c0e0`. All 2,311 sources pass the combined
+ABI/type/storage check in 21.610 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
@@ -140,12 +140,30 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   externally pinned byte-exact restoration precede atomic no-overwrite output.
   B independently reviewed source and failure/race oracles. Original profiles
   stay unchanged; Linux publication and institutional ingestion remain separate.
+- The native-offer economics campaign (`6187c0e0`) adds nine independently
+  reviewed deterministic/fuzz/invariant cases. Actual contract9 receipts,
+  revenue escrow, split releases, refund/retry and five threshold-two Safes
+  are checked with separate conservation and nonce models. The original
+  external entropy provider remains a zero-quote double; native execution is pending.
+- Phase-freeze developer workflows (`00fec435`) pass all 910 root client
+  package tests, generation/build/strict types and the exact ABI59 fixture
+  check. Independent review covers the canonical policy encoding, governance,
+  same-Ledger successor copying and ordinary Safe CALL receipts. These are
+  client/simulated-RPC results, not actual Safe execution.
+- Owner-published exhibition packages (`5d832333`) pass all nineteen new root
+  source/package/CLI/offline-restore cases in 58.336 seconds. Root independently
+  reviews source, same-block consistency and the test oracles. Original owner
+  receipt authority stays distinct from institutional claims; positive owner
+  wires are synthetic and actual-chain exhibition capture remains outstanding.
 - Original counter reads (`ea92b7d4`) now expose raw/scoped values and verified
   remaining units. Proofless Merkle allowance queries explicitly require
   evidence. Independent review covers all fifteen new cases, the exact
   194-source ABI and 155-source size captures, preserved host ABI/storage and
   all nine fitting selected products. Manager/fallback are 24,211/24,328 bytes.
-  One frozen 36-case read/preview/configuration run is assigned; no result yet.
+  The frozen 36-case read/preview/configuration run finishes 35 passes/one
+  failure. The retained grace-read assertion fails despite a successful 64-byte
+  return within the original gas budget; its exact expectation is being
+  diagnosed. No complete counter-read runtime acceptance is claimed.
 - Scoped BYTE_EXACT references (`a8a17f94`) add TOKEN/RELEASE/SEASON publication,
   complete scope binding, immutable history and original class-2 locks. Seven
   authored cases and all 174 ABI sources are independently reviewed. Native
