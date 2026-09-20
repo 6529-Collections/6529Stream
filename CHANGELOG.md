@@ -79,6 +79,17 @@ the release policy in `docs/release-policy.md`.
   Add exact-signature underfunding/retry and proof regressions; full-current
   execution remains separate from the source batch.
 
+## Scoped full-policy provider and discovery
+
+- Add constructor-fixed provider and discovery consumers for genuine per-plan
+  publication graphs, preserving the three original source profiles and exact
+  Registry, Artist, root, archive and component validation.
+- Resolve scope-specific snapshot identities with the declared bounded graph
+  budget and use discovery's configured component budget for source selection.
+  Retain full profile and reciprocal dependency checks before accepting evidence.
+- Add focused source-reviewed regressions. Native execution, complete finality
+  acceptance, deployed size and transaction gas remain pending.
+
 ## Scoped full-policy preservation and deployment recipe
 
 - Add distinct scoped-policy reference, ordered render-critical inventory and

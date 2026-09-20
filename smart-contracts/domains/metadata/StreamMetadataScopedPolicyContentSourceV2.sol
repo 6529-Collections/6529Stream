@@ -426,25 +426,29 @@ library StreamMetadataScopedPolicyContentSourceV2 {
                         )
                     ) != SNAPSHOT_PROFILE
         ) revert R.InvalidScopedContentRoot();
-        r.snapshots = _address(
-            r.provider, abi.encodeCall(Provider.scopedPolicySnapshotHost, (scope)), r.readGas
-        );
-        r.snapshotCodeHash = bytes32(
-            _word(
-                r.provider,
-                abi.encodeCall(Provider.scopedPolicySnapshotCodeHash, (scope)),
-                r.readGas
-            )
-        );
-        _pin(r.snapshots, r.snapshotCodeHash);
+        // The fixed budget getter is scalar. Scope identity getters may validate a genuine
+        // late factory graph, so transport their declared validation budget before resolving them.
         r.validationGas = _word(
             r.provider,
             abi.encodeCall(Provider.scopedPolicySnapshotValidationGas, (scope)),
             r.readGas
         );
+        if (r.validationGas < r.readGas || r.validationGas > type(uint32).max) {
+            revert R.InvalidScopedContentRoot();
+        }
+        r.snapshots = _address(
+            r.provider, abi.encodeCall(Provider.scopedPolicySnapshotHost, (scope)), r.validationGas
+        );
+        r.snapshotCodeHash = bytes32(
+            _word(
+                r.provider,
+                abi.encodeCall(Provider.scopedPolicySnapshotCodeHash, (scope)),
+                r.validationGas
+            )
+        );
+        _pin(r.snapshots, r.snapshotCodeHash);
         if (
-            r.validationGas < r.readGas || r.validationGas > type(uint32).max
-                || _word(
+            _word(
                         r.snapshots,
                         abi.encodeCall(IERC165.supportsInterface, (type(Snap).interfaceId)),
                         r.readGas

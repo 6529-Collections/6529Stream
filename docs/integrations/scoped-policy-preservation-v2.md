@@ -107,4 +107,6 @@ Fixtures identify their Core, Artist, late record and external archival
 boundaries. Creating a genuine child graph does not establish complete finality
 or actual production deployment feasibility. Native execution, full current-stack
 acceptance, deployed size, transaction gas and matching release evidence remain
-separate requirements. Provider/discovery integration is the next source batch.
+separate requirements. The additive
+[provider and discovery guide](scoped-policy-finality-v2.md) describes the next
+consumer layer and its validation boundary.
