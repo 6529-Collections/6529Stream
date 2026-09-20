@@ -29,6 +29,7 @@ interface IStreamConditionSources is IERC165, IStreamGasParameterHost {
     error InvalidConditionSourcePredecessor(uint64 sourceId);
     error ConditionSourceReadFailed(address host);
     error ConditionSourceDependencyChanged(address host);
+    error ConditionSourceChainChanged(uint256 expectedChainId, uint256 actualChainId);
     error ConditionSourceSetChanged(uint64 actualCount, bytes32 actualHead);
 
     event ConditionSourceAdded(

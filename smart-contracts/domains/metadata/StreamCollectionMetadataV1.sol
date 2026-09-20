@@ -49,6 +49,10 @@ import {
 } from "../../interfaces/stream/metadata/IStreamCollectionRecordPayloadChunks.sol";
 import { StreamMetadataRecordPayloads as RecordPayloads } from "./StreamMetadataRecordPayloads.sol";
 import {
+    IStreamConservationTier
+} from "../../interfaces/stream/metadata/IStreamConservationTier.sol";
+import { StreamConservationTierExecution } from "./StreamConservationTierExecution.sol";
+import {
     StreamSnapshotManifestBytes as PayloadBytes
 } from "../records/StreamSnapshotManifestBytes.sol";
 
@@ -63,7 +67,8 @@ contract StreamCollectionMetadataV1 is
     IStreamCollectionRecordReceipts,
     IStreamCollectionManifestReads,
     IStreamCollectionManifestWriter,
-    IStreamCollectionRecordPayloadChunks
+    IStreamCollectionRecordPayloadChunks,
+    IStreamConservationTier
 {
     using StreamRecordFamilies for bytes32;
 
@@ -250,6 +255,7 @@ contract StreamCollectionMetadataV1 is
         returns (bool)
     {
         return id == type(IStreamCollectionRecordPayloadChunks).interfaceId
+            || id == type(IStreamConservationTier).interfaceId
             || id == type(StaticSource).interfaceId
             || id == type(IStreamCollectionManifestReads).interfaceId || id == type(B).interfaceId
             || id == type(IStreamCollectionManifestWriter).interfaceId
@@ -261,6 +267,23 @@ contract StreamCollectionMetadataV1 is
 
     function beginScriptBundle(B.Plan calldata plan) external returns (bytes32) {
         _manifestWrite();
+    }
+
+    function declareConservationTier(uint256 collectionId, bytes32 tier) external override {
+        StreamConservationTierExecution.declareTier(
+            _grants, core, coreCodeHash, _gasParameterValue(DEPENDENCY_READ_GAS), collectionId, tier
+        );
+    }
+
+    function conservationTier(uint256 collectionId)
+        external
+        view
+        override
+        returns (bytes32 declared, bytes32 effective)
+    {
+        return StreamConservationTierExecution.readTier(
+            core, coreCodeHash, _gasParameterValue(DEPENDENCY_READ_GAS), collectionId
+        );
     }
 
     function beginRegistryLibrary(B.Plan calldata plan, B.RegistrySource calldata source)

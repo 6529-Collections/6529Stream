@@ -17,6 +17,7 @@ library StreamRecordFamilies {
     bytes32 internal constant IDENTITY = keccak256("6529STREAM_RECORD_FAMILY_IDENTITY_DISPLAY_V1");
     bytes32 internal constant SNAPSHOT = keccak256("6529STREAM_RECORD_FAMILY_SNAPSHOT_V1");
     bytes32 internal constant AGENT = keccak256("6529STREAM_RECORD_FAMILY_AGENT_V1");
+    bytes32 internal constant CONSERVATION = keccak256("6529STREAM_RECORD_FAMILY_CONSERVATION_V1");
 
     function bit(uint8 authorizationClass) internal pure returns (uint16) {
         return uint16(1) << authorizationClass;
@@ -28,7 +29,10 @@ library StreamRecordFamilies {
         if (family == INDEPENDENT) return bit(5);
         if (family == CURATOR) return bit(3) | bit(8);
         if (family == INSTITUTION) return bit(4);
-        if (family == RIGHTS || family == IDENTITY || family == SNAPSHOT || family == AGENT) {
+        if (
+            family == RIGHTS || family == IDENTITY || family == SNAPSHOT || family == AGENT
+                || family == CONSERVATION
+        ) {
             return bit(7) | bit(8);
         }
         if (family == ARCHIVE) return bit(6) | bit(8);
