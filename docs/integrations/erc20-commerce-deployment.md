@@ -92,7 +92,7 @@ Executor remains the authority for admission and execution.
 
 ## Validation boundary
 
-Thirteen authored focused cases use actual four-product artifacts, Core,
+Thirteen focused cases passed on the frozen helper source using actual four-product artifacts, Core,
 Manager/Ledger, Registry/Recorder and an upstream threshold Safe. They check
 literal constructor arguments and roles, registration transitions, sorted and
 conflicting catalogs, complete phase hashes, consent refusal/retry, actual owner
@@ -102,7 +102,18 @@ typed boundaries. Product construction in this suite uses the original literal
 arguments with genuine artifact CREATE; the script's broadcast entry has not been
 executed. The unchanged production code-size gate is retained.
 
-The frozen source and thirteen tests pass the Solidity ABI/type check (517
-sources). Focused execution and an actual delayed-governance/current-stack
-activation ceremony are pending. Earlier sale tests remain evidence only for
-their own captured source and do not prove these deployment plans.
+The source passes the 517-source Solidity ABI/type check. The separate native
+capture at `3cc3091d` (helper `3357af3e` plus the existing metadata-URI fixture
+correction) passes all thirteen cases in 3.48 seconds. Its 525 retained source
+files match Git; all 199 artifacts are authenticated against genuine native
+compiler outputs, with every one of the 196 production products below the
+original runtime and creation limits. The four product runtimes are Payment
+19,589, fixed carrier 23,708, Price carrier 22,005 and Dutch carrier 24,538 bytes.
+
+The isolated build reuses the closed Dutch capture only where source and artifact
+bytes match. Original production bytecode and raw metadata remain exact; new
+selected artifacts are verified against one genuine final compiler output and
+its complete linked-library closure. Testing invokes no compiler and changes no
+artifacts. An actual delayed-governance/current-stack activation ceremony and
+the broadcast script remain unexecuted. Earlier sale tests remain evidence only
+for their own captured source.

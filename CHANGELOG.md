@@ -192,7 +192,9 @@ the release policy in `docs/release-policy.md`.
 - Plan original Registry/catalog admission and actual phase policy consent with
   explicit Manager owner/Safe versus Executor routing. No broadcasts performed.
 - Author thirteen focused product/Registry/Manager/Safe cases; the 517-source
-  ABI/type check passes. Focused runtime and full activation remain pending.
+  ABI/type check and all 13 focused helper cases pass, with genuine artifact
+  verification and all 196 captured production products within original limits.
+  Full delayed activation and the broadcast script remain unexecuted.
 
 ## Standard ERC20 Dutch sales
 
