@@ -45,14 +45,21 @@ library StreamReferenceModePreparation {
         p.expectedSourcesHash = result.sourcesHash;
         receipt.sourcesHash = result.sourcesHash;
         result.canonical = StreamReferenceModeProof.payload(
-            p,
-            receipt,
-            source,
-            evidence,
-            result.mode,
-            StreamReferenceRenderPreparation.environment(inventories, p.environment)
+            p, receipt, source, evidence, result.mode, _environment(inventories, p.environment)
         );
         result.evidence = abi.encode(evidence);
+    }
+
+    /// @dev Derive the complete typed input's exact preparation identity here. Transporting
+    /// that large input to another worker solely to derive this same key is unnecessary.
+    /// The only reused value is the immutable, self-verified canonical environment bytes.
+    function _environment(
+        mapping(bytes32 => Bytes.Manifest) storage inventories,
+        R.Environment memory e
+    ) private view returns (bytes memory) {
+        bytes32 id = StreamReferenceRenderPreparation.environmentIdInternal(e);
+        if (inventories[id].contentHash != 0) return Bytes.read(inventories[id]);
+        return StreamReferenceRenderPreparation.environment(inventories, e);
     }
 
     function current(

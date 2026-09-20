@@ -53,60 +53,76 @@ library StreamReferenceEnvironmentJson {
         }
         _member(e.packageFiles, e.engineExecutablePath, e.engineExecutableSha256);
         _member(e.packageFiles, e.toolchainPath, e.toolchainSha256);
-        string memory out = string.concat(
-            '{"architecture":',
-            q(e.architecture, 64),
-            ',"captureProfile":',
-            h(e.captureProfile),
-            ',"colorSpace":',
-            q(e.colorSpace, 64),
-            ',"devicePixelRatio":',
-            u(e.devicePixelRatio),
-            ',"engineExecutablePath":',
-            q(e.engineExecutablePath, 1024),
-            ',"engineExecutableSha256":',
-            h(e.engineExecutableSha256)
+        bytes[7] memory pieces;
+        pieces[0] = bytes(
+            string.concat(
+                '{"architecture":',
+                q(e.architecture, 64),
+                ',"captureProfile":',
+                h(e.captureProfile),
+                ',"colorSpace":',
+                q(e.colorSpace, 64),
+                ',"devicePixelRatio":',
+                u(e.devicePixelRatio),
+                ',"engineExecutablePath":',
+                q(e.engineExecutablePath, 1024),
+                ',"engineExecutableSha256":',
+                h(e.engineExecutableSha256)
+            )
         );
-        out = string.concat(
-            out,
-            ',"engineName":',
-            q(e.engineName, 256),
-            ',"engineVersion":',
-            q(e.engineVersion, 256),
-            ',"licenseBasis":"undetermined","licenseNote":',
-            q(e.licenseNote, 16384),
-            ',"operatingSystem":',
-            q(e.operatingSystem, 64),
-            ',"operatingSystemVersion":',
-            q(e.operatingSystemVersion, 128),
-            ',"packageFiles":',
-            string(packageJSON)
+        pieces[1] = bytes(
+            string.concat(
+                ',"engineName":',
+                q(e.engineName, 256),
+                ',"engineVersion":',
+                q(e.engineVersion, 256),
+                ',"licenseBasis":"undetermined","licenseNote":',
+                q(e.licenseNote, 16384),
+                ',"operatingSystem":',
+                q(e.operatingSystem, 64),
+                ',"operatingSystemVersion":',
+                q(e.operatingSystemVersion, 128),
+                ',"packageFiles":'
+            )
         );
-        out = string.concat(
-            out,
-            ',"platformPrerequisites":',
-            string(platformJSON),
-            ',"runtimeObjectHash":',
-            h(e.objectHash),
-            ',"softwareRasterization":true,"toolchainName":',
-            q(e.toolchainName, 256),
-            ',"toolchainPath":',
-            q(e.toolchainPath, 1024),
-            ',"toolchainSha256":',
-            h(e.toolchainSha256)
+        pieces[2] = packageJSON;
+        pieces[3] = bytes(',"platformPrerequisites":');
+        pieces[4] = platformJSON;
+        pieces[5] = bytes(
+            string.concat(
+                ',"runtimeObjectHash":',
+                h(e.objectHash),
+                ',"softwareRasterization":true,"toolchainName":',
+                q(e.toolchainName, 256),
+                ',"toolchainPath":',
+                q(e.toolchainPath, 1024),
+                ',"toolchainSha256":',
+                h(e.toolchainSha256)
+            )
         );
-        out = string.concat(
-            out,
-            ',"toolchainVersion":',
-            q(e.toolchainVersion, 256),
-            ',"version":1,"viewportHeight":',
-            u(e.viewportHeight),
-            ',"viewportWidth":',
-            u(e.viewportWidth),
-            "}"
+        pieces[6] = bytes(
+            string.concat(
+                ',"toolchainVersion":',
+                q(e.toolchainVersion, 256),
+                ',"version":1,"viewportHeight":',
+                u(e.viewportHeight),
+                ',"viewportWidth":',
+                u(e.viewportWidth),
+                "}"
+            )
         );
-        if (bytes(out).length > MAX) revert StreamReferenceRenderTypes.InvalidReferenceRender();
-        return bytes(out);
+        uint256 length;
+        for (uint256 i; i < pieces.length; ++i) {
+            length += pieces[i].length;
+        }
+        if (length > MAX) revert StreamReferenceRenderTypes.InvalidReferenceRender();
+        bytes memory out = new bytes(length);
+        uint256 cursor;
+        for (uint256 i; i < pieces.length; ++i) {
+            _copy(out, cursor, pieces[i]);
+            cursor += pieces[i].length;
+        }
+        return out;
     }
 
     function files(StreamReferenceRenderTypes.PackageFile[] memory rows, bool relative)

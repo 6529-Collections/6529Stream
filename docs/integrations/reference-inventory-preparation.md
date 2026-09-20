@@ -85,3 +85,62 @@ and selected size measurement: original host runtime 20,833 bytes, mode host
 pending. The independent reference publication decoder/copy capacity failure
 recorded in the metric supplement guide also remains unresolved; this staged
 preparation result does not waive it.
+
+## Prepared canonical environments
+
+`IStreamReferenceEnvironmentPreparation` adds
+`prepareEnvironment(Environment)`. First prepare the two exact original full
+file inventories, then upload the original complete canonical environment
+bytes to the same Store in 8,192-byte chunks. The guarded host delegates to a
+fixed worker which authenticates those inventories, runs the original field
+validation and canonical builder, and checks the supplied manifest hash and
+length before retaining the bytes. The builder now concatenates the same
+ordered fragments into one exact-size buffer; its field order, quoting and
+limit remain unchanged.
+
+The preparation ID is `keccak256(abi.encode(domain, chainId, host, environment))`,
+where `domain` is `keccak256("6529STREAM_REFERENCE_ENVIRONMENT_PREPARATION_V1")`.
+All fields of the original typed Environment participate, including both full
+file arrays and the coverage reference. The identity uses the actual
+publication host, not the preparer or the worker. The original inventory and
+record domains and storage layout remain unchanged. The new domain shares
+the compiler-declared inventory mapping; `preparedFileInventory(id)` reads
+its complete retained bytes. First successful retention emits schema-1
+`ReferenceEnvironmentPrepared`; an intact repeated identity emits no event.
+Missing late chunks revert all state and events before identical retry.
+
+The mode preparation caller derives this same ID from its actual complete
+typed input. If a prepared environment exists, it checks and reads its exact
+immutable bytes. Otherwise the original environment construction remains the
+fallback. No caller supplies an alternate preparation ID. This reuses only
+deterministic canonical bytes; original writer authorization, dependency
+selection/runtime checks, current sources, archival coverage, mode evidence
+and finality checks still execute in their original flow. Preparation does
+not attest that an environment ran, or prove its coverage reference current.
+
+The initial environment preparation probe failed its unchanged transaction
+envelope during final chunk retention. The exact-buffer successor passes the
+focused original-body comparisons, malformed/oversized/error cases, 256 fuzz
+inputs, complete 1,048/102-row corpus, host/chain/full-input separation,
+eventless idempotence, missing-chunk rollback and retained-byte corruption
+controls. Its real Store and fixed worker operate through a minimal guarded
+host. Complete production-host execution and the complete publisher envelope
+remain separate acceptance requirements; no cap or minimum budget changed.
+
+The final focused 31-source capture passes eight tests and 256 fuzz cases.
+For the recorded corpus, preparation uses 13,936,415 gas including ordinary
+calldata intrinsic cost. A separate projected-read call uses 7,749,281 including
+intrinsic cost; it builds calldata before measurement and excludes the test
+caller's later returndata copy. That read number is not the cost of the whole
+mode-preparation caller or its preceding evidence checks. The tests identify
+the accounts and stored chunk pointers they cool; these measurements are not
+a universal cold-graph or all-permitted-input guarantee.
+
+The changed products fit selected pinned compiler settings: original host
+21,095-byte runtime, mode host 23,274, inventory/environment worker 7,753 and
+mode preparation worker 23,157. Existing host ABI entries and recursive
+storage layouts are preserved; only the new companion function and event are
+added. Whole publisher/Safe/lock/inventory transaction acceptance still needs
+the joined source capture. The separately retained payload-inlining experiment
+was not adopted: its parity tests passed, but its preparation runtime exceeded
+the deployment limit.

@@ -11,6 +11,9 @@ import { StreamReferenceInventoryPreparation } from "./StreamReferenceInventoryP
 import {
     IStreamReferenceInventoryPreparation
 } from "../../interfaces/stream/preservation/IStreamReferenceInventoryPreparation.sol";
+import {
+    IStreamReferenceEnvironmentPreparation
+} from "../../interfaces/stream/preservation/IStreamReferenceEnvironmentPreparation.sol";
 import "../records/StreamReferenceManifestJson.sol";
 import "../records/StreamReferenceRenderDefinitionReads.sol";
 import "../records/StreamSnapshotManifestBytes.sol";
@@ -23,6 +26,7 @@ import "../parameters/StreamGasParameterHost.sol";
 contract StreamReferenceRenderPublication is
     IStreamReferenceRenderPublication,
     IStreamReferenceInventoryPreparation,
+    IStreamReferenceEnvironmentPreparation,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
     IStreamModule,
@@ -110,6 +114,7 @@ contract StreamReferenceRenderPublication is
         return id == type(IERC165).interfaceId
             || id == type(IStreamReferenceRenderPublication).interfaceId
             || id == type(IStreamReferenceInventoryPreparation).interfaceId
+            || id == type(IStreamReferenceEnvironmentPreparation).interfaceId
             || id == type(IStreamArtworkFinalityComponent).interfaceId
             || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
             || id == type(IStreamModule).interfaceId
@@ -255,6 +260,17 @@ contract StreamReferenceRenderPublication is
 
     function preparedFileInventory(bytes32 id) external view override returns (bytes memory) {
         return StreamSnapshotManifestBytes.read(_fileInventories[id]);
+    }
+
+    function prepareEnvironment(StreamReferenceRenderTypes.Environment calldata)
+        external
+        override
+        guarded
+        returns (bytes32)
+    {
+        return StreamReferenceRenderPreparation.prepareEnvironment(
+            _fileInventories, _fixed.targets[3], _fixed.codeHashes[3], msg.data
+        );
     }
 
     function referenceRecord(bytes32 hash)
