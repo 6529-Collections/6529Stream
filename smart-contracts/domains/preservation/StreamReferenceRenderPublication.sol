@@ -7,6 +7,10 @@ import "../../interfaces/stream/modules/IStreamModule.sol";
 import "./StreamReferenceRenderSourceReads.sol";
 import "./StreamReferenceRenderRecordReads.sol";
 import "./StreamReferenceRenderPreparation.sol";
+import { StreamReferenceInventoryPreparation } from "./StreamReferenceInventoryPreparation.sol";
+import {
+    IStreamReferenceInventoryPreparation
+} from "../../interfaces/stream/preservation/IStreamReferenceInventoryPreparation.sol";
 import "../records/StreamReferenceManifestJson.sol";
 import "../records/StreamReferenceRenderDefinitionReads.sol";
 import "../records/StreamSnapshotManifestBytes.sol";
@@ -18,6 +22,7 @@ import "../parameters/StreamGasParameterHost.sol";
 ///      complete original canonical manifests and ABI witnesses use actual immutable Store chunks.
 contract StreamReferenceRenderPublication is
     IStreamReferenceRenderPublication,
+    IStreamReferenceInventoryPreparation,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
     IStreamModule,
@@ -104,6 +109,7 @@ contract StreamReferenceRenderPublication is
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IERC165).interfaceId
             || id == type(IStreamReferenceRenderPublication).interfaceId
+            || id == type(IStreamReferenceInventoryPreparation).interfaceId
             || id == type(IStreamArtworkFinalityComponent).interfaceId
             || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
             || id == type(IStreamModule).interfaceId
@@ -222,6 +228,28 @@ contract StreamReferenceRenderPublication is
     ) external override guarded returns (bytes32) {
         return StreamReferenceRenderPreparation.prepare(
             _fileInventories, _fixed.targets[3], _fixed.codeHashes[3], rows, relative
+        );
+    }
+
+    function prepareFileInventoryPart(StreamReferenceRenderTypes.PackageFile[] calldata, bool)
+        external
+        override
+        guarded
+        returns (bytes32)
+    {
+        return StreamReferenceInventoryPreparation.preparePart(
+            _fileInventories, _fixed.targets[3], _fixed.codeHashes[3], msg.data
+        );
+    }
+
+    function prepareFileInventoryFromParts(StreamReferenceRenderTypes.PackageFile[] calldata, bool)
+        external
+        override
+        guarded
+        returns (bytes32)
+    {
+        return StreamReferenceInventoryPreparation.assemble(
+            _fileInventories, _fixed.targets[3], _fixed.codeHashes[3], msg.data
         );
     }
 
