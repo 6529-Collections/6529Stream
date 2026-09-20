@@ -128,3 +128,25 @@ time-dependent fact. Adoption/source hash equality alone omits lifecycle/data,
 live Artist and derivative C2PA/standing facts. This implementation retains full
 re-observation and does not claim that all 16,384 cold rows fit one transaction.
 No cap increase, sampling or partial preparation is accepted as current evidence.
+
+## Frozen 46-case runtime evidence
+
+The first producer/checkpoint/tree/manifest source at `7701ad89` passed all
+46 focused cases (11 producer, 17 checkpoint, 5 tree, 13 manifest), including
+256 tree fuzz runs. The genuine Solidity 0.8.19 capture used the original
+via-IR, optimizer-200, Paris and metadata settings. The reviewed two-pass
+selector compiled 62 explicitly selected source files from the exact 234-source
+closure; the artifact verifier authenticated 78 executable artifacts and 4,558
+source metadata joins. All 47 selected production products fit the original
+runtime and creation limits. EVM execution skipped compilation, and every
+source, artifact, cache, compiler-capture and configuration byte stayed unchanged.
+
+This tests the actual new producer/checkpoint/tree/manifest with the typed
+surrounding boundaries described above. It does not establish the complete
+Router/op17/Safe/finality ceremony, transitive STATIC admission, universal gas
+capacity or the later snapshot/root/reference batches. The original 100-million
+test-harness gas limit is not a production transaction allowance.
+
+The local immutable evidence handoff is
+`D:/repos/6529Stream/.tmp-view-preservation-native1/HANDOFF.json`, SHA-256
+`9044e13fa6d7ea1f65f2f90bd7a43a82a2fedb7ca7d0e93dcbfad345fac59c65`.
