@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistC2PAHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import "./StreamArtistAttestationHydration.sol";
 import "./StreamArtistContentHydration.sol";
@@ -84,6 +85,9 @@ library StreamArtistReadinessHydrationFacts {
                         )
             ) revert T.InvalidRecord();
         }
+        StreamArtistC2PAHydration.checkSource(
+            source.owners[4], source.registry, q.artistId, q.bindingHash, q.collectionId, b.records
+        );
         RH.ConsentBundle memory c = StreamArtistContentHydration.decode(data[6].typedState);
         uint256 rc;
         uint256 cc;

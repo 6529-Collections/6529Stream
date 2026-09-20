@@ -44,6 +44,13 @@ the release policy in `docs/release-policy.md`.
 - Compose original STATIC renderer products with explicit retained-document
   admission and current Safe test recipes; complete analysis remains separate.
 
+- Add original Artist op24 C2PA credential history with independent personhood
+  heads and complete supported-profile hydration, plus exact offline report
+  reconciliation, pinned selected-verifier Metadata evidence and optional typed
+  STATIC provenance fields. Unsupported or stale evidence remains unevaluated;
+  no authorship or signing authority is granted by a report. Full current-graph
+  runtime acceptance and the existing Artist host size repair remain open.
+
 - Add a narrowly scoped current-Executor compatibility adapter and original
   preservation/family-registry composition, with governed metadata pause/resume
   and explicit family writers; current Safe tests await coordinated execution.

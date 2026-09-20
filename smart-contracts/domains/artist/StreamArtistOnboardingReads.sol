@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistC2PA.sol";
 import { StreamArtistProfilePayoutReads } from "./StreamArtistProfilePayoutReads.sol";
 import "./StreamArtistPlatformReads.sol";
 import "./StreamArtistAttributionPolicy.sol";
@@ -483,8 +484,8 @@ contract StreamArtistOnboardingReads {
         ) {
             revert T.MissingMintPrerequisite(keccak256("deployment-attestation"));
         }
-        T.AttestationRecord memory personhood =
-            attribution_.attestation(collectionId, 10, b.artistId);
+        T.AttestationRecord memory personhood = IStreamArtistC2PAReads(_suite.owners[4])
+            .personhoodAttestation(collectionId, b.artistId);
         if (
             personhood.recordHash == bytes32(0) || personhood.generation != b.generation
                 || personhood.subjectStateHash

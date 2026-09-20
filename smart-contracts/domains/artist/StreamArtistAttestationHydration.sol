@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistC2PACredentials.sol";
 import "./StreamArtistAttributionStateTypes.sol";
 import "./StreamArtistNativeReceipts.sol";
 import "./StreamArtistPayloadStore.sol";
@@ -110,6 +111,15 @@ library StreamArtistAttestationHydration {
                 s.statements[r.record.statementHash] = r.statement;
             }
             StreamArtistPayloadStore.store(keccak256("ARTIST_PUBLICATION_STATEMENT"), r.statement);
+            StreamArtistC2PACredentials.note(
+                b.sourceRegistry,
+                q.artistId,
+                q.bindingHash,
+                r.input.terms,
+                r.record,
+                r.statement,
+                false
+            );
         }
     }
 
@@ -126,6 +136,10 @@ library StreamArtistAttestationHydration {
         T.Attestation memory p = r.input.terms;
         T.AttestationRecord memory record = r.record;
         Attest.Association memory a = r.association;
+        if (p.subjectKind == 10 && p.schemaId == StreamArtistC2PACredentials.SCHEMA) {
+            StreamArtistC2PACredentials.decode(r.statement, q.artistId, p.subjectStateHash);
+            if (p.subjectId != q.artistId) revert T.InvalidRecord();
+        }
         if (
             p.collectionId != q.collectionId || p.subjectKind == 0 || p.subjectKind > 10
                 || ((p.subjectKind == 7 || p.subjectKind == 8) && !publication)

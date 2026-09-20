@@ -117,6 +117,15 @@ library StreamArtistPublicationHydration {
                 s.statements[r.record.statementHash] = r.statement;
             }
             StreamArtistPayloadStore.store(keccak256("ARTIST_PUBLICATION_STATEMENT"), r.statement);
+            StreamArtistC2PACredentials.note(
+                b.sourceRegistry,
+                q.artistId,
+                q.bindingHash,
+                r.input.terms,
+                r.record,
+                r.statement,
+                false
+            );
         }
         if (!publication) revert T.UnsupportedProfile();
     }

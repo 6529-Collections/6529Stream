@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistC2PACredentials.sol";
 import "./StreamArtistDisputeWithdrawalState.sol";
 import {
     StreamArtistAttributionPlatformTransport as PlatformTransport
@@ -75,6 +76,29 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     StreamArtistAttributionClaimState.Store private _attributionClaims;
     mapping(uint256 => bytes32) private _latestDisplayClaim;
     mapping(bytes32 => Attest.Association) private _attestationAssociations;
+
+    function c2paCredentialHead(bytes32 artistId) external view returns (C2PA.Head memory) {
+        return StreamArtistC2PACredentials.head(artistId);
+    }
+
+    function c2paCredentialRecord(bytes32 record) external view returns (C2PA.Head memory) {
+        return StreamArtistC2PACredentials.state().records[record];
+    }
+
+    function personhoodAttestation(uint256 collectionId, bytes32 artistId)
+        external
+        view
+        returns (T.AttestationRecord memory)
+    {
+        bytes32 record = StreamArtistC2PACredentials.personhoodKey(collectionId, artistId);
+        if (record != 0) return _records[record];
+        // Historical imports without the derived index retain their original personhood head.
+        T.AttestationRecord memory legacy =
+            _attestations[keccak256(abi.encode(collectionId, uint8(10), artistId))];
+        if (StreamArtistC2PACredentials.isPersonhood(legacy.schemaId)) return legacy;
+        T.AttestationRecord memory empty;
+        return empty;
+    }
     event ArtistAttestationDelegation(
         uint16 schemaVersion,
         bytes32 indexed recordHash,

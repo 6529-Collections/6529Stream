@@ -26,6 +26,12 @@ import {
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 import { Strings } from "../../vendor/openzeppelin/Strings.sol";
 import { StreamStaticRenderEncoding as Encoding } from "./StreamStaticRenderEncoding.sol";
+import {
+    IStreamStaticC2PAAttribution as C2PAAttribution
+} from "../../interfaces/stream/metadata/IStreamStaticC2PAAttribution.sol";
+import {
+    IStreamC2PAReconciliation as C2PA
+} from "../../interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
 
 /// @notice Versioned STATIC rendering API and full executable reads from exact pinned sources.
 /// @dev RenderRequest is an input, not a claim of token existence. The actual Router builds it
@@ -65,6 +71,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     bytes32[6] private _codeHashes;
     RendererManifest private _manifest;
     bytes32 private immutable _encodingCodeHash;
+    bool public immutable c2paAttributionEnabled;
 
     function encodingBinding() external view returns (address, bytes32) {
         return (address(Encoding), _encodingCodeHash);
@@ -99,6 +106,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         ) revert InvalidStaticRender();
         if (address(Encoding).code.length == 0) revert InvalidStaticRender();
         _encodingCodeHash = address(Encoding).codehash;
+        c2paAttributionEnabled = _c2paCapability(d.sources.attribution);
         _sources = d.sources;
         address[6] memory a = [
             d.sources.core,
@@ -279,7 +287,12 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
             _manifestPin(selected);
             p.facts.mediaManifestHash = selected.manifestHash;
         }
-        p.artist = _attribution(r.collectionId, r.tokenId);
+        if (c2paAttributionEnabled) {
+            (p.artist, p.c2pa, p.c2paSubject, p.c2paUnavailable) =
+                _attributionWithC2PA(r.collectionId, r.tokenId);
+        } else {
+            p.artist = _attribution(r.collectionId, r.tokenId);
+        }
     }
 
     function _bundleFacts(bytes32 id) private view returns (B.Facts memory f) {
@@ -478,6 +491,89 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         ) {
             revert InvalidStaticRender();
         }
+    }
+
+    function _c2paCapability(address target) private view returns (bool result) {
+        bytes memory input =
+            abi.encodeWithSignature("supportsInterface(bytes4)", type(C2PAAttribution).interfaceId);
+        uint256 cap = _gasParameterValue(READ_GAS);
+        if (gasleft() <= cap + cap / 63 + 10000) revert InvalidStaticRender();
+        bool ok;
+        uint256 size;
+        uint256 value;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            ok := staticcall(cap, target, add(input, 32), mload(input), pointer, 32)
+            size := returndatasize()
+            value := mload(pointer)
+        }
+        if (!ok || size == 0) return false; // Original companion has no optional interface.
+        if (size != 32 || value > 1) revert InvalidStaticRender();
+        return value == 1;
+    }
+
+    function _attributionWithC2PA(uint256 id, uint256 token)
+        private
+        view
+        returns (bytes memory value, C2PA.Display memory facts, bytes32 subject, bool unavailable)
+    {
+        value = '{"state":"attribution_unavailable"}';
+        unavailable = true;
+        address a = _sources.attribution;
+        if (a.code.length == 0 || a.codehash != _codeHashes[5]) {
+            return (value, facts, subject, unavailable);
+        }
+        uint256 cap = _gasParameterValue(ATTRIBUTION_GAS);
+        if (gasleft() <= cap + cap / 63 + 200000) return (value, facts, subject, unavailable);
+        bytes memory input = abi.encodeCall(C2PAAttribution.attributionWithC2PA, (id, token));
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, a, add(input, 32), mload(input), 0, 0)
+            size := returndatasize()
+        }
+        if (!ok || size < 288 || size > 33056) return (value, facts, subject, unavailable);
+        bytes memory raw = new bytes(size);
+        assembly ("memory-safe") { returndatacopy(add(raw, 32), 0, size) }
+        uint256 offset;
+        uint256 length;
+        uint256 validation;
+        uint256 authorship;
+        uint256 current_;
+        uint256 asserts_;
+        assembly ("memory-safe") {
+            offset := mload(add(raw, 32))
+            validation := mload(add(raw, 128))
+            authorship := mload(add(raw, 160))
+            current_ := mload(add(raw, 192))
+            asserts_ := mload(add(raw, 224))
+            length := mload(add(raw, 288))
+        }
+        if (
+            offset != 256 || length > 32768 || size != 288 + ((length + 31) / 32) * 32
+                || validation > 2 || authorship > 2 || current_ > 1 || asserts_ > 1
+        ) {
+            return (value, facts, subject, unavailable);
+        }
+        (bytes memory candidate, C2PA.Display memory display_, bytes32 subject_) =
+            abi.decode(raw, (bytes, C2PA.Display, bytes32));
+        if (keccak256(raw) != keccak256(abi.encode(candidate, display_, subject_))) {
+            return (value, facts, subject, unavailable);
+        }
+        if (
+            (!display_.current
+                    && (display_.validation != C2PA.ValidationStatus.UNEVALUATED
+                        || display_.authorship != C2PA.AuthorshipStatus.UNEVALUATED))
+                || ((display_.validation != C2PA.ValidationStatus.VALID
+                        || !display_.assertsAuthorship)
+                    && display_.authorship != C2PA.AuthorshipStatus.UNEVALUATED)
+                || (display_.recordHash == 0
+                    && (display_.selectionHash != 0
+                        || display_.current
+                        || display_.assertsAuthorship))
+                || (display_.recordHash != 0 && (display_.selectionHash == 0 || subject_ == 0))
+        ) return (value, facts, subject, unavailable);
+        return (candidate, display_, subject_, false);
     }
 
     function _attribution(uint256 id, uint256 token) private view returns (bytes memory value) {

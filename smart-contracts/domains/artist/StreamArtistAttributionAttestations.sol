@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistC2PACredentials.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "../../interfaces/stream/artist/StreamArtistSanctionConfirmationTypes.sol";
 import "./StreamArtistPlatformState.sol";
@@ -269,7 +270,8 @@ library StreamArtistAttributionAttestations {
             if (
                 p.subjectId != b.artistId || p.subjectStateHash != x.operativeIdentityHash
                     || (p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
-                        && p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
+                        && p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1")
+                        && p.schemaId != StreamArtistC2PACredentials.SCHEMA)
             ) revert T.InvalidRecord();
         } else if (p.subjectKind >= 1 && p.subjectKind <= 6) {
             if (
@@ -333,6 +335,9 @@ library StreamArtistAttributionAttestations {
             x.nonce,
             x.signedAt,
             m.record
+        );
+        StreamArtistC2PACredentials.note(
+            e.registry, b.artistId, b.bindingHash, p, item, statement, true
         );
     }
     event ArtistAttributionStateChanged(

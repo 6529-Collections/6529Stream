@@ -10,6 +10,10 @@ import {
 import { StreamRenderContextV1 as Context } from "./StreamRenderContextV1.sol";
 import { Strings } from "../../vendor/openzeppelin/Strings.sol";
 import { Base64 } from "../../vendor/openzeppelin/Base64.sol";
+import {
+    IStreamC2PAReconciliation as C2PA
+} from "../../interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
+import { StreamStaticC2PAJSON } from "./StreamStaticC2PAJSON.sol";
 
 /// @notice Fixed pure Metadata companion; consumes authenticated renderer input and makes no external read.
 /// @dev Its address/runtime/selector belong to the version's transitive declared read set.
@@ -30,6 +34,9 @@ library StreamStaticRenderEncoding {
         bytes32 bundle;
         B.Facts bundleFacts;
         bytes artist;
+        C2PA.Display c2pa;
+        bytes32 c2paSubject;
+        bool c2paUnavailable;
     }
 
     function render(
@@ -101,6 +108,7 @@ library StreamStaticRenderEncoding {
             context,
             ',"provenance":{"attribution":',
             p.artist,
+            StreamStaticC2PAJSON.fields(p.c2pa, p.c2paSubject, p.c2paUnavailable),
             '},"render_mode":"',
             full ? "full" : "marketplace",
             '","config_record_hash":"',
@@ -193,6 +201,7 @@ library StreamStaticRenderEncoding {
             uint256(p.facts.dependencyHash).toHexString(32),
             '","provenance":{"attribution":',
             artist,
+            StreamStaticC2PAJSON.fields(p.c2pa, p.c2paSubject, p.c2paUnavailable),
             '},"views":{"tokenJSON":"',
             root,
             "/tokenJSON/",
