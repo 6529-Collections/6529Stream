@@ -38,14 +38,22 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   Constructor inputs/order, actual contracts and assertions are preserved.
   The 413-source ABI check passes; a matched-source 40-case runtime/timing pilot
   is pending. Compact artifact metadata is not relabeled as full AST evidence.
-- The dedicated ERC20 paid-burn batch is being finalized, with 39 authored
-  tests, clean ABI and fitting selected production products. Its current-stack
-  execution and new Safe integration are pending. The separate allowlist-price
-  design leaves the original fixed-price host unchanged, but automatic review
-  separately rejected its application; a concrete inert proposal is being
-  reviewed for an exact local-only approval. No rejected code is applied.
+- The dedicated ERC20 paid-burn batch is source-integrated as `c717a3e1` after
+  independent review. All 21 focused gate tests pass; eighteen current-stack
+  tests are authored and pending execution. Four selected production products
+  fit deployment limits. The combined 2,108-source ABI/type/storage check passes
+  in 18.141 seconds; this is not full-system execution acceptance.
+- The separate allowlist-price proposal preserves the original fixed-price
+  host and passes 273-source type checks and selected deployment-size checks.
+  Twenty tests are authored, and independent source review is clear. Exact
+  local approval remains pending after automatic review rejected application;
+  no rejected code is applied.
 
-The latest publication/finality fixture still awaits its corrected native run.
+The latest publication/finality run passed code generation but failed setup
+when its fixture recorded the same immutable image object twice. A test-only
+correction verifies every identity field before reusing the object and adds
+fresh observation evidence. Independent source review is clear; the corrected
+run is pending. No valid combined metric export is claimed.
 All original deployment-size, Artist-profile, economic-continuity, full Safe,
 museum and final candidate acceptance obligations remain in the feature table.
 

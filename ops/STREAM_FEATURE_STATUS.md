@@ -10,7 +10,7 @@ not yet feature-complete or accepted as a combined system. The integrated branch
 now includes mint eligibility/continuity, free and native-paid burn paths with
 free-entry reveal credits, Artist dispute withdrawal, wallet-specific native
 pricing and its clients, and bounded museum authority reconciliation. Root
-passes 398 client tests, a 131-case museum authority/profile cohort, 27 archival
+passes 447 client tests, a 131-case museum authority/profile cohort, 27 archival
 export/publication cases, 44 scoped-dossier/legacy packaging cases, 62 actual-token
 capture/replay cases, 60 object-dossier adapter/assembly cases, 111 complete
 record-catalog/history compatibility cases and 81 offline preservation checks. The copied metric
@@ -29,8 +29,11 @@ metric/ERC20 offer/Safe clients pass 447 root tests and exact fixture checks.
 ERC20 offer acceptance is 71 shared and 42 carrier checks across independently
 verified original/retry source unions; the original failures remain retained.
 The deployment-artifact fixture pilot is source-integrated with runtime/timing
-pending. Paid ERC20 burn and a populated native museum recipe are being built.
-The allowlist-price proposal remains unapplied after automatic review rejection.
+pending. Paid ERC20 burn is source-integrated as c717a3e1: 21 focused gate tests
+pass, eighteen current-stack cases await execution, and all four measured
+production products fit. The combined 2,108-source ABI/type/storage check passes.
+The populated native museum recipe is being built. The reviewed, fitting
+allowlist-price proposal awaits exact local approval after automatic rejection.
 No full-system acceptance, complete museum conformance or new testnet release
 is claimed.
 
@@ -157,7 +160,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [sales.platform-rights](#salesplatform-rights-evidence) PLATFORM_WORKS template/custody/known-token rights | Built | Tests written | Not integrated | Explicit declaration-bound families 8–13, actual original poster, uncontested/correction admission and current actual-token policy; no fake Artist0 consent. **Remaining:** Independently reviewed source; latest native and real declaration/current transaction joining still required. Typed families 8–13 signing, registration/activation, inspection, bid/settlement and Safe CALL recipes are implemented; their full live composition is still required. |
 | [sales.erc20-immediate](#saleserc20-immediate-evidence) ERC20 immediate sales, PaymentIntent and permits | Built | Partly tested | Partial | Universal original ERC20 payer/executor separation, exact token delta, EIP-2612/Permit2/Safe authorization and settlement; not every native sale-family variant. **Remaining:** Final actual-current ERC20 wallet/asset/full-Safe matrix; reveal fee route below is absent. Do not use old ERC20 fixed-adapter guide's narrower permit boundary as current Universal status. |
 | [sales.erc20-reveal](#saleserc20-reveal-evidence) Executor-funded native reveal allowance for ERC20 immediate sales | Not started | Not tested | Not integrated | Separate wei allowance/excess executor credit; token PaymentIntent/Permit2 quantities stay token-only. **Remaining:** Exact inert source/test patch remains unapplied under automatic-review restriction. Owner approved local intent; do not imply shipped or apply denied artifact. |
-| [sales.burn-mint](#salesburn-mint-evidence) Current Stream-token burn-to-mint consumer | In progress | Partly tested | Not integrated | Free, prepared and native-paid paths are integrated as 9acd68f7; free-entry maximum reveal allowance/caller pull credits as 8b991c53. Root verifies final-source 49-case burn and later 31-distinct-case credit cohorts, with production sizes fitting in their separate captures. **Remaining:** Required ERC20 paid profile, actual current graph, authored governed-surplus/Safe retry execution and finality/payment composition. Later native price repairs are excluded from those burn captures. |
+| [sales.burn-mint](#salesburn-mint-evidence) Current Stream-token burn-to-mint consumer | In progress | Partly tested | Partial | Free, prepared and native-paid paths are integrated as 9acd68f7; free-entry maximum reveal allowance/caller pull credits as 8b991c53. Root verifies final-source 49-case burn and later 31-distinct-case credit cohorts. Dedicated zero-native-fee ERC20 paid source c717a3e1 is independently reviewed; 21 focused gate tests pass, four production products fit, and eighteen current-stack tests are authored. **Remaining:** ERC20 current execution, actual combined graph, authored governed-surplus/Safe retry execution and finality/payment composition. Nonzero native-fee support remains held separately. Later native price repairs are excluded from the earlier burn captures. |
 | [sales.burn-redeem](#salesburn-redeem-evidence) Current burn-to-redeem / physical redemption consumer | Built | Tested* | Not integrated | Canonical same-transaction Stream burn, original redemption/events and append-only fulfillment history.17 focused tests pass, including a 256-input property and real threshold Safe. **Remaining:** Actual current Core/module/governance/operator workflow, cold gas and full acceptance. Focused Core identity/governance/registry boundaries are typed substitutes; burn-to-mint remains separate. |
 | [sales.airdrop](#salesairdrop-evidence) Current operator batch distribution product | Built | Tested* | Partial | Committed ordered operator distribution and account-directed owed-NFT claims integrated d8f39826. Builder reports 21 focused cases, including real Safe and 64-input fuzz; independent source review is clear. **Remaining:** Execute authored actual-current governance/Artist/Manager case, genesis activation and capacity. STATIC collection distribution is outside this implemented entropy-backed profile. |
 | [sales.delegated-authority](#salesdelegated-authority-evidence) Native delegated offers, claims and refunds | Built | Tests written | Not integrated | Exact immutable/live NFTDelegation witness; principal remains payer/owner for offers; delegated claim/refund destination fixed to credited account; own exits remain independent. **Remaining:** Independent source reviews efd5336d/d3d293ec/77222cc clear. Later13 refund +6 offer/Safe authored cases await combined native; no generic delegated spending authority. |
@@ -438,7 +441,7 @@ in the complete final deployment; this table is not a list of deployed addresses
 | 15 | `ENGLISH_AUCTION_HOUSE` | [sales.english](#salesenglish-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 16 | `DUTCH_AUCTION_ADAPTER` | [sales.dutch](#salesdutch-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 17 | `PRIVATE_SALE_ADAPTER` | [sales.private-offer](#salesprivate-offer-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
-| 18 | `BURN_MINT_GATE` | [sales.burn-mint](#salesburn-mint-evidence) | Free/prepared/native-paid source integrated; remaining allowance/ERC20 profiles and actual-current acceptance stay explicit. |
+| 18 | `BURN_MINT_GATE` | [sales.burn-mint](#salesburn-mint-evidence) | Free/prepared/native-paid and zero-native-fee ERC20 source integrated; remaining fee-profile and actual-current acceptance stay explicit. |
 | 19 | `DELEGATE_REGISTRY_GATE` | [mint.delegate-registry](#mintdelegate-registry-evidence) | Concrete vault-delegation gate integratedfeda72d3; scoped tests pass, actual external registry and full genesis acceptance pending. |
 | 20 | `ERC20_PRIMARY_SETTLEMENT_ADAPTER` | [sales.erc20-immediate](#saleserc20-immediate-evidence), [sales.erc20-reveal](#saleserc20-reveal-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 21 | `ARTIST_REGISTRY` | [ART01](#art01-evidence), [ART06](#art06-evidence), [ART34](#art34-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
@@ -1862,6 +1865,13 @@ rules 2/3/5 and SSA-AUTH rule 3.
 
 - [stream-sales-and-auctions.md](../docs/stream-sales-and-auctions.md). Source `b2fc0c3c`. Source inspected at integration b2fc0c3c; no new native execution in this inventory.
 - [IStreamCoreBurn.sol](../smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol). Source `b2fc0c3c`. Source inspected at integration b2fc0c3c; no new native execution in this inventory.
+- Dedicated ERC20 batch `83c67868` is integrated as `c717a3e1`; see the
+  [caller guide](../docs/integrations/erc20-burn-to-mint.md). Independent source
+  review covers exact caller/replay, fixed static preview, source authority,
+  candidate/result joins and atomic rollback. The 31-source focused gate cohort
+  passes all 21 tests. The selected 70-source capture fits all four products;
+  eighteen authored current-stack cases remain unexecuted. This source batch
+  does not change shared Core, Manager, Ledger, payment adapter or recorder.
 
 
 ### sales.burn-redeem evidence
@@ -1870,7 +1880,7 @@ rules 2/3/5 and SSA-AUTH rule 3.
 
 - Integrated `c7f18a83`: [caller guide](../docs/integrations/burn-redemption.md), [interface](../smart-contracts/interfaces/stream/mint/IStreamBurnRedemption.sol), [host](../smart-contracts/domains/mint/StreamBurnRedemption.sol) and [focused suite](../test/unit/mint/StreamBurnRedemption.t.sol).
 - Root capture `burn-redemption-native2-20260915` passes 17 tests, including 256 fuzz inputs and real 2-of-2 Safe 1.4.1. Every captured source is verified against `0be87be5`; the capture retains its original base/hash overlay. 28-source compile; 6 production products fit; host runtime 15,876 /creation 19,389 bytes. Immutable terms/window, separate owner/executor approval, original redemption event ABI, retained identity, atomic burn/record rollback and append-only fulfillment history are covered.
-- The focused Core boundary uses an ERC721 implementation with explicit identity behavior, and Core/governance/module boundaries are typed substitutes. Actual current Core/operator/governance, cold gas and complete system activation remain pending. Physical fulfillment is an operator's recorded assertion. Burn-to-mint is still separate and missing.
+- The focused Core boundary uses an ERC721 implementation with explicit identity behavior, and Core/governance/module boundaries are typed substitutes. Actual current Core/operator/governance, cold gas and complete system activation remain pending. Physical fulfillment is an operator's recorded assertion. Burn-to-mint has its separate implementation and remaining acceptance in the preceding row.
 
 ### sales.airdrop evidence
 

@@ -31,15 +31,19 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 Both payment retry captures are complete and independently verified. Testing
 owns the one warmed receipt-fixture artifact pilot; no duplicate broad compiler
-is needed. Burn finalizes dedicated ERC20 paid-burn source and its gate tests.
+is needed. Paid burn source is integrated as c717a3e1, with 21 focused gate
+tests passing and eighteen current-stack cases pending. Root's combined
+2,108-source ABI/type/storage check passes. Burn prepares the one current-stack
+successor after the fixture pilot; original capture inputs remain immutable.
 Clients finished ERC20 offer calls and now build prefreeze/finality operator
 warnings. Museum extends the actual-token recipe with six same-block sources,
 populated Owner/Metadata lanes and explicit source-bound artifacts; root owns
 any subsequent local chain launch. Metadata completes the corrected publication
-fixture; revenue independently reviews exact proposals and runs the combined
-metric replay only after valid export. The price lead prepares the exact inert
-dedicated-carrier proposal after a new automatic application rejection; no
-alternate application path or implicit approval is used. Root owns integrations.
+fixture after its duplicate-image setup failure; revenue independently reviews
+exact proposals and runs the combined metric replay only after valid export.
+The price lead's reviewed, fitting dedicated-carrier proposal is complete and
+awaits exact local approval after automatic application rejection; no alternate
+application path or implicit approval is used. Root owns integrations.
 
 ## Reboot recovery assignments: 19 September
 

@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add a dedicated ERC20 paid burn-to-mint carrier and gate with independent NFT
+  burn authority, original payer authorization and atomic burn/payment/mint
+  rollback. The zero-native-reveal-fee profile has 21 passing focused gate tests;
+  eighteen current-stack tests are authored and await execution.
+
 - Add atomic ERC20 primary offer clients with original Sales signatures, separate
   payer intent, four nonpayable funding routes and complete user-entry Safe CALL plans.
 
