@@ -48,6 +48,9 @@ import {
 import {
     StreamArtistRecoveredPreparationSelection as Selection
 } from "./StreamArtistRecoveredPreparationSelection.sol";
+import {
+    StreamArtistRecoveredPreparationGenerations as GenerationStage
+} from "./StreamArtistRecoveredPreparationGenerations.sol";
 
 /// @notice Complete fixed typed recovered-authority preparation in original check order.
 library StreamArtistRecoveredPreparation {
@@ -90,6 +93,17 @@ library StreamArtistRecoveredPreparation {
             EvidenceStage.collect(
                 context.identity, c.provenance, c.source.owners[2], payoutContinuations
             );
+        uint8 consentMode;
+        (context.generations, consentMode, context.hasGenerations) = GenerationStage.collect(
+            c.source,
+            prepared.query,
+            c.provenance,
+            context.identity,
+            hasIdentityDelegations,
+            request.records.witnesses.length,
+            royaltyFreezes.length
+        );
+        if (context.hasGenerations) context.features |= RH.BINDING_GENERATIONS;
         if (context.economics.length != 0) context.features |= RH.DIRECT_ECONOMICS;
         bytes memory attestationRecords = AttestationStage.emptyRecords();
         if (context.hasAttestations) {
@@ -101,13 +115,8 @@ library StreamArtistRecoveredPreparation {
                 attestationInputs
             );
         }
-        uint8 consentMode;
-        (consentMode, context.hasDelegation, context.hasContent) = Selection.flags(
-            c.source.owners[0],
-            prepared.query.collectionId,
-            hasIdentityDelegations,
-            c.provenance.journals[6]
-        );
+        (context.hasDelegation, context.hasContent) =
+            Selection.flagsForMode(consentMode, hasIdentityDelegations, c.provenance.journals[6]);
         if (context.hasDelegation) context.features |= RH.DELEGATED_CONSENT;
         if (context.hasContent) {
             context.features |= RH.CONTENT_CONSENTS;

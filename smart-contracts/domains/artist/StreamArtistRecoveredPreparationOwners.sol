@@ -43,6 +43,9 @@ import {
 import {
     StreamArtistAuthorityHydrationTypes as AH
 } from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    StreamArtistRecoveredPreparationGenerations as GenerationStage
+} from "./StreamArtistRecoveredPreparationGenerations.sol";
 
 /// @notice Original ordered seven-owner payload construction after complete source joins.
 library StreamArtistRecoveredPreparationOwners {
@@ -62,6 +65,8 @@ library StreamArtistRecoveredPreparationOwners {
         bool hasAttestations;
         bool hasDelegation;
         bool hasContent;
+        bytes generations;
+        bool hasGenerations;
     }
 
     function collect(Context memory c) public view returns (AH.OwnerData[7] memory data) {
@@ -71,7 +76,10 @@ library StreamArtistRecoveredPreparationOwners {
             payload.provenance = RH.ownerProvenance(c.provenance, i);
             payload.publications = Publications.collect(c.source.owners[i], i);
             (data[i], payload.nonces) = Guards.collect(c.provenance, i, c.replayOrigins[i]);
-            if (i == 2) {
+            if (i == 0 && c.hasGenerations) {
+                payload.semanticState =
+                    GenerationStage.encode(c.generations, c.query, payload.provenance);
+            } else if (i == 2) {
                 payload.semanticState =
                     IdentityEncode.encode(c.identity, payload.provenance, payload.nonces);
             } else if (i == 4 && c.hasAttestations) {

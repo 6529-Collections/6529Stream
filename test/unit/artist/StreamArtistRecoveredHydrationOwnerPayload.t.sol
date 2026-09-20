@@ -167,6 +167,36 @@ contract StreamArtistRecoveredHydrationOwnerPayloadTest {
         }
     }
 
+    function testOwnerCapabilityRequiresExplicitBindingGenerationsOnEveryOwner() external view {
+        for (uint8 index; index < 7; ++index) {
+            RH.Capability memory capability = RH.Capability(
+                RH.PROFILE,
+                RH.VERSION,
+                index,
+                RH.ownerDomain(index),
+                RH.CHECKPOINT,
+                RH.ownerTag(index),
+                RH.CONTENT_GRAPH_FEATURES
+            );
+            Codec.requireCapability(capability, index, RH.CONTENT_GRAPH_FEATURES);
+            (bool ok, bytes memory reason) = address(this)
+                .staticcall(
+                    abi.encodeCall(
+                        this.checkCapability, (capability, index, RH.BINDING_GRAPH_FEATURES)
+                    )
+                );
+            assert(
+                !ok
+                    && keccak256(reason)
+                        == keccak256(
+                            abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)
+                        )
+            );
+            capability.supportedFeatures = RH.BINDING_GRAPH_FEATURES;
+            Codec.requireCapability(capability, index, RH.BINDING_GRAPH_FEATURES);
+        }
+    }
+
     function decode(bytes memory raw, uint8 index)
         external
         pure
@@ -329,7 +359,7 @@ contract StreamArtistRecoveredHydrationOwnerPayloadTest {
     function testOwnerPayloadRejectsUnsupportedFeatureAndNativeBoundaryCorruption() external {
         Payload.Payload memory p = _payload(2);
         RH.ExportHeader memory h = _header(2, p);
-        h.requiredFeatures |= 512;
+        h.requiredFeatures |= 1024;
         _reject(h, p);
         p = _repeated();
         p.provenance.journal[2].position.point.ownerRevision = 3;

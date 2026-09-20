@@ -165,7 +165,8 @@ revision+1; non-native preparations and executions do not become native receipts
 The [recovered-authority guide](../guides/artist-recovered-authority-hydration.md)
 defines the source certificate, repeated-import chronology and remaining scope.
 The implementation is under development: the seven concrete owners advertise
-feature mask 511 for the first graph, economics, delegation, attestation and content
+feature mask 1023 for the first graph, economics, delegation, attestation, content
+and pending-generation
 compositions below.
 Positive execution scenarios are authored, and ABI-only checks establish no
 runtime, Safe, capacity or release acceptance. Existing profiles remain strict.
@@ -226,6 +227,24 @@ Fresh estate permissions, defensive-status rules, grant eligibility and consumed
 scopes remain unchanged. Old31/63/127/255 feature constants and no-content codecs
 retain their exact meanings. Runtime, joined Registry/Coordinator capacity and
 broader authority/collection compositions remain pending.
+
+The pending-generation composition adds bit512 for complete original proposals1,
+refusals3 and non-native withdrawals4 before one final acceptance2. It admits two
+to128 generations of the same Artist's PRIMARY_ONLY, no-collaborator mode1 binding,
+with direct14 and base Attribution only. Full Binding/terms/terminal maps, original
+proposal hashes, every original mutation/replay coordinate and the final accepted
+head remain joined to complete Identity/Payout recovery histories. Owner0 and
+owner4 original mutation totals are2N; original withdrawal4 and owner4 mutations
+do not become native records. Import-only later eras preserve original coordinates.
+
+Original documents and refusal/acceptance signatures survive without inventing
+missing signer/nonce/deadline or Identity admission preimages. The full original25
+document history is already part of Identity transport. This profile leaves
+accepted-binding replacement, platform correction53, generation-aware economics,
+delegation/content/attestation combinations and wider graphs for separate work.
+Request and entry points remain unchanged; old31/63/127/255/511 constants and
+generation-one codecs retain their meanings. Source/type checks and authored
+actual class1/class3 scenarios do not establish execution or capacity acceptance.
 
 ## Original living delegation profile
 

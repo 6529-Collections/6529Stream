@@ -24,7 +24,8 @@ import {
 } from "./StreamArtistRecoveredPreparationInventory.sol";
 
 /// @notice Complete seven-owner certificate for the admitted recovered-authority graphs.
-/// @dev One recovered class1/class3 subject and one accepted generation-one binding without collaborators.
+/// @dev One recovered class1/class3 subject and one accepted binding without collaborators.
+/// Reproposed generations have their own bounded base-Attribution/direct-policy composition.
 /// Fixed typed exporters reject unsupported histories; every native occurrence, replay cell and
 /// nonce tree must be accounted for. No request witness can replace original producer state.
 library StreamArtistRecoveredHydrationPrepared {

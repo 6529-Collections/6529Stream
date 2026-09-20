@@ -129,6 +129,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Artist recovered authority hydration
 
+- Carry complete pending binding generations through recovered class1/class3
+  imports, retaining original refusals, withdrawals, terms, documents, signatures
+  and replay points before final acceptance. Add bounded feature512 for direct
+  policy/base Attribution graphs; preserve old encodings. Runtime and joined
+  deployment-capacity validation remain pending.
 - Carry complete recovered content-consent, royalty-freeze and content-freeze
   authorization histories through repeated imports, including original grant use,
   signature, nonce, replay and latest-record associations. Add an ordered

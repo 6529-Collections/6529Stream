@@ -8,7 +8,7 @@ entry point. Its seven-owner masks remain `0x7f`. Existing hydration selectors
 keep their existing profiles and exclusions.
 
 This is a source implementation with ABI-only checks. The seven concrete owners
-advertise feature mask 511 for these graphs; the base owner stays disabled. The positive
+advertise feature mask 1023 for these graphs; the base owner stays disabled. The positive
 import scenarios are authored but have not run. Safe execution, current-stack
 integration, bytecode size, gas, invariants and release acceptance remain pending.
 
@@ -22,9 +22,11 @@ The attestation extension adds complete original operation-24 history, including
 personhood summaries, C2PA credentials and publication evidence, for that graph.
 The content-consent extension carries original operations17/20/21 with their
 complete mixed consent and Identity dependencies.
+The pending-generation extension carries earlier refusals and withdrawals before
+one final accepted binding, with direct policy history and base Attribution.
 Complete Identity and Payout histories are transported together. Class 4,
 multiple Artists or collections,
-collaborator graphs, corrected generations and broader collection histories
+collaborator graphs, wider generation-aware records and broader collection histories
 remain separate full-v1 obligations. A capability bit does not bypass these
 typed source restrictions.
 
@@ -39,6 +41,7 @@ typed source restrictions.
 | 64 | Retained grants, consent mode 2 or native sale-consent operation 16; complete mixed consent history |
 | 128 | Complete original operation-24 attestation history, including personhood and C2PA derived state |
 | 256 | Complete original operation-17 content consent, operation-20 royalty-freeze authorization or operation-21 content-freeze authorization history |
+| 512 | Two to128 pending binding generations, each earlier generation refused or withdrawn before final acceptance; mode1, base Attribution and direct policy history only |
 
 Every source and destination owner must support the combined required mask.
 Pending requests, compromised status and unused preparations are included in
@@ -288,6 +291,40 @@ allowed only by the original20/21 rules. Delegated20 remains class1-only under
 the original mode1/2 and grant-capability32 rules. Retaining a freeze authorization
 does not itself execute a Metadata or Royalty Resolver freeze.
 
+## Pending binding generations
+
+Actual current Binding generation above one selects bit512. This bounded graph
+contains one Artist and one PRIMARY_ONLY collection, no collaborators, and two
+to128 complete generations. Every binding uses mode1. Each earlier proposal ends
+in an original refusal3 or withdrawal4 before the next proposal1; only the final
+generation is accepted by original operation2. An accepted binding cannot be
+reproposed by the original writer, so this profile does not describe replacement
+of an accepted binding or platform correction53.
+
+The tagged owner0 codec retains every original Binding, ordered terms and terminal
+record, plus the exact accepted current head. Original proposal hashes are
+reconstructed under their authenticated original environment. Proposal and
+terminal mutations give owner0 exactly2N original revisions for N generations.
+Withdrawals change state and replay guards but create no native receipt; proposal
+and refusal receipts retain their actual native order. Later import-only eras
+retain those original points and the complete rekeyed replay inventory.
+
+Owner4 retains the matching accepted generation and base Attribution. Its original
+2N mutation count does not create a native journal. Identity documents bind every
+proposal's original identity hash; refusal and final-acceptance signatures remain
+in the full Identity inventory. Original2/3 did not retain record-keyed Identity
+admission or signer/nonce/deadline preimages. The source producer, exact maps and
+complete nonce/replay evidence authenticate those facts; no missing preimage or
+cross-owner revision ordering is invented.
+
+Complete existing Identity, original25 document revisions, recovery and Payout
+histories continue through repeated imports. Consent is limited to direct14;
+grants, mode2,15/16/17/20/21 and Attribution24 are excluded from this generation
+profile. Request and entry points are unchanged, witnesses and royalty terms are
+empty, and the current accepted hash selects the complete earlier history.
+Old feature constants31/63/127/255/511 and generation-one codecs keep their exact
+meanings. Wider generation-aware record compositions remain separate work.
+
 ## Atomicity and transport bounds
 
 Each original owner import commits exactly once at its actual revision + 1.
@@ -410,6 +447,16 @@ repeated17 terms, overlapping21 lock sets, source heads, malformed transport and
 two-phase rollback/retry. Their partial certificates and synthetic second era
 do not establish seven-owner execution. A separate capability case requires256
 on every owner while preserving old255 support.
+
+Four actual class1 generation cases and two actual class3 cases use original
+refusal/withdrawal/reproposal/acceptance writers before genuine33/35 or40/35
+recovery. They retain original25 revisions, repeated A→B→C imports, fresh
+successor operations, original source checkpoints, current authority guards and
+late Archive rollback. Sixteen codec cases cover complete maps, exact mutation
+and native counts,128/129 transport bounds, pristine state and retry. Their
+second-era certificate is explicitly synthetic. Thirteen pure cross-owner cases
+cover exact original documents/signatures and chronology; one capability case
+requires512 on every owner while preserving old511 support. Runtime is pending.
 
 ABI-only compilation establishes source and type compatibility. It does not
 establish that these transactions execute, fit deployment limits or meet the

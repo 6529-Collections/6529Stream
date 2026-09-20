@@ -17,6 +17,16 @@ library StreamArtistRecoveredPreparationSelection {
         RH.JournalEntry[] calldata consentJournal
     ) public view returns (uint8 consentMode, bool hasDelegation, bool hasContent) {
         consentMode = Binding(bindingOwner).binding(collectionId).consentMode;
+        (hasDelegation, hasContent) =
+            flagsForMode(consentMode, hasIdentityDelegations, consentJournal);
+    }
+
+    /// @dev Reuse the binding already read by the bounded generation composition.
+    function flagsForMode(
+        uint8 consentMode,
+        bool hasIdentityDelegations,
+        RH.JournalEntry[] calldata consentJournal
+    ) public pure returns (bool hasDelegation, bool hasContent) {
         hasDelegation = hasIdentityDelegations || consentMode == 2;
         for (uint256 i; i < consentJournal.length; ++i) {
             uint16 op = consentJournal[i].receipt.operation;
