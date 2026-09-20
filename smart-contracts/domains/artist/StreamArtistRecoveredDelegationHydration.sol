@@ -29,18 +29,18 @@ library StreamArtistRecoveredDelegationHydration {
     bytes32 private constant OBSERVED =
         keccak256("identity_authority.replay.authorization_consumed_digest");
 
-    function validate(IH.Bundle memory b, RH.OwnerProvenance memory p) public pure {
+    function validate(IH.Bundle calldata b, RH.OwnerProvenance calldata p) public pure {
         uint256 grants;
         uint256 revocations;
         for (uint256 i; i < p.journal.length; ++i) {
-            RH.JournalEntry memory j = p.journal[i];
+            RH.JournalEntry calldata j = p.journal[i];
             if (j.receipt.artistId != b.artistId) continue;
             if (j.receipt.operation == 26) ++grants;
             if (j.receipt.operation == 27) {
                 ++revocations;
                 uint256 matched;
                 for (uint256 k; k < b.delegations.length; ++k) {
-                    IH.DelegationRow memory r = b.delegations[k];
+                    IH.DelegationRow calldata r = b.delegations[k];
                     if (!r.record.revoked || r.record.revocationRecordHash != j.receipt.recordHash)
                     {
                         continue;
@@ -64,7 +64,7 @@ library StreamArtistRecoveredDelegationHydration {
         if (grants != b.delegations.length) revert IH.InvalidRecoveredIdentity(b.artistId);
         uint256 revoked;
         for (uint256 i; i < b.delegations.length; ++i) {
-            IH.DelegationRow memory r = b.delegations[i];
+            IH.DelegationRow calldata r = b.delegations[i];
             _grant(b.artistId, r, p);
             if (
                 r.epoch > b.heads.delegationEpoch
@@ -90,12 +90,12 @@ library StreamArtistRecoveredDelegationHydration {
         _nonces(b, p);
     }
 
-    function _grant(bytes32 artistId, IH.DelegationRow memory r, RH.OwnerProvenance memory p)
+    function _grant(bytes32 artistId, IH.DelegationRow calldata r, RH.OwnerProvenance calldata p)
         private
         pure
     {
-        D.Record memory item = r.record;
-        D.Grant memory g = item.grant;
+        D.Record calldata item = r.record;
+        D.Grant calldata g = item.grant;
         if (
             r.recordHash == 0 || g.artistId != artistId || item.grantor == address(0)
                 || g.delegate == address(0) || g.delegate == item.grantor || g.capabilities == 0
@@ -106,7 +106,7 @@ library StreamArtistRecoveredDelegationHydration {
         Chronology.validateOwnerPoint(p, 2, r.position.point);
         uint256 matched;
         for (uint256 i; i < p.journal.length; ++i) {
-            RH.JournalEntry memory j = p.journal[i];
+            RH.JournalEntry calldata j = p.journal[i];
             if (j.receipt.operation != 26 || j.receipt.recordHash != r.recordHash) continue;
             if (
                 j.receipt.artistId != artistId || j.receipt.collectionId != 0
@@ -153,15 +153,15 @@ library StreamArtistRecoveredDelegationHydration {
     }
 
     function _alias(
-        RH.OwnerProvenance memory p,
-        RH.Point memory point,
+        RH.OwnerProvenance calldata p,
+        RH.Point calldata point,
         bytes32 surface,
         bytes32 scope,
         bytes32 commitment
     ) private pure {
         uint256 matched;
         for (uint256 i; i < p.aliases.length; ++i) {
-            RH.ReplayAlias memory a = p.aliases[i];
+            RH.ReplayAlias calldata a = p.aliases[i];
             if (a.originHash != point.environmentHash || a.surface != surface || a.scope != scope) {
                 continue;
             }
@@ -176,14 +176,14 @@ library StreamArtistRecoveredDelegationHydration {
         if (matched != 1) revert IH.InvalidRecoveredIdentity(scope);
     }
 
-    function _nonces(IH.Bundle memory b, RH.OwnerProvenance memory p) private pure {
+    function _nonces(IH.Bundle calldata b, RH.OwnerProvenance calldata p) private pure {
         if (
             p.eras.length == 0
                 || b.nonces.length != p.eras[p.eras.length - 1].checkpoint.nonceIndexCount
                 || b.nonces.length > RH.MAX_NONCE_INDICES
         ) revert IH.InvalidRecoveredIdentity(b.artistId);
         for (uint256 i; i < b.nonces.length; ++i) {
-            IH.NonceLane memory n = b.nonces[i];
+            IH.NonceLane calldata n = b.nonces[i];
             if (
                 n.key == 0 || (n.kind != 1 && n.kind != 2 && n.kind != 4 && n.kind != 5)
                     || n.words.length == 0 || n.words.length > RH.MAX_NONCE_PREFIXES
@@ -215,7 +215,7 @@ library StreamArtistRecoveredDelegationHydration {
 
     /// @dev Kind2 is populated only by successful delegated consumption. Original54 modifies
     /// the principal kind1 tree (or only digest guards), so it cannot inflate this use count.
-    function _consumed(IH.NonceLane memory n) private pure returns (uint256 count) {
+    function _consumed(IH.NonceLane calldata n) private pure returns (uint256 count) {
         for (uint256 i; i < n.words.length; ++i) {
             if (
                 n.words[i].prefix > type(uint248).max || n.words[i].words[0] == 0
