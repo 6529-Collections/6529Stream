@@ -116,11 +116,20 @@ No pre-sale vector is promoted into those later denominators.
 
 ## Validation boundary
 
-The source closure and authored tests cover the actual new publisher/workers and
-Store with explicit typed Core/Floor/provider/Metadata/Router/Schema/archive
-boundaries. The test fixture is deliberately zero-mint and uses synthetic capture
-and archive facts. Offline tests mock browser processes. Neither establishes a
+The focused native successor passes all eleven cases, including 256 vector-hash
+fuzz runs, using the actual new publisher/workers and Store with explicit typed
+Core/Floor/provider/Metadata/Router/Schema/archive boundaries. The fixture is
+deliberately zero-mint and uses synthetic capture and archive facts. The first
+capture retained five passes and six failures because its fixture omitted the
+original file-inventory preparation; the successor adds that preparation and a
+positive simultaneous collection/global grant precedence assertion. Production,
+compiler settings and all ten schema fixtures are unchanged.
+
+All seven selected production products fit the original size limits; the host is
+22,809 runtime bytes and 26,785 creation bytes. The exact 120-source capture joins
+125 artifact metadata records and 1,583 source Keccaks without a mismatch.
+Offline tooling tests mock browser processes. These checks do not establish a
 current-stack governance/Safe/floor transaction, genuine browser replay, complete
-package restoration, selected product sizes or transaction-capacity acceptance.
-Those remain separate integration checks. Existing metric publisher native16
-seven-pass/two-failure evidence is unchanged by this batch.
+package restoration or transaction-capacity acceptance. Whole-test gas includes
+uploads and multiple calls. Existing metric publisher native16 seven-pass/two-
+failure evidence is unchanged by this batch.

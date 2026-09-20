@@ -642,6 +642,12 @@ contract StreamProspectiveReferenceTest is EntropyTimeAuthorityFixture {
             p.captures[0].repeatCaptureSha256[0],
             88
         );
+        // Original preparation is mandatory even for this small typed fixture.
+        // Uploads alone do not populate the host's authenticated inventory namespace.
+        _upload(bytes(Environment.files(e.packageFiles, true)), false);
+        host.prepareFileInventory(e.packageFiles, true);
+        _upload(bytes(Environment.files(e.platformPrerequisites, false)), false);
+        host.prepareFileInventory(e.platformPrerequisites, false);
     }
 
     function _upload(bytes memory raw, bool omitLast) private returns (bytes32 missing) {
@@ -759,7 +765,14 @@ contract StreamProspectiveReferenceTest is EntropyTimeAuthorityFixture {
         vm.prank(address(0x123));
         vm.expectRevert(abi.encodeWithSelector(P.ProspectiveAuthority.selector, address(0x123)));
         host.publishProspectiveReference(p);
+        bytes32 first = host.publishProspectiveReference(p);
+        (, P.Receipt memory primary) = host.prospectiveRecord(first);
+        require(primary.authorizationClass == 3, "collection precedes simultaneous global grant");
         graph.controls(0, false);
+        p.referenceId = keccak256("second-global-reference");
+        p.expectedHead = first;
+        p.expectedRevision = 1;
+        _prepared(p);
         bytes32 h = host.publishProspectiveReference(p);
         (, P.Receipt memory r) = host.prospectiveRecord(h);
         require(r.authorizationClass == 8, "global exact class");
