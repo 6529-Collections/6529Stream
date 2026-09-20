@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./StreamFinalityCoordinatorPolicyReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityEntropySourceSet.sol";
 import "../../interfaces/stream/finality/IStreamCollectionTokenInventory.sol";
+import "../../interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import "../metadata/StreamMetadataRecoveryRoutes.sol";
 
@@ -275,14 +276,29 @@ contract StreamFinalityEntropySourceSet is IStreamFinalityEntropySourceSet {
                 || !((life == 2 && burned == 0) || (life == 3 && burned == 1))
         ) revert SourceSetToken(tokenId);
         if (_scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            // Inventory positions are dense; actual serials may have consumed gaps.
+            // Keep serving confined to the originally captured ordered token prefix.
             if (
-                serial > _membership.inventoryCount
-                    || abi.decode(
+                _membership.inventoryCount == 0
+                    || tokenId
+                        > abi.decode(
                             _read(
                                 tokenInventory,
                                 abi.encodeCall(
                                     IStreamCollectionTokenInventory.collectionTokenAt,
-                                    (cid, serial - 1)
+                                    (cid, _membership.inventoryCount - 1)
+                                ),
+                                32,
+                                _dependencies.readGas
+                            ),
+                            (uint256)
+                        )
+                    || abi.decode(
+                            _read(
+                                tokenInventory,
+                                abi.encodeCall(
+                                    IStreamCollectionTokenInventorySerialLookup.collectionTokenBySerial,
+                                    (cid, serial)
                                 ),
                                 32,
                                 _dependencies.readGas

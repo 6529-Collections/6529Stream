@@ -4,6 +4,47 @@ pragma solidity ^0.8.19;
 import "../../helpers/ScopeMembershipPublicationFixture.sol";
 
 contract StreamScopeMembershipPublicationTest is ScopeMembershipPublicationFixture {
+    function testPublishedScopesUseActualSerialsAcrossLeadingAndInteriorAbortGaps() public {
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = 2;
+        ids[1] = 5;
+        core.setToken(2, 1, 2, 2);
+        core.setToken(5, 1, 5, 3);
+        core.setMinted(1, 2);
+        inventory.scanCollectionTokens(1, 5);
+        require(inventory.collectionTokenAt(1, 0) == 2 && inventory.collectionTokenAt(1, 1) == 5);
+        for (uint8 family = 2; family <= 4; ++family) {
+            StreamFinalityScope memory scope = _seal(family, ids, "ipfs://sparse-serials");
+            require(membership.requireScopeMembership(scope).tokenCount == 2);
+            require(
+                membership.scopeTokenAt(scope, 0) == 2 && membership.scopeTokenAt(scope, 1) == 5
+            );
+            require(membership.scopeCoversToken(scope, 2) && membership.scopeCoversToken(scope, 5));
+            require(!membership.scopeCoversToken(scope, 1), "aborted allocation is not a member");
+        }
+    }
+
+    function testGapMemberMustBeIndexedAndKeepExactCoreSerialBeforeScopeSeal() public {
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 2;
+        core.setToken(2, 1, 2, 2);
+        core.setMinted(1, 1);
+        bytes32 record = _publish(_manifest(2, ids), "ipfs://unindexed-gap-member");
+        StreamFinalityScope memory scope = membership.beginScopeMembership(record);
+        vm.expectRevert();
+        membership.continueScopeMembership(scope, 1);
+        require(membership.tokenScopeCount(2) == 0, "failed part creates no membership");
+        inventory.scanCollectionTokens(1, 2);
+        core.setToken(2, 1, 3, 2);
+        core.setMinted(1, 1);
+        vm.expectRevert();
+        membership.continueScopeMembership(scope, 1);
+        core.setToken(2, 1, 2, 2);
+        core.setMinted(1, 1);
+        membership.continueScopeMembership(scope, 1);
+        require(membership.scopeTokenAt(scope, 0) == 2, "exact original serial retry");
+    }
+
     function testReverseIndexTracksValidatedPrefixAndOnlyReportsCompleteAfterSeal() public {
         uint256[] memory ids = _tokens(257);
         _index(ids, 0, 256);

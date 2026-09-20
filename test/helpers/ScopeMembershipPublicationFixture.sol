@@ -16,6 +16,7 @@ contract ScopeMetadataCoreBoundary {
     }
     mapping(uint256 => Token) internal tokens;
     mapping(uint256 => uint256) public collectionMintedEver;
+    uint256 public lastAllocatedTokenId;
     mapping(bytes32 => address) public selected;
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
@@ -28,7 +29,13 @@ contract ScopeMetadataCoreBoundary {
 
     function setToken(uint256 id, uint256 cid, uint256 serial, uint8 life) external {
         tokens[id] = Token(cid, serial, life);
+        if (id > lastAllocatedTokenId) lastAllocatedTokenId = id;
         if (life == 2 && serial > collectionMintedEver[cid]) collectionMintedEver[cid] = serial;
+    }
+
+    /// @dev Explicit completed-mint count for sparse identity fixtures; not an allocation frontier.
+    function setMinted(uint256 cid, uint256 count) external {
+        collectionMintedEver[cid] = count;
     }
 
     function tokenCollectionIdentity(uint256 id)

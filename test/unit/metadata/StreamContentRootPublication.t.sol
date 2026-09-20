@@ -8,6 +8,7 @@ contract RootCoreBoundary {
     mapping(bytes32 => address) public selected;
     mapping(uint256 => address) public owners;
     mapping(uint256 => uint8) public lifecycles;
+    uint256 public lastAllocatedTokenId;
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == 0x80ac58cd || id == 0x01ffc9a7;
@@ -42,6 +43,7 @@ contract RootCoreBoundary {
     function setToken(uint256 id, address owner, uint8 lifecycle) external {
         owners[id] = owner;
         lifecycles[id] = lifecycle;
+        if (id > lastAllocatedTokenId) lastAllocatedTokenId = id;
     }
 
     function tokenCollectionIdentity(uint256 id)
@@ -49,7 +51,8 @@ contract RootCoreBoundary {
         view
         returns (bool, uint256, uint256, bool)
     {
-        return (lifecycles[id] != 0, 1, id, lifecycles[id] == 3);
+        if (lifecycles[id] == 0) return (false, 0, 0, false);
+        return (true, 1, id, lifecycles[id] == 3);
     }
 
     function tokenLifecycle(uint256 id) external view returns (uint8) {

@@ -144,7 +144,10 @@ contract ReferenceSourceArchiveBoundary {
 ///      native Coordinator policies, checkpoint and complete stored leaf-manifest verification.
 /// @dev Core/Executor, artist authorization, seed production and archive-family receipts are
 ///      explicit boundaries. Safe publication uses real upstream threshold signatures.
-contract ReferenceSourceExportTest is ContentRootPublicationFixture, EntropyTimeAuthorityFixture {
+abstract contract ReferenceSourceExportFixture is
+    ContentRootPublicationFixture,
+    EntropyTimeAuthorityFixture
+{
     event log_named_uint(string key, uint256 value);
     ReferenceSourceVm internal constant cheat =
         ReferenceSourceVm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -222,36 +225,33 @@ contract ReferenceSourceExportTest is ContentRootPublicationFixture, EntropyTime
             );
         }
         core.setMinted(2);
-        core.setToken(1, address(this), 2);
-        core.setToken(2, address(this), 2);
-        cheat.mockCall(
-            address(core),
-            abi.encodeCall(IStreamCoreIdentity.coordinatorAtMint, (uint256(1))),
-            abi.encode(address(first))
-        );
-        cheat.mockCall(
-            address(core),
-            abi.encodeCall(IStreamCoreIdentity.coordinatorAtMint, (uint256(2))),
-            abi.encode(address(second))
-        );
-        for (uint256 i = 1; i <= 2; ++i) {
-            address c = i == 1 ? address(first) : address(second);
+        uint256[2] memory sourceIds = _sourceTokenIds();
+        for (uint256 i; i < 2; ++i) {
+            uint256 id = sourceIds[i];
+            core.setToken(id, address(this), 2);
+            address c = i == 0 ? address(first) : address(second);
+            cheat.mockCall(
+                address(core),
+                abi.encodeCall(IStreamCoreIdentity.coordinatorAtMint, (id)),
+                abi.encode(c)
+            );
             cheat.mockCall(
                 c,
-                abi.encodeCall(IStreamEntropyView.tokenSeed, (i)),
+                abi.encodeCall(IStreamEntropyView.tokenSeed, (id)),
                 abi.encode(bytes32(uint256(77)), true)
             );
             cheat.mockCall(
-                c, abi.encodeCall(IStreamEntropyView.tokenEntropyStatus, (i)), abi.encode(uint8(5))
+                c, abi.encodeCall(IStreamEntropyView.tokenEntropyStatus, (id)), abi.encode(uint8(5))
             );
         }
         inventory = new StreamCollectionTokenInventory(
             address(core), address(executor), _gas("TOKEN_INVENTORY_CORE_READ_GAS", 100000, 1)
         );
         uint256[] memory ids = new uint256[](2);
-        ids[0] = 1;
-        ids[1] = 2;
-        inventory.appendCollectionTokens(1, ids);
+        ids[0] = sourceIds[0];
+        ids[1] = sourceIds[1];
+        if (ids[0] == 1 && ids[1] == 2) inventory.appendCollectionTokens(1, ids);
+        else inventory.scanCollectionTokens(1, ids[1]);
         membership = new StreamFinalityScopeMembership(
             address(core),
             address(metadata),
@@ -314,9 +314,9 @@ contract ReferenceSourceExportTest is ContentRootPublicationFixture, EntropyTime
             abi.encodeWithSignature("finalityComponentCount(uint256)", 1),
             abi.encode(uint256(0))
         );
-        for (uint256 i = 1; i <= 2; ++i) {
+        for (uint256 i; i < 2; ++i) {
             StreamFinalityScope memory tokenScope =
-                StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, i, 0);
+                StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, sourceIds[i], 0);
             cheat.mockCall(
                 address(finality),
                 abi.encodeWithSignature(
@@ -359,7 +359,7 @@ contract ReferenceSourceExportTest is ContentRootPublicationFixture, EntropyTime
         IStreamOnchainContentCheckpoint.TokenPayload[] memory payloads =
             new IStreamOnchainContentCheckpoint.TokenPayload[](2);
         for (uint256 i; i < 2; ++i) {
-            uint256 id = i + 1;
+            uint256 id = _sourceTokenIds()[i];
             bytes memory html = abi.encodePacked(
                 "<html><head></head><body><script>const tokenId=",
                 Strings.toString(id),
@@ -403,6 +403,11 @@ contract ReferenceSourceExportTest is ContentRootPublicationFixture, EntropyTime
 
     function _scope() internal pure returns (StreamFinalityScope memory) {
         return StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0);
+    }
+
+    /// @dev Sparse cohorts override retained identities without changing completed supply.
+    function _sourceTokenIds() internal pure virtual returns (uint256[2] memory) {
+        return [uint256(1), uint256(2)];
     }
 
     function _gas(string memory name, uint256 cap, uint8 failure)
@@ -559,7 +564,9 @@ contract ReferenceSourceExportTest is ContentRootPublicationFixture, EntropyTime
         vm.prank(publisher);
         hash = snapshots.publishSnapshot(p);
     }
+}
 
+contract ReferenceSourceExportTest is ReferenceSourceExportFixture {
     /// @dev Actual Router output and actual complete native snapshot; Core/artist/seed/old archive remain explicit fixture boundaries.
     function testExportOriginalFirstAndLastRouterMetadataWithAuthenticatedSnapshot() public {
         (bytes32 hash, bytes memory canonical) = _publish(address(this));

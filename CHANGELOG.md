@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Preserve complete collection inventory and finality/preservation membership
+  across incident-aborted serial gaps with bounded authenticated Core scans,
+  exact serial lookup and snapshot-pinned offline reference endpoint checks.
+
 - Add exact frozen entropy-successor policies, constant-time pending-request
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover

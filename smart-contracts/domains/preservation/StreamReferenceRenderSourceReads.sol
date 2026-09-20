@@ -178,7 +178,7 @@ library StreamReferenceRenderSourceReads {
         StreamTokenContentLeaf memory leaf = abi.decode(raw, (StreamTokenContentLeaf));
         _canonical(checkpoint, raw, abi.encode(leaf));
         if (
-            c.tokenId == 0 || leaf.tokenId != c.tokenId || c.collectionSerial != index + 1
+            c.tokenId == 0 || leaf.tokenId != c.tokenId || c.collectionSerial == 0
                 || c.metadataJSONHash != leaf.metadataHash || c.htmlHash != leaf.animationHash
                 || c.animationHTML.length == 0 || c.animationHTML.length > 40960
                 || c.animationHTML.length != c.htmlBytes || keccak256(c.animationHTML) != c.htmlHash

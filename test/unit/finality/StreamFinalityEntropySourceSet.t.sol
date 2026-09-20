@@ -21,6 +21,72 @@ contract LegacyEntropyAdapterBoundary {
 contract StreamFinalityEntropySourceSetTest is StreamFinalityCoordinatorPolicyReadsTest {
     event log_named_uint(string key, uint256 value);
 
+    function _gapSetup() private returns (Fixture memory f) {
+        f.first = _native(true);
+        f.second = _native(true);
+        f.sources = new StreamFinalityCoordinatorInventory(
+            address(core), address(membership), 100000, 2000000
+        );
+        f.reader = new FixedCoordinatorPolicyConsumer(_dependencies(f.sources));
+        f.ids = new uint256[](2);
+        f.ids[0] = 2;
+        f.ids[1] = 5;
+        for (uint256 i; i < 2; ++i) {
+            core.setToken(f.ids[i], 1, f.ids[i], 2);
+            cheat.mockCall(
+                address(core),
+                abi.encodeCall(IStreamCoreIdentity.coordinatorAtMint, (f.ids[i])),
+                abi.encode(i == 0 ? address(f.first) : address(f.second))
+            );
+        }
+        core.setMinted(1, 2);
+        inventory.scanCollectionTokens(1, 5);
+        f.plan = f.sources.beginInventory(_scope());
+        f.sources.appendInventory(f.plan, 256);
+    }
+
+    function testSparseSerialSeedsRemainBoundToOriginalSourcesAndHistoricalPrefix() public {
+        Fixture memory f = _gapSetup();
+        bytes32 firstSeed = _finalize(f.first, 2, keccak256("first sparse seed"));
+        bytes32 lastSeed = _finalize(f.second, 5, keccak256("last sparse seed"));
+        StreamFinalityEntropySourceSet a = _prepare(f);
+        (bytes32 seed, bool complete) = a.tokenSeedForFinality(2);
+        require(complete && seed == firstSeed, "serial two at ordinal zero");
+        (seed, complete) = a.tokenSeedForFinality(5);
+        require(complete && seed == lastSeed, "interior consumed serials skipped");
+        core.setToken(5, 1, 5, 3);
+        (seed, complete) = a.tokenSeedForFinality(5);
+        require(complete && seed == lastSeed, "burned original member retained");
+        core.setToken(8, 1, 8, 2);
+        core.setMinted(1, 3);
+        cheat.mockCall(
+            address(core),
+            abi.encodeCall(IStreamCoreIdentity.coordinatorAtMint, (uint256(8))),
+            abi.encode(address(f.first))
+        );
+        inventory.scanCollectionTokens(1, 3);
+        vm.expectRevert();
+        a.tokenSeedForFinality(8);
+        vm.expectRevert();
+        a.requireCurrentSourceSet();
+        (seed, complete) = a.tokenSeedForFinality(2);
+        require(complete && seed == firstSeed, "old prefix remains readable after later indexing");
+    }
+
+    function testSparseSerialEntropyRejectsAbortedAndMisboundCoreIdentities() public {
+        Fixture memory f = _gapSetup();
+        StreamFinalityEntropySourceSet a = _prepare(f);
+        vm.expectRevert();
+        a.tokenSeedForFinality(1);
+        core.setToken(2, 1, 3, 2);
+        core.setMinted(1, 2);
+        vm.expectRevert();
+        a.tokenSeedForFinality(2);
+        core.setToken(2, 1, 2, 2);
+        core.setMinted(1, 2);
+        a.tokenSeedForFinality(2);
+    }
+
     function _factory(Fixture memory f) private returns (StreamFinalityEntropySourceFactory) {
         address registry = core.selected(keccak256("MODULE_REGISTRY"));
         StreamMetadataRecoveryRoutes.Pointer memory pointer = StreamMetadataRecoveryRoutes.Pointer(

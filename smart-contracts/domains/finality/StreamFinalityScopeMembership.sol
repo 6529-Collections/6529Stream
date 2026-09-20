@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamScopeMembershipReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityTokenScopeInventory.sol";
 import "../../interfaces/stream/finality/IStreamCollectionTokenInventory.sol";
+import "../../interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import "../../interfaces/stream/core/IStreamCoreCollectionView.sol";
 import "../parameters/StreamGasParameterHost.sol";
@@ -90,6 +91,7 @@ contract StreamFinalityScopeMembership is
         _supports(core_, 0x80ac58cd, cap);
         _supports(metadataHost_, type(IStreamCollectionMetadataV1).interfaceId, cap);
         _supports(inventory_, type(IStreamCollectionTokenInventory).interfaceId, cap);
+        _supports(inventory_, type(IStreamCollectionTokenInventorySerialLookup).interfaceId, cap);
         for (uint256 i; i < 5; ++i) {
             _codeHashes[i] = _target(i).codehash;
         }
@@ -173,8 +175,8 @@ contract StreamFinalityScopeMembership is
                                 _read(
                                     tokenInventory,
                                     abi.encodeCall(
-                                        IStreamCollectionTokenInventory.collectionTokenAt,
-                                        (scope.collectionId, serial - 1)
+                                        IStreamCollectionTokenInventorySerialLookup.collectionTokenBySerial,
+                                        (scope.collectionId, serial)
                                     ),
                                     32
                                 ),

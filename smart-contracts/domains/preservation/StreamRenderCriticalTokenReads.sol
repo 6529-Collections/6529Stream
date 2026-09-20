@@ -19,6 +19,7 @@ import "../finality/StreamOnchainContentBytes.sol";
 import "../../interfaces/stream/core/IStreamCoreMint.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import "../../interfaces/stream/finality/IStreamCollectionTokenInventory.sol";
+import "../../interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol";
 
 /// @notice Actual current original inputs and deterministic native bytes, never a supplied set.
 import { StreamRenderCriticalSourceReads as Sources } from "./StreamRenderCriticalSourceReads.sol";
@@ -133,7 +134,7 @@ library StreamRenderCriticalTokenReads {
                     )
                 )
         ) revert T.InvalidInventoryItem();
-        _tokenIdentity(d, actualId, c.collectionId, index);
+        _tokenIdentity(d, actualId, c.collectionId, inventory);
         raw = IO.fixedRead(
             checkpoint,
             abi.encodeCall(
@@ -151,7 +152,7 @@ library StreamRenderCriticalTokenReads {
         S.Dependencies memory d,
         uint256 actualId,
         uint256 expectedCid,
-        uint64 index
+        address inventory
     ) private view {
         bytes memory raw = IO.fixedRead(
             d.targets[0],
@@ -162,7 +163,19 @@ library StreamRenderCriticalTokenReads {
         (bool known, uint256 cid, uint256 serial, bool burned) =
             abi.decode(raw, (bool, uint256, uint256, bool));
         IO.canonical(d.targets[0], raw, abi.encode(known, cid, serial, burned));
-        if (!known || cid != expectedCid || serial != uint256(index) + 1) {
+        if (
+            !known || cid != expectedCid || serial == 0
+                || uint256(
+                        IO.word(
+                            inventory,
+                            abi.encodeCall(
+                                IStreamCollectionTokenInventorySerialLookup.collectionTokenBySerial,
+                                (expectedCid, serial)
+                            ),
+                            d.readGas
+                        )
+                    ) != actualId
+        ) {
             revert T.InvalidInventoryItem();
         }
     }
