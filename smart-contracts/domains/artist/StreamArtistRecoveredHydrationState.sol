@@ -100,6 +100,32 @@ library StreamArtistRecoveredHydrationState {
         p.aliases = s.aliases;
     }
 
+    /// @notice Bounded read of one immutable, producer-authenticated imported occurrence.
+    /// @dev Owner index/registry come from the caller's fixed binding. No prefix scan,
+    /// native fallback, cross-owner mutable read, storage write or new state field.
+    function importedReceiptAt(uint256 index, uint8 ownerIndex, address currentRegistry)
+        public
+        view
+        returns (RH.JournalEntry memory entry, bytes32 importCommitment, uint64 localImportRevision)
+    {
+        State storage s = _state();
+        if (index >= s.journal.length || currentRegistry == address(0)) {
+            revert RH.InvalidRecoveredHydrationProvenance();
+        }
+        entry = s.journal[index];
+        (, importCommitment, localImportRevision,) = originCertificateInline(
+            entry.position.point.environmentHash, ownerIndex, currentRegistry
+        );
+        RH.OwnerEra storage era =
+            s.eras[s.originIndexPlusOne[entry.position.point.environmentHash] - 1];
+        if (
+            entry.position.point.ownerIndex != ownerIndex || entry.receipt.operation == 0
+                || entry.receipt.recordHash == 0 || entry.position.nativeIndex >= era.nativeCount
+                || entry.position.point.ownerRevision <= era.lowerRevision
+                || entry.position.point.ownerRevision > era.checkpoint.ownerState.revision
+        ) revert RH.InvalidRecoveredHydrationProvenance();
+    }
+
     /// @notice Compact read of a key installed only by the unchanged validated op60 producer.
     /// @dev Full original environment bytes remain available through environment(). No cache/write.
     function originCertificate(bytes32 hash, uint8 ownerIndex, address currentRegistry)

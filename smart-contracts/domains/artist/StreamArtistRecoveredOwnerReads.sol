@@ -8,6 +8,9 @@ import {
     IStreamArtistRecoveredHydrationOwner as API
 } from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
 import {
+    IStreamArtistImportedReceiptRead as ReceiptAPI
+} from "../../interfaces/stream/artist/IStreamArtistImportedReceiptRead.sol";
+import {
     IStreamArtistAuthorityHydrationCoordinator as Coordinator
 } from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import {
@@ -53,6 +56,12 @@ library StreamArtistRecoveredOwnerReads {
             return abi.encode(
                 Imported.importedPrefix(), Imported.commitment(), Imported.importedAtRevision()
             );
+        }
+        if (selector == ReceiptAPI.recoveredHydrationImportedReceiptAt.selector) {
+            uint256 receiptIndex = abi.decode(data[4:], (uint256));
+            (RH.JournalEntry memory entry, bytes32 commitment, uint64 revision) =
+                Imported.importedReceiptAt(receiptIndex, index, binding.registry);
+            return abi.encode(entry, commitment, revision);
         }
         if (selector == API.recoveredHydrationAuxiliaryPoint.selector) {
             (bytes32 kind, bytes32 key) = abi.decode(data[4:], (bytes32, bytes32));

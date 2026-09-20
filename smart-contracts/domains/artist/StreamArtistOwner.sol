@@ -174,6 +174,15 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         _forwardRecoveredRead();
     }
 
+    /// @notice One exact original occurrence; never scans or synthesizes an imported row.
+    function recoveredHydrationImportedReceiptAt(uint256)
+        external
+        view
+        returns (StreamArtistRecoveredHydrationTypes.JournalEntry calldata, bytes32, uint64)
+    {
+        _forwardRecoveredRead();
+    }
+
     function recoveredHydrationReplayPoint(bytes32)
         external
         view
