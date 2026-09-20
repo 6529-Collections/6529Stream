@@ -152,6 +152,15 @@
   provider joins. ABI-only checks pass; native, capacity and actual ceremony
   acceptance remain pending.
 
+## Explicit current-authority STATIC Artist reads
+
+- Add an immutable complete-suite catalogue and direct original namespace facts
+  for admitted A-to-B-to-C Artist attribution. Keep legacy profiles unchanged.
+- Preserve current claims, corrections, adverse state and sanctions; expose a
+  separate non-sanction projection without suppressing legitimate provenance drift.
+- Record scoped source/type/size evidence and remaining governed admission,
+  actual migration and C2PA work in the [guide](docs/guides/static-artist-current-authority.md).
+
 ## Explicit preservation rendering and admission
 
 - Add a fresh full-artwork renderer and attribution profile that exclude only

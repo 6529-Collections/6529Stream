@@ -151,6 +151,22 @@ library StreamArtistRecoveredHydrationState {
         return (hash, s.commitment, s.importedAtRevision, s.ownerIndex);
     }
 
+    /// @notice Raw imported-only facts for a fixed STATIC validator. No new authority or cache.
+    /// @dev Invalid/missing array membership produces a zero stored origin. The fixed consumer
+    /// must check the returned original profile, commitment, revision and owner index as well.
+    /// The existing certificate method and its complete revert behavior remain unchanged.
+    function originFactsInline(bytes32 hash, address currentRegistry)
+        internal view returns (bytes32 storedHash, bytes32 commitment_, uint64 revision, uint8 ownerIndex, bytes32 profile)
+    {
+        State storage s = _state();
+        uint256 plus = s.originIndexPlusOne[hash];
+        if (plus != 0 && plus <= s.origins.length && plus <= s.eras.length
+            && s.origins[plus - 1].registry != currentRegistry) {
+            storedHash = s.eras[plus - 1].originHash;
+        }
+        return (storedHash, s.commitment, s.importedAtRevision, s.ownerIndex, s.profile);
+    }
+
     function environment(bytes32 originHash) public view returns (RH.OriginEnvironment memory) {
         State storage s = _state();
         uint256 plus = s.originIndexPlusOne[originHash];

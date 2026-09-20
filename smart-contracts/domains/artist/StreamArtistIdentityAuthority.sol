@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredHydrationState as StaticHydrationState } from "./StreamArtistRecoveredHydrationState.sol";
+import { IStreamStaticArtistLineageFacts as StaticLineage } from "../../interfaces/stream/artist/IStreamStaticArtistLineageFacts.sol";
 import { StreamArtistRecoveredTimingInventory } from "./StreamArtistRecoveredTimingInventory.sol";
 import {
     StreamArtistRecoveredIdentityTransport
@@ -935,6 +937,37 @@ contract StreamArtistIdentityAuthority is
     {
         T.Identity storage r = _identity.identities[artistId];
         return (r.authorityAddress, r.authorityClass, r.status, r.identityRecordHash);
+    }
+
+    /// @notice Direct original history and optional imported-only origin facts.
+    function staticArtistLineage(bytes32 hash) external view returns (StaticLineage.Lineage calldata) {
+        StreamArtistHistoryState.State storage s = StreamArtistHistoryState.state();
+        // The public result is the same fifteen-word Lineage tuple. Every narrow source
+        // is explicitly widened before this flat memory frame is returned.
+        bytes32[15] memory words;
+        words[0] = bytes32(uint256(s.cutover ? 1 : 0));
+        words[1] = bytes32(uint256(uint160(s.successor)));
+        words[2] = bytes32(uint256(s.cutoverBlock));
+        words[3] = bytes32(s.bindings.length);
+        if (s.bindings.length == 1) {
+            address predecessor = s.bindings[0].predecessorRegistry;
+            words[4] = bytes32(uint256(uint160(predecessor)));
+            words[5] = bytes32(uint256(s.bindings[0].snapshotBlock));
+            words[6] = s.bindings[0].importRoot;
+            words[7] = s.bindings[0].manifestHash;
+            words[8] = s.predecessorCode[predecessor];
+            words[9] = bytes32(s.predecessorCount[predecessor]);
+        }
+        if (hash != 0) {
+            (bytes32 stored, bytes32 commitment_, uint64 revision, uint8 index, bytes32 profile) =
+                StaticHydrationState.originFactsInline(hash, artistRegistry);
+            words[10] = stored;
+            words[11] = commitment_;
+            words[12] = bytes32(uint256(revision));
+            words[13] = bytes32(uint256(index));
+            words[14] = profile;
+        }
+        assembly ("memory-safe") { return(words, 480) }
     }
 
     /// @dev Exact original operative document selection, with direct reads throughout.

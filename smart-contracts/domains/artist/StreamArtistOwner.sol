@@ -155,7 +155,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     }
 
     function authorityHydrationCommitment() external view returns (bytes32) {
-        return StreamArtistHydrationGuards.commitment();
+        return StreamArtistHydrationGuards.commitmentInline();
     }
 
     function recoveredAuthorityHydrationCapability()

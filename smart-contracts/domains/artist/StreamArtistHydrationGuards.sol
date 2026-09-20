@@ -27,6 +27,11 @@ library StreamArtistHydrationGuards {
         return state().commitment;
     }
 
+    /// @dev Direct STATIC read of the same original one-use completion marker.
+    function commitmentInline() internal view returns (bytes32) {
+        return state().commitment;
+    }
+
     function sourceCell(bytes32 key) public view returns (T.ReplayCell memory) {
         return state().sourceCells[key];
     }
