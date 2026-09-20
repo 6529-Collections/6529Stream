@@ -383,13 +383,9 @@ contract StreamArtistRecoveredBindingCorrectionsActualTest is
                 suite.roleRegistry, address(artist), p.reasonHash, "urn:correction:governance"
             );
         bytes32 action = keccak256(abi.encode("original class2 correction", c, originals.length));
-        avm.mockCall(
-            authority,
-            abi.encodeCall(IStreamGovernanceReads.currentAction, ()),
-            abi.encode(true, action, uint8(2), c.scopeHash, c.oldValueHash, c.newValueHash)
-        );
         ArtistUnitGovernance(authority)
-            .executeModuleContext(
+            .executeModuleContextWithAction(
+                action,
                 address(ingress),
                 abi.encodeCall(
                     Correction.proposeArtistBindingAfterRevocation,
@@ -400,10 +396,11 @@ contract StreamArtistRecoveredBindingCorrectionsActualTest is
                 c.oldValueHash,
                 c.newValueHash
             );
-        avm.mockCall(
-            authority,
-            abi.encodeCall(IStreamGovernanceReads.currentAction, ()),
-            abi.encode(false, bytes32(0), uint8(0), bytes32(0), bytes32(0), bytes32(0))
+        (bool active, bytes32 id, uint8 kind, bytes32 scope, bytes32 oldValue, bytes32 newValue) =
+            IStreamGovernanceReads(authority).currentAction();
+        require(
+            !active && id == 0 && kind == 0 && scope == 0 && oldValue == 0 && newValue == 0,
+            "actual typed governance context cleared before living recovery"
         );
         _rhCandidate(0, "binding_lifecycle.replay.correction_action", action);
         _capture();

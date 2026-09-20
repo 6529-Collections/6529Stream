@@ -165,6 +165,7 @@ contract ArtistUnitGovernance {
     address private contestProposer;
     bytes32 private contestReason;
     string private contestURI;
+    bytes32 private explicitModuleAction;
 
     /// @dev Exact governance read boundary, not actual staging, proposer admission or timelock evidence.
     function configureContestReads(
@@ -213,6 +214,23 @@ contract ArtistUnitGovernance {
         newState = 0;
     }
 
+    /// @dev A scoped unique action ID for repeated exact-context unit recipes. The original
+    /// execution body and default action remain unchanged; this is not delayed governance.
+    function executeModuleContextWithAction(
+        bytes32 action,
+        address target,
+        bytes calldata data,
+        uint8 actionClass,
+        bytes32 scope_,
+        bytes32 oldState_,
+        bytes32 newState_
+    ) external {
+        require(action != 0 && explicitModuleAction == 0, "unique typed module action");
+        explicitModuleAction = action;
+        this.executeModuleContext(target, data, actionClass, scope_, oldState_, newState_);
+        delete explicitModuleAction;
+    }
+
     function isStreamGovernedParameterAuthority() external pure returns (bool) {
         return true;
     }
@@ -224,7 +242,9 @@ contract ArtistUnitGovernance {
     {
         return (
             active,
-            active ? keccak256("unit authority gas raise") : bytes32(0),
+            active
+                ? (explicitModuleAction == 0 ? keccak256("unit authority gas raise") : explicitModuleAction)
+                : bytes32(0),
             active ? selectedClass : 0,
             scope,
             oldState,
