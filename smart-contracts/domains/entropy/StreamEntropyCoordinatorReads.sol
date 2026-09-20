@@ -17,6 +17,9 @@ import "../../interfaces/stream/governance/IStreamGovernanceRoleSources.sol";
 import "../../interfaces/stream/mint/IStreamMintGovernanceRegistry.sol";
 import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
+import {
+    StreamEntropyCollectionPolicyState as PolicyState
+} from "./StreamEntropyCollectionPolicyState.sol";
 
 /// @notice Fixed read/admission worker; preserves the coordinator's original storage, domains and caller context.
 library StreamEntropyCoordinatorReads {
@@ -50,7 +53,10 @@ library StreamEntropyCoordinatorReads {
             bytes32 collectionSaltCommitment
         )
     {
-        if (config.provider == address(0) || !reveal.declared) {
+        if (
+            PolicyState.explicitPolicy(collectionId) || config.provider == address(0)
+                || !reveal.declared
+        ) {
             return (false, bytes32(0), address(0), 0, bytes32(0));
         }
         collectionSaltCommitment = keccak256(
@@ -197,11 +203,23 @@ library StreamEntropyCoordinatorReads {
         StreamEntropyCoordinator.CollectionConfig storage config,
         uint256 fee
     ) public view {
-        address provider = config.provider;
+        _validateRevealFee(config.provider, config.providerCodeHash, config.providerConfigHash, fee);
+    }
+
+    function validateRevealFeeValue(
+        StreamEntropyCoordinator.CollectionConfig memory config,
+        uint256 fee
+    ) public view {
+        _validateRevealFee(config.provider, config.providerCodeHash, config.providerConfigHash, fee);
+    }
+
+    function _validateRevealFee(address provider, bytes32 codeHash, bytes32 configHash, uint256 fee)
+        private
+        view
+    {
         if (
-            provider.code.length == 0 || provider.codehash != config.providerCodeHash
-                || IStreamEntropyProvider(provider).streamEntropyProviderConfigHash()
-                    != config.providerConfigHash
+            provider.code.length == 0 || provider.codehash != codeHash
+                || IStreamEntropyProvider(provider).streamEntropyProviderConfigHash() != configHash
         ) {
             revert StreamEntropyCoordinator.ProviderConfigurationChanged(provider);
         }

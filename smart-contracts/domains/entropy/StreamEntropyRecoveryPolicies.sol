@@ -303,6 +303,17 @@ library StreamEntropyRecoveryPolicies {
         view
         returns (bytes32 actionId)
     {
+        return requireActionClass(authority, scope, oldHash, newHash, 1);
+    }
+
+    /// @dev The fixed calling worker selects the class, never public transaction calldata.
+    function requireActionClass(
+        address authority,
+        bytes32 scope,
+        bytes32 oldHash,
+        bytes32 newHash,
+        uint8 requiredClass
+    ) public view returns (bytes32 actionId) {
         if (
             msg.sender != authority || authority.code.length == 0
                 || authority.codehash != store().authorityCodeHash
@@ -327,7 +338,7 @@ library StreamEntropyRecoveryPolicies {
             bytes32 actualNew
         ) = abi.decode(result, (uint256, bytes32, uint256, bytes32, bytes32, bytes32));
         if (
-            executing != 1 || currentId == 0 || cls != 1 || actualScope != scope
+            executing != 1 || currentId == 0 || cls != requiredClass || actualScope != scope
                 || actualOld != oldHash || actualNew != newHash
         ) {
             revert R.FreshRecoveryPolicyInvalidContext();

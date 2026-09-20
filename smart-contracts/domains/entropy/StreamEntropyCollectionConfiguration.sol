@@ -7,6 +7,9 @@ import "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
+import {
+    StreamEntropyCollectionPolicyState as PolicyState
+} from "./StreamEntropyCollectionPolicyState.sol";
 
 /// @notice Fixed collection configuration worker; retains host storage, validation order and events.
 library StreamEntropyCollectionConfiguration {
@@ -39,6 +42,7 @@ library StreamEntropyCollectionConfiguration {
         bool publicRequests,
         uint64 timeoutBlocks
     ) public {
+        PolicyState.requireLegacy(collectionId);
         if (!core.collectionExists(collectionId)) {
             revert StreamEntropyCoordinator.InvalidCollection(collectionId);
         }
@@ -109,6 +113,7 @@ library StreamEntropyCollectionConfiguration {
             uint64 requestSLOBlocks,
             uint256 revealFeePerTokenWei
         ) = abi.decode(data, (uint256, uint8, bytes32, uint64, uint256));
+        PolicyState.requireLegacy(collectionId);
         if (
             !core.collectionExists(collectionId)
                 || collectionEntropyConfig[collectionId].provider == address(0)

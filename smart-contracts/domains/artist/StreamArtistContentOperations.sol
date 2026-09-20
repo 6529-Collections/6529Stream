@@ -23,6 +23,8 @@ import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 /// @dev No readiness state. Executed-finality provider admission remains an explicit integration seam.
 library StreamArtistContentOperations {
     bytes32 private constant ENTROPY_RECOVERY = keccak256("6529STREAM_ENTROPY_RECOVERY_V1");
+    bytes32 private constant ENTROPY_CONFIGURATION =
+        keccak256("6529STREAM_ENTROPY_CONFIGURATION_V1");
 
     function consent(
         StreamArtistDelegationTypes.CoordinatorContext memory x,
@@ -216,7 +218,9 @@ library StreamArtistContentOperations {
             _host(suite, supplied);
             return;
         }
-        if (family != ENTROPY_RECOVERY) revert T.ComponentChanged(supplied);
+        if (family != ENTROPY_RECOVERY && family != ENTROPY_CONFIGURATION) {
+            revert T.ComponentChanged(supplied);
+        }
         _selected(suite.core, keccak256("ENTROPY_COORDINATOR"), supplied);
         bytes memory raw = _entropyRead(suite, supplied, abi.encodeWithSignature("core()"), 32);
         uint256 value;

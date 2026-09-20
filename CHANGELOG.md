@@ -35,6 +35,11 @@ the release policy in `docs/release-policy.md`.
 - Add the original chain/Core/global-token citation to current default metadata,
   with separate governed STATIC profile evidence and preserved historical render
   entries. Record-state qualifiers and full current-graph acceptance remain separate.
+- Add explicit Artist-consented collection entropy policies and terminal
+  DISABLED/NOT_REQUIRED token registration, preserving the legacy ASYNC profile.
+  Nonrandom consumer integrations and INSTANT support remain separate work;
+  current-stack runtime acceptance is pending.
+
 - Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,

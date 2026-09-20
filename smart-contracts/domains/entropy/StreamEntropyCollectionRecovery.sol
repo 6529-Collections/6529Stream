@@ -13,6 +13,9 @@ import {
 } from "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import { StreamEntropyRecoveryPolicies } from "./StreamEntropyRecoveryPolicies.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
+import {
+    StreamEntropyCollectionPolicyState as PolicyState
+} from "./StreamEntropyCollectionPolicyState.sol";
 
 /// @notice Fixed binding worker; namespace is separate from original collection storage.
 library StreamEntropyCollectionRecovery {
@@ -49,6 +52,22 @@ library StreamEntropyCollectionRecovery {
 
     function record(uint256 id) public view returns (C.CollectionRecovery memory) {
         return store().bindings[id];
+    }
+
+    function validateExplicit(uint256 id, bytes32 policyId, uint16 attempts, uint32 epoch)
+        public
+        view
+        returns (bytes32)
+    {
+        return _policy(id, policyId, attempts, epoch, true);
+    }
+
+    /// @dev Internal-only application after the full V2 policy transition and consent are verified.
+    function applyExplicit(uint256 id, C.CollectionRecovery memory next, bytes32 actionId)
+        internal
+    {
+        next.lastActionId = actionId;
+        store().bindings[id] = next;
     }
 
     function validateEpoch(uint256 id, uint32 epoch) public view {
@@ -91,6 +110,7 @@ library StreamEntropyCollectionRecovery {
         uint16 attempts,
         bytes32 policyId
     ) public view returns (bytes32 scope, bytes32 oldHash, bytes32 newHash) {
+        PolicyState.requireLegacy(id);
         if (!core.collectionExists(id) || config.provider == address(0)) {
             revert C.InvalidCollectionRecovery(id);
         }

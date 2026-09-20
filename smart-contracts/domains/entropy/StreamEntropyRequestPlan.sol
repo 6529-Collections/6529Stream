@@ -10,6 +10,9 @@ import "../../interfaces/stream/entropy/IStreamEntropyProviderLifecycle.sol";
 
 import "./StreamEntropyCoordinator.sol";
 import "./StreamEntropyProviderLifecycle.sol";
+import {
+    StreamEntropyCollectionPolicyState as PolicyState
+} from "./StreamEntropyCollectionPolicyState.sol";
 
 /// @notice Fixed request preimage and quote worker; submission and custody remain in the host.
 library StreamEntropyRequestPlan {
@@ -31,6 +34,7 @@ library StreamEntropyRequestPlan {
         if (subject.status != StreamEntropyStatus.REGISTERED) {
             revert StreamEntropyCoordinator.InvalidStatus(subject.status);
         }
+        if (scopeId != 0) PolicyState.requireAsync(subject.collectionId);
         return build(
             core,
             subject.collectionId,

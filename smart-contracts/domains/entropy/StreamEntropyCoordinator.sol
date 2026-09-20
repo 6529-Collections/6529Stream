@@ -5,6 +5,10 @@ import {
 } from "../../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
 import { StreamEntropyContinuity } from "./StreamEntropyContinuity.sol";
 import { StreamEntropyScopeRegistration } from "./StreamEntropyScopeRegistration.sol";
+import { StreamEntropyCollectionPolicy } from "./StreamEntropyCollectionPolicy.sol";
+import {
+    IStreamEntropyCollectionPolicy as CollectionPolicy
+} from "../../interfaces/stream/entropy/IStreamEntropyCollectionPolicy.sol";
 import { StreamEntropyTerminalAdmission } from "./StreamEntropyTerminalAdmission.sol";
 import { StreamEntropySubjectReads } from "./StreamEntropySubjectReads.sol";
 import {
@@ -67,7 +71,8 @@ contract StreamEntropyCoordinator is
     IStreamEntropyProviderLifecycle,
     IStreamEntropyRecoveryPolicies,
     IStreamEntropyCollectionRecovery,
-    IStreamEntropyFreshRecovery
+    IStreamEntropyFreshRecovery,
+    CollectionPolicy
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -294,6 +299,7 @@ contract StreamEntropyCoordinator is
         returns (bool)
     {
         return id == type(IStreamEntropyCoordinator).interfaceId
+            || id == type(CollectionPolicy).interfaceId
             || id == type(IStreamRevealFeeEscrow).interfaceId
             || id == type(IStreamRevealPolicyAdmin).interfaceId
             || id == type(IStreamTimeParameterHost).interfaceId
@@ -433,6 +439,56 @@ contract StreamEntropyCoordinator is
             publicRequests,
             timeoutBlocks
         );
+    }
+
+    function configureCollectionEntropyPolicy(uint256, CollectionPolicy.PolicyInput calldata)
+        external
+        override
+    {
+        _collectionPolicyWrite();
+    }
+
+    function collectionEntropyPolicy(uint256)
+        external
+        view
+        override
+        returns (CollectionPolicy.PolicyRecord memory)
+    {
+        _auxiliaryRead();
+    }
+
+    function collectionEntropyPolicyTransition(uint256, CollectionPolicy.PolicyInput calldata)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32, bytes32)
+    {
+        _auxiliaryRead();
+    }
+
+    function freezeCollectionEntropyPolicy(uint256) external override {
+        _collectionPolicyWrite();
+    }
+
+    function _collectionPolicyWrite() private {
+        StreamEntropyCollectionPolicy.write(
+            core,
+            authority,
+            collectionEntropyConfig,
+            collectionProviderEpoch,
+            _revealPolicies,
+            revealFeeEscrow,
+            msg.data
+        );
+    }
+
+    function freezeCollectionEntropyPolicyTransition(uint256)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32, bytes32)
+    {
+        _auxiliaryRead();
     }
 
     /// @notice Explicit declared-zero policies remain distinguishable from absent configuration.
@@ -673,6 +729,12 @@ contract StreamEntropyCoordinator is
             core.tokenLifecycle(tokenId) != uint8(StreamTokenLifecycle.MINTED)
                 || core.coordinatorAtMint(tokenId) != address(this)
         ) revert InvalidToken(tokenId);
+        if (
+            subject.status == StreamEntropyStatus.DISABLED
+                || subject.status == StreamEntropyStatus.NOT_REQUIRED
+        ) {
+            revert InvalidStatus(subject.status);
+        }
         // A matured public remedy does not depend on availability of optional role reads.
         // Subtraction avoids overflow when a governed window approaches uint256's limit.
         bool lapsed = subject.status == StreamEntropyStatus.REGISTERED
@@ -911,23 +973,13 @@ contract StreamEntropyCoordinator is
     }
 
     function _notify(uint256 tokenId, bytes32 requestKey) private {
-        try core.emitMetadataUpdate(tokenId, requestKey) {
-            metadataNotificationPending[tokenId] = false;
-        } catch {
-            metadataNotificationPending[tokenId] = true;
-            emit MetadataNotificationFailed(tokenId, requestKey);
-        }
+        StreamEntropyFulfillment.notify(core, metadataNotificationPending, tokenId, requestKey);
     }
 
     function retryMetadataNotification(uint256 tokenId) external nonReentrant {
-        Subject storage subject = _subjects[_tokenKey(tokenId)];
-        if (
-            !metadataNotificationPending[tokenId]
-                || (subject.status != StreamEntropyStatus.FINALIZED
-                    && subject.status != StreamEntropyStatus.STALE
-                    && subject.status != StreamEntropyStatus.FAILED)
-        ) revert InvalidToken(tokenId);
-        _notify(tokenId, subject.requestKey);
+        StreamEntropyFulfillment.retryNotification(
+            core, _subjects, metadataNotificationPending, tokenId
+        );
     }
 
     bytes32 public constant GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT =
@@ -1140,7 +1192,12 @@ contract StreamEntropyCoordinator is
     /// @dev Only terminal read entrypoints use this fixed decoder. No mutation/guard cleanup is bypassed.
     function _auxiliaryRead() private view {
         bytes memory result = StreamEntropyAuxiliaryReads.read(
-            core, collectionEntropyConfig, collectionProviderEpoch, msg.data
+            core,
+            collectionEntropyConfig,
+            collectionProviderEpoch,
+            _revealPolicies,
+            revealFeeEscrow,
+            msg.data
         );
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }

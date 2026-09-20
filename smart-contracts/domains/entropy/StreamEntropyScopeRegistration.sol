@@ -5,6 +5,12 @@ import "./StreamEntropyCoordinator.sol";
 import { IStreamCore } from "../../interfaces/stream/core/IStreamCore.sol";
 import { IStreamRevealFeeEscrow } from "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import { IStreamCorePointers } from "../../interfaces/stream/core/IStreamCorePointers.sol";
+import {
+    StreamEntropyCollectionPolicyState as PolicyState
+} from "./StreamEntropyCollectionPolicyState.sol";
+import {
+    IStreamEntropyCollectionPolicy as P
+} from "../../interfaces/stream/entropy/IStreamEntropyCollectionPolicy.sol";
 
 /// @notice Original scope registration, with current-selection admission for new subjects only.
 library StreamEntropyScopeRegistration {
@@ -50,6 +56,7 @@ library StreamEntropyScopeRegistration {
         if (selected != address(this) || codeHash != address(this).codehash) {
             revert StreamEntropyCoordinator.InvalidCollection(collectionId);
         }
+        PolicyState.requireAsync(collectionId);
         if (configs[collectionId].provider == address(0)) {
             revert StreamEntropyCoordinator.InvalidCollection(collectionId);
         }
@@ -65,6 +72,13 @@ library StreamEntropyScopeRegistration {
 
     event EntropyRegistered(
         uint256 indexed collectionId, uint256 indexed tokenId, bytes32 mintCommitment
+    );
+    event TokenEntropyPolicyRegistered(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        uint256 indexed tokenId,
+        bytes32 indexed policyHash,
+        uint8 status
     );
 
     /// @notice Original only-Core token hook; sender, identity, policy, writes and event order retained.
@@ -96,21 +110,34 @@ library StreamEntropyScopeRegistration {
         }
         StreamEntropyCoordinator.CollectionConfig storage config =
             collectionEntropyConfig[collectionId];
-        if (config.provider == address(0)) {
+        PolicyState.Entry storage policy = PolicyState.store().entries[collectionId];
+        bool explicitPolicy = policy.revision != 0;
+        bool disabled = explicitPolicy && policy.mode == P.Mode.DISABLED;
+        if (!disabled && config.provider == address(0)) {
             revert StreamEntropyCoordinator.InvalidCollection(collectionId);
         }
-        if (!_revealPolicies[collectionId].declared) {
+        if (!disabled && !_revealPolicies[collectionId].declared) {
             revert StreamEntropyCoordinator.RevealPolicyUndeclared(collectionId);
         }
         config.locked = true;
         _subjects[key].collectionId = collectionId;
         _subjects[key].inputsHash = mintCommitment;
-        _subjects[key].status = StreamEntropyStatus.REGISTERED;
+        StreamEntropyStatus status = disabled
+            ? StreamEntropyStatus.DISABLED
+            : explicitPolicy && policy.renderRequirement == P.RenderRequirement.NOT_REQUIRED
+                ? StreamEntropyStatus.NOT_REQUIRED
+                : StreamEntropyStatus.REGISTERED;
+        _subjects[key].status = status;
         if (block.number > type(uint64).max) {
             revert StreamEntropyCoordinator.EntropyBlockNumberOverflow();
         }
         registeredAtBlock[tokenId] = uint64(block.number);
-        ++nonterminalTokenCount[collectionId];
+        if (status == StreamEntropyStatus.REGISTERED) ++nonterminalTokenCount[collectionId];
         emit EntropyRegistered(collectionId, tokenId, mintCommitment);
+        if (explicitPolicy) {
+            emit TokenEntropyPolicyRegistered(
+                2, collectionId, tokenId, policy.policyHash, uint8(status)
+            );
+        }
     }
 }

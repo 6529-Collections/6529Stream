@@ -8,8 +8,44 @@ import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyView.sol";
 
-/// @notice Fixed callback state worker; counters, original finalization event and metadata notification stay in the host.
+/// @notice Fixed callback and notification worker; original storage, call order and events stay in the host context.
 library StreamEntropyFulfillment {
+    event MetadataNotificationFailed(uint256 indexed tokenId, bytes32 indexed requestKey);
+
+    function notify(
+        IStreamCore core,
+        mapping(uint256 => bool) storage pending,
+        uint256 tokenId,
+        bytes32 requestKey
+    ) public {
+        try core.emitMetadataUpdate(tokenId, requestKey) {
+            pending[tokenId] = false;
+        } catch {
+            pending[tokenId] = true;
+            emit MetadataNotificationFailed(tokenId, requestKey);
+        }
+    }
+
+    function retryNotification(
+        IStreamCore core,
+        mapping(bytes32 => StreamEntropyCoordinator.Subject) storage subjects,
+        mapping(
+            uint256 => bool
+        ) storage pending,
+        uint256 tokenId
+    ) public {
+        StreamEntropyCoordinator.Subject storage subject =
+            subjects[keccak256(abi.encode("TOKEN", tokenId))];
+        if (
+            !pending[tokenId]
+                || (subject.status != StreamEntropyStatus.FINALIZED
+                    && subject.status != StreamEntropyStatus.STALE
+                    && subject.status != StreamEntropyStatus.FAILED)
+        ) {
+            revert StreamEntropyCoordinator.InvalidToken(tokenId);
+        }
+        notify(core, pending, tokenId, subject.requestKey);
+    }
     event StaleEntropyFulfillment(
         uint16 schemaVersion,
         uint256 indexed tokenId,

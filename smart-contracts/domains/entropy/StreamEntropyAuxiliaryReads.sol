@@ -8,6 +8,16 @@ import {
     IStreamEntropyFreshRecovery
 } from "../../interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol";
 import "./StreamEntropyCoordinator.sol";
+import { StreamEntropyCollectionPolicy } from "./StreamEntropyCollectionPolicy.sol";
+import {
+    StreamEntropyCollectionPolicyState as PolicyState
+} from "./StreamEntropyCollectionPolicyState.sol";
+import {
+    IStreamEntropyCollectionPolicy as P
+} from "../../interfaces/stream/entropy/IStreamEntropyCollectionPolicy.sol";
+import {
+    IStreamRevealFeeEscrow as F
+} from "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
 import {
@@ -39,9 +49,18 @@ library StreamEntropyAuxiliaryReads {
         IStreamCore core,
         mapping(uint256 => StreamEntropyCoordinator.CollectionConfig) storage configs,
         mapping(uint256 => uint32) storage epochs,
+        mapping(uint256 => F.CollectionRevealPolicy) storage reveals,
+        mapping(uint256 => uint256) storage escrows,
         bytes calldata data
     ) public view returns (bytes memory) {
         bytes4 selector = bytes4(data[:4]);
+        if (
+            selector == P.collectionEntropyPolicy.selector
+                || selector == P.collectionEntropyPolicyTransition.selector
+                || selector == P.freezeCollectionEntropyPolicyTransition.selector
+        ) {
+            return StreamEntropyCollectionPolicy.read(core, configs, epochs, reveals, escrows, data);
+        }
         if (selector == L.entropyProviderRecord.selector) {
             return
                 abi.encode(StreamEntropyProviderLifecycle.record(abi.decode(data[4:], (address))));
@@ -128,6 +147,13 @@ library StreamEntropyAuxiliaryReads {
         }
         if (selector == IStreamEntropyFreshRecovery.artistContentFamilyState.selector) {
             (uint256 id, bytes32 family) = abi.decode(data[4:], (uint256, bytes32));
+            if (family == PolicyState.FAMILY) {
+                if (!core.collectionExists(id)) return abi.encode(false, bytes32(0));
+                P.PolicyRecord memory p = StreamEntropyCollectionPolicy.record(
+                    core, id, configs[id], reveals[id], epochs[id]
+                );
+                return abi.encode(true, p.contentStateHash);
+            }
             (bool supported, bytes32 state) =
                 StreamEntropyFreshRecovery.familyState(core, id, family);
             return abi.encode(supported, state);
