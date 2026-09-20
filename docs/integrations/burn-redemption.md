@@ -79,6 +79,16 @@ It checks independent approvals, immutable terms/records, exact canonical events
 pre-burn rejection, late rollback and retry, registry drift and retirement,
 reentrancy, time windows, URI validation and a 256-input replay property.
 
-Full current-Core/governance composition, operator preparation, transaction gas
-limits and the matching full-v1 testnet deployment remain required. Passing this
-suite does not establish those separate acceptance items.
+The separate current-stack host,
+[`StreamCurrentBurnRedemption.t.sol`](../../test/current/StreamCurrentBurnRedemption.t.sol),
+uses the actual Core, Manager, Ledger, Artist suite, module registry and delayed
+Governance Executor. Separate threshold Safes hold the source tokens, operate
+the program and govern module admission. Its source tokens come from an actual
+Manager mint. The inherited external entropy service remains a test boundary.
+
+Those authored cases cover the real approval and burn path, retained identity,
+program and module lifecycle, fulfillment history and Safe rollback/retry.
+A Core burn-block case does not establish artwork-finality or frozen-manifest
+acceptance. Native execution on the combined source, transaction gas limits,
+full genesis and the matching full-v1 testnet deployment remain required.
+Authored tests and ABI compilation do not establish those runtime results.

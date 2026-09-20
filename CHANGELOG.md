@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Current burn-redemption acceptance recipes
+
+- Add actual current Core, Manager, Artist, registry and delayed-governance
+  burn-redemption cases with distinct threshold Safe principals. Cover source
+  approvals, retained identity, canonical records, retirement and fulfillment.
+- Preserve production behavior and existing typed-suite evidence. The new
+  current-stack cases require combined native execution; ABI/source checks do
+  not establish a runtime or complete finality acceptance result.
 ## Same-leaf ERC20 price carrier
 
 - Add a dedicated signed one-token price carrier using the original Manager's
