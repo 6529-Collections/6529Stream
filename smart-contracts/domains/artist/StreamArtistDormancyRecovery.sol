@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 import { StreamArtistIdentityRecoveryMutation } from "./StreamArtistIdentityRecoveryMutation.sol";
 import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
 import {
+    StreamArtistGuardianSupersession as GuardianSupersession
+} from "./StreamArtistGuardianSupersession.sol";
+import {
     StreamArtistGuardianHistoryTypes as GH
 } from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
 
@@ -193,13 +196,37 @@ library StreamArtistDormancyRecovery {
         Recovery.Request memory p
     ) private view returns (bytes32, R.GuardianRecord memory) {
         // Both context and preparation consume the same selected origin/terminal and guardian proof.
+        // Original history joins the actual op33 evidence. Keep the caller's Appeal document
+        // and supersession list unchanged for adjudication, registration and acceptance.
+        Recovery.Request memory historical = p;
+        if (p.supersededRecordHashes.length != 0) {
+            historical = Recovery.Request(
+                p.artistId,
+                p.newAddress,
+                p.vestedAuthorityClass,
+                p.expectedCauseHash,
+                p.expectedResolutionHash,
+                contests.records[cause.facts.referenceHash].terms.evidenceHash,
+                p.reasonHash,
+                new bytes32[](0)
+            );
+        }
         if (rotations.latestExecution[p.artistId] != dormancy.activation[p.artistId]) {
             return DormRotation.facts(
-                s, dormancy, estate, rotations, resolutions, succession, contests, e, cause, p
+                s,
+                dormancy,
+                estate,
+                rotations,
+                resolutions,
+                succession,
+                contests,
+                e,
+                cause,
+                historical
             );
         }
         return DormPredecessor.facts(
-            s, dormancy, estate, rotations, resolutions, succession, contests, e, cause, p
+            s, dormancy, estate, rotations, resolutions, succession, contests, e, cause, historical
         );
     }
 
@@ -237,9 +264,6 @@ library StreamArtistDormancyRecovery {
                 || cause.facts.pendingTransitionHash != bytes32(0)
                 || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        if (p.supersededRecordHashes.length != 0) {
-            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        }
         (bytes32 predecessor, R.GuardianRecord memory guardian) = _facts(
             s,
             dormancy,
@@ -258,7 +282,20 @@ library StreamArtistDormancyRecovery {
         c.causeHash = cause.causeHash;
         c.incumbent = principal.authorityAddress;
         c.postContestSeconds = StreamArtistRotationState.rotationSeconds(rotations);
-        if (guardian.terms.minContestSeconds > c.postContestSeconds) {
+        bytes32 supersessionContext;
+        if (p.supersededRecordHashes.length != 0) {
+            (supersessionContext, c.postContestSeconds) = GuardianSupersession.contextAndWindow(
+                s.guardianSupersession,
+                s.guardianHistory,
+                s.vestingHistory,
+                rotations,
+                o.environment,
+                cause,
+                p,
+                s.guardianRecordsSeen[p.artistId],
+                c.postContestSeconds
+            );
+        } else if (guardian.terms.minContestSeconds > c.postContestSeconds) {
             c.postContestSeconds = guardian.terms.minContestSeconds;
         }
         c.standingTailSeconds = StreamArtistRotationState.standingSeconds(rotations);
@@ -316,6 +353,9 @@ library StreamArtistDormancyRecovery {
                 predecessor
             )
         );
+        if (p.supersededRecordHashes.length != 0) {
+            c.oldValueHash = keccak256(abi.encode(c.oldValueHash, supersessionContext));
+        }
         c.newValueHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_INTENT_V2"),

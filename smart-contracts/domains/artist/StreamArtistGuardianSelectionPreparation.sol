@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyVestingReads } from "./StreamArtistDormancyVestingReads.sol";
 import {
     StreamArtistGuardianSelectionTypes as S
 } from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
@@ -282,7 +283,13 @@ contract StreamArtistGuardianSelectionPreparation {
                 uint8 phase,
                 Estate.ExecutionFacts memory execution
             ) = IStreamArtistEstateOwner(owner).estateActivationRecord(basis.transition.recordHash);
-            if (
+            if (request.recordHash == 0) {
+                // A current designated op43 has no estate-request record. Authenticate its
+                // original owner notice/completion/vesting instead of synthesizing an op40.
+                StreamArtistDormancyVestingReads.current(
+                    owner, artistRegistry, deploymentChainId, basis.artistId, basis.transition
+                );
+            } else if (
                 request.recordHash != basis.transition.recordHash
                     || request.terms.artistId != basis.artistId || phase != 2
                     || execution.activationRecordHash != request.recordHash

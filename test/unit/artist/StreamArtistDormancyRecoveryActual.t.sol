@@ -11,6 +11,9 @@ import "./StreamArtistDormancyLifecycle.t.sol";
 import { Vm } from "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import { OfficialSafe } from "../../helpers/OfficialSafeFixture.sol";
 import {
+    StreamArtistGuardianAppealTypes as DormancyAppeal
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
+import {
     IStreamArtistIdentityRecovery,
     IStreamArtistIdentityRecoveryOwner
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
@@ -477,7 +480,7 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
         _assertRecovery(this.executeRegistered(p, a), p);
     }
 
-    function testDormancyClassEscalationAndUnspecifiedSupersessionStayClosed() public {
+    function testDormancyClassEscalationAndUnprovenProtectedSupersessionStayClosed() public {
         _setupRecovery(false, false, false);
         this.checkDormancyClasses();
     }
@@ -495,7 +498,9 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
         p.vestedAuthorityClass = 3;
         p.supersededRecordHashes = new bytes32[](1);
         p.supersededRecordHashes[0] = lowerGuardian;
-        avm.expectPartialRevert(IdentityRecovery.UnsupportedIdentityRecoveryProfile.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(DormancyAppeal.InvalidGuardianAppeal.selector, p.evidenceHash)
+        );
         ingress.identityRecoveryContext(p, a);
         p.supersededRecordHashes = new bytes32[](0);
         require(

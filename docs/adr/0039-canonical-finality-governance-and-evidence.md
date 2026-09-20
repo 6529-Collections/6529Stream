@@ -1768,3 +1768,37 @@ adjudication remain separate profiles. Five authored actual Artist/Archive/Safe
 cases and the changed historical context control are described in the
 [caller guide](../guides/artist-dormancy-recovery.md); native and current-Core
 acceptance are not inferred from their source/type checks.
+
+### Guardian adjudication after designated dormancy
+
+First designated-dormancy recovery additionally uses the existing guardian
+supersession rules at its actual current execution. Direct operation43 now has
+an authenticated cutoff and election basis: canonical original notice and
+completion, class3 designated plan/capabilities, exact owner-bound vesting and
+living-class1 predecessor. Existing dormancy history checks continue to bind the
+current epoch, operative plan, original closures and complete guardian prefix.
+An executed successor rotation supplies its own original operation32 cutoff.
+No caller-selected older cutoff is accepted.
+
+Records inside that cutoff prefix require the original APPEAL findings and
+document proof; later records require its actual principal/class and retain the
+ARBITER route. Operational-head displacement still uses a complete election,
+and retained lifetime memberships preserve veto. A post43 record captured before
+a later32 cutoff is protected by that cutoff. Original guardian hashes, nonces,
+associations and permanent judgments are not rewritten.
+
+Historical dormancy/contest evidence and the caller's APPEAL evidence commitment
+are authenticated separately. Context and preparation use the same original33
+historical proof while retaining the caller request for adjudication and signing.
+Only nonempty supersession lists add the existing adjudication commitment;
+empty-list fact/context bytes and all original operation domains are unchanged.
+Original preparation, freeze/application, acceptance/replay, epoch increment and
+typed receipt/Archive producers remain unchanged. Source tests reconstruct the
+actual thirteen-word receipt commitments instead of equating them with semantic
+record hashes.
+
+This is ART27's first batch. Recovery after a prior designated-dormancy recovery,
+and a designated appointment after a prior living recovery, still require their
+own origin/epoch/history admission. Class4/steward-to-living and expanded
+hydration remain excluded. Source/type validation does not establish native,
+linked-product size, current-graph or transaction-capacity acceptance.

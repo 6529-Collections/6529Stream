@@ -30,9 +30,9 @@ or after the original post-vesting window. Waiting does not mature an earlier
 compromise. The original unclosed profile has no prior recovery, intervening rotation, prior
 cause or resolution. The additive closed profile below authenticates admitted
 kind-1 dismissals. The standing-history profile below additionally admits
-closed, unexecuted rotation attempts. All profiles refuse enumerated supersession;
-dormancy-origin adjudication and intervening executed rotations remain separate
-unfinished work.
+closed, unexecuted rotation attempts. The executed-rotation and guardian
+supersession profiles below extend those histories. Prior operation35 and
+steward-origin authority histories remain separate unfinished work.
 
 ## Guardians, authority and execution
 
@@ -166,8 +166,9 @@ continuity, three recovery receipts and atomic Archive composition are retained.
 No operation ID, facade selector or storage field is added. Operations 1–60 keep
 their original domains and recipes.
 
-Prior operation-35 recovery, enumerated supersession and class-4 authority
-transitions remain outside this rotated-dormancy profile.
+Prior operation-35 recovery and class-4 authority transitions remain outside this
+rotated-dormancy profile. Guardian supersession uses the actual terminal cutoff
+and adjudication rules below.
 
 Nine authored cases in `StreamArtistDormancyRotationRecoveryActual.t.sol` cover
 earlier living ancestry, original receipts and replay, repeated rotations with
@@ -221,6 +222,63 @@ all nine preceding rotation test bodies are unchanged. The combined sources
 pass a 754-source ABI/storage type check. These new bodies have not executed;
 native runtime, changed-product size and actual-current governance acceptance
 remain pending.
+
+## Guardian supersession at the current dormancy cutoff
+
+The first elected recovery after designated dormancy may enumerate original
+guardian records for adjudication. The same original operation35 request, sorted
+list commitment, new-address acceptance and governance action are used. This
+includes the supported direct43, dismissed/standing43 and executed32 histories.
+It adds neither a recovery from class4 nor a new appointment authority.
+
+The cutoff is the actual current executed vesting. For direct43, the fixed-owner
+reader reconstructs the original notice and completion hashes, checks the actual
+designated class3 plan and current capabilities, and authenticates the immutable
+operation43 vesting snapshot. Its preceding snapshot is living class1. The
+complete captured guardian prefix and current history remain mandatory. Election
+preparation uses that same original43 evidence; it does not substitute an estate
+activation record. After later rotations, the existing authenticated operation32
+cutoff applies.
+
+A record captured in the cutoff's original guardian prefix requires the existing
+APPEAL findings and hostile-document proof. A later record must have the actual
+cutoff principal's signer and authority class and follows the existing ARBITER
+route. A record written after43 but captured by a later32 is therefore protected
+by that later cutoff. Its original association, nonce and signer do not change.
+Removing an operational head still requires a completed election over the entire
+retained history. Only adjudicated memberships lose veto; any retained lifetime
+membership of the same Safe remains effective.
+
+The historical appointment/closure proof checks the original operation33 evidence.
+For an APPEAL request this is separate from the caller's hostile-document
+commitment. Both context and preparation build the same historical-only request;
+the caller's original evidence and list remain unchanged in the adjudication,
+registered request, acceptance and new-intent hashes. Empty-list fact and context
+bytes are unchanged. Only nonempty lists append the existing supersession proof
+to the dormancy context, following the established estate recipe.
+
+No new mutation, operation, storage field or receipt domain is introduced. The
+existing preparation freezes the exact adjudication and election. Execution
+records the original operation35/list commitments, consumes the original replay
+cells, increments the current delegation epoch once and appends the original two
+typed receipt commitments and their secondary occurrence. The semantic recovery
+record is distinct from its primary receipt commitment. Tests reconstruct the
+thirteen-word receipt preimages; late Archive failure must restore the entire
+authority, exclusion, receipt and replay state before an identical retry.
+
+`StreamArtistDormancyGuardianSupersessionActual.t.sol` uses actual Artist owners,
+threshold Safes and Archive with the existing explicit unit Core/governance
+boundaries. It covers direct and rotated cutoffs, both adjudication routes,
+retained veto, election completeness, evidence and role drift, original receipt
+preimages and Archive retry. These authored scenarios await coordinated native
+execution, linked-product size, gas/capacity and current-graph acceptance.
+
+ART27 remains incomplete after this batch. Two confirmed history families are
+queued separately: designated43 followed by recovery35 and a later recovery;
+and living recovery35 followed by designated43 and elected recovery. Their
+capability-origin, epoch and prior-record proofs must be implemented explicitly.
+Held steward-to-living/class4 and expanded hydration work remain outside this
+profile.
 
 ## Validation
 

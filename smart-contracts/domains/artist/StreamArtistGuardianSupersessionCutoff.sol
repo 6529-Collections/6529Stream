@@ -9,6 +9,7 @@ import { StreamArtistRotationState as Rotations } from "./StreamArtistRotationSt
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
 import { StreamArtistEstateHashes } from "./StreamArtistEstateHashes.sol";
+import { StreamArtistDormancyVestingReads } from "./StreamArtistDormancyVestingReads.sol";
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import {
     IStreamArtistEstateOwner
@@ -125,6 +126,13 @@ library StreamArtistGuardianSupersessionCutoff {
             ) {
                 revert S.InvalidGuardianSupersession(terminal);
             }
+        } else if (v.operationId == 43 && v.authorityClass == 3) {
+            V.Snapshot memory original = StreamArtistDormancyVestingReads.current(
+                address(this), e.registry, e.chainId, artistId, t
+            );
+            if (keccak256(abi.encode(original)) != keccak256(abi.encode(v))) {
+                revert S.InvalidGuardianSupersession(terminal);
+            }
         } else {
             revert S.InvalidGuardianSupersession(terminal);
         }
@@ -139,7 +147,7 @@ library StreamArtistGuardianSupersessionCutoff {
                     || prior.commitment != _hash(e, prior) || prior.ownerRevision >= v.ownerRevision
                     || prior.executedAt > v.executedAt || prior.newAddress != v.oldAddress
                     || prior.guardians.count > v.guardians.count
-                    || (v.operationId == 40
+                    || (v.operationId == 40 || v.operationId == 43
                             ? prior.authorityClass != 1
                             : prior.authorityClass != v.authorityClass)
             ) {
