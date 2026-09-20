@@ -184,3 +184,38 @@ changed production products fit; whole-publication gas acceptance remains
 pending. Malformed nested ABI rejection is still required before writes, but
 this transport capture does not claim identical error precedence between
 malformed nested data and an invalid header.
+
+### Joined staged-preparation capture
+
+The retained `reference-metric-publication-native8` successor compiles only the
+changed test recipe against the frozen 354-source cached graph. All 12 selected
+production products fit. Five of nine test bodies pass: exact combined context
+export, both original-anchor controls, repeated-PNG object/coverage identity, and
+the actual host's staged preparation envelopes. Measured calls including calldata
+intrinsic cost are 2,431,458 gas for the largest 64-row part, 12,820,216 for the
+complete inventory, and 13,942,210 for deterministic environment preparation.
+These close the named preparation calls for this corpus, not whole publication.
+
+The four publication/Safe/lock/inventory cases still fail before reference
+publication completes. The retained cached trace measures actual preview at
+35,360,587 gas, its preparation worker at 29,773,494, and the payload worker at
+6,560,150. The bounded write exhausts memory-expansion gas after reading the
+179,418-byte retained environment, before dispatching the large payload tuple.
+The later supplement binding, Safe retry, component lock and inventory assertions
+are therefore still unexecuted. No production cap or admission guard was relaxed.
+
+The earlier native7 failures are also retained. Its original aggregate setup
+exhausted a one-billion-gas test harness. A cached three-billion-gas harness retry
+reached a separate snapshot defect: in installed Forge 1.7.1
+(`4072e48705af9d93e3c0f6e29e93b5e9a40caed8`), a three-source probe observed that
+creating an actual Store carrier, cooling it with `vm.cool` in `setUp`, and then
+reading it in a test body lost its code across the setup snapshot. Untouched
+carriers and carriers created/cooled inside the same test body passed. This is
+the retained probe's scope, not a production Store failure.
+
+The native8 recipe accordingly performs the actual preuploads, staged calls and
+cooling inside the relevant test bodies. It retains every explicit 16,777,216
+per-call envelope, calldata intrinsic calculation and result check. The larger
+aggregate harness is only infrastructure for multiple transactions in one test.
+Named accounts/chunks are cooled; there is no claim that all transitive accounts
+and storage slots are cold, or that this typed fixture is a live RPC anchor.

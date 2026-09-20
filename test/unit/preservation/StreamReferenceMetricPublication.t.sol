@@ -61,6 +61,9 @@ contract StreamReferenceMetricPublicationTest is
     PreservationReferenceConsumer private consumer;
     Mode.Evidence private modeEvidence;
     bool private refreshedReceipts;
+    uint256 private largestPartGas;
+    uint256 private largestInventoryGas;
+    uint256 private environmentPreparationGas;
 
     function setUp() public override {
         super.setUp();
@@ -81,8 +84,6 @@ contract StreamReferenceMetricPublicationTest is
                 abi.encode(d, address(executor), configs, bindings)
             )
         );
-        modes.prepareFileInventory(terms.environment.packageFiles, true);
-        modes.prepareFileInventory(terms.environment.platformPrerequisites, false);
         _metric();
         StreamFinalityReferenceReads.Dependencies memory f;
         f.core = address(core);
@@ -99,6 +100,78 @@ contract StreamReferenceMetricPublicationTest is
         f.readGas = 500000;
         f.validationGas = 14000000;
         consumer = new PreservationReferenceConsumer(f);
+    }
+
+    function _prepareEnvironment() private {
+        // Cooling a newly created carrier in setUp loses its code at this Foundry version's
+        // setup-to-test snapshot. Keep actual retention and its cold envelope in the test body.
+        _prepareFiles(terms.environment.packageFiles, true);
+        _prepareFiles(terms.environment.platformPrerequisites, false);
+        bytes memory environmentBytes = StreamReferenceEnvironmentJson.manifest(terms.environment);
+        _upload(environmentBytes);
+        (, environmentPreparationGas) = _prepareBounded(
+            abi.encodeCall(modes.prepareEnvironment, (terms.environment)), environmentBytes
+        );
+    }
+
+    function _prepareFiles(StreamReferenceRenderTypes.PackageFile[] memory rows, bool relative)
+        private
+    {
+        for (uint256 start; start < rows.length; start += 64) {
+            uint256 count = rows.length - start;
+            if (count > 64) count = 64;
+            StreamReferenceRenderTypes.PackageFile[] memory part =
+                new StreamReferenceRenderTypes.PackageFile[](count);
+            for (uint256 i; i < count; ++i) {
+                part[i] = rows[start + i];
+            }
+            bytes memory partBytes = bytes(StreamReferenceEnvironmentJson.files(part, relative));
+            _upload(partBytes);
+            (, uint256 used) = _prepareBounded(
+                abi.encodeCall(modes.prepareFileInventoryPart, (part, relative)), partBytes
+            );
+            if (used > largestPartGas) largestPartGas = used;
+        }
+        bytes memory raw = bytes(StreamReferenceEnvironmentJson.files(rows, relative));
+        (, uint256 used) = _prepareBounded(
+            abi.encodeCall(modes.prepareFileInventoryFromParts, (rows, relative)), raw
+        );
+        if (used > largestInventoryGas) largestInventoryGas = used;
+    }
+
+    function _prepareBounded(bytes memory input, bytes memory raw)
+        private
+        returns (bytes32 id, uint256 total)
+    {
+        uint256 intrinsic = _intrinsic(input);
+        for (uint256 i; i < (raw.length + 8191) / 8192; ++i) {
+            (address pointer,) = store.chunk(keccak256(_part(raw, i)));
+            safeVm.cool(pointer);
+        }
+        safeVm.cool(address(store));
+        safeVm.cool(address(modes));
+        uint256 before = gasleft();
+        (bool ok, bytes memory returned) =
+            address(modes).call{ gas: TX_CAP - intrinsic - 5000 }(input);
+        total = before - gasleft() + intrinsic;
+        if (!ok) assembly ("memory-safe") { revert(add(returned, 32), mload(returned)) }
+        require(total <= TX_CAP);
+        id = abi.decode(returned, (bytes32));
+        require(keccak256(modes.preparedFileInventory(id)) == keccak256(raw));
+        // Actual host, Store and these retained chunks are cooled. This does not claim a fresh
+        // RPC transaction or that all transitive linked accounts and storage slots are cold.
+    }
+
+    function testActualHostStagedEnvironmentPreparationEnvelopes() public {
+        _prepareEnvironment();
+        require(largestPartGas != 0 && largestPartGas <= TX_CAP);
+        require(largestInventoryGas != 0 && largestInventoryGas <= TX_CAP);
+        require(environmentPreparationGas != 0 && environmentPreparationGas <= TX_CAP);
+        emit log_named_uint("actualHostLargestPartWithIntrinsic", largestPartGas);
+        emit log_named_uint("actualHostLargestInventoryWithIntrinsic", largestInventoryGas);
+        emit log_named_uint(
+            "actualHostEnvironmentPreparationWithIntrinsic", environmentPreparationGas
+        );
     }
 
     function _combinedEnvironment() private {
@@ -410,6 +483,7 @@ contract StreamReferenceMetricPublicationTest is
     }
 
     function testFullSupplementAdmissionConsumerAndOriginalClassTwoLock() public {
+        _prepareEnvironment();
         bytes32 hash = _publish();
         bytes32 originalPayload = keccak256(modes.referencePayload(hash));
         vm.expectRevert();
@@ -476,6 +550,7 @@ contract StreamReferenceMetricPublicationTest is
     }
 
     function testMissingLastChunkSafeRollbackAndIdenticalAuthorizedRetry() public {
+        _prepareEnvironment();
         bytes32 hash = _publish();
         (Metric.Supplement memory s, bytes memory raw) = _supplement();
         uint256 count = (raw.length + 8191) / 8192;
@@ -516,6 +591,7 @@ contract StreamReferenceMetricPublicationTest is
     }
 
     function testSupplementFinalBindingTransactionEnvelope() public {
+        _prepareEnvironment();
         bytes32 hash = _publish();
         (Metric.Supplement memory s, bytes memory raw) = _supplement();
         bytes32[] memory chunks = _upload(raw);
@@ -544,6 +620,7 @@ contract StreamReferenceMetricPublicationTest is
     }
 
     function testOriginalInventoryIncludesEverySupplementByteRole() public {
+        _prepareEnvironment();
         bytes32 hash = _publish();
         (Metric.Supplement memory s, bytes memory raw) = _supplement();
         _upload(raw);
