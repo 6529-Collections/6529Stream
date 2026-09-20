@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/mint/IStreamOperatorDistribution.sol";
 import "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
+import "../../interfaces/stream/mint/IStreamMintCounterReads.sol";
+import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC721.sol";
@@ -361,6 +363,29 @@ contract StreamOperatorDistribution is
                 || c.staticIncrement != 1
         ) {
             revert InvalidDistribution();
+        }
+        if (mode == IStreamMintManager.CounterKeyMode.CONSTANT) {
+            IStreamMintCounterReads.CounterKeyContext memory context;
+            context.collectionId = b.collectionId;
+            context.phaseId = b.phaseId;
+            context.counterId = id;
+            context.executor = address(this);
+            // Resolve in Manager context: its immutable first-use interpretation may be
+            // legacy PHASE even when a broader raw definition was registered afterward.
+            bytes32 subject =
+                IStreamMintCounterReads(address(manager)).resolveCounter(context).subjectKey;
+            bytes32 phaseSubject = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_MINT_COUNTER_SUBJECT_V1"),
+                    block.chainid,
+                    address(IStreamMintReads(address(manager)).mintLedger()),
+                    mode,
+                    b.collectionId,
+                    b.phaseId,
+                    id
+                )
+            );
+            if (subject != phaseSubject) revert InvalidDistribution();
         }
     }
 

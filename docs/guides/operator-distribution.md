@@ -40,6 +40,12 @@ revenue credit.
    for both phase configuration and the executor-set policy update, then hand
    Manager administration back to governance.
 
+The distributor resolves the supply counter through the actual Manager and
+requires its original PHASE subject. A COLLECTION or GLOBAL supply definition
+is rejected before minting. The Manager's latched legacy PHASE interpretation
+remains valid even if a definition is registered later; recipient counters may
+retain their configured shared scope.
+
 The phase commits the program before execution; the distributor has no separate
 mutable program administrator. Current phase pause, expiry, executor approval,
 Artist consent and Ledger replay checks all remain in effect. The product uses
@@ -108,8 +114,8 @@ There is no admin NFT sweep or claim confiscation path.
 
 ## Reveal obligations and execution gas
 
-Current entropy-backed collections require an explicitly declared reveal
-policy. Read the live per-token fee and send exactly `fee * quantity` with the
+ASYNC collections require an explicitly declared reveal policy. Read the live
+per-token fee and send exactly `fee * quantity` with the
 distribution. Both underpayment and overpayment revert. The distributor
 forwards each obligation into the selected coordinator's collection reveal-fee
 escrow; it retains no operator credit. Funding failure rolls back the whole
@@ -126,9 +132,17 @@ coordinator retains its own requester authorization: grant the distributor that
 permission if automatic requests require it. Permissionless fallback and
 operator monitoring must cover failed attempts.
 
-The current implementation requires the entropy-backed reveal surface. A future
-STATIC collection route must be integrated against its authoritative route read;
-omitting a reveal declaration is never interpreted as an exemption.
+Explicit DISABLED and INSTANT collection policies have no asynchronous reveal
+promise or fee. The shared completion path authenticates the original token's
+policy and coordinator: DISABLED uses its real terminal record, while required
+INSTANT entropy remains registered for a later-block request. An explicit
+NOT_REQUIRED rendering policy skips the automatic request only after validating
+its original terminal token evidence; ASYNC fee/declaration rules still apply.
+
+STATIC is a renderer classification, not permission to omit collection entropy
+configuration. Missing or contradictory policies fail closed. The separate
+current terminal-entropy cases cover DISABLED and NOT_REQUIRED distribution;
+complete renderer/distribution composition remains part of combined acceptance.
 
 ## Validation boundary
 

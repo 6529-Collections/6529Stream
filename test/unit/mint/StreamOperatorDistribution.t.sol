@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 
 import "../../helpers/StreamDistributionFixture.sol";
 import "../../helpers/OfficialSafeFixture.sol";
+import "../../../smart-contracts/interfaces/stream/mint/IStreamMintCounterPolicy.sol";
+import "../../../smart-contracts/interfaces/stream/mint/IStreamMintCounterReads.sol";
 
 /// @notice Actual current Manager/Ledger and Safe; typed Core, Artist, registry and entropy boundaries.
 contract StreamOperatorDistributionTest is OfficialSafeFixture {
@@ -23,6 +25,8 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
     address private constant BOB = address(0xB0B);
     IStreamOperatorDistribution.Program private program;
     bytes32 private rootOverride;
+    bytes32 private supplyConfigHash = keccak256("supply config");
+    bytes32 private recipientConfigHash = keccak256("recipient config");
 
     function setUp() public {
         vm.warp(100);
@@ -118,6 +122,96 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
         vm.expectPartialRevert(IStreamMintLedger.CounterCapExceeded.selector);
         _send(batch);
         _rolledBack();
+    }
+
+    function testCollectionSupplyScopeRejectsBeforeMintCountersOrReplay() public {
+        _rejectSupplyScope(IStreamMintCounterPolicy.CounterScope.COLLECTION);
+    }
+
+    function testGlobalSupplyScopeRejectsBeforeMintCountersOrReplay() public {
+        _rejectSupplyScope(IStreamMintCounterPolicy.CounterScope.GLOBAL);
+    }
+
+    function testExplicitPhaseSupplyDefinitionDistributesNormally() public {
+        supplyConfigHash = ledger.registerCounterDefinition(
+            _definition(
+                IStreamMintCounterPolicy.CounterScope.PHASE,
+                IStreamMintManager.CounterKeyMode.CONSTANT
+            )
+        );
+        IStreamMintManager.MintBatch memory batch = _batch(_recipients(ALICE, BOB));
+        _configure(batch);
+        (bool defined, IStreamMintCounterPolicy.Definition memory selected) =
+            ledger.counterDefinitionForManager(address(manager), supplyConfigHash);
+        require(
+            defined && selected.scope == IStreamMintCounterPolicy.CounterScope.PHASE,
+            "explicit phase selected"
+        );
+        require(
+            _resolvedSubject(SUPPLY, address(0)) == _supplySubject(1, PHASE),
+            "original phase supply subject"
+        );
+        _send(batch);
+        require(core.ownerOf(1) == ALICE && core.ownerOf(2) == BOB, "explicit phase delivered");
+        require(
+            _count(SUPPLY, IStreamMintManager.CounterKeyMode.CONSTANT, address(0)) == 2,
+            "explicit phase supply consumed"
+        );
+        require(manager.isAuthorizationUsed(batch.authorizationId), "authorization consumed");
+    }
+
+    function testLateGlobalDefinitionCannotReinterpretLegacyDistributionSupply() public {
+        IStreamMintCounterPolicy.Definition memory definition = _definition(
+            IStreamMintCounterPolicy.CounterScope.GLOBAL, IStreamMintManager.CounterKeyMode.CONSTANT
+        );
+        supplyConfigHash =
+            keccak256(abi.encode(keccak256("6529STREAM_MINT_COUNTER_DEFINITION_V1"), definition));
+        (bool known,) = ledger.counterDefinition(supplyConfigHash);
+        require(!known, "definition initially absent");
+        IStreamMintManager.MintBatch memory batch = _batch(_recipients(ALICE, BOB));
+        _configure(batch);
+        require(
+            _resolvedSubject(SUPPLY, address(0)) == _supplySubject(1, PHASE),
+            "legacy phase subject selected"
+        );
+        require(
+            ledger.registerCounterDefinition(definition) == supplyConfigHash,
+            "same hash registered later"
+        );
+        (bool nowKnown, IStreamMintCounterPolicy.Definition memory registered) =
+            ledger.counterDefinition(supplyConfigHash);
+        require(
+            nowKnown && registered.scope == IStreamMintCounterPolicy.CounterScope.GLOBAL,
+            "real global definition exists"
+        );
+        (bool selected, IStreamMintCounterPolicy.Definition memory retained) =
+            ledger.counterDefinitionForManager(address(manager), supplyConfigHash);
+        require(
+            !selected && retained.scope == IStreamMintCounterPolicy.CounterScope.PHASE,
+            "manager retains absent legacy definition"
+        );
+        require(
+            _resolvedSubject(SUPPLY, address(0)) == _supplySubject(1, PHASE),
+            "late registration preserves phase subject"
+        );
+        _send(batch);
+        require(core.ownerOf(1) == ALICE && core.ownerOf(2) == BOB, "legacy phase delivered");
+        require(
+            _count(SUPPLY, IStreamMintManager.CounterKeyMode.CONSTANT, address(0)) == 2,
+            "legacy phase supply consumed"
+        );
+        require(
+            ledger.counterValue(_valueKey(0, 0, SUPPLY, _supplySubject(0, 0))) == 0,
+            "late global storage remains unused"
+        );
+    }
+
+    function testCollectionRecipientScopeRemainsAllowed() public {
+        _sharedRecipientScope(IStreamMintCounterPolicy.CounterScope.COLLECTION);
+    }
+
+    function testGlobalRecipientScopeRemainsAllowed() public {
+        _sharedRecipientScope(IStreamMintCounterPolicy.CounterScope.GLOBAL);
     }
 
     function testDirectRejectRollsBackWholeBatchAndLedger() public {
@@ -466,7 +560,7 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
             IStreamMintLedger.CounterDeltaMode.STATIC,
             program.totalQuantity,
             1,
-            keccak256("supply config")
+            supplyConfigHash
         );
         counters[1] = IStreamMintManager.MintCounterConfig(
             true,
@@ -475,7 +569,7 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
             IStreamMintLedger.CounterDeltaMode.STATIC,
             program.perRecipientCap,
             1,
-            keccak256("recipient config")
+            recipientConfigHash
         );
         IStreamMintManager.MintPhaseConfig memory phase = IStreamMintManager.MintPhaseConfig(
             false,
@@ -504,6 +598,136 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
         returns (uint256[] memory, bytes32)
     {
         return distribution.distribute(program, 0, new bytes32[](0), b, "");
+    }
+
+    function _rejectSupplyScope(IStreamMintCounterPolicy.CounterScope scope) private {
+        supplyConfigHash = ledger.registerCounterDefinition(
+            _definition(scope, IStreamMintManager.CounterKeyMode.CONSTANT)
+        );
+        IStreamMintManager.MintBatch memory batch = _batch(_recipients(ALICE, BOB));
+        _configure(batch);
+        (bool defined, IStreamMintCounterPolicy.Definition memory selected) =
+            ledger.counterDefinitionForManager(address(manager), supplyConfigHash);
+        require(defined && selected.scope == scope, "actual shared supply definition selected");
+        uint256 scopeCollection = scope == IStreamMintCounterPolicy.CounterScope.GLOBAL ? 0 : 1;
+        bytes32 subject = _supplySubject(scopeCollection, 0);
+        require(
+            _resolvedSubject(SUPPLY, address(0)) == subject && subject != _supplySubject(1, PHASE),
+            "genuine non-phase supply subject"
+        );
+        vm.prank(address(distribution));
+        (bytes32 operationRoot,) = manager.previewSingleStepMintOperation(batch, "");
+        require(operationRoot != 0, "ordinary manager request is valid");
+        vm.expectRevert(IStreamOperatorDistribution.InvalidDistribution.selector);
+        _send(batch);
+        _rolledBack();
+        require(
+            !manager.isAuthorizationUsed(batch.authorizationId)
+                && !manager.isOperationRootUsed(operationRoot),
+            "replay state untouched"
+        );
+        require(
+            ledger.counterValue(_valueKey(scopeCollection, 0, SUPPLY, subject)) == 0,
+            "shared supply counter untouched"
+        );
+        require(
+            ledger.counterValue(_valueKey(1, PHASE, SUPPLY, _supplySubject(1, PHASE))) == 0,
+            "phase supply counter untouched"
+        );
+        require(
+            _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 0
+                && _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, BOB) == 0,
+            "recipient counters untouched"
+        );
+    }
+
+    function _sharedRecipientScope(IStreamMintCounterPolicy.CounterScope scope) private {
+        recipientConfigHash = ledger.registerCounterDefinition(
+            _definition(scope, IStreamMintManager.CounterKeyMode.RECIPIENT)
+        );
+        IStreamMintManager.MintBatch memory batch = _batch(_recipients(ALICE, ALICE));
+        _configure(batch);
+        (bool defined, IStreamMintCounterPolicy.Definition memory selected) =
+            ledger.counterDefinitionForManager(address(manager), recipientConfigHash);
+        require(defined && selected.scope == scope, "actual shared recipient definition selected");
+        _send(batch);
+        require(core.ownerOf(1) == ALICE && core.ownerOf(2) == ALICE, "shared recipient delivered");
+        bytes32 subject = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_MINT_COUNTER_SUBJECT_V1"),
+                block.chainid,
+                address(ledger),
+                IStreamMintManager.CounterKeyMode.RECIPIENT,
+                ALICE
+            )
+        );
+        uint256 scopeCollection = scope == IStreamMintCounterPolicy.CounterScope.GLOBAL ? 0 : 1;
+        require(
+            ledger.counterValue(_valueKey(scopeCollection, 0, RECIPIENT, subject)) == 2,
+            "duplicates consume actual shared recipient key"
+        );
+        require(
+            ledger.counterValue(_valueKey(1, PHASE, RECIPIENT, subject)) == 0,
+            "recipient value is not phase scoped"
+        );
+        require(
+            _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 2,
+            "manager reads the same shared recipient value"
+        );
+        require(
+            _count(SUPPLY, IStreamMintManager.CounterKeyMode.CONSTANT, address(0)) == 2,
+            "supply remains phase scoped"
+        );
+    }
+
+    function _definition(
+        IStreamMintCounterPolicy.CounterScope scope,
+        IStreamMintManager.CounterKeyMode keyMode
+    ) private pure returns (IStreamMintCounterPolicy.Definition memory) {
+        return IStreamMintCounterPolicy.Definition(
+            scope, keyMode, bytes32(0), keccak256("distribution scope definition")
+        );
+    }
+
+    function _resolvedSubject(bytes32 id, address beneficiary) private view returns (bytes32) {
+        IStreamMintCounterReads.CounterKeyContext memory context;
+        context.collectionId = 1;
+        context.phaseId = PHASE;
+        context.counterId = id;
+        context.beneficiary = beneficiary;
+        context.executor = address(distribution);
+        return IStreamMintCounterReads(address(manager)).resolveCounter(context).subjectKey;
+    }
+
+    function _supplySubject(uint256 collectionId, bytes32 phaseId) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_MINT_COUNTER_SUBJECT_V1"),
+                block.chainid,
+                address(ledger),
+                IStreamMintManager.CounterKeyMode.CONSTANT,
+                collectionId,
+                phaseId,
+                SUPPLY
+            )
+        );
+    }
+
+    function _valueKey(uint256 collectionId, bytes32 phaseId, bytes32 id, bytes32 subject)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1"),
+                address(manager),
+                collectionId,
+                phaseId,
+                id,
+                subject
+            )
+        );
     }
 
     function _recipients(address first, address second) private pure returns (address[] memory r) {

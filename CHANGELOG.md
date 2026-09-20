@@ -3,6 +3,15 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Operator distribution supply scope
+
+- Require the distribution's supply counter to resolve to its original PHASE
+  subject through the actual Manager. Reject COLLECTION/GLOBAL supply sharing
+  while preserving latched legacy definitions and configured recipient scopes.
+- Clarify existing explicit terminal entropy-policy behavior in the operator
+  guide; missing policy does not grant a reveal exemption. Combined current
+  execution and transaction-capacity acceptance remain separate.
+
 ## ERC20 executor-funded native reveal allowance
 
 - Keep token prices, payer intents and permits in token units while the bound
