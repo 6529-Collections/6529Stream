@@ -5,6 +5,10 @@ Status: proposed composition, with characterization tests authored against
 ABI checks and source review do not establish native execution or complete
 inventory, Archive coverage, or Finality acceptance.
 
+The follow-on [bounded multi-origin implementation plan](multi-origin-artist-archive-implementation-plan.md)
+specifies the proposed indexed receipt read, fixed worker, additive inventory
+and coverage profiles, and current-versus-original authority joins.
+
 ## Preserve three distinct identities
 
 The [current record reader](record-artist-succession.md) can authenticate the
