@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `74f91719`: clone wallets, incident-gap consumers, entropy and mint fallbacks, six genesis products, staged inventory clients and publication transport are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
+| Source checkpoint | `5066ef97`: clone wallets, incident-gap consumers, entropy and mint fallbacks, six genesis products, staged inventory clients and publication transport are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,36 +30,40 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 20 September
 
 - Root owns shared architecture, integration and final candidate delivery.
-  Source through `74f91719` passes the complete 2,141-source ABI check; current
-  native acceptance remains separated from focused and historical evidence.
-- Protocol lead verifies actual Core-to-Coordinator cold registration at the
-  real launch500000 value and low-budget atomic rejection. Both original/new
- 120000-floor controls failed; the original success oracle was inappropriate.
-  Measure hook cost for final EC-REGGAS four-times-cost floor calibration.
-  Frozen successor continuity and role34 helper source is already integrated.
-- Revenue lead completed the genuine version4 clone implementation and its
-  84-case capture; now reviews generic preservation full-payload requirements
-  and producer gaps, separately from the metadata lead and Museum task.
-- Metadata lead owns remaining publication payload/environment gas costs and
-  noncollection preservation scopes. Staged preparation and single-decode
-  transport are integrated; actual production transaction capacity is open.
-- Mint task completed the 13-case recovery capture after handing over the
-  ordinary/incident role35 fallback. Nine actual-current recipes await the
-  coordinated joined freeze; same-Ledger imports and retirement stay genuine.
-- Burn task runs the frozen four-consumer gap-aware cohort. Core14 and
-  Inventory18 are complete; offchain reference regressions pass63 at root.
-- Museum task implements original Artistop24 evidence joins and the additive
-  general/notarized attestation producer, schema and offline mappings.
-- Client task completed staged inventory529 and gap-aware inventory558 at
-  root, and now builds fallback and version4 clone caller updates.
-- Testing task owns full37 genesis composition, renderer registration and actual-current
-  Safe tests. Its narrow legacy-admin adapter is integrated0125573d. No broad native freeze
-  is started until the current feature batch and known source blockers settle.
+  All 2,159 sources pass the ABI/type/storage check at `5066ef97`; complete
+  native acceptance remains separate from focused and historical evidence.
+- The protocol lead is implementing C2PA credential/key-history reconciliation
+  in an isolated Artist branch. Actual launch-budget entropy registration,
+  receiver rollback and low-budget rejection pass three cases. The observed
+  hook cost is 131,789 gas; final EC-REGGAS floor calibration remains required.
+- The revenue lead completed clone wallets and full-byte preservation records,
+  with 84 and nine scoped passes respectively. It now extends MetadataV1 to
+  the specified 24,576-byte payload capacity while preserving old pointers.
+- The metadata lead completed staged inventories, publication transport and
+  exact environment preparation (`5066ef97`). It owns the frozen actual
+  publisher capacity run and then remaining noncollection preservation scopes.
+- The mint task completed 13 focused recovery cases and nine authored current
+  Safe recipes. It now checks mint-entrypoint coverage and current-fixture
+  readiness with Testing; it owns no duplicate deployment or client work.
+- The burn task has Core14, Inventory18 and 44 scope/entropy consumer passes
+  on recorded sources. Five preservation cases are in a corrected fixture
+  retry (`235387fa`); the original Router size blocker remains separate.
+- The Museum task delivered general/native Artist/notarization records and
+  offline dossiers (`9677f5bf`), passing 86 root checks. Its accepted-profile
+  15-case native cohort passes; final source/size attestation is being recorded.
+  General payload capacity still needs its separate 24,576-byte extension.
+- The client task completed gap-aware inventory with 558 root package passes,
+  then builds fallback, clone and staged environment caller workflows.
+- The testing task composes the genuine role27/28 records, fallback and clone
+  products into the full 37-role candidate. STATIC composition (`8d1672ac`)
+  adds six authored current/Safe cases; the narrow legacy-admin compatibility
+  adapter (`0125573d`) remains distinct from the full-byte preservation host.
 
-Do not duplicate source writers or broad compilers. Exact approval-review
-denials remain in force; no rejected patch is applied. RC1 and all original
-captures remain immutable. Complete Safe/fuzz/gas/CI/testnet acceptance follows
-the stabilized full-feature implementation.
+Keep builders implementing while isolated frozen tests run. Do not duplicate
+source writers or broad compilers. Exact approval-review denials remain in
+force; no rejected patch is applied. Preserve RC1 and all original captures.
+Complete Safe/fuzz/gas/CI and matching testnet evidence follow the stabilized
+full-feature implementation.
 
 ## Reboot recovery assignments: 19 September
 

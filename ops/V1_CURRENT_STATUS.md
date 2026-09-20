@@ -34,6 +34,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   Gap-aware inventory and four finality/preservation readers are integrated
   through `5f233476`. The inventory has 18 focused passes. Consumer execution found fixture setup
   omissions; reviewed test-only corrections74f91719 are in a cached retry.
+  Scope/entropy consumers now pass 44 cases including two 256-input fuzz
+  properties; five preservation bodies remain blocked by fixture setup.
   No complete consumer pass is claimed. Root passes all 63 affected offchain reference/snapshot tests.
   These captures exclude later entropy changes unless explicitly recorded.
 - Frozen entropy successor policies and the configured ordinary backup are
@@ -41,8 +43,11 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   continuity cases and ten retained subject-identity cases pass on their
   recorded source. A cold-hook probe at 120,000 gas fails on both original
   and new implementations; that probe used the configured floor rather than
-  the launch plan's actual 500,000 value. Corrected actual-launch success and
-  low-budget fail-closed cases are running. EC-REGGAS additionally requires the
+  the launch plan's actual 500,000 value. Corrected actual-launch success,
+  receiver rollback/retry and low-budget fail-closed tests now pass 3/3
+  (`6fb0d7c3`). The observed hook frame consumes 131,789 gas, so four times
+  that observation is 527,156; this is scoped call-frame evidence, not a final
+  complete-graph transaction measurement. EC-REGGAS additionally requires the
   new candidate's immutable floor to cover four times measured cold hook cost;
   the historical 120,000 floor is not accepted as final calibration evidence.
 - Staged authenticated file-inventory preparation (`9a276348`) passes six
@@ -61,17 +66,36 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   Independent source review is clear. Further payload/environment transport
   work continues because the earlier genuine full publication still fails
   `RouterEvidenceGas(6179424,6195238)` before its final assertions.
+- Exact environment preparation (`5066ef97`) passes eight focused cases and
+  256-input parity fuzzing. The original 1,048/102-row environment prepares at
+  13,936,415 gas including intrinsic; prepared-read callee cost is 7,749,281.
+  These are minimal guarded-host/worker/Store measurements. The real publisher
+  successor is being prepared; complete publication capacity is still open.
 - Six genuine missing genesis products are composed in `a960a5b1`, with five
   actual-current/Safe tests authored. Remaining role composition includes the
-  general/notarized attestations and renderer registration. The narrow
+  final role assembly and activation. The narrow
   legacy-admin adapter is integrated as `0125573d`: seven current/Safe cases
   are authored; selected adapter size is 5,448 runtime/5,981 creation bytes.
-  The generic preservation host still needs full-byte retention, and MetadataV1
-  supports 8,192 bytes against the specified 24,576; both repairs are assigned.
+  The new full-byte preservation producer is integrated as `09fd273d`: nine
+  focused cases pass, including 256-input fuzz, full 24,576-byte/three-chunk
+  reconstruction and threshold Safe, with typed surrounding boundaries.
+  All 35 captured production products fit. MetadataV1 still supports 8,192
+  against the specified 24,576; its capacity repair remains assigned.
   Source composition alone does not close all 37 genesis roles.
+- General attestations, native Artist evidence and typed identity notarization
+  are integrated as `9677f5bf`. Root passes 86 affected checks (63 functional
+  and 23 documentation); fixture semantics and offline reconstruction do not
+  establish actual institutional facts. The exact accepted-profile 15-case
+  native run passes all 15 cases; source/size attestation is being recorded.
+  Provisional no-IR codegen remains separate from accepted-profile evidence.
+  This host also has an 8,192-byte payload bound with full 24,576 support queued.
+- Original STATIC renderer/companion/registry composition is integrated as
+  `8d1672ac`, independently source-reviewed. Six current/Safe cases are authored;
+  fixture analysis and partial direct read rosters are explicitly synthetic.
+  Complete transitive analysis, goldens and joined runtime remain required.
 
-The latest complete-source ABI/type/storage pass at `74f91719` covers 2,141
-sources in 18.984 seconds with no errors. It does not generate bytecode or
+The latest complete-source ABI/type/storage pass at `5066ef97` covers 2,159
+sources in 18.625 seconds with no errors. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different

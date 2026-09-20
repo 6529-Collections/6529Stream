@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add full-byte preservation records with original family authority, immutable
+  record history and enumerable ordered chunk retention up to24,576 bytes.
+- Compose original STATIC renderer products with explicit retained-document
+  admission and current Safe test recipes; complete analysis remains separate.
+
 - Add a narrowly scoped current-Executor compatibility adapter and original
   preservation/family-registry composition, with governed metadata pause/resume
   and explicit family writers; current Safe tests await coordinated execution.

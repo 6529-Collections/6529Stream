@@ -33,15 +33,16 @@ six additional genuine genesis products
 have five authored current/Safe cases; source integration is complete for these
 batches, while their joined runtime acceptance remains outstanding. The
 narrow legacy-admin compatibility adapter0125573d adds seven authored Safe
-cases; it does not complete generic preservation full-byte retention.
+cases; the separate full-byte producer09fd273d now has nine scoped passes.
 
 The new entropy continuity source is integrated and independently reviewed.
 A cold-registration probe at120000 fails on both original and new sources;
 it mistakenly tested the configured floor instead of the actual launch
-value500000. The protocol lead owns actual-launch acceptance and low-budget
-rollback controls; the final candidate floor must be calibrated to four times
-measured cold hook cost under EC-REGGAS. Museum general/notarized attestations,
-remaining genesis composition and preservation scopes are being implemented.
+value500000. Three actual-launch/receiver-rollback/low-budget tests now pass at6fb0d7c3; the final candidate floor must be calibrated to four times
+measured cold hook cost under EC-REGGAS (current scoped observation131789). General/notarized attestations9677f5bf pass86 root affected checks with
+accepted-profile native pending; full-byte preservation09fd273d passes nine
+scoped cases. STATIC composition8d1672ac adds six authored current/Safe cases.
+Remaining full payload capacity and complete genesis composition are active.
 Original held proposals remain unapplied. No full-system acceptance, complete
 museum conformance or new testnet release is claimed.
 
@@ -77,14 +78,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `74f917195af6e212196aba13705276022847a172`; see the [20 September batch](#latest-integration-checkpoint-20-september) for source-specific evidence and remaining joins |
+| Current integration source | `5066ef97506f5b022d1d9ae9a2a65369f29770bc`; see the [20 September batch](#latest-integration-checkpoint-20-september) for source-specific evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,141-source ABI/type/storage check passes at `74f91719` in 18.984 seconds. This is not bytecode or full-system runtime evidence. |
+| Latest broad cheap compilation evidence | 2,159-source ABI/type/storage check passes at `5066ef97` in 18.625 seconds. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -251,7 +252,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [entropy.funding](#entropyfunding-evidence) Reveal fees, quotations, sponsors and pull refunds | Built | Partly tested | Partial | Coordinator-hosted reveal-fee escrow and provider quote validation with native sale funding; dedicated focused suite included in the 100-case entropy capture. **Remaining:** Latest fee/callback/escrow conservation acceptance. ERC20 executor allowance is separately absent. |
 | [entropy.incidents](#entropyincidents-evidence) Timeouts, service-level findings and precommitted fresh recovery | Built | Tested* | Partial | Frozen incident/recovery policies, epochs and collection/token fresh recovery. Recorded focused run passes 100 cases across ten suites, including eight 256-input properties. **Remaining:** Complete latest actual Artist/governance/upstream-provider transaction composition. |
 | [entropy.artist-join](#entropyartist-join-evidence) Real Artist consent and unavailability findings in reveal recovery | Built | Partly tested | Partial | Actual Artist/Safe/Archive tests and operation23 finding source exist. Canonical role-registry/role grant and test-name fixes are integrated 5104173c/2c39c316. **Remaining:** Execute the repaired recovery/unavailability joins, then complete actual mint/Executor/provider composition and finding hydration acceptance. |
-| [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | Built | Partly tested | Not integrated | Frozen V2 successor permission, covered pending-request admission, original host provenance and configured ordinary backup helper are source-integratedcf57de5e with independent review. Eleven continuity and ten prior subject-identity cases pass on recorded sources. **Remaining:** Verify actual-Core cold registration at the real launch500000 value, calibrate the new candidate immutable floor from measured cold cost per EC-REGGAS, execute current/Safe cutover and complete genesis activation. The120000-floor success oracle failed on both original and new sources and was corrected. |
+| [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | Built | Partly tested | Not integrated | Frozen V2 successor permission, covered pending-request admission, original host provenance and configured ordinary backup helper are source-integratedcf57de5e with independent review. Eleven continuity and ten prior subject-identity cases pass on recorded sources. Actual-Core launch500000 registration/receiver rollback and low-budget atomic rejection pass 3/3 at6fb0d7c3. **Remaining:** Calibrate the new candidate immutable floor from measured cold cost per EC-REGGAS, execute current/Safe cutover and complete genesis activation. The120000-floor success oracle failed on both original and new sources and was corrected. |
 
 ### Metadata and records
 
