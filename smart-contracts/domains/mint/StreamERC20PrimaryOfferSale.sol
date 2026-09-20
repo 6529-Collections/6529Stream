@@ -17,9 +17,10 @@ import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 
-/// @notice Atomic ERC20 primary OFFER_SALE through contract20's original nonpayable payer boundary.
+/// @notice Atomic ERC20 primary OFFER_SALE through contract20 with zero native value.
 /// @dev Full buyer offers do not authorize token pulls. Nonpayer executors supply the buyer's own
 /// PaymentIntent to contract20. This profile accepts only a zero declared native reveal fee.
+/// Its shared payable callback ABI explicitly rejects nonzero value before any sale effects.
 contract StreamERC20PrimaryOfferSale is
     IStreamERC20PrimaryOfferSale,
     IStreamERC20SaleExecution,
@@ -376,12 +377,20 @@ contract StreamERC20PrimaryOfferSale is
         c = StreamERC20PrimaryOfferRuntime.preview(_state, _runtime(), q);
     }
 
+    /// @dev Preserve the original nonpayable empty revert before the reentrancy guard.
+    modifier rejectNativeValue() {
+        if (msg.value != 0) revert();
+        _;
+    }
+
     function executeERC20PreRevenueSingleStep(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate_,
         bytes calldata data
     )
         external
+        payable
         override
+        rejectNativeValue
         nonReentrant
         returns (bytes4 magic, StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {

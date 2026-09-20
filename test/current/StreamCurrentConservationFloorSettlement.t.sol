@@ -243,11 +243,14 @@ contract StreamCurrentConservationFloorSettlementTest is NativeCustodyAuctionFix
     }
 
     function _erc20Product() private {
+        // Keep this existing receipt/floor oracle on an explicit zero-fee OWNER_WINDOW policy.
+        entropy.configure(0, 1, false, false);
         token = new UniversalPermitToken();
         _setAssetPolicy(policy, address(token), 1, keccak256("conservation exact ERC20"), 0);
         payment = new StreamERC20PrimarySettlementAdapter(recorder, address(0), bytes32(0));
         erc20Sale = new StreamUniversalFixedPriceSaleAdapter(
-            manager, recorder, vm.addr(AUCTION_PLATFORM_KEY), artists
+            manager, recorder, vm.addr(AUCTION_PLATFORM_KEY), artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 1_000_000, 100_000, 2)
         );
         _register(
             address(payment),

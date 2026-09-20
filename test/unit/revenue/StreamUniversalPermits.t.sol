@@ -210,6 +210,47 @@ contract StreamUniversalPermitsTest is UniversalSettlementTestBase {
         require(!ok && token.balanceOf(payer) == 10_000, "immutable third-party runtime pin");
     }
 
+    function testEIP2612NativeFundingFailureRestoresPermitAndIdenticalRetry() public {
+        vm.deal(payer, 125);
+        ImmediateRevealFixture entropy = ImmediateRevealFixture(core.entropy());
+        entropy.configure(true, 0, 100, 5);
+        (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
+         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c) = _execution(payer, payer, payer, 1);
+        StreamPrimarySettlementTypes.EIP2612PermitAuthorization memory p = _eipPermit();
+        bytes memory exact = abi.encodeCall(payment.settleERC20PrimarySaleWithEIP2612Permit, (c, p, abi.encode(e)));
+        vm.prank(payer); (bool ok,) = address(payment).call{value: 125}(exact);
+        require(!ok && token.nonces(payer) == 0 && token.allowance(payer, address(payment)) == 10000
+            && token.balanceOf(payer) == 10000 && token.balanceOf(wallet) == 0 && payer.balance == 125
+            && recorder.totalOfficialSettled(address(token)) == 0 && sale.refundLiability() == 0,
+            "late reveal funding restores permit and both currencies");
+        entropy.configure(true, 0, 100, 0);
+        vm.prank(payer); (ok,) = address(payment).call{value: 125}(exact);
+        require(ok && token.nonces(payer) == 1 && token.allowance(payer, address(payment)) == 0
+            && token.balanceOf(wallet) == 1000 && entropy.revealFeeEscrow(1) == 100
+            && sale.refundableBalance(saleId, payer) == 25, "exact token-only permit retries with native fee");
+    }
+
+    function testPermit2NativeFundingFailureRestoresBitmapAndIdenticalRetry() public {
+        vm.deal(payer, 125); vm.prank(payer); token.approve(permit2, 4000);
+        ImmediateRevealFixture entropy = ImmediateRevealFixture(core.entropy());
+        entropy.configure(true, 0, 100, 5);
+        (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
+         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c) = _execution(payer, payer, payer, 1);
+        StreamPrimarySettlementTypes.Permit2TransferAuthorization memory p = _permit2Authorization(PAYER_KEY, 255);
+        bytes memory exact = abi.encodeCall(payment.settleERC20PrimarySaleWithPermit2, (c, p, abi.encode(e)));
+        vm.prank(payer); (bool ok,) = address(payment).call{value: 125}(exact);
+        require(!ok && IStreamPinnedPermit2(permit2).nonceBitmap(payer, 0) == 0
+            && token.allowance(payer, permit2) == 4000 && token.balanceOf(payer) == 10000
+            && token.balanceOf(wallet) == 0 && payer.balance == 125 && sale.refundLiability() == 0,
+            "official Permit2 and both currencies roll back");
+        entropy.configure(true, 0, 100, 0);
+        vm.prank(payer); (ok,) = address(payment).call{value: 125}(exact);
+        require(ok && IStreamPinnedPermit2(permit2).nonceBitmap(payer, 0) == uint256(1) << 255
+            && token.allowance(payer, permit2) == 3000 && token.balanceOf(wallet) == 1000
+            && entropy.revealFeeEscrow(1) == 100 && sale.refundableBalance(saleId, payer) == 25,
+            "token-only Permit2 allowance and native allowance stay independent");
+    }
+
     function _eipPermit()
         internal
         returns (StreamPrimarySettlementTypes.EIP2612PermitAuthorization memory p)

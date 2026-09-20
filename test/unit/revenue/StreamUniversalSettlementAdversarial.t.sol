@@ -52,7 +52,7 @@ contract UniversalCallbackAdversary is
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata c,
         bytes calldata
     )
-        external
+        external payable
         returns (bytes4, StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
         if (mode == 1) {

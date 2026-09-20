@@ -7,6 +7,9 @@ import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.
 
 interface RecordingFaultVM {
     function expectCall(address, uint256, bytes calldata) external;
+    function expectCall(address, uint256, bytes calldata, uint64) external;
+    function mockCallRevert(address, uint256, bytes calldata, bytes calldata) external;
+    function clearMockedCalls() external;
 }
 
 /// @notice Actual current Core/Manager/Recorder regression for the extracted ERC20 worker.
@@ -22,11 +25,13 @@ contract StreamCurrentERC20RecordingTest is NativeEnglishAuctionFixture {
 
     function setUp() public override {
         super.setUp();
+        entropy.configure(0, 1, false, false); // Explicit zero-fee regression policy.
         token = new MockStreamPaymentToken();
         _setAssetPolicy(policy, address(token), 1, keccak256("actual current exact ERC20"), 0);
         payment = new StreamERC20PrimarySettlementAdapter(recorder, address(0), 0);
         sale = new StreamUniversalFixedPriceSaleAdapter(
-            manager, recorder, vm.addr(AUCTION_PLATFORM_KEY), artists
+            manager, recorder, vm.addr(AUCTION_PLATFORM_KEY), artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 1_000_000, 100_000, 2)
         );
         _register(
             address(payment),
@@ -223,7 +228,7 @@ contract StreamCurrentERC20RecordingTest is NativeEnglishAuctionFixture {
         bytes memory callData =
             abi.encodeCall(payment.settleERC20PrimarySaleByPayer, (c, abi.encode(e)));
         token.configureCallback(address(payment), callData, 1);
-        entropy.configure(100, 1, true, false);
+        entropy.configure(0, 1, true, false);
         faults.expectCall(
             address(token), 0, abi.encodeCall(token.transfer, (wallet, uint256(1000)))
         );
@@ -250,7 +255,7 @@ contract StreamCurrentERC20RecordingTest is NativeEnglishAuctionFixture {
                 ),
             "original replay state remains unused"
         );
-        entropy.configure(100, 1, false, false);
+        entropy.configure(0, 1, false, false);
         bytes memory raw;
         vm.prank(payer);
         (ok, raw) = address(payment).call(callData);
@@ -271,4 +276,88 @@ contract StreamCurrentERC20RecordingTest is NativeEnglishAuctionFixture {
             "successful original call cannot replay"
         );
     }
+    function testActualCoreERC20RevealFailureKeepsMintRootAndTokenOnlyReceipt() public {
+        entropy.configure(100, 0, false, true);
+        vm.deal(payer, 125);
+        (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
+         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c) = _execution(1);
+        vm.recordLogs();
+        vm.prank(payer);
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory r =
+            payment.settleERC20PrimarySaleByPayer{value: 125}(c, abi.encode(e));
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(sale) || logs[i].topics[0] != keccak256(
+                "ImmediateRevealAttempt(uint16,uint256,uint256,bool,bytes32,uint256,uint256,bytes)")) continue;
+            ++count;
+            (uint16 schema, bool success, bytes32 key, uint256 request,, bytes memory prefix) =
+                abi.decode(logs[i].data, (uint16,bool,bytes32,uint256,uint256,bytes));
+            require(schema == 1 && !success && key == 0 && request == 0 && prefix.length <= 256
+                && logs[i].topics.length == 3 && logs[i].topics[1] == bytes32(uint256(1))
+                && logs[i].topics[2] == bytes32(uint256(1)), "canonical bounded actual-token attempt");
+        }
+        require(count == 1 && core.ownerOf(1) == payer && core.lastAllocatedTokenId() == 1
+            && manager.nextOperationNonce() == 1 && ledger.counterValue(_counter()) == 1
+            && ledger.isManagerOperationRootUsed(address(manager), c.operationIdentityCommitment),
+            "provider failure preserves actual Core/Manager/Ledger result");
+        require(r.asset == address(token) && r.amount == 1000 && r.executor == payer
+            && r.operationIdentityCommitment == c.operationIdentityCommitment
+            && token.rawBalance(payer) == 9000 && token.rawBalance(wallet) == 1000
+            && recorder.totalOfficialSettled(address(token)) == 1000, "original exact token receipt");
+        require(entropy.revealFeeEscrow(1) == 100 && entropy.requestCalls() == 0
+            && sale.refundableBalance(saleId, payer) == 25 && sale.refundLiability() == 25
+            && address(payment).balance == 0 && address(sale).balance == 25, "separate native accounting");
+    }
+
+    function testActualCoreSafeExecutorIntentAndExactLateNativeFundingRetry() public {
+        uint256[] memory keys = new uint256[](2); keys[0] = 0x1901; keys[1] = 0x1902;
+        OfficialSafe executor = createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 903);
+        vm.deal(address(executor), 125);
+        entropy.configure(100, 0, false, false);
+        (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,) = _execution(1);
+        e.authorization.executor = address(executor);
+        bytes32 digest = sale.authorizationDigest(e.authorization);
+        e.platformSignature = _proof(AUCTION_PLATFORM_KEY, digest);
+        e.artistSignature = _proof(SIGNER_KEY, digest);
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c = sale.previewExecution(e);
+        StreamPrimarySettlementTypes.PaymentIntent memory intent = StreamPrimarySettlementTypes.PaymentIntent(
+            payer, address(token), 1000, saleId, c.sale.expectedPrimaryPolicyHash, keccak256("current native allowance"), 10000);
+        bytes memory input = abi.encodeCall(payment.settleERC20PrimarySaleWithIntent,
+            (c, intent, _proof(PAYER_KEY, payment.paymentIntentDigest(intent)), abi.encode(e)));
+        bytes32 txHash = executor.getTransactionHash(address(payment), 125, input, 0, 0, 0, 0,
+            address(0), address(0), executor.nonce());
+        bytes memory exactSafeCall = abi.encodeCall(OfficialSafe.execTransaction,
+            (address(payment), uint256(125), input, uint8(0), uint256(0), uint256(0), uint256(0),
+             address(0), payable(address(0)), safeThresholdSignature(keys, txHash)));
+        bytes memory fund = abi.encodeCall(IStreamRevealFeeEscrow.fundRevealFeeEscrow, (uint256(1)));
+        faults.expectCall(address(entropy), 100, fund, 2);
+        faults.expectCall(address(token), 0, abi.encodeCall(token.transfer, (wallet, uint256(1000))), 2);
+        faults.mockCallRevert(address(entropy), 100, fund, abi.encodeWithSignature("Error(string)", "late native funding"));
+        (bool ok,) = address(executor).call(exactSafeCall);
+        require(!ok && executor.nonce() == 0 && address(executor).balance == 125
+            && core.lastAllocatedTokenId() == 0 && core.collectionNextSerial(1) == 1
+            && manager.nextOperationNonce() == 0 && ledger.counterValue(_counter()) == 0
+            && !ledger.isManagerOperationRootUsed(address(manager), c.operationIdentityCommitment),
+            "actual mint and Safe nonce rollback after funding is reached");
+        require(!payment.isPaymentIntentNonceUsed(payer, intent.nonce)
+            && !sale.authorizationUsed(vm.addr(SIGNER_KEY), e.authorization.nonce)
+            && sale.executionIdByNonce(saleId, 1) == 0 && token.rawBalance(payer) == 10000
+            && token.rawBalance(wallet) == 0 && token.allowance(payer, address(payment)) == 10000
+            && recorder.totalOfficialSettled(address(token)) == 0 && entropy.revealFeeEscrow(1) == 0
+            && sale.refundLiability() == 0 && address(sale).balance == 0, "all payment/replay liabilities roll back");
+        faults.clearMockedCalls();
+        (ok,) = address(executor).call(exactSafeCall);
+        require(ok && executor.nonce() == 1 && core.ownerOf(1) == payer
+            && ledger.counterValue(_counter()) == 1 && manager.nextOperationNonce() == 1
+            && token.rawBalance(wallet) == 1000 && recorder.totalOfficialSettled(address(token)) == 1000
+            && entropy.revealFeeEscrow(1) == 100 && entropy.requestCalls() == 1, "identical complete Safe call succeeds");
+        require(sale.refundableBalance(saleId, address(executor)) == 25
+            && sale.refundableBalance(saleId, payer) == 0 && sale.refundLiability() == 25,
+            "native Safe funder differs from token payer");
+        require(executeSafe(executor, keys, address(sale), 0,
+            abi.encodeCall(sale.claimRefund, (saleId, address(executor))), 0), "actual Safe pull refund");
+        require(address(executor).balance == 25 && sale.refundLiability() == 0, "exact native excess refund");
+    }
+
 }

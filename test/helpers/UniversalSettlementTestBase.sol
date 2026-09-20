@@ -85,7 +85,8 @@ abstract contract UniversalSettlementTestBase is
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
         payment = new StreamERC20PrimarySettlementAdapter(recorder, permit2, permit2.codehash);
         sale = new StreamUniversalFixedPriceSaleAdapter(
-            IStreamMintManager(address(manager)), recorder, vm.addr(PLATFORM_KEY), artists
+            IStreamMintManager(address(manager)), recorder, vm.addr(PLATFORM_KEY), artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 1_000_000, 100_000, 2)
         );
         _register(
             address(payment),

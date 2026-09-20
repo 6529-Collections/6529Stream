@@ -85,7 +85,8 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
             new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
         payment = new StreamERC20PrimarySettlementAdapter(recorder, address(0), bytes32(0));
         universalSale = new StreamUniversalFixedPriceSaleAdapter(
-            manager, recorder, vm.addr(PLATFORM_KEY), IStreamArtistAttribution(address(artists))
+            manager, recorder, vm.addr(PLATFORM_KEY), IStreamArtistAttribution(address(artists)),
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 1_000_000, 100_000, 2)
         );
         _assertDeployableProductionInstance(address(recorder));
         _assertDeployableProductionInstance(address(payment));
@@ -141,8 +142,8 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
         GovernanceActionRequest memory asset = StreamCurrentAssetPolicy.activationRequest(
             assetPolicy, address(token), keccak256("current universal exact ERC20"), DEPLOYMENT_HASH
         );
-        GovernanceCall[] memory calls = new GovernanceCall[](3);
-        bytes[] memory data = new bytes[](3);
+        GovernanceCall[] memory calls = new GovernanceCall[](4);
+        bytes[] memory data = new bytes[](4);
         for (uint256 i; i < 2; ++i) {
             calls[i] = registrations[i];
             data[i] = registrationData[i];
@@ -155,6 +156,12 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
             asset.newValueHash
         );
         data[2] = asset.callData;
+        data[3] = abi.encodeCall(entropy.setRequester, (address(universalSale), true));
+        calls[3] = StreamCurrentStackPlan.call(
+            address(entropy), data[3],
+            keccak256(abi.encode("universal reveal requester", address(entropy), address(universalSale))),
+            keccak256(abi.encode(false)), keccak256(abi.encode(true))
+        );
         _executeGovernedBatch(calls, data);
         require(
             registry.moduleRecord(address(payment)).status == ModuleRegistryStatus.ACTIVE
@@ -311,6 +318,7 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
         ) = _execution(1, address(payerSafe), address(payerSafe));
+        uint256 expectedRequest = provider.nextRequestId();
         require(
             executeSafe(
                 payerSafe,
@@ -324,8 +332,8 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
         );
         _assertSettled(c, address(payerSafe));
         uint256 tokenId = core.lastAllocatedTokenId();
-        (, uint256 requestId) = entropy.requestEntropy(tokenId);
-        provider.fulfill(requestId, keccak256("universal current entropy"));
+        require(provider.nextRequestId() == expectedRequest + 1, "automatic AT_MINT request reached actual provider");
+        provider.fulfill(expectedRequest, keccak256("universal current entropy"));
         (bytes32 seed, bool finalized) = entropy.tokenSeed(tokenId);
         require(
             finalized && seed != 0 && bytes(core.tokenURI(tokenId)).length != 0,

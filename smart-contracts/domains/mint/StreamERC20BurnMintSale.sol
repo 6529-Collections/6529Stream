@@ -22,8 +22,9 @@ import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 
 /// @notice Original universal authorization and settlement for dedicated same-transaction ERC20 burns.
-/// @dev Positive PROFILE, one token, order one and zero native reveal fee. The original carrier,
-/// free/native burn routes, Manager/Ledger and payment/recorder contracts are unchanged.
+/// @dev Positive PROFILE, one token, order one and zero native reveal fee/value.
+/// The shared payable callback ABI rejects nonzero value before any burn or sale effects.
+/// Original authorization, free/native burn routes and Manager/Ledger behavior are retained.
 contract StreamERC20BurnMintSale is
     IStreamERC20BurnMintSale,
     IStreamERC20BurnMintContinuation,
@@ -272,12 +273,20 @@ contract StreamERC20BurnMintSale is
         c = StreamERC20BurnMintRuntime.previewBurnExecution(_state, _context(), e);
     }
 
+    /// @dev Preserve the original nonpayable empty revert before the reentrancy guard.
+    modifier rejectNativeValue() {
+        if (msg.value != 0) revert();
+        _;
+    }
+
     function executeERC20PreRevenueSingleStep(
         S.ERC20SettlementCandidate calldata supplied,
         bytes calldata data
     )
         external
+        payable
         override
+        rejectNativeValue
         nonReentrant
         returns (bytes4 magic, S.PrimarySettlementResult memory result)
     {

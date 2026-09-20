@@ -1,10 +1,10 @@
 # ADR 0045: Native reveal fees for token sales
 
-Status: Integrator-selected implementation design under the owner's adopted
-full-v1 implementation authority, 14 September 2026. Contract implementation
-is pending the actual automatic-review approval. This decision does not claim
-shipped behavior, runtime acceptance, deployment, or authorization to execute a
-live governance or funds operation.
+Status: Local implementation applied on 20 September 2026 following review of
+the exact source artifact, under the owner's adopted full-v1 implementation
+authority. ABI/type and recursive storage checks pass; native runtime, size
+and capacity validation remain pending. This decision does not authorize a
+live governance, deployment or funds operation.
 
 ## Mixed payment units
 
@@ -30,7 +30,7 @@ An ERC-20 immediate-sale transaction carries two independent amounts:
 - The authenticated transaction executor supplies `msg.value` as its maximum
   native reveal-fee allowance. It may be a different account from the ERC-20
   payer. Existing entrypoint selectors and signing domains/types remain
-  unchanged; the intended implementation widens the relevant entrypoints and
+  unchanged; the implementation widens the relevant entrypoints and
   authenticated sale callback to payable.
 
 The sale adapter captures the actual selected coordinator's declared policy

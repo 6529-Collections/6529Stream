@@ -36,6 +36,7 @@ import {
 } from "../../smart-contracts/interfaces/stream/revenue/IStreamPinnedPermit2.sol";
 
 interface CurrentERC20BurnEventVm {
+    function expectCall(address target, uint256 value, bytes calldata input, uint64 count) external;
     function expectEmit(bool, bool, bool, bool, address) external;
 }
 
@@ -166,6 +167,35 @@ contract StreamCurrentERC20BurnMintTest is NativeCuratedSaleFixture, OfficialPer
         token.mint(payer, 10000);
         vm.prank(payer);
         token.approve(address(payment), 10000);
+    }
+
+    function testBurnRejectsNativeValueAndSameSignedPaymentSucceedsWithZeroValue() public {
+        E.Execution memory e = _open(payer, payer, payer);
+        S.ERC20SettlementCandidate memory c = burnSale.previewExecution(e);
+        bytes memory exact = abi.encodeCall(payment.settleERC20PrimarySaleByPayer, (c, abi.encode(e)));
+        vm.deal(payer, 1);
+        vm.deal(address(payment), 17);
+        vm.deal(address(burnSale), 23);
+        CurrentERC20BurnEventVm(address(vm)).expectCall(address(token), 0,
+            abi.encodeCall(token.transferFrom, (payer, address(payment), uint256(1000))), 1);
+        vm.prank(payer);
+        (bool ok, bytes memory reason) = address(burnSale).call{value: 1}(
+            abi.encodeCall(burnSale.executeERC20PreRevenueSingleStep, (c, abi.encode(e))));
+        require(!ok && reason.length == 0, "original nonpayable callback empty revert");
+        _assertUnused(e, c, 0);
+        vm.prank(payer);
+        (ok, reason) = address(payment).call{value: 1}(exact);
+        require(!ok && keccak256(reason) == keccak256(abi.encodeWithSelector(
+            StreamERC20PrimarySettlementAdapter.PaymentCallbackFailed.selector)), "unsupported callback value");
+        _assertUnused(e, c, 0);
+        require(payer.balance == 1 && address(payment).balance == 17 && address(burnSale).balance == 23,
+            "no value retained or source burned; original surplus preserved");
+        vm.prank(payer);
+        (ok, reason) = address(payment).call(exact);
+        require(ok, "same signed payment accepts original zero-value burn route");
+        _assertExecuted(e, c, abi.decode(reason, (S.PrimarySettlementResult)));
+        require(payer.balance == 1 && address(payment).balance == 17 && address(burnSale).balance == 23,
+            "zero-value burn preserves native balances");
     }
 
     function testActualPaidBurnRetainsOriginalProgramAuthorizationAndOfficialReceipt() public {

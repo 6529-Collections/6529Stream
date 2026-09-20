@@ -3,8 +3,10 @@ pragma solidity ^0.8.19;
 
 import "../entropy/IStreamRevealFeeEscrow.sol";
 
-/// @notice Additive native immediate-sale reveal quote and payer-owned excess custody.
-/// @dev Value above the signed sale amount is the maximum reveal fee allowance.
+/// @notice Additive immediate-sale native reveal quote and native-funder excess custody.
+/// @dev Native sales use value above their signed amount; token sales use all msg.value.
+///      The account named payer here is the native funder: the bound executor for token
+///      sales, which can differ from the ERC-20 payer. Amounts here are always wei.
 interface IStreamImmediateSaleReveal {
     struct RevealQuote {
         address coordinator;
@@ -44,7 +46,7 @@ interface IStreamImmediateSaleReveal {
     function saleRevealQuote(bytes32 saleId) external view returns (RevealQuote memory);
     function refundableBalance(bytes32 saleId, address payer) external view returns (uint256);
     function refundLiability() external view returns (uint256);
-    /// @notice Only the credited payer, including a Safe CALL, chooses the destination.
+    /// @notice Only the credited native funder, including a Safe CALL, chooses the destination.
     function claimRefund(bytes32 saleId, address recipient) external;
     /// @notice Append-only state discovery; zero balances remain enumerable after claims.
     function refundAccountCount() external view returns (uint256);

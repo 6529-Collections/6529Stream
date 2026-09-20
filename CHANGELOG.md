@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## ERC20 executor-funded native reveal allowance
+
+- Keep token prices, payer intents and permits in token units while the bound
+  executor supplies native reveal fees and owns excess pull refunds. Preserve
+  zero-native offer and burn callbacks and current conservation receipt checks.
+- Apply the reviewed implementation with ABI/type and recursive storage checks
+  passing. Native size, runtime and capacity validation remain pending.
+
 ## Joined Artist Attribution capacity extraction
 
 - Share original dispute transport and ordinary personhood/recovered read encodings,

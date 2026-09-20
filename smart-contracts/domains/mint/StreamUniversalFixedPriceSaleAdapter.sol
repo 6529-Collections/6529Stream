@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
+import "./StreamUniversalSaleState.sol";
+import "./StreamImmediateSaleReveal.sol";
+import "../parameters/StreamGasParameterHost.sol";
 import "./StreamSaleConsent.sol";
 import "./StreamUniversalSaleRights.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleFacts.sol";
@@ -12,13 +15,12 @@ import "../../interfaces/stream/mint/IStreamUniversalFixedPriceSaleAdapter.sol";
 import "../../interfaces/standards/IERC5267.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
-import "../../vendor/openzeppelin/Ownable.sol";
-import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 
 /// @notice Repeatable signed sale programs consumed through the sole universal payer boundary.
 /// @dev This consumer accepts only fixed collection PROFILE rights and single-step one-token
-///      minting. It never pulls an allowance, holds payment or records official revenue totals.
+///      minting. It never pulls token allowances or records official revenue totals. Native
+///      reveal allowances and executor-owned credits are separate from ERC-20 revenue.
 contract StreamUniversalFixedPriceSaleAdapter is
     IStreamUniversalFixedPriceSaleAdapter,
     IStreamERC20SaleExecution,
@@ -26,8 +28,9 @@ contract StreamUniversalFixedPriceSaleAdapter is
     IStreamArtistSaleFacts,
     IERC5267,
     StreamSettlementContext,
-    Ownable,
-    ReentrancyGuard,
+    StreamUniversalSaleState,
+    StreamGasParameterHost,
+    IStreamImmediateSaleReveal,
     ERC165
 {
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
@@ -47,19 +50,29 @@ contract StreamUniversalFixedPriceSaleAdapter is
     address public immutable platformSigner;
     IStreamArtistAttribution public immutable artistRegistry;
     bytes32 public immutable artistRegistryCodeHash;
-    uint256 public nextSaleNonce = 1;
-    bool public paused;
-    mapping(bytes32 => SaleRecord) private _sales;
-    mapping(address => mapping(bytes32 => bool)) public authorizationUsed;
-    mapping(bytes32 => mapping(uint256 => bytes32)) public executionIdByNonce;
-    mapping(bytes32 => uint8) public executionStatus;
+    bytes32 private constant _REVEAL_GAS =
+        keccak256("6529STREAM_GGP_REVEAL_ATTEMPT_GAS_LIMIT");
+    uint256 public override refundLiability;
+    mapping(bytes32 => mapping(address => uint256)) private _refunds;
+    mapping(bytes32 => mapping(address => bool)) private _refundSeen;
+    bytes32[] private _refundSales;
+    address[] private _refundExecutors;
 
     constructor(
         IStreamMintManager manager,
         IStreamPrimarySaleSettlement recorder,
         address signer,
-        IStreamArtistAttribution artists
-    ) StreamSettlementContext(recorder.revenueResolver(), recorder.moduleRegistry()) {
+        IStreamArtistAttribution artists,
+        GasParameterConfig memory revealGas
+    )
+        StreamSettlementContext(recorder.revenueResolver(), recorder.moduleRegistry())
+        StreamGasParameterHost(IStreamSplitFactory(recorder.revenueResolver().splitFactory()).governanceAuthority())
+    {
+        if (
+            keccak256(bytes(revealGas.name)) != keccak256("REVEAL_ATTEMPT_GAS_LIMIT")
+                || revealGas.failureClass != FAILURE_CLASS_FAIL_CLOSED_PRECHECK
+        ) revert GasParameterInvalidConfig(_REVEAL_GAS);
+        _registerGasParameter(revealGas);
         if (
             !StreamSettlementAdmission.isContract(address(manager)) || signer == address(0)
                 || !StreamSettlementAdmission.isContract(address(recorder))
@@ -81,7 +94,9 @@ contract StreamUniversalFixedPriceSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamUniversalFixedPriceSaleAdapter).interfaceId
+        return id == type(IStreamImmediateSaleReveal).interfaceId
+            || id == type(IStreamGasParameterHost).interfaceId
+            || id == type(IStreamUniversalFixedPriceSaleAdapter).interfaceId
             || id == type(IERC5267).interfaceId
             || id == type(IStreamERC20SaleExecution).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
@@ -273,6 +288,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
         bytes calldata data
     )
         external
+        payable
         override
         nonReentrant
         returns (bytes4 magic, StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
@@ -288,6 +304,11 @@ contract StreamUniversalFixedPriceSaleAdapter is
                 || keccak256(abi.encode(c)) != keccak256(abi.encode(candidate))
         ) revert UniversalCandidateMismatch();
         StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
+        uint256 originalNativeBalance = address(this).balance - msg.value;
+        if (originalNativeBalance < refundLiability) revert SaleRevealAccountingMismatch();
+        RevealQuote memory quote = StreamImmediateSaleReveal.quote(core, c.sale.collectionId);
+        uint256 revealCap = gasParameter(_REVEAL_GAS);
+        uint256 excess = StreamImmediateSaleReveal.preflight(quote, msg.value, revealCap);
         authorizationUsed[e.authorization.artist][e.authorization.nonce] = true;
         executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce] =
         c.executionBinding.executionId;
@@ -316,6 +337,22 @@ contract StreamUniversalFixedPriceSaleAdapter is
                 || ids.length != 1 || ids[0] != c.operationId
         ) revert UniversalMintResultInvalid();
         _requireConsent(e.authorization.saleId);
+        StreamImmediateSaleReveal.fundAndAttempt(
+            core, c.sale.collectionId, tokens[0], quote, revealCap
+        );
+        _requireSaleContext();
+        _requireConsent(e.authorization.saleId);
+        StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
+        StreamSaleArtist.requireArtist(
+            artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
+        );
+        if (keccak256(abi.encode(_rights(c.sale.collectionId))) != keccak256(abi.encode(c.rights))) {
+            revert UniversalCandidateMismatch();
+        }
+        if (address(this).balance != originalNativeBalance + excess) {
+            revert SaleRevealAccountingMismatch();
+        }
+        _creditRevealExcess(e.authorization.saleId, c.executor, excess);
         executionStatus[c.executionBinding.executionId] = 2;
         emit UniversalSaleExecution(
             e.authorization.saleId,
@@ -327,6 +364,58 @@ contract StreamUniversalFixedPriceSaleAdapter is
             tokens[0]
         );
         return (IStreamERC20SaleExecution.executeERC20PreRevenueSingleStep.selector, result);
+    }
+
+    /// @notice The quote is in wei; it is never added to the ERC-20 sale price.
+    function saleRevealQuote(bytes32 id) external view override returns (RevealQuote memory) {
+        SaleRecord storage record = _sales[id];
+        if (record.saleNonce == 0) revert UniversalSaleUnavailable(id);
+        _requireSaleContext();
+        return StreamImmediateSaleReveal.quote(core, record.config.collectionId);
+    }
+
+    /// @dev The legacy interface names this account payer; here it is the native funder/executor.
+    function refundableBalance(bytes32 id, address executor) external view override returns (uint256) {
+        return _refunds[id][executor];
+    }
+
+    function refundAccountCount() external view override returns (uint256) {
+        return _refundSales.length;
+    }
+
+    function refundAccountAt(uint256 index)
+        external view override returns (bytes32 id, address executor)
+    {
+        return (_refundSales[index], _refundExecutors[index]);
+    }
+
+    /// @notice Only the credited executor chooses a recipient. Escape is independent of admission.
+    function claimRefund(bytes32 id, address recipient) external override nonReentrant {
+        uint256 amount = _refunds[id][msg.sender];
+        if (amount == 0) revert SaleRefundEmpty(id, msg.sender);
+        if (recipient == address(0) || recipient == address(this)) {
+            revert SaleRefundTransferFailed(recipient);
+        }
+        uint256 beforeBalance = address(this).balance;
+        if (beforeBalance < refundLiability) revert SaleRevealAccountingMismatch();
+        _refunds[id][msg.sender] = 0;
+        refundLiability -= amount;
+        (bool ok,) = recipient.call{value: amount}("");
+        if (!ok) revert SaleRefundTransferFailed(recipient);
+        if (address(this).balance != beforeBalance - amount) revert SaleRevealAccountingMismatch();
+        emit SaleRefundClaimed(1, id, msg.sender, recipient, amount);
+    }
+
+    function _creditRevealExcess(bytes32 id, address executor, uint256 amount) private {
+        if (amount == 0) return;
+        if (!_refundSeen[id][executor]) {
+            _refundSeen[id][executor] = true;
+            _refundSales.push(id);
+            _refundExecutors.push(executor);
+        }
+        _refunds[id][executor] += amount;
+        refundLiability += amount;
+        emit SalePaymentExcessCredited(1, id, executor, amount);
     }
 
     function _candidate(SaleExecutionData memory e)

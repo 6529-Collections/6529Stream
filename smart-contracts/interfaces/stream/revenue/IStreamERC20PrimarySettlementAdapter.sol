@@ -5,6 +5,8 @@ import "./StreamPrimarySettlementTypes.sol";
 import "./IStreamPrimarySettlementBindings.sol";
 
 /// @notice Contract 20: sole payer authorization and allowance-pulling boundary.
+/// @dev PaymentIntent and permits authorize token units only. The bound executor supplies
+///      msg.value as a separate native reveal allowance and owns its excess sale credit.
 interface IStreamERC20PrimarySettlementAdapter is IStreamPrimarySettlementBindings {
     event PaymentIntentConsumed(
         address indexed payer,
@@ -22,26 +24,26 @@ interface IStreamERC20PrimarySettlementAdapter is IStreamPrimarySettlementBindin
     function settleERC20PrimarySaleByPayer(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate,
         bytes calldata saleExecutionData
-    ) external returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
+    ) external payable returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
 
     function settleERC20PrimarySaleWithIntent(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate,
         StreamPrimarySettlementTypes.PaymentIntent calldata intent,
         bytes calldata signature,
         bytes calldata saleExecutionData
-    ) external returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
+    ) external payable returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
 
     function settleERC20PrimarySaleWithEIP2612Permit(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate,
         StreamPrimarySettlementTypes.EIP2612PermitAuthorization calldata permit,
         bytes calldata saleExecutionData
-    ) external returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
+    ) external payable returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
 
     function settleERC20PrimarySaleWithPermit2(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate,
         StreamPrimarySettlementTypes.Permit2TransferAuthorization calldata permit,
         bytes calldata saleExecutionData
-    ) external returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
+    ) external payable returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory);
 
     /// @notice Only the immutable recorder may enter once, during its exact active callback.
     function fundERC20PrimarySale(

@@ -45,6 +45,7 @@ import {
 } from "../../smart-contracts/integrations/delegation/NFTdelegation.sol";
 
 interface CurrentERC20OfferEventVm {
+    function expectCall(address target, uint256 value, bytes calldata input, uint64 count) external;
     function expectEmit(bool, bool, bool, bool, address) external;
 }
 
@@ -154,6 +155,36 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
         token.mint(payer, 10000);
         vm.prank(payer);
         token.approve(address(payment), 10000);
+    }
+
+    function testOfferRejectsNativeValueAndSameSignedPaymentSucceedsWithZeroValue() public {
+        (Plan memory p, OfferT.Acceptance memory q) =
+            _open(true, payer, vm.addr(SIGNER_KEY), 1, _emptyOffer());
+        Primary.ERC20SettlementCandidate memory c = offers.previewExecution(q);
+        bytes memory exact = abi.encodeCall(payment.settleERC20PrimarySaleByPayer, (c, abi.encode(q)));
+        vm.deal(payer, 1);
+        vm.deal(address(payment), 17);
+        vm.deal(address(offers), 23);
+        CurrentERC20OfferEventVm(address(vm)).expectCall(address(token), 0,
+            abi.encodeCall(token.transferFrom, (payer, address(payment), uint256(1000))), 1);
+        vm.prank(payer);
+        (bool ok, bytes memory reason) = address(offers).call{value: 1}(
+            abi.encodeCall(offers.executeERC20PreRevenueSingleStep, (c, abi.encode(q))));
+        require(!ok && reason.length == 0, "original nonpayable callback empty revert");
+        _assertUnused(p, q, c, 0);
+        vm.prank(payer);
+        (ok, reason) = address(payment).call{value: 1}(exact);
+        require(!ok && keccak256(reason) == keccak256(abi.encodeWithSelector(
+            StreamERC20PrimarySettlementAdapter.PaymentCallbackFailed.selector)), "unsupported callback value");
+        _assertUnused(p, q, c, 0);
+        require(payer.balance == 1 && address(payment).balance == 17 && address(offers).balance == 23,
+            "no value retained; original native surplus preserved");
+        vm.prank(payer);
+        (ok, reason) = address(payment).call(exact);
+        require(ok, "same signed payment accepts original zero-value route");
+        _assertExecuted(p, q, c, abi.decode(reason, (Primary.PrimarySettlementResult)));
+        require(payer.balance == 1 && address(payment).balance == 17 && address(offers).balance == 23,
+            "zero-value execution preserves native balances");
     }
 
     function testSelectedDirectPayerFundsActualRevenueAndMintsOriginalWork() public {

@@ -66,6 +66,7 @@ contract StreamERC20PrimarySettlementAdapter is
     error PaymentCallbackFailed();
     error PaymentCallbackMalformed(uint256 length);
     error PaymentResultMismatch();
+    error PaymentNativeBalanceMismatch();
     error PermitCapabilityUnavailable(address asset);
     error PermitAuthorizationFailed();
 
@@ -108,7 +109,7 @@ contract StreamERC20PrimarySettlementAdapter is
     function settleERC20PrimarySaleByPayer(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata c,
         bytes calldata data
-    ) external override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
+    ) external payable override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
         _begin(c, data, 0, "");
         if (msg.sender != c.sale.payer) revert InvalidPaymentCandidate();
         return _execute(c, data);
@@ -119,7 +120,7 @@ contract StreamERC20PrimarySettlementAdapter is
         StreamPrimarySettlementTypes.PaymentIntent calldata intent,
         bytes calldata signature,
         bytes calldata data
-    ) external override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
+    ) external payable override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
         _begin(c, data, 1, "");
         if (
             intent.payer != c.sale.payer || intent.asset != c.asset
@@ -143,7 +144,7 @@ contract StreamERC20PrimarySettlementAdapter is
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata c,
         StreamPrimarySettlementTypes.EIP2612PermitAuthorization calldata permit,
         bytes calldata data
-    ) external override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
+    ) external payable override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
         _begin(c, data, 2, abi.encode(permit));
         if (msg.sender != c.sale.payer || block.timestamp > permit.deadline) {
             revert InvalidPaymentCandidate();
@@ -156,7 +157,7 @@ contract StreamERC20PrimarySettlementAdapter is
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata c,
         StreamPrimarySettlementTypes.Permit2TransferAuthorization calldata permit,
         bytes calldata data
-    ) external override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
+    ) external payable override returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
         _begin(c, data, 3, abi.encode(permit));
         if (msg.sender != c.sale.payer || block.timestamp > permit.deadline) {
             revert InvalidPaymentCandidate();
@@ -210,6 +211,7 @@ contract StreamERC20PrimarySettlementAdapter is
         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
         bytes memory executionData
     ) private returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result) {
+        uint256 originalNativeBalance = address(this).balance - msg.value;
         phase = Phase.AUTHENTICATED;
         bytes memory data = abi.encodeCall(
             IStreamERC20SaleExecution.executeERC20PreRevenueSingleStep, (c, executionData)
@@ -220,7 +222,7 @@ contract StreamERC20PrimarySettlementAdapter is
         uint256 size;
         address target = c.saleAdapter;
         assembly ("memory-safe") {
-            ok := call(gas(), target, 0, add(data, 32), mload(data), add(response, 32), 416)
+            ok := call(gas(), target, callvalue(), add(data, 32), mload(data), add(response, 32), 416)
             size := returndatasize()
         }
         if (!ok) revert PaymentCallbackFailed();
@@ -249,6 +251,9 @@ contract StreamERC20PrimarySettlementAdapter is
             _balance(c.asset, address(this), cap) != _active.originalSelf
                 || _balance(c.asset, primarySaleSettlement, cap) != _active.originalRecorder
         ) revert SettlementAmountMismatch(c.asset);
+        if (address(this).balance != originalNativeBalance) {
+            revert PaymentNativeBalanceMismatch();
+        }
         delete _active;
         delete _permitInput;
         phase = Phase.IDLE;
