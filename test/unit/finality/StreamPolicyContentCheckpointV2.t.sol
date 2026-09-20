@@ -150,6 +150,7 @@ contract PolicyOutputVersionsBoundary is TerminalRouteVersions {
     function requireCurrentCitation(bytes32 k)
         external
         view
+        override
         returns (address, bytes32, bytes32, bytes4)
     {
         require(admitted && k == key, "separate current citation admission");

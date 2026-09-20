@@ -220,6 +220,7 @@ contract StaticRouteVersions {
     function requireCurrentCitation(bytes32 k)
         external
         view
+        virtual
         returns (address, bytes32, bytes32, bytes4)
     {
         if (
