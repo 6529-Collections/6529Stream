@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[COLLECTION policy V2 finality and acquisition V8](../../docs/museum-policy-finality-v8.md)
+retains original policy/readiness rows, complete inventory and output manifests,
+snapshot/reference payloads and six STATIC component preimages. It preserves
+title V5 inputs, reconciles twelve sources and retains explicit limits on
+historical Core/metadata facts, terminal admission and complete authority.
+
 [Scoped STATIC finality and acquisition V7](../../docs/museum-scoped-static-finality-v7.md)
 retains original TOKEN/RELEASE/SEASON snapshots, complete membership and ordered
 output hash rows, with original governance inputs and a token proof. It preserves

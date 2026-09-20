@@ -86,11 +86,15 @@ jobs:
           python -m tools.metadata.acquisition_governance_transactions_v1 --check
           python -m tools.metadata.acquisition_scoped_static_finality_v1 --check
           python -m tools.metadata.acquisition_packet_v7 --check
+          python -m tools.metadata.acquisition_policy_collection_finality_v2 --check
+          python -m tools.metadata.acquisition_packet_v8 --check
       - name: Test scoped STATIC finality and V7 schemas
         run: python -m unittest tools.metadata.test_acquisition_scoped_static_finality_v1 tools.metadata.test_acquisition_packet_v7 -v
 
       - name: Test offline preservation packages and reference metrics
         run: python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v
+      - name: Test COLLECTION policy V2 finality and V8 schemas
+        run: python -m unittest tools.metadata.test_acquisition_policy_collection_finality_v2 tools.metadata.test_acquisition_packet_v8 -v
       - name: Test offline validation and export
         run: python -m unittest discover -s tools/museum -t . -p "test_*.py" -v
       - name: Check schema generation

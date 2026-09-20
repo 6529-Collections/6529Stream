@@ -5,6 +5,13 @@ independent JSON fixtures for the developing typed record consumers. The
 definitions are proposed registration inputs; generated files are not evidence
 of onchain registration or accepted finality.
 
+[COLLECTION policy V2 finality and packet V8](../../docs/museum-policy-finality-v8.md)
+add original policy, snapshot/reference and STATIC preimage evidence without
+changing earlier definition bytes. Generate/check only the new definitions
+with `python -m tools.metadata.acquisition_policy_collection_finality_v2` and
+`python -m tools.metadata.acquisition_packet_v8`, each supporting `--check`.
+Historical authority and complete acquisition coverage remain unresolved.
+
 [Scoped STATIC finality and packet V7](../../docs/museum-scoped-static-finality-v7.md)
 add a distinct TOKEN/RELEASE/SEASON branch with original snapshot, complete
 membership, selection and output hash rows. Generate/check the new definitions

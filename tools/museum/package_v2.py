@@ -226,6 +226,16 @@ def verify_package(directory, expected_manifest_hash):
         from .public_governance_transaction_capture import verify
         from .bagit import read_tree
         return verify(read_tree(directory), expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "acquisition_policy_finality_v8_assembly":
+        from .acquisition_policy_finality_v8 import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
+
+    if isinstance(value, dict) and value.get("mode") == "public_policy_finality_capture_v2":
+        from .public_policy_finality_capture_v2 import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
+
     if isinstance(value, dict) and value.get("mode") == "acquisition_finality_v7_assembly":
         from .acquisition_finality_v7 import verify
         from .bagit import read_tree
