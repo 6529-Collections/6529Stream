@@ -18,17 +18,27 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `86074453`. All 2,417 sources pass the combined
-ABI/type/storage check in 22.891 seconds (ABI78). This is source compatibility,
+Latest Solidity source checkpoint: `6ad73f77`. All 2,421 sources pass the combined
+ABI/type/storage check in 23.391 seconds (ABI80). This is source compatibility,
 not whole-system runtime acceptance. Original RC1 remains unchanged.
 
+- Core replacement now requires exact complete-policy import readiness in addition
+  to pending-request coverage (`4b6e05ea`, [ADR0052](../docs/adr/0052-entropy-policy-succession.md)).
+  Eight focused cases and two256-input fuzz properties pass; all16 captured
+  production products fit, including Core19,630/23,068 runtime/init bytes.
+  Exact source/runtime/pointer-revision/inventory binding, malformed responses
+  and empty inventory are covered by typed boundaries. Real successor import,
+  activation and governed cutover remain to finish and execute.
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling
   (`128c8378`) passes 28 focused cases and two 256-input fuzz properties; all
   52 nonempty production products in that capture fit. These sale tests use
   typed surrounding Core/Coordinator boundaries. Actual current-stack terminal
   mint/distribution/Safe cases (`3baa6c13`, import correction `1a4858fd`) are
-  independently source-reviewed and type-checked; their ten cases have not run.
+  independently source-reviewed and type-checked; their ten cases have not run. Actual INSTANT8 (`5af68676`/`6ad73f77`) is
+  also independently reviewed and type-checked. Its full-current campaign is
+  held at preflight because the actual Router exceeds deployment limits; a
+  behavior/storage-preserving factoring repair is being designed.
 - Explicit terminal metadata/STATIC and V2 policy-source/readiness consumers
   (`86074453`) pass 28 focused native cases, with independent source/oracle
   review and exact source/artifact evidence. All eleven selected products fit.
@@ -57,9 +67,11 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   `fd7dc021`) is source-integrated; its nine cases await native execution.
 - Single-frame reference commitments (`78fd429f`) pass 21 isolated cases and
   three 256-input fuzz properties. The fair full-commitment comparison saves
-  1,175,817 gas. One actual-publisher native13 retry is running with the original
-  graph and limits. Native12's five passes/four failures remain the latest
-  completed actual-publisher result; isolated savings do not close capacity.
+  1,175,817 gas. Actual-publisher native13
+  completes with five passes/four failures: all four previously blocked cases
+  now publish within the original limit (15,664,912 gas including intrinsic),
+  then fail in the supplement path. That later failure is being traced.
+  Exact source/artifact attestation is pending; complete-flow acceptance remains open.
 
 Active builds cover exact legacy/explicit entropy-policy successor import and
 origin relay, complete recovery rewinds, V2 output/finality, scoped inventories,

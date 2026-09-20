@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `86074453`: INSTANT, terminal commerce/metadata, current-notice recovery, joined Artist capacity, public Museum capture and clients integrated. ABI78 has2,417 sources/zero errors; root clients1,133 pass. Runtime acceptance remains scoped. |
+| Source checkpoint | `6ad73f77`: INSTANT, terminal commerce/metadata, current-notice recovery, joined Artist capacity, public Museum capture and clients integrated. ABI80 has2,421 sources/zero errors; root clients1,133 pass. Runtime acceptance remains scoped. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,13 +29,14 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `86074453`: ABI78 checks 2,417 sources with zero errors.
+Latest intake is `6ad73f77`: ABI80 checks 2,421 sources with zero errors.
 Root clients pass 1,133 cases; scoped commerce passes28 plus two256-input fuzz
 properties. INSTANT producer47 and terminal-consumer28 native passes retain
 separate documented typed boundaries. Joined Artist capacity repair fits all11
 selected products, including Registry24,018/Coordinator24,333/Identity24,179.
-Actual current terminal10 and three-version Safe9 are source-integrated and
-reviewed, with native execution pending. RC1 and its evidence remain immutable.
+Actual current terminal10, INSTANT8 and three-version Safe9 are source-integrated
+and reviewed, with native execution pending. Core policy-import admission
+(`4b6e05ea`) passes8 typed cases/two256-input properties; all16 products fit. RC1 and its evidence remain immutable.
 
 Current ownership supersedes older historical next-batch statements below:
 
@@ -45,9 +46,10 @@ Current ownership supersedes older historical next-batch statements below:
 - B: finite terminal consumer batch21a is integrated as86074453; build distinct
   V2 current output/checkpoint/snapshot/reference/locked-finality flow, retaining
   original op17 and separate SNAPSHOT/IDENTITY versus CURATOR authority.
-- C: sole actual-publisher native13 (session79568), exact native12 graph plus
-  Writerb986/e8, original caps. Selected Writer gate fits19,106/19,138 bytes.
-  Keep scoped inventory implementation moving while the frozen run executes.
+- C: actual-publisher native13 is complete5PASS/4FAIL. Publication now fits
+  at15,664,912 including intrinsic; failure moved to the supplement path.
+  Attest exact artifacts and trace one cached failure without compilation.
+  Keep scoped inventory/archive/multi-scope provider implementation moving.
 - Mint: faithful legacy and explicit policy import, complete inventory and
   ultimate-origin provider relay. Root owns Core admission and atomic activation.
 - Burn: complete six-family non-guardian V3 rewinds after integrated current
@@ -58,10 +60,11 @@ Current ownership supersedes older historical next-batch statements below:
   The first actual RC1 RPC attempt failed on pruned logs, with no capture output.
 - Clients: current adjudication/current-notice op35 workflow pinned to3ac39b;
   collection-policy and INSTANT callers are integrated and tested. No inferred V3.
-- Testing: independently review authored actual INSTANT8, then prepare one exact
-  frozen terminal10+INSTANT8 native campaign from the joined source. Inspect
-  reusable provenance-matched caches before any long compiler; root coordinates
-  launch. Continue independent actual joins while frozen tests run.
+- Testing: reviewed INSTANT8 plus bootstrap correction are integrated. The
+  frozen18-case native plan is prepared but must not launch against the known
+  Router44,008/49,781 size failure. Prepare a mechanical Router factoring plan
+  preserving all storage/ABI/behavior, excluding the held cache/storage proposal.
+  Root coordinates shared Router writes with B before a new matched capture.
 
 Root owns technical decisions, shared interfaces, integration and candidate
 closure. No new funding or onchain action is needed. Source integration,
