@@ -276,12 +276,13 @@ contract StreamConditionSourcesTest is StreamGovernanceBootstrapHarness, Officia
         catalog.requireSourceSet(oldCount, oldHead);
         StreamConditionSources foreign =
             new StreamConditionSources(address(b.core), address(b.executor));
+        bytes32 foreignHead = foreign.sourceSetHashAt(0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamConditionSources.ConditionSourceSetChanged.selector, count, head
             )
         );
-        catalog.requireSourceSet(count, foreign.sourceSetHashAt(0));
+        catalog.requireSourceSet(count, foreignHead);
     }
 
     function testDirectRootAndOutsiderCannotAppend() public {
@@ -455,7 +456,7 @@ contract StreamConditionSourcesTest is StreamGovernanceBootstrapHarness, Officia
         address first = _host(IStreamConditionSources.Lane.OWNER);
         _append(first, IStreamConditionSources.Lane.OWNER, 0);
         (uint64 count, bytes32 head) = catalog.sourceSetHead();
-        uint256 original = block.chainid;
+        uint256 original = catalog.deploymentChainId();
         vm.chainId(original + 1);
         address next = _host(IStreamConditionSources.Lane.OWNER);
         vm.expectRevert(

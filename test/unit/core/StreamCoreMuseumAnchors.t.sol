@@ -405,7 +405,7 @@ contract StreamCoreMuseumAnchorsTest is CharacterizationTestBase {
         );
     }
 
-    function testFailedCompletionRollsBackAllocationAndLeavesDeclarationAvailable() public {
+    function testCompletionFailureRollsBackAllocationAndLeavesDeclarationAvailable() public {
         facade.setCallback(true, true);
         vm.expectRevert(abi.encodeWithSelector(StreamCore.EntropyRegistrationFailed.selector));
         manager.mint(target, 1, address(0xBEEF), "", keccak256("failed callback"));
