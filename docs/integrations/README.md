@@ -10,6 +10,7 @@ deployment evidence.
 | Publish original native reference renders and retained runtime evidence | [Native reference render](../guides/native-reference-render.md) |
 | Retain and validate exact independent finality manifest bytes | [Finality input manifests](finality-input-manifests.md) |
 | Discover the fixed required finality components | [Fixed finality discovery](fixed-finality-discovery.md) |
+| Construct original current-authority policy sources and seal a deferred collection profile | [Current-authority policy binding](current-authority-deferred-policy.md) |
 | Preserve and verify large external runtime objects | [External object archive](../guides/external-object-archive.md) |
 | Publish and retrieve retained native collection snapshots | [Native onchain snapshots](native-onchain-snapshots.md) |
 | Freeze and serve every original entropy source through one route | [Original entropy source sets](original-entropy-source-sets.md) |

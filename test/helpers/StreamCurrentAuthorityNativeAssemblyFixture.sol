@@ -4011,7 +4011,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         return StreamCurrentAuthorityGraphCreation.code(kind);
     }
 
-    function _afterCurrentAuthorityCoordinatorDeployment() internal override {
+    function _afterCurrentAuthorityCoordinatorDeployment() internal virtual override {
         _installAssemblyArtistPointer();
     }
 

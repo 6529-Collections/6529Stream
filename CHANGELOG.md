@@ -40,6 +40,17 @@
 - Source/type and test-instrument size checks pass. Current-stack execution,
   callback gas acceptance and inner failure traces remain pending.
 
+## Original current-authority scoped-policy profiles
+
+- Add distinct current-authority scoped-policy factory, provider and Discovery
+  profiles with exact original archives and resolver-bound inventory plans.
+- Add a separate deferred collection-policy capability to break the original
+  mint/deployment constructor cycle. The original Executor seals actual sources
+  once through the exact terminal Governance action; pending policy reads fail.
+- Author genuine original graph construction and binding cases alongside focused
+  profile, rollback and source-selection cases. Native execution, deployment
+  size, gas and complete scoped STATIC finality evidence remain pending.
+
 ## Metric currentness temporary memory
 
 - Reclaim dead canonical evidence and complete context-preimage buffers after

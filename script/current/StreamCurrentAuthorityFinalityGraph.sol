@@ -540,7 +540,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
         v[8] = _finalityValue(base, "deploymentChainId", bytes32(block.chainid));
         v[9] = _finalityValue(base, "readGas", bytes32(uint256(500000)));
-        v[10] = _finalityValue(base, "sourceGas", bytes32(uint256(4000000)));
+        v[10] = _finalityValue(base, "sourceGas", bytes32(_assemblyComponentSourceGas()));
         v[11] = _finalityValue(base, "routerModuleVersion", assemblyRouter.streamModuleVersion());
         (, bytes32 routerManifest) = assemblyRouter.streamModuleManifest();
         (, bytes32 metadataManifest) = assemblyMetadata.streamModuleManifest();
@@ -555,17 +555,10 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
             "metadataModuleManifestHash",
             metadataManifest
         );
-        string[] memory parents = new string[](1);
-        parents[0] = base;
-        assemblyRuntimes[uint256(Late.PROVIDER)] = _productRuntime(
-            "StreamCurrentAuthorityNativeEvidenceProvider",
-            parents,
-            _authorityCreation(
-                StreamCurrentAuthorityGraphCreation.Kind
-                .StreamCurrentAuthorityNativeEvidenceProvider
-            ),
-            v
-        );
+        (string memory providerName, string[] memory parents, bytes memory providerCreation) =
+            _assemblyProviderTemplate();
+        assemblyRuntimes[uint256(Late.PROVIDER)] =
+            _productRuntime(providerName, parents, providerCreation, v);
         v = new RuntimeValue[](6);
         base = "StreamCoreFinalityAdapter";
         v[0] = _finalityValue(base, "core", _addressWord(address(assemblyCore)));
@@ -584,7 +577,12 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
             _graphCreation(StreamCurrentGraphCreation.Kind.StreamCoreFinalityAdapter),
             v
         );
-        base = "StreamFinalityLineageCurrentDiscovery";
+        (
+            string memory discoveryName,
+            string[] memory discoveryParents,
+            bytes memory discoveryCreation
+        ) = _assemblyDiscoveryTemplate();
+        base = discoveryName;
         v = new RuntimeValue[](4);
         v[0] = _finalityValue(base, "core", _addressWord(address(assemblyCore)));
         v[1] = _finalityValue(base, "metadataHost", _addressWord(address(assemblyMetadata)));
@@ -592,14 +590,8 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
             base, "scopeEvidenceProvider", _addressWord(assemblyLate[uint256(Late.PROVIDER)])
         );
         v[3] = _finalityValue(base, "deploymentChainId", bytes32(block.chainid));
-        assemblyRuntimes[uint256(Late.DISCOVERY)] = _productRuntime(
-            base,
-            new string[](0),
-            _authorityCreation(
-                StreamCurrentAuthorityGraphCreation.Kind.StreamFinalityLineageCurrentDiscovery
-            ),
-            v
-        );
+        assemblyRuntimes[uint256(Late.DISCOVERY)] =
+            _productRuntime(base, discoveryParents, discoveryCreation, v);
         _predictAssemblyRegistryRuntime();
         _predictAssemblyCoordinatorRuntime();
         assemblyRuntimes[uint256(Late.WORK)] = _selectorRuntime(
@@ -866,7 +858,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         string[] memory parents,
         bytes memory creation,
         RuntimeValue[] memory values
-    ) private view returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         string[] memory declarations = new string[](parents.length + 1);
         declarations[0] = _artifact(name);
         for (uint256 i; i < parents.length; ++i) {
@@ -880,7 +872,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
     }
 
     function _finalityValue(string memory name, string memory variable, bytes32 value)
-        private
+        internal
         pure
         returns (RuntimeValue memory)
     {
@@ -892,7 +884,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         string memory name,
         string memory variable,
         bytes32 value
-    ) private pure returns (RuntimeValue memory) {
+    ) internal pure returns (RuntimeValue memory) {
         return RuntimeValue(
             string.concat("smart-contracts/domains/", domain, "/", name, ".sol"),
             name,
@@ -901,7 +893,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
     }
 
-    function _addressWord(address value) private pure returns (bytes32) {
+    function _addressWord(address value) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(value)));
     }
 
@@ -947,7 +939,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         d.referenceGas = 12000000;
     }
 
-    function _assemblyKnownCodeHash(address target) private view returns (bytes32 hash) {
+    function _assemblyKnownCodeHash(address target) internal view returns (bytes32 hash) {
         require(target != address(0), "no zero assembly dependency");
         if (target == assemblyCoordinatorAddress) {
             require(assemblyCoordinatorRuntime.length != 0, "Coordinator runtime already derived");
@@ -1044,8 +1036,8 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         }
         c.chainId = block.chainid;
         c.readGas = 500000;
-        c.sourceGas = 16000000;
-        c.componentSourceGas = 4000000;
+        c.sourceGas = _assemblyProviderSourceGas();
+        c.componentSourceGas = _assemblyComponentSourceGas();
         c.inventoryDependencyHash = AuthorityInventory.dependencyHash(
             AuthorityInventory.INVENTORY_PROFILE,
             _assemblyInventoryDependencies(),
@@ -1059,10 +1051,77 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         _afterCurrentAuthorityCoordinatorDeployment();
         _requireCurrentGraphSelections();
         _deployAssemblyFinalitySelectors(c);
+        _afterCurrentAuthoritySelectorsDeployment(c);
     }
 
     /// @dev Scenario hosts may execute real pointer governance here; the selection guard follows.
     function _afterCurrentAuthorityCoordinatorDeployment() internal virtual { }
+
+    /// @dev Additive original-profile recipes may install their own fixed sources before the
+    /// provider, then their late preservation hosts after the original selectors. These hooks
+    /// never replace an already deployed provider or an already locked presentation anchor.
+    function _afterCurrentAuthoritySelectorsDeployment(
+        StreamFinalityNativeProviderReads.Config memory
+    ) internal virtual { }
+
+    function _assemblyProviderTemplate()
+        internal
+        view
+        virtual
+        returns (string memory name, string[] memory parents, bytes memory creation)
+    {
+        name = "StreamCurrentAuthorityNativeEvidenceProvider";
+        parents = new string[](1);
+        parents[0] = "StreamFinalityRouterEvidenceProvider";
+        creation = _authorityCreation(
+            StreamCurrentAuthorityGraphCreation.Kind.StreamCurrentAuthorityNativeEvidenceProvider
+        );
+    }
+
+    function _assemblyDiscoveryTemplate()
+        internal
+        view
+        virtual
+        returns (string memory name, string[] memory parents, bytes memory creation)
+    {
+        name = "StreamFinalityLineageCurrentDiscovery";
+        parents = new string[](0);
+        creation = _authorityCreation(
+            StreamCurrentAuthorityGraphCreation.Kind.StreamFinalityLineageCurrentDiscovery
+        );
+    }
+
+    function _assemblyProviderArguments(StreamFinalityNativeProviderReads.Config memory c)
+        internal
+        virtual
+        returns (bytes memory)
+    {
+        return abi.encode(c);
+    }
+
+    function _assemblyDiscoveryArguments(StreamFinalityDiscoveryTypes.Configuration memory c)
+        internal
+        virtual
+        returns (bytes memory)
+    {
+        return abi.encode(c);
+    }
+
+    function _assemblyProviderSourceGas() internal view virtual returns (uint256) {
+        return 16000000;
+    }
+
+    function _assemblyComponentSourceGas() internal view virtual returns (uint256) {
+        return 4000000;
+    }
+
+    function _assemblyDiscoveryComponentGas() internal view virtual returns (uint32) {
+        return 12000000;
+    }
+
+    function _assemblyFinalityComponentGas() internal view virtual returns (uint256) {
+        return 30000000;
+    }
 
     function _deployAssemblyFinalityCoordinator()
         private
@@ -1070,15 +1129,9 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
     {
         _predictAssemblyLateRuntimes();
         c = _assemblyProviderConfiguration();
+        (,, bytes memory providerCreation) = _assemblyProviderTemplate();
         assemblyProvider = StreamCurrentAuthorityNativeEvidenceProvider(
-            _deployAssemblyLate(
-                Late.PROVIDER,
-                _authorityCreation(
-                    StreamCurrentAuthorityGraphCreation.Kind
-                    .StreamCurrentAuthorityNativeEvidenceProvider
-                ),
-                abi.encode(c)
-            )
+            _deployAssemblyLate(Late.PROVIDER, providerCreation, _assemblyProviderArguments(c))
         );
         assemblyAuthorityResolver = StreamArtistCurrentAuthorityResolver(
             _deploySlot(
@@ -1150,16 +1203,11 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         d.finalityRegistryCodeHash = keccak256(assemblyRuntimes[uint256(Late.REGISTRY)]);
         d.routerAdapters = assemblyRouterAdapters;
         d.readGas = 500000;
-        d.componentGas = 12000000;
+        d.componentGas = _assemblyDiscoveryComponentGas();
         d.entropyGas = 8000000;
+        (,, bytes memory discoveryCreation) = _assemblyDiscoveryTemplate();
         assemblyDiscovery = StreamFinalityLineageCurrentDiscovery(
-            _deployAssemblyLate(
-                Late.DISCOVERY,
-                _authorityCreation(
-                    StreamCurrentAuthorityGraphCreation.Kind.StreamFinalityLineageCurrentDiscovery
-                ),
-                abi.encode(d)
-            )
+            _deployAssemblyLate(Late.DISCOVERY, discoveryCreation, _assemblyDiscoveryArguments(d))
         );
         StreamFinalityDeploymentConfiguration memory deployment =
             StreamFinalityDeploymentConfiguration(
@@ -1181,7 +1229,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
                     address(assemblyArtists),
                     address(assemblyExecutor),
                     address(assemblyDiscovery),
-                    _gas("FINALITY_COMPONENT_READ_GAS", 30000000, 50000, 2),
+                    _gas("FINALITY_COMPONENT_READ_GAS", _assemblyFinalityComponentGas(), 50000, 2),
                     deployment,
                     address(assemblyAuthorityResolver)
                 )
