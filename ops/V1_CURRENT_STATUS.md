@@ -18,51 +18,58 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `5310fc7b`. All 2,381 sources pass the combined
-ABI/type/storage check in 22.656 seconds. This does not establish complete-system
-acceptance. Original RC1 remains unchanged.
+Latest Solidity source checkpoint: `86074453`. All 2,417 sources pass the combined
+ABI/type/storage check in 22.891 seconds (ABI78). This is source compatibility,
+not whole-system runtime acceptance. Original RC1 remains unchanged.
 
-- Explicit Artist-consented entropy configuration and terminal non-random token
-  registration are integrated (`e7b509ca`), with 29 authored cases. Shared
-  immediate sale handling (`2e3744a6`) passes 13 focused cases and 256 fee/refund
-  fuzz inputs against typed Core/Coordinator boundaries. DISABLED charges no
-  reveal fee; ASYNC NOT_REQUIRED retains its declared fee and scope obligations
-  without attempting a token request. Actual-current execution remains pending.
-- Complete original living-record hydration (`75ad082d`) and evidence-bound
-  recovery adjudication V2 (`5310fc7b`) are source-integrated. Independent
-  production reviews are clear; their 20 and 44 authored cases are unexecuted.
-  The joined six-product size check catches Registry 24,919, Coordinator 24,938
-  and Identity 25,760-byte runtimes above EIP-170. The other three selected
-  products fit. The Artist lead owns the three-host repair; earlier separate
-  branch size passes do not establish joined deployability.
-- Current default artwork citations (`84c69bc3`) preserve original token identity
-  and explicit historical render entries. Ten isolated output-codec cases pass.
-  C2PA lifecycle (`1bc06f5b`) and the citation test join (`e1190d7b`) add genuine
-  current admission and old-checkpoint/history drift recipes; they have not run
-  natively. Current-output changes correctly invalidate old checkpoint
-  currentness while retaining its original rows and hashes.
-- Museum original-mint/entropy composition (`1216379d`) passes 41 new root cases;
-  complete selected-rights evidence (`5975396a`) passes 31. These close their
-  stated source-profile fields, not the complete acquisition packet. Their
-  strict genesis-history limit cannot capture current Sepolia; an additive
-  bounded public-chain log/receipt capture profile is being built, with its
-  provider-completeness trust stated explicitly.
-- Combined Artist delegation clients (`318e16e1`) and citation admission/Safe
-  callers (`91a61b68`) pass the joined 1,044-case client package in 38.091 seconds,
-  including generation, build and strict types. The immutable citation fixture
-  check passes. Simulated RPC/receipt tests remain separate from actual Safe
-  execution and operational gas evidence.
-- Actual-publisher native12 retains five passes/four failures. Reusing the decoded
-  publication saves 522,174 gas in the actual call, but final publication still
-  exceeds the original limit. A separate exact encoded-preimage reuse repair is
-  being tested; no cap was raised and no publication success is claimed.
+- LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
+  pass 47 focused native cases on the producer's recorded source. Sale handling
+  (`128c8378`) passes 28 focused cases and two 256-input fuzz properties; all
+  52 nonempty production products in that capture fit. These sale tests use
+  typed surrounding Core/Coordinator boundaries. Actual current-stack terminal
+  mint/distribution/Safe cases (`3baa6c13`, import correction `1a4858fd`) are
+  independently source-reviewed and type-checked; their ten cases have not run.
+- Explicit terminal metadata/STATIC and V2 policy-source/readiness consumers
+  (`86074453`) pass 28 focused native cases, with independent source/oracle
+  review and exact source/artifact evidence. All eleven selected products fit.
+  The capture uses actual components with documented typed boundaries; its
+  original Router still exceeds deployment limits. Full V2 output checkpoints,
+  snapshots, reference publication and locked-finality consumption remain to build.
+- Complete original living-record hydration (`75ad082d`), adjudication V2
+  (`5310fc7b`) and current living-notice recovery (`055f2396`) are source-integrated.
+  Their respective 20, 44 and ten authored cases await runtime acceptance.
+  The joined capacity repair (`6d3e55df`) preserves all 708 old ABI entries and
+  original layouts; all 563 size-input sources match integration. Registry,
+  Coordinator and Identity now fit at 24,018 / 24,333 / 24,179 runtime bytes;
+  all eleven selected products fit. Other held Artist/Router/Estate size issues
+  remain. Complete non-guardian rewinds and advanced hydration are still building.
+- Public-chain Museum RIGHTS/ownership capture (`b5ec1031`) passes 56 root cases;
+  public mint/entropy capture and the pinned RC1 recipe (`7d20df15`) pass 39.
+  These cohorts overlap and are not a distinct combined count. The additive
+  bounded log/receipt profile states provider-log-completeness trust explicitly.
+  An actual RC1 capture reached the public RPC but failed on pruned historical
+  logs; no successful public-chain capture or complete acquisition packet is claimed.
+- Collection-policy clients (`aae07ba6`) and INSTANT/direct-read clients
+  (`be336ace`) pass the joined 1,133-case root package in 38.908 seconds,
+  including generation, build and strict types. Original source profiles remain
+  separate. Simulated RPC/receipt evidence does not prove actual Safe execution.
+  The three-version Safe owner matrix (`f0c55176`, corrected negative oracles
+  `fd7dc021`) is source-integrated; its nine cases await native execution.
+- Single-frame reference commitments (`78fd429f`) pass 21 isolated cases and
+  three 256-input fuzz properties. The fair full-commitment comparison saves
+  1,175,817 gas. One actual-publisher native13 retry is running with the original
+  graph and limits. Native12's five passes/four failures remain the latest
+  completed actual-publisher result; isolated savings do not close capacity.
 
-Current builders continue INSTANT and direct STATIC-compatible entropy reads,
-terminal rendering/finality, current-notice recovery and record rewinds,
-public-chain Museum capture, entropy policy clients and actual Safe cases.
-Personhood linkage is designed; three-host Artist capacity repair has priority.
-Full-v1 remains incomplete; matching runtime, full CI, freeze and testnet evidence
-are still required after implementation stabilizes.
+Active builds cover exact legacy/explicit entropy-policy successor import and
+origin relay, complete recovery rewinds, V2 output/finality, scoped inventories,
+Museum evidence joins, recovery clients and actual-current Safe testing.
+Automatic approval review separately rejected application of the new personhood
+proof helper, citing its identity/security boundary. Those blocked paths remain
+unapplied; a complete corrected inert proposal is being prepared for review.
+Full-v1 remains incomplete. Final current-stack/Safe/fuzz/gas/CI acceptance,
+source freeze and matching new testnet evidence remain required.
+
 
 - Combined multiple-Artist delegation hydration (`588341d2`) is integrated.
   Independent production and all fourteen test-oracle reviews are clear. Root

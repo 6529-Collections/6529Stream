@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `5310fc7b`: explicit entropy, terminal sales, complete original living records, adjudication V2, citation recipes/clients and Museum mint/rights evidence integrated. ABI73 has2,381 sources/zero errors; actual acceptance remains scoped. |
+| Source checkpoint | `86074453`: INSTANT, terminal commerce/metadata, current-notice recovery, joined Artist capacity, public Museum capture and clients integrated. ABI78 has2,417 sources/zero errors; root clients1,133 pass. Runtime acceptance remains scoped. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,37 +29,43 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `5310fc7b` (ABI73, 2,381 sources, zero errors). Root client
-package passes 1,044 cases; new Museum mint/entropy and RIGHTS cohorts pass41/31.
-Root terminal sale helpers pass13 cases plus256 fuzz inputs; only typed surrounding
-Core/Coordinator boundaries were used. The immutable citation fixture also checks.
-Native publisher12 is complete5PASS/4FAIL: 522,174 gas saved, original limit still
-exceeded. C owns an isolated encoded-preimage repair and the preserved scoped
-inventory draft; no native13 is authorized yet.
+Latest intake is `86074453`: ABI78 checks 2,417 sources with zero errors.
+Root clients pass 1,133 cases; scoped commerce passes28 plus two256-input fuzz
+properties. INSTANT producer47 and terminal-consumer28 native passes retain
+separate documented typed boundaries. Joined Artist capacity repair fits all11
+selected products, including Registry24,018/Coordinator24,333/Identity24,179.
+Actual current terminal10 and three-version Safe9 are source-integrated and
+reviewed, with native execution pending. RC1 and its evidence remain immutable.
 
 Current ownership supersedes older historical next-batch statements below:
 
-- A: repair exact joined Registry24,919/Coordinator24,938/Identity25,760 runtime
-  overruns from hydration+adjudication, preserving both interfaces; then implement
-  original-op24 selected personhood/notarization reference proof.
-- B: terminal metadata/STATIC/full-policy finality consumers. New direct source
-  getter is required because original Coordinator read workers delegatecall;
-  Mint owns that producer, B owns the consumer and distinct admission profile.
-- C: encoded publication preimage cost repair and scoped inventory completion.
-- Mint: required LOW_SECURITY INSTANT profile and direct16-word
-  `staticTerminalEntropyFacts` producer. Keep original policy/source domains.
-- Burn: current-notice continuation first; complete six-family non-guardian
-  rewinds follow under a distinct typed plan. Class4 remains required.
-- Museum: usable bounded public-chain filtered-log/receipt history and
-  RIGHTS/ownership capture, preserving original strict profiles and stating
-  provider-log-completeness trust. A owns personhood producer; no duplicate writer.
-- Clients: exact `d7fb4212` collection-policy/Artist consent/governance Safe calls.
-- Testing: independent Safe9 review, then actual-current terminal collection
-  policy/native sale/distribution recipes. Native runs remain source-specific.
+- A: independently reviewed joined Artist capacity and terminal10; preparing
+  complete corrected inert personhood proposal after automatic application
+  rejection. Blocked proof paths remain unapplied. Coordinate later V3 host size.
+- B: finite terminal consumer batch21a is integrated as86074453; build distinct
+  V2 current output/checkpoint/snapshot/reference/locked-finality flow, retaining
+  original op17 and separate SNAPSHOT/IDENTITY versus CURATOR authority.
+- C: sole actual-publisher native13 (session79568), exact native12 graph plus
+  Writerb986/e8, original caps. Selected Writer gate fits19,106/19,138 bytes.
+  Keep scoped inventory implementation moving while the frozen run executes.
+- Mint: faithful legacy and explicit policy import, complete inventory and
+  ultimate-origin provider relay. Root owns Core admission and atomic activation.
+- Burn: complete six-family non-guardian V3 rewinds after integrated current
+  living-notice recovery. Coordinate additive host forwarding with A/root;
+  class4 and advanced authority hydration remain required.
+- Museum: next required institutional/examination source join from actual built
+  producers; public RIGHTS/ownership/mint capture and RC1 recipe are integrated.
+  The first actual RC1 RPC attempt failed on pruned logs, with no capture output.
+- Clients: current adjudication/current-notice op35 workflow pinned to3ac39b;
+  collection-policy and INSTANT callers are integrated and tested. No inferred V3.
+- Testing: independently review authored actual INSTANT8, then prepare one exact
+  frozen terminal10+INSTANT8 native campaign from the joined source. Inspect
+  reusable provenance-matched caches before any long compiler; root coordinates
+  launch. Continue independent actual joins while frozen tests run.
 
-Root owns common interfaces, integration and joined size/acceptance. No new
-funding or onchain action is needed. Remaining full-feature implementation,
-latest current Safe/fuzz/gas/CI, source freeze and matching testnet are required.
+Root owns technical decisions, shared interfaces, integration and candidate
+closure. No new funding or onchain action is needed. Source integration,
+focused tests, operational capacity and full release acceptance remain distinct.
 
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329
