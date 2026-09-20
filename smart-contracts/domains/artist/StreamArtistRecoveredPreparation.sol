@@ -125,20 +125,22 @@ library StreamArtistRecoveredPreparation {
         ) {
             if (context.hasContent) context.features |= RH.CONTENT_CONSENTS;
             if (context.hasGenerations) {
-                context.consent = GenerationStage.content(
+                context.consent = GenerationStage.contentWithAuthority(
                     c.source.owners[6],
                     prepared.query,
                     RH.ownerProvenance(c.provenance, 6),
                     context.economics,
                     royaltyFreezes,
-                    context.generations
+                    context.generations,
+                    hasIdentityDelegations
                 );
-                GenerationStage.contentFacts(
+                GenerationStage.contentFactsWithAuthority(
                     context.identity,
                     context.consent,
                     prepared.query,
                     c.provenance,
-                    attestationRecords
+                    attestationRecords,
+                    context.generations
                 );
             } else {
                 context.consent = ConsentStage.content(

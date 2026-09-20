@@ -24,6 +24,10 @@ import {
     StreamArtistRecoveredGenerationBaseConsents as GenerationBase
 } from "./StreamArtistRecoveredGenerationBaseConsents.sol";
 
+import {
+    StreamArtistRecoveredGenerationDelegatedConsents as GenerationDelegated
+} from "./StreamArtistRecoveredGenerationDelegatedConsents.sol";
+
 /// @notice Fixed typed stage of recovered-authority preparation.
 /// @dev Intermediate bytes are ABI encodings of the named complete bundle, never caller-selected calls.
 library StreamArtistRecoveredPreparationConsents {
@@ -54,6 +58,12 @@ library StreamArtistRecoveredPreparationConsents {
         AH.Query memory query,
         RH.OwnerProvenance memory provenance
     ) public pure returns (bytes memory) {
+        if (GenerationDelegated.tagged(raw)) {
+            (ContentConsents.Bundle memory item, uint64 generation, uint8 mode) =
+                GenerationDelegated.decode(query, provenance, raw);
+            if (GenerationDelegated.hasContent(item)) revert RH.InvalidRecoveredHydrationProfile();
+            return GenerationDelegated.encode(item, query, provenance, generation, mode);
+        }
         ContentConsents.Bundle memory b = abi.decode(raw, (ContentConsents.Bundle));
         return GenerationBase.encode(b, query, provenance, GenerationBase.generation(b));
     }
@@ -64,6 +74,14 @@ library StreamArtistRecoveredPreparationConsents {
         AH.Query memory query,
         RH.OwnerProvenance memory provenance
     ) public pure returns (bytes memory) {
+        if (GenerationDelegated.tagged(raw)) {
+            (ContentConsents.Bundle memory item, uint64 generation, uint8 mode) =
+                GenerationDelegated.decode(query, provenance, raw);
+            if (hasContent != GenerationDelegated.hasContent(item)) {
+                revert RH.InvalidRecoveredHydrationProfile();
+            }
+            return GenerationDelegated.encode(item, query, provenance, generation, mode);
+        }
         if (hasContent) {
             ContentConsents.Bundle memory b = abi.decode(raw, (ContentConsents.Bundle));
             uint64 generation = Generation.generation(b);

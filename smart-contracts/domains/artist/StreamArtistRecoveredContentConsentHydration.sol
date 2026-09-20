@@ -57,6 +57,10 @@ import {
     StreamArtistRecoveredGenerationBaseConsents as GenerationBase
 } from "./StreamArtistRecoveredGenerationBaseConsents.sol";
 
+import {
+    StreamArtistRecoveredGenerationDelegatedConsents as GenerationDelegated
+} from "./StreamArtistRecoveredGenerationDelegatedConsents.sol";
+
 /// @notice Complete recovered singleton Consent14/15/16/17/20/21 history.
 /// @dev Original17/20/21 records omit signer/nonce/time. Their fixed-owner maps, native entries
 /// and replay admissions are retained without inventing missing preimages or current eligibility.
@@ -80,7 +84,8 @@ library StreamArtistRecoveredContentConsentHydration {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 6);
         return (h.requiredFeatures & RH.CONTENT_CONSENTS) != 0
             || ((h.requiredFeatures & RH.BINDING_GENERATIONS) != 0
-                && GenerationBase.tagged(p.semanticState));
+                && (GenerationBase.tagged(p.semanticState)
+                    || GenerationDelegated.tagged(p.semanticState)));
     }
 
     function collect(
@@ -132,15 +137,28 @@ library StreamArtistRecoveredContentConsentHydration {
         bytes memory outer
     ) public returns (Bundle memory result) {
         (RH.ExportHeader memory header, Payload.Payload memory payload) = Payload.decode(outer, 6);
+        bool delegatedGeneration = GenerationDelegated.tagged(payload.semanticState);
         bool baseOnly = GenerationBase.tagged(payload.semanticState);
         if (
             payload.nonces.length != 0
-                || (baseOnly
-                        ? (header.requiredFeatures & RH.CONTENT_CONSENTS) != 0
-                        : (header.requiredFeatures & RH.CONTENT_CONSENTS) == 0)
+                || (!delegatedGeneration
+                    && (baseOnly
+                            ? (header.requiredFeatures & RH.CONTENT_CONSENTS) != 0
+                            : (header.requiredFeatures & RH.CONTENT_CONSENTS) == 0))
         ) _invalid();
         uint64 generation = 1;
-        if (baseOnly) {
+        if (delegatedGeneration) {
+            if (
+                (header.requiredFeatures & (RH.BINDING_GENERATIONS | RH.DELEGATED_CONSENT))
+                    != (RH.BINDING_GENERATIONS | RH.DELEGATED_CONSENT)
+            ) _invalid();
+            (result, generation,) =
+                GenerationDelegated.decode(q, payload.provenance, payload.semanticState);
+            if (
+                ((header.requiredFeatures & RH.CONTENT_CONSENTS) != 0)
+                    != GenerationDelegated.hasContent(result)
+            ) _invalid();
+        } else if (baseOnly) {
             if ((header.requiredFeatures & RH.BINDING_GENERATIONS) == 0) _invalid();
             (result, generation) =
                 GenerationBase.decode(q, payload.provenance, payload.semanticState);

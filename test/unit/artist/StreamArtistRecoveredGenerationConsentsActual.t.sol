@@ -299,15 +299,33 @@ contract StreamArtistRecoveredGenerationConsentsActualTest is
         _gcAssert(suite, contents.length, freezes.length);
     }
 
-    function testGenerationConsentUnusedGrantStillRefusesUnsupportedComposition() external {
+    function testGenerationConsentUnusedGrantUsesExplicitCompositionWithoutDroppingContent()
+        external
+    {
         _gcBaseline(1);
-        _raGrant();
+        bytes32 grant = _raGrant();
+        bytes32 original = keccak256(abi.encode(ingress.delegationRecord(grant)));
         Successor memory next = _rhCutover();
         RH.Request memory request = _gcRequest();
-        bytes32 before_ = _rhDestinationHash(next);
-        avm.expectRevert(T.UnsupportedProfile.selector);
-        this.gcPrepare(next.coordinator.suiteConfiguration(), request, royaltyTerms);
-        require(_rhDestinationHash(next) == before_, "no unused grant omitted to fit profile");
+        Commit.Prepared memory p =
+            this.gcPrepare(next.coordinator.suiteConfiguration(), request, royaltyTerms);
+        (RH.ExportHeader memory h, Payload.Payload memory payload) =
+            Payload.decode(p.data[6].typedState, 6);
+        require(
+            (h.requiredFeatures & 320) == 320
+                && abi.decode(payload.semanticState, (bytes32))
+                    == keccak256("6529STREAM_ARTIST_RECOVERED_GENERATION_DELEGATED_CONSENTS_V1"),
+            "complete grant and content tag"
+        );
+        request.expectedSemanticInventory = Prepared.inventory(p);
+        // The fixed content recipe carries the exhaustive original20 witness set.
+        Recovered(address(next.registry))
+            .hydrateRecoveredArtistAuthorityWithConsents(request, royaltyTerms);
+        _gcAssert(next.coordinator.suiteConfiguration(), contents.length, freezes.length);
+        require(
+            keccak256(abi.encode(next.registry.delegationRecord(grant))) == original,
+            "exact unused grant retained beside content"
+        );
     }
 
     function gcPrepare(

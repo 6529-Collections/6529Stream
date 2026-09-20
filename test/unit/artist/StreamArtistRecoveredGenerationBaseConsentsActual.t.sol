@@ -180,8 +180,8 @@ contract StreamArtistRecoveredGenerationBaseConsentsActualTest is
         _gbTransfer(last);
         require(
             keccak256(
-                    abi.encode(Sales(original.owners[6]).saleConsentRecord(saleRows[0].recordHash))
-                ) == originalSale,
+                abi.encode(Sales(original.owners[6]).saleConsentRecord(saleRows[0].recordHash))
+            ) == originalSale,
             "original A immutable"
         );
         _gbAssert(last.coordinator.suiteConfiguration());
@@ -301,16 +301,27 @@ contract StreamArtistRecoveredGenerationBaseConsentsActualTest is
         _gbAssert(next.coordinator.suiteConfiguration());
     }
 
-    function testGenerationBaseUnusedGrantCannotBeProjectedAway() external {
+    function testGenerationBaseUnusedGrantSelectsExplicitCompleteComposition() external {
         _gbMixed(false);
-        _raGrant();
+        bytes32 grant = _raGrant();
+        bytes32 original = keccak256(abi.encode(ingress.delegationRecord(grant)));
         Successor memory next = _rhCutover();
-        RH.Request memory request = _gbRequest();
-        bytes32 before_ = _rhDestinationHash(next);
-        avm.expectRevert(T.UnsupportedProfile.selector);
-        this.gbPrepare(next.coordinator.suiteConfiguration(), request);
+        (RH.Request memory request, Commit.Prepared memory p) = _gbPrepare(next);
+        (RH.ExportHeader memory h, Payload.Payload memory payload) =
+            Payload.decode(p.data[6].typedState, 6);
         require(
-            _rhDestinationHash(next) == before_, "unsupported grant leaves all owners unchanged"
+            (h.requiredFeatures & 64) != 0
+                && abi.decode(payload.semanticState, (bytes32))
+                    == keccak256("6529STREAM_ARTIST_RECOVERED_GENERATION_DELEGATED_CONSENTS_V1"),
+            "complete unused grant selects explicit new tag"
+        );
+        avm.expectRevert(RH.InvalidRecoveredHydrationProfile.selector);
+        this.gbDecode(p.query, payload.provenance, payload.semanticState);
+        Recovered(address(next.registry)).hydrateRecoveredArtistAuthority(request);
+        _gbAssert(next.coordinator.suiteConfiguration());
+        require(
+            keccak256(abi.encode(next.registry.delegationRecord(grant))) == original,
+            "unused grant retained, never projected out"
         );
     }
 

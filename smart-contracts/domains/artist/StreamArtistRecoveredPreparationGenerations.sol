@@ -50,6 +50,16 @@ import {
     StreamArtistRecoveredGenerationBaseConsentFacts as BaseFacts
 } from "./StreamArtistRecoveredGenerationBaseConsentFacts.sol";
 
+import {
+    StreamArtistRecoveredBindingGenerationModes as Modes
+} from "./StreamArtistRecoveredBindingGenerationModes.sol";
+import {
+    StreamArtistRecoveredGenerationDelegatedConsents as Delegated
+} from "./StreamArtistRecoveredGenerationDelegatedConsents.sol";
+import {
+    StreamArtistRecoveredGenerationDelegatedConsentFacts as DelegatedFacts
+} from "./StreamArtistRecoveredGenerationDelegatedConsentFacts.sol";
+
 /// @notice Original bounded generation selection and complete source joins before attestations.
 library StreamArtistRecoveredPreparationGenerations {
     function collect(
@@ -65,9 +75,10 @@ library StreamArtistRecoveredPreparationGenerations {
         consentMode = current.consentMode;
         hasGenerations = current.generation > 1;
         if (!hasGenerations) return (encoded, consentMode, false);
-        if (consentMode != 1 || hasIdentityDelegations) {
+        if (consentMode != 1 && consentMode != 2) {
             revert T.UnsupportedProfile();
         }
+        hasIdentityDelegations; // Full inventory is reconciled by contentFactsWithAuthority.
         // The earlier witness collector authenticates exact original15/24 counts. Royalty
         // witnesses must separately match every original20 occurrence, never a projection.
         bool needsWitness = provenance.journals[4].length != 0;
@@ -87,7 +98,7 @@ library StreamArtistRecoveredPreparationGenerations {
             revert T.UnsupportedProfile();
         }
         Generations.Bundle memory generations =
-            Generations.collect(source.owners[0], query, RH.ownerProvenance(provenance, 0));
+            Modes.collect(source.owners[0], query, RH.ownerProvenance(provenance, 0));
         encoded = abi.encode(generations);
         if (address(Facts).code.length == 0) assembly ("memory-safe") { revert(0, 0) }
         (bool ok, bytes memory result) = address(Facts)
@@ -138,6 +149,38 @@ library StreamArtistRecoveredPreparationGenerations {
         abi.decode(Tuple.result(ok, result), (uint256[]));
     }
 
+    /// @notice Additive complete grant/mode composition; the old no-grant route is untouched.
+    function contentWithAuthority(
+        address source,
+        AH.Query memory query,
+        RH.OwnerProvenance memory provenance,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        bytes memory rawGenerations,
+        bool hasIdentityDelegations
+    ) public view returns (bytes memory) {
+        Generations.Bundle memory b = abi.decode(rawGenerations, (Generations.Bundle));
+        if (!hasIdentityDelegations && b.current.consentMode == 1) {
+            return content(source, query, provenance, economics, royalties, rawGenerations);
+        }
+        if (
+            b.bindingHash != query.bindingHash || b.current.bindingHash != query.bindingHash
+                || b.current.generation != b.rows.length || !b.current.accepted
+                || (b.current.consentMode != 1 && b.current.consentMode != 2)
+        ) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
+        return Delegated.collect(
+            source,
+            query,
+            provenance,
+            economics,
+            royalties,
+            b.current.generation,
+            b.current.consentMode
+        );
+    }
+
     function content(
         address source,
         AH.Query memory query,
@@ -172,6 +215,40 @@ library StreamArtistRecoveredPreparationGenerations {
                 source, query, provenance, economics, royalties, b.current.generation
             )
         );
+    }
+
+    /// @notice Bind the new consent tag to the same fully authenticated generation bundle.
+    function contentFactsWithAuthority(
+        bytes memory identity,
+        bytes memory consent,
+        AH.Query memory query,
+        RH.Provenance memory provenance,
+        bytes memory records,
+        bytes memory rawGenerations
+    ) public view {
+        if (!Delegated.tagged(consent)) {
+            contentFacts(identity, consent, query, provenance, records);
+            return;
+        }
+        uint8 mode = Delegated.requireBinding(
+            query, RH.ownerProvenance(provenance, 6), consent, rawGenerations
+        );
+        if (address(DelegatedFacts).code.length == 0) assembly ("memory-safe") { revert(0, 0) }
+        (bool ok, bytes memory result) = address(DelegatedFacts)
+            .staticcall(
+                bytes.concat(
+                    DelegatedFacts.validate.selector,
+                    Tuple.fourModeAndRows(
+                        identity,
+                        abi.encode(consent),
+                        abi.encode(query),
+                        abi.encode(provenance),
+                        mode,
+                        records
+                    )
+                )
+            );
+        Tuple.result(ok, result);
     }
 
     function contentFacts(
@@ -211,6 +288,6 @@ library StreamArtistRecoveredPreparationGenerations {
         AH.Query memory query,
         RH.OwnerProvenance memory provenance
     ) public pure returns (bytes memory) {
-        return Generations.encode(abi.decode(encoded, (Generations.Bundle)), query, provenance);
+        return Modes.encode(abi.decode(encoded, (Generations.Bundle)), query, provenance);
     }
 }

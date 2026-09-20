@@ -62,10 +62,29 @@ library StreamArtistRecoveredGenerationBaseValidation {
         RH.OwnerProvenance memory p,
         uint64 generation
     ) public pure {
+        _validate(b, q, p, generation, true);
+    }
+
+    function validateWithGrants(
+        Base.Bundle memory b,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        uint64 generation
+    ) public pure {
+        _validate(b, q, p, generation, false);
+    }
+
+    function _validate(
+        Base.Bundle memory b,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        uint64 generation,
+        bool requireBaseOccurrence
+    ) private pure {
         if (generation < 2 || generation > 128) {
             revert T.UnsupportedProfile();
         }
-        if (b.economics.length + b.sales.length == 0) _invalid();
+        if (requireBaseOccurrence && b.economics.length + b.sales.length == 0) _invalid();
         Provenance.validateOwner(p, 6);
         if (b.keys.length > MAX_ROWS || b.economics.length > MAX_ROWS || b.sales.length > MAX_ROWS) revert T.UnsupportedProfile();
         if (

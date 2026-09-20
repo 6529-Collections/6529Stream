@@ -77,3 +77,6 @@ Two stage cases test exact original15/24 witness and20 term counts. Core,
 governance, Metadata and sale facts retain explicit typed fixture boundaries.
 These are authored/typechecked cases; no runtime, maximum-carrier, full-current
 graph or release acceptance is claimed here.
+
+Complete generation histories containing original grants or mode2 use the separately tagged
+[delegation composition](artist-generation-delegation.md); this direct, grant-free codec remains unchanged.

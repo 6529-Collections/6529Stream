@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredBindingGenerationModes as Modes
+} from "../../../smart-contracts/domains/artist/StreamArtistRecoveredBindingGenerationModes.sol";
 
 import {
     StreamArtistRecoveredPreparationGenerations as Stage
@@ -121,16 +124,18 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
     }
 
     function testFuzzGenerationRejectsWrongModeBeforeCollector(uint8 mode) public {
-        if (mode == 1) mode = 0;
+        if (mode == 1 || mode == 2) mode = 0;
         Fixture memory f = _fixture(2, mode);
         _blockWorkers(f);
         _reject(f, false, 0, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
     }
 
-    function testGenerationRejectsDelegationsBeforeCollector() public {
+    function testGenerationDelegationsReachCompleteCollectorBeforeLaterUseReconciliation() public {
         Fixture memory f = _fixture(2, 1);
-        _blockWorkers(f);
-        _reject(f, true, 0, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        _mockProofWorkers(f);
+        (bytes memory encoded, uint8 mode, bool selected) =
+            Stage.collect(f.source, f.query, f.provenance, f.identity, true, 0, 0);
+        assert(selected && mode == 1 && keccak256(encoded) == keccak256(abi.encode(f.generations)));
     }
 
     function testFuzzGenerationRejectsWitnessesBeforeCollector(uint256 count) public {
@@ -232,8 +237,8 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         _blockWorkers(f);
         bytes memory reason = abi.encodeWithSelector(SyntheticWorkerFailure.selector, 10);
         bytes memory input = _collectInput(f);
-        vm.mockCallRevert(address(Generations), input, reason);
-        vm.expectCall(address(Generations), input, 1);
+        vm.mockCallRevert(address(Modes), input, reason);
+        vm.expectCall(address(Modes), input, 1);
         _reject(f, false, 0, 0, reason);
     }
 
@@ -278,8 +283,8 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
 
     function testGenerationMissingFactsCodeRejectsBeforeAttribution() public {
         Fixture memory f = _fixture(2, 1);
-        vm.mockCall(address(Generations), _collectInput(f), abi.encode(f.generations));
-        vm.expectCall(address(Generations), _collectInput(f), 1);
+        vm.mockCall(address(Modes), _collectInput(f), abi.encode(f.generations));
+        vm.expectCall(address(Modes), _collectInput(f), 1);
         // The real code-length guard must stop before the Facts staticcall.
         vm.etch(address(Facts), hex"");
         PreparationGenerationSource(f.source.owners[4]).setAttribution(2, 2, true);
@@ -290,15 +295,15 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         Fixture memory f = _fixture(2, 1);
         RH.OwnerProvenance memory owner = _ownerZero(f.provenance);
         bytes memory input =
-            abi.encodeWithSelector(Generations.encode.selector, f.generations, f.query, owner);
+            abi.encodeWithSelector(Modes.encode.selector, f.generations, f.query, owner);
         bytes memory expected = hex"005529ff001122334455";
         vm.mockCallRevert(
-            address(Generations),
-            abi.encodePacked(Generations.encode.selector),
+            address(Modes),
+            abi.encodePacked(Modes.encode.selector),
             abi.encodeWithSelector(UnexpectedCollector.selector)
         );
-        vm.mockCall(address(Generations), input, abi.encode(expected));
-        vm.expectCall(address(Generations), input, 1);
+        vm.mockCall(address(Modes), input, abi.encode(expected));
+        vm.expectCall(address(Modes), input, 1);
         _same(Stage.encode(abi.encode(f.generations), f.query, owner), expected);
     }
 
@@ -306,10 +311,10 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         Fixture memory f = _fixture(2, 1);
         RH.OwnerProvenance memory owner = _ownerZero(f.provenance);
         bytes memory input =
-            abi.encodeWithSelector(Generations.encode.selector, f.generations, f.query, owner);
+            abi.encodeWithSelector(Modes.encode.selector, f.generations, f.query, owner);
         bytes memory reason = abi.encodeWithSelector(SyntheticWorkerFailure.selector, 30);
-        vm.mockCallRevert(address(Generations), input, reason);
-        vm.expectCall(address(Generations), input, 1);
+        vm.mockCallRevert(address(Modes), input, reason);
+        vm.expectCall(address(Modes), input, 1);
         (bool ok, bytes memory result) = address(this)
             .staticcall(abi.encodeCall(this.encode, (abi.encode(f.generations), f.query, owner)));
         assert(!ok);
@@ -406,8 +411,8 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
 
     function _blockWorkers(Fixture memory f) private {
         vm.mockCallRevert(
-            address(Generations),
-            abi.encodePacked(Generations.collect.selector),
+            address(Modes),
+            abi.encodePacked(Modes.collect.selector),
             abi.encodeWithSelector(UnexpectedCollector.selector)
         );
         vm.mockCallRevert(
@@ -420,13 +425,13 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
 
     function _mockProofWorkers(Fixture memory f) private {
         vm.mockCallRevert(
-            address(Generations),
-            abi.encodePacked(Generations.collect.selector),
+            address(Modes),
+            abi.encodePacked(Modes.collect.selector),
             abi.encodeWithSelector(UnexpectedCollector.selector)
         );
         bytes memory input = _collectInput(f);
-        vm.mockCall(address(Generations), input, abi.encode(f.generations));
-        vm.expectCall(address(Generations), input, 1);
+        vm.mockCall(address(Modes), input, abi.encode(f.generations));
+        vm.expectCall(address(Modes), input, 1);
         vm.mockCallRevert(
             address(Facts),
             abi.encodePacked(Facts.validate.selector),
@@ -439,7 +444,7 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
 
     function _collectInput(Fixture memory f) private pure returns (bytes memory) {
         return abi.encodeWithSelector(
-            Generations.collect.selector, f.source.owners[0], f.query, _ownerZero(f.provenance)
+            Modes.collect.selector, f.source.owners[0], f.query, _ownerZero(f.provenance)
         );
     }
 

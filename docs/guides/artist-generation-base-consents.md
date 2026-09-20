@@ -1,7 +1,7 @@
 # Recovered pending generations with direct policy, economics and sale history
 
 This additive operation60 composition supports one original class1/class3 recovered Artist and
-one PRIMARY_ONLY, mode1 collection whose complete original binding history contains2–128
+one PRIMARY_ONLY, mode1 collection whose complete original binding history contains2â€“128
 pending generations. Every earlier generation must be refused or withdrawn, and only the final
 generation is accepted. It adds complete direct14/15/16 histories with at least one original15
 or16 and no17/20/21 occurrence. The existing request, entrypoint, original signing domains,
@@ -60,14 +60,14 @@ Safe nonce, and the exact signed request can be retried after the external fault
 ## Evidence and remaining scope
 
 The focused suite authors actual Artist/Registry/Coordinator/Archive/resolver/Safe cases for
-15-only, direct Safe16-only, mixed generation3+24, repeated A→B→C import and fresh domains,
+15-only, direct Safe16-only, mixed generation3+24, repeated Aâ†’Bâ†’C import and fresh domains,
 missing/foreign witnesses, source/capability drift, generation/tag/grant/omission refusal,
 counted late Archive failure with identical Safe retry, and old14/24 literal byte preservation.
 Core, governance, Metadata and sale facts are explicit typed boundaries. Type and selected
 product size checks are source evidence; runtime, full-current integration, gas and maximum
 carrier acceptance remain pending. The original24,575-byte carrier limit is unchanged.
 
-Generation-aware mode2/grants, accepted-binding corrections, class4, collaborators and broader
+Generation-aware mode2/grants now use the separately tagged [complete delegation composition](artist-generation-delegation.md). Accepted-binding corrections, class4, collaborators and broader
 multiplicity remain separate supported-profile work. Original operation60 keeps the selected
 Router; a genuine Router replacement has its own tagged history requirements and is not
 inferred from this Artist migration.

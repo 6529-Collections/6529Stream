@@ -37,47 +37,36 @@ import {
 import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
 
 import {
-    StreamArtistRecoveredBindingGenerationModes as Modes
-} from "./StreamArtistRecoveredBindingGenerationModes.sol";
+    StreamArtistRecoveredBindingGenerations as Original
+} from "./StreamArtistRecoveredBindingGenerations.sol";
 
-/// @notice Complete original pending binding generations followed by one accepted generation.
-/// @dev All original owner0 mutations occur in the first era; accepted bindings cannot be
-/// reproposed. Later eras contain only the real import mutation. Refusal maps omit signer,
-/// nonce and observed time: fixed-source records/receipts authenticate them without guessed
-/// preimages. The Coordinator separately authenticates Identity, Acceptance and Attribution.
-library StreamArtistRecoveredBindingGenerations {
+/// @notice Explicit mode-aware pending-generation codec; no new binding producer or writer.
+/// @dev The old all-mode1 encoder stays canonical for its supported histories. All source
+/// rows, original proposal hashes, terminal receipts, era revisions and guards are retained.
+library StreamArtistRecoveredBindingGenerationModes {
     bytes32 internal constant SCHEMA =
-        keccak256("6529STREAM_ARTIST_RECOVERED_BINDING_GENERATIONS_V1");
+        keccak256("6529STREAM_ARTIST_RECOVERED_BINDING_GENERATION_MODES_V1");
     uint256 internal constant MAX_GENERATIONS = 128;
     bytes32 private constant PROPOSAL = keccak256("binding_lifecycle.replay.proposal_key");
     bytes32 private constant REFUSAL = keccak256("binding_lifecycle.replay.refusal_uniqueness");
     bytes32 private constant WITHDRAWAL =
         keccak256("binding_lifecycle.replay.proposal_terminal_transition_key");
 
-    struct Row {
-        T.Binding item;
-        C.BindingTerms terms;
-        L.Terminal terminal;
+    function tagged(bytes memory raw) internal pure returns (bool) {
+        return raw.length >= 32 && abi.decode(raw, (bytes32)) == SCHEMA;
     }
 
-    struct Bundle {
-        bytes32 artistId;
-        uint256 collectionId;
-        bytes32 bindingHash;
-        bytes32 provenanceCommitment;
-        T.Binding current;
-        Row[] rows;
-    }
-
-    function selected(bytes memory outer) public pure returns (bool) {
-        (RH.ExportHeader memory h,) = Payload.decode(outer, 0);
-        return (h.requiredFeatures & RH.BINDING_GENERATIONS) != 0;
+    function hasModeTwo(Original.Bundle memory b) internal pure returns (bool) {
+        for (uint256 i; i < b.rows.length; ++i) {
+            if (b.rows[i].item.consentMode == 2) return true;
+        }
+        return false;
     }
 
     function collect(address source, AH.Query memory q, RH.OwnerProvenance memory p)
         public
         view
-        returns (Bundle memory b)
+        returns (Original.Bundle memory b)
     {
         Provenance.validateOwnerSource(p, 0, source);
         b.artistId = q.artistId;
@@ -87,23 +76,25 @@ library StreamArtistRecoveredBindingGenerations {
         b.current = Binding(source).binding(q.collectionId);
         uint256 count = b.current.generation;
         if (count < 2 || count > MAX_GENERATIONS) revert T.UnsupportedProfile();
-        b.rows = new Row[](count);
+        b.rows = new Original.Row[](count);
         for (uint256 i; i < count; ++i) {
             uint64 generation = uint64(i + 1);
-            b.rows[i] = Row(
+            b.rows[i] = Original.Row(
                 Binding(source).bindingAt(q.collectionId, generation),
                 Terms(source).bindingTerms(q.collectionId, generation),
                 Lifecycle(source).bindingTermination(q.collectionId, generation)
             );
         }
-        validate(b, q, p);
+        if (hasModeTwo(b)) validate(b, q, p);
+        else Original.validate(b, q, p);
     }
 
-    function encode(Bundle memory b, AH.Query memory q, RH.OwnerProvenance memory p)
+    function encode(Original.Bundle memory b, AH.Query memory q, RH.OwnerProvenance memory p)
         public
         pure
         returns (bytes memory)
     {
+        if (!hasModeTwo(b)) return Original.encode(b, q, p);
         validate(b, q, p);
         return abi.encode(SCHEMA, RH.VERSION, b);
     }
@@ -111,12 +102,11 @@ library StreamArtistRecoveredBindingGenerations {
     function decode(AH.Query memory q, RH.OwnerProvenance memory p, bytes memory raw)
         public
         pure
-        returns (Bundle memory b)
+        returns (Original.Bundle memory b)
     {
-        if (Modes.tagged(raw)) return Modes.decode(q, p, raw);
         bytes32 schema;
         uint16 version;
-        (schema, version, b) = abi.decode(raw, (bytes32, uint16, Bundle));
+        (schema, version, b) = abi.decode(raw, (bytes32, uint16, Original.Bundle));
         if (
             schema != SCHEMA || version != RH.VERSION
                 || keccak256(raw) != keccak256(abi.encode(schema, version, b))
@@ -124,7 +114,11 @@ library StreamArtistRecoveredBindingGenerations {
         validate(b, q, p);
     }
 
-    function validate(Bundle memory b, AH.Query memory q, RH.OwnerProvenance memory p) public pure {
+    function validate(Original.Bundle memory b, AH.Query memory q, RH.OwnerProvenance memory p)
+        public
+        pure
+    {
+        if (!hasModeTwo(b)) _invalid();
         if (Provenance.validateOwner(p, 0) != b.provenanceCommitment) {
             revert RH.InvalidRecoveredHydrationProvenance();
         }
@@ -139,7 +133,7 @@ library StreamArtistRecoveredBindingGenerations {
         uint256 cursor;
         RH.OriginEnvironment memory origin = p.origins[0];
         for (uint256 i; i < count; ++i) {
-            Row memory r = b.rows[i];
+            Original.Row memory r = b.rows[i];
             _row(r, q, uint64(i + 1), i + 1 == count, origin);
             _native(p, cursor++, q, 1, r.item.bindingHash, uint64(2 * i + 1));
             if (r.terminal.kind == 1) {
@@ -161,51 +155,8 @@ library StreamArtistRecoveredBindingGenerations {
         _guards(b, p);
     }
 
-    function importState(
-        mapping(uint256 => T.Binding) storage bindings,
-        mapping(uint256 => mapping(uint64 => T.Binding)) storage history,
-        mapping(uint256 => mapping(uint64 => C.BindingTerms)) storage terms,
-        mapping(uint256 => mapping(uint64 => L.Terminal)) storage terminals,
-        AH.Query memory q,
-        bytes memory outer
-    ) public {
-        (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 0);
-        if ((h.requiredFeatures & RH.BINDING_GENERATIONS) == 0 || p.nonces.length != 0) _invalid();
-        Bundle memory b = decode(q, p.provenance, p.semanticState);
-        if (b.current.consentMode == 2 && (h.requiredFeatures & RH.DELEGATED_CONSENT) == 0) {
-            _invalid();
-        }
-        T.Binding memory emptyBinding;
-        C.BindingTerms memory emptyTerms;
-        L.Terminal memory emptyTerminal;
-        if (keccak256(abi.encode(bindings[q.collectionId])) != keccak256(abi.encode(emptyBinding)))
-        {
-            revert T.InvalidRecord();
-        }
-        for (uint256 i; i < b.rows.length; ++i) {
-            uint64 generation = uint64(i + 1);
-            if (
-                keccak256(abi.encode(history[q.collectionId][generation]))
-                        != keccak256(abi.encode(emptyBinding))
-                    || keccak256(abi.encode(terms[q.collectionId][generation]))
-                        != keccak256(abi.encode(emptyTerms))
-                    || keccak256(abi.encode(terminals[q.collectionId][generation]))
-                        != keccak256(abi.encode(emptyTerminal))
-            ) {
-                revert T.InvalidRecord();
-            }
-        }
-        bindings[q.collectionId] = b.current;
-        for (uint256 i; i < b.rows.length; ++i) {
-            uint64 generation = uint64(i + 1);
-            history[q.collectionId][generation] = b.rows[i].item;
-            terms[q.collectionId][generation] = b.rows[i].terms;
-            terminals[q.collectionId][generation] = b.rows[i].terminal;
-        }
-    }
-
     function _row(
-        Row memory r,
+        Original.Row memory r,
         AH.Query memory q,
         uint64 generation,
         bool last,
@@ -215,9 +166,9 @@ library StreamArtistRecoveredBindingGenerations {
             r.item.artistId != q.artistId || r.item.artistAddress == address(0)
                 || r.item.identityRecordHash == 0 || r.item.proposer == address(0)
                 || r.item.generation != generation || r.item.accepted != last
-                || r.item.consentMode != 1 || r.item.saleConsentScope > 1
-                || r.item.registryImmutabilityElection > 1 || r.terms.count != 0
-                || r.terms.mode != 0 || r.terms.threshold != 0
+                || (r.item.consentMode != 1 && r.item.consentMode != 2)
+                || r.item.saleConsentScope > 1 || r.item.registryImmutabilityElection > 1
+                || r.terms.count != 0 || r.terms.mode != 0 || r.terms.threshold != 0
                 || r.terms.collaboratorSetHash != Hashes.emptyCollaborators()
                 || r.terms.capabilityPolicySetHash != Hashes.emptyCapabilities()
         ) _invalid();
@@ -262,7 +213,7 @@ library StreamArtistRecoveredBindingGenerations {
         }
     }
 
-    function _guards(Bundle memory b, RH.OwnerProvenance memory p) private pure {
+    function _guards(Original.Bundle memory b, RH.OwnerProvenance memory p) private pure {
         // Provenance validates canonical sorted unique keys and the count in EVERY era.
         // Exactly 2N-1 distinct allowed logical keys therefore cover each complete rekeyed set.
         for (uint256 i; i < p.aliases.length; ++i) {
@@ -270,7 +221,7 @@ library StreamArtistRecoveredBindingGenerations {
             bool found;
             for (uint256 j; j < b.rows.length; ++j) {
                 if (a.scope != keccak256(abi.encode(b.collectionId, uint64(j + 1)))) continue;
-                Row memory r = b.rows[j];
+                Original.Row memory r = b.rows[j];
                 bool proposal = a.surface == PROPOSAL;
                 bytes32 record = proposal ? r.item.bindingHash : r.terminal.recordHash;
                 if (!proposal) {

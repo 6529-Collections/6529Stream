@@ -1,5 +1,14 @@
 # Changelog
 
+## Added: recovered pending generations with complete delegation histories
+
+- Compose original mode1/mode2 pending generations with full grant, revision, revocation and
+  delegated consent/attestation histories through unchanged seven-owner operation60 authority.
+- Add explicit generation-mode and delegated-consent tags, conserve historical grant uses and
+  nonce lanes, and preserve every earlier supported profile encoding.
+- Author actual Artist/Safe, malformed-inventory and late Archive retry cases; runtime and
+  full-current acceptance remain separate. No storage, signature, capability or cap change.
+
 ## Added: recovered generation histories without content writes
 
 - Add the explicit generation-base consent codec for complete direct14/15/16 histories with
