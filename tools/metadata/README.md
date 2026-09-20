@@ -16,6 +16,13 @@ packet identity and optional condition capture cardinality. Generate/check its
 two new definitions with `python -m tools.metadata.acquisition_packet_v3` and
 `--check`; V1/V2 definitions and native owner authority keep their exact meanings.
 
+The additive [packet V4](../../docs/museum-acquisition-conservation.md) represents
+native conservation tier/default, four selection lanes and historical universal
+floor receipts. Generate/check its two definitions with
+`python -m tools.metadata.acquisition_packet_v4` and `--check`. Validation checks
+supplied fields and their relationships; the separate Museum composer replays
+the original captures. V1–V3 definitions remain unchanged.
+
 Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.

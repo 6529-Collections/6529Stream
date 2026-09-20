@@ -9,6 +9,19 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [native conservation composition](museum-acquisition-conservation.md) joins
+the three frozen source captures at one common anchor and reconciles shared RPC
+observations, headers, receipts and retained matching logs. Its additive packet
+representation preserves native tier provenance without inventing a generic tier
+record, all four Artist/estate selection lanes, and historical universal floor
+receipts. A sale's tier is checked at its original position: prospective LITE
+can precede a later explicit declaration before completed minting. Original
+intent/interview commitments can be resolved where their actual source history
+and exact preimages are retained; this does not supply missing rights, personhood,
+master/archive, constructor configuration or prospective-reference evidence.
+DIRECT and unsupported mixed receipt histories remain outside this composition.
+All 19 requirement statuses remain visible and full packet export stays blocked.
+
 The [floor receipt capture](museum-conservation-floor-source.md) now follows
 functional ledger source `7d9040dc700575027067b0cc4d822d06b7dff5f2`. It discovers
 the complete bounded ledger event history before collection filtering, retains
@@ -18,16 +31,17 @@ Earlier preparation is optional; inline persistence produces the same paid
 receipts. Saved historical source facts survive replacement. Full candidate
 preimages are unavailable from this interface and remain commitments. This
 consumer does not claim supplemental or all-paid-route coverage, documentary
-personhood, native runtime acceptance or an assembled packet. One additive
-native tier/default and floor representation remains required.
+personhood, native runtime acceptance or an assembled packet. The composition
+above supplies the additive native tier/default and floor representation;
+independent documentary prerequisites remain required.
 
 The [tier provenance capture](museum-conservation-tier-source.md) now reads the
 durable Core declaration and reconciles complete allocation, abort and completed
 mint history. It distinguishes raw zero, the post-completion LITE default, and
 the separate prospective LITE sale rule. Historical Metadata replacement cannot
 erase a Core declaration. This is an independent source capture; selected
-intent/interview evidence, genuine floor receipts and the additive native-tier
-packet representation remain separate joins. V1--V3 packet definitions are
+intent/interview evidence and genuine floor receipts are separate inputs to the
+new composition. V1--V3 packet definitions are
 unchanged, and no generic metadata record is invented for a native tier event.
 
 The historical missing-producer table below describes its recorded source only.

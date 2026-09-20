@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Native conservation composition](../../docs/museum-acquisition-conservation.md)
+replays tier, selected intent/interview and universal floor captures at one
+shared source state. It produces the additive native packet fragment, retains
+all four selection lanes and distinguishes historical receipts from current
+heads. Documentary prerequisites and complete packet export remain explicit.
+
 [Conservation floor receipts](../../docs/museum-conservation-floor-source.md)
 retain the permanent ledger, historical source admissions, exact first-sale and
 release facts, and original consumed settlement results. Preparation is optional;

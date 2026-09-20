@@ -67,6 +67,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add a native conservation packet representation and offline composition of
+  frozen tier, selected intent/interview and universal floor captures. Reconcile
+  shared RPC observations and preserve historical tier timing, four distinct
+  selection lanes and unresolved documentary joins. Keep V1--V3 definitions and
+  original captures unchanged, with all 19 acquisition requirements visible.
+
 - Add native conservation-floor capture and offline replay with complete bounded
   ledger discovery, retained source admissions, immutable receipt hashes and
   original consumed settlement results/events. Preserve inline purchases and
