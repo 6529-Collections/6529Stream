@@ -380,9 +380,20 @@ contract StreamRendererRegistry is V, StreamGasParameterHost {
     }
 
     function _role(bytes32 role) private pure returns (bool) {
+        // Finite named Artist/C2PA companion profile. A role is a declaration label, not
+        // authority or proof of finality safety; exact targets, reads and evidence still bind.
         return role == keccak256("CORE") || role == keccak256("COLLECTION_METADATA")
             || role == keccak256("METADATA_COMPANION") || role == keccak256("DEPENDENCY_REGISTRY")
-            || role == keccak256("ENTROPY_COORDINATOR");
+            || role == keccak256("ENTROPY_COORDINATOR")
+            || role == keccak256("STATIC_C2PA_ATTRIBUTION")
+            || role == keccak256("C2PA_RECONCILIATION") || role == keccak256("ARTIST_REGISTRY")
+            || role == keccak256("ARTIST_STATIC_DISPLAY") || role == keccak256("ARTIST_COORDINATOR")
+            || role == keccak256("ARTIST_IDENTITY_OWNER")
+            || role == keccak256("ARTIST_BINDING_OWNER")
+            || role == keccak256("ARTIST_ATTRIBUTION_OWNER")
+            || role == keccak256("ARTIST_COLLABORATOR_RECORDS_OWNER")
+            || role == keccak256("ARTIST_ACCEPTANCE_OWNER")
+            || role == keccak256("ARTIST_SANCTION_OWNER");
     }
 
     function _key(R.RendererManifest calldata m) private pure returns (bytes32) {

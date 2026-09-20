@@ -312,6 +312,166 @@ contract StreamRendererRegistryTest is CharacterizationTestBase, OfficialSafeFix
         require(registry.versionCount() == 0, "read set change cannot reuse prior analysis");
     }
 
+    /// @dev These synthetic targets test finite labels and gate mechanics only. They do not
+    /// authenticate an Artist deployment or supply a performed transitive STATIC analysis.
+    function testFiniteArtistC2PARolesPreserveOriginalRolesAndExactTargetCommitment() public {
+        bytes32[16] memory roles = [
+            keccak256("CORE"),
+            keccak256("COLLECTION_METADATA"),
+            keccak256("METADATA_COMPANION"),
+            keccak256("DEPENDENCY_REGISTRY"),
+            keccak256("ENTROPY_COORDINATOR"),
+            keccak256("STATIC_C2PA_ATTRIBUTION"),
+            keccak256("C2PA_RECONCILIATION"),
+            keccak256("ARTIST_REGISTRY"),
+            keccak256("ARTIST_STATIC_DISPLAY"),
+            keccak256("ARTIST_COORDINATOR"),
+            keccak256("ARTIST_IDENTITY_OWNER"),
+            keccak256("ARTIST_BINDING_OWNER"),
+            keccak256("ARTIST_ATTRIBUTION_OWNER"),
+            keccak256("ARTIST_COLLABORATOR_RECORDS_OWNER"),
+            keccak256("ARTIST_ACCEPTANCE_OWNER"),
+            keccak256("ARTIST_SANCTION_OWNER")
+        ];
+        for (uint256 i; i < roles.length; ++i) {
+            V.Target[] memory targets = _oneTarget(roles[i]);
+            StreamRendererRegistry candidate = _registryForTargets(targets);
+            require(
+                candidate.targetCount() == 1
+                    && candidate.targetSetHash() == keccak256(abi.encode(targets)),
+                "immutable named target set"
+            );
+            require(
+                keccak256(abi.encode(candidate.targetAt(0))) == keccak256(abi.encode(targets[0])),
+                "exact address runtime and role"
+            );
+            require(candidate.versionCount() == 0, "label does not admit a version");
+        }
+    }
+
+    function testRoleProfileRejectsGenericArtistOwnerRecordsAndDefaultViewLabels() public {
+        bytes32[5] memory forbidden = [
+            bytes32(0),
+            keccak256("ARTIST_OWNER"),
+            keccak256("OWNER_RECORDS"),
+            keccak256("DEFAULT_VIEW"),
+            keccak256("ARBITRARY_METADATA")
+        ];
+        for (uint256 i; i < forbidden.length; ++i) {
+            V.Target[] memory targets = _oneTarget(forbidden[i]);
+            vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+            this.constructRegistry(targets);
+        }
+    }
+
+    function testNamedRolesStillRequireSortedUniqueLiveRuntimeTargetsAndBoundedCount() public {
+        V.Target[] memory targets = _oneTarget(keccak256("ARTIST_ATTRIBUTION_OWNER"));
+        targets[0].codeHash = keccak256("different runtime");
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.constructRegistry(targets);
+        targets[0] = V.Target(address(0x6529), bytes32(0), keccak256("ARTIST_IDENTITY_OWNER"));
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.constructRegistry(targets);
+        targets = new V.Target[](2);
+        targets[0] = _oneTarget(keccak256("ARTIST_REGISTRY"))[0];
+        targets[1] = targets[0];
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.constructRegistry(targets);
+        address high = address(schemas) > address(store) ? address(schemas) : address(store);
+        address low = address(schemas) > address(store) ? address(store) : address(schemas);
+        targets[0] = V.Target(high, high.codehash, keccak256("ARTIST_REGISTRY"));
+        targets[1] = V.Target(low, low.codehash, keccak256("ARTIST_STATIC_DISPLAY"));
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.constructRegistry(targets);
+        targets = new V.Target[](65);
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.constructRegistry(targets);
+        require(
+            registry.MAX_TARGETS() == 64 && registry.MAX_READS() == 128, "unchanged profile bounds"
+        );
+    }
+
+    function testNamedRoleReadCapsAndFreshAnalysisRemainRequired() public {
+        registry = _registryForTargets(_oneTarget(keccak256("C2PA_RECONCILIATION")));
+        (V.Registration memory r,) = _recipe();
+        V.Read[] memory reads_ = new V.Read[](1);
+        reads_[0] = V.Read(0, S.document.selector, 0, true);
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        reads_[0].maxReturnBytes = 16777217;
+        reads_[0].exact = false;
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        reads_[0].maxReturnBytes = 33;
+        reads_[0].exact = true;
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        reads_[0].maxReturnBytes = 32;
+        vm.expectRevert(
+            abi.encodeWithSelector(V.InvalidRendererEvidence.selector, r.analysisDocument)
+        );
+        this.registerRecipe(r, reads_);
+        V.Analysis memory analysis =
+            abi.decode(schemas.documentBytes(r.analysisDocument), (V.Analysis));
+        analysis.readSetHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_RENDERER_READ_SET_V1"), registry.targetSetHash(), reads_
+            )
+        );
+        r.analysisDocument = _catalog(abi.encode(analysis));
+        bytes32 key = _register(r, reads_);
+        require(
+            keccak256(abi.encode(registry.reads(key))) == keccak256(abi.encode(reads_)),
+            "exact declared read retained"
+        );
+    }
+
+    function testNamedRoleCannotBypassReadOrderingSelectorOrCount() public {
+        registry = _registryForTargets(_oneTarget(keccak256("ARTIST_ATTRIBUTION_OWNER")));
+        (V.Registration memory r,) = _recipe();
+        V.Read[] memory reads_ = new V.Read[](1);
+        reads_[0] = V.Read(1, S.document.selector, 32, true);
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        reads_[0] = V.Read(0, bytes4(0), 32, true);
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        reads_ = new V.Read[](2);
+        reads_[0] = V.Read(0, S.document.selector, 32, true);
+        reads_[1] = reads_[0];
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        reads_ = new V.Read[](129);
+        vm.expectRevert(abi.encodeWithSelector(V.InvalidRendererRegistration.selector));
+        this.registerRecipe(r, reads_);
+        require(registry.versionCount() == 0, "invalid reads never admitted");
+    }
+
+    function constructRegistry(V.Target[] memory targets)
+        external
+        returns (StreamRendererRegistry)
+    {
+        return _registryForTargets(targets);
+    }
+
+    function _oneTarget(bytes32 role) private view returns (V.Target[] memory targets) {
+        targets = new V.Target[](1);
+        targets[0] = V.Target(address(schemas), address(schemas).codehash, role);
+    }
+
+    function _registryForTargets(V.Target[] memory targets)
+        private
+        returns (StreamRendererRegistry)
+    {
+        return new StreamRendererRegistry(
+            address(executor),
+            address(schemas),
+            targets,
+            G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 1500000, 100000, 2),
+            G.GasParameterConfig("RENDERER_GOLDEN_VECTOR_GAS", 2000000, 100000, 2)
+        );
+    }
+
     function testDynamicClassAndManifestDriftRejected() public {
         (V.Registration memory r, V.Read[] memory reads_) = _recipe();
         r.manifest.rendererClass = keccak256("DYNAMIC");
