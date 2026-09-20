@@ -113,6 +113,7 @@ contract StreamArtistRotatedRepeatedRecoveryActualTest is
         );
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
             ingress.identityContestGovernanceContext(artistId, rtTerminal, evidence, reason);
+        _repeatGovernanceWitness(scope, oldHash, newHash);
         authority.executeModuleContext(
             address(ingress),
             abi.encodeCall(
@@ -124,6 +125,7 @@ contract StreamArtistRotatedRepeatedRecoveryActualTest is
             oldHash,
             newHash
         );
+        _repeatGovernanceInactive();
         Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
         require(
             cause.facts.kind == 1 && cause.facts.executedTransitionHash == rtTerminal
@@ -161,7 +163,11 @@ contract StreamArtistRotatedRepeatedRecoveryActualTest is
     }
 
     function rotatedRepeatDismiss() external onlySelf {
-        rtLatestClosure = _dismissalExecute(_dismissalRequest(), 1, 0);
+        Dismissal.Request memory p = _dismissalRequest();
+        Dismissal.Context memory context = ingress.identityContestDismissalContext(p);
+        _repeatGovernanceWitness(context.scopeHash, context.oldValueHash, context.newValueHash);
+        rtLatestClosure = _dismissalExecute(p, 1, 0);
+        _repeatGovernanceInactive();
         if (rtFirstClosure == 0) rtFirstClosure = rtLatestClosure;
         Dismissal.Closure memory closed = ingress.identityTransitionClosure(artistId, rtTerminal);
         require(

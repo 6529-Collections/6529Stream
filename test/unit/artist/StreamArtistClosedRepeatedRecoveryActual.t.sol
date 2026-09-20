@@ -46,6 +46,7 @@ contract StreamArtistClosedRepeatedRecoveryActualTest is StreamArtistRepeatedRec
         );
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
             ingress.identityContestGovernanceContext(artistId, crPrior, evidence, reason);
+        _repeatGovernanceWitness(scope, oldHash, newHash);
         authority.executeModuleContext(
             address(ingress),
             abi.encodeCall(
@@ -57,6 +58,7 @@ contract StreamArtistClosedRepeatedRecoveryActualTest is StreamArtistRepeatedRec
             oldHash,
             newHash
         );
+        _repeatGovernanceInactive();
         Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
         require(
             cause.facts.kind == 1 && cause.facts.executedTransitionHash == crPrior
@@ -79,7 +81,10 @@ contract StreamArtistClosedRepeatedRecoveryActualTest is StreamArtistRepeatedRec
     function closedRepeatDismiss(bool abandoned) external onlySelf {
         Dismissal.Request memory p = _dismissalRequest();
         bytes32 previous = ingress.latestIdentityContestDismissal(artistId);
+        Dismissal.Context memory context = ingress.identityContestDismissalContext(p);
+        _repeatGovernanceWitness(context.scopeHash, context.oldValueHash, context.newValueHash);
         crLatest = _dismissalExecute(p, 1, 0);
+        _repeatGovernanceInactive();
         if (crFirst == 0) crFirst = crLatest;
         Dismissal.Record memory r = ingress.identityContestDismissalRecord(crLatest);
         Dismissal.Closure memory c = ingress.identityTransitionClosure(artistId, crPrior);

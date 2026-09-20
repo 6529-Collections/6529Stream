@@ -72,6 +72,7 @@ contract StreamArtistRepeatedRecoveryActualTest is
         );
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
             ingress.identityContestGovernanceContext(artistId, rrPrior, evidence, reason);
+        _repeatGovernanceWitness(scope, oldHash, newHash);
         authority.executeModuleContext(
             address(ingress),
             abi.encodeCall(
@@ -83,12 +84,55 @@ contract StreamArtistRepeatedRecoveryActualTest is
             oldHash,
             newHash
         );
+        _repeatGovernanceInactive();
         Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
         require(
             cause.facts.executedTransitionHash == rrPrior && cause.facts.kind == 1
                 && cause.facts.authorityClass == rrEstate.authorityClass
                 && ingress.artistTransitionState(rrPrior).contestedAt == when,
             "original op33 writes the actual prior recovery transition marker"
+        );
+    }
+
+    function _repeatGovernanceWitness(bytes32 scope, bytes32 oldHash, bytes32 newHash) internal {
+        // Registered35 leaves a selector-wide inactive mock. Replace only this exact typed
+        // governance read while the real history producer runs; keep every scheduled-action mock.
+        address authority = manager.governanceAuthority();
+        bytes32 actionId = keccak256("unit authority gas raise");
+        avm.mockCall(
+            authority,
+            abi.encodeCall(IStreamGovernanceReads.currentAction, ()),
+            abi.encode(true, actionId, uint8(1), scope, oldHash, newHash)
+        );
+        (
+            bool active,
+            bytes32 actualId,
+            uint8 actionClass,
+            bytes32 actualScope,
+            bytes32 actualOld,
+            bytes32 actualNew
+        ) = IStreamGovernanceReads(authority).currentAction();
+        require(
+            active && actualId == actionId && actionClass == 1 && actualScope == scope
+                && actualOld == oldHash && actualNew == newHash,
+            "exact active governance witness for the real history producer"
+        );
+    }
+
+    function _repeatGovernanceInactive() internal {
+        _inactive();
+        (
+            bool active,
+            bytes32 actionId,
+            uint8 actionClass,
+            bytes32 scope,
+            bytes32 oldHash,
+            bytes32 newHash
+        ) = IStreamGovernanceReads(manager.governanceAuthority()).currentAction();
+        require(
+            !active && actionId == 0 && actionClass == 0 && scope == 0 && oldHash == 0
+                && newHash == 0,
+            "history producer restores the all-zero inactive governance boundary"
         );
     }
 
