@@ -138,7 +138,7 @@ contract StreamFinalityPolicyMultiScopeEvidenceProvider is
     }
 
     function finalitySourceConfigurationHash() external view override returns (bytes32) {
-        return Selection.configurationHash(_sourceSelection);
+        return Selection.configurationHashStored(_sourceSelection);
     }
 
     function finalitySourcesForScope(StreamFinalityScope calldata scope)
@@ -147,7 +147,8 @@ contract StreamFinalityPolicyMultiScopeEvidenceProvider is
         override
         returns (Profiles.Sources memory)
     {
-        return Selection.current(_sourceSelection, scope);
+        bytes memory encoded = Selection.currentEncoded(_sourceSelection, scope);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function policyOutputManifestV2() external view override returns (address) {
@@ -281,8 +282,7 @@ contract StreamFinalityPolicyMultiScopeEvidenceProvider is
 
     function _policyScope(StreamFinalityScope memory scope) private view returns (bool) {
         if (scope.scopeType != StreamFinalityScopeType.COLLECTION) return false;
-        Profiles.Sources memory s = Selection.current(_sourceSelection, scope);
-        return s.profile.profileHash == Selection.profileHash(2);
+        return Selection.isPolicyStored(_sourceSelection, scope);
     }
 
     function _profile(StreamFinalityNativeProviderReads.Config memory c, uint8 index, bytes32 hash)

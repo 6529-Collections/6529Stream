@@ -11,6 +11,18 @@ import { StreamViewAdoption as ViewAdoption } from "./StreamViewAdoption.sol";
 import { StreamViewAdoptionState as ViewState } from "./StreamViewAdoptionState.sol";
 import { StreamViewAdoptionRouting as ViewRouting } from "./StreamViewAdoptionRouting.sol";
 import { StreamViewAdoptionTransport as ViewTransport } from "./StreamViewAdoptionTransport.sol";
+import { StreamViewAdoptionV2 as PolicyViewAdoption } from "./StreamViewAdoptionV2.sol";
+import { StreamViewAdoptionStateV2 as PolicyViewState } from "./StreamViewAdoptionStateV2.sol";
+import {
+    StreamViewAdoptionPolicyTransportV2 as PolicyViewTransport
+} from "./StreamViewAdoptionPolicyTransportV2.sol";
+import {
+    StreamViewAdoptionRoutingV2 as PolicyViewRouting
+} from "./StreamViewAdoptionRoutingV2.sol";
+import {
+    IStreamViewAdoptionPolicyRouterV2
+} from "../../interfaces/stream/metadata/IStreamViewAdoptionPolicyRouterV2.sol";
+
 import {
     IStreamMetadataFullViews,
     IStreamMetadataHistoricalFullView
@@ -134,6 +146,7 @@ contract StreamMetadataRouter is
     }
     uint256 private immutable _staticChainId = block.chainid;
     bytes32 private immutable _viewRoutingCodeHash = address(ViewRouting).codehash;
+    bytes32 private immutable _policyViewRoutingCodeHash = address(PolicyViewRouting).codehash;
     IStreamCore public immutable core;
     address public immutable authority;
     IStreamArtistAttribution public immutable artistRegistry;
@@ -355,7 +368,9 @@ contract StreamMetadataRouter is
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
-            || id == type(IStreamMetadataScopeMembership).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamMetadataScopeMembership).interfaceId
+            || id == type(IStreamViewAdoptionPolicyRouterV2).interfaceId
+            || super.supportsInterface(id);
     }
 
     /// @notice Explicit static-profile activation; the original serving profile stays unselected otherwise.
@@ -885,6 +900,24 @@ contract StreamMetadataRouter is
         return ViewAdoption.adoptEncoded(_contentLayout(), _contentContext(), msg.data);
     }
 
+    function previewPolicyViewAdoption(ViewTypes.Input calldata, address)
+        external
+        view
+        returns (bytes32, bytes32)
+    {
+        bytes memory raw =
+            PolicyViewAdoption.previewEncoded(_contentLayout(), _contentContext(), msg.data);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function adoptPolicyView(ViewTypes.Input calldata) external returns (bytes32) {
+        return PolicyViewAdoption.adoptEncoded(_contentLayout(), _contentContext(), msg.data);
+    }
+
+    function viewAdoptionProfile(bytes32 key) external view returns (bytes32) {
+        return PolicyViewState.profile(key);
+    }
+
     function viewAdoptionHead(StreamFinalityScope calldata scope) external view returns (bytes32) {
         return ViewState.state().heads[ViewState.subject(address(core), scope)];
     }
@@ -920,7 +953,9 @@ contract StreamMetadataRouter is
     }
 
     function _view() private view {
-        bytes memory raw = ViewTransport.serve(_viewRoutingCodeHash, msg.data);
+        bytes memory raw = PolicyViewTransport.serve(
+            address(core), _viewRoutingCodeHash, _policyViewRoutingCodeHash, msg.data
+        );
         assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 

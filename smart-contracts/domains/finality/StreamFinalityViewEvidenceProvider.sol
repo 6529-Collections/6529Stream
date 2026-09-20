@@ -62,7 +62,7 @@ contract StreamFinalityViewEvidenceProvider is
         return _view;
     }
 
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == type(IStreamViewSourceBinding).interfaceId || super.supportsInterface(id);
     }
 }

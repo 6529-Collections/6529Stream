@@ -53,6 +53,29 @@ library StreamFinalityProfileSourceReads {
         return keccak256(abi.encode(DOMAIN, c.chainId, address(this), c));
     }
 
+    /// @dev Compiler-owned caller storage, same delegate-host domain and exact original encoder.
+    function configurationHashStored(Context storage c) public view returns (bytes32) {
+        return configurationHash(c);
+    }
+
+    /// @dev Exact full original Sources encoding from compiler-owned caller storage.
+    function currentEncoded(Context storage c, StreamFinalityScope memory scope)
+        public
+        view
+        returns (bytes memory)
+    {
+        return abi.encode(current(c, scope));
+    }
+
+    /// @dev Caller retains the original non-COLLECTION early return before invoking this path.
+    function isPolicyStored(Context storage c, StreamFinalityScope memory scope)
+        public
+        view
+        returns (bool)
+    {
+        return current(c, scope).profile.profileHash == profileHash(2);
+    }
+
     function profileHash(uint8 index) internal pure returns (bytes32) {
         if (index == 0) return OriginalDefinitions.PROFILE_HASH;
         if (index == 1) return ScopedDefinitions.PROFILE_HASH;
