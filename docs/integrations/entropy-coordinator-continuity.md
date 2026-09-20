@@ -149,3 +149,42 @@ at 24,079 runtime bytes and 28,439 creation bytes, Core at 19,638/23,076, and al
 six affected fixed workers below both limits. This is source-specific selected
 capacity evidence, not a refreshed genesis artifact set. Core and Coordinator
 retain all 304 original ABI entries and their original ordinary storage layout.
+
+### Current registration value and floor evidence
+
+`StreamEntropyRegistrationCap.t.sol` runs the actual Core mutation and actual
+Coordinator registration with the four rows from `StreamCurrentStackPlan`.
+The entropy row is value **500,000**, floor **120,000**, failure class **2**;
+the constructor initializes revision **1**. The final `2` in that deployment
+tuple is not a revision. The Core test subclass adds only original worker
+views. Registry, Manager, governance, role registry and provider remain explicit
+typed boundaries, so this is not the complete current graph.
+
+All three focused cases pass: cold first registration at the current value,
+late receiver rejection with complete Core/Coordinator rollback and identical
+mint retry, and fail-closed registration at a separately deployed 120,000
+value. Cooling names Core, Coordinator, Manager, Registry, the registration
+worker and the Core read worker and their storage. Core's mint naturally warms
+the token identity and original coordinator cells before calling the hook.
+
+The cached trace measures **131,789 gas** in `onTokenMinted` in each successful
+hook frame, including the hook preceding receiver rejection. The first Core
+mint frame uses **393,262 gas**, and its typed Manager frame uses **395,021**.
+These are execution-frame measurements, not full transaction gas including
+intrinsic costs, and the cooling declaration is not a claim of a complete
+transitive genesis benchmark.
+
+Earlier probes incorrectly required success at the minimum permitted value.
+Both the original pre-extraction Coordinator and the continuity Coordinator
+failed that 120,000-value probe before reaching the receiver. Those failing
+captures remain evidence; they do not establish a continuity regression.
+The final positive run restores the exact reviewed entropy production and
+includes Core's separate monotone prepared-abort correction.
+
+This positive integration result does **not** validate the release floor.
+EC-REGGAS rule 2 requires at least four times measured all-cold genesis hook
+cost and a genesis value at least that floor. Four times this observed frame
+cost is **527,156**, already above both the current floor and current value.
+Final genesis configuration requires its own complete cold benchmark and a
+new compliant floor/value profile. This test changes no deployment settings,
+governed policy or transaction cap.
