@@ -14,6 +14,9 @@ the release policy in `docs/release-policy.md`.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
 
+- Add collection token inventory recovery clients with bounded allocation scans,
+  actual-serial lookups, saved-prefix membership and exact direct/Safe CALL review.
+
 - Add staged reference file-inventory clients with exact fixed-row parts,
   original full identities, pinned gas quotes, receipt readback and Safe plans.
 

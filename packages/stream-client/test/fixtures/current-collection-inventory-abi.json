@@ -1,0 +1,927 @@
+{
+  "schemaVersion": 1,
+  "capture": "capture-erc20-burn-final-v2-StreamCollectionTokenInventory.t",
+  "compilerVersion": "0.8.19",
+  "sourceCommit": "e6a1704005f6a1197903eac372a166383a910681",
+  "sourceCount": 62,
+  "inputSha256": "9a351a3b51b235a17d766ddaabc6d985fff8b34482d5f7ff92d6837220b6c631",
+  "outputSha256": "5d3138f0dfc73f346c9263de451c853a4db3067625cd6d7ac5a226857c00a96d",
+  "sourceBinding": "All 62 literal input sources independently verified byte-for-byte against this Git commit.",
+  "qualification": "Frozen ABI and source evidence; client fixtures do not establish real RPC, Safe execution, downstream consumer compatibility, gas or release acceptance.",
+  "sources": {
+    "smart-contracts/core/StreamCore.sol": "4dbea35ac2a312f79464540f9b466a610fe168f2da75d6daa048cb30b2804907",
+    "smart-contracts/core/StreamCoreExternalReads.sol": "861c9f29a295702121ea82df9b6025ecb113f1f5d3167800e77fa5baf30731ec",
+    "smart-contracts/core/StreamCoreReadBuffer.sol": "8efd67d74274d1dcce42045d2f7ed694733b6edda141241c4279e6b0159833e6",
+    "smart-contracts/domains/finality/StreamCollectionTokenInventory.sol": "61d32a7e14ea990282884138d1a5c7585d29a095dc64e7c13c03358fb926e572",
+    "smart-contracts/domains/metadata/StreamMetadataRenderer.sol": "c57e7736cd31c276bd16a189cfb26edab75dd882ff7622f0d09f84609fe3b3a0",
+    "smart-contracts/domains/parameters/StreamGasParameterHost.sol": "09932d1df58cd555e29ad43e7bc562a88da5bc4b8588b8207b4867cdb7ad1552",
+    "smart-contracts/interfaces/standards/IERC7572.sol": "4be74b9fb6610491453a0f79bb191d67a7936f87ff1b1b7383dd6b199cd44928",
+    "smart-contracts/interfaces/stream/access/IStreamAdmins.sol": "90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistHistory.sol": "ba33cc325c533d88b0eec5e8e09f2f6b76716eea63b355ff811ba59830d9bf74",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistMintConsent.sol": "0885427d23cc9c79b708f861a385876e5b7a85c64a1625dc6e46c155008bf29c",
+    "smart-contracts/interfaces/stream/artist/StreamArtistOnboardingTypes.sol": "caadd0e470cb744fb7bcc7980597b629ba0ea8871eb6d6dd691973f329014321",
+    "smart-contracts/interfaces/stream/core/IStreamCore.sol": "897997004aa06c03a43cceb96fc47eb07153dfbca14bd13fdbdf96be35bb951f",
+    "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol": "734a1a81b208ae7d944b44b15409a56d90ce7f7ad10ac9e7c19c8c2321430366",
+    "smart-contracts/interfaces/stream/core/IStreamCoreCollectionManagement.sol": "59f376b0be8b185f284b5e520971cc8752ed145709f60fc070fc4977612bb265",
+    "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol": "8a5ce0c442d2f9b29b81bf53696da483cc44f61e2af1b7f78f902f43df685046",
+    "smart-contracts/interfaces/stream/core/IStreamCoreEnumeration.sol": "bf70c0c905b473aec70744dbf89063e91faa1f7017b047544c61eda118c4d7ed",
+    "smart-contracts/interfaces/stream/core/IStreamCoreGasParameters.sol": "0f8e6d012509474262352cb0eb2c1bf3a969728e01ec3ea4190afbb1f5c58f48",
+    "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol": "5adc232448975b2cd3835206647384866d313b6b5047db4c6a8f90c84d9de252",
+    "smart-contracts/interfaces/stream/core/IStreamCoreMetadataEmitters.sol": "6e432676894425f38716de6c24849b6af30d2692993bd20025f8bb858e3c1db7",
+    "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol": "018244ade20202342ff4a998b0005527208a7f5127d091df64626b7fba38c7ed",
+    "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": "d3971717024317891effbb623d6ee4351427d7ba7e6ceed0f79630b5565d3a55",
+    "smart-contracts/interfaces/stream/core/StreamCoreTypes.sol": "89b899592a917e72408082d2bf240b97b232463dba5d4d94a5b6ffe718b5c911",
+    "smart-contracts/interfaces/stream/dependencies/IDependencyRegistry.sol": "51bcc84c717b83338933bd4fd8fa8ade48be1b6d9a4d130ac002b87e43977c53",
+    "smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol": "20142dfca1d852d95702d94ecf23ffeb2ef1551e847f30bc6c7b7a24e7a109d4",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol": "826bfcf8ee17490294ff2e90067281544e92ab5a2ca08c13bffaf65639538677",
+    "smart-contracts/interfaces/stream/finality/IStreamCollectionTokenInventory.sol": "785f8646a0ed95f6657fdd170a71f8a908c04f0807642cef6e42be4b8625238c",
+    "smart-contracts/interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol": "e78617021d097ecc0cc9c67490ecf29e21c6a71ba5c2ff0787b77062d3851827",
+    "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol": "caeda7b29efd6ee23db0aabd754c0cc1d20eb95428e6f42e7366a9dd7a4cbc7f",
+    "smart-contracts/interfaces/stream/governance/IStreamSystemManifest.sol": "2bcf41ccc8b83f4109d52be56dd47eda9573a27d3d1ff38a5b366fe701eb5173",
+    "smart-contracts/interfaces/stream/legacy/entropy/IRandomizerLifecycle.sol": "8be92ab4ee63f74c716c662d90f1a5e30ab78ff20c033ae7343deaece3ac6f06",
+    "smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol": "ea23c5205b287d8c473448fcf31347d9a3ba7ab7d554dbf4704caf45b6183a43",
+    "smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol": "a858388864ad6dc5512ccc05c151773e1a1f4af86817a0916c5ca3b7ec257536",
+    "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol": "ceafa276a2705e8451f802c88c3e6765926de94ffa24261a782a389f5bd463c6",
+    "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol": "be94ef9d2b751f57de9fec33f55cabc5c3556d6c48a2d1a5949fd575f162c2ce",
+    "smart-contracts/interfaces/stream/mint/IStreamMintLedgerImport.sol": "8ac413a101dabe2b0fc49777f288a096771094e5b1449e1158c42728f88e04d9",
+    "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol": "ece6ea0115a625d2ded00cf13c04813f5bb36e334c49b34aaee5f2cd2bc9dd44",
+    "smart-contracts/interfaces/stream/mint/IStreamMintReads.sol": "e24b4e3d88356b4e2c046c9120c96db4172e4db40aaf99c46e4b229f15c50f3c",
+    "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol": "1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7",
+    "smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol": "a50e29b292e8d93068617548806aab531bb7595cbce9ce3127f9b05f2572951f",
+    "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol": "d8e32f79e4dbb7a072c00efd112bdc7d9edce45e91026654d89c5c2ec3608731",
+    "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol": "699e2dd62061702633d00a5e70afde86b00da36b76f5259aad384ebe82b92ef6",
+    "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolverContinuity.sol": "12b6de50c9030ada61153fcbab0860747dffde810dc3bb4a169561bb826a67d6",
+    "smart-contracts/interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol": "4baccfd7eae2ca245761410df8a0e731100bbb25785e20a2496a3e326b7ce191",
+    "smart-contracts/interfaces/stream/revenue/IStreamRoyaltyResolver.sol": "cf1255a46e9e3d6bc065779d7441be688f0d895c54a47021512a7d67c3e736a8",
+    "smart-contracts/interfaces/stream/revenue/IStreamRoyaltySnapshot.sol": "76ed2dd286485c0421ec40cb35049d71813e379cda83214016d1f35f540ccead",
+    "smart-contracts/vendor/openzeppelin/Address.sol": "73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8",
+    "smart-contracts/vendor/openzeppelin/Base64.sol": "fd4b111803de39b774b62e902b6c6d3edb30861fb26c09a0551b87c1a138fbcf",
+    "smart-contracts/vendor/openzeppelin/Context.sol": "6de5302543723d32c8eaf17becc4525936e16d9c4551455c93d306b9b72c0799",
+    "smart-contracts/vendor/openzeppelin/ERC165.sol": "c8be91bb41c7c38afcb84529f3153c6d9e9f0e431dc00dc02064cdbd0ed6e5d8",
+    "smart-contracts/vendor/openzeppelin/ERC721.sol": "fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702",
+    "smart-contracts/vendor/openzeppelin/IERC165.sol": "92762629f91532d937e795ceee7391d5e4e9db0ca8eba233da3dd1e95ce9d792",
+    "smart-contracts/vendor/openzeppelin/IERC2981.sol": "e937a4817f399cbdde795de41cc414ad422b780cf9966fcc191dcf912add5fb4",
+    "smart-contracts/vendor/openzeppelin/IERC721.sol": "0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e",
+    "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol": "aa6d6ca7da62a705ea5636f4d2fb8ee912e8048da7117f32849f9310965656c0",
+    "smart-contracts/vendor/openzeppelin/IERC721Receiver.sol": "b5145aae17268919000985c914074e999fcdc2f4ef51419b00372ceb2caff16b",
+    "smart-contracts/vendor/openzeppelin/Math.sol": "d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21",
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol": "aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429",
+    "smart-contracts/vendor/openzeppelin/Strings.sol": "fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2",
+    "test/helpers/OfficialSafeFixture.sol": "94225e08ab97c00628b5cfc6204c507267ceebf38e690813767fb91cec403cf1",
+    "test/regression/legacy/helpers/CharacterizationTestBase.sol": "7fc7785d6c9d417bcd2f23aabf6235786fcc28c038b6b33f7758d1cd850c4be7",
+    "test/unit/core/StreamCorePermanentTarget.t.sol": "1abc0d7e402bdca8360065fb03aeb3a6d32bca037932f1671f6c33a6cbc9af5d",
+    "test/unit/finality/StreamCollectionTokenInventory.t.sol": "0acdb6e2b31fa673f5c5cd731a2ccfdad0a25c7c5f1a425a884b4654f153b162"
+  },
+  "selections": {
+    "inventory": {
+      "source": "smart-contracts/domains/finality/StreamCollectionTokenInventory.sol",
+      "contract": "StreamCollectionTokenInventory",
+      "methods": [
+        "appendCollectionTokens",
+        "collectionInventoryState",
+        "collectionTokenAt",
+        "core",
+        "requireCompleteCollection",
+        "scanCollectionTokens",
+        "collectionScanThrough",
+        "collectionTokenBySerial",
+        "coreCodeHash",
+        "deploymentChainId",
+        "MAX_INDEX_BATCH",
+        "INVENTORY_DOMAIN",
+        "APPEND_DOMAIN",
+        "supportsInterface"
+      ],
+      "events": [
+        "CollectionTokenIndexed"
+      ],
+      "errors": [
+        "InvalidInventoryConfiguration",
+        "InventoryBatchSize",
+        "InventoryCollectionUnknown",
+        "InventoryCoreChanged",
+        "InventoryCoreReadFailed",
+        "InventoryIncomplete",
+        "InventoryIndexOutOfBounds",
+        "InventoryTokenMismatch",
+        "InventoryScanPrepared"
+      ]
+    },
+    "core": {
+      "source": "smart-contracts/core/StreamCore.sol",
+      "contract": "StreamCore",
+      "methods": [
+        "collectionExists",
+        "collectionMintedEver",
+        "lastAllocatedTokenId",
+        "tokenCollectionIdentity",
+        "tokenLifecycle"
+      ],
+      "events": [],
+      "errors": []
+    },
+    "legacy": {
+      "source": "smart-contracts/interfaces/stream/finality/IStreamCollectionTokenInventory.sol",
+      "contract": "IStreamCollectionTokenInventory",
+      "methods": [
+        "appendCollectionTokens",
+        "collectionInventoryState",
+        "collectionTokenAt",
+        "core",
+        "requireCompleteCollection"
+      ],
+      "events": [
+        "CollectionTokenIndexed"
+      ],
+      "errors": [
+        "InvalidInventoryConfiguration",
+        "InventoryBatchSize",
+        "InventoryCollectionUnknown",
+        "InventoryCoreChanged",
+        "InventoryCoreReadFailed",
+        "InventoryIncomplete",
+        "InventoryIndexOutOfBounds",
+        "InventoryTokenMismatch"
+      ]
+    },
+    "serialLookup": {
+      "source": "smart-contracts/interfaces/stream/finality/IStreamCollectionTokenInventorySerialLookup.sol",
+      "contract": "IStreamCollectionTokenInventorySerialLookup",
+      "methods": [
+        "collectionTokenBySerial"
+      ],
+      "events": [],
+      "errors": []
+    }
+  },
+  "abis": {
+    "inventory": [
+      {
+        "inputs": [],
+        "name": "InvalidInventoryConfiguration",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "size",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryBatchSize",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryCollectionUnknown",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InventoryCoreChanged",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "selector",
+            "type": "bytes4"
+          }
+        ],
+        "name": "InventoryCoreReadFailed",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "indexedCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedCount",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryIncomplete",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryIndexOutOfBounds",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryScanPrepared",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expectedCollectionSerial",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryTokenMismatch",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "collectionSerial",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "CollectionTokenIndexed",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "APPEND_DOMAIN",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "INVENTORY_DOMAIN",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "MAX_INDEX_BATCH",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "tokenIds",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "appendCollectionTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionInventoryState",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "indexedCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionScanThrough",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionTokenAt",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionSerial",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionTokenBySerial",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "coreCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "deploymentChainId",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "requireCompleteCollection",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxScan",
+            "type": "uint256"
+          }
+        ],
+        "name": "scanCollectionTokens",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "scannedThrough",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "indexedCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "id",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      }
+    ],
+    "core": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionExists",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionMintedEver",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "lastAllocatedTokenId",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "tokenCollectionIdentity",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "mappingExists",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionSerial",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "burned",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "tokenLifecycle",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "lifecycle",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "legacy": [
+      {
+        "inputs": [],
+        "name": "InvalidInventoryConfiguration",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "size",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryBatchSize",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryCollectionUnknown",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InventoryCoreChanged",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "selector",
+            "type": "bytes4"
+          }
+        ],
+        "name": "InventoryCoreReadFailed",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "indexedCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedCount",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryIncomplete",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryIndexOutOfBounds",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expectedCollectionSerial",
+            "type": "uint256"
+          }
+        ],
+        "name": "InventoryTokenMismatch",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "collectionSerial",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "CollectionTokenIndexed",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "tokenIds",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "appendCollectionTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionInventoryState",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "indexedCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionTokenAt",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "requireCompleteCollection",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "prefixHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "serialLookup": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionSerial",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionTokenBySerial",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

@@ -368,6 +368,8 @@ contract profiles and outstanding larger-script work.
   approval, prepare free or native purchases and recover free-burn fee credits.
 - [Burn program closure warnings](docs/current-burn-finality.md) join bounded
   program histories to source and target collections before burn blocks or finality.
+- [Collection token inventory recovery](docs/current-collection-inventory.md)
+  scans allocation gaps, preserves actual serials and checks saved-prefix membership.
 - [Native allowlist prices](docs/current-native-allowlist-price.md) prepare explicit
   price policies and proof-bearing purchases with the original signing domain.
 - [Native Dutch allowlists](docs/current-native-allowlist-dutch.md) preserve signed

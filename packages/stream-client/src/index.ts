@@ -39,6 +39,8 @@ export * from "./current-reference-metric.js";
 export * from "./current-reference-metric-workflow.js";
 export * from "./current-reference-inventory.js";
 export * from "./current-reference-inventory-workflow.js";
+export * from "./current-collection-inventory.js";
+export * from "./current-collection-inventory-workflow.js";
 export * from "./current-erc20-primary-offer-signing.js";
 export * from "./current-erc20-primary-offer-content.js";
 export * from "./current-erc20-primary-offer.js";
