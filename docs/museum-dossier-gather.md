@@ -11,6 +11,10 @@ This batch implements MUSEUM-17 evidence gathering. It does not emit a complete
 remains unresolved; it never becomes a fabricated absence, waiver or complete
 history. Native renderer citation generation is a separate integration.
 
+The additive [mint and entropy composer](museum-mint-entropy-evidence.md)
+extracts the retained paid mint and can join a complete original-coordinator
+capture without changing this profile or its historical packages.
+
 ## Inputs and authority
 
 The original token fixture must pass its external manifest pin and complete

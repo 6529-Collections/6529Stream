@@ -206,6 +206,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add original paid-mint and entropy-registration extraction plus an offline
+  composer for complete bounded original-coordinator entropy/event captures.
+  Preserve earlier examinations and explicitly retain unresolved entropy when
+  coordinator reads or complete event history are unavailable.
+
 - Add source-driven token examination gathering with complete admitted native
   record extraction, exact offline replay and a 19-item acquisition evidence
   index. Add the V2 executed-recovery citation namespace under ADR 0051,
