@@ -23,6 +23,9 @@ import { StreamRecordDocumentReads } from "../records/StreamRecordDocumentReads.
 
 /// @notice Fixed encoding of the original Metadata publication and subject recipes.
 /// @dev Delegatecall retains the Metadata host in every original candidate hash.
+import { StreamMetadataRecordPayloads } from "./StreamMetadataRecordPayloads.sol";
+import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
+
 library StreamMetadataPublicationEncoding {
     function requireSubject(
         address core,
@@ -68,6 +71,36 @@ library StreamMetadataPublicationEncoding {
         StreamRecordDocumentReads.activeSchema(c.schema, p.schemaId, p.canonicalizationId, c.cap);
         _code(c.store, c.storeHash);
         bytes memory payload = StreamRecordDocumentReads.chunk(c.store, p.payloadHash, c.cap);
+        if (
+            payload.length == 0 || payload.length > c.maximum || keccak256(payload) != p.payloadHash
+        ) revert IStreamCollectionMetadataV1.InvalidMetadataRecord();
+        kind = artistSubjectKind(p.recordType, p.schemaId);
+        hash = StreamCollectionRecordHashes.publicationHash(c.core, p);
+        if (hash != p.candidateRecordHash) {
+            revert IStreamCollectionMetadataV1.InvalidMetadataRecord();
+        }
+    }
+
+    function candidatePrepared(
+        mapping(bytes32 => Bytes.Manifest) storage prepared,
+        CandidateContext memory c,
+        P.Publication memory p,
+        IStreamCollectionMetadataV1.RecordPolicy memory policy
+    ) public view returns (bytes32 hash, uint8 kind) {
+        if (
+            p.metadataHost != address(this) || p.recorder == address(0) || p.payloadAlgorithm != 1
+                || p.effectiveAt == 0 || !policy.admitted
+                || (policy.authorizationMask & StreamRecordFamilies.bit(1)) == 0
+                || (policy.family != StreamRecordFamilies.ARTIST
+                    && !(policy.family == StreamRecordFamilies.CURATOR
+                        && p.recordType == keccak256("WORK_DESCRIPTION")))
+        ) revert IStreamCollectionMetadataV1.InvalidMetadataRecord();
+        _code(c.schema, c.schemaHash);
+        _code(c.store, c.storeHash);
+        StreamRecordDocumentReads.activeSchema(c.schema, p.schemaId, p.canonicalizationId, c.cap);
+        _code(c.store, c.storeHash);
+        bytes memory payload =
+            StreamMetadataRecordPayloads.candidateBytes(prepared, c.store, p.payloadHash, c.cap);
         if (
             payload.length == 0 || payload.length > c.maximum || keccak256(payload) != p.payloadHash
         ) revert IStreamCollectionMetadataV1.InvalidMetadataRecord();

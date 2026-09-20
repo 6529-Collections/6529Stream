@@ -874,7 +874,7 @@ contract StreamCollectionMetadataV1Test is CollectionMetadataV1Fixture {
             abi.encodeCall(metadata.recordChainHash, (uint256(1), CURATOR)),
             0
         );
-        payload = new bytes(8193);
+        payload = new bytes(24577);
         r = _record(CURATOR, payload);
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadataV1.InvalidMetadataRecord.selector)

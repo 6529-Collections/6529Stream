@@ -44,6 +44,14 @@ import {
     StreamCollectionManifestTypes as M
 } from "../../interfaces/stream/metadata/StreamCollectionManifestTypes.sol";
 
+import {
+    IStreamCollectionRecordPayloadChunks
+} from "../../interfaces/stream/metadata/IStreamCollectionRecordPayloadChunks.sol";
+import { StreamMetadataRecordPayloads as RecordPayloads } from "./StreamMetadataRecordPayloads.sol";
+import {
+    StreamSnapshotManifestBytes as PayloadBytes
+} from "../records/StreamSnapshotManifestBytes.sol";
+
 /// @notice Full-byte collection records with direct or detached artist authorization.
 /// @dev Catalog and operator grants use exact delayed Executor transitions. Generic records
 ///      do not claim typed finality readiness or authorize a renderer to consume their values.
@@ -54,7 +62,8 @@ contract StreamCollectionMetadataV1 is
     IStreamArtistRecordPublicationHost,
     IStreamCollectionRecordReceipts,
     IStreamCollectionManifestReads,
-    IStreamCollectionManifestWriter
+    IStreamCollectionManifestWriter,
+    IStreamCollectionRecordPayloadChunks
 {
     using StreamRecordFamilies for bytes32;
 
@@ -103,7 +112,7 @@ contract StreamCollectionMetadataV1 is
     bytes32 public immutable chunkStoreCodeHash;
     bytes32 public immutable artistRegistryCodeHash;
     bytes32 public immutable executorCodeHash;
-    uint256 public constant MAX_RECORD_PAYLOAD_BYTES = 8192;
+    uint256 public constant MAX_RECORD_PAYLOAD_BYTES = 24576;
     bytes32 public constant DEPENDENCY_READ_GAS =
         keccak256("6529STREAM_GGP_METADATA_DEPENDENCY_READ_GAS");
     bytes32 public constant ARTIST_READ_GAS = keccak256("6529STREAM_GGP_METADATA_ARTIST_READ_GAS");
@@ -121,6 +130,8 @@ contract StreamCollectionMetadataV1 is
     mapping(uint256 => mapping(bytes32 => bool)) private _pointerSeen;
     mapping(bytes32 => bool) public consumedArtistAuthorization;
     StreamCollectionManifests.State private _manifests;
+    // Appended only: original record/pointer/receipt and manifest storage roots remain unchanged.
+    mapping(bytes32 => PayloadBytes.Manifest) private _recordPayloads;
 
     /// @notice STATIC source entrypoints. Direct copies from the original owner storage only.
     function staticScriptManifest(bytes32 hash)
@@ -238,7 +249,8 @@ contract StreamCollectionMetadataV1 is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(StaticSource).interfaceId
+        return id == type(IStreamCollectionRecordPayloadChunks).interfaceId
+            || id == type(StaticSource).interfaceId
             || id == type(IStreamCollectionManifestReads).interfaceId || id == type(B).interfaceId
             || id == type(IStreamCollectionManifestWriter).interfaceId
             || id == type(IStreamCollectionMetadataV1).interfaceId
@@ -544,7 +556,8 @@ contract StreamCollectionMetadataV1 is
                 || keccak256(payload) != bytes32(record.contentHash.digest)
         ) revert InvalidMetadataRecord();
         // Publication is permissionless; only _append accepts the pointer into the record index.
-        StreamSchemaDocumentStore(chunkStore).publishChunk(payload);
+        if (payload.length <= 8192) StreamSchemaDocumentStore(chunkStore).publishChunk(payload);
+        else RecordPayloads.prepare(_recordPayloads, chunkStore, chunkStoreCodeHash, payload);
         P.Publication memory p = _publication(recorder, collectionId, record);
         _candidate(p);
         P.Evidence memory evidence = abi.decode(
@@ -585,7 +598,8 @@ contract StreamCollectionMetadataV1 is
     function _candidate(P.Publication memory p) private view returns (bytes32 hash, uint8 kind) {
         _requireArtistSelected();
         _requireSubject(p.collectionId, p.subjectId);
-        return StreamMetadataPublicationEncoding.candidate(
+        return StreamMetadataPublicationEncoding.candidatePrepared(
+            _recordPayloads,
             StreamMetadataPublicationEncoding.CandidateContext(
                 core,
                 schemaRegistry,
@@ -649,7 +663,8 @@ contract StreamCollectionMetadataV1 is
         override
         returns (address pointer, bytes memory payload)
     {
-        return StreamCollectionManifestExecution.payload(
+        return RecordPayloads.payload(
+            _recordPayloads,
             _knownRecord(hash),
             chunkStore,
             chunkStoreCodeHash,
@@ -732,13 +747,65 @@ contract StreamCollectionMetadataV1 is
     }
 
     function _indexPayload(uint256 collectionId, bytes32 family, bytes calldata payload) private {
-        (bytes32 contentHash, address pointer) =
-            StreamSchemaDocumentStore(chunkStore).publishChunk(payload);
-        bytes32 pointerKey = keccak256(abi.encode(family, contentHash));
-        if (!_pointerSeen[collectionId][pointerKey]) {
-            _pointerSeen[collectionId][pointerKey] = true;
-            _pointers[collectionId].push(Pointer(pointer, family, contentHash));
-        }
+        RecordPayloads.index(
+            _recordPayloads,
+            _pointers,
+            _pointerSeen,
+            chunkStore,
+            chunkStoreCodeHash,
+            collectionId,
+            family,
+            payload
+        );
+    }
+
+    function prepareRecordPayload(bytes calldata payload) external override returns (bytes32 hash) {
+        hash = RecordPayloads.prepare(_recordPayloads, chunkStore, chunkStoreCodeHash, payload);
+        emit RecordPayloadPrepared(
+            1, hash, uint32(payload.length), uint8((payload.length + 8191) / 8192)
+        );
+    }
+
+    function preparedRecordPayloadChunkCount(bytes32 hash)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return RecordPayloads.count(_recordPayloads, chunkStore, chunkStoreCodeHash, hash);
+    }
+
+    function preparedRecordPayloadChunkAt(bytes32 hash, uint256 index)
+        external
+        view
+        override
+        returns (address, bytes32)
+    {
+        return RecordPayloads.chunk(_recordPayloads, chunkStore, chunkStoreCodeHash, hash, index);
+    }
+
+    function recordPayloadChunkCount(bytes32 hash) external view override returns (uint256) {
+        return RecordPayloads.count(
+            _recordPayloads,
+            chunkStore,
+            chunkStoreCodeHash,
+            bytes32(_knownRecord(hash).record.contentHash.digest)
+        );
+    }
+
+    function recordPayloadChunkAt(bytes32 hash, uint256 index)
+        external
+        view
+        override
+        returns (address, bytes32)
+    {
+        return RecordPayloads.chunk(
+            _recordPayloads,
+            chunkStore,
+            chunkStoreCodeHash,
+            bytes32(_knownRecord(hash).record.contentHash.digest),
+            index
+        );
     }
 
     function _directWriter(
