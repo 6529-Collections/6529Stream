@@ -62,6 +62,17 @@
   provider joins. ABI-only checks pass; native, capacity and actual ceremony
   acceptance remain pending.
 
+## Explicit preservation rendering and admission
+
+- Add a fresh full-artwork renderer and attribution profile that exclude only
+  sanction-derived display while preserving the original live rendering paths.
+- Add independent class-1 Registry evidence with actual golden execution, fixed
+  source/runtime binding and per-selection admission receipts.
+- Factor original admission-only validation into a fixed delegate worker while
+  preserving original guards, hashes, storage and serving methods.
+- Record source/type/selected-size evidence and remaining runtime, lineage and
+  complete finality integration in the [guide](docs/guides/preservation-rendering.md).
+
 ## Metric context hashing without the full temporary copy
 
 - Reserve a bounded prefix beside the original immutable publication bytes and

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamRendererAdmissionValidation as AdmissionValidation
+} from "./StreamRendererAdmissionValidation.sol";
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
 import { IStreamRenderer as R } from "../../interfaces/stream/metadata/IStreamRenderer.sol";
 import {
@@ -29,12 +32,22 @@ import {
     StreamCurrentCitationAdmission as CitationAdmission
 } from "./StreamCurrentCitationAdmission.sol";
 
+import {
+    IStreamPreservationRegistryV1 as Preservation
+} from "../../interfaces/stream/metadata/IStreamPreservationRegistryV1.sol";
+import {
+    StreamPreservationRegistration as PreservationWriter
+} from "./StreamPreservationRegistration.sol";
+import {
+    StreamPreservationAdmission as PreservationAdmission
+} from "./StreamPreservationAdmission.sol";
+
 /// @notice Governance-admitted STATIC versions with immutable runtime, source set and evidence.
 /// @dev No removal, incident-disable, target substitution or reactivation entry exists. A version
 /// remains available to historical pins after deprecation. The deployment's named allowlist is
 /// immutable. Gate reports are exact registered analysis assertions, not onchain proof of a
 /// program's reachable opcodes; genuine static analysis remains a release admission obligation.
-contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost {
+contract StreamRendererRegistry is V, Current, Terminal, Preservation, StreamGasParameterHost {
     bytes32 public constant ANALYSIS_PROFILE =
         keccak256("6529STREAM_STATIC_RENDERER_ANALYSIS_ABI_V1");
     bytes32 public constant READ_GAS = keccak256("6529STREAM_GGP_METADATA_DEPENDENCY_READ_GAS");
@@ -60,6 +73,8 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
     // Fixed namespace keeps both the original registry and derived module storage unchanged.
     bytes32 private constant CITATION_SLOT =
         keccak256("6529STREAM_RENDERER_REGISTRY_CURRENT_CITATION_STORAGE_V1");
+
+    bytes32 private immutable _preservationValidationCodeHash;
 
     struct CitationState {
         mapping(bytes32 => Current.CurrentRecord) records;
@@ -98,7 +113,7 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
             Target memory t = targets[i];
             if (
                 t.target <= previous || t.target.code.length == 0 || t.target.codehash != t.codeHash
-                    || !_role(t.role)
+                    || !(_role(t.role) || _preservationRole(t.role))
             ) revert InvalidRendererRegistration();
             previous = t.target;
             _targets.push(t);
@@ -108,11 +123,110 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
         schemaRegistryCodeHash = schemas.codehash;
         targetSetHash = keccak256(abi.encode(targets));
         deploymentChainId = block.chainid;
+        if (address(PreservationAdmission).code.length == 0) {
+            revert Preservation.InvalidPreservationAdmission();
+        }
+        _preservationValidationCodeHash = address(PreservationAdmission).codehash;
     }
 
     function supportsInterface(bytes4 id) public pure virtual returns (bool) {
         return id == type(V).interfaceId || id == type(Current).interfaceId
-            || id == type(Terminal).interfaceId || id == 0x01ffc9a7;
+            || id == type(Terminal).interfaceId || id == type(Preservation).interfaceId
+            || id == 0x01ffc9a7;
+    }
+
+    function _preservationState() private pure returns (PreservationWriter.State storage s) {
+        bytes32 slot = keccak256("6529STREAM_RENDERER_REGISTRY_PRESERVATION_STORAGE_V1");
+        assembly ("memory-safe") { s.slot := slot }
+    }
+
+    function preservationValidationBinding() external view returns (address, bytes32) {
+        return (address(PreservationAdmission), _preservationValidationCodeHash);
+    }
+
+    function preservationKey(bytes32 versionKey, address producer, bytes32 profile)
+        external
+        pure
+        returns (bytes32)
+    {
+        return PreservationAdmission.key(versionKey, producer, profile);
+    }
+
+    function registerPreservation(Preservation.PreservationRegistration calldata, Read[] calldata)
+        external
+    {
+        PreservationWriter.registerEncoded(
+            _preservationState(), _versions, _targets, _reads, _preservationContext(), msg.data
+        );
+    }
+
+    function preservationTransition(Preservation.PreservationRegistration calldata, Read[] calldata)
+        external
+        view
+        returns (bytes32, bytes32, bytes32)
+    {
+        return PreservationWriter.transitionEncoded(
+            _preservationState(), _versions, _preservationContext(), msg.data
+        );
+    }
+
+    function preservationRecord(bytes32 key)
+        external
+        view
+        returns (Preservation.PreservationRecord memory)
+    {
+        return _preservationState().records[key];
+    }
+
+    function preservationReads(bytes32 key) external view returns (Read[] memory) {
+        return _preservationState().reads[key];
+    }
+
+    function requirePreservation(bytes32 versionKey, address producer, bytes32 profile)
+        external
+        view
+        returns (Preservation.ProducerBinding calldata, Preservation.Admission calldata)
+    {
+        if (address(PreservationAdmission).codehash != _preservationValidationCodeHash) {
+            revert Preservation.PreservationUnavailable(PreservationAdmission.key(
+                    versionKey, producer, profile
+                ));
+        }
+        bytes memory raw = Calls.fixedCode(
+            address(PreservationAdmission),
+            abi.encodeWithSelector(
+                PreservationAdmission.requireRegistry.selector,
+                address(this),
+                versionKey,
+                producer,
+                profile,
+                _gasParameterValue(READ_GAS)
+            ),
+            512,
+            gasleft()
+        );
+        if (raw.length != 512) revert Preservation.InvalidPreservationAdmission();
+        // Terminal raw return: the fixed worker has already produced the exact public tuple.
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function _preservationContext() private view returns (PreservationWriter.Context memory) {
+        return PreservationWriter.Context(
+            governanceAuthority,
+            governanceAuthorityCodeHash,
+            schemaRegistry,
+            schemaRegistryCodeHash,
+            targetSetHash,
+            deploymentChainId,
+            _gasParameterValue(READ_GAS),
+            _gasParameterValue(GOLDEN_GAS)
+        );
+    }
+
+    function _preservationRole(bytes32 role) private pure returns (bool) {
+        return role == keccak256("PRESERVATION_RENDERER")
+            || role == keccak256("PRESERVATION_ATTRIBUTION")
+            || role == keccak256("PRESERVATION_COMPANION");
     }
 
     function registerTerminalEntropy(
@@ -370,10 +484,12 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
         if (_versions[key].exists) revert RendererAlreadyRegistered(key);
         bytes32 declaration = _declaration(r, declared);
         bytes32 action = _governed(_scope(key), _state(0, false), _state(declaration, false), 1);
-        _manifest(r);
-        bytes32 setHash = _readSet(declared);
-        bytes32 analysis = _analysis(r, setHash);
-        bytes32 golden = _golden(r);
+        (bytes32 setHash, bytes32 analysis, bytes32 golden) = AdmissionValidation.validate(
+            r,
+            declared,
+            _targets,
+            AdmissionValidation.Context(schemaRegistry, schemaRegistryCodeHash, targetSetHash)
+        );
         // External renderer calls above are STATICCALLs. No target can mutate the registry
         // or its schema/evidence state between validation and this single immutable insertion.
         _versions[key] = Version(
@@ -498,67 +614,6 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
             );
     }
 
-    function _manifest(Registration calldata r) private view {
-        R.RendererManifest calldata m = r.manifest;
-        if (
-            r.renderer.code.length == 0 || m.rendererId == 0 || m.rendererVersion == 0
-                || m.contextVersion == 0 || m.rendererClass != keccak256("STATIC")
-                || m.schemaHash == 0 || m.manifestHash == 0 || m.deprecated
-                || bytes(m.schemaURI).length > 2048 || bytes(m.manifestURI).length > 2048
-                || m.maxJSONBytes == 0 || m.maxJSONBytes > MAX_OUTPUT_BYTES
-                || m.maxHTMLBytes > MAX_OUTPUT_BYTES || r.contextDocument != m.contextVersion
-        ) revert InvalidRendererRegistration();
-        uint256 cap = _gasParameterValue(READ_GAS);
-        if (
-            !abi.decode(
-                    Calls.read(
-                        r.renderer,
-                        abi.encodeCall(IERC165.supportsInterface, (type(R).interfaceId)),
-                        Calls.ReadOptions(32, true),
-                        cap
-                    ),
-                    (bool)
-                )
-                || abi.decode(
-                        Calls.read(
-                            r.renderer,
-                            abi.encodeCall(R.rendererVersion, ()),
-                            Calls.ReadOptions(32, true),
-                            cap
-                        ),
-                        (bytes32)
-                    ) != m.rendererVersion
-                || abi.decode(
-                        Calls.read(
-                            r.renderer,
-                            abi.encodeCall(R.renderContextVersion, ()),
-                            Calls.ReadOptions(32, true),
-                            cap
-                        ),
-                        (bytes32)
-                    ) != m.contextVersion
-        ) {
-            revert InvalidRendererRegistration();
-        }
-        bytes memory encoded = Calls.read(
-            r.renderer, abi.encodeCall(R.rendererManifest, ()), Calls.ReadOptions(4576, false), cap
-        );
-        R.RendererManifest memory actual = abi.decode(encoded, (R.RendererManifest));
-        if (
-            keccak256(encoded) != keccak256(abi.encode(actual))
-                || keccak256(abi.encode(actual)) != keccak256(abi.encode(m))
-        ) {
-            revert InvalidRendererRegistration();
-        }
-        if (
-            _fact(r.schemaDocument, S.DocumentKind.SCHEMA).contentHash != m.schemaHash
-                || _fact(r.manifestDocument, S.DocumentKind.CATALOG).contentHash != m.manifestHash
-        ) {
-            revert InvalidRendererEvidence(r.manifestDocument);
-        }
-        _fact(r.contextDocument, S.DocumentKind.SCHEMA);
-    }
-
     function _readSet(Read[] calldata declared) private view returns (bytes32) {
         if (declared.length > MAX_READS) revert InvalidRendererRegistration();
         uint256 previous;
@@ -577,48 +632,6 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
             previous = order;
         }
         return keccak256(abi.encode(READ_SET, targetSetHash, declared));
-    }
-
-    function _analysis(Registration calldata r, bytes32 setHash) private view returns (bytes32) {
-        bytes memory payload = _document(r.analysisDocument);
-        Analysis memory a = abi.decode(payload, (Analysis));
-        if (
-            keccak256(payload) != keccak256(abi.encode(a)) || a.profile != ANALYSIS_PROFILE
-                || a.renderer != r.renderer || a.runtimeHash != r.renderer.codehash
-                || a.readSetHash != setHash || a.rendererVersion != r.manifest.rendererVersion
-                || a.contextVersion != r.manifest.contextVersion
-                || a.schemaHash != r.manifest.schemaHash || a.toolHash == 0 || a.findingsHash == 0
-                || !a.passed
-        ) {
-            revert InvalidRendererEvidence(r.analysisDocument);
-        }
-        return keccak256(payload);
-    }
-
-    function _golden(Registration calldata r) private view returns (bytes32) {
-        bytes memory payload = _document(r.goldenDocument);
-        GoldenVector[] memory vectors = abi.decode(payload, (GoldenVector[]));
-        if (
-            keccak256(payload) != keccak256(abi.encode(vectors)) || vectors.length == 0
-                || vectors.length > MAX_VECTORS
-        ) {
-            revert InvalidRendererEvidence(r.goldenDocument);
-        }
-        uint256 maximum = 29 + 4 * ((uint256(r.manifest.maxJSONBytes) + 2) / 3);
-        for (uint256 i; i < vectors.length; ++i) {
-            if (vectors[i].outputHash == 0) revert InvalidRendererEvidence(r.goldenDocument);
-            bytes memory output = Calls.read(
-                r.renderer,
-                abi.encodeCall(R.tokenURI, (vectors[i].request)),
-                Calls.ReadOptions(64 + ((maximum + 31) / 32) * 32, false),
-                _gasParameterValue(GOLDEN_GAS)
-            );
-            string memory uri = Calls.stringResult(output, maximum);
-            if (keccak256(bytes(uri)) != vectors[i].outputHash) {
-                revert InvalidRendererEvidence(r.goldenDocument);
-            }
-        }
-        return keccak256(payload);
     }
 
     function _document(bytes32 id) private view returns (bytes memory payload) {

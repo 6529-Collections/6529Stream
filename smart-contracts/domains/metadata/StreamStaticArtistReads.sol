@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistPlatformCorrectionReads } from "../artist/StreamArtistPlatformCorrectionReads.sol";
-import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
+import {
+    StreamArtistPlatformCorrectionReads
+} from "../artist/StreamArtistPlatformCorrectionReads.sol";
+import {
+    StreamArtistPlatformCorrectionLineageTypes as PL,
+    IStreamArtistPlatformCorrectionLineage as PlatformLineage
+} from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
 import {
     IStreamStaticArtistSource
 } from "../../interfaces/stream/metadata/IStreamStaticArtistSource.sol";
@@ -55,6 +60,58 @@ library StreamStaticArtistReads {
         uint256 collection,
         uint256 token
     ) internal view returns (bytes memory) {
+        return _object(
+            router,
+            chainId,
+            core,
+            artist,
+            artistCodeHash,
+            original,
+            originalCodeHash,
+            collection,
+            token,
+            true
+        );
+    }
+
+    /// @notice Explicit preservation projection; only covering-sanction resolution is excluded.
+    function preservationObject(
+        address router,
+        uint256 chainId,
+        address core,
+        address artist,
+        bytes32 artistCodeHash,
+        address original,
+        bytes32 originalCodeHash,
+        uint256 collection,
+        uint256 token
+    ) internal view returns (bytes memory) {
+        return _object(
+            router,
+            chainId,
+            core,
+            artist,
+            artistCodeHash,
+            original,
+            originalCodeHash,
+            collection,
+            token,
+            false
+        );
+    }
+
+    function _object(
+        address router,
+        uint256 chainId,
+        address core,
+        address artist,
+        bytes32 artistCodeHash,
+        address original,
+        bytes32 originalCodeHash,
+        uint256 collection,
+        uint256 token,
+        bool includeSanction
+    ) private view returns (bytes memory) {
         _pin(artist, artistCodeHash);
         StreamMetadataRecoveryRoutes.Pointer memory p = abi.decode(
             _read(
@@ -98,7 +155,8 @@ library StreamStaticArtistReads {
         bool corrected = platform.correction.accepted;
         if (StreamArtistPlatformCorrectionReads.needed(platform)) {
             corrected = StreamArtistPlatformCorrectionReads.effectiveEncoded(
-                platform, _platformContinuation(artist, collection));
+                platform, _platformContinuation(artist, collection)
+            );
         }
         f.platform = platform.declaration.recordHash != 0 && !corrected;
         f.hasPlatformHistory = platform.declaration.recordHash != 0;
@@ -151,7 +209,7 @@ library StreamStaticArtistReads {
             );
             f.collaborators = _collaborators(artist, collection, b.generation);
             _attestation(router, chainId, core, artist, original, originalCodeHash, collection, f);
-            if (f.state == 2) {
+            if (includeSanction && f.state == 2) {
                 _sanctions(
                     router, core, artist, original, originalCodeHash, collection, token, b, f
                 );
@@ -533,8 +591,14 @@ library StreamStaticArtistReads {
         }
     }
 
-    function _platformContinuation(address artist, uint256 collection) private view returns (bytes memory) {
-        return _read(artist, abi.encodeCall(PlatformLineage.platformCorrectionStatus, (collection)), 192);
+    function _platformContinuation(address artist, uint256 collection)
+        private
+        view
+        returns (bytes memory)
+    {
+        return _read(
+            artist, abi.encodeCall(PlatformLineage.platformCorrectionStatus, (collection)), 192
+        );
     }
 
     function _artistSelector(bytes4 s) private pure returns (bool) {
