@@ -33,6 +33,9 @@ the release policy in `docs/release-policy.md`.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
 
+- Add mint Manager fallback ceremony clients with original governance commitments,
+  retirement classification, genuine imports and atomic activation/recovery review.
+
 - Add collection token inventory recovery clients with bounded allocation scans,
   actual-serial lookups, saved-prefix membership and exact direct/Safe CALL review.
 

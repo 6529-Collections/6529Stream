@@ -360,6 +360,8 @@ contract profiles and outstanding larger-script work.
   protected inventories and manifests, then prepares bounded import and completion calls.
 - [Mint counter profiles and continuity](docs/current-mint-continuity.md) produce
   reviewed inventory manifests and prepare bounded definition, ancestry and state imports.
+- [Mint Manager fallback ceremony](docs/current-mint-fallback.md) prepares
+  retirement, genuine accounting imports and delayed activation or incident recovery.
 - [Mint gate inputs](docs/current-mint-gates.md) produce ticket signing packets,
   delegated vault requests and canonical static allowlist proofs and commitments.
 - [Operator distributions](docs/current-distribution.md) preserve ordered artwork
