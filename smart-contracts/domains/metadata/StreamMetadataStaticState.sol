@@ -83,6 +83,11 @@ library StreamMetadataStaticState {
         bytes32 key = tokenId == 0 ? bytes32(0) : s.tokenOverrides[tokenId];
         if (key == 0) key = c.collectionOverride;
         if (key == 0) key = c.activationDefault;
-        return s.records[key];
+        return record(key);
+    }
+
+    /// @dev Share the complete storage-to-memory copy across direct configuration reads.
+    function record(bytes32 key) internal view returns (S.ConfigRecord memory) {
+        return state().records[key];
     }
 }

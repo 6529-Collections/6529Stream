@@ -114,8 +114,9 @@ library StreamMetadataStaticRouting {
                 : StreamCurrentCitationRouting.input(
                     selected, request, mode, Gas.value(Gas.BUNDLE_READ_GAS)
                 );
-        bytes memory raw =
-            Calls.read(selected.renderer, input, 64 + ((maximum + 31) / 32) * 32, false, cap);
+        bytes memory raw = Calls.read(
+            selected.renderer, input, Calls.ReadOptions(64 + ((maximum + 31) / 32) * 32, false), cap
+        );
         return Calls.stringResult(raw, maximum);
     }
 
@@ -145,7 +146,7 @@ library StreamMetadataStaticRouting {
         view
         returns (bytes memory)
     {
-        return Calls.read(a, input, size, true, Gas.value(Gas.BUNDLE_READ_GAS));
+        return Calls.read(a, input, Calls.ReadOptions(size, true), Gas.value(Gas.BUNDLE_READ_GAS));
     }
 
     function _pin(address a, bytes32 hash) private view {

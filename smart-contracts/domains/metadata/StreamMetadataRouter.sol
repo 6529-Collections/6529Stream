@@ -116,6 +116,7 @@ contract StreamMetadataRouter is
         bytes32 consent;
         bytes32 ratification;
     }
+
     // Memory-backed flags avoid specializing the large serving path for each public selector.
     struct TokenViewOptions {
         bool allowBurned;
@@ -382,7 +383,7 @@ contract StreamMetadataRouter is
 
     function defaultMetadataConfig() external view returns (Static.ConfigRecord memory) {
         StaticState.State storage s = StaticState.state();
-        return s.records[s.defaultHead];
+        return StaticState.record(s.defaultHead);
     }
 
     function metadataConfigAuthorization(bytes32 hash)
@@ -394,7 +395,7 @@ contract StreamMetadataRouter is
     }
 
     function metadataConfigRecord(bytes32 hash) external view returns (Static.ConfigRecord memory) {
-        return StaticState.state().records[hash];
+        return StaticState.record(hash);
     }
 
     function collectionMetadataConfig(uint256 id)
@@ -483,8 +484,7 @@ contract StreamMetadataRouter is
         bytes memory raw = StaticCalls.read(
             address(core),
             abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (token)),
-            128,
-            true,
+            StaticCalls.ReadOptions(128, true),
             StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
         );
         bool exists;
@@ -1056,8 +1056,7 @@ contract StreamMetadataRouter is
         bytes memory identity = StaticCalls.read(
             address(core),
             abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (tokenId)),
-            128,
-            true,
+            StaticCalls.ReadOptions(128, true),
             StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
         );
         (bool exists, uint256 staticCollection,,) =

@@ -239,7 +239,10 @@ library StreamMetadataStaticConfiguration {
     function _snapshot(Prepared memory p, uint256 id) private view {
         if (!p.record.config.frozen) return;
         bytes memory raw = Calls.read(
-            address(this), abi.encodeCall(S.staticRenderSource, (id)), 16000, false, _cap()
+            address(this),
+            abi.encodeCall(S.staticRenderSource, (id)),
+            Calls.ReadOptions(16000, false),
+            _cap()
         );
         p.snapshot = abi.decode(raw, (S.RawSource));
         if (keccak256(raw) != keccak256(abi.encode(p.snapshot)) || !p.snapshot.configured) {
@@ -304,8 +307,12 @@ library StreamMetadataStaticConfiguration {
                 || v.registrationHash == 0
         ) revert S.InvalidStaticMetadataConfig();
         _code(v.renderer, v.runtimeHash);
-        bytes memory raw =
-            Calls.read(v.renderer, abi.encodeCall(R.rendererManifest, ()), 4576, false, _cap());
+        bytes memory raw = Calls.read(
+            v.renderer,
+            abi.encodeCall(R.rendererManifest, ()),
+            Calls.ReadOptions(4576, false),
+            _cap()
+        );
         R.RendererManifest memory m = abi.decode(raw, (R.RendererManifest));
         if (
             keccak256(raw) != keccak256(abi.encode(m)) || m.rendererClass != keccak256("STATIC")
@@ -320,7 +327,10 @@ library StreamMetadataStaticConfiguration {
                     )
         ) revert S.InvalidStaticMetadataConfig();
         bytes memory registeredRaw = Calls.read(
-            input.registry, abi.encodeCall(V.registration, (input.versionKey)), 9216, false, _cap()
+            input.registry,
+            abi.encodeCall(V.registration, (input.versionKey)),
+            Calls.ReadOptions(9216, false),
+            _cap()
         );
         V.Registration memory registered = abi.decode(registeredRaw, (V.Registration));
         if (
@@ -461,7 +471,7 @@ library StreamMetadataStaticConfiguration {
     }
 
     function _read(address a, bytes memory data, uint256 size) private view returns (bytes memory) {
-        return Calls.read(a, data, size, true, _cap());
+        return Calls.read(a, data, Calls.ReadOptions(size, true), _cap());
     }
 
     function _cap() private view returns (uint256) {

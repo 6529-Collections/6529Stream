@@ -88,8 +88,7 @@ library StreamCurrentCitationAdmission {
             bytes memory raw = Calls.read(
                 original.renderer,
                 abi.encodeCall(C.renderCurrent, (v.request, v.mode)),
-                64 + ((maximum + 31) / 32) * 32,
-                false,
+                Calls.ReadOptions(64 + ((maximum + 31) / 32) * 32, false),
                 goldenGas
             );
             if (keccak256(bytes(Calls.stringResult(raw, maximum))) != v.outputHash) {
@@ -120,15 +119,17 @@ library StreamCurrentCitationAdmission {
                     Calls.read(
                         renderer,
                         abi.encodeCall(IERC165.supportsInterface, (type(C).interfaceId)),
-                        32,
-                        true,
+                        Calls.ReadOptions(32, true),
                         cap
                     ),
                     (bool)
                 )
                 || abi.decode(
                         Calls.read(
-                            renderer, abi.encodeCall(C.currentCitationProfile, ()), 32, true, cap
+                            renderer,
+                            abi.encodeCall(C.currentCitationProfile, ()),
+                            Calls.ReadOptions(32, true),
+                            cap
                         ),
                         (bytes32)
                     ) != PROFILE
@@ -136,7 +137,9 @@ library StreamCurrentCitationAdmission {
             revert A.InvalidCurrentCitation();
         }
         (address encoding, bytes32 runtime) = abi.decode(
-            Calls.read(renderer, abi.encodeCall(C.encodingBinding, ()), 64, true, cap),
+            Calls.read(
+                renderer, abi.encodeCall(C.encodingBinding, ()), Calls.ReadOptions(64, true), cap
+            ),
             (address, bytes32)
         );
         if (encoding != r.encoding || runtime != r.encodingRuntimeHash) {

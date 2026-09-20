@@ -32,14 +32,18 @@ library StreamEntropyRenderPolicyReads {
                     Calls.read(
                         coordinator,
                         abi.encodeCall(IERC165.supportsInterface, (P.CAPABILITY)),
-                        32,
-                        true,
+                        Calls.ReadOptions(32, true),
                         cap
                     ),
                     (bool)
                 )
                 || abi.decode(
-                        Calls.read(coordinator, abi.encodeWithSignature("core()"), 32, true, cap),
+                        Calls.read(
+                            coordinator,
+                            abi.encodeWithSignature("core()"),
+                            Calls.ReadOptions(32, true),
+                            cap
+                        ),
                         (address)
                     ) != core
         ) {
@@ -48,8 +52,7 @@ library StreamEntropyRenderPolicyReads {
         bytes memory raw = Calls.read(
             coordinator,
             abi.encodeCall(Read.collectionEntropyPolicy, (collectionId)),
-            384,
-            true,
+            Calls.ReadOptions(384, true),
             cap
         );
         p = abi.decode(raw, (P.Policy));
@@ -78,7 +81,10 @@ library StreamEntropyRenderPolicyReads {
     {
         (bool exists, uint256 actualCollection,,) = abi.decode(
             Calls.read(
-                core, abi.encodeCall(Core.tokenCollectionIdentity, (tokenId)), 128, true, cap
+                core,
+                abi.encodeCall(Core.tokenCollectionIdentity, (tokenId)),
+                Calls.ReadOptions(128, true),
+                cap
             ),
             (bool, uint256, uint256, bool)
         );
@@ -86,7 +92,12 @@ library StreamEntropyRenderPolicyReads {
             revert InvalidTerminalEntropy(tokenId);
         }
         t.coordinator = abi.decode(
-            Calls.read(core, abi.encodeCall(Core.coordinatorAtMint, (tokenId)), 32, true, cap),
+            Calls.read(
+                core,
+                abi.encodeCall(Core.coordinatorAtMint, (tokenId)),
+                Calls.ReadOptions(32, true),
+                cap
+            ),
             (address)
         );
         t.coordinatorCodeHash = t.coordinator.codehash;
@@ -96,22 +107,25 @@ library StreamEntropyRenderPolicyReads {
                     Calls.read(
                         t.coordinator,
                         abi.encodeCall(IERC165.supportsInterface, (P.STATIC_CAPABILITY)),
-                        32,
-                        true,
+                        Calls.ReadOptions(32, true),
                         cap
                     ),
                     (bool)
                 )
                 || abi.decode(
-                        Calls.read(t.coordinator, abi.encodeWithSignature("core()"), 32, true, cap),
+                        Calls.read(
+                            t.coordinator,
+                            abi.encodeWithSignature("core()"),
+                            Calls.ReadOptions(32, true),
+                            cap
+                        ),
                         (address)
                     ) != core
         ) revert InvalidTerminalEntropy(tokenId);
         bytes memory raw = Calls.read(
             t.coordinator,
             abi.encodeCall(StaticRead.staticTerminalEntropyFacts, (tokenId)),
-            512,
-            true,
+            Calls.ReadOptions(512, true),
             cap
         );
         uint256 retainedCollection;
@@ -136,7 +150,10 @@ library StreamEntropyRenderPolicyReads {
     {
         (bool exists, uint256 actualCollection,,) = abi.decode(
             Calls.read(
-                core, abi.encodeCall(Core.tokenCollectionIdentity, (tokenId)), 128, true, cap
+                core,
+                abi.encodeCall(Core.tokenCollectionIdentity, (tokenId)),
+                Calls.ReadOptions(128, true),
+                cap
             ),
             (bool, uint256, uint256, bool)
         );
@@ -144,13 +161,22 @@ library StreamEntropyRenderPolicyReads {
             revert InvalidTerminalEntropy(tokenId);
         }
         t.coordinator = abi.decode(
-            Calls.read(core, abi.encodeCall(Core.coordinatorAtMint, (tokenId)), 32, true, cap),
+            Calls.read(
+                core,
+                abi.encodeCall(Core.coordinatorAtMint, (tokenId)),
+                Calls.ReadOptions(32, true),
+                cap
+            ),
             (address)
         );
         t.coordinatorCodeHash = t.coordinator.codehash;
         t.policy = policy(t.coordinator, core, collectionId, cap);
-        bytes memory raw =
-            Calls.read(t.coordinator, abi.encodeCall(E.tokenEntropy, (tokenId)), 256, true, cap);
+        bytes memory raw = Calls.read(
+            t.coordinator,
+            abi.encodeCall(E.tokenEntropy, (tokenId)),
+            Calls.ReadOptions(256, true),
+            cap
+        );
         (
             StreamEntropyStatus status,
             bytes32 seed,
@@ -178,7 +204,12 @@ library StreamEntropyRenderPolicyReads {
                 || seed != 0 || request != 0 || requestId != 0 || attempt != 0
         ) revert InvalidTerminalEntropy(tokenId);
         (bytes32 savedSeed, bool finalized) = abi.decode(
-            Calls.read(t.coordinator, abi.encodeCall(E.tokenSeed, (tokenId)), 64, true, cap),
+            Calls.read(
+                t.coordinator,
+                abi.encodeCall(E.tokenSeed, (tokenId)),
+                Calls.ReadOptions(64, true),
+                cap
+            ),
             (bytes32, bool)
         );
         if (
@@ -187,8 +218,7 @@ library StreamEntropyRenderPolicyReads {
                         Calls.read(
                             t.coordinator,
                             abi.encodeCall(E.tokenEntropyStatus, (tokenId)),
-                            32,
-                            true,
+                            Calls.ReadOptions(32, true),
                             cap
                         ),
                         (StreamEntropyStatus)

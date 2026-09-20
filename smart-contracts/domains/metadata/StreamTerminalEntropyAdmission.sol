@@ -43,7 +43,10 @@ library StreamTerminalEntropyAdmission {
         uint256 required;
         (address core, address entropy, bytes32 entropyHash) = abi.decode(
             Calls.read(
-                original.renderer, abi.encodeCall(T.terminalPolicyBinding, ()), 96, true, readGas
+                original.renderer,
+                abi.encodeCall(T.terminalPolicyBinding, ()),
+                Calls.ReadOptions(96, true),
+                readGas
             ),
             (address, address, bytes32)
         );
@@ -54,8 +57,7 @@ library StreamTerminalEntropyAdmission {
             Calls.read(
                 original.renderer,
                 abi.encodeCall(T.terminalValidationBinding, ()),
-                64,
-                true,
+                Calls.ReadOptions(64, true),
                 readGas
             ),
             (address, bytes32)
@@ -157,8 +159,7 @@ library StreamTerminalEntropyAdmission {
             bytes memory raw = Calls.read(
                 original.renderer,
                 abi.encodeCall(T.renderTerminal, (v.request, v.mode)),
-                64 + ((maximum + 31) / 32) * 32,
-                false,
+                Calls.ReadOptions(64 + ((maximum + 31) / 32) * 32, false),
                 goldenGas
             );
             if (keccak256(bytes(Calls.stringResult(raw, maximum))) != v.outputHash) {
@@ -180,21 +181,28 @@ library StreamTerminalEntropyAdmission {
                     Calls.read(
                         renderer,
                         abi.encodeCall(IERC165.supportsInterface, (type(T).interfaceId)),
-                        32,
-                        true,
+                        Calls.ReadOptions(32, true),
                         cap
                     ),
                     (bool)
                 )
                 || abi.decode(
                         Calls.read(
-                            renderer, abi.encodeCall(T.terminalEntropyProfile, ()), 32, true, cap
+                            renderer,
+                            abi.encodeCall(T.terminalEntropyProfile, ()),
+                            Calls.ReadOptions(32, true),
+                            cap
                         ),
                         (bytes32)
                     ) != PROFILE
         ) revert A.InvalidTerminalEntropyAdmission();
         (address encoding, bytes32 runtime) = abi.decode(
-            Calls.read(renderer, abi.encodeCall(T.terminalEncodingBinding, ()), 64, true, cap),
+            Calls.read(
+                renderer,
+                abi.encodeCall(T.terminalEncodingBinding, ()),
+                Calls.ReadOptions(64, true),
+                cap
+            ),
             (address, bytes32)
         );
         if (encoding != r.encoding || runtime != r.encodingRuntimeHash) {

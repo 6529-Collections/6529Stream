@@ -126,8 +126,9 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
         }
         _retained(r.versionKey);
         bytes32 declaration = _terminalDeclaration(r, declared);
-        bytes32 action =
-            _governed(_terminalScope(r.versionKey), _terminalHash(0), _terminalHash(declaration), 1);
+        bytes32 action = _governed(
+            _terminalScope(r.versionKey), _terminalHash(0), _terminalHash(declaration), 1
+        );
         bytes32 setHash = _readSet(declared);
         bytes memory analysis = _document(r.analysisDocument);
         bytes memory golden = _document(r.goldenDocument);
@@ -513,29 +514,35 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
                     Calls.read(
                         r.renderer,
                         abi.encodeCall(IERC165.supportsInterface, (type(R).interfaceId)),
-                        32,
-                        true,
+                        Calls.ReadOptions(32, true),
                         cap
                     ),
                     (bool)
                 )
                 || abi.decode(
                         Calls.read(
-                            r.renderer, abi.encodeCall(R.rendererVersion, ()), 32, true, cap
+                            r.renderer,
+                            abi.encodeCall(R.rendererVersion, ()),
+                            Calls.ReadOptions(32, true),
+                            cap
                         ),
                         (bytes32)
                     ) != m.rendererVersion
                 || abi.decode(
                         Calls.read(
-                            r.renderer, abi.encodeCall(R.renderContextVersion, ()), 32, true, cap
+                            r.renderer,
+                            abi.encodeCall(R.renderContextVersion, ()),
+                            Calls.ReadOptions(32, true),
+                            cap
                         ),
                         (bytes32)
                     ) != m.contextVersion
         ) {
             revert InvalidRendererRegistration();
         }
-        bytes memory encoded =
-            Calls.read(r.renderer, abi.encodeCall(R.rendererManifest, ()), 4576, false, cap);
+        bytes memory encoded = Calls.read(
+            r.renderer, abi.encodeCall(R.rendererManifest, ()), Calls.ReadOptions(4576, false), cap
+        );
         R.RendererManifest memory actual = abi.decode(encoded, (R.RendererManifest));
         if (
             keccak256(encoded) != keccak256(abi.encode(actual))
@@ -603,8 +610,7 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
             bytes memory output = Calls.read(
                 r.renderer,
                 abi.encodeCall(R.tokenURI, (vectors[i].request)),
-                64 + ((maximum + 31) / 32) * 32,
-                false,
+                Calls.ReadOptions(64 + ((maximum + 31) / 32) * 32, false),
                 _gasParameterValue(GOLDEN_GAS)
             );
             string memory uri = Calls.stringResult(output, maximum);
@@ -621,8 +627,7 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
         bytes memory encoded = Calls.read(
             schemaRegistry,
             abi.encodeCall(S.documentBytes, (id)),
-            64 + ((uint256(f.totalBytes) + 31) / 32) * 32,
-            false,
+            Calls.ReadOptions(64 + ((uint256(f.totalBytes) + 31) / 32) * 32, false),
             _gasParameterValue(READ_GAS)
         );
         payload = abi.decode(encoded, (bytes));
@@ -642,8 +647,7 @@ contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost 
             Calls.read(
                 schemaRegistry,
                 abi.encodeCall(F.documentFacts, (id)),
-                288,
-                true,
+                Calls.ReadOptions(288, true),
                 _gasParameterValue(READ_GAS)
             ),
             (F.DocumentFacts)

@@ -22,6 +22,52 @@ contract StreamStaticMetadataRoutingTest is StaticMetadataRoutingFixture {
         require(activation.sourceSnapshotHash != 0, "original source captured at activation");
     }
 
+    function testConfigRecordGettersPreserveCompleteSnapshotsAndUnknownZeros() public {
+        S.ConfigRecord memory empty;
+        require(
+            keccak256(abi.encode(router.metadataConfigRecord(keccak256("unknown record"))))
+                == keccak256(abi.encode(empty)),
+            "unknown record remains complete zero record"
+        );
+        S.ConfigInput memory input = _input(R.MetadataMode.HYBRID, false);
+        bytes32 global = router.setDefaultMetadataConfig(input);
+        S.ConfigRecord memory globalRecord = router.defaultMetadataConfig();
+        bytes32 globalBytes = keccak256(abi.encode(globalRecord));
+        require(globalRecord.recordHash == global);
+        require(keccak256(abi.encode(globalRecord.config)) == keccak256(abi.encode(input.config)));
+        require(keccak256(abi.encode(router.metadataConfigRecord(global))) == globalBytes);
+        router.activateStaticMetadata(1, global);
+        _mint();
+        S.ConfigRecord memory collection = router.collectionMetadataConfig(1);
+        bytes32 collectionBytes = keccak256(abi.encode(collection));
+        require(
+            keccak256(abi.encode(router.metadataConfigRecord(collection.recordHash)))
+                == collectionBytes
+        );
+        require(keccak256(abi.encode(router.resolvedMetadataConfig(91))) == collectionBytes);
+
+        S.ConfigInput memory tokenInput = _input(R.MetadataMode.ONCHAIN, false);
+        _approve(91, tokenInput, keccak256("record getter token consent"));
+        bytes32 tokenHash = router.setTokenMetadataConfig(91, tokenInput);
+        S.ConfigRecord memory tokenRecord = router.resolvedMetadataConfig(91);
+        require(tokenRecord.recordHash == tokenHash && tokenRecord.tokenId == 91);
+        require(
+            keccak256(abi.encode(tokenRecord.config)) == keccak256(abi.encode(tokenInput.config))
+        );
+        require(
+            keccak256(abi.encode(router.metadataConfigRecord(tokenHash)))
+                == keccak256(abi.encode(tokenRecord))
+        );
+        require(keccak256(abi.encode(router.collectionMetadataConfig(1))) == collectionBytes);
+        input.config.baseURI = "https://example.test/new-default/";
+        router.setDefaultMetadataConfig(input);
+        require(keccak256(abi.encode(router.metadataConfigRecord(global))) == globalBytes);
+        require(
+            keccak256(abi.encode(router.resolvedMetadataConfig(91)))
+                == keccak256(abi.encode(tokenRecord))
+        );
+    }
+
     function testActivationPinsDefaultAndIndependentFullRecord() public {
         S.ConfigInput memory input = _input(R.MetadataMode.ONCHAIN, false);
         bytes32 global = router.setDefaultMetadataConfig(input);

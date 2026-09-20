@@ -27,12 +27,20 @@ library StreamTerminalEntropyValidation {
         p = Reads.staticTerminal(r.core, r.tokenId, r.collectionId, cap);
         (bool exists, uint256 cid, uint256 serial, bool burned) = abi.decode(
             Calls.read(
-                r.core, abi.encodeCall(I.tokenCollectionIdentity, (r.tokenId)), 128, true, cap
+                r.core,
+                abi.encodeCall(I.tokenCollectionIdentity, (r.tokenId)),
+                Calls.ReadOptions(128, true),
+                cap
             ),
             (bool, uint256, uint256, bool)
         );
         uint8 lifecycle = abi.decode(
-            Calls.read(r.core, abi.encodeCall(I.tokenLifecycle, (r.tokenId)), 32, true, cap),
+            Calls.read(
+                r.core,
+                abi.encodeCall(I.tokenLifecycle, (r.tokenId)),
+                Calls.ReadOptions(32, true),
+                cap
+            ),
             (uint8)
         );
         bool frozen = configFrozen
@@ -40,8 +48,7 @@ library StreamTerminalEntropyValidation {
                 Calls.read(
                     r.core,
                     abi.encodeCall(C.collectionFreezeStatus, (r.collectionId)),
-                    32,
-                    true,
+                    Calls.ReadOptions(32, true),
                     cap
                 ),
                 (bool)
@@ -56,14 +63,20 @@ library StreamTerminalEntropyValidation {
                 || r.collectionSupplyMode
                     != abi.decode(
                         Calls.read(
-                            r.core, abi.encodeCall(C.collectionSupplyMode, (cid)), 32, true, cap
+                            r.core,
+                            abi.encodeCall(C.collectionSupplyMode, (cid)),
+                            Calls.ReadOptions(32, true),
+                            cap
                         ),
                         (uint8)
                     )
                 || r.collectionStatus
                     != abi.decode(
                         Calls.read(
-                            r.core, abi.encodeCall(C.collectionStatus, (cid)), 32, true, cap
+                            r.core,
+                            abi.encodeCall(C.collectionStatus, (cid)),
+                            Calls.ReadOptions(32, true),
+                            cap
                         ),
                         (uint8)
                     )

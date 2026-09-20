@@ -808,6 +808,6 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         view
         returns (bytes memory)
     {
-        return Calls.read(a, input, maximum, exact, _gasParameterValue(READ_GAS));
+        return Calls.read(a, input, Calls.ReadOptions(maximum, exact), _gasParameterValue(READ_GAS));
     }
 }

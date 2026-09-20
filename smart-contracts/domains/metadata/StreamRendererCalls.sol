@@ -6,11 +6,19 @@ library StreamRendererCalls {
     error RendererReadFailed(address target, bytes4 selector);
     uint256 internal constant RESERVE = 12000;
 
-    function read(address target, bytes memory input, uint256 maximum, bool exact, uint256 cap)
+    // Keep literal return bounds from producing a separate read body at each call site.
+    struct ReadOptions {
+        uint256 maximum;
+        bool exact;
+    }
+
+    function read(address target, bytes memory input, ReadOptions memory options, uint256 cap)
         internal
         view
         returns (bytes memory result)
     {
+        uint256 maximum = options.maximum;
+        bool exact = options.exact;
         uint256 left = gasleft();
         if (target.code.length == 0 || left <= RESERVE || cap == 0) {
             revert RendererReadFailed(target, bytes4(input));

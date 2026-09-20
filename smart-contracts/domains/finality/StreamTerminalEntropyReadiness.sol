@@ -100,8 +100,7 @@ contract StreamTerminalEntropyReadiness is I {
         bytes memory raw = Calls.read(
             metadataRouter,
             abi.encodeCall(M.resolvedMetadataConfig, (tokenId)),
-            8192,
-            false,
+            Calls.ReadOptions(8192, false),
             readGas
         );
         M.ConfigRecord memory c = abi.decode(raw, (M.ConfigRecord));
@@ -174,6 +173,6 @@ contract StreamTerminalEntropyReadiness is I {
         view
         returns (bytes memory)
     {
-        return Calls.read(target, input, size, true, cap);
+        return Calls.read(target, input, Calls.ReadOptions(size, true), cap);
     }
 }

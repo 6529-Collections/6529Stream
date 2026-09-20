@@ -27,8 +27,7 @@ library StreamCurrentCitationRouting {
             Calls.read(
                 selected.renderer,
                 abi.encodeCall(IERC165.supportsInterface, (type(C).interfaceId)),
-                32,
-                true,
+                Calls.ReadOptions(32, true),
                 cap
             ),
             (bool)
@@ -38,8 +37,7 @@ library StreamCurrentCitationRouting {
                 Calls.read(
                     selected.registry,
                     abi.encodeCall(A.requireCurrentCitation, (selected.versionKey)),
-                    128,
-                    true,
+                    Calls.ReadOptions(128, true),
                     cap
                 ),
                 (address, bytes32, bytes32, bytes4)

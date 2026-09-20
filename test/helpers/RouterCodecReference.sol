@@ -24,8 +24,8 @@ import {
     StreamMetadataStaticConfiguration as StaticConfiguration
 } from "../../smart-contracts/domains/metadata/StreamMetadataStaticConfiguration.sol";
 import {
-    StreamRendererCalls as StaticCalls
-} from "../../smart-contracts/domains/metadata/StreamRendererCalls.sol";
+    OriginalRendererCallsForSharing as StaticCalls
+} from "./OriginalRendererCallsForSharing.sol";
 import {
     StreamMetadataRouterRendering
 } from "../../smart-contracts/domains/metadata/StreamMetadataRouterRendering.sol";
