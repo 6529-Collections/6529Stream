@@ -112,6 +112,11 @@ the release policy in `docs/release-policy.md`.
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
 
+- Add a direct native Independent-catalogue PREMIS source adapter for typed
+  preservation objects and retained files. Preserve original records while
+  measuring local size/digests, retaining missing/mismatch diagnostics and
+  replaying the full offline package without inventing historical fixity events.
+
 - Add exact Museum decoding for native Artist C2PA credentials and selected
   reconciliation reports, preserving separate personhood, history and display
   observations. Supplied-byte and hash checks do not establish C2PA cryptography,

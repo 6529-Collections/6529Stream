@@ -47,3 +47,6 @@ schemas/museum/lido/licenses/W3C-SOFTWARE-NOTICE-2002.html whitespace=-blank-at-
 
 # Preserve generated WORK-to-LIDO XML bytes on every checkout.
 schemas/museum/work-lido/** text eol=lf
+
+# Preserve generated native retained-file PREMIS XML bytes on every checkout.
+schemas/museum/premis-retained/example/expected/premis.xml text eol=lf

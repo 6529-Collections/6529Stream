@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Native retained-file PREMIS](../../docs/museum-premis-retained.md) joins exact
+preservation-object records from the complete Independent catalogue to local
+retained bytes, with offline size/digest comparisons and replayable XML output.
+Missing or mismatching files remain explicit and prevent partial XML success.
+
 [Artist C2PA consumption](../../docs/museum-artist-c2pa.md) adds strict native
 credential, personhood and reconciliation decoders. It retains historical
 selected-verifier claims separately from current display observations and
