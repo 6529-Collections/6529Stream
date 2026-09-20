@@ -224,6 +224,13 @@ the release policy in `docs/release-policy.md`.
 
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
+
+- Add standalone native tier/selection context and six-source DIRECT acquisition
+  composition. Join completed-mint chronology, original sale tier, saved provider
+  selection dependencies and first-sale intent/interview history. Preserve current
+  and superseded selections separately, carry earlier RIGHTS/personhood evidence,
+  and keep original captures, V4 and full-packet acceptance boundaries unchanged.
+
 - Add a standalone native DIRECT floor schema and a two-input personhood
   assembly that replays the original floor, RIGHTS, provider and personhood
   evidence together. Preserve native adapter receipts and distinguish saved

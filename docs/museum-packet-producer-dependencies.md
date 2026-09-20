@@ -9,6 +9,18 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [DIRECT tier and selection composition](museum-direct-conservation-composition.md)
+adds the existing tier/default and four-lane selection captures to the earlier
+DIRECT personhood assembly. It reconciles six actual source transcripts, joins
+each recorded DIRECT token to a preceding completed mint, checks original tier
+positions, and compares saved first-sale registration, intent/waiver and interview
+commitments with original selected history. Saved provider dependencies and
+superseded pre-sale selections remain explicit. The new standalone context has
+no floor projection; native DIRECT/personhood and V4 boundaries stay unchanged.
+Items 6 and 13 remain partial until their remaining full-packet evidence and
+representation are supplied. Synthetic replay does not establish native runtime,
+recorded-chain or institutional acceptance.
+
 The [DIRECT personhood bridge](museum-direct-personhood.md) adds a separate
 native DIRECT floor fragment and joins the original provider-binding package
 to a personhood capture. It reconciles the four original floor, RIGHTS,

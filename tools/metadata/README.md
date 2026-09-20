@@ -42,6 +42,14 @@ Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.
 
+The standalone [native conservation context](../../docs/museum-direct-conservation-composition.md)
+represents current tier/default and all four collection/token Artist/estate
+selection lanes independently of the sale-floor family. Generate/check it with
+`python -m tools.metadata.acquisition_conservation_context_v1` and `--check`.
+It reuses the frozen V4 tier/selection semantics without constructing a floor or
+claiming full-packet compatibility. The DIRECT composer separately replays six
+original sources and checks historical correspondence.
+
 ```sh
 python -m tools.metadata.rights_profile
 python -m tools.metadata.rights_profile --check

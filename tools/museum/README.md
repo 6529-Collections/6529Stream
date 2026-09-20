@@ -1,5 +1,13 @@
 # Museum offline tooling
 
+[DIRECT tier and selection composition](../../docs/museum-direct-conservation-composition.md)
+adds original tier/default and four-lane selection captures to the native DIRECT
+assembly. It checks six-source observations, original provider selector pins,
+completed token mint before paid floor publication, sale-time tier, and saved
+intent/interview correspondence. Run
+`python -m tools.museum.acquisition_direct_conservation --help`.
+All 19 requirements remain visible; complete-packet export stays unavailable.
+
 [DIRECT floor and personhood](../../docs/museum-direct-personhood.md) adds two
 standalone native fragments over an unchanged provider-binding package and
 personhood capture. The assembly replays four original source transcripts and
