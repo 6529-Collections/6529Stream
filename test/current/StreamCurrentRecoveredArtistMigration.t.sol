@@ -464,14 +464,14 @@ contract CurrentRecoveredSuccessorGraph is StreamCurrentFinalityGraph {
 /// @dev Native execution remains pending. Selector completion additionally requires the separately
 /// owned authenticated current-Metadata Artist reader. Construction and operation60 assertions
 /// below do not claim complete finality/content readiness or preservation-record continuity.
-contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceRecipe {
-    bytes32 private constant POINTER = keccak256("ARTIST_REGISTRY");
+abstract contract StreamCurrentRecoveredArtistMigrationFixture is CurrentRecoveredSourceRecipe {
+    bytes32 internal constant POINTER = keccak256("ARTIST_REGISTRY");
     AH.Origin[][7] private candidates;
     AH.PolicyKey[] private policyKeys;
-    T.SuiteConfiguration private destination;
-    StreamArtistOnboardingRegistry private successor;
-    StreamArtistOnboardingCoordinator private successorCoordinator;
-    CurrentRecoveredSuccessorGraph private successorGraph;
+    T.SuiteConfiguration internal destination;
+    StreamArtistOnboardingRegistry internal successor;
+    StreamArtistOnboardingCoordinator internal successorCoordinator;
+    CurrentRecoveredSuccessorGraph internal successorGraph;
     bytes32 private sourceRecovery;
 
     struct SignedCall {
@@ -521,6 +521,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
     function _additionalOperatingPolicies()
         internal
         view
+        virtual
         override
         returns (GovernanceActionPolicyEntry[] memory rows)
     {
@@ -625,7 +626,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
     }
 
     function _policy(uint8 cls, address target, bytes4 selector)
-        private
+        internal
         view
         returns (GovernanceActionPolicyEntry memory)
     {
@@ -721,7 +722,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
     }
 
-    function _pointerBatch() private returns (GovernanceCall[] memory calls, bytes[] memory data) {
+    function _pointerBatch() internal returns (GovernanceCall[] memory calls, bytes[] memory data) {
         StreamCorePointerState memory old = StreamCurrentStackPlan.readPointer(core, POINTER);
         StreamCorePointerState memory next = StreamCurrentStackPlan.pointerState(
             address(registry), _successorRecord(), false, old.revision + 1
@@ -741,7 +742,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
             StreamGenesisManifestPlan.publicationCall(manifest, payload, update, aggregate.modules);
     }
 
-    function _bindHistory() private returns (HT.Leaf[] memory leaves) {
+    function _bindHistory() internal returns (HT.Leaf[] memory leaves) {
         leaves = _leaves();
         (bytes32 root,) = _proof(leaves, 0);
         HT.Context memory context_ = History(address(successor))
@@ -772,7 +773,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
     }
 
-    function _verifyAndObserve(HT.Leaf[] memory leaves) private {
+    function _verifyAndObserve(HT.Leaf[] memory leaves) internal {
         (, uint64 artistCount) = History(address(artists)).artistHistoryLane(1, fixtureArtistId);
         (, bytes32[] memory proof) = _proof(leaves, artistCount - 1);
         _safeCall(
@@ -794,7 +795,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         require(observed && next == address(successor), "actual original57 source latch");
     }
 
-    function _cutover() private {
+    function _cutover() internal {
         HT.Leaf[] memory leaves = _bindHistory();
         (GovernanceCall[] memory calls, bytes[] memory data) = _pointerBatch();
         _run(3, calls, data);
@@ -802,7 +803,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         _verifyAndObserve(leaves);
     }
 
-    function _assertPointer() private view {
+    function _assertPointer() internal view {
         StreamCorePointerState memory pointer = StreamCurrentStackPlan.readPointer(core, POINTER);
         require(
             pointer.target == address(successor) && pointer.codeHash == address(successor).codehash
@@ -816,7 +817,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
     }
 
-    function _request() private view returns (MigrationHydration.Request memory p) {
+    function _request() internal view virtual returns (MigrationHydration.Request memory p) {
         p.records.authority.artistIds = new bytes32[](1);
         p.records.authority.artistIds[0] = fixtureArtistId;
         p.records.authority.collections = new MH.Collection[](1);
@@ -857,7 +858,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
     }
 
     function _prepared()
-        private
+        internal
         view
         returns (MigrationHydration.Request memory request, Commit.Prepared memory prepared)
     {
@@ -866,7 +867,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         request.expectedSemanticInventory = Prepared.inventory(prepared);
     }
 
-    function _state(T.SuiteConfiguration memory suite) private view returns (bytes32 hash) {
+    function _state(T.SuiteConfiguration memory suite) internal view returns (bytes32 hash) {
         for (uint8 i; i < 7; ++i) {
             address owner = suite.owners[i];
             CP.Checkpoint memory cp = CP(owner).authorityCheckpoint();
@@ -895,7 +896,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
     }
 
-    function _signed(address target, bytes memory data) private returns (SignedCall memory s) {
+    function _signed(address target, bytes memory data) internal returns (SignedCall memory s) {
         s.target = target;
         s.data = data;
         s.nonce = recoveredSafe.nonce();
@@ -915,11 +916,11 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
     }
 
-    function _safeCall(address target, bytes memory data) private {
+    function _safeCall(address target, bytes memory data) internal {
         this.submitSigned(_signed(target, data));
     }
 
-    function _safeFailure(SignedCall memory call_) private {
+    function _safeFailure(SignedCall memory call_) internal {
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
         this.submitSigned(call_);
         require(
@@ -927,7 +928,7 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
     }
 
-    function _assertImported(Commit.Prepared memory prepared) private view {
+    function _assertImported(Commit.Prepared memory prepared) internal view {
         bytes32 value = HydrationOwner(destination.owners[2]).authorityHydrationCommitment();
         require(value != 0, "real op60 commitment");
         for (uint8 i; i < 7; ++i) {
@@ -1020,6 +1021,104 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         }
     }
 
+    function _freshGuardian() internal {
+        address[] memory members = new address[](1);
+        members[0] = address(artistSafe);
+        MigrationRotation.GuardianSet memory terms =
+            MigrationRotation.GuardianSet(fixtureArtistId, members, 1, 0);
+        uint256 nonce =
+            IStreamArtistIdentityOwner(destination.owners[2]).identity(fixtureArtistId).nonceHint;
+        _safeCall(
+            address(successor),
+            abi.encodeCall(successor.setArtistGuardians, (terms, T.Authorization(nonce, 0, "")))
+        );
+        require(
+            MigrationNative(destination.owners[2]).artistNativeReceiptCount() == 1,
+            "actual recovered Safe creates first native suffix"
+        );
+        HT.Receipt memory receipt = MigrationNative(destination.owners[2]).artistNativeReceiptAt(0);
+        require(
+            receipt.operation == 28 && receipt.artistId == fixtureArtistId
+                && receipt.recordHash != 0 && receipt.recordHash != migrationSourceGuardian,
+            "fresh successor-domain guardian receipt"
+        );
+        MigrationRotation.GuardianRecord memory guardian =
+            successor.guardianSetRecord(receipt.recordHash);
+        require(
+            guardian.signer == address(recoveredSafe)
+                && guardian.provisional.transitionRecordHash == sourceRecovery,
+            "fresh provisional guardian preserves original recovery35 association"
+        );
+    }
+
+    function _leaves() private view returns (HT.Leaf[] memory rows) {
+        History h = History(address(artists));
+        (, uint64 a) = h.artistHistoryLane(1, fixtureArtistId);
+        (, uint64 b) = h.artistHistoryLane(2, bytes32(uint256(1)));
+        rows = new HT.Leaf[](uint256(a) + b);
+        for (uint64 i; i < a; ++i) {
+            (bytes32 r, bytes32 c) = h.artistHistoryRecordAt(1, fixtureArtistId, i);
+            rows[i] = HT.Leaf(1, fixtureArtistId, i, r, c);
+        }
+        for (uint64 i; i < b; ++i) {
+            (bytes32 r, bytes32 c) = h.artistHistoryRecordAt(2, bytes32(uint256(1)), i);
+            rows[uint256(a) + i] = HT.Leaf(2, bytes32(uint256(1)), i, r, c);
+        }
+    }
+
+    function _proof(HT.Leaf[] memory leaves, uint256 index)
+        private
+        view
+        returns (bytes32 root, bytes32[] memory proof)
+    {
+        bytes32[] memory layer = new bytes32[](leaves.length);
+        proof = new bytes32[](64);
+        uint256 used;
+        uint256 n = leaves.length;
+        for (uint256 i; i < n; ++i) {
+            HT.Leaf memory p = leaves[i];
+            layer[i] = keccak256(
+                bytes.concat(
+                    keccak256(
+                        abi.encode(
+                            bytes32(
+                                0xea04da6644046a7c731e99312c32df311e81aa7e137dfc2a49c2116bb325195d
+                            ),
+                            block.chainid,
+                            address(artists),
+                            p.laneKind,
+                            p.laneKey,
+                            p.sequence,
+                            p.recordHash,
+                            p.recordChainHash
+                        )
+                    )
+                )
+            );
+        }
+        while (n > 1) {
+            if ((index ^ 1) < n) proof[used++] = layer[index ^ 1];
+            uint256 nextN = (n + 1) / 2;
+            for (uint256 i; i < nextN; ++i) {
+                uint256 j = i * 2;
+                if (j + 1 == n) {
+                    layer[i] = layer[j];
+                } else {
+                    bytes32 a = layer[j];
+                    bytes32 b = layer[j + 1];
+                    layer[i] = a < b ? keccak256(abi.encode(a, b)) : keccak256(abi.encode(b, a));
+                }
+            }
+            index /= 2;
+            n = nextN;
+        }
+        root = layer[0];
+        assembly ("memory-safe") { mstore(proof, used) }
+    }
+}
+
+/// @notice The original four actual-current migration assertions, using the shared recipe.
+contract StreamCurrentRecoveredArtistMigrationTest is StreamCurrentRecoveredArtistMigrationFixture {
     function testCurrentRecoveredMigrationLateArchiveFailureRetriesIdenticalSignedSafeCall()
         public
     {
@@ -1197,100 +1296,5 @@ contract StreamCurrentRecoveredArtistMigrationTest is CurrentRecoveredSourceReci
         );
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "pending successor selectors"));
         successorGraph.finishSelectedGraph();
-    }
-
-    function _freshGuardian() private {
-        address[] memory members = new address[](1);
-        members[0] = address(artistSafe);
-        MigrationRotation.GuardianSet memory terms =
-            MigrationRotation.GuardianSet(fixtureArtistId, members, 1, 0);
-        uint256 nonce =
-            IStreamArtistIdentityOwner(destination.owners[2]).identity(fixtureArtistId).nonceHint;
-        _safeCall(
-            address(successor),
-            abi.encodeCall(successor.setArtistGuardians, (terms, T.Authorization(nonce, 0, "")))
-        );
-        require(
-            MigrationNative(destination.owners[2]).artistNativeReceiptCount() == 1,
-            "actual recovered Safe creates first native suffix"
-        );
-        HT.Receipt memory receipt = MigrationNative(destination.owners[2]).artistNativeReceiptAt(0);
-        require(
-            receipt.operation == 28 && receipt.artistId == fixtureArtistId
-                && receipt.recordHash != 0 && receipt.recordHash != migrationSourceGuardian,
-            "fresh successor-domain guardian receipt"
-        );
-        MigrationRotation.GuardianRecord memory guardian =
-            successor.guardianSetRecord(receipt.recordHash);
-        require(
-            guardian.signer == address(recoveredSafe)
-                && guardian.provisional.transitionRecordHash == sourceRecovery,
-            "fresh provisional guardian preserves original recovery35 association"
-        );
-    }
-
-    function _leaves() private view returns (HT.Leaf[] memory rows) {
-        History h = History(address(artists));
-        (, uint64 a) = h.artistHistoryLane(1, fixtureArtistId);
-        (, uint64 b) = h.artistHistoryLane(2, bytes32(uint256(1)));
-        rows = new HT.Leaf[](uint256(a) + b);
-        for (uint64 i; i < a; ++i) {
-            (bytes32 r, bytes32 c) = h.artistHistoryRecordAt(1, fixtureArtistId, i);
-            rows[i] = HT.Leaf(1, fixtureArtistId, i, r, c);
-        }
-        for (uint64 i; i < b; ++i) {
-            (bytes32 r, bytes32 c) = h.artistHistoryRecordAt(2, bytes32(uint256(1)), i);
-            rows[uint256(a) + i] = HT.Leaf(2, bytes32(uint256(1)), i, r, c);
-        }
-    }
-
-    function _proof(HT.Leaf[] memory leaves, uint256 index)
-        private
-        view
-        returns (bytes32 root, bytes32[] memory proof)
-    {
-        bytes32[] memory layer = new bytes32[](leaves.length);
-        proof = new bytes32[](64);
-        uint256 used;
-        uint256 n = leaves.length;
-        for (uint256 i; i < n; ++i) {
-            HT.Leaf memory p = leaves[i];
-            layer[i] = keccak256(
-                bytes.concat(
-                    keccak256(
-                        abi.encode(
-                            bytes32(
-                                0xea04da6644046a7c731e99312c32df311e81aa7e137dfc2a49c2116bb325195d
-                            ),
-                            block.chainid,
-                            address(artists),
-                            p.laneKind,
-                            p.laneKey,
-                            p.sequence,
-                            p.recordHash,
-                            p.recordChainHash
-                        )
-                    )
-                )
-            );
-        }
-        while (n > 1) {
-            if ((index ^ 1) < n) proof[used++] = layer[index ^ 1];
-            uint256 nextN = (n + 1) / 2;
-            for (uint256 i; i < nextN; ++i) {
-                uint256 j = i * 2;
-                if (j + 1 == n) {
-                    layer[i] = layer[j];
-                } else {
-                    bytes32 a = layer[j];
-                    bytes32 b = layer[j + 1];
-                    layer[i] = a < b ? keccak256(abi.encode(a, b)) : keccak256(abi.encode(b, a));
-                }
-            }
-            index /= 2;
-            n = nextN;
-        }
-        root = layer[0];
-        assembly ("memory-safe") { mstore(proof, used) }
     }
 }
