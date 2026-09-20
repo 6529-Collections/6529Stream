@@ -58,6 +58,12 @@ import {
     StreamArtistRecoveredContentConsentHydration as Checked
 } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredContentConsentHydration.sol";
 import {
+    StreamArtistRecoveredContentConsentReads as ContentReads
+} from "../../../smart-contracts/domains/artist/StreamArtistRecoveredContentConsentReads.sol";
+import {
+    StreamArtistRecoveredContentConsentValidation as ContentValidation
+} from "../../../smart-contracts/domains/artist/StreamArtistRecoveredContentConsentValidation.sol";
+import {
     StreamArtistContentTypes as Content
 } from "../../../smart-contracts/interfaces/stream/artist/StreamArtistContentTypes.sol";
 import {
@@ -323,6 +329,29 @@ contract StreamArtistRecoveredContentConsentHydrationTest {
         T.EconomicsConsent[] terms;
         T.RoyaltyFreeze[] royaltyTerms;
         Checked.Bundle bundle;
+    }
+
+    function testRecoveredContentLinkedWorkersPreserveLiteralEncodingAndHeads() external {
+        Fixture memory f = _fixture();
+        bytes32 sourceBefore = _sourceDigest(f);
+        Checked.Bundle memory rows = ContentReads.collectRows(
+            address(f.source.consent()), f.query, f.provenance, f.terms, f.royaltyTerms
+        );
+        ContentValidation.validate(rows, f.query, f.provenance);
+        ContentReads.requireHeads(address(f.source.consent()), rows);
+        bytes memory literal = abi.encode(
+            keccak256("6529STREAM_ARTIST_RECOVERED_CONTENT_CONSENTS_V1"), uint16(1), rows
+        );
+        assert(keccak256(abi.encode(rows)) == keccak256(abi.encode(f.bundle)));
+        assert(keccak256(literal) == keccak256(Checked.encode(f.bundle, f.query, f.provenance)));
+        Checked.Bundle memory decoded = Checked.decode(f.query, f.provenance, literal);
+        assert(keccak256(abi.encode(decoded)) == keccak256(abi.encode(rows)));
+        bytes memory envelope =
+            _outer(f, literal, RH.CONTENT_CONSENTS | RH.DELEGATED_CONSENT | RH.DIRECT_ECONOMICS);
+        assert(keccak256(envelope) == keccak256(_encoded(f)));
+        f.target.hydrate(f.query, envelope, false);
+        _same(f);
+        assert(_sourceDigest(f) == sourceBefore);
     }
 
     function testRecoveredContentActualSixMixedFamiliesRoundTripAllMaps() external {
