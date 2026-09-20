@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Scoped full-policy inventory and bundle archive](docs/current-scoped-policy-inventory-archive-v2.md)
+  covers the original ordered inventory and archival proof calls under ABI129,
+  with separate immutable evidence, current sources and environment refresh.
+
 - [Scoped full-policy reference publication](docs/current-scoped-policy-reference-v2.md)
   covers original environment and inventory preparation plus reference
   publication under ABI129, with distinct fresh/current archive coverage.

@@ -856,6 +856,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add original scoped-policy inventory and bundle archive clients with ordered
+  source objects, authenticated segment events and current coverage refresh.
+
 - Add original scoped-policy reference preparation and publication clients,
   preserving exact environment bytes and external archive coverage semantics.
 

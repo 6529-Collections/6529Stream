@@ -105,6 +105,11 @@ continues the original ABI129 profile with environment and file-inventory
 preparation plus reference publication. It preserves the distinction between
 fresh external coverage, the original current receipt pair and immutable history.
 
+The [scoped inventory and bundle archive clients](current-scoped-policy-inventory-archive-v2.md)
+add the original seventeen inventory and five bundle writes under ABI129.
+Authenticated ordered segment rows, immutable admissions, current inventory
+sources and current-environment refresh retain their separate evidence roles.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a
