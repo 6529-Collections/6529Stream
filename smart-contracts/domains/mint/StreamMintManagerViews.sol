@@ -19,6 +19,7 @@ import "../../interfaces/stream/mint/IStreamMintManagerImport.sol";
 import "../../interfaces/stream/mint/IStreamMintPolicyGrace.sol";
 import "../../interfaces/stream/mint/IStreamMintPhaseFreeze.sol";
 import "../../interfaces/stream/mint/IStreamMintPreview.sol";
+import "../../interfaces/stream/mint/IStreamMintCounterReads.sol";
 
 /// @notice Fixed decoding for retained Manager preview ABIs, outside Manager runtime headroom.
 library StreamMintManagerViews {
@@ -37,7 +38,8 @@ library StreamMintManagerViews {
             || interfaceId == type(IStreamMintManagerImport).interfaceId
             || interfaceId == type(IStreamMintPolicyGrace).interfaceId
             || interfaceId == type(IStreamMintPhaseFreeze).interfaceId
-            || interfaceId == type(IStreamMintPreview).interfaceId;
+            || interfaceId == type(IStreamMintPreview).interfaceId
+            || interfaceId == type(IStreamMintCounterReads).interfaceId;
     }
 
     struct SubjectPreview {

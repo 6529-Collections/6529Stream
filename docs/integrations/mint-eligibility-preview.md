@@ -64,7 +64,6 @@ See the [batch evidence](../../ops/MINT_PREVIEW_ACCEPTANCE.md) for source, size 
 test scope. Focused typed-boundary evidence is separate from actual-current
 Safe, full integration, fuzz and gas acceptance.
 
-The other original Read API requirements `rawCounterValue`,
-`remainingForCounter` and `resolveCounter` remain a subsequent implementation
-slice. This preview does not complete those surfaces or enable the dynamic
-resolver profiles excluded from v1.
+The [counter reads](mint-counter-reads.md) provide raw/scoped values, remaining
+units and proof-aware resolution as a separate capability. They do not enable
+the dynamic resolver profiles excluded from v1.

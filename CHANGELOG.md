@@ -25,6 +25,10 @@ the release policy in `docs/release-policy.md`.
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
   live provenance semantics, exact analysis and golden-evidence requirements.
+- Add scoped mint counter values and remaining-unit reads, including verified
+  Merkle resolution. Proofless Merkle allowance reads require evidence instead
+  of treating the configured ceiling as an account allocation.
+
 - Add advisory mint eligibility and per-counter diagnostics at the Manager,
   preserving explicit executor/gate context, aggregate caps and original
   execution checks. Focused runtime and complete current-stack acceptance remain pending.

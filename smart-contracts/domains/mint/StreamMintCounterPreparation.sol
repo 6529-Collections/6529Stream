@@ -3,12 +3,34 @@ pragma solidity ^0.8.19;
 
 import "./StreamMintOperationIdentity.sol";
 import "./StreamMintCounterPolicy.sol";
+import "../../interfaces/stream/mint/IStreamMintCounterReads.sol";
 
 /// @notice Applies immutable scoped policy and inline proof-bound caps to canonical consumptions.
 library StreamMintCounterPreparation {
     bytes32 private constant VALUE_KEY_DOMAIN = keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1");
     bytes32 private constant RESOLUTION_DOMAIN =
         keccak256("6529STREAM_MINT_ALLOWLIST_RESOLUTION_V1");
+
+    /// @notice Applies the same original scope and inline Merkle proof to one read-only row.
+    function resolveCounter(
+        IStreamMintLedger.CounterConsumption memory row,
+        IStreamMintManager.MintCounterConfig memory config,
+        StreamMintOperationIdentity.CounterContext memory context,
+        bytes memory resolverData
+    ) external view returns (IStreamMintLedger.CounterConsumption memory) {
+        (, IStreamMintCounterPolicy.Definition memory d) =
+            StreamMintCounterPolicy.read(context.ledger, config.counterConfigHash);
+        _scope(row, config, d.scope, context);
+        if (config.capMode == IStreamMintLedger.CounterCapMode.MERKLE_STATIC) {
+            IStreamMintCounterPolicy.AllowlistProof memory proof =
+                abi.decode(resolverData, (IStreamMintCounterPolicy.AllowlistProof));
+            if (keccak256(resolverData) != keccak256(abi.encode(proof))) {
+                revert IStreamMintCounterReads.MintCounterProofEncodingInvalid(row.counterId);
+            }
+            _prove(row, config, d.capRoot, proof, context.manager);
+        }
+        return row;
+    }
 
     function prepare(
         IStreamMintManager.MintBatch calldata batch,

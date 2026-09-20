@@ -32,6 +32,7 @@ import "./StreamMintManagerPolicy.sol";
 import "./StreamMintPhaseFreezeControl.sol";
 import "./StreamMintManagerViews.sol";
 import "./StreamMintPreview.sol";
+import "./StreamMintCounterReads.sol";
 import "./StreamMintImport.sol";
 import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
 import {
@@ -56,6 +57,7 @@ contract StreamMintManager is
     IStreamMintPolicyGrace,
     IStreamMintPhaseFreeze,
     IStreamMintPreview,
+    IStreamMintCounterReads,
     Ownable,
     ReentrancyGuard,
     ERC165,
@@ -757,17 +759,50 @@ contract StreamMintManager is
 
     /// @notice Returns manager-scoped authorization replay state independent of the caller.
     function isAuthorizationUsed(bytes32 authorizationId) external view override returns (bool) {
-        return mintLedger.isManagerAuthorizationUsed(address(this), authorizationId);
+        _counterRead();
+    }
+
+    function rawCounterValue(bytes32 valueKey) external view override returns (uint64) {
+        _counterRead();
+    }
+
+    function counterValue(uint256 collectionId, bytes32 phaseId, bytes32 counterId, bytes32 subjectKey)
+        external view override returns (uint64)
+    {
+        _counterRead();
+    }
+
+    function remainingForCounter(uint256 collectionId, bytes32 phaseId, bytes32 counterId, bytes32 subjectKey)
+        external view override returns (uint64)
+    {
+        _counterRead();
+    }
+
+    function resolveCounter(IStreamMintCounterReads.CounterKeyContext calldata context)
+        external view override returns (IStreamMintCounterReads.CounterResolution memory resolution)
+    {
+        _counterRead();
+    }
+
+    function remainingForResolvedCounter(IStreamMintCounterReads.CounterKeyContext calldata context)
+        external view override returns (IStreamMintCounterReads.CounterResolution memory, uint64, uint64)
+    {
+        _counterRead();
+    }
+
+    function _counterRead() private view {
+        bytes memory encoded = StreamMintCounterReads.read(msg.data);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @notice Returns manager-scoped nullifier replay state independent of the caller.
     function isNullifierUsed(bytes32 nullifier) external view override returns (bool) {
-        return mintLedger.isManagerNullifierUsed(address(this), nullifier);
+        _counterRead();
     }
 
     /// @notice Returns manager-scoped operation-root replay state independent of the caller.
     function isOperationRootUsed(bytes32 operationRoot) external view override returns (bool) {
-        return mintLedger.isManagerOperationRootUsed(address(this), operationRoot);
+        _counterRead();
     }
 
     /// @notice Returns the immediate predecessor policy and its grace expiry.
@@ -777,10 +812,7 @@ contract StreamMintManager is
         override
         returns (bytes32 previousPolicyHash, uint64 graceUntil)
     {
-        // Revision adjacency is enforced by the ledger; this view exposes only hash and expiry.
-        // slither-disable-next-line unused-return
-        (previousPolicyHash,, graceUntil) =
-            mintLedger.policyGrace(address(this), collectionId, phaseId);
+        _counterRead();
     }
 
     /// @notice Returns the ordered counter IDs for a phase.
