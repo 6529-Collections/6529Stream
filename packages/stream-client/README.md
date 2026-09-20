@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Canonical native purchases and claims](docs/current-canonical-native-sales.md)
+  covers original Sales-v1 fixed/open and free/PWYW purchases, native excess
+  refunds and historical Manager revocation through direct and Safe calls.
+
 - [Revenue pulls and escrow recovery](docs/current-revenue-pull.md) covers
   initialized clone claims, ordered Router batches and original Escrow recovery,
   including direct, Safe and genuine Executor stages.

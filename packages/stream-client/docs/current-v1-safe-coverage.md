@@ -68,6 +68,10 @@ The later [revenue pull and recovery client](current-revenue-pull.md) is qualifi
 separately against ABI107 for initialized clone claims, Router batches and
 Escrow flush/recovery, including the required Executor stages.
 
+The [canonical native sales client](current-canonical-native-sales.md) separately
+retains ABI113 for fixed/open and free/PWYW purchases, excess refunds and original
+Manager revocation. It preserves the earlier native-adapter signing profiles.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

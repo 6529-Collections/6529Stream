@@ -14,6 +14,8 @@ export * from "./current-artist-operation.js";
 export * from "./current-artist-workflow.js";
 export * from "./current-custody.js";
 export * from "./current-native-sales.js";
+export * from "./current-canonical-native-sales.js";
+export * from "./current-canonical-native-sales-workflow.js";
 export * from "./current-manifests.js";
 export * from "./current-secondary.js";
 export * from "./current-native-sale-credits.js";

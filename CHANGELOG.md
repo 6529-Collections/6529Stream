@@ -307,6 +307,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified canonical native fixed/open purchases and free/PWYW claims,
+  with original Sales-v1 signing, native refunds and historical Manager revocation.
+
 - Add source-qualified split-wallet, ClaimRouter and Escrow pull/recovery callers
   with exact authorization, governance stages and direct/Safe receipt checks.
 
