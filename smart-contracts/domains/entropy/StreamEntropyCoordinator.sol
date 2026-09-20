@@ -3,7 +3,26 @@ pragma solidity ^0.8.19;
 import {
     IStreamEntropyCoordinatorContinuity as EntropyContinuityCapability
 } from "../../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
+import { StreamEntropyExecution } from "./StreamEntropyExecution.sol";
 import { StreamEntropyContinuity } from "./StreamEntropyContinuity.sol";
+import {
+    IStreamEntropyPolicyContinuity as PolicyContinuity
+} from "../../interfaces/stream/entropy/IStreamEntropyPolicyContinuity.sol";
+import {
+    IStreamEntropyOriginRelay as OriginRelay
+} from "../../interfaces/stream/entropy/IStreamEntropyOriginRelay.sol";
+import { StreamEntropyPolicyInventory as Inventory } from "./StreamEntropyPolicyInventory.sol";
+import {
+    StreamEntropyPolicyImportState as PolicyImportState
+} from "./StreamEntropyPolicyImportState.sol";
+import { StreamEntropyPolicyImport as PolicyImport } from "./StreamEntropyPolicyImport.sol";
+import { StreamEntropyPolicyExport as PolicyExports } from "./StreamEntropyPolicyExport.sol";
+import {
+    StreamEntropyDirectReadEncoding as DirectReadEncoding
+} from "./StreamEntropyDirectReadEncoding.sol";
+import { StreamEntropyRelayState as RelayState } from "./StreamEntropyRelayState.sol";
+import { StreamEntropyOriginRelay as Relay } from "./StreamEntropyOriginRelay.sol";
+import { StreamEntropyRelayAdmission as RelayAdmission } from "./StreamEntropyRelayAdmission.sol";
 import { StreamEntropyScopeRegistration } from "./StreamEntropyScopeRegistration.sol";
 import { StreamEntropyCollectionPolicy } from "./StreamEntropyCollectionPolicy.sol";
 import {
@@ -79,7 +98,9 @@ contract StreamEntropyCoordinator is
     IStreamEntropyCollectionRecovery,
     IStreamEntropyFreshRecovery,
     CollectionPolicy,
-    IStreamEntropyTerminalFacts
+    IStreamEntropyTerminalFacts,
+    PolicyContinuity,
+    OriginRelay
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -293,6 +314,7 @@ contract StreamEntropyCoordinator is
     }
 
     modifier onlyAuthority() {
+        PolicyImportState.requireOperational();
         if (msg.sender != authority) revert Unauthorized(msg.sender);
         _;
     }
@@ -318,6 +340,7 @@ contract StreamEntropyCoordinator is
         return id == type(IStreamEntropyCoordinator).interfaceId
             || id == type(CollectionPolicy).interfaceId
             || id == type(IStreamEntropyTerminalFacts).interfaceId
+            || id == type(PolicyContinuity).interfaceId || id == type(OriginRelay).interfaceId
             || id == type(IStreamRevealFeeEscrow).interfaceId
             || id == type(IStreamRevealPolicyAdmin).interfaceId
             || id == type(IStreamTimeParameterHost).interfaceId
@@ -333,6 +356,238 @@ contract StreamEntropyCoordinator is
             || id == type(EntropyContinuityCapability).interfaceId
             || id == type(IStreamEntropyProviderLifecycle).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
+    }
+
+    function entropyPolicyInventory() external view override returns (uint256, uint64, bytes32) {
+        Inventory.Header memory h = Inventory.header();
+        return (h.count, h.serial, h.idDigest);
+    }
+
+    function entropyPolicyCollectionAt(uint256 index) external view override returns (uint256) {
+        return Inventory.at(index);
+    }
+
+    function exportEntropyPolicy(uint256 id)
+        external
+        view
+        override
+        returns (PolicyContinuity.PolicyExport memory)
+    {
+        bytes memory encoded = DirectReadEncoding.policy(
+            PolicyExports.policy(
+                core,
+                id,
+                collectionEntropyConfig[id],
+                collectionProviderEpoch[id],
+                _revealPolicies[id]
+            )
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function exportEntropyRecovery(bytes32 id)
+        external
+        view
+        override
+        returns (PolicyContinuity.RecoveryExport memory)
+    {
+        bytes memory encoded = DirectReadEncoding.recovery(PolicyExports.recovery(id));
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function entropyPolicyImport()
+        external
+        view
+        override
+        returns (PolicyContinuity.ImportReceipt memory)
+    {
+        PolicyContinuity.ImportReceipt memory receipt = PolicyImportState.receipt();
+        // All seventeen canonical memory words are already the static return tuple.
+        assembly ("memory-safe") { return(receipt, 544) }
+    }
+
+    function importedEntropyPolicy(uint256 id)
+        external
+        view
+        override
+        returns (bytes32, bytes32, address, bytes32, bytes32)
+    {
+        return PolicyImportState.imported(id);
+    }
+
+    function entropyPolicyImportReady(
+        address predecessor,
+        bytes32 codeHash,
+        uint64 pointerRevision,
+        uint256 count,
+        uint64 serial,
+        bytes32 idDigest
+    ) external view override returns (bool) {
+        return PolicyImportState.ready(
+            predecessor, codeHash, pointerRevision, count, serial, idDigest
+        );
+    }
+
+    function beginEntropyPolicyImport(address, bytes32) external override {
+        _policyImportWrite();
+    }
+
+    function importNextEntropyPolicy(uint256) external override {
+        _policyImportWrite();
+    }
+
+    function confirmEntropyRelayRoute(uint256) external override {
+        _policyImportWrite();
+    }
+
+    function sealEntropyPolicyImport() external override {
+        _policyImportWrite();
+    }
+
+    function activateEntropyPolicyImport() external override {
+        _policyImportWrite();
+    }
+
+    function _policyImportWrite() private {
+        PolicyImport.write(
+            core,
+            authority,
+            collectionEntropyConfig,
+            collectionProviderEpoch,
+            _revealPolicies,
+            revealFeeEscrow,
+            msg.data
+        );
+    }
+
+    function entropyPolicyImportTransition(address predecessor, bytes32 manifest)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return _policyImportTransition();
+    }
+
+    function entropyPolicyImportSealTransition()
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return _policyImportTransition();
+    }
+
+    function entropyPolicyImportActivationTransition()
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return _policyImportTransition();
+    }
+
+    function _policyImportTransition() private view returns (bytes32, bytes32, bytes32) {
+        return PolicyImport.transitionEncoded(core, authority, msg.data);
+    }
+
+    function admitEntropyRelay(uint256 id, address successor, bytes32 importHash)
+        external
+        override
+    {
+        PolicyImportState.requireOperational();
+        RelayAdmission.admit(core, authority, id, successor, importHash);
+    }
+
+    function entropyRelayAdmissionTransition(uint256 id, address successor, bytes32 importHash)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return RelayAdmission.admissionTransition(core, authority, id, successor, importHash);
+    }
+
+    function entropyRelayAdmission(uint256 id, address successor)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        RelayState.Admission storage a = RelayState.store().admissions[id][successor];
+        return (a.successorCodeHash, a.importHash, a.policyHash);
+    }
+
+    function relayEntropyRequest(OriginRelay.RelayInput calldata input)
+        external
+        payable
+        override
+        nonReentrant
+        returns (uint256)
+    {
+        PolicyImportState.requireOperational();
+        return Relay.submitEncoded(core, requests, providerRequestKeys, msg.data[4:]);
+    }
+
+    function relayInstantEntropy(OriginRelay.RelayInput calldata input)
+        external
+        view
+        override
+        returns (bytes32, bytes32)
+    {
+        PolicyImportState.requireOperational();
+        return Relay.instantEncoded(core, msg.data[4:]);
+    }
+
+    function relayRequestWitness(bytes32 key) external view override returns (bytes32) {
+        Request storage request = requests[key];
+        Subject storage subject = _subjects[request.subjectKey];
+        RelayState.LocalRoute storage route = RelayState.store().localRoutes[key];
+        RequestPolicySnapshot storage snapshot = _requestPolicies[key];
+        if (
+            request.provider == address(0) || request.provider != snapshot.provider
+                || subject.status != StreamEntropyStatus.REQUESTED || subject.requestKey != key
+                || route.origin == address(0)
+                || (request.scopeId == 0
+                        ? request.tokenId == 0 || request.subjectKey != _tokenKey(request.tokenId)
+                        : request.tokenId != 0 || request.subjectKey != request.scopeId
+                        || !_registeredScopes[request.scopeId])
+        ) revert OriginRelay.EntropyRelayWitnessMismatch(key);
+        bool instant = PolicyState.mode(subject.collectionId) == CollectionPolicy.Mode.INSTANT;
+        if (snapshot.inputsHash != (instant ? bytes32(0) : subject.inputsHash)) {
+            revert OriginRelay.EntropyRelayWitnessMismatch(key);
+        }
+        OriginRelay.RelayInput memory input = OriginRelay.RelayInput(
+            route.importHash, subject.collectionId, request.tokenId, request.scopeId, key, snapshot
+        );
+        bytes32 witness =
+            RelayState.witnessHash(core, address(this), route.origin, route.originCodeHash, input);
+        // The sole route writer validates the key and derives relayId before saving this witness.
+        // Rehashing the actual immutable request/snapshot authenticates every input again here.
+        if (witness != route.witnessHash) {
+            revert OriginRelay.EntropyRelayWitnessMismatch(key);
+        }
+        return witness;
+    }
+
+    function retryEntropyRelay(bytes32 relayId)
+        external
+        override
+        nonReentrant
+        returns (bool, uint8)
+    {
+        return Relay.retry(core, requests, providerRequestKeys, relayId);
+    }
+
+    function entropyRelayResult(bytes32 relayId)
+        external
+        view
+        override
+        returns (OriginRelay.RelayResult memory)
+    {
+        OriginRelay.RelayResult memory result = RelayState.store().results[relayId];
+        // All seventeen canonical memory words are already the static return tuple.
+        assembly ("memory-safe") { return(result, 544) }
     }
 
     function configureFreshRecoveryPolicyV2(
@@ -446,17 +701,7 @@ contract StreamEntropyCoordinator is
         bool publicRequests,
         uint64 timeoutBlocks
     ) external onlyAuthority {
-        StreamEntropyCollectionConfiguration.configure(
-            core,
-            collectionEntropyConfig,
-            collectionProviderEpoch,
-            _revealPolicies,
-            collectionId,
-            provider,
-            collectionSalt,
-            publicRequests,
-            timeoutBlocks
-        );
+        _entropyWrite();
     }
 
     function configureCollectionEntropyPolicy(uint256, CollectionPolicy.PolicyInput calldata)
@@ -489,6 +734,7 @@ contract StreamEntropyCoordinator is
     }
 
     function _collectionPolicyWrite() private {
+        PolicyImportState.requireOperationalAndMarkUsed();
         StreamEntropyCollectionPolicy.write(
             core,
             authority,
@@ -548,29 +794,17 @@ contract StreamEntropyCoordinator is
         uint64 requestSLOBlocks,
         uint256 revealFeePerTokenWei
     ) external override {
-        _requireEntropyAdmin();
-        StreamEntropyCollectionConfiguration.configureReveal(
-            core, collectionEntropyConfig, _revealPolicies, msg.data[4:]
-        );
+        _entropyWrite();
     }
 
     /// @notice Retunes funding for future mints without changing frozen reveal promises or escrow.
     function updateRevealFeePerToken(uint256 collectionId, uint256 next) external override {
-        _requireEntropyAdmin();
-        StreamEntropyCollectionConfiguration.updateFee(
-            collectionEntropyConfig, _revealPolicies, collectionId, next
-        );
+        _entropyWrite();
     }
 
     /// @notice Permissionless funding does not query or request the provider, including during outages.
     function fundRevealFeeEscrow(uint256 collectionId) external payable nonReentrant {
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
-        if (!_revealPolicies[collectionId].declared) revert RevealPolicyUndeclared(collectionId);
-        revealFeeEscrow[collectionId] += msg.value;
-        totalRevealFeeEscrows += msg.value;
-        emit RevealFeeEscrowFunded(
-            1, collectionId, msg.sender, msg.value, revealFeeEscrow[collectionId]
-        );
+        _entropyWrite();
     }
 
     /// @notice Residual collection funds can only reach the current registry-resolved treasury.
@@ -579,47 +813,16 @@ contract StreamEntropyCoordinator is
         override
         nonReentrant
     {
-        _requireEntropyAdmin();
-        if (!_revealPolicies[collectionId].declared) revert RevealPolicyUndeclared(collectionId);
-        if (
-            nonterminalTokenCount[collectionId] != 0 || amount == 0
-                || amount > revealFeeEscrow[collectionId]
-        ) {
-            revert RevealEscrowUnavailable(collectionId);
-        }
-        address treasury = roleRegistry.resolveRole(_TREASURY);
-        if (treasury.code.length == 0) revert InvalidDestination();
-        revealFeeEscrow[collectionId] -= amount;
-        totalRevealFeeEscrows -= amount;
-        (bool success,) = treasury.call{ value: amount }("");
-        if (!success) revert CreditTransferFailed();
-        emit RevealFeeEscrowWithdrawn(1, collectionId, treasury, amount);
-    }
-
-    function _requireEntropyAdmin() private view {
-        if (!_hasRole(_ENTROPY_ADMIN, msg.sender)) revert Unauthorized(msg.sender);
-    }
-
-    function _hasRole(bytes32 role, address account) private view returns (bool) {
-        return StreamEntropyCoordinatorReads.hasRole(
-            core, authority, roleRegistry, roleRegistryCodeHash, role, account
-        );
+        _entropyWrite();
     }
 
     function setRequester(address requester, bool allowed) external onlyAuthority {
-        if (requester == address(0)) revert InvalidDependency(requester);
-        requesters[requester] = allowed;
-        emit EntropyRequesterUpdated(requester, allowed);
+        _entropyWrite();
     }
 
     /// @notice Compatibility transition, bound to its original delayed catalog class.
     function setProviderRevoked(address provider, bool revoked) external onlyAuthority {
-        _updateProvider(
-            provider,
-            revoked ? EntropyProviderState.INCIDENT_REVOKED : EntropyProviderState.ACTIVE,
-            StreamEntropyProviderLifecycle.LEGACY_REASON,
-            true
-        );
+        _updateProvider();
     }
 
     function entropyProviderRecord(address provider)
@@ -666,7 +869,7 @@ contract StreamEntropyCoordinator is
         override
         onlyAuthority
     {
-        _updateProvider(provider, EntropyProviderState.ACTIVE, reasonURI, false);
+        _updateProvider();
     }
 
     function deprecateEntropyProvider(address provider, string calldata reasonURI)
@@ -674,7 +877,7 @@ contract StreamEntropyCoordinator is
         override
         onlyAuthority
     {
-        _updateProvider(provider, EntropyProviderState.DEPRECATED, reasonURI, false);
+        _updateProvider();
     }
 
     function revokeEntropyProvider(address provider, string calldata reasonURI)
@@ -682,19 +885,12 @@ contract StreamEntropyCoordinator is
         override
         onlyAuthority
     {
-        _updateProvider(provider, EntropyProviderState.INCIDENT_REVOKED, reasonURI, false);
+        _updateProvider();
     }
 
-    function _updateProvider(
-        address provider,
-        EntropyProviderState next,
-        string memory reasonURI,
-        bool legacy
-    ) private {
-        StreamEntropyProviderLifecycle.update(authority, provider, next, reasonURI, legacy);
-        bool revoked = next == EntropyProviderState.INCIDENT_REVOKED;
-        providerRevoked[provider] = revoked;
-        emit ProviderRevocationUpdated(provider, revoked);
+    function _updateProvider() private {
+        PolicyImportState.requireOperational();
+        StreamEntropyProviderLifecycle.updateEncoded(authority, providerRevoked, msg.data);
     }
 
     function onTokenMinted(
@@ -703,15 +899,7 @@ contract StreamEntropyCoordinator is
         address recipient,
         bytes32 mintCommitment
     ) external override {
-        StreamEntropyScopeRegistration.token(
-            core,
-            _subjects,
-            collectionEntropyConfig,
-            _revealPolicies,
-            registeredAtBlock,
-            nonterminalTokenCount,
-            msg.data[4:]
-        );
+        _entropyWrite();
     }
 
     /// @inheritdoc IStreamEntropyTiming
@@ -742,23 +930,7 @@ contract StreamEntropyCoordinator is
         nonReentrant
         returns (bytes32 requestKey, uint256 providerRequestId)
     {
-        Subject storage subject = _subjects[_tokenKey(tokenId)];
-        StreamEntropyRequestPlan.authorizeToken(
-            StreamEntropyRequestPlan.Authorization(
-                core,
-                authority,
-                roleRegistry,
-                roleRegistryCodeHash,
-                requesters[msg.sender],
-                _timeParameterValue(GTP_ENTROPY_REVEAL_SLO_BLOCKS)
-            ),
-            subject,
-            collectionEntropyConfig[subject.collectionId],
-            _revealPolicies[subject.collectionId],
-            registeredAtBlock[tokenId],
-            tokenId
-        );
-        return _request(_tokenKey(tokenId), tokenId, bytes32(0));
+        return abi.decode(_entropyWrite(), (bytes32, uint256));
     }
 
     function registerEntropyScope(uint256 collectionId, uint8 scopeKind, bytes32 scopeRef)
@@ -766,6 +938,7 @@ contract StreamEntropyCoordinator is
         override
         returns (bytes32 scopeId)
     {
+        PolicyImportState.requireOperationalAndMarkUsed();
         return StreamEntropyScopeRegistration.register(
             core,
             authority,
@@ -787,52 +960,7 @@ contract StreamEntropyCoordinator is
         nonReentrant
         returns (bytes32 requestKey, uint256 providerRequestId)
     {
-        if (msg.sender != authority && !requesters[msg.sender]) {
-            revert Unauthorized(msg.sender);
-        }
-        // Token keys share _subjects storage but must never enter the mutable scope-input path.
-        if (!_registeredScopes[scopeId] || scopeInputsHash == 0) revert InvalidSubject(scopeId);
-        _subjects[scopeId].inputsHash = scopeInputsHash;
-        return _request(scopeId, 0, scopeId);
-    }
-
-    function _request(bytes32 subjectKey, uint256 tokenId, bytes32 scopeId)
-        private
-        returns (bytes32 requestKey, uint256 providerRequestId)
-    {
-        Subject storage subject = _subjects[subjectKey];
-        StreamEntropyRequestPlan.Plan memory p = StreamEntropyRequestPlan.initial(
-            core,
-            subject,
-            collectionEntropyConfig[subject.collectionId],
-            collectionProviderEpoch[subject.collectionId],
-            tokenId,
-            scopeId
-        );
-        return _submitRequest(subjectKey, tokenId, scopeId, p);
-    }
-
-    function _submitRequest(
-        bytes32 subjectKey,
-        uint256 tokenId,
-        bytes32 scopeId,
-        StreamEntropyRequestPlan.Plan memory p
-    ) private returns (bytes32 requestKey, uint256 providerRequestId) {
-        Subject storage subject = _subjects[subjectKey];
-        _fundRequest(subject.collectionId, tokenId, p.fee);
-        requestKey = p.key;
-        ++pendingRequestCount;
-        providerRequestId = StreamEntropyRequestSubmission.submit(
-            core,
-            subject,
-            requests,
-            _requestPolicies,
-            providerRequestKeys,
-            StreamEntropyRequestSubmission.Input(subjectKey, tokenId, scopeId, p)
-        );
-        if (p.instant) {
-            _completeRequest(requestKey, requests[requestKey], subject);
-        }
+        return abi.decode(_entropyWrite(), (bytes32, uint256));
     }
 
     function _recoveryEnvironment()
@@ -854,30 +982,14 @@ contract StreamEntropyCoordinator is
         nonReentrant
         returns (bytes32 requestKey, uint256 providerRequestId)
     {
-        return _requestFreshWithEvidence(input, bytes32(0));
+        return abi.decode(_entropyWrite(), (bytes32, uint256));
     }
 
     function requestFreshEntropyWithUnavailability(
         RecoveryInput calldata input,
         bytes32 findingRecordHash
     ) external payable nonReentrant returns (bytes32 requestKey, uint256 providerRequestId) {
-        if (findingRecordHash == 0) revert FreshRecoveryArtistEvidenceUnavailable();
-        return _requestFreshWithEvidence(input, findingRecordHash);
-    }
-
-    function _requestFreshWithEvidence(RecoveryInput calldata input, bytes32 findingRecordHash)
-        private
-        returns (bytes32 requestKey, uint256 providerRequestId)
-    {
-        if (!_hasRole(keccak256("ROLE_ENTROPY_INCIDENT_DECLARER"), msg.sender)) {
-            revert Unauthorized(msg.sender);
-        }
-        StreamEntropyRequestPlan.Plan memory p = StreamEntropyFreshRecovery.admitSelected(
-            _recoveryEnvironment(), _subjects, requests, _requestPolicies, input, findingRecordHash
-        );
-        Request storage old = requests[input.oldRequestKey];
-        if (old.tokenId != 0) ++nonterminalTokenCount[_subjects[old.subjectKey].collectionId];
-        return _submitRequest(old.subjectKey, old.tokenId, old.scopeId, p);
+        return abi.decode(_entropyWrite(), (bytes32, uint256));
     }
 
     function artistEntropyRecoveryIntent(RecoveryInput calldata input)
@@ -927,78 +1039,38 @@ contract StreamEntropyCoordinator is
         _auxiliaryRead();
     }
 
-    function _fundRequest(uint256 collectionId, uint256 tokenId, uint256 fee) private {
-        uint256 draw;
-        if (tokenId != 0) {
-            uint256 escrow = revealFeeEscrow[collectionId];
-            draw = escrow < fee ? escrow : fee;
-        }
-        uint256 callerCost = fee - draw;
-        if (msg.value < callerCost) {
-            if (tokenId == 0) revert InsufficientEntropyFee(fee, msg.value);
-            revert InsufficientRevealFee(fee, draw, msg.value);
-        }
-        if (draw != 0) {
-            revealFeeEscrow[collectionId] -= draw;
-            totalRevealFeeEscrows -= draw;
-            emit RevealFeeEscrowSpent(1, collectionId, tokenId, draw, revealFeeEscrow[collectionId]);
-        }
-        uint256 excess = msg.value - callerCost;
-        if (excess != 0) {
-            entropyFeeCredit[msg.sender] += excess;
-            totalFeeCredits += excess;
-            emit EntropyFeeCredited(msg.sender, excess);
-        }
-    }
-
     function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness)
         external
         override
         nonReentrant
         returns (uint8 outcome)
     {
-        Request storage request = requests[requestKey];
-        Subject storage subject = _subjects[request.subjectKey];
-        bytes32 activeRequestKey = subject.requestKey;
-        outcome = StreamEntropyFulfillment.finalize(
-            core, request, subject, _requestPolicies[requestKey], requestKey, rawRandomness
-        );
-        if (outcome != 0) return _reject(requestKey, outcome);
-        StreamEntropyContinuity.close(activeRequestKey);
-        _completeRequest(requestKey, request, subject);
-        return 0;
+        return abi.decode(_entropyWrite(), (uint8));
     }
 
-    function _completeRequest(bytes32 requestKey, Request storage request, Subject storage subject)
-        private
+    function fulfillRelayedEntropy(bytes32 requestKey, bytes32 relayId, bytes32 rawRandomness)
+        external
+        override
+        nonReentrant
+        returns (uint8 outcome)
     {
-        --pendingRequestCount;
-        if (request.tokenId != 0) --nonterminalTokenCount[subject.collectionId];
-        emit EntropyFinalized(
-            requestKey, request.tokenId, request.scopeId, subject.seed, request.rawRandomness
-        );
-        if (request.tokenId != 0) _notify(request.tokenId, requestKey);
-    }
-
-    function _reject(bytes32 requestKey, uint8 outcome) private returns (uint8) {
-        emit EntropyFulfillmentRejected(requestKey, outcome);
-        return outcome;
-    }
-
-    function _notify(uint256 tokenId, bytes32 requestKey) private {
-        StreamEntropyFulfillment.notify(core, metadataNotificationPending, tokenId, requestKey);
+        return abi.decode(_entropyWrite(), (uint8));
     }
 
     function retryMetadataNotification(uint256 tokenId) external nonReentrant {
-        StreamEntropyFulfillment.retryNotification(
-            core, _subjects, metadataNotificationPending, tokenId
-        );
+        _entropyWrite();
     }
 
     bytes32 public constant GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT =
         keccak256("6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT");
     bytes32 public constant GGP_ENTROPY_INSTANT_READ_GAS_LIMIT =
         keccak256("6529STREAM_GGP_ENTROPY_INSTANT_READ_GAS_LIMIT");
+    bytes32 public constant GGP_ENTROPY_RELAY_AUTH_READ_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_ENTROPY_RELAY_AUTH_READ_GAS_LIMIT");
+    bytes32 public constant GGP_ENTROPY_RELAY_INSTANT_READ_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_ENTROPY_RELAY_INSTANT_READ_GAS_LIMIT");
+    bytes32 public constant GGP_ENTROPY_RELAY_DELIVERY_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_ENTROPY_RELAY_DELIVERY_GAS_LIMIT");
 
     function gasParameter(bytes32 id) external view returns (uint256) {
         _auxiliaryRead();
@@ -1033,8 +1105,7 @@ contract StreamEntropyCoordinator is
         string calldata reasonURI,
         bytes32 evidenceHash
     ) external override nonReentrant {
-        if (tokenId == 0) revert InvalidToken(tokenId);
-        _markUnrecoverable(_tokenKey(tokenId), tokenId, bytes32(0), reasonURI, evidenceHash);
+        _entropyWrite();
     }
 
     function markEntropyScopeRequestUnrecoverable(
@@ -1042,82 +1113,21 @@ contract StreamEntropyCoordinator is
         string calldata reasonURI,
         bytes32 evidenceHash
     ) external override nonReentrant {
-        if (!_registeredScopes[scopeId]) revert InvalidSubject(scopeId);
-        _markUnrecoverable(scopeId, 0, scopeId, reasonURI, evidenceHash);
-    }
-
-    function _markUnrecoverable(
-        bytes32 subjectKey,
-        uint256 tokenId,
-        bytes32 scopeId,
-        string calldata reasonURI,
-        bytes32 evidenceHash
-    ) private {
-        if (!_hasRole(keccak256("ROLE_ENTROPY_INCIDENT_DECLARER"), msg.sender)) {
-            revert Unauthorized(msg.sender);
-        }
-        Subject storage subject = _subjects[subjectKey];
-        bytes32 key = subject.requestKey;
-        Request storage request = requests[key];
-        RequestPolicySnapshot storage policy = _requestPolicies[key];
-        StreamEntropyIncidentTransition.record(
-            subject,
-            request,
-            policy,
-            subjectKey,
-            tokenId,
-            scopeId,
-            providerRevoked[request.provider],
-            collectionEntropyConfig[subject.collectionId],
-            _timeParameterValue(GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS),
-            StreamEntropyIncidentParameters.value(GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT),
-            reasonURI,
-            evidenceHash
-        );
-        _terminal(key, subject, StreamEntropyStatus.FAILED);
-        StreamEntropyIncidentTransition.emitFailure(
-            subject, request, policy, tokenId, scopeId, reasonURI, evidenceHash
-        );
+        _entropyWrite();
     }
 
     /// @notice Marks a timed-out request terminal without authorizing a fresh random draw.
     function markRequestStale(bytes32 requestKey) external onlyAuthority nonReentrant {
-        Request storage request = requests[requestKey];
-        Subject storage subject = _subjects[request.subjectKey];
-        StreamEntropyTerminalAdmission.stale(request, subject, requestKey);
-        _terminal(requestKey, subject, StreamEntropyStatus.STALE);
+        _entropyWrite();
     }
 
     /// @notice Requires adapter evidence of terminal failure before displaying a failed request.
     function markRequestFailed(bytes32 requestKey) external onlyAuthority nonReentrant {
-        Request storage request = requests[requestKey];
-        Subject storage subject = _subjects[request.subjectKey];
-        StreamEntropyTerminalAdmission.failed(request, subject, requestKey);
-        _terminal(requestKey, subject, StreamEntropyStatus.FAILED);
-    }
-
-    function _terminal(bytes32 requestKey, Subject storage subject, StreamEntropyStatus status)
-        private
-    {
-        subject.status = status;
-        StreamEntropyContinuity.close(requestKey);
-        --pendingRequestCount;
-        emit EntropyRequestTerminal(requestKey, status);
-        uint256 tokenId = requests[requestKey].tokenId;
-        if (tokenId != 0) {
-            --nonterminalTokenCount[subject.collectionId];
-            _notify(tokenId, requestKey);
-        }
+        _entropyWrite();
     }
 
     function claimEntropyFeeCredit(address payable destination) external nonReentrant {
-        if (destination == address(0)) revert InvalidDestination();
-        uint256 amount = entropyFeeCredit[msg.sender];
-        entropyFeeCredit[msg.sender] = 0;
-        totalFeeCredits -= amount;
-        (bool success,) = destination.call{ value: amount }("");
-        if (!success) revert CreditTransferFailed();
-        emit EntropyFeeCreditClaimed(msg.sender, destination, amount);
+        _entropyWrite();
     }
 
     function tokenSeed(uint256 tokenId)
@@ -1251,6 +1261,41 @@ contract StreamEntropyCoordinator is
             msg.data
         );
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
+    }
+
+    /// @dev Fixed finite worker; return normally so every host modifier performs its cleanup.
+    function _entropyWrite() private returns (bytes memory) {
+        StreamEntropyExecution.Word storage credits;
+        StreamEntropyExecution.Word storage pending;
+        StreamEntropyExecution.Word storage escrowTotal;
+        assembly ("memory-safe") {
+            credits.slot := totalFeeCredits.slot
+            pending.slot := pendingRequestCount.slot
+            escrowTotal.slot := totalRevealFeeEscrows.slot
+        }
+        return StreamEntropyExecution.write(
+            StreamEntropyExecution.Environment(core, authority, roleRegistry, roleRegistryCodeHash),
+            collectionEntropyConfig,
+            requesters,
+            providerRevoked,
+            _subjects,
+            requests,
+            providerRequestKeys,
+            entropyFeeCredit,
+            credits,
+            pending,
+            metadataNotificationPending,
+            _registeredScopes,
+            _revealPolicies,
+            revealFeeEscrow,
+            escrowTotal,
+            registeredAtBlock,
+            nonterminalTokenCount,
+            collectionProviderEpoch,
+            _requestPolicies,
+            _timeParameters,
+            msg.data
+        );
     }
 
     function _tokenKey(uint256 tokenId) private pure returns (bytes32) {

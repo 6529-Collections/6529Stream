@@ -32,6 +32,7 @@ library StreamEntropyProviderLifecycle {
         S newState,
         string reasonURI
     );
+    event ProviderRevocationUpdated(address indexed provider, bool revoked);
 
     function store() private pure returns (Store storage s) {
         bytes32 slot = SLOT;
@@ -109,6 +110,35 @@ library StreamEntropyProviderLifecycle {
         newHash = keccak256(
             abi.encode(STATE, scope, next, codeHash, r.revision + 1, keccak256(bytes(reasonURI)))
         );
+    }
+
+    /// @dev Fixed host mutation selectors share one transport; original lifecycle checks run below.
+    function updateEncoded(
+        address authority,
+        mapping(address => bool) storage revokedProviders,
+        bytes calldata data
+    ) public {
+        bytes4 selector = bytes4(data[:4]);
+        address provider;
+        S next;
+        string memory reason;
+        bool legacy = selector == LEGACY_SELECTOR;
+        if (legacy) {
+            bool revoked;
+            (provider, revoked) = abi.decode(data[4:], (address, bool));
+            next = revoked ? S.INCIDENT_REVOKED : S.ACTIVE;
+            reason = LEGACY_REASON;
+        } else {
+            (provider, reason) = abi.decode(data[4:], (address, string));
+            if (selector == L.activateEntropyProvider.selector) next = S.ACTIVE;
+            else if (selector == L.deprecateEntropyProvider.selector) next = S.DEPRECATED;
+            else if (selector == L.revokeEntropyProvider.selector) next = S.INCIDENT_REVOKED;
+            else revert L.ProviderLifecycleInvalidContext();
+        }
+        update(authority, provider, next, reason, legacy);
+        bool revoked = next == S.INCIDENT_REVOKED;
+        revokedProviders[provider] = revoked;
+        emit ProviderRevocationUpdated(provider, revoked);
     }
 
     function update(

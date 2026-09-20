@@ -18,6 +18,8 @@ import {
     IStreamRevealFeeEscrow as F
 } from "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import { StreamEntropyCollectionPolicyState as S } from "./StreamEntropyCollectionPolicyState.sol";
+import { StreamEntropyPolicyInventory as Inventory } from "./StreamEntropyPolicyInventory.sol";
+import { StreamEntropyPolicyReauthor as Reauthor } from "./StreamEntropyPolicyReauthor.sol";
 import {
     StreamEntropyCollectionPolicyAuthority as A
 } from "./StreamEntropyCollectionPolicyAuthority.sol";
@@ -155,6 +157,7 @@ library StreamEntropyCollectionPolicy {
             StreamEntropyCollectionRecovery.applyExplicit(id, p.recovery, p.entry.lastActionId);
         }
         S.store().entries[id] = p.entry;
+        Inventory.recordLocal(id);
         emit CollectionEntropyPolicyConfigured(
             2,
             id,
@@ -182,6 +185,7 @@ library StreamEntropyCollectionPolicy {
         _authorize(core, authority, id, p, 2);
         configs[id].locked = true;
         S.store().entries[id] = p.entry;
+        Inventory.touch(id);
         emit CollectionEntropyPolicyFrozen(
             2,
             id,
@@ -310,6 +314,9 @@ library StreamEntropyCollectionPolicy {
         );
         p.recovery.policyId = input.recoveryPolicyId;
         p.recovery.maxFreshRecoveryAttempts = input.maxFreshRecoveryAttempts;
+        Reauthor.requireLocalProviders(
+            id, input.provider, input.recoveryPolicyId, input.maxFreshRecoveryAttempts
+        );
         if (recoveryChanged) {
             if (p.recovery.revision == type(uint64).max) revert P.InvalidCollectionPolicy(id);
             ++p.recovery.revision;

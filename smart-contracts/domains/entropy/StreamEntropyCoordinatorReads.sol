@@ -20,6 +20,7 @@ import "../../vendor/openzeppelin/IERC165.sol";
 import {
     StreamEntropyCollectionPolicyState as PolicyState
 } from "./StreamEntropyCollectionPolicyState.sol";
+import { StreamEntropyPolicyInventory as Inventory } from "./StreamEntropyPolicyInventory.sol";
 
 /// @notice Fixed read/admission worker; preserves the coordinator's original storage, domains and caller context.
 library StreamEntropyCoordinatorReads {
@@ -59,11 +60,12 @@ library StreamEntropyCoordinatorReads {
         ) {
             return (false, bytes32(0), address(0), 0, bytes32(0));
         }
+        (address policyOrigin,) = Inventory.origin(collectionId);
         collectionSaltCommitment = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ENTROPY_COLLECTION_SALT_V1"),
                 block.chainid,
-                address(this),
+                policyOrigin,
                 address(core),
                 collectionId,
                 config.collectionSalt
@@ -95,7 +97,7 @@ library StreamEntropyCoordinatorReads {
             abi.encode(
                 keccak256("6529STREAM_ENTROPY_FINALITY_POLICY_V1"),
                 block.chainid,
-                address(this),
+                policyOrigin,
                 address(core),
                 collectionId,
                 providerEpoch == 1
@@ -111,7 +113,7 @@ library StreamEntropyCoordinatorReads {
                 abi.encode(
                     keccak256("6529STREAM_ENTROPY_FINALITY_FRESH_POLICY_V1"),
                     block.chainid,
-                    address(this),
+                    policyOrigin,
                     address(core),
                     collectionId,
                     providerPolicy,

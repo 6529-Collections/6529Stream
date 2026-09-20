@@ -12,6 +12,9 @@ import {
 } from "../../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
 import { IStreamCore } from "../../interfaces/stream/core/IStreamCore.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
+import {
+    StreamEntropyPolicyImportState as ImportState
+} from "./StreamEntropyPolicyImportState.sol";
 
 /// @notice Fixed policy worker; data and replay protection live in the calling coordinator.
 library StreamEntropyRecoveryPolicies {
@@ -81,6 +84,10 @@ library StreamEntropyRecoveryPolicies {
         store().authorityCodeHash = authority.codehash;
     }
 
+    function authorityCodeHashLocal() internal view returns (bytes32) {
+        return store().authorityCodeHash;
+    }
+
     function record(bytes32 id)
         public
         view
@@ -88,6 +95,37 @@ library StreamEntropyRecoveryPolicies {
     {
         Entry storage e = store().entries[id];
         return (e.policy, e.policyHash, e.revision, e.lastActionId);
+    }
+
+    /// @dev Direct STATIC-safe host read; preserves the original recovery tuple.
+    function recordLocal(bytes32 id)
+        internal
+        view
+        returns (R.FreshRecoveryPolicy memory, bytes32, uint64, bytes32)
+    {
+        Entry storage e = store().entries[id];
+        return (e.policy, e.policyHash, e.revision, e.lastActionId);
+    }
+
+    function replacementLocal(bytes32 id) internal view returns (address, bytes32) {
+        Replacement storage r = store().replacements[id];
+        return (r.successor, r.codeHash);
+    }
+
+    /// @dev Only the fixed import worker installs a validated frozen original definition.
+    function installImported(
+        bytes32 id,
+        R.FreshRecoveryPolicy memory policy,
+        bytes32 policyHash,
+        uint64 revision,
+        bytes32 lastActionId,
+        address successor,
+        bytes32 successorCodeHash
+    ) internal {
+        Store storage s = store();
+        s.entries[id] = Entry(policy, policyHash, revision, lastActionId);
+        s.replacements[id] = Replacement(successor, successorCodeHash);
+        s.consumed[id][lastActionId] = true;
     }
 
     function transition(bytes32 id, bytes32 proposedHash, bool freezing)
@@ -207,6 +245,7 @@ library StreamEntropyRecoveryPolicies {
         Replacement memory replacement_,
         address core
     ) private {
+        ImportState.requireOperationalAndMarkUsed();
         if (
             p.maxFreshRecoveryAttempts == 0 || p.steps.length < p.maxFreshRecoveryAttempts
                 || p.steps.length > MAX_STEPS || p.incidentDeclarerRole != DECLARER
@@ -279,6 +318,7 @@ library StreamEntropyRecoveryPolicies {
     }
 
     function freeze(address authority, bytes32 id) public {
+        ImportState.requireOperationalAndMarkUsed();
         Entry storage e = store().entries[id];
         bytes32 actionId = _authorize(authority, id, e.policyHash, true);
         e.policy.frozen = true;

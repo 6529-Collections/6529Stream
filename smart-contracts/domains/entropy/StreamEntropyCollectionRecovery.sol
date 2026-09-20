@@ -13,6 +13,11 @@ import {
 } from "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import { StreamEntropyRecoveryPolicies } from "./StreamEntropyRecoveryPolicies.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
+import { StreamEntropyPolicyInventory as Inventory } from "./StreamEntropyPolicyInventory.sol";
+import {
+    StreamEntropyPolicyImportState as ImportState
+} from "./StreamEntropyPolicyImportState.sol";
+import { StreamEntropyPolicyReauthor as Reauthor } from "./StreamEntropyPolicyReauthor.sol";
 import {
     StreamEntropyCollectionPolicyState as PolicyState
 } from "./StreamEntropyCollectionPolicyState.sol";
@@ -52,6 +57,17 @@ library StreamEntropyCollectionRecovery {
 
     function record(uint256 id) public view returns (C.CollectionRecovery memory) {
         return store().bindings[id];
+    }
+
+    /// @dev Direct STATIC-safe host read; no linked-library dispatch.
+    function recordLocal(uint256 id) internal view returns (C.CollectionRecovery memory) {
+        return store().bindings[id];
+    }
+
+    /// @dev Only the fixed import worker installs a validated original binding while inactive.
+    function installImported(uint256 id, C.CollectionRecovery memory binding) internal {
+        store().bindings[id] = binding;
+        if (binding.lastActionId != 0) store().consumed[id][binding.lastActionId] = true;
     }
 
     function validateExplicit(uint256 id, bytes32 policyId, uint16 attempts, uint32 epoch)
@@ -159,8 +175,10 @@ library StreamEntropyCollectionRecovery {
         uint16 attempts,
         bytes32 policyId
     ) public {
+        ImportState.requireOperationalAndMarkUsed();
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
             transition(core, configs[id], epochs[id], id, attempts, policyId);
+        Reauthor.requireLocalProviders(id, configs[id].provider, policyId, attempts);
         bytes32 actionId =
             StreamEntropyRecoveryPolicies.requireAction(authority, scope, oldHash, newHash);
         Store storage s = store();
@@ -174,6 +192,7 @@ library StreamEntropyCollectionRecovery {
         ++b.revision;
         b.lastActionId = actionId;
         uint32 epoch = ++epochs[id];
+        Inventory.recordLocal(id);
         emit CollectionFreshRecoveryConfigured(
             1, id, policyId, b.policyHash, attempts, epoch, b.revision, actionId
         );

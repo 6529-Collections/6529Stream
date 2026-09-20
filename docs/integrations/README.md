@@ -23,6 +23,7 @@ deployment evidence.
 | Select original intent/waiver records and preserve interview attribution | [Conservation selection](../architecture/conservation-record-selection-profile.md) |
 | Integrate the initial adjudicated identity-recovery profile | [Initial identity recovery](initial-identity-recovery.md) |
 | Read a fixed coordinator's original locked collection policy | [Entropy policy evidence](entropy-finality-evidence.md) |
+| Preserve configured policies and original provider callers across Coordinator replacement | [Entropy policy import and relay](entropy-policy-import-relay.md) |
 | Consume exact current WORK and RIGHTS selections | [Description evidence](finality-description-evidence.md) |
 | Authenticate published RELEASE, SEASON and VIEW membership | [Scope membership](../scope-membership.md) |
 | Resume the developing artist and reveal authority batch | [Current activation](current-artist-activation.md) |

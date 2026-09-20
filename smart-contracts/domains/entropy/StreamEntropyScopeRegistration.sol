@@ -11,6 +11,7 @@ import {
 import {
     IStreamEntropyCollectionPolicy as P
 } from "../../interfaces/stream/entropy/IStreamEntropyCollectionPolicy.sol";
+import { StreamEntropyPolicyInventory as Inventory } from "./StreamEntropyPolicyInventory.sol";
 
 /// @notice Original scope registration, with current-selection admission for new subjects only.
 library StreamEntropyScopeRegistration {
@@ -62,6 +63,9 @@ library StreamEntropyScopeRegistration {
         }
         if (!policies[collectionId].declared) {
             revert StreamEntropyCoordinator.RevealPolicyUndeclared(collectionId);
+        }
+        if (!configs[collectionId].locked) {
+            Inventory.touch(collectionId);
         }
         configs[collectionId].locked = true;
         _registeredScopes[scopeId] = true;
@@ -122,6 +126,7 @@ library StreamEntropyScopeRegistration {
         ) {
             revert StreamEntropyCoordinator.RevealPolicyUndeclared(collectionId);
         }
+        if (!config.locked) Inventory.touch(collectionId);
         config.locked = true;
         _subjects[key].collectionId = collectionId;
         _subjects[key].inputsHash = mintCommitment;

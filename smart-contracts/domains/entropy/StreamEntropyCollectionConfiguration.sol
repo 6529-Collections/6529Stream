@@ -10,6 +10,11 @@ import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle
 import {
     StreamEntropyCollectionPolicyState as PolicyState
 } from "./StreamEntropyCollectionPolicyState.sol";
+import { StreamEntropyPolicyInventory as Inventory } from "./StreamEntropyPolicyInventory.sol";
+import { StreamEntropyPolicyReauthor as Reauthor } from "./StreamEntropyPolicyReauthor.sol";
+import {
+    IStreamEntropyCollectionRecovery as Recovery
+} from "../../interfaces/stream/entropy/IStreamEntropyCollectionRecovery.sol";
 
 /// @notice Fixed collection configuration worker; retains host storage, validation order and events.
 library StreamEntropyCollectionConfiguration {
@@ -63,6 +68,11 @@ library StreamEntropyCollectionConfiguration {
             collectionProviderEpoch[collectionId] = ++epoch;
         }
         StreamEntropyCollectionRecovery.validateEpoch(collectionId, epoch);
+        Recovery.CollectionRecovery memory binding =
+            StreamEntropyCollectionRecovery.recordLocal(collectionId);
+        Reauthor.requireLocalProviders(
+            collectionId, provider, binding.policyId, binding.maxFreshRecoveryAttempts
+        );
         collectionEntropyConfig[collectionId] = StreamEntropyCoordinator.CollectionConfig(
             provider,
             publicRequests,
@@ -78,6 +88,7 @@ library StreamEntropyCollectionConfiguration {
                 revealPolicies[collectionId].revealFeePerTokenWei
             );
         }
+        Inventory.recordLocal(collectionId);
         emit CollectionEntropyConfigured(
             collectionId, provider, configHash, collectionSalt, publicRequests, timeoutBlocks
         );
@@ -135,9 +146,18 @@ library StreamEntropyCollectionConfiguration {
         StreamEntropyCoordinatorReads.validateRevealFee(
             collectionEntropyConfig[collectionId], revealFeePerTokenWei
         );
+        Recovery.CollectionRecovery memory binding =
+            StreamEntropyCollectionRecovery.recordLocal(collectionId);
+        Reauthor.requireLocalProviders(
+            collectionId,
+            collectionEntropyConfig[collectionId].provider,
+            binding.policyId,
+            binding.maxFreshRecoveryAttempts
+        );
         _revealPolicies[collectionId] = IStreamRevealFeeEscrow.CollectionRevealPolicy(
             true, requestMode, revealOwnerRole, requestSLOBlocks, revealFeePerTokenWei
         );
+        Inventory.recordLocal(collectionId);
         emit RevealPolicyConfigured(
             1, collectionId, requestMode, revealOwnerRole, requestSLOBlocks, revealFeePerTokenWei
         );
@@ -157,6 +177,9 @@ library StreamEntropyCollectionConfiguration {
         if (!policy.declared) revert StreamEntropyCoordinator.RevealPolicyUndeclared(collectionId);
         StreamEntropyCoordinatorReads.validateRevealFee(collectionEntropyConfig[collectionId], next);
         uint256 previous = policy.revealFeePerTokenWei;
+        if (previous != next) {
+            Inventory.touch(collectionId);
+        }
         policy.revealFeePerTokenWei = next;
         emit RevealFeePerTokenUpdated(1, collectionId, previous, next);
     }

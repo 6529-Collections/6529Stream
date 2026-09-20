@@ -11,6 +11,14 @@ the release policy in `docs/release-policy.md`.
 - Preserve old profile encodings and original publication domains; retain global
   C2PA key-history order. Focused cases are authored; native acceptance is pending.
 
+## Entropy policy succession and original-provider relay
+
+- Add complete governed LEGACY/EXPLICIT policy import with retained original
+  hashes, Artist receipts, recovery definitions and distinct local balances.
+- Relay new requests through the immutable original provider caller, preserving
+  successor request identities and once-only raw capture with retryable delivery.
+  Combined runtime, production size and current-stack acceptance remain pending.
+
 ## LOW_SECURITY instant entropy
 
 - Add a bounded synchronous entropy path with separate provider identity,

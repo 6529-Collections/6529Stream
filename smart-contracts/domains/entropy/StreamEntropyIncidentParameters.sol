@@ -14,6 +14,12 @@ library StreamEntropyIncidentParameters {
         keccak256("6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT");
     bytes32 internal constant INSTANT_GAS =
         keccak256("6529STREAM_GGP_ENTROPY_INSTANT_READ_GAS_LIMIT");
+    bytes32 internal constant RELAY_AUTH_GAS =
+        keccak256("6529STREAM_GGP_ENTROPY_RELAY_AUTH_READ_GAS_LIMIT");
+    bytes32 internal constant RELAY_INSTANT_GAS =
+        keccak256("6529STREAM_GGP_ENTROPY_RELAY_INSTANT_READ_GAS_LIMIT");
+    bytes32 internal constant RELAY_DELIVERY_GAS =
+        keccak256("6529STREAM_GGP_ENTROPY_RELAY_DELIVERY_GAS_LIMIT");
     bytes32 private constant SLOT = keccak256("6529STREAM_ENTROPY_INCIDENT_PARAMETERS_STORAGE_V1");
     bytes32 private constant SCOPE =
         0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71;
@@ -60,6 +66,11 @@ library StreamEntropyIncidentParameters {
         s.authorityCodeHash = authority.codehash;
         _register(s, PROBE_GAS, "ENTROPY_RESULT_PROBE_GAS_LIMIT", 100000, 1);
         _register(s, INSTANT_GAS, "ENTROPY_INSTANT_READ_GAS_LIMIT", 100000, 2);
+        // Separate nested envelopes: an origin must still forward its complete inner cap.
+        // Focused relay measurements are required before release evidence freezes these floors.
+        _register(s, RELAY_AUTH_GAS, "ENTROPY_RELAY_AUTH_READ_GAS_LIMIT", 100000, 2);
+        _register(s, RELAY_INSTANT_GAS, "ENTROPY_RELAY_INSTANT_READ_GAS_LIMIT", 750000, 2);
+        _register(s, RELAY_DELIVERY_GAS, "ENTROPY_RELAY_DELIVERY_GAS_LIMIT", 500000, 1);
     }
 
     function _register(
@@ -75,9 +86,12 @@ library StreamEntropyIncidentParameters {
     }
 
     function ids() internal pure returns (bytes32[] memory result) {
-        result = new bytes32[](2);
+        result = new bytes32[](5);
         result[0] = PROBE_GAS;
         result[1] = INSTANT_GAS;
+        result[2] = RELAY_AUTH_GAS;
+        result[3] = RELAY_INSTANT_GAS;
+        result[4] = RELAY_DELIVERY_GAS;
     }
 
     function info(bytes32 id) internal view returns (uint256, uint256, uint8, uint64) {

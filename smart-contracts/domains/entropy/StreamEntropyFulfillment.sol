@@ -4,6 +4,10 @@ import "./StreamEntropyCoordinator.sol";
 import "./StreamEntropyCoordinatorReads.sol";
 import "./StreamEntropyFreshRecovery.sol";
 import "./StreamEntropyProviderLifecycle.sol";
+import { StreamEntropyRelayState, StreamEntropyRelayReads } from "./StreamEntropyRelayState.sol";
+import {
+    IStreamEntropyOriginRelay as OriginRelayCapability
+} from "../../interfaces/stream/entropy/IStreamEntropyOriginRelay.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyView.sol";
@@ -72,8 +76,78 @@ library StreamEntropyFulfillment {
         if (msg.sender != request.provider) {
             revert StreamEntropyCoordinator.Unauthorized(msg.sender);
         }
+        return _finalize(core, request, subject, policy, requestKey, rawRandomness);
+    }
+
+    /// @notice Authenticates both stored routes before the original finalization body runs.
+    function finalizeRelayed(
+        IStreamCore core,
+        StreamEntropyCoordinator.Request storage request,
+        StreamEntropyCoordinator.Subject storage subject,
+        IStreamEntropyEpochs.RequestPolicySnapshot storage policy,
+        mapping(address => mapping(uint256 => bytes32)) storage providerKeys,
+        bytes32 requestKey,
+        bytes32 relayId,
+        bytes32 rawRandomness
+    ) public returns (uint8) {
+        StreamEntropyRelayState.LocalRoute storage route =
+            StreamEntropyRelayState.store().localRoutes[requestKey];
+        if (
+            route.origin == address(0) || msg.sender != route.origin
+                || route.origin.codehash != route.originCodeHash || route.relayId != relayId
+                || request.provider == address(0) || policy.provider != request.provider
+                || providerKeys[request.provider][request.providerRequestId] != requestKey
+        ) {
+            revert OriginRelayCapability.InvalidEntropyRelay();
+        }
+        OriginRelayCapability.RelayResult memory result = abi.decode(
+            StreamEntropyRelayReads.read(
+                route.origin,
+                abi.encodeCall(OriginRelayCapability.entropyRelayResult, (relayId)),
+                544
+            ),
+            (OriginRelayCapability.RelayResult)
+        );
+        OriginRelayCapability.RelayInput memory input = OriginRelayCapability.RelayInput(
+            route.importHash,
+            subject.collectionId,
+            request.tokenId,
+            request.scopeId,
+            requestKey,
+            policy
+        );
+        if (
+            !result.submitted || !result.rawReceived || result.raw != rawRandomness
+                || result.successor != address(this)
+                || result.successorCodeHash != address(this).codehash
+                || result.importHash != route.importHash
+                || result.collectionId != subject.collectionId
+                || result.successorRequestKey != requestKey || result.relayId != relayId
+                || result.provider != request.provider
+                || result.providerCodeHash != policy.providerCodeHash
+                || result.providerConfigHash != policy.providerConfigHash
+                || result.providerRequestId != request.providerRequestId
+                || result.contextHash != keccak256(StreamEntropyRelayState.context(core, input))
+                || route.witnessHash
+                    != StreamEntropyRelayState.witnessHash(
+                        core, address(this), route.origin, route.originCodeHash, input
+                    )
+        ) {
+            revert OriginRelayCapability.InvalidEntropyRelay();
+        }
+        return _finalize(core, request, subject, policy, requestKey, rawRandomness);
+    }
+
+    function _finalize(
+        IStreamCore core,
+        StreamEntropyCoordinator.Request storage request,
+        StreamEntropyCoordinator.Subject storage subject,
+        IStreamEntropyEpochs.RequestPolicySnapshot storage policy,
+        bytes32 requestKey,
+        bytes32 rawRandomness
+    ) private returns (uint8) {
         if (subject.status == StreamEntropyStatus.FINALIZED) return 3;
-        if (!StreamEntropyProviderLifecycle.canFulfill(msg.sender, policy.providerCodeHash)) {
+        if (!StreamEntropyProviderLifecycle.canFulfill(request.provider, policy.providerCodeHash)) {
             return 5;
         }
         if (subject.status == StreamEntropyStatus.STALE) return 1;
