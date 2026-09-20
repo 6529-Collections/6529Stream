@@ -113,7 +113,7 @@ contract StreamFinalityPolicyMultiScopeEvidenceProvider is
         }
     }
 
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return super.supportsInterface(id) || id == type(Profiles).interfaceId
             || id == type(IStreamPolicyOutputEvidenceBindingV2).interfaceId
             || id == type(IStreamPolicyPublicationEvidenceBindingV2).interfaceId;

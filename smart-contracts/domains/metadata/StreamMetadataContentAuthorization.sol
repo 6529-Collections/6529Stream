@@ -35,14 +35,44 @@ library StreamMetadataContentAuthorization {
         bytes32 familyId,
         bytes32 newStateHash
     ) public returns (bytes32 consent, bytes32 ratification) {
+        return _authorize(
+            consumed, evolutionRatification, evolutionContent, ctx, familyId, newStateHash, false
+        );
+    }
+
+    /// @notice Closed alternate-view profile requires original op17 consent even before mint.
+    function authorizeRequired(
+        mapping(bytes32 => bool) storage consumed,
+        mapping(uint256 => bytes32) storage evolutionRatification,
+        mapping(uint256 => bytes32) storage evolutionContent,
+        Context memory ctx,
+        bytes32 familyId,
+        bytes32 newStateHash
+    ) public returns (bytes32 consent, bytes32 ratification) {
+        return _authorize(
+            consumed, evolutionRatification, evolutionContent, ctx, familyId, newStateHash, true
+        );
+    }
+
+    function _authorize(
+        mapping(bytes32 => bool) storage consumed,
+        mapping(uint256 => bytes32) storage evolutionRatification,
+        mapping(uint256 => bytes32) storage evolutionContent,
+        Context memory ctx,
+        bytes32 familyId,
+        bytes32 newStateHash,
+        bool required
+    ) private returns (bytes32 consent, bytes32 ratification) {
         (bool ratified, bytes32 ratifiedState, bytes32 record) =
             IStreamArtistContentRatification(ctx.artist).firstReleaseRatification(ctx.collectionId);
         if (!ratified) {
             if (
-                IStreamCoreCollectionView(ctx.core).collectionMintedEver(ctx.collectionId) == 0
-                    || IStreamArtistAttribution(ctx.artist)
-                        .attribution(ctx.collectionId)
-                        .nominatedArtist == address(0)
+                !required
+                    && (IStreamCoreCollectionView(ctx.core).collectionMintedEver(ctx.collectionId)
+                            == 0
+                        || IStreamArtistAttribution(ctx.artist)
+                            .attribution(ctx.collectionId)
+                            .nominatedArtist == address(0))
             ) return (0, 0);
         } else {
             if (

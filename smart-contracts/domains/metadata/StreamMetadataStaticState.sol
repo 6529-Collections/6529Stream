@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamViewAdoptionState as Views } from "./StreamViewAdoptionState.sol";
 import {
     IStreamStaticMetadataRouter as S
 } from "../../interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
@@ -44,6 +45,20 @@ library StreamMetadataStaticState {
     }
 
     function familyOf(address core, uint256 collectionId, Collection memory c)
+        internal
+        view
+        returns (bytes32)
+    {
+        return Views.wrap(
+            core,
+            collectionId,
+            legacyFamilyOf(core, collectionId, c),
+            Views.state().aggregates[collectionId]
+        );
+    }
+
+    /// @dev Original exact preimage; new VIEW aggregation is separate and revision-zero neutral.
+    function legacyFamilyOf(address core, uint256 collectionId, Collection memory c)
         internal
         view
         returns (bytes32)

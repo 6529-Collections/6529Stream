@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamMetadataRouterReadFacade as ReadFacade } from "./StreamMetadataRouterReadFacade.sol";
+import {
+    StreamViewAdoptionTypes as ViewTypes
+} from "../../interfaces/stream/metadata/StreamViewAdoptionTypes.sol";
+import {
+    IStreamViewAdoptionRouter as ViewAPI
+} from "../../interfaces/stream/metadata/IStreamViewAdoptionRouter.sol";
+import { StreamViewAdoption as ViewAdoption } from "./StreamViewAdoption.sol";
+import { StreamViewAdoptionState as ViewState } from "./StreamViewAdoptionState.sol";
+import { StreamViewAdoptionRouting as ViewRouting } from "./StreamViewAdoptionRouting.sol";
+import { StreamViewAdoptionTransport as ViewTransport } from "./StreamViewAdoptionTransport.sol";
 import {
     IStreamMetadataFullViews,
     IStreamMetadataHistoricalFullView
@@ -119,6 +130,7 @@ contract StreamMetadataRouter is
         uint8 mode;
     }
     uint256 private immutable _staticChainId = block.chainid;
+    bytes32 private immutable _viewRoutingCodeHash = address(ViewRouting).codehash;
     IStreamCore public immutable core;
     address public immutable authority;
     IStreamArtistAttribution public immutable artistRegistry;
@@ -157,6 +169,8 @@ contract StreamMetadataRouter is
     );
     error OriginalFinalityAnchorAlreadyInitialized();
     error OriginalFinalityAnchorUninitialized();
+    // Preserve the original inferred error ABI across the fixed read-facade extraction.
+    error StaticMetadataSourceChanged(address target);
     event OriginalFinalityAnchorInitialized(
         uint16 schemaVersion, address indexed registry, bytes32 codeHash
     );
@@ -325,7 +339,8 @@ contract StreamMetadataRouter is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(Static).interfaceId || id == type(IStreamGasParameterHost).interfaceId
+        return id == type(ViewAPI).interfaceId || id == type(Static).interfaceId
+            || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamMetadataRouter).interfaceId
             || id == type(IStreamMetadataRenderingProfile).interfaceId
             || id == type(IStreamMetadataHistoricalFullView).interfaceId
@@ -852,6 +867,59 @@ contract StreamMetadataRouter is
         _rootRead();
     }
 
+    function previewViewAdoption(ViewTypes.Input calldata, address)
+        external
+        view
+        returns (bytes32, bytes32)
+    {
+        bytes memory raw =
+            ViewAdoption.previewEncoded(_contentLayout(), _contentContext(), msg.data);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function adoptView(ViewTypes.Input calldata) external returns (bytes32) {
+        return ViewAdoption.adoptEncoded(_contentLayout(), _contentContext(), msg.data);
+    }
+
+    function viewAdoptionHead(StreamFinalityScope calldata scope) external view returns (bytes32) {
+        return ViewState.state().heads[ViewState.subject(address(core), scope)];
+    }
+
+    function viewAdoptionEncoded(bytes32 hash) external view returns (bytes memory) {
+        bytes memory raw = ViewTransport.encoded(hash);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function viewAdoptionCarrier(bytes32 hash) external view returns (address, bytes32, uint32) {
+        ViewState.Carrier storage carrier = ViewState.state().records[hash];
+        return (carrier.pointer, carrier.hash, carrier.size);
+    }
+
+    function viewAdoptionAggregate(uint256 cid) external view returns (ViewTypes.Aggregate memory) {
+        return ViewState.state().aggregates[cid];
+    }
+
+    function tokenJSONForView(uint256, bytes32) external view returns (string memory) {
+        _view();
+    }
+
+    function tokenHTMLForView(uint256, bytes32) external view returns (string memory) {
+        _view();
+    }
+
+    function historicalTokenJSONForView(uint256, bytes32) external view returns (string memory) {
+        _view();
+    }
+
+    function historicalTokenHTMLForView(uint256, bytes32) external view returns (string memory) {
+        _view();
+    }
+
+    function _view() private view {
+        bytes memory raw = ViewTransport.serve(_viewRoutingCodeHash, msg.data);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
     function previewScopedContentRootPublication(
         ScopedRoot.Publication calldata publication,
         address publisher
@@ -1037,33 +1105,15 @@ contract StreamMetadataRouter is
         view
         returns (string memory)
     {
-        bool allowBurned = options.allowBurned;
-        uint8 mode = options.mode;
-        // Probe only dispatch identity. Unknown tokens retain the original legacy finality/
-        // identity error path; the strict new config reads still use _staticCollection.
-        bytes memory identity = StaticCalls.read(
-            address(core),
-            abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (tokenId)),
-            StaticCalls.ReadOptions(128, true),
-            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
-        );
-        (bool exists, uint256 staticCollection,,) =
-            abi.decode(identity, (bool, uint256, uint256, bool));
-        if (exists && StaticState.activated(staticCollection)) {
-            return StaticRouting.serve(address(core), tokenId, allowBurned, mode);
-        }
-        return StreamMetadataRouterRendering.serve(
+        return ReadFacade.token(
             _prepared,
             _collections,
             _artistPresentation,
             originalFinalityAnchor,
             _selectedManifests,
-            StreamMetadataRouterRendering.Context(
-                address(core), address(artistRegistry), _artistRegistryCodeHash, _servingAnchor()
-            ),
+            _readContext(),
             tokenId,
-            allowBurned,
-            mode
+            options
         );
     }
 
@@ -1083,6 +1133,16 @@ contract StreamMetadataRouter is
             a.codeHash,
             collectionId,
             tokenId
+        );
+    }
+
+    function _readContext() private view returns (ReadFacade.Context memory) {
+        return ReadFacade.Context(
+            address(core),
+            address(artistRegistry),
+            _artistRegistryCodeHash,
+            _originalFinalityAnchorInitialized,
+            servingOriginalFinalityAnchor
         );
     }
 
@@ -1123,19 +1183,8 @@ contract StreamMetadataRouter is
     {
         _requireCore(core_);
         _requireCollection(collectionId);
-        (bool frozen, string memory resolved) = StreamMetadataFinalityServing.collection(
-            _artistPresentation,
-            originalFinalityAnchor,
-            StreamMetadataRecoveryRoutes.Environment(
-                address(core), address(artistRegistry), _artistRegistryCodeHash
-            ),
-            _servingAnchor(),
-            collectionId
-        );
-        if (frozen) return resolved;
-        PreparedMetadata storage metadata = _prepared[collectionId];
-        return StreamMetadataRenderPreparation.attributedCollectionURI(
-            metadata.name, metadata.description, metadata.image, _liveAttribution(collectionId, 0)
+        return ReadFacade.collection(
+            _prepared, _artistPresentation, originalFinalityAnchor, _readContext(), collectionId
         );
     }
 

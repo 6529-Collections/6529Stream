@@ -293,6 +293,24 @@ library StreamMetadataRouterContent {
         return _authorizeContentWrite(l, e, collectionId, familyId, state);
     }
 
+    /// @notice VIEW uses the original consent/evolution maps with no pre-mint bypass.
+    function authorizeView(Layout memory l, Context memory e, uint256 cid, bytes32 nextFamily)
+        public
+        returns (bytes32, bytes32)
+    {
+        _requireSelectedArtistRegistry(l, e);
+        return StreamMetadataContentAuthorization.authorizeRequired(
+            consumedArtistContentConsent(l),
+            _evolutionRatification(l),
+            _evolutionContent(l),
+            StreamMetadataContentAuthorization.Context(
+                e.core, e.artist, cid, _contentState(l, e, cid)
+            ),
+            keccak256("RENDERER_CONFIG"),
+            nextFamily
+        );
+    }
+
     function recordApplication(
         Layout memory l,
         Context memory e,
