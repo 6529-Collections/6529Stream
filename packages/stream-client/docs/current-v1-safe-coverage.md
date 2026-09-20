@@ -53,10 +53,13 @@ read support is recorded separately from transaction support.
 
 The first added caller from this audit is the
 [canonical personhood reference profile](current-artist-personhood.md) of the
-original principal Artist operation 24. The original recovered-history
-operation-60 caller remains a high-priority gap. ABI102 supports its explicit
-class-1/class-3 singleton profile and direct-economics extension, while recovered
-personhood composition and later delegation feature bit 64 remain excluded.
+original principal Artist operation 24. A later
+[recovered-history operation-60 caller](current-artist-recovered-hydration.md)
+is qualified separately against ABI104, including its reviewed delegation and
+attestation compositions. This machine inventory retains its ABI102 snapshot
+and original client evidence. ABI102 supports the class-1/class-3 singleton
+profile and direct-economics extension; recovered personhood and delegation
+feature bit 64 remain excluded at that earlier source.
 
 The inventory also retains gaps for governance/control families, clone claims
 and escrow, original records/read surfaces, Core/mint controls, and broader

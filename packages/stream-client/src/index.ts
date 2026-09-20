@@ -83,3 +83,5 @@ export * from "./current-direct-conservation.js";
 export * from "./current-direct-conservation-workflow.js";
 export * from "./current-artist-personhood.js";
 export * from "./current-artist-personhood-workflow.js";
+export * from "./current-artist-recovered-hydration.js";
+export * from "./current-artist-recovered-hydration-workflow.js";

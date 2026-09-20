@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Recovered Artist authority](docs/current-artist-recovered-hydration.md) collects
+  the complete original operation-60 profile-10 request and certificate, retains
+  original domains and provenance, and inspects paged Archive and Safe receipts.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain

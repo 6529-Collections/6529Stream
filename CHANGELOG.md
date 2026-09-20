@@ -166,6 +166,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add recovered Artist operation-60 client preparation, complete source-certificate
+  checks and paged Archive receipt reconciliation through the original Safe CALL.
+
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 - Add native Artist personhood capture, offline replay and acquisition
