@@ -294,8 +294,7 @@ contract StreamArtistDormancyRotationRecoveryActualTest is StreamArtistDormancyR
     {
         Estate.AuthorityCapabilities memory caps = ingress.currentAuthorityCapabilities(artistId);
         V.Snapshot memory v = _drSnapshot(record);
-        (bytes32 primary, bytes32 occurrence, bytes32 secondary) =
-            IStreamArtistIdentityRecoveryOwner(suite.owners[2]).identityRecoveryReceipts(record);
+        _assertOriginalRecoveryReceipts(record);
         (bool used,) = ingress.rotationAcceptanceNonceState(artistId, p.newAddress, a.nonce);
         require(
             record != 0 && caps.authorityClass == 3 && caps.status == 3
@@ -303,7 +302,6 @@ contract StreamArtistDormancyRotationRecoveryActualTest is StreamArtistDormancyR
                 && caps.effectiveCapabilities == drCaps && v.operationId == 35
                 && v.previousTransitionRecordHash == drTerminal
                 && v.previousCommitment == _drSnapshot(drTerminal).commitment && used
-                && primary == record && occurrence != 0 && secondary != 0 && secondary != primary
                 && _operationPayload(35, manager.governanceAuthority(), record).length != 0
                 && _drHistory() == drHistory,
             "original op43 rights, actual terminal parent, acceptance, all receipts and unchanged history"
