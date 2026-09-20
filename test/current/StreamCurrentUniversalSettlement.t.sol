@@ -53,11 +53,18 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
         SafeComponents memory components = deploySafeComponents("1.4.1");
         artistSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 81);
         payerSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 82);
+    }
+
+    /// @dev Elect consent before the single graph deployment; return after governance time warps.
+    function deployUniversalScenario(bool required) external {
+        require(msg.sender == address(this), "fixture caller");
+        requireSaleConsent = required;
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         require(
             manager.owner() == address(executor) && executor.genesisInitialized(),
             "actual final owners"
         );
+        _enableUniversalCommerceFloor();
     }
 
     function _enableUniversalCommerceFloor() private {
@@ -238,9 +245,7 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
     }
 
     function testRequiredUniversalSaleReadRejectsBeforeConsentAndSafePaymentThenSucceeds() public {
-        requireSaleConsent = true;
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
-        _enableUniversalCommerceFloor();
+        this.deployUniversalScenario(true);
         require(artists.saleConsentScope(1) == 1, "actual immutable REQUIRED election");
         IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e =
             _signedExecution(61, address(payerSafe), address(payerSafe));
@@ -301,7 +306,7 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
     }
 
     function testActualSafeDirectPaymentMintsRevealsAndClaimsOfficialRevenue() public {
-        _enableUniversalCommerceFloor();
+        this.deployUniversalScenario(false);
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
@@ -353,7 +358,7 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
     }
 
     function testActualSafeSignedIntentMintsAndRejectsExactReplay() public {
-        _enableUniversalCommerceFloor();
+        this.deployUniversalScenario(false);
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
@@ -392,7 +397,7 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
     }
 
     function testLateRecipientRejectionRollsBackAndSameSafeIntentRetries() public {
-        _enableUniversalCommerceFloor();
+        this.deployUniversalScenario(false);
         CurrentUniversalRecipient recipient = new CurrentUniversalRecipient();
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
