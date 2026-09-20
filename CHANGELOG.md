@@ -5,6 +5,20 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add a narrowly scoped current-Executor compatibility adapter and original
+  preservation/family-registry composition, with governed metadata pause/resume
+  and explicit family writers; current Safe tests await coordinated execution.
+
+- Add deterministic version4 split-wallet clones with a pinned, locked singleton
+  implementation, retaining original authorization and historical identities.
+- Add a distinct ordinary/incident mint fallback with genuine Ledger imports,
+  permanent writer retirement and exact governed prepared-mint recovery.
+- Compose six additional genuine genesis products with original dependencies
+  and current/Safe regression recipes; full37 activation remains outstanding.
+- Stage exact reference inventories in authenticated fixed-row parts and
+  reduce duplicate publication tuple decoding while preserving original bytes,
+  identities and validation order. Complete publisher gas acceptance is open.
+
 - Preserve complete collection inventory and finality/preservation membership
   across incident-aborted serial gaps with bounded authenticated Core scans,
   exact serial lookup and snapshot-pinned offline reference endpoint checks.

@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `e9af0d34`: paid-burn clients0466f9d3, Core incident-abort6e21e932, Museum notices62dc2990 and inventory serialization integrated. Root502 client/93 Museum tests pass; independently verified paid-burn39 and genuine metric replay pass. Full publication still fails gas; full-v1 remains unfinished. See [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `74f91719`: clone wallets, incident-gap consumers, entropy and mint fallbacks, six genesis products, staged inventory clients and publication transport are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,39 +29,37 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-The active owners and next coherent batches are:
+- Root owns shared architecture, integration and final candidate delivery.
+  Source through `74f91719` passes the complete 2,141-source ABI check; current
+  native acceptance remains separated from focused and historical evidence.
+- Protocol lead verifies actual Core-to-Coordinator cold registration at the
+  real launch500000 value and low-budget atomic rejection. Both original/new
+ 120000-floor controls failed; the original success oracle was inappropriate.
+  Measure hook cost for final EC-REGGAS four-times-cost floor calibration.
+  Frozen successor continuity and role34 helper source is already integrated.
+- Revenue lead completed the genuine version4 clone implementation and its
+  84-case capture; now reviews generic preservation full-payload requirements
+  and producer gaps, separately from the metadata lead and Museum task.
+- Metadata lead owns remaining publication payload/environment gas costs and
+  noncollection preservation scopes. Staged preparation and single-decode
+  transport are integrated; actual production transaction capacity is open.
+- Mint task completed the 13-case recovery capture after handing over the
+  ordinary/incident role35 fallback. Nine actual-current recipes await the
+  coordinated joined freeze; same-Ledger imports and retirement stay genuine.
+- Burn task runs the frozen four-consumer gap-aware cohort. Core14 and
+  Inventory18 are complete; offchain reference regressions pass63 at root.
+- Museum task implements original Artistop24 evidence joins and the additive
+  general/notarized attestation producer, schema and offline mappings.
+- Client task completed staged inventory529 and gap-aware inventory558 at
+  root, and now builds fallback and version4 clone caller updates.
+- Testing task owns full37 genesis composition, renderer registration and actual-current
+  Safe tests. Its narrow legacy-admin adapter is integrated0125573d. No broad native freeze
+  is started until the current feature batch and known source blockers settle.
 
-- Root: shared architecture, source integration, independent review, full
-  acceptance and delivery. Core incident-abort high-water fix is integrated;
-  Burn owns its focused runtime and affected inventory consumers.
-- Artist/protocol lead: exact frozen V2 entropy successor permission, pending
-  request coverage and configured role34 fallback, preserving historical
-  coordinator binding. Selected products fit after fixed-worker extraction;
-  regression/activation source remains in progress.
-- Revenue lead: genuine fixed-runtime split-wallet clones and pinned singleton
-  implementation for role6, with a distinct wallet version and unchanged
-  original profile-domain structure. Existing RC1 identities remain historical.
-- Metadata lead: staged authenticated file-inventory preparation and redundant
-  publication-copy removal under the actual transaction cap; noncollection
-  preservation scopes follow. No gas guard or original identity is waived.
-- Mint task: distinct ordinary/incident-capable role35 fallback, real same-Ledger
-  snapshot/import and one-way writer retirement, exact governed abort and Safe
-  activation. Shared Core/entropy and old launch script remain outside its scope.
-- Burn task: Core incident-gap acceptance and gap-aware CollectionTokenInventory,
-  four finality/render readers and offchain reference manifest. Paid-burn39 is
-  accepted only for its recorded source.
-- Museum task: remaining Artist/general/notarized attestation source and semantic
-  mappings. Owner-notice batch is integrated; native compile packet stays fixed.
-- Client task: exact staged inventory preparation and Safe callers from the
-  metadata lead's frozen interface; paid-burn502 package checks are complete.
-- Testing task: isolated full37 genesis composition/helpers and current/Safe
-  cases. Source-only30 current/Safe/fuzz preparation is complete and preserved;
-  a new freeze/build follows stabilization and resolution of size blockers.
-
-Do not duplicate owned source or launch competing broad compilers. All pending
-exact approval-review denials remain in force; no rejected patch is applied.
-Preserve RC1 and original evidence, and label implementation separately from
-matching runtime acceptance.
+Do not duplicate source writers or broad compilers. Exact approval-review
+denials remain in force; no rejected patch is applied. RC1 and all original
+captures remain immutable. Complete Safe/fuzz/gas/CI/testnet acceptance follows
+the stabilized full-feature implementation.
 
 ## Reboot recovery assignments: 19 September
 

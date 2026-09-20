@@ -18,61 +18,72 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-- Paid ERC20 burn-to-mint now has 39 distinct passing scoped cases: 21 gate
-  cases and 18 current-contract cases. Independent review verifies their exact
-  source/compiler/artifact bindings. The latter includes Safe authority and
-  payment-failure rollback; it is not a full-system run or evidence for later
-  Core changes. All four selected production products fit deployment limits.
-- The corresponding clients are integrated as `0466f9d3`. All 502 root package
-  tests, generation/build/type checks and the original batch38 ABI-fixture check
-  pass. Independent source review is clear. Four funding routes and sixteen
-  other actions have ordinary zero-value Safe CALL plans; client simulations
-  do not replace actual joined Safe execution.
-- Owner notice semantics and closed offline dossiers are integrated as
-  `62dc2990`: 93 affected root tests pass, with independent source review clear.
-  Original owner/independent statements, claimed delivery and actual recovery
-  execution remain separate. Fixtures are synthetic; positive chain capture
-  and institutional acceptance remain outstanding.
-- Core incident abort is repaired in `6e21e932`: consumed token IDs and
-  collection serials remain permanent gaps. Deterministic and fuzz regressions
-  are authored and source-reviewed. Focused runtime acceptance and the affected
-  gap-aware inventory/finality readers are being completed together.
-- Genuine metric replay reproduces the native5 export's expected report and
-  verifies all 102 platform prerequisites. The test-only publication fixture
-  and exact inputs are integrated as `ded3a39a`. Native5 passes four cases;
-  native6 passes those four but its four publication cases fail the unchanged
-  transaction gas guard before supplement/finality assertions. Replay success
-  is not publication acceptance.
-- Exact-byte inventory serialization is integrated as `e9af0d34`, independently
-  reviewed against its frozen original. Eight scoped cases and three 256-input
-  fuzz properties pass; the recorded source bridge contains only quote and
-  loop-brace formatting changes. Package serialization falls from 33.479 to
-  18.145 million gas, still above the 16,777,216 transaction cap before host
-  overhead. Staged authenticated preparation and redundant-copy removal are
-  being built; the cap and original inventory identities remain unchanged.
+- Version-4 split wallets now use genuine deterministic clones with a pinned,
+  locked implementation (`5e1b3902`). Independent source review is clear and
+  84 focused wallet/authorization/clone cases pass, including real Safe
+  versions. All seven captured production products fit deployment limits.
+  Full current-genesis and final economic integration remain outstanding.
+- The ordinary and incident-capable mint fallback is source-integrated as
+  `60df1e3f`. Its original Ledger imports, permanent writer retirement and
+  governed recovery have independent source review; all 13 focused recovery
+  cases pass with actual Core/Ledger/fallback and typed surrounding boundaries.
+  Nine current-contract Safe recipes, including stale-supply and late manifest
+  rollback cases (`a575d215`), are authored and await joined execution.
+- Core incident abort preserves consumed token IDs and collection serials.
+  Fourteen focused actual-Core cases pass, including fuzzing and capped supply.
+  Gap-aware inventory and four finality/preservation readers are integrated
+  through `5f233476`. The inventory has 18 focused passes. Consumer execution found fixture setup
+  omissions; reviewed test-only corrections74f91719 are in a cached retry.
+  No complete consumer pass is claimed. Root passes all 63 affected offchain reference/snapshot tests.
+  These captures exclude later entropy changes unless explicitly recorded.
+- Frozen entropy successor policies and the configured ordinary backup are
+  source-integrated as `cf57de5e`, independently reviewed. Eleven focused
+  continuity cases and ten retained subject-identity cases pass on their
+  recorded source. A cold-hook probe at 120,000 gas fails on both original
+  and new implementations; that probe used the configured floor rather than
+  the launch plan's actual 500,000 value. Corrected actual-launch success and
+  low-budget fail-closed cases are running. EC-REGGAS additionally requires the
+  new candidate's immutable floor to cover four times measured cold hook cost;
+  the historical 120,000 floor is not accepted as final calibration evidence.
+- Staged authenticated file-inventory preparation (`9a276348`) passes six
+  focused worker/Store cases. Its 1,048-row finalization probe uses 12,768,072
+  gas including intrinsic cost under named cooling, below 16,777,216; the
+  fixture uses a minimal host, so production publication capacity is unproven.
+  Exact full inventory identities and original byte encodings are preserved.
+- Staged inventory clients (`11dcf32a`) pass all 529 root package tests,
+  generation/build/strict types and the exact retained ABI fixture check.
+  Independent interoperability review is clear. Safe plans and simulated RPC
+  readback are not actual joined Safe execution. The later gap-aware inventory
+  clients (`613d3750`) pass all 558 root package tests, generation/build/types;
+  their exact serial lookup, bounded scans and receipt checks retain that scope.
+- Publication header/single-decode transport (`23e45d78`) passes three focused
+  parity cases, including 256 fuzz inputs; all three selected products fit.
+  Independent source review is clear. Further payload/environment transport
+  work continues because the earlier genuine full publication still fails
+  `RouterEvidenceGas(6179424,6195238)` before its final assertions.
+- Six genuine missing genesis products are composed in `a960a5b1`, with five
+  actual-current/Safe tests authored. Remaining role composition includes the
+  general/notarized attestations and renderer registration. The narrow
+  legacy-admin adapter is integrated as `0125573d`: seven current/Safe cases
+  are authored; selected adapter size is 5,448 runtime/5,981 creation bytes.
+  The generic preservation host still needs full-byte retention, and MetadataV1
+  supports 8,192 bytes against the specified 24,576; both repairs are assigned.
+  Source composition alone does not close all 37 genesis roles.
 
-The earlier combined package preparation measured 38,710,093 gas before
-intrinsic. The separate publication failure is
-`RouterEvidenceGas(6179424,6195238)`. Both failures remain retained and open.
-The latest complete-source ABI/type/storage pass at `62dc2990` covers 2,109
-sources in 18.000 seconds; the later serializer has separate focused evidence.
-Neither check proves whole-system runtime acceptance.
+The latest complete-source ABI/type/storage pass at `74f91719` covers 2,141
+sources in 18.984 seconds with no errors. It does not generate bytecode or
+prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
+scoped cases, owner-notice adapters 93 affected root cases, and the populated
+Museum recipe 150 affected cases. Those counts overlap or use different
+sources and must not be added into a complete-system total.
 
-The populated native Museum recipe `ace7eb95` retains 150 passing affected
-tests. Its compile request is prepared, but the actual chain demonstration
-needs fresh products and resolution of existing Artist/Router size failures.
-Earlier shared/ERC20-offer acceptance remains 71 and 42 distinct scoped cases.
-The artifact-based fixture pilot passes 40 cases and three fuzz properties,
-with unchanged production products and ordinary CREATE behavior; no compiler
-speedup was established.
-
-Current builders own configured entropy and Manager fallback activation,
-full 37-role genesis composition, the real deterministic split-wallet clone
-implementation, preservation capacity, gap-aware inventories, and the remaining
-Museum attestation mappings. The separate reviewed allowlist-price proposal
-and older exact rejected patches remain unapplied pending their specific
-approval answers. All full Safe/current-stack/fuzz/gas/CI and matching
-testnet-candidate obligations remain open. RC1 is unchanged.
+Genuine native5 metric replay passes against all 102 platform prerequisites;
+native6 retains four passes and four publication gas failures. Exact-byte pure
+serialization retains eight scoped passes and three fuzz properties. Existing
+Artist/Router deployment-size failures, the remaining product scopes and the
+exact rejected proposals remain open. No rejected patch has been applied.
+Full current-stack/Safe/fuzz/gas/CI acceptance, a source freeze and matching
+new testnet candidate are still required. RC1 is unchanged.
 
 ## 19 September recovery and integration
 

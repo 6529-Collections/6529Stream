@@ -10,7 +10,7 @@ not yet feature-complete or accepted as a combined system. The integrated branch
 now includes mint eligibility/continuity, free and native-paid burn paths with
 free-entry reveal credits, Artist dispute withdrawal, wallet-specific native
 pricing and its clients, and bounded museum authority reconciliation. Root
-passes 502 client tests, a 131-case museum authority/profile cohort, 27 archival
+passes 558 client tests, a 131-case museum authority/profile cohort, 27 archival
 export/publication cases, 44 scoped-dossier/legacy packaging cases, 62 actual-token
 capture/replay cases, 60 object-dossier adapter/assembly cases, 111 complete
 record-catalog/history compatibility cases and 81 offline preservation checks. The copied metric
@@ -23,26 +23,27 @@ Build and runtime integration remain separate facts in the rows below.
 ## Latest integration checkpoint: 20 September
 
 The [current integrated batch](V1_CURRENT_STATUS.md#20-september-integrated-batch)
-supersedes older pending-run statements. Paid burn has 39 distinct scoped
-passes (21 gate plus 18 current-contract cases); independent source and artifact
-review is clear. Its clients pass all 502 root package tests and exact fixture
-checks. Owner notice semantic/dossier adapters pass 93 affected root tests;
-their positive native capture remains pending. The populated Museum recipe
-retains 150 affected passes, and offer acceptance retains 71 shared/42 carrier
-cases. Counts overlap where noted and are never a whole-system total.
+records each source and test boundary. New clone wallets have 84 scoped passes;
+Core incident-gap recovery has 14; gap-aware inventory has 18. The downstream
+consumer run is pending. Staged preservation preparation has six scoped passes,
+and the later gap-aware clients pass all 558 root package tests. Publication transport has three
+parity passes including fuzzing, but complete publisher capacity is still open.
+Mint fallback has 13 focused passes and nine authored current/Safe cases;
+six additional genuine genesis products
+have five authored current/Safe cases; source integration is complete for these
+batches, while their joined runtime acceptance remains outstanding. The
+narrow legacy-admin compatibility adapter0125573d adds seven authored Safe
+cases; it does not complete generic preservation full-byte retention.
 
-Genuine native5 metric replay succeeds, but four native6 publication cases fail
-the real transaction gas guard. Exact-byte serialization optimization passes
-eight scoped cases, including three fuzz properties, and remains insufficient
-for the full package. Staged preparation is being built. Core incident-abort
-high-water repair is source-integrated; its runtime and downstream gap-reader
-batch remain active. Builders also own entropy/Manager fallbacks, full 37-role
-genesis composition, the actual split-wallet clone implementation and Museum
-attestation mappings. Original held proposals remain unapplied.
-
-No full-system acceptance, complete museum conformance or new testnet release
-is claimed. The latest integrated source/evidence is recorded in the linked
-current batch; historical source rows below keep their original scope.
+The new entropy continuity source is integrated and independently reviewed.
+A cold-registration probe at120000 fails on both original and new sources;
+it mistakenly tested the configured floor instead of the actual launch
+value500000. The protocol lead owns actual-launch acceptance and low-budget
+rollback controls; the final candidate floor must be calibrated to four times
+measured cold hook cost under EC-REGGAS. Museum general/notarized attestations,
+remaining genesis composition and preservation scopes are being implemented.
+Original held proposals remain unapplied. No full-system acceptance, complete
+museum conformance or new testnet release is claimed.
 
 ## How to read this document
 
@@ -76,14 +77,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `2314878c59ba762b70a4fc65d069fb439dd6ec83`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `74f917195af6e212196aba13705276022847a172`; see the [20 September batch](#latest-integration-checkpoint-20-september) for source-specific evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,098-source ABI/type/storage check passes at 2e0fca1a in 18.015 seconds; later test-only provider setup has separate 351-source ABI evidence; no errors. This is not bytecode or full-system runtime evidence. |
+| Latest broad cheap compilation evidence | 2,141-source ABI/type/storage check passes at `74f91719` in 18.984 seconds. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -136,8 +137,8 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
 | [core.nft](#corenft-evidence) NFT ownership, approvals, transfers, receiver callbacks and burn | Built | Partly tested | Partial | Current Core ERC-721 lifecycle, permanent token identity and standard read interfaces. Earlier current-stack/Safe captures demonstrate principal flows. **Remaining:** Rerun on the final combined source; burn-to-mint and physical redemption are separate products. |
-| [core.collections](#corecollections-evidence) Fixed, capped-open and uncapped collections; global token IDs | Built | Partly tested | Partial | Collection lifecycle, bounded supply changes, dense global allocation and identity retained after burn/abort. **Remaining:** Final boundary and batch-capacity acceptance on the combined candidate. |
-| [core.prepared](#coreprepared-evidence) Prepare, complete and abort a mint atomically | Built | Partly tested | Partial | Manager-only preparation and settlement; entropy registration and receiver failure roll back together. Earlier current tests pass on their recorded source. **Remaining:** Recheck all latest sale, snapshot and reveal combinations. |
+| [core.collections](#corecollections-evidence) Fixed, capped-open and uncapped collections; global token IDs | Built | Partly tested | Partial | Collection lifecycle, bounded supply changes, monotonic global allocation, identity retained after burn and permanent consumed gaps after incident abort. **Remaining:** Final boundary and batch-capacity acceptance on the combined candidate. |
+| [core.prepared](#coreprepared-evidence) Prepare, complete and abort a mint atomically | Built | Partly tested | Partial | Manager-only preparation and settlement; entropy registration and receiver failure roll back together. Incident-abort source6e21/2feb passes14 focused actual-Core cases including capped supply and fuzzing. Later entropy hook execution and measured genesis gas calibration remain separate. **Remaining:** Recheck all latest sale, snapshot and reveal combinations. |
 | [core.pointers](#corepointers-evidence) Governed modules, permanent Core boundaries and bounded external calls | Built | Partly tested | Partial | Interface/codehash admission, pointer selection, metadata/royalty hooks and gas budgets. **Remaining:** Latest dependency replacement, fallback and full gas acceptance. |
 | [mint.static](#mintstatic-evidence) Static caps, counter subjects and phase-policy grace windows | Built | Partly tested | Partial | Static increment/cap engine and recipient, payer, executor, constant and context subjects; phase-bound counters and prior-policy grace. **Remaining:** Final combined policy/replay fuzz campaign; expanded scopes below are not implemented by this row. |
 | [mint.merkle-caps](#mintmerkle-caps-evidence) Different wallet allowances from a pinned Merkle root | Built | Tested* | Partial | Canonical inline MERKLE_STATIC proofs bind differentiated allowances and projected batch consumption. Integrated feda72d3; included in the 87-case mint cohort. **Remaining:** Actual Core/Artist/sale integration and full batch gas limits; required sale-price consumption is tracked separately under sales.merkle-prices; e7eb51f0 authenticates enabled prices and rejects undeclared nonzero values. |
@@ -179,7 +180,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
 | [revenue.asset-policy](#revenueasset-policy-evidence) Approved ERC20 assets, permit policies and non-stranding deprecated exits | Built | Partly tested | Partial | Governed standard-token admission and permanent exit grace; asset and permit policy registry source exists. **Remaining:** Final supported asset-family/permit and deprecated-exit acceptance through actual settlement and split wallets. |
-| [revenue.factory-wallets](#revenuefactory-wallets-evidence) Canonical split profiles, deterministic wallets and pool | In progress | Partly tested | Partial | Canonical account/label shares, deterministic registered/deployed profiles, common wallet identity and curator-pool primitive. **Remaining:** Genuine singleton clone implementation required by genesis role6 is now being built; existing wallets use full CREATE2 deployments. Final all-entry/account asset/deployment/rounding/capacity matrix and actual pool admission; does not include runtime/factory incident lifecycle. |
+| [revenue.factory-wallets](#revenuefactory-wallets-evidence) Canonical split profiles, deterministic wallets and pool | Built | Partly tested | Partial | Canonical account/label shares, deterministic registered/deployed profiles, common wallet identity and curator-pool primitive. Version4 genuine pinned clones are integrated5e1b3902;84 scoped wallet/authorization/clone tests pass and all seven captured production products fit. Historical RC1 identities remain unchanged. **Remaining:** Final all-entry/account asset/deployment/rounding/capacity matrix and actual pool admission; does not include runtime/factory incident lifecycle. |
 | [revenue.claims](#revenueclaims-evidence) Split-wallet pull releases and claim aggregation | Built | Partly tested | Partial | Account-directed permissionless releases, original signed redirection/revocation, per-asset accounting and fixed claim router. **Remaining:** Final real-wallet/Safe/ERC20 policy changes, hostile callbacks and full conservation envelope; no generic estate legal entitlement inference. |
 | [revenue.live-royalties](#revenuelive-royalties-evidence) Live royalty precedence and explicit token/collection/default overrides | Built | Partly tested | Partial | Actual token > collection > default, configured disabled distinct from absent, maximum cap and original canonical policy hashes. **Remaining:** Final current-token/live-to-snapshot/frozen/callback combination; old narrow fixture results are not all modes. |
 | [revenue.snapshots](#revenuesnapshots-evidence) Original-mint royalty snapshots including configured-zero/default | Built | Partly tested | Partial | Collection-specific source-0 consent wrapper, positive/zero frozen token disclosure and original acquisition-time snapshots. **Remaining:** ec06 five actual Artist/Core dynamic/snapshot/same-NFT authored cases are integrated and await native. Prior complementary Artist/Core cohorts passed; not absent product. |
@@ -250,7 +251,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [entropy.funding](#entropyfunding-evidence) Reveal fees, quotations, sponsors and pull refunds | Built | Partly tested | Partial | Coordinator-hosted reveal-fee escrow and provider quote validation with native sale funding; dedicated focused suite included in the 100-case entropy capture. **Remaining:** Latest fee/callback/escrow conservation acceptance. ERC20 executor allowance is separately absent. |
 | [entropy.incidents](#entropyincidents-evidence) Timeouts, service-level findings and precommitted fresh recovery | Built | Tested* | Partial | Frozen incident/recovery policies, epochs and collection/token fresh recovery. Recorded focused run passes 100 cases across ten suites, including eight 256-input properties. **Remaining:** Complete latest actual Artist/governance/upstream-provider transaction composition. |
 | [entropy.artist-join](#entropyartist-join-evidence) Real Artist consent and unavailability findings in reveal recovery | Built | Partly tested | Partial | Actual Artist/Safe/Archive tests and operation23 finding source exist. Canonical role-registry/role grant and test-name fixes are integrated 5104173c/2c39c316. **Remaining:** Execute the repaired recovery/unavailability joins, then complete actual mint/Executor/provider composition and finding hydration acceptance. |
-| [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | In progress | Partly tested | Not integrated | Core pins entropy provenance and fallback roles are specified. The complete distinct-instance safe-mode activation/continuity product is not demonstrated. **Remaining:** Implement or establish the full safe-mode profile, deploy the distinct fallback, and prove old-token reads and fresh-token routing through real cutover. |
+| [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | Built | Partly tested | Not integrated | Frozen V2 successor permission, covered pending-request admission, original host provenance and configured ordinary backup helper are source-integratedcf57de5e with independent review. Eleven continuity and ten prior subject-identity cases pass on recorded sources. **Remaining:** Verify actual-Core cold registration at the real launch500000 value, calibrate the new candidate immutable floor from measured cold cost per EC-REGGAS, execute current/Safe cutover and complete genesis activation. The120000-floor success oracle failed on both original and new sources and was corrected. |
 
 ### Metadata and records
 
