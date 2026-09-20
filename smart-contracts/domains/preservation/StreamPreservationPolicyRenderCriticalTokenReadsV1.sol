@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -247,7 +253,16 @@ library StreamPreservationPolicyRenderCriticalTokenReadsV1 {
         );
         o.output = abi.decode(raw, (Content.Output));
         IO.canonical(sd.targets[7], raw, abi.encode(o.output));
-        _preservation(d, o);
+        bytes32 family = FamilyRead.requirePlan(
+            d,
+            sd.targets[7],
+            sd.codeHashes[7],
+            c.records.checkpointHash,
+            c.source.content,
+            c.source.outputs,
+            false
+        );
+        _preservation(d, o, family);
         if (
             o.selection.tokenId != token || o.output.leaf.tokenId != token
                 || o.output.selectionRowHash
@@ -407,9 +422,12 @@ library StreamPreservationPolicyRenderCriticalTokenReadsV1 {
         }
     }
 
-    function _preservation(S.Dependencies memory d, Original memory o) private view {
+    function _preservation(S.Dependencies memory d, Original memory o, bytes32 family)
+        private
+        view
+    {
         if (
-            o.output.preservation.profile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+            !FamilyRead.allows(family, o.output.preservation.profile)
                 || o.output.preservation.core != d.targets[0]
                 || o.output.preservation.metadataRouter != d.targets[4]
                 || o.output.preservationAdmission.registry != o.selection.selection.registry

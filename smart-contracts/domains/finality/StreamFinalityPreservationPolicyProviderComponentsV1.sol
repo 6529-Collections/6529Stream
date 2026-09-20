@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
+
 import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import {
     StreamFinalityNativeProviderReads as Native
@@ -31,10 +41,20 @@ library StreamFinalityPreservationPolicyProviderComponentsV1 {
     error InvalidPolicyProviderSnapshot();
 
     function snapshotHash(Native.Config memory c, uint256 cid) public view returns (bytes32) {
+        return snapshotHash(c, cid, Producers.ORIGINAL_PROFILE);
+    }
+
+    function snapshotHash(Native.Config memory c, uint256 cid, bytes32 preservationFamily)
+        public
+        view
+        returns (bytes32)
+    {
+        SnapshotFamilies.version2(preservationFamily);
         StreamFinalityScope memory scope =
             StreamFinalityScope(StreamFinalityScopeType.COLLECTION, cid, 0, 0);
-        Source.Projection memory p =
-            Source.current(_dependencies(c), c.targets[2], c.codeHashes[2], scope);
+        Source.Projection memory p = Source.current(
+            _dependencies(c), c.targets[2], c.codeHashes[2], scope, preservationFamily
+        );
         bytes memory raw = StreamFinalityBoundedReads.read(
             c.targets[8], abi.encodeCall(Snapshot.currentSnapshot, (scope)), 544, c.readGas
         );
@@ -50,10 +70,22 @@ library StreamFinalityPreservationPolicyProviderComponentsV1 {
         view
         returns (bool, bytes32)
     {
+        return facts(c, scope, family, Producers.ORIGINAL_PROFILE);
+    }
+
+    function facts(
+        Native.Config memory c,
+        StreamFinalityScope memory scope,
+        bytes32 family,
+        bytes32 preservationFamily
+    ) public view returns (bool, bytes32) {
+        SnapshotFamilies.version2(preservationFamily);
         if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
-            return Metadata.facts(c, scope);
+            return Metadata.facts(c, scope, preservationFamily);
         }
-        return Static.facts(_dependencies(c), c.targets[2], c.codeHashes[2], scope, family);
+        return Static.facts(
+            _dependencies(c), c.targets[2], c.codeHashes[2], scope, family, preservationFamily
+        );
     }
 
     function _dependencies(Native.Config memory c)

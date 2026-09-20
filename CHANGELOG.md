@@ -6,6 +6,19 @@
   capability, canonical dependency tuples and separate graph domain. Add eight
   dispatch and corruption regressions; native ceremony acceptance remains open.
 
+## Explicit token-preservation V2 family
+
+- Select fixed V2 checkpoint, output, snapshot and reference children in the
+  new current-authority factories. Retain each row's actual original or
+  current-Artist producer profile and full Registry admission.
+- Add governed V2 interpretations and closed shared-worker dispatch while
+  preserving original V1 documents, tuple widths, consent and historical state.
+  Compose the existing one-time VIEW binding in the new provider separately.
+- Add focused family, publication, rollback and discovery cases. Combined
+  ABI-only validation passes; native execution, sizes, gas and the actual
+  succession ceremony remain pending. See the
+  [integration guide](docs/integrations/current-authority-preservation-graphs.md).
+
 ## Governed VIEW route-read budget
 
 - Add an explicitly governed VIEW budget shared by adoption, current-source

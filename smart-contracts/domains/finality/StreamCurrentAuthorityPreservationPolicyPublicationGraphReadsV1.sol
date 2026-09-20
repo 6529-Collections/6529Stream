@@ -226,22 +226,22 @@ library StreamCurrentAuthorityPreservationPolicyPublicationGraphReadsV1 {
         if (
             g.preparedChildren > 1
                 && _word(g.children[1], "preservationPolicyProfile()", budget)
-                    != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")
+                    != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2")
         ) revert T.PublicationGraphChanged(g.graphId);
         if (
             g.preparedChildren > 2
                 && _word(g.children[2], "outputProfile()", budget)
-                    != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")
+                    != keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2")
         ) revert T.PublicationGraphChanged(g.graphId);
         if (
             g.preparedChildren > 3
                 && _word(g.children[3], "preservationPolicySnapshotProfile()", budget)
-                    != keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V1")
+                    != keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V2")
         ) revert T.PublicationGraphChanged(g.graphId);
         if (
             g.preparedChildren > 4
                 && _word(g.children[4], "preservationPolicyReferenceProfile()", budget)
-                    != keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_V1")
+                    != keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_V2")
         ) revert T.PublicationGraphChanged(g.graphId);
         if (
             g.preparedChildren > 5

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     IStreamPreservationPolicyContentCheckpointV1 as C
 } from "../../interfaces/stream/finality/IStreamPreservationPolicyContentCheckpointV1.sol";
 import {
@@ -81,7 +84,6 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
     address public immutable override sourceFactory;
     bytes32 public immutable sourceFactoryCodeHash;
     bytes32 public immutable override factoryDependenciesHash;
-    bytes32 public constant PRESERVATION_PROFILE = keccak256("6529STREAM_PRESERVATION_RENDER_V1");
     bytes32 public constant LEAF_CHAIN =
         keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_LEAVES_V1");
     bytes32 public constant OUTPUT_CHAIN = keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUTS_V1");
@@ -98,6 +100,7 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
         address policySourceSet,
         address readiness,
         bool scoped_,
+        bool familyV2_,
         address executor,
         GasParameterConfig memory readGas,
         GasParameterConfig memory renderGas
@@ -173,9 +176,11 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
                     ) != policySourceSet
         ) revert InvalidStaticContentConfiguration();
         scoped = scoped_;
-        PROFILE = scoped_
-            ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
-            : keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1");
+        PROFILE = familyV2_
+            ? (scoped_ ? Family.SCOPED_CHECKPOINT_PROFILE : Family.COLLECTION_CHECKPOINT_PROFILE)
+            : (scoped_
+                    ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+                    : keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1"));
         Scoped.Binding memory factoryBinding;
         if (scoped_) {
             factoryBinding = Scoped.bind(core, selection, policySourceSet, readGas.genesisValue);
@@ -190,8 +195,11 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
     }
 
     function preservationOutputProfile() external pure returns (bytes32) {
-        return PRESERVATION_PROFILE;
+        return _preservationProfile();
     }
+
+    /// @dev Fixed by the concrete wrapper; no caller-supplied family selection.
+    function _preservationProfile() internal pure virtual returns (bytes32);
 
     /// @dev The original selected Registry owns the immutable class-1 admission. A producer's
     /// capability claim or a caller's supplied evidence cannot replace this exact current read.
@@ -244,7 +252,7 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
                 terminalReadinessCodeHash,
                 inventoryHash,
                 policyChainHash,
-                PRESERVATION_PROFILE,
+                _preservationProfile(),
                 salt
             )
         );
@@ -260,7 +268,7 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
                 0,
                 0,
                 0,
-                PRESERVATION_PROFILE
+                _preservationProfile()
             );
             emit StaticContentStarted(1, id, salt, _plans[id]);
         }
@@ -343,7 +351,7 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
 
     function _current(bytes32 id, Plan storage p) private view {
         if (
-            p.tokenCount == 0 || p.preservationProfile != PRESERVATION_PROFILE
+            p.tokenCount == 0 || p.preservationProfile != _preservationProfile()
                 || keccak256(abi.encode(_selection(p.selectionId))) != p.selectionHash
                 || p.inventoryHash != _sourceWord(E.originalInventoryHash.selector)
                 || p.policyChainHash != _sourceWord(E.originalPolicyChainHash.selector)
@@ -440,8 +448,18 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
             string memory imageURI
         )
     {
+        bytes32 producerProfile = _preservationProfile();
+        if (producerProfile == Family.FAMILY_PROFILE) {
+            producerProfile = abi.decode(
+                _read(producer, abi.encodeWithSignature("preservationProfile()"), 32, true, false),
+                (bytes32)
+            );
+            if (!Family.isSupported(producerProfile)) revert P.InvalidPreservationBinding();
+        } else if (producerProfile != Family.ORIGINAL_PROFILE) {
+            revert P.InvalidPreservationBinding();
+        }
         value.preservation = Binding.current(
-            producer, PRESERVATION_PROFILE, core, metadataRouter, _gasParameterValue(READ_GAS)
+            producer, producerProfile, core, metadataRouter, _gasParameterValue(READ_GAS)
         );
         Binding.requireCurrent(value.preservation, row, _gasParameterValue(READ_GAS));
         value.preservationAdmission = _admission(row, value.preservation);

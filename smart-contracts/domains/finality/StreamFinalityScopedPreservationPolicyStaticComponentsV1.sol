@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
     StreamFinalityScope
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import {
@@ -37,6 +43,16 @@ library StreamFinalityScopedPreservationPolicyStaticComponentsV1 {
         view
         returns (bool, bytes32)
     {
+        return facts(c, scope, family, Producers.ORIGINAL_PROFILE);
+    }
+
+    function facts(
+        Provider.Config memory c,
+        StreamFinalityScope memory scope,
+        bytes32 family,
+        bytes32 preservationFamily
+    ) public view returns (bool, bytes32) {
+        SnapshotFamilies.version2(preservationFamily);
         Snapshots.Dependencies memory fixed_ = Snapshots.Dependencies(
             c.targets[0],
             c.targets[1],
@@ -68,7 +84,7 @@ library StreamFinalityScopedPreservationPolicyStaticComponentsV1 {
                             c.readGas
                         ),
                         (bytes32)
-                    ) != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1")
+                    ) != SnapshotFamilies.profile(preservationFamily, true)
         ) {
             revert ScopedStaticSource();
         }
@@ -77,10 +93,11 @@ library StreamFinalityScopedPreservationPolicyStaticComponentsV1 {
         );
         S.Receipt memory r = abi.decode(raw, (S.Receipt));
         if (keccak256(raw) != keccak256(abi.encode(r))) revert ScopedStaticSource();
-        Snapshots.requireLocked(fixed_, scope, r.recordHash, r.revision);
+        Snapshots.requireLocked(fixed_, scope, r.recordHash, r.revision, preservationFamily);
         Metadata.Config memory mc = Metadata.Config(fixed_, c.targets[3], c.codeHashes[3]);
         // requireLocked above authenticates the current source before this original projection.
-        Metadata.RootFacts memory original = Metadata.rootFacts(mc, scope, false);
+        Metadata.RootFacts memory original =
+            Metadata.rootFacts(mc, scope, false, preservationFamily);
         S.Dependencies memory d = original.dependencies;
         if (keccak256(abi.encode(original.snapshot)) != keccak256(abi.encode(r))) {
             revert ScopedStaticSource();

@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceFamiliesV2 as F
+} from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
+import {
     StreamScopedPreservationPolicyReferenceTypesV1 as T
 } from "../../interfaces/stream/preservation/StreamScopedPreservationPolicyReferenceTypesV1.sol";
 import {
@@ -33,9 +40,20 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
         T.Receipt memory receipt,
         bool current
     ) public view returns (bytes32 hash, bytes memory canonical) {
-        definitions(d);
-        T.SourceFacts memory f = Sources.requireSource(d, p, current);
-        hash = Sources.sourceHash(d, f);
+        return prepare(inventories, d, p, receipt, current, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function prepare(
+        mapping(bytes32 => Bytes.Manifest) storage inventories,
+        T.Dependencies memory d,
+        T.Publication memory p,
+        T.Receipt memory receipt,
+        bool current,
+        bytes32 family
+    ) public view returns (bytes32 hash, bytes memory canonical) {
+        definitions(d, family);
+        T.SourceFacts memory f = Sources.requireSource(d, p, current, family);
+        hash = Sources.sourceHash(d, f, family);
         receipt.observation.sourcesHash = hash;
         bytes memory environment = Prepared.environment(inventories, p.observation.environment);
         if (
@@ -49,13 +67,7 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
         receipt.observation.payloadBytes = 0;
         receipt.observation.recordedAt = 0;
         canonical = abi.encode(
-            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_PAYLOAD_V1"),
-            d.chainId,
-            address(this),
-            p,
-            receipt,
-            f,
-            environment
+            F.payloadDomain(family, true), d.chainId, address(this), p, receipt, f, environment
         );
         if (canonical.length == 0 || canonical.length > 524288) {
             revert T.InvalidScopedPolicyReference();
@@ -68,10 +80,20 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
         T.Receipt storage receipt,
         T.Dependencies memory d
     ) public view {
-        definitions(d);
-        T.SourceFacts memory f = Sources.requireSource(d, publication(original), true);
+        requireCurrent(original, payload, receipt, d, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireCurrent(
+        Bytes.Manifest storage original,
+        Bytes.Manifest storage payload,
+        T.Receipt storage receipt,
+        T.Dependencies memory d,
+        bytes32 family
+    ) public view {
+        definitions(d, family);
+        T.SourceFacts memory f = Sources.requireSource(d, publication(original), true, family);
         if (
-            Sources.sourceHash(d, f) != receipt.observation.sourcesHash
+            Sources.sourceHash(d, f, family) != receipt.observation.sourcesHash
                 || Bytes.requireIntact(payload) != receipt.observation.payloadHash
         ) revert T.InvalidScopedPolicyReference();
     }
@@ -85,6 +107,14 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
     }
 
     function source(Bytes.Manifest storage payload) public view returns (bytes memory) {
+        return source(payload, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function source(Bytes.Manifest storage payload, bytes32 family)
+        public
+        view
+        returns (bytes memory)
+    {
         bytes memory raw = Bytes.read(payload);
         (
             bytes32 domain,
@@ -98,7 +128,7 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
             raw, (bytes32, uint256, address, T.Publication, T.Receipt, T.SourceFacts, bytes)
         );
         if (
-            domain != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_PAYLOAD_V1")
+            domain != F.payloadDomain(family, true)
                 || keccak256(raw)
                     != keccak256(abi.encode(domain, chain, host, p, r, f, environment))
         ) revert T.InvalidScopedPolicyReference();
@@ -116,6 +146,11 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
     }
 
     function definitions(T.Dependencies memory d) public view {
+        definitions(d, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function definitions(T.Dependencies memory d, bytes32 family) public view {
+        F.Definition memory definition = F.definition(family, true);
         Documents.Dependencies memory known;
         for (uint256 i; i < 4; ++i) {
             known.targets[i] = d.targets[i];
@@ -124,27 +159,27 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
         known.chainId = d.chainId;
         known.readGas = d.readGas;
         bytes32[7] memory ids = [
-            D.SCHEMA_ID,
-            D.PROFILE_ID,
-            D.CANON_ID,
+            definition.schemaId,
+            definition.profileId,
+            definition.canonId,
             Original.ENVIRONMENT_SCHEMA_ID,
             Original.PNG_SCHEMA_ID,
             Original.ZIP_SCHEMA_ID,
             Original.FORMAT_CATALOG_ID
         ];
         bytes32[7] memory hashes = [
-            D.SCHEMA_HASH,
-            D.PROFILE_HASH,
-            D.CANON_HASH,
+            definition.schemaHash,
+            definition.profileHash,
+            definition.canonHash,
             Original.ENVIRONMENT_SCHEMA_HASH,
             Original.PNG_SCHEMA_HASH,
             Original.ZIP_SCHEMA_HASH,
             Original.FORMAT_CATALOG_HASH
         ];
         uint32[7] memory lengths = [
-            D.SCHEMA_BYTES,
-            D.PROFILE_BYTES,
-            D.CANON_BYTES,
+            definition.schemaBytes,
+            definition.profileBytes,
+            definition.canonBytes,
             Original.ENVIRONMENT_SCHEMA_BYTES,
             Original.PNG_SCHEMA_BYTES,
             Original.ZIP_SCHEMA_BYTES,

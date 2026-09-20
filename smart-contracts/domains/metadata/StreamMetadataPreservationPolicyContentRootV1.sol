@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 import {
     IStreamContentRootPublication as R
@@ -68,6 +71,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
         address artifacts;
         uint256 readGas;
         bytes32 hash;
+        bytes32 family;
     }
 
     event TokenContentRootPublished(
@@ -154,7 +158,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
                 || m.contentRoot == 0 || m.outputRoot == 0 || m.manifestHash == 0
                 || m.checkpointHash == 0 || m.checkpointStateHash == 0 || m.inventoryHash == 0
                 || m.policyChainHash == 0 || m.metadataRouter != address(this)
-                || m.preservationProfile != PRESERVATION_OUTPUT_PROFILE
+                || m.preservationProfile != route.family
         ) {
             revert R.InvalidContentRootPublication();
         }
@@ -164,8 +168,9 @@ library StreamMetadataPreservationPolicyContentRootV1 {
                         route.checkpoint, abi.encodeCall(P.entropySourceSet, ()), route.readGas
                     ) || m.entropySourceSet.code.length == 0
         ) revert R.InvalidContentRootPublication();
+        bytes32[5] memory definitionIds = Families.ids(route.family, false);
         binding = V.Binding(
-            PROFILE,
+            Families.profile(route.family, false),
             route.manifest,
             route.manifest.codehash,
             route.checkpoint,
@@ -177,11 +182,11 @@ library StreamMetadataPreservationPolicyContentRootV1 {
             m.inventoryHash,
             m.policyChainHash,
             m.outputRoot,
-            Schemas.definitionHash(OutputSchemas.SCHEMA),
-            Schemas.definitionHash(OutputSchemas.CANON),
-            Schemas.definitionHash(OutputSchemas.LEAF_SCHEMA),
-            Schemas.definitionHash(Schemas.ROOT_SCHEMA),
-            Schemas.definitionHash(Schemas.ROOT_CANON),
+            Families.definitionHash(route.family, false, definitionIds[0]),
+            Families.definitionHash(route.family, false, definitionIds[1]),
+            Families.definitionHash(route.family, false, definitionIds[2]),
+            Families.definitionHash(route.family, false, definitionIds[3]),
+            Families.definitionHash(route.family, false, definitionIds[4]),
             m.metadataRouter,
             m.preservationProfile
         );
@@ -192,11 +197,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
         r.routeHash = route.hash;
         r.stateHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_ROOT_STATE_V1"),
-                block.chainid,
-                address(this),
-                r,
-                binding
+                Families.stateDomain(route.family, false), block.chainid, address(this), r, binding
             )
         );
     }
@@ -223,7 +224,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
         current.publishedAt = uint64(block.timestamp);
         hash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V1"),
+                Families.recordDomain(binding.preservationOutputProfile, false),
                 block.chainid,
                 address(this),
                 current,
@@ -238,7 +239,9 @@ library StreamMetadataPreservationPolicyContentRootV1 {
         emit TokenContentRootPublished(
             3, p.collectionId, _subject(ctx.core, p.collectionId), hash, current
         );
-        emit PreservationPolicyContentRootBindingPublished(1, p.collectionId, hash, binding);
+        emit PreservationPolicyContentRootBindingPublished(
+            binding.preservationOutputProfile == Families.V2 ? 2 : 1, p.collectionId, hash, binding
+        );
     }
 
     function readBinding(bytes32 hash) public view returns (V.Binding memory) {
@@ -401,6 +404,11 @@ library StreamMetadataPreservationPolicyContentRootV1 {
         address checkpoint =
             _address(r.manifest, abi.encodeCall(M.contentCheckpoint, ()), r.readGas);
         r.checkpoint = checkpoint;
+        r.family =
+            bytes32(_word(checkpoint, abi.encodeCall(P.preservationOutputProfile, ()), r.readGas));
+        if (!Families.valid(r.family) || (r.family == Families.V2 && factoryCapability != 1)) {
+            revert R.InvalidContentRootPublication();
+        }
         if (
             _word(
                         r.manifest,
@@ -408,7 +416,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
                         r.readGas
                     ) != 1
                 || bytes32(_word(r.manifest, abi.encodeCall(M.outputProfile, ()), r.readGas))
-                    != PROFILE
+                    != Families.outputProfile(r.family, false)
                 || _word(
                         checkpoint,
                         abi.encodeCall(IERC165.supportsInterface, (type(P).interfaceId)),
@@ -418,12 +426,12 @@ library StreamMetadataPreservationPolicyContentRootV1 {
                         _word(
                             checkpoint, abi.encodeCall(P.preservationPolicyProfile, ()), r.readGas
                         )
-                    ) != PROFILE
+                    ) != Families.checkpointProfile(r.family, false)
                 || bytes32(
                         _word(
                             checkpoint, abi.encodeCall(P.preservationOutputProfile, ()), r.readGas
                         )
-                    ) != PRESERVATION_OUTPUT_PROFILE
+                    ) != r.family
         ) {
             revert R.InvalidContentRootPublication();
         }
@@ -465,11 +473,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
         }
         r.hash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_ROOT_ROUTE_V1"),
-                block.chainid,
-                ctx,
-                targets,
-                runtimeHashes
+                Families.routeDomain(r.family, false), block.chainid, ctx, targets, runtimeHashes
             )
         );
     }
@@ -509,13 +513,7 @@ library StreamMetadataPreservationPolicyContentRootV1 {
     }
 
     function _schemas(Route memory r) private view {
-        bytes32[5] memory ids = [
-            OutputSchemas.SCHEMA,
-            OutputSchemas.CANON,
-            OutputSchemas.LEAF_SCHEMA,
-            Schemas.ROOT_SCHEMA,
-            Schemas.ROOT_CANON
-        ];
+        bytes32[5] memory ids = Families.ids(r.family, false);
         for (uint256 i; i < ids.length; ++i) {
             bytes memory input = abi.encodeCall(IStreamSchemaRegistry.document, (ids[i]));
             bytes memory out = _readBounded(r.schemas, input, 8192, r.readGas);
@@ -526,7 +524,8 @@ library StreamMetadataPreservationPolicyContentRootV1 {
                     || uint8(d.specification.kind) != ((i == 1 || i == 4) ? 1 : 0)
                     || keccak256(bytes(d.specification.name)) != ids[i]
                     || d.specification.canonicalizationId != keccak256("RAW_BYTES")
-                    || d.specification.contentHash != Schemas.definitionHash(ids[i])
+                    || d.specification.contentHash
+                        != Families.definitionHash(r.family, false, ids[i])
             ) revert R.InvalidContentRootPublication();
         }
     }

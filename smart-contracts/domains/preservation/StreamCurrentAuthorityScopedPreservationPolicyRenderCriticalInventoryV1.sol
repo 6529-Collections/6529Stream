@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 import {
@@ -209,8 +212,9 @@ contract StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1
         Scoped.Plan storage p = _states[id].plans[id];
         Reference.Context memory context =
             Reference.Context(c.scope, c.subject, c.artistId, c.snapshot, c.referenceRender);
-        (T.Item[] memory rows, uint64 total) =
-            Reference.items(_states[id].dependencies, context, p.referenceCursor, maximum);
+        (T.Item[] memory rows, uint64 total) = Reference.items(
+            _states[id].dependencies, context, p.referenceCursor, maximum, Family.FAMILY_PROFILE
+        );
         if (p.referenceCursor != 0 && p.referenceCount != total) revert T.InventorySourceChanged();
         p.referenceCount = total;
         State.append(

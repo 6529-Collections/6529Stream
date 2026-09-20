@@ -47,7 +47,9 @@ library StreamCurrentAuthorityPreservationPolicyProviderOperationsV1 {
             configured.outputManifest,
             configured.outputManifestCodeHash
         );
-        return Manifest.encode(Sources.manifestDependencies(c), s);
+        return Manifest.encode(
+            Sources.manifestDependencies(c), s, keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
     }
 
     function inputs(Config memory configured, StreamFinalityScope memory scope, bytes32 hash)
@@ -64,7 +66,12 @@ library StreamCurrentAuthorityPreservationPolicyProviderOperationsV1 {
             configured.outputManifest,
             configured.outputManifestCodeHash
         );
-        (schema, canon) = Manifest.requireCurrent(Sources.manifestDependencies(c), s, hash);
+        (schema, canon) = Manifest.requireCurrent(
+            Sources.manifestDependencies(c),
+            s,
+            hash,
+            keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
         return (s.inputs, schema, canon);
     }
 
@@ -82,7 +89,12 @@ library StreamCurrentAuthorityPreservationPolicyProviderOperationsV1 {
             configured.outputManifest,
             configured.outputManifestCodeHash
         );
-        Manifest.requireCurrent(Sources.manifestDependencies(c), s, hash);
+        Manifest.requireCurrent(
+            Sources.manifestDependencies(c),
+            s,
+            hash,
+            keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
         return Review.review(c, s);
     }
 
@@ -118,7 +130,12 @@ library StreamCurrentAuthorityPreservationPolicyProviderOperationsV1 {
             configured.outputManifest,
             configured.outputManifestCodeHash
         );
-        (schema, canon) = Manifest.requireCurrent(Sources.manifestDependencies(c), s, hash);
+        (schema, canon) = Manifest.requireCurrent(
+            Sources.manifestDependencies(c),
+            s,
+            hash,
+            keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
         inputs_ = s.inputs;
         if (withReview) review_ = Review.review(c, s);
     }

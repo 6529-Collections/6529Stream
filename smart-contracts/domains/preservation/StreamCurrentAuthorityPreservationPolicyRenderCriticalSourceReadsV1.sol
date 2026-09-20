@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamPreservationPolicyRenderCriticalTypesV1 as V
 } from "../../interfaces/stream/preservation/StreamPreservationPolicyRenderCriticalTypesV1.sol";
 import {
@@ -104,7 +107,8 @@ library StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1 {
             _reference(d),
             scope,
             c.referenceRender.observation.recordHash,
-            c.referenceRender.observation.revision
+            c.referenceRender.observation.revision,
+            Family.FAMILY_PROFILE
         );
         raw = IO.fixedRead(
             d.targets[5], abi.encodeCall(Snapshot.currentSnapshot, (scope)), 544, d.readGas
@@ -112,7 +116,7 @@ library StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1 {
         c.snapshot = abi.decode(raw, (Snap.Receipt));
         IO.canonical(d.targets[5], raw, abi.encode(c.snapshot));
         SnapshotReads.Evidence memory evidence = SnapshotReads.requireCurrent(
-            _snapshot(d), scope, c.snapshot.recordHash, c.snapshot.revision
+            _snapshot(d), scope, c.snapshot.recordHash, c.snapshot.revision, Family.FAMILY_PROFILE
         );
         if (
             c.referenceRender.observation.snapshotRecordHash != c.snapshot.recordHash
@@ -128,7 +132,7 @@ library StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1 {
         IO.canonical(d.targets[6], raw, abi.encode(facts));
         c.referenceSourceHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_SOURCES_V1"),
+                keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_SOURCES_V2"),
                 d.chainId,
                 d.targets[6],
                 rd.targets,
@@ -142,6 +146,10 @@ library StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1 {
                 || facts.contentRootRecordHash != evidence.contentRootRecord
         ) revert T.InventorySourceChanged();
         c.source = facts.snapshotSource;
+        if (
+            c.source.content.preservationProfile != Family.FAMILY_PROFILE
+                || c.source.outputs.preservationProfile != Family.FAMILY_PROFILE
+        ) revert T.InventorySourceChanged();
         S.Context memory common;
         common.collectionId = cid;
         common.descriptions = Description.requireCurrent(_descriptions(d), scope);

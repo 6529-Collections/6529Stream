@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyOutputSchemasV2 as OutputV2
+} from "../finality/StreamPreservationPolicyOutputSchemasV2.sol";
+import {
+    StreamPreservationPolicySnapshotDefinitionsV2 as DefinitionsV2
+} from "../records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
+import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -35,6 +47,20 @@ library StreamPreservationPolicyRenderCriticalNativeReadsV1 {
         view
         returns (T.Item[] memory rows)
     {
+        return items(d, c, Family.ORIGINAL_PROFILE);
+    }
+
+    function items(S.Dependencies memory d, C.Context memory c, bytes32 family)
+        public
+        view
+        returns (T.Item[] memory rows)
+    {
+        if (
+            !FamilyRead.valid(family)
+                || (family == Family.FAMILY_PROFILE
+                    && (c.source.content.preservationProfile != family
+                        || c.source.outputs.preservationProfile != family))
+        ) revert T.InventorySourceChanged();
         (Snapshot.Dependencies memory sd,) = Sources.bindings(d);
         bytes memory raw = IO.read(
             d.targets[5],
@@ -62,8 +88,9 @@ library StreamPreservationPolicyRenderCriticalNativeReadsV1 {
             0,
             payload
         );
-        rows[0].schemaId = D.SCHEMA_ID;
-        rows[0].canonicalizationId = D.CANON_ID;
+        rows[0].schemaId = (family == Family.FAMILY_PROFILE ? DefinitionsV2.SCHEMA_ID : D.SCHEMA_ID);
+        rows[0].canonicalizationId =
+        (family == Family.FAMILY_PROFILE ? DefinitionsV2.CANON_ID : D.CANON_ID);
         rows[next++] = Items.bytesItem(
             T.Kind.NATIVE_BYTES,
             keccak256("POLICY_SNAPSHOT_SOURCE_V2"),
@@ -102,8 +129,9 @@ library StreamPreservationPolicyRenderCriticalNativeReadsV1 {
         manifest.source = sd.targets[8];
         manifest.sourceRecord = c.source.root.publication.verifiedManifestRecordHash;
         manifest.algorithm = 1;
-        manifest.canonicalizationId = Output.CANON;
-        manifest.schemaId = Output.SCHEMA;
+        manifest.canonicalizationId =
+        (family == Family.FAMILY_PROFILE ? OutputV2.CANON : Output.CANON);
+        manifest.schemaId = (family == Family.FAMILY_PROFILE ? OutputV2.SCHEMA : Output.SCHEMA);
         manifest.digest = abi.encodePacked(c.source.outputs.manifestHash);
         manifest.byteSize = c.source.outputs.byteLength;
         manifest.objectHash = c.source.outputs.artifactHash;

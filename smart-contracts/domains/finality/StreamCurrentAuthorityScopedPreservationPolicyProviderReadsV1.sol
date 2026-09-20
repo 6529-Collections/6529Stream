@@ -71,8 +71,8 @@ import {
     StreamBundleArchiveTypes as Archive
 } from "../../interfaces/stream/preservation/StreamBundleArchiveTypes.sol";
 import {
-    StreamPreservationPolicyOutputSchemasV1 as OutputSchemas
-} from "./StreamPreservationPolicyOutputSchemasV1.sol";
+    StreamPreservationPolicyOutputSchemasV2 as OutputSchemas
+} from "./StreamPreservationPolicyOutputSchemasV2.sol";
 
 /// @notice Distinct TOKEN/RELEASE/SEASON inputs from the complete authenticated scoped inventory.
 /// @dev Inventory is a semantic producer, not a caller-supplied list. Its exact constructor
@@ -103,28 +103,28 @@ library StreamCurrentAuthorityScopedPreservationPolicyProviderReadsV1 {
             6,
             type(Outputs).interfaceId,
             "outputProfile()",
-            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+            keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2")
         );
         _profile(
             c,
             7,
             type(Checkpoint).interfaceId,
             "preservationPolicyProfile()",
-            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2")
         );
         _profile(
             c,
             8,
             type(IStreamScopedPreservationPolicySnapshotPublicationV1).interfaceId,
             "scopedPreservationPolicySnapshotProfile()",
-            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1")
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2")
         );
         _profile(
             c,
             9,
             type(IStreamScopedPreservationPolicyReferencePublicationV1).interfaceId,
             "scopedPreservationPolicyReferenceProfile()",
-            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V1")
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V2")
         );
         _profile(
             c,
@@ -529,7 +529,8 @@ library StreamCurrentAuthorityScopedPreservationPolicyProviderReadsV1 {
                 c.codeHashes[3]
             ),
             s.scope,
-            false
+            false,
+            keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
         );
         StreamScopedPreservationPolicySnapshotTypesV1.Receipt memory snapshot = f.snapshot;
         if (

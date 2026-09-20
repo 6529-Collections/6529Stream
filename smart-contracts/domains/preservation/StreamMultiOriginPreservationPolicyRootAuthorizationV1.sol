@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 import {
     StreamRenderCriticalSourceTypes as S
@@ -100,12 +103,14 @@ library StreamMultiOriginPreservationPolicyRootAuthorizationV1 {
         );
         PreservationRoot.Binding memory binding = abi.decode(raw, (PreservationRoot.Binding));
         IO.canonical(d.targets[4], raw, abi.encode(binding));
+        bytes32 family = binding.preservationOutputProfile;
+        if (!Families.valid(family)) revert V.InvalidInventoryItem();
         if (
             keccak256(abi.encode(root, binding))
                     != keccak256(abi.encode(c.source.root, c.source.rootBinding))
                 || keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V1"),
+                            Families.recordDomain(family, false),
                             d.chainId,
                             d.targets[4],
                             root,
@@ -113,12 +118,29 @@ library StreamMultiOriginPreservationPolicyRootAuthorizationV1 {
                         )
                     ) != c.records.rootRecordHash || root.artistId != c.records.artistId
                 || root.publication.collectionId != c.records.collectionId
-                || root.artistConsent == 0
-                || binding.profileId != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")
+                || root.artistConsent == 0 || binding.profileId != Families.profile(family, false)
                 || binding.metadataRouter != d.targets[4]
-                || binding.preservationOutputProfile
-                    != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
         ) revert V.InvalidInventoryItem();
+        if (
+            family == Families.V2
+                && (c.source.content.preservationProfile != family
+                    || c.source.outputs.preservationProfile != family
+                    || binding.outputRoot != c.source.outputs.outputRoot
+                    || binding.checkpointHash != c.source.outputs.checkpointHash
+                    || binding.checkpointStateHash != c.source.outputs.checkpointStateHash)
+        ) revert V.InvalidInventoryItem();
+        if (family == Families.V2) {
+            bytes32[5] memory ids = Families.ids(family, false);
+            if (
+                binding.outputSchemaHash != Families.definitionHash(family, false, ids[0])
+                    || binding.outputCanonicalizationHash
+                        != Families.definitionHash(family, false, ids[1])
+                    || binding.leafSchemaHash != Families.definitionHash(family, false, ids[2])
+                    || binding.rootSchemaHash != Families.definitionHash(family, false, ids[3])
+                    || binding.rootCanonicalizationHash
+                        != Families.definitionHash(family, false, ids[4])
+            ) revert V.InvalidInventoryItem();
+        }
         bytes32 signedFamily = originalAggregate.revision == 0
             ? root.stateHash
             : keccak256(

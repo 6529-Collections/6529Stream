@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationPolicySnapshotDefinitionsV2 as SnapshotDefinitionsV2
+} from "../records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
+import {
+    StreamPreservationPolicyReferenceDefinitionsV2 as ReferenceDefinitionsV2
+} from "../records/StreamPreservationPolicyReferenceDefinitionsV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
 
 import "./StreamFinalityPreservationPolicyInputManifestSchemasV1.sol";
 import "./StreamFinalityRouterEvidence.sol";
@@ -36,7 +45,18 @@ library StreamFinalityPreservationPolicyInputManifestReadsV1 {
         Dependencies memory d,
         StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s
     ) public pure returns (bytes memory payload) {
-        _shape(s);
+        return encode(d, s, Families.V1);
+    }
+
+    /// @dev The input envelope is producer-neutral; its exact snapshot/reference profile hashes
+    /// already commit the chosen family. Only the fixed current-authority provider selects V2.
+    function encode(
+        Dependencies memory d,
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s,
+        bytes32 preservationFamily
+    ) public pure returns (bytes memory payload) {
+        if (!Families.valid(preservationFamily)) revert InvalidInputManifest();
+        _shape(s, preservationFamily);
         if (
             d.chainId == 0 || d.targets[0] == address(0) || d.targets[1] == address(0)
                 || d.targets[4] == address(0)
@@ -74,8 +94,17 @@ library StreamFinalityPreservationPolicyInputManifestReadsV1 {
         StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory expected,
         bytes32 contentHash
     ) public view returns (bytes32 schemaId, bytes32 canonicalizationId) {
+        return requireCurrent(d, expected, contentHash, Families.V1);
+    }
+
+    function requireCurrent(
+        Dependencies memory d,
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory expected,
+        bytes32 contentHash,
+        bytes32 preservationFamily
+    ) public view returns (bytes32 schemaId, bytes32 canonicalizationId) {
         _bindings(d);
-        bytes memory payload = encode(d, expected);
+        bytes memory payload = encode(d, expected, preservationFamily);
         if (contentHash == 0 || keccak256(payload) != contentHash) {
             revert InputManifestBytes(contentHash);
         }
@@ -173,10 +202,10 @@ library StreamFinalityPreservationPolicyInputManifestReadsV1 {
         );
     }
 
-    function _shape(StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s)
-        private
-        pure
-    {
+    function _shape(
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s,
+        bytes32 preservationFamily
+    ) private pure {
         if (
             s.scope.scopeType != StreamFinalityScopeType.COLLECTION || s.scope.collectionId == 0
                 || s.scope.tokenId != 0 || s.scope.scopeId != 0 || s.coreFactsHash == 0
@@ -187,10 +216,15 @@ library StreamFinalityPreservationPolicyInputManifestReadsV1 {
                     != keccak256("6529STREAM_ENTROPY_POLICY_SOURCE_SET_V2")
                 || s.entropy.inventoryPlan == 0 || s.entropy.inventoryHash == 0
                 || s.entropy.policyChainHash == 0 || s.entropy.policyCount == 0
-                || s.entropy.snapshotProfileHash != SnapshotDefinitions.PROFILE_HASH
-                || s.entropy.referenceProfileHash != ReferenceDefinitions.PROFILE_HASH
-                || s.postFreezePolicy != 1 || s.sanctionPolicy != 1
-                || s.nonSanctionComponents.length != 9
+                || s.entropy.snapshotProfileHash
+                    != (preservationFamily == Families.V2
+                            ? SnapshotDefinitionsV2.PROFILE_HASH
+                            : SnapshotDefinitions.PROFILE_HASH)
+                || s.entropy.referenceProfileHash
+                    != (preservationFamily == Families.V2
+                            ? ReferenceDefinitionsV2.PROFILE_HASH
+                            : ReferenceDefinitions.PROFILE_HASH) || s.postFreezePolicy != 1
+                || s.sanctionPolicy != 1 || s.nonSanctionComponents.length != 9
         ) revert InvalidInputManifest();
         StreamFinalityScopeInputs memory e = s.inputs;
         if (

@@ -36,8 +36,8 @@ import {
     IStreamFinalityProfileSources as Profiles
 } from "../../interfaces/stream/finality/IStreamFinalityProfileSources.sol";
 import {
-    StreamPreservationPolicySnapshotDefinitionsV1 as Definitions
-} from "../records/StreamPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamPreservationPolicySnapshotDefinitionsV2 as Definitions
+} from "../records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
 import {
     IStreamContentRootPublication as Root
 } from "../../interfaces/stream/metadata/IStreamContentRootPublication.sol";
@@ -58,7 +58,7 @@ import {
 /// @notice Closed Router-profile selection and genuine recipe-factory resolution.
 /// @dev Selection never calls reference/inventory/component evidence and cannot authorize it.
 library StreamCurrentAuthorityPreservationPolicyGraphSelectionV1 {
-    bytes32 private constant ROOT_PROFILE = keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1");
+    bytes32 private constant ROOT_PROFILE = keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V2");
 
     struct Context {
         Original.Config original;
@@ -184,7 +184,8 @@ library StreamCurrentAuthorityPreservationPolicyGraphSelectionV1 {
         }
         if (
             b.profileId != ROOT_PROFILE || b.metadataRouter != router
-                || b.preservationOutputProfile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                || b.preservationOutputProfile
+                    != keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
         ) revert PolicyGraphSource(router);
         bytes memory activation = Reads.read(
             router,
@@ -293,7 +294,8 @@ library StreamCurrentAuthorityPreservationPolicyGraphSelectionV1 {
         if (
             head == 0 || keccak256(raw) != keccak256(abi.encode(b)) || b.profileId != ROOT_PROFILE
                 || b.metadataRouter != c.original.targets[2]
-                || b.preservationOutputProfile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                || b.preservationOutputProfile
+                    != keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
                 || b.outputManifest != g.children[2] || b.outputManifestCodeHash != g.codeHashes[2]
                 || b.checkpoint != g.children[1] || b.checkpointCodeHash != g.codeHashes[1]
                 || b.entropySourceSet != g.sourceSet

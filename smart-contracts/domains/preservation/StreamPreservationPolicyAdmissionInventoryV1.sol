@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
 
 import {
     StreamRenderCriticalSourceTypes as S
@@ -45,7 +51,44 @@ library StreamPreservationPolicyAdmissionInventoryV1 {
         Content.Output memory output,
         uint64 index
     ) public view returns (T.Item memory row, uint64 count) {
-        Original memory o = _load(d, selected, output);
+        return _item(d, selected, output, index, Family.ORIGINAL_PROFILE);
+    }
+
+    /// @dev The host supplied this complete Plan from its authenticated stored Context;
+    /// TokenReads has rebound it to the actual pinned checkpoint before this call.
+    function itemForPlan(
+        S.Dependencies memory d,
+        Content.Plan memory plan,
+        Selection.TokenSelection memory selected,
+        Content.Output memory output,
+        uint64 index
+    ) public view returns (T.Item memory row, uint64 count) {
+        if (
+            plan.preservationProfile != Family.FAMILY_PROFILE || plan.tokenCount == 0
+                || plan.nextIndex != plan.tokenCount || plan.contentRoot == 0
+                || plan.outputRoot == 0 || selected.tokenId != output.leaf.tokenId
+                || output.selectionRowHash
+                    != keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_STATIC_SELECTION_ROW_V1"),
+                            d.chainId,
+                            d.targets[0],
+                            d.targets[4],
+                            selected
+                        )
+                    )
+        ) revert T.InventorySourceChanged();
+        return _item(d, selected, output, index, plan.preservationProfile);
+    }
+
+    function _item(
+        S.Dependencies memory d,
+        Selection.TokenSelection memory selected,
+        Content.Output memory output,
+        uint64 index,
+        bytes32 family
+    ) private view returns (T.Item memory row, uint64 count) {
+        Original memory o = _load(d, selected, output, family);
         count = uint64(10 + o.targets.length);
         if (index >= count) revert T.InvalidInventoryItem();
         address registry = selected.selection.registry;
@@ -138,7 +181,8 @@ library StreamPreservationPolicyAdmissionInventoryV1 {
     function _load(
         S.Dependencies memory d,
         Selection.TokenSelection memory selected,
-        Content.Output memory output
+        Content.Output memory output,
+        bytes32 family
     ) private view returns (Original memory o) {
         address registry = selected.selection.registry;
         if (
@@ -146,7 +190,7 @@ library StreamPreservationPolicyAdmissionInventoryV1 {
                 || output.leaf.tokenId != selected.tokenId
                 || output.preservation.core != d.targets[0]
                 || output.preservation.metadataRouter != d.targets[4]
-                || output.preservation.profile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                || !FamilyRead.allows(family, output.preservation.profile)
                 || output.preservationAdmission.registry != registry
                 || output.preservationAdmission.registryCodeHash
                     != selected.selection.registryCodeHash

@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
 
 import {
     StreamFinalityPreservationPolicySnapshotReadsV1 as SnapshotReads
@@ -46,14 +55,26 @@ library StreamFinalityPreservationPolicyStaticSourceV1 {
         bytes32 routerCodeHash,
         StreamFinalityScope memory scope
     ) public view returns (Projection memory result) {
+        return current(d, router, routerCodeHash, scope, Producers.ORIGINAL_PROFILE);
+    }
+
+    function current(
+        SnapshotReads.Dependencies memory d,
+        address router,
+        bytes32 routerCodeHash,
+        StreamFinalityScope memory scope,
+        bytes32 preservationFamily
+    ) public view returns (Projection memory result) {
+        SnapshotFamilies.version2(preservationFamily);
         _pin(router, routerCodeHash);
         bytes memory raw = Reads.read(
             d.snapshots, abi.encodeCall(Snapshot.currentSnapshot, (scope)), 544, d.readGas
         );
         S.Receipt memory receipt = abi.decode(raw, (S.Receipt));
         _canonical(raw, abi.encode(receipt));
-        SnapshotReads.Evidence memory current_ =
-            SnapshotReads.requireCurrent(d, scope, receipt.recordHash, receipt.revision);
+        SnapshotReads.Evidence memory current_ = SnapshotReads.requireCurrent(
+            d, scope, receipt.recordHash, receipt.revision, preservationFamily
+        );
         _canonical(raw, abi.encode(current_.receipt));
         raw = Reads.read(d.snapshots, abi.encodeCall(Snapshot.dependencies, ()), 832, d.readGas);
         S.Dependencies memory source = abi.decode(raw, (S.Dependencies));
@@ -80,14 +101,15 @@ library StreamFinalityPreservationPolicyStaticSourceV1 {
         if (keccak256(abi.encode(saved)) != keccak256(abi.encode(receipt))) {
             revert InvalidPolicyStaticSource();
         }
-        S.Source memory facts = _payload(d, source, original, receipt);
+        S.Source memory facts = _payload(d, source, original, receipt, preservationFamily);
         if (
             original.contentRootRecord != current_.contentRootRecord
                 || facts.root.publication.verifiedManifestRecordHash
                     != current_.outputManifestRecord || facts.outputs.checkpointHash == 0
                 || facts.content.selectionId == 0 || facts.selection.tokenCount == 0
                 || facts.selection.nextIndex != facts.selection.tokenCount || !facts.artist.locked
-                || facts.artist.snapshotHash == 0 || receipt.profileHash != Definitions.PROFILE_HASH
+                || facts.artist.snapshotHash == 0
+                || receipt.profileHash != SnapshotFamilies.hashes(preservationFamily, false)[1]
         ) revert InvalidPolicyStaticSource();
         result = Projection(
             source.targets[6],
@@ -109,7 +131,8 @@ library StreamFinalityPreservationPolicyStaticSourceV1 {
         SnapshotReads.Dependencies memory d,
         S.Dependencies memory source,
         S.Publication memory original,
-        S.Receipt memory receipt
+        S.Receipt memory receipt,
+        bytes32 preservationFamily
     ) private view returns (S.Source memory facts) {
         bytes memory out = Reads.dynamicRead(
             d.snapshots,
@@ -156,7 +179,7 @@ library StreamFinalityPreservationPolicyStaticSourceV1 {
         receipt.manifestBytes = 0;
         receipt.recordedAt = 0;
         if (
-            domain != keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1")
+            domain != SnapshotFamilies.payloadDomain(preservationFamily, false)
                 || chain != d.chainId || host != d.snapshots
                 || keccak256(abi.encode(targets, hashes))
                     != keccak256(abi.encode(source.targets, source.codeHashes))
@@ -166,7 +189,7 @@ library StreamFinalityPreservationPolicyStaticSourceV1 {
                 || fields.sourceHash
                     != keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"),
+                            SnapshotFamilies.sourcesDomain(preservationFamily, false),
                             chain,
                             host,
                             targets,

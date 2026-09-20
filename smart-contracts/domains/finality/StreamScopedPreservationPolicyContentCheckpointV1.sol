@@ -4,9 +4,11 @@ import {
     StreamPreservationPolicyContentCheckpointBaseV1 as Base
 } from "./StreamPreservationPolicyContentCheckpointBaseV1.sol";
 
-/// @notice Complete TOKEN/RELEASE/SEASON preservation output with each selected renderer's governed producer admission.
-/// @dev Existing full-output checkpoints and their historical byte meanings are unchanged.
+/// @notice Complete TOKEN/RELEASE/SEASON preservation output with exact per-row governed producer admission.
+/// @dev This wrapper fixes the original single-token profile; historical V1 meanings remain unchanged.
 contract StreamScopedPreservationPolicyContentCheckpointV1 is Base {
+    bytes32 public constant PRESERVATION_PROFILE = keccak256("6529STREAM_PRESERVATION_RENDER_V1");
+
     constructor(
         address selection,
         address policySourceSet,
@@ -14,5 +16,9 @@ contract StreamScopedPreservationPolicyContentCheckpointV1 is Base {
         address executor,
         GasParameterConfig memory readGas,
         GasParameterConfig memory renderGas
-    ) Base(selection, policySourceSet, readiness, true, executor, readGas, renderGas) { }
+    ) Base(selection, policySourceSet, readiness, true, false, executor, readGas, renderGas) { }
+
+    function _preservationProfile() internal pure override returns (bytes32) {
+        return PRESERVATION_PROFILE;
+    }
 }

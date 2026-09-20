@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -74,7 +80,8 @@ library StreamScopedPreservationPolicyRenderCriticalTokenReadsV1 {
         view
         returns (uint256 token, Original memory original)
     {
-        Snapshot.Dependencies memory sd = Sources.snapshotBindings(d);
+        Snapshot.Dependencies memory sd =
+            Sources.snapshotBindings(d, c.snapshotSource.content.preservationProfile);
         if (index >= c.tokenCount) revert T.InvalidInventoryItem();
         token = uint256(
             IO.word(
@@ -91,7 +98,8 @@ library StreamScopedPreservationPolicyRenderCriticalTokenReadsV1 {
         uint64 index,
         Content.Payload memory supplied
     ) public view returns (T.Item[] memory rows) {
-        Snapshot.Dependencies memory sd = Sources.snapshotBindings(d);
+        Snapshot.Dependencies memory sd =
+            Sources.snapshotBindings(d, c.snapshotSource.content.preservationProfile);
         if (
             index >= c.tokenCount || supplied.tokenId == 0
                 || supplied.tokenId
@@ -262,7 +270,16 @@ library StreamScopedPreservationPolicyRenderCriticalTokenReadsV1 {
         );
         o.output = abi.decode(raw, (Content.Output));
         IO.canonical(sd.targets[7], raw, abi.encode(o.output));
-        _preservation(d, o);
+        bytes32 family = FamilyRead.requirePlan(
+            d,
+            sd.targets[7],
+            sd.codeHashes[7],
+            c.checkpointHash,
+            c.snapshotSource.content,
+            c.snapshotSource.outputs,
+            true
+        );
+        _preservation(d, o, family);
         if (
             o.selection.tokenId != token || o.output.leaf.tokenId != token
                 || o.output.selectionRowHash
@@ -422,9 +439,12 @@ library StreamScopedPreservationPolicyRenderCriticalTokenReadsV1 {
         }
     }
 
-    function _preservation(S.Dependencies memory d, Original memory o) private view {
+    function _preservation(S.Dependencies memory d, Original memory o, bytes32 family)
+        private
+        view
+    {
         if (
-            o.output.preservation.profile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+            !FamilyRead.allows(family, o.output.preservation.profile)
                 || o.output.preservation.core != d.targets[0]
                 || o.output.preservation.metadataRouter != d.targets[4]
                 || o.output.preservationAdmission.registry != o.selection.selection.registry

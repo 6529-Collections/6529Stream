@@ -32,17 +32,17 @@ import {
     StreamPreservationPolicyPublicationReadinessDeploymentV1 as Readiness
 } from "./StreamPreservationPolicyPublicationReadinessDeploymentV1.sol";
 import {
-    StreamPreservationPolicyPublicationCheckpointDeploymentV1 as Checkpoint
-} from "./StreamPreservationPolicyPublicationCheckpointDeploymentV1.sol";
+    StreamPreservationPolicyPublicationCheckpointDeploymentV2 as Checkpoint
+} from "./StreamPreservationPolicyPublicationCheckpointDeploymentV2.sol";
 import {
-    StreamPreservationPolicyPublicationOutputDeploymentV1 as Output
-} from "./StreamPreservationPolicyPublicationOutputDeploymentV1.sol";
+    StreamPreservationPolicyPublicationOutputDeploymentV2 as Output
+} from "./StreamPreservationPolicyPublicationOutputDeploymentV2.sol";
 import {
-    StreamPreservationPolicyPublicationSnapshotDeploymentV1 as Snapshot
-} from "./StreamPreservationPolicyPublicationSnapshotDeploymentV1.sol";
+    StreamPreservationPolicyPublicationSnapshotDeploymentV2 as Snapshot
+} from "./StreamPreservationPolicyPublicationSnapshotDeploymentV2.sol";
 import {
-    StreamPreservationPolicyPublicationReferenceDeploymentV1 as Reference
-} from "./StreamPreservationPolicyPublicationReferenceDeploymentV1.sol";
+    StreamPreservationPolicyPublicationReferenceDeploymentV2 as Reference
+} from "./StreamPreservationPolicyPublicationReferenceDeploymentV2.sol";
 import {
     StreamCurrentAuthorityPreservationPolicyPublicationInventoryDeploymentV1 as Inventory
 } from "./StreamCurrentAuthorityPreservationPolicyPublicationInventoryDeploymentV1.sol";

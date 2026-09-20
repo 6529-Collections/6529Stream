@@ -229,6 +229,26 @@ library StreamCurrentAuthorityScopedPreservationPolicyPublicationGraphReadsV1 {
         }
         uint256 budget = r.inventory.readGas;
         if (
+            g.preparedChildren > 1
+                && _word(g.children[1], "preservationPolicyProfile()", budget)
+                    != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2")
+        ) revert T.PublicationGraphChanged(g.graphId);
+        if (
+            g.preparedChildren > 2
+                && _word(g.children[2], "outputProfile()", budget)
+                    != keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2")
+        ) revert T.PublicationGraphChanged(g.graphId);
+        if (
+            g.preparedChildren > 3
+                && _word(g.children[3], "scopedPreservationPolicySnapshotProfile()", budget)
+                    != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2")
+        ) revert T.PublicationGraphChanged(g.graphId);
+        if (
+            g.preparedChildren > 4
+                && _word(g.children[4], "scopedPreservationPolicyReferenceProfile()", budget)
+                    != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V2")
+        ) revert T.PublicationGraphChanged(g.graphId);
+        if (
             g.preparedChildren > 5
                 && _word(g.children[5], "scopedPreservationPolicyInventoryProfile()", budget)
                     != D.SCOPED_PRESERVATION_POLICY_INVENTORY_PROFILE

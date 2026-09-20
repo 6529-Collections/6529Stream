@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamPreservationPolicyRenderCriticalStateV1 as State
 } from "./StreamPreservationPolicyRenderCriticalStateV1.sol";
 import {
@@ -74,11 +77,28 @@ library StreamPreservationPolicyRenderCriticalTokenStagesV1 {
     }
 
     function appendPreservation(State.State storage s, bytes32 id) public {
+        appendPreservation(s, id, false);
+    }
+
+    function appendPreservation(State.State storage s, bytes32 id, bool familyV2) public {
         _stage(s, id, 5);
         (, Tokens.Original memory o) =
             Tokens.sourceAt(s.records.dependencies, s.contexts[id], s.records.plans[id].nextToken);
-        (T.Item memory row, uint64 count) =
-            Preservation.item(s.records.dependencies, o.selection, o.output, s.progress[id].row);
+        T.Item memory row;
+        uint64 count;
+        if (familyV2) {
+            (row, count) = Preservation.itemForPlan(
+                s.records.dependencies,
+                s.contexts[id].source.content,
+                o.selection,
+                o.output,
+                s.progress[id].row
+            );
+        } else {
+            (row, count) = Preservation.item(
+                s.records.dependencies, o.selection, o.output, s.progress[id].row
+            );
+        }
         _row(s, id, row, count);
     }
 

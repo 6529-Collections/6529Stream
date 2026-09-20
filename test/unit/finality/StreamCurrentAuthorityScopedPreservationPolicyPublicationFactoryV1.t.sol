@@ -202,7 +202,7 @@ contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1Test 
         require(graphFactory.graphForPlan(keccak256("unprepared")).graphId == 0);
     }
 
-    function testSevenRealChildrenRetainOldPublicationChildrenAndFullAuthorityProfiles() public {
+    function testSevenRealChildrenSelectFixedV2ProductsAndFullAuthorityProfiles() public {
         StreamFinalityScope memory scope = _setup();
         uint64 beforeNonce = createVm.getNonce(address(graphFactory));
         vm.prank(address(0xB0B));
@@ -243,26 +243,26 @@ contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1Test 
         }
         require(
             GraphContent(g.children[1]).preservationPolicyProfile()
-                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2")
         );
         require(
             GraphContent(g.children[1]).preservationOutputProfile()
-                == keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                == keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
         );
         require(GraphContent(g.children[1]).terminalReadiness() == g.children[0]);
         require(GraphContent(g.children[1]).entropySourceSet() == g.sourceSet);
         require(GraphOutput(g.children[2]).contentCheckpoint() == g.children[1]);
         require(
             GraphOutput(g.children[2]).outputProfile()
-                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+                == keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2")
         );
         require(
             GraphSnapshot(g.children[3]).scopedPreservationPolicySnapshotProfile()
-                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1")
+                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2")
         );
         require(
             GraphReference(g.children[4]).scopedPreservationPolicyReferenceProfile()
-                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V1")
+                == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V2")
         );
         InventoryChild inventory = InventoryChild(g.children[5]);
         BundleChild bundle = BundleChild(g.children[6]);
@@ -311,6 +311,40 @@ contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1Test 
             keccak256(abi.encode(graphFactory.prepareGraph(scope, 7))) == keccak256(abi.encode(g))
         );
         require(createVm.getNonce(address(graphFactory)) == afterNonce, "idempotent completion");
+    }
+
+    function testRetainedGraphRejectsLegacyOrUnknownChildCapabilities() public {
+        StreamFinalityScope memory scope = _setup();
+        GraphTypes.Graph memory g = graphFactory.prepareGraph(scope, 7);
+        bytes[4] memory inputs = [
+            abi.encodeCall(GraphContent.preservationPolicyProfile, ()),
+            abi.encodeCall(GraphOutput.outputProfile, ()),
+            abi.encodeCall(GraphSnapshot.scopedPreservationPolicySnapshotProfile, ()),
+            abi.encodeCall(GraphReference.scopedPreservationPolicyReferenceProfile, ())
+        ];
+        bytes32[4] memory oldProfiles = [
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1"),
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1"),
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1"),
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V1")
+        ];
+        for (uint256 i; i < 4; ++i) {
+            address child = g.children[i + 1];
+            (bool current, bytes memory saved) = child.staticcall(inputs[i]);
+            require(current && saved.length == 32, "actual fixed child profile");
+            for (uint256 j; j < 2; ++j) {
+                snapshotVm.mockCall(
+                    child, inputs[i], abi.encode(j == 0 ? oldProfiles[i] : bytes32(0))
+                );
+                (bool ok,) = address(graphFactory)
+                    .staticcall(abi.encodeCall(GraphInterface.requireCurrentGraph, (scope)));
+                require(!ok, "current factory cannot downgrade children");
+            }
+            snapshotVm.mockCall(child, inputs[i], saved);
+            require(
+                graphFactory.requireCurrentGraph(scope).graphId == g.graphId, "same graph recovers"
+            );
+        }
     }
 
     function testMissingResolverRejectsOperativeUseWithoutCreatingAChild() public {

@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceFamiliesV2 as F
+} from "../preservation/StreamPreservationPolicyReferenceFamiliesV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
+import {
     StreamPreservationPolicyReferenceTypesV1 as T
 } from "../../interfaces/stream/preservation/StreamPreservationPolicyReferenceTypesV1.sol";
 import {
@@ -38,6 +45,11 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
     error PolicyReferenceDependency(address source);
 
     function requireBindings(Dependencies memory d) public view {
+        requireBindings(d, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireBindings(Dependencies memory d, bytes32 family) public view {
+        F.isV2(family);
         if (d.chainId != block.chainid || d.readGas < 50000 || d.sourceGas < d.readGas) {
             revert InvalidPolicyReferenceEvidence();
         }
@@ -66,7 +78,7 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
                             d.readGas
                         ),
                         (bytes32)
-                    ) != keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_V1")
+                    ) != F.profile(family, false)
         ) revert InvalidPolicyReferenceEvidence();
         bytes memory raw =
             Reads.read(d.targets[4], abi.encodeCall(P.dependencies, ()), 608, d.readGas);
@@ -91,7 +103,18 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
         bytes32 hash,
         uint64 revision
     ) public view returns (T.Publication memory p, T.Receipt memory receipt) {
-        requireBindings(d);
+        return original(d, scope, hash, revision, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function original(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (T.Publication memory p, T.Receipt memory receipt) {
+        F.Definition memory definition = F.definition(family, false);
+        requireBindings(d, family);
         bytes32 subject = _subject(d, scope);
         bytes memory raw = Reads.dynamicRead(
             d.targets[4], abi.encodeCall(P.referenceRecord, (hash)), 524960, d.sourceGas
@@ -116,8 +139,8 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
                 || o.effectiveAt != r.effectiveAt || r.effectiveAt == 0
                 || o.reasonHash != r.reasonHash || r.reasonHash == 0 || r.recordedAt == 0
                 || r.effectiveAt > r.recordedAt || r.recordedAt > block.timestamp
-                || r.schemaHash != D.SCHEMA_HASH || r.profileHash != D.PROFILE_HASH
-                || r.canonicalizationHash != D.CANON_HASH
+                || r.schemaHash != definition.schemaHash || r.profileHash != definition.profileHash
+                || r.canonicalizationHash != definition.canonHash
         ) revert InvalidPolicyReferenceEvidence();
         // Original producer hashes the complete receipt before assigning these two final fields.
         T.Receipt memory fields = abi.decode(abi.encode(receipt), (T.Receipt));
@@ -126,7 +149,7 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
         if (
             keccak256(
                     abi.encode(
-                        keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_RECORD_V1"),
+                        F.recordDomain(family, false),
                         d.chainId,
                         d.targets[4],
                         d.targets[0],
@@ -146,7 +169,17 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
         bytes32 hash,
         uint64 revision
     ) public view returns (T.Receipt memory receipt) {
-        (, receipt) = original(d, scope, hash, revision);
+        return requireCurrent(d, scope, hash, revision, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireCurrent(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (T.Receipt memory receipt) {
+        (, receipt) = original(d, scope, hash, revision, family);
         bytes memory raw = Reads.read(
             d.targets[4],
             abi.encodeCall(P.requireCurrent, (scope, hash, revision)),
@@ -166,7 +199,17 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
         bytes32 hash,
         uint64 revision
     ) public view returns (T.Receipt memory receipt, R.Lock memory locked) {
-        receipt = requireCurrent(d, scope, hash, revision);
+        return requireLocked(d, scope, hash, revision, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireLocked(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (T.Receipt memory receipt, R.Lock memory locked) {
+        receipt = requireCurrent(d, scope, hash, revision, family);
         bytes memory raw =
             Reads.read(d.targets[4], abi.encodeCall(P.referenceLock, (scope)), 128, d.readGas);
         locked = abi.decode(raw, (R.Lock));
@@ -186,7 +229,19 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
         bytes32 hash,
         uint64 revision
     ) public view returns (StreamFinalityComponentState memory state) {
-        (T.Receipt memory receipt, R.Lock memory locked) = requireLocked(d, scope, hash, revision);
+        return component(d, scope, hash, revision, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function component(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (StreamFinalityComponentState memory state) {
+        F.Definition memory definition = F.definition(family, false);
+        (T.Receipt memory receipt, R.Lock memory locked) =
+            requireLocked(d, scope, hash, revision, family);
         bytes memory raw = Reads.read(
             d.targets[4],
             abi.encodeCall(IStreamArtworkScopedFinalityComponent.finalityStateForScope, (scope)),
@@ -199,15 +254,12 @@ library StreamFinalityPreservationPolicyReferenceReadsV1 {
             !state.frozen || state.componentType != StreamFinalityDomains.COMPONENT_REFERENCE_RENDER
                 || state.component != d.targets[4] || state.codeHash != d.codeHashes[4]
                 || state.interfaceId != type(IStreamArtworkScopedFinalityComponent).interfaceId
-                || state.moduleVersion
-                    != keccak256("STREAM_PRESERVATION_POLICY_REFERENCE_RENDER_IMPLEMENTATION_V1")
-                || state.manifestHash != D.PROFILE_HASH
+                || state.moduleVersion != F.moduleVersion(family, false)
+                || state.manifestHash != definition.profileHash
                 || state.dataHash
                     != keccak256(
                         abi.encode(
-                            keccak256(
-                                "6529STREAM_LOCKED_PRESERVATION_POLICY_REFERENCE_COMPONENT_V1"
-                            ),
+                            F.componentDomain(family, false),
                             d.chainId,
                             d.targets[4],
                             d.targets[0],

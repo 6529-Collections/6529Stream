@@ -63,6 +63,10 @@ import {
     StreamFinalityCoordinatorPolicyReadsV2 as Policies
 } from "../finality/StreamFinalityCoordinatorPolicyReadsV2.sol";
 
+import {
+    StreamPreservationTokenProducerProfilesV1 as ProducerProfiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
 /// @notice Complete admitted preservation-policy output, original factory/source and full frozen policy joins.
 /// @dev A complete output-row archive authenticates hashes, not full rendered byte preservation or
 /// Artist root-publication authority. The consumer must retain those separate finality obligations.
@@ -80,7 +84,14 @@ library StreamScopedPreservationPolicySnapshotSourceReadsV1 {
         return StreamMetadataSubjects.scopeSubject(d.chainId, d.targets[0], scope);
     }
 
+    /// @dev Historical entry point remains fixed to the original producer profile.
     function bindings(S.Dependencies memory d) public view {
+        bindings(d, ProducerProfiles.ORIGINAL_PROFILE);
+    }
+
+    /// @dev Only a fixed caller configuration selects the closed family; no host autodetection.
+    function bindings(S.Dependencies memory d, bytes32 family) public view {
+        bool v2 = _version2(family);
         if (
             d.chainId != block.chainid || d.readGas < 50000 || d.sourceGas < d.readGas
                 || d.inventoryGas < d.readGas || d.readGas > type(uint32).max
@@ -141,22 +152,37 @@ library StreamScopedPreservationPolicySnapshotSourceReadsV1 {
         _supports(d.targets[10], type(Entropy).interfaceId, d.readGas);
         if (
             _word(d, 7, "preservationPolicyProfile()")
-                    != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+                    != (v2
+                            ? ProducerProfiles.SCOPED_CHECKPOINT_PROFILE
+                            : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1"))
                 || _word(d, 8, "outputProfile()")
-                    != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1")
+                    != (v2
+                            ? ProducerProfiles.OUTPUT_MANIFEST_PROFILE
+                            : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_V1"))
                 || _word(d, 10, "SOURCE_SET_PROFILE()")
                     != keccak256("6529STREAM_ENTROPY_POLICY_SOURCE_SET_V2")
                 || _word(d, 7, "entropySourceSetCodeHash()") != d.codeHashes[10]
         ) revert S.InvalidScopedPolicySnapshot();
+        if (v2 && _word(d, 7, "preservationOutputProfile()") != family) {
+            revert S.InvalidScopedPolicySnapshot();
+        }
         _factory(d);
     }
 
     function current(S.Dependencies memory d, S.Publication memory p)
         public
         view
+        returns (S.Source memory)
+    {
+        return current(d, p, ProducerProfiles.ORIGINAL_PROFILE);
+    }
+
+    function current(S.Dependencies memory d, S.Publication memory p, bytes32 family)
+        public
+        view
         returns (S.Source memory f)
     {
-        bindings(d);
+        bindings(d, family);
         f.scope = p.scope;
         bytes32 subject = scopeSubject(d, p.scope);
         bytes memory raw = _read(
@@ -204,7 +230,7 @@ library StreamScopedPreservationPolicySnapshotSourceReadsV1 {
                 || f.outputs.tokenCount != f.membership.tokenCount || f.outputs.contentRoot == 0
                 || f.outputs.outputRoot == 0 || f.outputs.manifestHash == 0
                 || f.outputs.checkpointStateHash == 0 || f.outputs.metadataRouter != d.targets[4]
-                || f.outputs.preservationProfile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                || f.outputs.preservationProfile != family
         ) revert S.InvalidScopedPolicySnapshot();
         raw = _read(
             d, 7, abi.encodeCall(Content.checkpoint, (f.outputs.checkpointHash)), 448, d.readGas
@@ -242,9 +268,20 @@ library StreamScopedPreservationPolicySnapshotSourceReadsV1 {
         view
         returns (bytes32)
     {
+        return sourceHash(d, f, ProducerProfiles.ORIGINAL_PROFILE);
+    }
+
+    function sourceHash(S.Dependencies memory d, S.Source memory f, bytes32 family)
+        internal
+        view
+        returns (bytes32)
+    {
+        bool v2 = _version2(family);
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"),
+                (v2
+                        ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V2")
+                        : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1")),
                 d.chainId,
                 address(this),
                 d.targets,
@@ -399,6 +436,12 @@ library StreamScopedPreservationPolicySnapshotSourceReadsV1 {
         ) {
             revert S.InvalidScopedPolicySnapshot();
         }
+    }
+
+    function _version2(bytes32 family) private pure returns (bool) {
+        if (family == ProducerProfiles.ORIGINAL_PROFILE) return false;
+        if (family == ProducerProfiles.FAMILY_PROFILE) return true;
+        revert S.InvalidScopedPolicySnapshot();
     }
 
     function _supports(address target, bytes4 capability, uint256 cap) private view {

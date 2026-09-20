@@ -47,18 +47,23 @@ import {
     IStreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 as Inventory
 } from "../../interfaces/stream/preservation/IStreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1.sol";
 import {
-    StreamPreservationPolicySnapshotDefinitionsV1 as SnapshotDefinitions
-} from "../records/StreamPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamPreservationPolicySnapshotDefinitionsV2 as SnapshotDefinitions
+} from "../records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
 import {
-    StreamPreservationPolicyReferenceDefinitionsV1 as ReferenceDefinitions
-} from "../records/StreamPreservationPolicyReferenceDefinitionsV1.sol";
+    StreamPreservationPolicyReferenceDefinitionsV2 as ReferenceDefinitions
+} from "../records/StreamPreservationPolicyReferenceDefinitionsV2.sol";
 import {
-    StreamPreservationPolicyOutputSchemasV1 as OutputDefinitions
-} from "./StreamPreservationPolicyOutputSchemasV1.sol";
+    StreamPreservationPolicyOutputSchemasV2 as OutputDefinitions
+} from "./StreamPreservationPolicyOutputSchemasV2.sol";
 import {
-    StreamPreservationPolicyContentRootSchemasV1 as RootDefinitions
-} from "./StreamPreservationPolicyContentRootSchemasV1.sol";
-import "./StreamFinalityPreservationPolicyInputManifestReadsV1.sol";
+    StreamPreservationPolicyContentRootSchemasV2 as RootDefinitions
+} from "./StreamPreservationPolicyContentRootSchemasV2.sol";
+import {
+    StreamFinalityPreservationPolicyInputManifestReadsV1
+} from "./StreamFinalityPreservationPolicyInputManifestReadsV1.sol";
+import {
+    StreamFinalityPreservationPolicyInputManifestTypesV1
+} from "../../interfaces/stream/finality/StreamFinalityPreservationPolicyInputManifestTypesV1.sol";
 import "./StreamFinalityHashes.sol";
 import "../metadata/StreamMetadataSubjects.sol";
 import "../../interfaces/stream/finality/IStreamFinalityCurrentComponentRoutes.sol";
@@ -435,11 +440,12 @@ library StreamCurrentAuthorityPreservationPolicyProviderReadsV1 {
         PreservationRoot.Binding memory b = abi.decode(raw, (PreservationRoot.Binding));
         if (
             keccak256(raw) != keccak256(abi.encode(b))
-                || b.profileId != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")
+                || b.profileId != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V2")
                 || b.outputManifest != sd.targets[8] || b.outputManifestCodeHash != sd.codeHashes[8]
                 || b.checkpoint != sd.targets[7] || b.checkpointCodeHash != sd.codeHashes[7]
                 || b.metadataRouter != c.targets[2]
-                || b.preservationOutputProfile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                || b.preservationOutputProfile
+                    != keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
                 || b.entropySourceSet != sd.targets[10]
                 || b.entropySourceSetCodeHash != sd.codeHashes[10]
         ) revert NativeProviderSource();

@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
+
+import {
     StreamScopeMembershipFacts
 } from "../../interfaces/stream/finality/StreamScopeMembershipTypes.sol";
 import {
@@ -61,6 +71,15 @@ library StreamFinalityScopedPreservationPolicyMetadataFactsV1 {
         StreamFinalityScopedPreservationPolicyProviderReadsV1.Config memory c,
         StreamFinalityScope memory scope
     ) public view returns (bool frozen, bytes32 dataHash) {
+        return facts(c, scope, Producers.ORIGINAL_PROFILE);
+    }
+
+    function facts(
+        StreamFinalityScopedPreservationPolicyProviderReadsV1.Config memory c,
+        StreamFinalityScope memory scope,
+        bytes32 preservationFamily
+    ) public view returns (bool frozen, bytes32 dataHash) {
+        SnapshotFamilies.version2(preservationFamily);
         if (
             scope.collectionId == 0 || block.chainid != c.chainId
                 || (scope.scopeType == StreamFinalityScopeType.TOKEN
@@ -131,7 +150,7 @@ library StreamFinalityScopedPreservationPolicyMetadataFactsV1 {
             f.descriptions.rightsRevision,
             f.descriptions.rightsSelectionHash
         );
-        _root(c, scope, f);
+        _root(c, scope, f, preservationFamily);
         bool snapshotLocked = _snapshot(c, scope, f);
         // Scope-specific seals freeze this subject in an open series. The independent Core
         // component/Preparation proves its terminal scope; no whole-collection freeze is inferred.
@@ -139,17 +158,24 @@ library StreamFinalityScopedPreservationPolicyMetadataFactsV1 {
             && snapshotLocked;
         // Bind only this family's fixed graph and historical inputs, never sanction/current key,
         // complete input-manifest hash, external inventory or a self-referential component array.
-        dataHash = _dataHash(c, scope, f);
+        dataHash = _dataHash(c, scope, f, preservationFamily);
     }
 
     function _dataHash(
         StreamFinalityScopedPreservationPolicyProviderReadsV1.Config memory c,
         StreamFinalityScope memory scope,
-        LocalFacts memory f
+        LocalFacts memory f,
+        bytes32 preservationFamily
     ) private pure returns (bytes32 dataHash) {
         dataHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SELECTED_METADATA_COMPONENT_V1"),
+                (SnapshotFamilies.version2(preservationFamily)
+                        ? keccak256(
+                            "6529STREAM_SCOPED_PRESERVATION_POLICY_SELECTED_METADATA_COMPONENT_V2"
+                        )
+                        : keccak256(
+                            "6529STREAM_SCOPED_PRESERVATION_POLICY_SELECTED_METADATA_COMPONENT_V1"
+                        )),
                 c.chainId,
                 c.targets[0],
                 c.targets[1],
@@ -167,7 +193,8 @@ library StreamFinalityScopedPreservationPolicyMetadataFactsV1 {
     function _root(
         StreamFinalityScopedPreservationPolicyProviderReadsV1.Config memory c,
         StreamFinalityScope memory scope,
-        LocalFacts memory f
+        LocalFacts memory f,
+        bytes32 preservationFamily
     ) private view {
         Metadata.RootFacts memory original = Metadata.rootFacts(
             Metadata.Config(
@@ -188,7 +215,8 @@ library StreamFinalityScopedPreservationPolicyMetadataFactsV1 {
                 c.codeHashes[3]
             ),
             scope,
-            false
+            false,
+            preservationFamily
         );
         // Fresh authoritative membership must still equal every coordinate in the original
         // snapshot. The projection deliberately avoids complete inventory/component recursion.

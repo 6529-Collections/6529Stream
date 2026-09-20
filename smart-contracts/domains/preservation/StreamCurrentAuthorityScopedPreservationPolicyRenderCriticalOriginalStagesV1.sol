@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalStateV1 as State
 } from "./StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalStateV1.sol";
 import {
@@ -18,8 +21,9 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalOriginalStag
     function appendNative(State.State storage state, bytes32 id, uint64 maximum) public {
         State.stage(state, id, 0);
         Scoped.Plan storage p = state.plans[id];
-        (T.Item[] memory rows, uint64 total) =
-            Native.items(state.dependencies, state.contexts[id], p.nativeCursor, maximum);
+        (T.Item[] memory rows, uint64 total) = Native.items(
+            state.dependencies, state.contexts[id], p.nativeCursor, maximum, Family.FAMILY_PROFILE
+        );
         Roles.relabel(rows);
         if (p.nativeCursor != 0 && p.nativeCount != total) revert T.InventorySourceChanged();
         p.nativeCount = total;

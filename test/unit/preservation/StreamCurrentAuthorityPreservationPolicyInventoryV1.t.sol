@@ -126,7 +126,7 @@ contract PreservationAuthorityInventoryHarness {
             Stages.appendProfile(_states[id], id);
         } else {
             require(phase == 5);
-            Stages.appendPreservation(_states[id], id);
+            Stages.appendPreservation(_states[id], id, true);
         }
     }
 
@@ -256,6 +256,9 @@ contract StreamCurrentAuthorityPreservationPolicyInventoryV1Test {
         context.records.artistId = keccak256("artist");
         context.records.subject = keccak256("subject");
         context.records.tokenCount = 1;
+        context.source.content.preservationProfile =
+            keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2");
+        context.source.outputs.preservationProfile = context.source.content.preservationProfile;
         context.records.rootRecordHash = keccak256("original preservation root");
         context.records.checkpointHash = keccak256("preservation checkpoint");
         context.records.tokenInventoryHash = keccak256("one actual ordinal boundary");
@@ -445,7 +448,7 @@ contract StreamCurrentAuthorityPreservationPolicyInventoryV1Test {
     function _preservationCount(uint64 count) private {
         vm.mockCall(
             address(Preservation),
-            abi.encodeWithSelector(Preservation.item.selector),
+            abi.encodeWithSelector(Preservation.itemForPlan.selector),
             abi.encode(_row(), count)
         );
     }

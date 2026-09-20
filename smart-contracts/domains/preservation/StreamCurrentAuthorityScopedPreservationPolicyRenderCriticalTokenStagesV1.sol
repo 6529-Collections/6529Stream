@@ -79,8 +79,13 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalTokenStagesV
     function appendPreservation(State.State storage s, bytes32 id) public {
         uint64 ordinal = _stage(s, id, 5);
         (, Tokens.Original memory o) = Tokens.sourceAt(s.dependencies, s.contexts[id], ordinal);
-        (T.Item memory row, uint64 count) =
-            Preservation.item(s.dependencies, o.selection, o.output, s.tokenProgress[id].row);
+        (T.Item memory row, uint64 count) = Preservation.itemForPlan(
+            s.dependencies,
+            s.contexts[id].snapshotSource.content,
+            o.selection,
+            o.output,
+            s.tokenProgress[id].row
+        );
         _row(s, id, ordinal, row, count);
     }
 

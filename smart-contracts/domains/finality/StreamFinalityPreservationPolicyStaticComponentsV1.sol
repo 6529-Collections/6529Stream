@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
+
+import {
     StreamFinalityStaticComponentFacts as Static
 } from "./StreamFinalityStaticComponentFacts.sol";
 import {
@@ -35,7 +45,20 @@ library StreamFinalityPreservationPolicyStaticComponentsV1 {
         StreamFinalityScope memory scope,
         bytes32 family
     ) public view returns (bool frozen, bytes32 dataHash) {
-        Source.Projection memory source = Source.current(d, router, routerCodeHash, scope);
+        return facts(d, router, routerCodeHash, scope, family, Producers.ORIGINAL_PROFILE);
+    }
+
+    function facts(
+        Snapshots.Dependencies memory d,
+        address router,
+        bytes32 routerCodeHash,
+        StreamFinalityScope memory scope,
+        bytes32 family,
+        bytes32 preservationFamily
+    ) public view returns (bool frozen, bytes32 dataHash) {
+        SnapshotFamilies.version2(preservationFamily);
+        Source.Projection memory source =
+            Source.current(d, router, routerCodeHash, scope, preservationFamily);
         // Source.current has just validated this same immutable host's current original lock
         // against the complete receipt. Require its action here: current alone is not frozen.
         bytes memory raw = Reads.read(

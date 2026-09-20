@@ -25,8 +25,8 @@ import {
     StreamFinalityScopeType
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import {
-    StreamScopedPreservationPolicySnapshotDefinitionsV1 as Definitions
-} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamScopedPreservationPolicySnapshotDefinitionsV2 as Definitions
+} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV2.sol";
 import {
     StreamScopedPreservationPolicyPublicationRecipeV1 as Recipe
 } from "./StreamScopedPreservationPolicyPublicationRecipeV1.sol";

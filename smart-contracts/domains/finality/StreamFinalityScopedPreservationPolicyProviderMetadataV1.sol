@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
+
+import {
     StreamFinalityScopedPreservationPolicySnapshotReadsV1 as SnapshotReads
 } from "./StreamFinalityScopedPreservationPolicySnapshotReadsV1.sol";
 import { StreamFinalityRouterEvidence as Reads } from "./StreamFinalityRouterEvidence.sol";
@@ -66,7 +76,16 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         view
         returns (bytes32 value, uint64 count, bytes32 schema)
     {
-        RootFacts memory f = rootFacts(c, scope, true);
+        return root(c, scope, Producers.ORIGINAL_PROFILE);
+    }
+
+    function root(Config memory c, StreamFinalityScope memory scope, bytes32 preservationFamily)
+        public
+        view
+        returns (bytes32 value, uint64 count, bytes32 schema)
+    {
+        SnapshotFamilies.version2(preservationFamily);
+        RootFacts memory f = rootFacts(c, scope, true, preservationFamily);
         return (f.record.contentRoot, f.record.leafCount, OutputSchemas.LEAF_SCHEMA);
     }
 
@@ -78,7 +97,17 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         view
         returns (RootFacts memory f)
     {
-        _scope(c, scope);
+        return rootFacts(c, scope, current, Producers.ORIGINAL_PROFILE);
+    }
+
+    function rootFacts(
+        Config memory c,
+        StreamFinalityScope memory scope,
+        bool current,
+        bytes32 preservationFamily
+    ) public view returns (RootFacts memory f) {
+        SnapshotFamilies.version2(preservationFamily);
+        _scope(c, scope, preservationFamily);
         bytes memory raw = Reads.read(
             c.snapshots.snapshots,
             abi.encodeCall(Snapshot.currentSnapshot, (scope)),
@@ -87,13 +116,16 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         );
         f.snapshot = abi.decode(raw, (S.Receipt));
         _canonical(raw, abi.encode(f.snapshot));
-        (S.Publication memory original, S.Receipt memory receipt) =
-            SnapshotReads.original(c.snapshots, scope, f.snapshot.recordHash, f.snapshot.revision);
+        (S.Publication memory original, S.Receipt memory receipt) = SnapshotReads.original(
+            c.snapshots, scope, f.snapshot.recordHash, f.snapshot.revision, preservationFamily
+        );
         if (keccak256(raw) != keccak256(abi.encode(receipt))) {
             revert InvalidScopedProviderMetadata();
         }
         if (current) {
-            SnapshotReads.requireCurrent(c.snapshots, scope, receipt.recordHash, receipt.revision);
+            SnapshotReads.requireCurrent(
+                c.snapshots, scope, receipt.recordHash, receipt.revision, preservationFamily
+            );
         }
         raw = Reads.read(
             c.snapshots.snapshots,
@@ -117,9 +149,9 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
                 revert InvalidScopedProviderMetadata();
             }
         }
-        f.source = _payload(c, f.dependencies, original, receipt);
+        f.source = _payload(c, f.dependencies, original, receipt, preservationFamily);
         _factory(c, f);
-        _root(c, scope, original.outputManifestRecord, f);
+        _root(c, scope, original.outputManifestRecord, f, preservationFamily);
     }
 
     function snapshot(Config memory c, StreamFinalityScope memory scope)
@@ -127,8 +159,17 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         view
         returns (bytes32)
     {
-        _scope(c, scope);
-        return _snapshot(c, scope).manifestHash;
+        return snapshot(c, scope, Producers.ORIGINAL_PROFILE);
+    }
+
+    function snapshot(Config memory c, StreamFinalityScope memory scope, bytes32 preservationFamily)
+        public
+        view
+        returns (bytes32)
+    {
+        SnapshotFamilies.version2(preservationFamily);
+        _scope(c, scope, preservationFamily);
+        return _snapshot(c, scope, preservationFamily).manifestHash;
     }
 
     function manifest(Config memory c, StreamFinalityScope memory scope)
@@ -136,7 +177,16 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         view
         returns (bool, bytes32)
     {
-        _scope(c, scope);
+        return manifest(c, scope, Producers.ORIGINAL_PROFILE);
+    }
+
+    function manifest(Config memory c, StreamFinalityScope memory scope, bytes32 preservationFamily)
+        public
+        view
+        returns (bool, bytes32)
+    {
+        SnapshotFamilies.version2(preservationFamily);
+        _scope(c, scope, preservationFamily);
         bytes memory raw = Reads.read(
             c.membership,
             abi.encodeWithSignature(
@@ -165,11 +215,11 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         return (true, f.scopeManifestHash);
     }
 
-    function _snapshot(Config memory c, StreamFinalityScope memory scope)
-        private
-        view
-        returns (S.Receipt memory r)
-    {
+    function _snapshot(
+        Config memory c,
+        StreamFinalityScope memory scope,
+        bytes32 preservationFamily
+    ) private view returns (S.Receipt memory r) {
         bytes memory raw = Reads.read(
             c.snapshots.snapshots,
             abi.encodeCall(Snapshot.currentSnapshot, (scope)),
@@ -178,10 +228,15 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         );
         r = abi.decode(raw, (S.Receipt));
         if (keccak256(raw) != keccak256(abi.encode(r))) revert InvalidScopedProviderMetadata();
-        SnapshotReads.requireCurrent(c.snapshots, scope, r.recordHash, r.revision);
+        SnapshotReads.requireCurrent(
+            c.snapshots, scope, r.recordHash, r.revision, preservationFamily
+        );
     }
 
-    function _scope(Config memory c, StreamFinalityScope memory scope) private view {
+    function _scope(Config memory c, StreamFinalityScope memory scope, bytes32 preservationFamily)
+        private
+        view
+    {
         if (
             c.snapshots.chainId != block.chainid || c.snapshots.readGas < 50000
                 || c.snapshots.validationGas < c.snapshots.readGas
@@ -239,7 +294,7 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
                             c.snapshots.readGas
                         ),
                         (bytes32)
-                    ) != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1")
+                    ) != SnapshotFamilies.profile(preservationFamily, true)
         ) {
             revert InvalidScopedProviderMetadata();
         }
@@ -268,7 +323,8 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         Config memory c,
         S.Dependencies memory source,
         S.Publication memory original,
-        S.Receipt memory receipt
+        S.Receipt memory receipt,
+        bytes32 preservationFamily
     ) private view returns (S.Source memory f) {
         bytes memory out = Reads.dynamicRead(
             c.snapshots.snapshots,
@@ -313,7 +369,7 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         receipt.manifestBytes = 0;
         receipt.recordedAt = 0;
         if (
-            domain != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1")
+            domain != SnapshotFamilies.payloadDomain(preservationFamily, true)
                 || chain != c.snapshots.chainId || host != c.snapshots.snapshots
                 || keccak256(abi.encode(targets, hashes))
                     != keccak256(abi.encode(source.targets, source.codeHashes))
@@ -323,7 +379,7 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
                 || fields.sourceHash
                     != keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"),
+                            SnapshotFamilies.sourcesDomain(preservationFamily, true),
                             chain,
                             host,
                             targets,
@@ -334,8 +390,7 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         ) revert InvalidScopedProviderMetadata();
         if (
             value.outputs.metadataRouter != c.snapshots.router
-                || value.outputs.preservationProfile
-                    != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
+                || value.outputs.preservationProfile != preservationFamily
                 || value.content.preservationProfile != value.outputs.preservationProfile
         ) revert InvalidScopedProviderMetadata();
         f = value;
@@ -413,7 +468,8 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         Config memory c,
         StreamFinalityScope memory scope,
         bytes32 outputManifestRecord,
-        RootFacts memory f
+        RootFacts memory f,
+        bytes32 preservationFamily
     ) private view {
         f.recordHash = abi.decode(
             Reads.read(
@@ -442,7 +498,8 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         );
         f.binding = abi.decode(raw, (PreservationRoot.Binding));
         _canonical(raw, abi.encode(f.binding));
-        PreservationRoot.Binding memory expected = _binding(f.dependencies, f.source, f.snapshot);
+        PreservationRoot.Binding memory expected =
+            _binding(f.dependencies, f.source, f.snapshot, preservationFamily);
         if (keccak256(raw) != keccak256(abi.encode(expected))) {
             revert InvalidScopedProviderMetadata();
         }
@@ -488,7 +545,7 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
             r.stateHash
                 != keccak256(
                     abi.encode(
-                        keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_STATE_V1"),
+                        RootFamilies.stateDomain(preservationFamily, true),
                         c.snapshots.chainId,
                         c.snapshots.router,
                         c.snapshots.core,
@@ -510,12 +567,14 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         }
     }
 
-    function _binding(S.Dependencies memory d, S.Source memory source, S.Receipt memory receipt)
-        private
-        pure
-        returns (PreservationRoot.Binding memory b)
-    {
-        b.profileId = RootSchemas.PROFILE;
+    function _binding(
+        S.Dependencies memory d,
+        S.Source memory source,
+        S.Receipt memory receipt,
+        bytes32 preservationFamily
+    ) private pure returns (PreservationRoot.Binding memory b) {
+        b.profileId = RootFamilies.profile(preservationFamily, true);
+        bytes32[5] memory ids = RootFamilies.ids(preservationFamily, true);
         b.outputManifest = d.targets[8];
         b.outputManifestCodeHash = d.codeHashes[8];
         b.checkpoint = d.targets[7];
@@ -527,11 +586,11 @@ library StreamFinalityScopedPreservationPolicyProviderMetadataV1 {
         b.inventoryHash = source.outputs.inventoryHash;
         b.policyChainHash = source.outputs.policyChainHash;
         b.outputRoot = source.outputs.outputRoot;
-        b.outputSchemaHash = RootSchemas.definitionHash(OutputSchemas.SCHEMA);
-        b.outputCanonicalizationHash = RootSchemas.definitionHash(OutputSchemas.CANON);
-        b.leafSchemaHash = RootSchemas.definitionHash(OutputSchemas.LEAF_SCHEMA);
-        b.rootSchemaHash = RootSchemas.definitionHash(RootSchemas.ROOT_SCHEMA);
-        b.rootCanonicalizationHash = RootSchemas.definitionHash(RootSchemas.ROOT_CANON);
+        b.outputSchemaHash = RootFamilies.definitionHash(preservationFamily, true, ids[0]);
+        b.outputCanonicalizationHash = RootFamilies.definitionHash(preservationFamily, true, ids[1]);
+        b.leafSchemaHash = RootFamilies.definitionHash(preservationFamily, true, ids[2]);
+        b.rootSchemaHash = RootFamilies.definitionHash(preservationFamily, true, ids[3]);
+        b.rootCanonicalizationHash = RootFamilies.definitionHash(preservationFamily, true, ids[4]);
         b.sourceFactory = source.sourceFactory;
         b.sourceFactoryCodeHash = source.sourceFactoryCodeHash;
         b.factoryDependenciesHash = source.factoryDependenciesHash;

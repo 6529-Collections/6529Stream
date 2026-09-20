@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyRootFamiliesV2 as FamilySchemas
+} from "../../../smart-contracts/domains/finality/StreamPreservationPolicyRootFamiliesV2.sol";
+import {
     StreamMultiOriginPreservationPolicyRootAuthorizationV1 as Codec
 } from "../../../smart-contracts/domains/preservation/StreamMultiOriginPreservationPolicyRootAuthorizationV1.sol";
 import {
@@ -303,6 +306,73 @@ contract StreamMultiOriginPreservationPolicyRootAuthorizationV1Test {
         _reject(V.InvalidInventoryItem.selector);
     }
 
+    function testFamilyV2ImportedRootRetainsOriginalArchiveAndExactConsent() public {
+        _fixture(O.Lane.IMPORTED, true);
+        _useFamilyV2();
+        (V.Item memory item, O.RecordOrigin memory got) = this.read();
+        O.RecordOrigin memory expected = fact;
+        expected.role = ROLE;
+        require(keccak256(abi.encode(got)) == keccak256(abi.encode(expected)));
+        require(item.source == address(originalArchive) && item.source != address(currentArchive));
+        require(item.provenanceHash == _expectedProvenance(expected));
+    }
+
+    function testFamilyV2NativeRootRetainsOriginalArchive() public {
+        _fixture(O.Lane.NATIVE, false);
+        _useFamilyV2();
+        (V.Item memory item, O.RecordOrigin memory got) = this.read();
+        require(item.source == address(originalArchive) && got.role == ROLE);
+        require(item.provenanceHash == _expectedProvenance(got));
+    }
+
+    function testFamilyV2RejectsWrongSchemaBeforeOccurrenceProof() public {
+        _fixture(O.Lane.IMPORTED, true);
+        _useFamilyV2();
+        binding.outputSchemaHash = keccak256("wrong family schema");
+        _bindRoot();
+        vm.mockCallRevert(address(Proof), _proofInput(), hex"12345678");
+        _reject(V.InvalidInventoryItem.selector);
+    }
+
+    function testFamilyV2RejectsCrossFamilyContextBeforeOccurrenceProof() public {
+        _fixture(O.Lane.IMPORTED, true);
+        _useFamilyV2();
+        context.source.content.preservationProfile = FamilySchemas.V1;
+        vm.mockCallRevert(address(Proof), _proofInput(), hex"12345678");
+        _reject(V.InvalidInventoryItem.selector);
+    }
+
+    function testFamilyV2RejectsV1RootProfileBeforeOccurrenceProof() public {
+        _fixture(O.Lane.IMPORTED, true);
+        _useFamilyV2();
+        binding.profileId = FamilySchemas.profile(FamilySchemas.V1, false);
+        _bindRoot();
+        vm.mockCallRevert(address(Proof), _proofInput(), hex"12345678");
+        _reject(V.InvalidInventoryItem.selector);
+    }
+
+    function _useFamilyV2() private {
+        binding.preservationOutputProfile = FamilySchemas.V2;
+        binding.profileId = FamilySchemas.profile(FamilySchemas.V2, false);
+        bytes32[5] memory ids = FamilySchemas.ids(FamilySchemas.V2, false);
+        binding.outputSchemaHash = FamilySchemas.definitionHash(FamilySchemas.V2, false, ids[0]);
+        binding.outputCanonicalizationHash =
+            FamilySchemas.definitionHash(FamilySchemas.V2, false, ids[1]);
+        binding.leafSchemaHash = FamilySchemas.definitionHash(FamilySchemas.V2, false, ids[2]);
+        binding.rootSchemaHash = FamilySchemas.definitionHash(FamilySchemas.V2, false, ids[3]);
+        binding.rootCanonicalizationHash =
+            FamilySchemas.definitionHash(FamilySchemas.V2, false, ids[4]);
+        binding.outputRoot = keccak256("complete family output root");
+        binding.checkpointHash = keccak256("family checkpoint");
+        binding.checkpointStateHash = keccak256("complete family plan");
+        context.source.content.preservationProfile = FamilySchemas.V2;
+        context.source.outputs.preservationProfile = FamilySchemas.V2;
+        context.source.outputs.outputRoot = binding.outputRoot;
+        context.source.outputs.checkpointHash = binding.checkpointHash;
+        context.source.outputs.checkpointStateHash = binding.checkpointStateHash;
+        _bindRoot();
+    }
+
     function _fixture(O.Lane lane, bool withScopes) private {
         delete d;
         delete context;
@@ -420,7 +490,9 @@ contract StreamMultiOriginPreservationPolicyRootAuthorizationV1Test {
         context.source.rootBinding = binding;
         context.records.rootRecordHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V1"),
+                binding.preservationOutputProfile == FamilySchemas.V2
+                    ? FamilySchemas.recordDomain(FamilySchemas.V2, false)
+                    : keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V1"),
                 block.chainid,
                 d.targets[4],
                 root,

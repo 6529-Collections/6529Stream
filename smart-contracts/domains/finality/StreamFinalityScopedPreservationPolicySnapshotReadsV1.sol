@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
 
 import {
     StreamScopedPreservationPolicySnapshotTypesV1 as S
@@ -45,7 +51,19 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
         bytes32 recordHash,
         uint64 revision
     ) public view returns (StreamFinalitySnapshotEvidence memory e) {
-        (S.Publication memory p, S.Receipt memory r) = original(d, scope, recordHash, revision);
+        return requireCurrent(d, scope, recordHash, revision, Producers.ORIGINAL_PROFILE);
+    }
+
+    function requireCurrent(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (StreamFinalitySnapshotEvidence memory e) {
+        SnapshotFamilies.version2(family);
+        (S.Publication memory p, S.Receipt memory r) =
+            original(d, scope, recordHash, revision, family);
         bytes memory raw = Reads.read(
             d.snapshots,
             abi.encodeCall(Snapshot.requireCurrent, (scope, recordHash, revision)),
@@ -88,7 +106,7 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
             locked,
             keccak256(
                 abi.encode(
-                    keccak256("6529STREAM_FINALITY_SCOPED_PRESERVATION_POLICY_SNAPSHOT_LOCK_V1"),
+                    SnapshotFamilies.finalityLockDomain(family, true),
                     d.chainId,
                     d.snapshots,
                     scope,
@@ -98,7 +116,7 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
         );
         e.inputHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_FINALITY_SCOPED_PRESERVATION_POLICY_SNAPSHOT_INPUT_V1"),
+                SnapshotFamilies.inputDomain(family, true),
                 d.chainId,
                 d.core,
                 d.metadata,
@@ -117,7 +135,18 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
         bytes32 recordHash,
         uint64 revision
     ) public view returns (StreamFinalitySnapshotEvidence memory e) {
-        e = requireCurrent(d, scope, recordHash, revision);
+        return requireLocked(d, scope, recordHash, revision, Producers.ORIGINAL_PROFILE);
+    }
+
+    function requireLocked(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (StreamFinalitySnapshotEvidence memory e) {
+        SnapshotFamilies.version2(family);
+        e = requireCurrent(d, scope, recordHash, revision, family);
         if (!e.locked) revert InvalidScopedPreservationPolicySnapshotEvidence();
     }
 
@@ -128,6 +157,17 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
         bytes32 recordHash,
         uint64 revision
     ) public view returns (S.Publication memory p, S.Receipt memory r) {
+        return original(d, scope, recordHash, revision, Producers.ORIGINAL_PROFILE);
+    }
+
+    function original(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (S.Publication memory p, S.Receipt memory r) {
+        SnapshotFamilies.version2(family);
         if (
             d.chainId != block.chainid || d.readGas < 50000 || d.validationGas < d.readGas
                 || recordHash == 0 || revision == 0
@@ -145,7 +185,7 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
                 || _word(d, abi.encodeCall(Snapshot.metadataHost, ()))
                     != bytes32(uint256(uint160(d.metadata)))
                 || _word(d, abi.encodeCall(Snapshot.scopedPreservationPolicySnapshotProfile, ()))
-                    != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1")
+                    != SnapshotFamilies.profile(family, true)
                 || _word(d, abi.encodeCall(IERC165.supportsInterface, (type(Snapshot).interfaceId)))
                     != bytes32(uint256(1))
         ) revert InvalidScopedPreservationPolicySnapshotEvidence();
@@ -180,9 +220,10 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
                 || r.grantRevision == 0 || r.displayGrantRevision == 0 || r.recordedAt == 0
                 || r.recordedAt > block.timestamp || p.effectiveAt == 0
                 || p.effectiveAt > r.recordedAt || p.reasonHash == 0
-                || bytes(p.manifestURI).length > 2048 || r.schemaHash != Definitions.SCHEMA_HASH
-                || r.profileHash != Definitions.PROFILE_HASH
-                || r.canonicalizationHash != Definitions.CANON_HASH
+                || bytes(p.manifestURI).length > 2048
+                || r.schemaHash != SnapshotFamilies.hashes(family, true)[0]
+                || r.profileHash != SnapshotFamilies.hashes(family, true)[1]
+                || r.canonicalizationHash != SnapshotFamilies.hashes(family, true)[2]
         ) revert InvalidScopedPreservationPolicySnapshotEvidence();
         S.Receipt memory committed = abi.decode(abi.encode(r), (S.Receipt));
         committed.recordHash = 0;
@@ -190,7 +231,7 @@ library StreamFinalityScopedPreservationPolicySnapshotReadsV1 {
         if (
             keccak256(
                     abi.encode(
-                        keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_RECORD_V1"),
+                        SnapshotFamilies.recordDomain(family, true),
                         d.chainId,
                         d.snapshots,
                         d.core,

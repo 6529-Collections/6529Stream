@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 import {
     StreamRenderCriticalSourceTypes as S
@@ -99,23 +102,20 @@ library StreamMultiOriginScopedPreservationPolicyRootAuthorizationV1 {
         );
         PreservationRoot.Binding memory binding = abi.decode(raw, (PreservationRoot.Binding));
         IO.canonical(d.targets[4], raw, abi.encode(binding));
+        bytes32 family = binding.preservationOutputProfile;
+        if (!Families.valid(family)) revert V.InvalidInventoryItem();
         if (
             originalAggregate.revision == 0 || originalAggregate.transitionChain == 0
-                || binding.profileId != RootSchemas.PROFILE
-                || binding.metadataRouter != d.targets[4]
-                || binding.preservationOutputProfile
-                    != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
-                || originalLegacyFamilyHash == 0 || actor == address(0) || record.artistConsent == 0
-                || record.artistId != c.artistId
+                || binding.profileId != Families.profile(family, true)
+                || binding.metadataRouter != d.targets[4] || originalLegacyFamilyHash == 0
+                || actor == address(0) || record.artistConsent == 0 || record.artistId != c.artistId
                 || keccak256(abi.encode(record.publication.scope)) != keccak256(abi.encode(c.scope))
                 || record.snapshotHost != d.targets[5] || record.snapshotCodeHash != d.codeHashes[5]
                 || record.publication.snapshotRecordHash != c.snapshot.recordHash
                 || record.publication.snapshotRevision != c.snapshot.revision
                 || keccak256(
                         abi.encode(
-                            keccak256(
-                                "6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V1"
-                            ),
+                            Families.recordDomain(family, true),
                             d.chainId,
                             d.targets[4],
                             d.targets[0],
@@ -126,6 +126,26 @@ library StreamMultiOriginScopedPreservationPolicyRootAuthorizationV1 {
                     ) != c.rootRecordHash
         ) {
             revert V.InvalidInventoryItem();
+        }
+        if (
+            family == Families.V2
+                && (c.snapshotSource.content.preservationProfile != family
+                    || c.snapshotSource.outputs.preservationProfile != family
+                    || binding.outputRoot != c.snapshotSource.outputs.outputRoot
+                    || binding.checkpointHash != c.snapshotSource.outputs.checkpointHash
+                    || binding.checkpointStateHash != c.snapshotSource.outputs.checkpointStateHash)
+        ) revert V.InvalidInventoryItem();
+        if (family == Families.V2) {
+            bytes32[5] memory ids = Families.ids(family, true);
+            if (
+                binding.outputSchemaHash != Families.definitionHash(family, true, ids[0])
+                    || binding.outputCanonicalizationHash
+                        != Families.definitionHash(family, true, ids[1])
+                    || binding.leafSchemaHash != Families.definitionHash(family, true, ids[2])
+                    || binding.rootSchemaHash != Families.definitionHash(family, true, ids[3])
+                    || binding.rootCanonicalizationHash
+                        != Families.definitionHash(family, true, ids[4])
+            ) revert V.InvalidInventoryItem();
         }
         bytes32 signedFamily = keccak256(
             abi.encode(

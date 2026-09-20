@@ -319,6 +319,10 @@ contract StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1
         context_.checkpointHash = keccak256("preservation checkpoint");
         context_.selectionHash = keccak256("frozen original selection");
         context_.tokenCount = 1;
+        context_.snapshotSource.content.preservationProfile =
+            keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2");
+        context_.snapshotSource.outputs.preservationProfile =
+        context_.snapshotSource.content.preservationProfile;
         _select(selected, keccak256("complete B"));
         token_.selection.tokenId = 101;
         token_.output.leaf.tokenId = 101;
@@ -664,8 +668,9 @@ contract StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1
         vm.mockCall(
             address(Preservation),
             abi.encodeWithSelector(
-                Preservation.item.selector,
+                Preservation.itemForPlan.selector,
                 captured_.dependencies,
+                context_.snapshotSource.content,
                 token_.selection,
                 token_.output,
                 index

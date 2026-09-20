@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -78,7 +81,7 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalSourceReadsV
         // This original method checks the immutable named pins and common Core/archive getters;
         // it neither reads nor accepts a COLLECTION snapshot/reference record.
         Original.bindings(d);
-        Previous.snapshotBindings(d);
+        Previous.snapshotBindings(d, Family.FAMILY_PROFILE);
         c.scope = scope;
         c.subject = StreamMetadataSubjects.scopeSubject(d.chainId, d.targets[0], scope);
         bytes memory raw = IO.fixedRead(
@@ -90,7 +93,8 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalSourceReadsV
             Previous.referenceDependencies(d),
             scope,
             c.referenceRender.observation.recordHash,
-            c.referenceRender.observation.revision
+            c.referenceRender.observation.revision,
+            Family.FAMILY_PROFILE
         );
         // The original current producer has just checked the complete snapshot, authoritative
         // membership, selected source, scoped Artist root, environment and observations.
@@ -107,7 +111,7 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalSourceReadsV
         if (
             keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_SOURCES_V1"),
+                            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_SOURCES_V2"),
                             d.chainId,
                             d.targets[6],
                             rd.targets,
@@ -123,6 +127,10 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalSourceReadsV
         ) revert T.InventorySourceChanged();
         c.snapshot = f.snapshot;
         c.snapshotSource = f.snapshotSource;
+        if (
+            c.snapshotSource.content.preservationProfile != Family.FAMILY_PROFILE
+                || c.snapshotSource.outputs.preservationProfile != Family.FAMILY_PROFILE
+        ) revert T.InventorySourceChanged();
         c.outputManifestRecord = _snapshotOutput(d, c);
         c.descriptions = Descriptions.requireCurrent(Previous.descriptionDependencies(d), scope);
         StreamFinalityConservationEvidence memory conservation =

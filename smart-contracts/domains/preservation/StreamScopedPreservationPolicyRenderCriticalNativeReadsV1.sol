@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyOutputSchemasV2 as OutputV2
+} from "../finality/StreamPreservationPolicyOutputSchemasV2.sol";
+import {
+    StreamScopedPreservationPolicySnapshotDefinitionsV2 as DefinitionsV2
+} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV2.sol";
+import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -64,9 +76,19 @@ library StreamScopedPreservationPolicyRenderCriticalNativeReadsV1 {
         view
         returns (T.Item[] memory rows, uint64 total)
     {
+        return items(d, c, start, maximum, Family.ORIGINAL_PROFILE);
+    }
+
+    function items(
+        S.Dependencies memory d,
+        Scoped.Context memory c,
+        uint64 start,
+        uint64 maximum,
+        bytes32 family
+    ) public view returns (T.Item[] memory rows, uint64 total) {
         if (maximum == 0 || maximum > 64) revert T.InvalidInventorySegment();
-        Snapshot.Dependencies memory sd = Sources.snapshotBindings(d);
-        R.SourceFacts memory f = Sources.sourceFacts(d, c);
+        Snapshot.Dependencies memory sd = Sources.snapshotBindings(d, family);
+        R.SourceFacts memory f = Sources.sourceFacts(d, c, family);
         // Preserve the actual factory tuple and all four constructor targets, in addition
         // to the original inventory/snapshot/Artist roster and complete policy occurrences.
         Policies.Dependencies memory factory = _factory(d, f);
@@ -125,8 +147,10 @@ library StreamScopedPreservationPolicyRenderCriticalNativeReadsV1 {
                     0,
                     payload
                 );
-                rows[i].schemaId = Definitions.SCHEMA_ID;
-                rows[i].canonicalizationId = Definitions.CANON_ID;
+                rows[i].schemaId =
+                (family == Family.FAMILY_PROFILE ? DefinitionsV2.SCHEMA_ID : Definitions.SCHEMA_ID);
+                rows[i].canonicalizationId =
+                (family == Family.FAMILY_PROFILE ? DefinitionsV2.CANON_ID : Definitions.CANON_ID);
             } else if (at == 2) {
                 rows[i] = Items.bytesItem(
                     T.Kind.NATIVE_BYTES,
@@ -178,10 +202,12 @@ library StreamScopedPreservationPolicyRenderCriticalNativeReadsV1 {
                 rows[i].source = sd.targets[8];
                 rows[i].sourceRecord = c.outputManifestRecord;
                 rows[i].algorithm = 1;
-                rows[i].canonicalizationId = OutputSchemas.CANON;
+                rows[i].canonicalizationId =
+                (family == Family.FAMILY_PROFILE ? OutputV2.CANON : OutputSchemas.CANON);
                 rows[i].digest = abi.encodePacked(f.snapshotSource.outputs.manifestHash);
                 rows[i].byteSize = f.snapshotSource.outputs.byteLength;
-                rows[i].schemaId = OutputSchemas.SCHEMA;
+                rows[i].schemaId =
+                (family == Family.FAMILY_PROFILE ? OutputV2.SCHEMA : OutputSchemas.SCHEMA);
                 rows[i].objectHash = f.snapshotSource.outputs.artifactHash;
                 rows[i].originalCoverageHash = f.snapshotSource.outputs.coverageHash;
             } else if (at == 8) {

@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceFamiliesV2 as F
+} from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
+import {
     StreamPreservationPolicyReferenceTypesV1 as T
 } from "../../interfaces/stream/preservation/StreamPreservationPolicyReferenceTypesV1.sol";
 import {
@@ -62,6 +69,15 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
 
     /// @notice Exact constructor graph. Current selection/source eligibility is checked on use.
     function bindings(T.Dependencies memory d) public view returns (S.Dependencies memory source) {
+        return bindings(d, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function bindings(T.Dependencies memory d, bytes32 family)
+        public
+        view
+        returns (S.Dependencies memory source)
+    {
+        F.isV2(family);
         if (
             d.chainId != block.chainid || d.readGas < 50000 || d.sourceGas < d.readGas
                 || d.snapshotGas < d.sourceGas || d.archiveGas < d.readGas
@@ -91,7 +107,10 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
                             d.readGas
                         ),
                         (bytes32)
-                    ) != keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V1")
+                    )
+                    != (F.isV2(family)
+                            ? keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V2")
+                            : keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V1"))
         ) revert T.InvalidPolicyReference();
         bytes memory raw =
             Reads.read(d.targets[5], abi.encodeCall(Snap.dependencies, ()), 832, d.readGas);
@@ -130,9 +149,18 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         view
         returns (T.SourceFacts memory f)
     {
+        return requireSource(d, p, current, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireSource(
+        T.Dependencies memory d,
+        T.Publication memory p,
+        bool current,
+        bytes32 family
+    ) public view returns (T.SourceFacts memory f) {
         f.scopeSubject = subject(d, p.scope);
         if (p.observation.collectionId != p.scope.collectionId) revert T.InvalidPolicyReference();
-        S.Dependencies memory source = bindings(d);
+        S.Dependencies memory source = bindings(d, family);
         SnapRead.Dependencies memory reader = SnapRead.Dependencies(
             d.targets[0],
             d.targets[1],
@@ -145,7 +173,11 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
             d.snapshotGas
         );
         SnapRead.Evidence memory snapshot = SnapRead.requireCurrent(
-            reader, p.scope, p.observation.snapshotRecordHash, p.observation.snapshotRevision
+            reader,
+            p.scope,
+            p.observation.snapshotRecordHash,
+            p.observation.snapshotRevision,
+            family
         );
         bytes memory raw = Reads.dynamicRead(
             d.targets[5],
@@ -160,7 +192,7 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
             revert T.InvalidPolicyReference();
         }
         f.snapshot = receipt;
-        f.snapshotSource = _snapshot(d, source, original, receipt);
+        f.snapshotSource = _snapshot(d, source, original, receipt, family);
         f.contentRootRecordHash = original.contentRootRecord;
         f.contentRoot = f.snapshotSource.root;
         f.contentRootBinding = f.snapshotSource.rootBinding;
@@ -204,7 +236,8 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
                 f.snapshotSource,
                 uint64(i == 0 ? 0 : count - 1),
                 p.observation.captures[i],
-                current
+                current,
+                family
             );
         }
     }
@@ -214,14 +247,17 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         view
         returns (bytes32)
     {
+        return sourceHash(d, f, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function sourceHash(T.Dependencies memory d, T.SourceFacts memory f, bytes32 family)
+        internal
+        view
+        returns (bytes32)
+    {
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_REFERENCE_SOURCES_V1"),
-                d.chainId,
-                address(this),
-                d.targets,
-                d.codeHashes,
-                f
+                F.sourceDomain(family, false), d.chainId, address(this), d.targets, d.codeHashes, f
             )
         );
     }
@@ -244,7 +280,8 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         T.Dependencies memory d,
         S.Dependencies memory source,
         S.Publication memory original,
-        S.Receipt memory receipt
+        S.Receipt memory receipt,
+        bytes32 family
     ) private view returns (S.Source memory f) {
         bytes memory out = Reads.dynamicRead(
             d.targets[5],
@@ -291,7 +328,10 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         receipt.manifestBytes = 0;
         receipt.recordedAt = 0;
         if (
-            domain != keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1")
+            domain
+                    != (F.isV2(family)
+                            ? keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V2")
+                            : keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1"))
                 || chain != d.chainId || host != d.targets[5]
                 || keccak256(abi.encode(targets, hashes))
                     != keccak256(abi.encode(source.targets, source.codeHashes))
@@ -301,7 +341,13 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
                 || fields.sourceHash
                     != keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"),
+                            (F.isV2(family)
+                                    ? keccak256(
+                                        "6529STREAM_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V2"
+                                    )
+                                    : keccak256(
+                                            "6529STREAM_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"
+                                        )),
                             chain,
                             host,
                             targets,

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1 as OriginSources
 } from "./StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1.sol";
 import {
@@ -313,7 +316,9 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
 
     function appendDefinition(bytes32 id) external {
         Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        StreamPreservationPolicyRenderCriticalDefinitionStagesV1.appendDefinition(_states[id], id);
+        StreamPreservationPolicyRenderCriticalDefinitionStagesV1.appendDefinition(
+            _states[id], id, Family.FAMILY_PROFILE
+        );
     }
 
     function appendToken(bytes32 id, Content.Payload calldata payload) external {
@@ -343,7 +348,7 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
 
     function appendTokenPreservation(bytes32 id) external {
         Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        Tokens.appendPreservation(_states[id], id);
+        Tokens.appendPreservation(_states[id], id, true);
     }
 
     function tokenProgress(bytes32 id) external view returns (State.Progress memory) {

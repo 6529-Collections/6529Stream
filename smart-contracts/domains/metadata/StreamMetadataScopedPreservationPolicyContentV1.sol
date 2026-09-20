@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
+
+import {
     IStreamScopedContentRootPublication as R
 } from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
 import {
@@ -73,7 +77,11 @@ library StreamMetadataScopedPreservationPolicyContentV1 {
 
     function readBinding(bytes32 hash) public view returns (V.Binding memory result) {
         result = Companion.state().bindings[hash];
-        if (result.profileId != 0 && result.profileId != Schemas.PROFILE) {
+        if (
+            result.profileId != 0
+                && (!Families.valid(result.preservationOutputProfile)
+                    || result.profileId != Families.profile(result.preservationOutputProfile, true))
+        ) {
             revert R.InvalidScopedContentRoot();
         }
     }
@@ -88,14 +96,16 @@ library StreamMetadataScopedPreservationPolicyContentV1 {
         if (
             consent == 0 || record.publisher == address(0) || record.artistConsent != 0
                 || record.publishedAt != 0 || block.timestamp == 0
-                || block.timestamp > type(uint64).max || binding.profileId != Schemas.PROFILE
+                || block.timestamp > type(uint64).max
+                || !Families.valid(binding.preservationOutputProfile)
+                || binding.profileId != Families.profile(binding.preservationOutputProfile, true)
         ) revert R.InvalidScopedContentRoot();
         R.Aggregate memory aggregate = State.next(state, core, record);
         record.artistConsent = consent;
         record.publishedAt = uint64(block.timestamp);
         hash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_RECORD_V1"),
+                Families.recordDomain(binding.preservationOutputProfile, true),
                 block.chainid,
                 address(this),
                 core,
@@ -118,7 +128,11 @@ library StreamMetadataScopedPreservationPolicyContentV1 {
             3, record.publication.scope.collectionId, id, hash, record, aggregate
         );
         emit ScopedPreservationPolicyContentRootBindingPublished(
-            1, record.publication.scope.collectionId, id, hash, binding
+            binding.preservationOutputProfile == Families.V2 ? 2 : 1,
+            record.publication.scope.collectionId,
+            id,
+            hash,
+            binding
         );
     }
 

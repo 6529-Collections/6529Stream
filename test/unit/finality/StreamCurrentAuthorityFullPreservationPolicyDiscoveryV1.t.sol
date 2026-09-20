@@ -33,8 +33,8 @@ import {
     StreamCurrentAuthorityInventoryTypes as Capture
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 import {
-    StreamScopedPreservationPolicySnapshotDefinitionsV1 as ScopedDefinitions
-} from "../../../smart-contracts/domains/records/StreamScopedPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamScopedPreservationPolicySnapshotDefinitionsV2 as ScopedDefinitions
+} from "../../../smart-contracts/domains/records/StreamScopedPreservationPolicySnapshotDefinitionsV2.sol";
 import {
     IStreamGasParameterHost as Gas
 } from "../../../smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol";
@@ -64,8 +64,8 @@ import {
     IStreamPreservationPolicyPublicationGraphBindingV1 as CollectionBinding
 } from "../../../smart-contracts/interfaces/stream/finality/IStreamPreservationPolicyPublicationGraphBindingV1.sol";
 import {
-    StreamPreservationPolicySnapshotDefinitionsV1 as CollectionDefinitions
-} from "../../../smart-contracts/domains/records/StreamPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamPreservationPolicySnapshotDefinitionsV2 as CollectionDefinitions
+} from "../../../smart-contracts/domains/records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
 
 interface PreservationLineageVm {
     function mockCall(address target, bytes calldata input, bytes calldata output) external;
@@ -631,6 +631,27 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1Test is LineageD
         _successor(_new());
         _sign();
         _scopedRecord(authority.registry, keccak256("ARTIST_SANCTION"));
+        _assertCurrent();
+    }
+
+    function testLegacyPreservationProfileCannotRelabelCurrentV2FactoryChildren() public {
+        _dynamicScope();
+        _assertCurrent();
+        bytes32 actual = selected.profileHash;
+        selected.profileHash = keccak256(
+            bytes(
+                vm.readFile(
+                    "docs/schemas/preservation/scoped-preservation-policy-snapshot-v1.profile.json"
+                )
+            )
+        );
+        require(selected.profileHash != actual, "distinct governed family interpretation");
+        _source();
+        (bool ok,) =
+            address(scoped).staticcall(abi.encodeCall(scoped.requireCurrentRoutes, (scope, true)));
+        require(!ok, "old profile cannot name V2 children");
+        selected.profileHash = actual;
+        _source();
         _assertCurrent();
     }
 

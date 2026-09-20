@@ -60,6 +60,16 @@ contract PreservationAdmissionInventoryProbe {
     ) external view returns (T.Item memory, uint64) {
         return AdmissionItems.item(d, s, o, i);
     }
+
+    function itemForPlan(
+        D.Dependencies calldata d,
+        C.Plan calldata p,
+        S.TokenSelection calldata s,
+        C.Output calldata o,
+        uint64 i
+    ) external view returns (T.Item memory, uint64) {
+        return AdmissionItems.itemForPlan(d, p, s, o, i);
+    }
 }
 
 /// @notice Exercises the real inventory worker against explicit producer/Registry/document boundaries.
@@ -188,6 +198,83 @@ contract StreamPreservationPolicyAdmissionInventoryV1Test {
         );
         _documents();
         _commitRoster();
+    }
+
+    function testV2FullPlanRetainsEveryOriginalProducerRow() public {
+        C.Plan memory p = _familyPlan();
+        for (uint64 i; i < 16; ++i) {
+            (T.Item memory row, uint64 count) = probe.itemForPlan(deps, p, selected, output, i);
+            require(count == 16 && keccak256(abi.encode(row)) == keccak256(abi.encode(_item(i))));
+        }
+    }
+
+    function testV2CurrentArtistProducerRequiresSameCompleteAdmissionAndRoster() public {
+        _producerProfile(keccak256("6529STREAM_CURRENT_ARTIST_PRESERVATION_RENDER_V1"));
+        C.Plan memory p = _familyPlan();
+        for (uint64 i; i < 16; ++i) {
+            (T.Item memory row, uint64 count) = probe.itemForPlan(deps, p, selected, output, i);
+            require(count == 16 && row.byteSize != 0 && row.digest.length == 32);
+            if (i == 0) _digest(row, abi.encode(output.preservation));
+        }
+        _fails(0); // The legacy entrypoint still rejects this distinct producer.
+    }
+
+    function testV2RejectsViewAndUnknownProducerDespiteMatchingRegistryBoundary() public {
+        _producerProfile(keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_V1"));
+        C.Plan memory p = _familyPlan();
+        _familyFails(p);
+        _producerProfile(keccak256("unregistered family marker"));
+        _familyFails(p);
+    }
+
+    function testV2RejectsIncompletePlanAndWrongSelectionRow() public {
+        C.Plan memory p = _familyPlan();
+        p.nextIndex = 0;
+        _familyFails(p);
+        p.nextIndex = 1;
+        p.preservationProfile = keccak256("6529STREAM_PRESERVATION_RENDER_V1");
+        _familyFails(p);
+        p.preservationProfile = keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2");
+        output.selectionRowHash = keccak256("different authenticated selection");
+        _familyFails(p);
+    }
+
+    function _familyPlan() private returns (C.Plan memory p) {
+        p.preservationProfile = keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2");
+        p.tokenCount = 1;
+        p.nextIndex = 1;
+        p.contentRoot = keccak256("saved complete content");
+        p.outputRoot = keccak256("saved complete output");
+        output.selectionRowHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_STATIC_SELECTION_ROW_V1"),
+                deps.chainId,
+                deps.targets[0],
+                deps.targets[4],
+                selected
+            )
+        );
+    }
+
+    function _producerProfile(bytes32 profile) private {
+        output.preservation.profile = profile;
+        record.registration.binding.profile = profile;
+        key = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRESERVATION_KEY_V1"),
+                selected.selection.versionKey,
+                address(producer),
+                profile
+            )
+        );
+        producer.set(abi.encodeWithSignature("preservationProfile()"), abi.encode(profile));
+        _commitRoster();
+    }
+
+    function _familyFails(C.Plan memory p) private view {
+        (bool ok,) = address(probe)
+            .staticcall(abi.encodeCall(probe.itemForPlan, (deps, p, selected, output, uint64(0))));
+        require(!ok, "family does not bypass complete admission");
     }
 
     function _documents() private {

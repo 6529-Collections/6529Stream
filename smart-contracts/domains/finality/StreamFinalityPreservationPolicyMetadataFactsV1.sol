@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "./StreamPreservationPolicyRootFamiliesV2.sol";
+
 import "./StreamFinalityNativeProviderReads.sol";
 import {
     StreamFinalityPreservationPolicyStaticSourceV1 as Projection
@@ -48,6 +58,15 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
         StreamFinalityNativeProviderReads.Config memory c,
         StreamFinalityScope memory scope
     ) public view returns (bool frozen, bytes32 dataHash) {
+        return facts(c, scope, Producers.ORIGINAL_PROFILE);
+    }
+
+    function facts(
+        StreamFinalityNativeProviderReads.Config memory c,
+        StreamFinalityScope memory scope,
+        bytes32 preservationFamily
+    ) public view returns (bool frozen, bytes32 dataHash) {
+        SnapshotFamilies.version2(preservationFamily);
         if (
             scope.scopeType != StreamFinalityScopeType.COLLECTION || scope.collectionId == 0
                 || scope.tokenId != 0 || scope.scopeId != 0 || block.chainid != c.chainId
@@ -99,8 +118,8 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
             f.descriptions.rightsRevision,
             f.descriptions.rightsSelectionHash
         );
-        _root(c, scope.collectionId, f);
-        bool snapshotLocked = _snapshot(c, scope.collectionId, f);
+        _root(c, scope.collectionId, f, preservationFamily);
+        bool snapshotLocked = _snapshot(c, scope.collectionId, f, preservationFamily);
         bool coreFrozen = abi.decode(
             _read(
                 c,
@@ -116,17 +135,20 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
             && f.conservation.intentLock.locked && snapshotLocked;
         // Bind only this family's fixed graph and historical inputs, never sanction/current key,
         // complete input-manifest hash, external inventory or a self-referential component array.
-        dataHash = _dataHash(c, scope, f);
+        dataHash = _dataHash(c, scope, f, preservationFamily);
     }
 
     function _dataHash(
         StreamFinalityNativeProviderReads.Config memory c,
         StreamFinalityScope memory scope,
-        LocalFacts memory f
+        LocalFacts memory f,
+        bytes32 preservationFamily
     ) private pure returns (bytes32 dataHash) {
         dataHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_PRESERVATION_POLICY_SELECTED_METADATA_COMPONENT_V1"),
+                (SnapshotFamilies.version2(preservationFamily)
+                        ? keccak256("6529STREAM_PRESERVATION_POLICY_SELECTED_METADATA_COMPONENT_V2")
+                        : keccak256("6529STREAM_PRESERVATION_POLICY_SELECTED_METADATA_COMPONENT_V1")),
                 c.chainId,
                 c.targets[0],
                 c.targets[1],
@@ -144,7 +166,8 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
     function _root(
         StreamFinalityNativeProviderReads.Config memory c,
         uint256 cid,
-        LocalFacts memory f
+        LocalFacts memory f,
+        bytes32 preservationFamily
     ) private view {
         f.rootRecordHash = abi.decode(
             _read(
@@ -191,12 +214,11 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
         f.binding = abi.decode(raw, (PreservationRoot.Binding));
         if (
             keccak256(raw) != keccak256(abi.encode(f.binding))
-                || f.binding.profileId != keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1")
+                || f.binding.profileId != RootFamilies.profile(preservationFamily, false)
                 || f.binding.metadataRouter != c.targets[2]
-                || f.binding.preservationOutputProfile
-                    != keccak256("6529STREAM_PRESERVATION_RENDER_V1") || f.binding.outputRoot == 0
-                || f.binding.entropySourceSet == address(0) || f.binding.inventoryHash == 0
-                || f.binding.policyChainHash == 0
+                || f.binding.preservationOutputProfile != preservationFamily
+                || f.binding.outputRoot == 0 || f.binding.entropySourceSet == address(0)
+                || f.binding.inventoryHash == 0 || f.binding.policyChainHash == 0
         ) revert NativeMetadataSource();
         f.rootSchemaId = schema;
     }
@@ -230,10 +252,12 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
     function _snapshot(
         StreamFinalityNativeProviderReads.Config memory c,
         uint256 cid,
-        LocalFacts memory f
+        LocalFacts memory f,
+        bytes32 preservationFamily
     ) private view returns (bool locked) {
-        StreamFinalityScope memory scope =
-            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, cid, 0, 0);
+        StreamFinalityScope memory scope = StreamFinalityScope(
+            StreamFinalityScopeType.COLLECTION, cid, 0, 0
+        );
         SnapshotReads.Dependencies memory d = SnapshotReads.Dependencies(
             c.targets[0],
             c.targets[1],
@@ -245,7 +269,7 @@ library StreamFinalityPreservationPolicyMetadataFactsV1 {
             c.readGas,
             c.componentSourceGas
         );
-        f.source = Projection.current(d, c.targets[2], c.codeHashes[2], scope);
+        f.source = Projection.current(d, c.targets[2], c.codeHashes[2], scope, preservationFamily);
         if (f.source.contentRootRecordHash != f.rootRecordHash) revert NativeMetadataSource();
         bytes memory raw = _read(c, 8, abi.encodeCall(Snapshot.currentSnapshot, (scope)), 544);
         f.snapshot = abi.decode(raw, (S2.Receipt));

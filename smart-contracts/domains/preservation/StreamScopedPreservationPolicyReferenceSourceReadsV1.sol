@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
+import {
+    StreamPreservationPolicyReferenceFamiliesV2 as F
+} from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
+import {
     StreamScopedPreservationPolicyReferenceTypesV1 as T
 } from "../../interfaces/stream/preservation/StreamScopedPreservationPolicyReferenceTypesV1.sol";
 import {
@@ -77,6 +87,15 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
 
     /// @notice Exact constructor graph. Current selection/source eligibility is checked on use.
     function bindings(T.Dependencies memory d) public view returns (S.Dependencies memory source) {
+        return bindings(d, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function bindings(T.Dependencies memory d, bytes32 family)
+        public
+        view
+        returns (S.Dependencies memory source)
+    {
+        F.isV2(family);
         if (
             d.chainId != block.chainid || d.readGas < 50000 || d.sourceGas < d.readGas
                 || d.snapshotGas < d.sourceGas || d.archiveGas < d.readGas
@@ -104,7 +123,10 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
                             d.readGas
                         ),
                         (bytes32)
-                    ) != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1")
+                    )
+                    != (F.isV2(family)
+                            ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2")
+                            : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1"))
                 || abi.decode(
                         Reads.read(
                             d.targets[4],
@@ -154,11 +176,20 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         view
         returns (T.SourceFacts memory f)
     {
+        return requireSource(d, p, current, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireSource(
+        T.Dependencies memory d,
+        T.Publication memory p,
+        bool current,
+        bytes32 family
+    ) public view returns (T.SourceFacts memory f) {
         f.scopeSubject = subject(d, p.scope);
         if (p.observation.collectionId != p.scope.collectionId) {
             revert T.InvalidScopedPolicyReference();
         }
-        S.Dependencies memory source = bindings(d);
+        S.Dependencies memory source = bindings(d, family);
         SnapRead.Dependencies memory reader = SnapRead.Dependencies(
             d.targets[0],
             d.targets[1],
@@ -173,14 +204,22 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
             d.snapshotGas
         );
         SnapRead.requireCurrent(
-            reader, p.scope, p.observation.snapshotRecordHash, p.observation.snapshotRevision
+            reader,
+            p.scope,
+            p.observation.snapshotRecordHash,
+            p.observation.snapshotRevision,
+            family
         );
         (S.Publication memory original, S.Receipt memory receipt) = SnapRead.original(
-            reader, p.scope, p.observation.snapshotRecordHash, p.observation.snapshotRevision
+            reader,
+            p.scope,
+            p.observation.snapshotRecordHash,
+            p.observation.snapshotRevision,
+            family
         );
         f.snapshot = receipt;
-        f.snapshotSource = _snapshot(d, source, original, receipt);
-        _root(d, source, p, original.outputManifestRecord, f);
+        f.snapshotSource = _snapshot(d, source, original, receipt, family);
+        _root(d, source, p, original.outputManifestRecord, f, family);
         uint256 count = f.snapshotSource.membership.tokenCount;
         if (
             count == 0 || count > type(uint64).max
@@ -210,7 +249,8 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
                 f.snapshotSource,
                 uint64(i == 0 ? 0 : count - 1),
                 p.observation.captures[i],
-                current
+                current,
+                family
             );
         }
     }
@@ -220,14 +260,17 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         view
         returns (bytes32)
     {
+        return sourceHash(d, f, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function sourceHash(T.Dependencies memory d, T.SourceFacts memory f, bytes32 family)
+        internal
+        view
+        returns (bytes32)
+    {
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_SOURCES_V1"),
-                d.chainId,
-                address(this),
-                d.targets,
-                d.codeHashes,
-                f
+                F.sourceDomain(family, true), d.chainId, address(this), d.targets, d.codeHashes, f
             )
         );
     }
@@ -250,7 +293,8 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         T.Dependencies memory d,
         S.Dependencies memory source,
         S.Publication memory original,
-        S.Receipt memory receipt
+        S.Receipt memory receipt,
+        bytes32 family
     ) private view returns (S.Source memory f) {
         bytes memory out = Reads.dynamicRead(
             d.targets[5],
@@ -297,7 +341,10 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         receipt.manifestBytes = 0;
         receipt.recordedAt = 0;
         if (
-            domain != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1")
+            domain
+                    != (F.isV2(family)
+                            ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V2")
+                            : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1"))
                 || chain != d.chainId || host != d.targets[5]
                 || keccak256(abi.encode(targets, hashes))
                     != keccak256(abi.encode(source.targets, source.codeHashes))
@@ -307,7 +354,13 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
                 || fields.sourceHash
                     != keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"),
+                            (F.isV2(family)
+                                    ? keccak256(
+                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V2"
+                                    )
+                                    : keccak256(
+                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"
+                                    )),
                             chain,
                             host,
                             targets,
@@ -324,7 +377,8 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         S.Dependencies memory source,
         T.Publication memory p,
         bytes32 outputManifestRecord,
-        T.SourceFacts memory f
+        T.SourceFacts memory f,
+        bytes32 family
     ) private view {
         f.contentRootRecordHash = abi.decode(
             Reads.read(
@@ -351,7 +405,8 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         );
         f.contentRootBinding = abi.decode(raw, (PreservationRoot.Binding));
         _canonical(d.targets[4], raw, abi.encode(f.contentRootBinding));
-        PreservationRoot.Binding memory expected = _binding(source, f.snapshotSource, f.snapshot);
+        PreservationRoot.Binding memory expected =
+            _binding(source, f.snapshotSource, f.snapshot, family);
         if (keccak256(raw) != keccak256(abi.encode(expected))) {
             revert T.InvalidScopedPolicyReference();
         }
@@ -398,7 +453,7 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
             r.stateHash
                 != keccak256(
                     abi.encode(
-                        keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_STATE_V1"),
+                        RootFamilies.stateDomain(family, true),
                         d.chainId,
                         d.targets[4],
                         d.targets[0],
@@ -409,12 +464,14 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         ) revert T.InvalidScopedPolicyReference();
     }
 
-    function _binding(S.Dependencies memory d, S.Source memory source, S.Receipt memory receipt)
-        private
-        pure
-        returns (PreservationRoot.Binding memory b)
-    {
-        b.profileId = RootSchemas.PROFILE;
+    function _binding(
+        S.Dependencies memory d,
+        S.Source memory source,
+        S.Receipt memory receipt,
+        bytes32 family
+    ) private pure returns (PreservationRoot.Binding memory b) {
+        bytes32[5] memory ids = RootFamilies.ids(family, true);
+        b.profileId = RootFamilies.profile(family, true);
         b.outputManifest = d.targets[8];
         b.outputManifestCodeHash = d.codeHashes[8];
         b.checkpoint = d.targets[7];
@@ -426,11 +483,11 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         b.inventoryHash = source.outputs.inventoryHash;
         b.policyChainHash = source.outputs.policyChainHash;
         b.outputRoot = source.outputs.outputRoot;
-        b.outputSchemaHash = RootSchemas.definitionHash(OutputSchemas.SCHEMA);
-        b.outputCanonicalizationHash = RootSchemas.definitionHash(OutputSchemas.CANON);
-        b.leafSchemaHash = RootSchemas.definitionHash(OutputSchemas.LEAF_SCHEMA);
-        b.rootSchemaHash = RootSchemas.definitionHash(RootSchemas.ROOT_SCHEMA);
-        b.rootCanonicalizationHash = RootSchemas.definitionHash(RootSchemas.ROOT_CANON);
+        b.outputSchemaHash = RootFamilies.definitionHash(family, true, ids[0]);
+        b.outputCanonicalizationHash = RootFamilies.definitionHash(family, true, ids[1]);
+        b.leafSchemaHash = RootFamilies.definitionHash(family, true, ids[2]);
+        b.rootSchemaHash = RootFamilies.definitionHash(family, true, ids[3]);
+        b.rootCanonicalizationHash = RootFamilies.definitionHash(family, true, ids[4]);
         b.sourceFactory = source.sourceFactory;
         b.sourceFactoryCodeHash = source.sourceFactoryCodeHash;
         b.factoryDependenciesHash = source.factoryDependenciesHash;

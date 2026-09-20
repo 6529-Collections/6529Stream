@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
+
+import {
     IStreamScopedContentRootPublication as R
 } from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
 import {
@@ -65,6 +69,8 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         uint256 readGas;
         uint256 validationGas;
         bytes32 hash;
+        bytes32 family;
+        bytes32 snapshotProfile;
     }
 
     function prepare(Context memory ctx, R.Publication memory p, address publisher)
@@ -135,12 +141,12 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         r.bindingHash = bindingHash;
         r.publisher = publisher;
         (r.authorizationClass, r.grantRevision) = _authority(route, p.scope.collectionId, publisher);
-        binding = _binding(dependencies, source, receipt);
-        _schemas(dependencies, route.readGas);
+        binding = _binding(dependencies, source, receipt, route.family);
+        _schemas(dependencies, route.readGas, route.family);
         r.routeHash = route.hash;
         r.stateHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_STATE_V1"),
+                Families.stateDomain(route.family, true),
                 block.chainid,
                 address(this),
                 ctx.core,
@@ -169,8 +175,9 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
             route.validationGas
         );
         S.Publication memory publication;
-        (publication, receipt) =
-            SnapshotReads.original(known, p.scope, p.snapshotRecordHash, p.snapshotRevision);
+        (publication, receipt) = SnapshotReads.original(
+            known, p.scope, p.snapshotRecordHash, p.snapshotRevision, route.family
+        );
         bytes memory raw = _read(
             route.snapshots,
             abi.encodeCall(
@@ -242,7 +249,10 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         expectedReceipt.manifestBytes = 0;
         expectedReceipt.recordedAt = 0;
         if (
-            domain != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1")
+            domain
+                    != (route.family == Families.V2
+                            ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V2")
+                            : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1"))
                 || chain != block.chainid || host != route.snapshots
                 || keccak256(abi.encode(targets, pins))
                     != keccak256(abi.encode(d.targets, d.codeHashes))
@@ -253,7 +263,13 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
                 || receipt.sourceHash
                     != keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"),
+                            (route.family == Families.V2
+                                    ? keccak256(
+                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V2"
+                                    )
+                                    : keccak256(
+                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"
+                                    )),
                             chain,
                             host,
                             targets,
@@ -265,8 +281,8 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
                 || source.outputs.checkpointHash == 0 || source.outputs.checkpointStateHash == 0
                 || source.outputs.entropySourceSet != d.targets[10]
                 || source.outputs.metadataRouter != d.targets[4]
-                || source.outputs.preservationProfile != OUTPUT_PROFILE
-                || source.content.preservationProfile != OUTPUT_PROFILE
+                || source.outputs.preservationProfile != route.family
+                || source.content.preservationProfile != route.family
                 || source.outputs.inventoryHash == 0 || source.outputs.policyChainHash == 0
                 || source.sourceFactory == address(0) || source.sourceFactoryCodeHash == 0
                 || source.factoryDependenciesHash == 0
@@ -280,12 +296,14 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         // is introduced. No terminal policy is relabeled finalized here.
     }
 
-    function _binding(S.Dependencies memory d, S.Source memory source, S.Receipt memory receipt)
-        private
-        pure
-        returns (V.Binding memory b)
-    {
-        b.profileId = Schemas.PROFILE;
+    function _binding(
+        S.Dependencies memory d,
+        S.Source memory source,
+        S.Receipt memory receipt,
+        bytes32 family
+    ) private pure returns (V.Binding memory b) {
+        bytes32[5] memory definitionIds = Families.ids(family, true);
+        b.profileId = Families.profile(family, true);
         b.outputManifest = d.targets[8];
         b.outputManifestCodeHash = d.codeHashes[8];
         b.checkpoint = d.targets[7];
@@ -297,11 +315,11 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         b.inventoryHash = source.outputs.inventoryHash;
         b.policyChainHash = source.outputs.policyChainHash;
         b.outputRoot = source.outputs.outputRoot;
-        b.outputSchemaHash = Schemas.definitionHash(OutputSchemas.SCHEMA);
-        b.outputCanonicalizationHash = Schemas.definitionHash(OutputSchemas.CANON);
-        b.leafSchemaHash = Schemas.definitionHash(OutputSchemas.LEAF_SCHEMA);
-        b.rootSchemaHash = Schemas.definitionHash(Schemas.ROOT_SCHEMA);
-        b.rootCanonicalizationHash = Schemas.definitionHash(Schemas.ROOT_CANON);
+        b.outputSchemaHash = Families.definitionHash(family, true, definitionIds[0]);
+        b.outputCanonicalizationHash = Families.definitionHash(family, true, definitionIds[1]);
+        b.leafSchemaHash = Families.definitionHash(family, true, definitionIds[2]);
+        b.rootSchemaHash = Families.definitionHash(family, true, definitionIds[3]);
+        b.rootCanonicalizationHash = Families.definitionHash(family, true, definitionIds[4]);
         b.sourceFactory = source.sourceFactory;
         b.sourceFactoryCodeHash = source.sourceFactoryCodeHash;
         b.factoryDependenciesHash = source.factoryDependenciesHash;
@@ -312,7 +330,7 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         b.preservationOutputProfile = source.outputs.preservationProfile;
     }
 
-    function _schemas(S.Dependencies memory d, uint256 readGas) private view {
+    function _schemas(S.Dependencies memory d, uint256 readGas, bytes32 family) private view {
         Documents.Dependencies memory known;
         for (uint256 i; i < 4; ++i) {
             known.targets[i] = d.targets[i];
@@ -320,15 +338,9 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         }
         known.chainId = d.chainId;
         known.readGas = readGas;
-        bytes32[5] memory ids = [
-            OutputSchemas.SCHEMA,
-            OutputSchemas.CANON,
-            OutputSchemas.LEAF_SCHEMA,
-            Schemas.ROOT_SCHEMA,
-            Schemas.ROOT_CANON
-        ];
+        bytes32[5] memory ids = Families.ids(family, true);
         for (uint256 i; i < ids.length; ++i) {
-            bytes memory document = Schemas.document(ids[i]);
+            bytes memory document = Families.document(family, true, ids[i]);
             Documents.definition(
                 known,
                 ids[i],
@@ -421,6 +433,22 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         ) {
             revert R.ScopedContentRootDependency(r.metadata);
         }
+        r.snapshotProfile = bytes32(
+            _word(
+                r.provider,
+                abi.encodeCall(Provider.scopedPreservationPolicySnapshotProfile, ()),
+                r.readGas
+            )
+        );
+        if (r.snapshotProfile == SNAPSHOT_PROFILE) {
+            r.family = Families.V1;
+        } else if (
+            r.snapshotProfile == keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2")
+        ) {
+            r.family = Families.V2;
+        } else {
+            revert R.InvalidScopedContentRoot();
+        }
         if (
             _word(
                         r.provider,
@@ -433,7 +461,7 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
                             abi.encodeCall(Provider.scopedPreservationPolicySnapshotProfile, ()),
                             r.readGas
                         )
-                    ) != SNAPSHOT_PROFILE
+                    ) != r.snapshotProfile
         ) revert R.InvalidScopedContentRoot();
         // The fixed budget getter is scalar. Scope identity getters may validate a genuine
         // late factory graph, so transport their declared validation budget before resolving them.
@@ -470,7 +498,7 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
                             abi.encodeCall(Snap.scopedPreservationPolicySnapshotProfile, ()),
                             r.readGas
                         )
-                    ) != SNAPSHOT_PROFILE
+                    ) != r.snapshotProfile
                 || _address(r.snapshots, abi.encodeCall(Snap.core, ()), r.readGas) != ctx.core
                 || _address(r.snapshots, abi.encodeCall(Snap.metadataHost, ()), r.readGas)
                     != r.metadata
@@ -483,7 +511,7 @@ library StreamMetadataScopedPreservationPolicyContentSourceV1 {
         }
         r.hash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_ROUTE_V1"),
+                Families.routeDomain(r.family, true),
                 block.chainid,
                 targets,
                 hashes,

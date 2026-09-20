@@ -36,8 +36,8 @@ import {
     IStreamScopedPreservationPolicyPublicationEvidenceBindingV1 as PublicationBinding
 } from "../../interfaces/stream/finality/IStreamScopedPreservationPolicyPublicationEvidenceBindingV1.sol";
 import {
-    StreamScopedPreservationPolicySnapshotDefinitionsV1 as ScopedPolicyDefinitions
-} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamScopedPreservationPolicySnapshotDefinitionsV2 as ScopedPolicyDefinitions
+} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV2.sol";
 import {
     StreamCurrentAuthorityScopedPreservationPolicyDiscoveryFactoryReadsV1 as PublicationFactoryReads
 } from "./StreamCurrentAuthorityScopedPreservationPolicyDiscoveryFactoryReadsV1.sol";
@@ -52,8 +52,8 @@ import {
     StreamCurrentAuthorityPreservationPolicyDiscoveryFactoryReadsV1 as CollectionFactoryReads
 } from "./StreamCurrentAuthorityPreservationPolicyDiscoveryFactoryReadsV1.sol";
 import {
-    StreamPreservationPolicySnapshotDefinitionsV1 as CollectionPolicyDefinitions
-} from "../records/StreamPreservationPolicySnapshotDefinitionsV1.sol";
+    StreamPreservationPolicySnapshotDefinitionsV2 as CollectionPolicyDefinitions
+} from "../records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
 
 /// @notice Current-authority discovery for genuine fixed-factory preservation graphs.
 /// @dev The original two static profiles retain their original branch semantics; no static policy catalogue is fabricated.

@@ -106,6 +106,24 @@ contract PreservationInputManifestConsumerBoundaryV1 {
         return StreamFinalityPreservationPolicyInputManifestReadsV1.scopeInputsHash(d, s);
     }
 
+    // Test-only family transport. Production selects the fixed family in its provider.
+    function encodedFamily(
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s,
+        bytes32 family
+    ) external view returns (bytes memory) {
+        return StreamFinalityPreservationPolicyInputManifestReadsV1.encode(d, s, family);
+    }
+
+    function checkedFamily(
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s,
+        bytes32 hash,
+        bytes32 family
+    ) external view returns (bytes32, bytes32) {
+        return StreamFinalityPreservationPolicyInputManifestReadsV1.requireCurrent(
+            d, s, hash, family
+        );
+    }
+
     function encodedScoped(ScopedTypes.Statement memory s) external view returns (bytes memory) {
         return ScopedReads.encode(_scopedDependencies(), s);
     }
@@ -606,6 +624,71 @@ contract StreamFinalityPreservationPolicyInputManifestReadsV1Test is Characteriz
         _retire(ScopedDocs.CANON_ID);
         _scopedFails(s, hash);
         consumer.checked(statement, manifestHash);
+    }
+
+    function testV2FamilyRetainsNeutralEnvelopeAndOriginalRegistryInputDomain() public {
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s = statement;
+        s.entropy.snapshotProfileHash = SnapshotDefinitionsV2.PROFILE_HASH;
+        s.entropy.referenceProfileHash = ReferenceDefinitionsV2.PROFILE_HASH;
+        bytes memory raw = consumer.encodedFamily(s, Families.V2);
+        require(keccak256(raw) != manifestHash, "actual V2 profile hashes change bytes");
+        require(_word(raw, 0) == SCHEMA && _word(raw, 1) == CANON, "neutral envelope retained");
+        require(
+            consumer.inputsHash(s) == consumer.inputsHash(statement), "Registry domain retained"
+        );
+        (bytes32 hash,) = store.publishChunk(raw);
+        (bool ok,) = address(consumer)
+            .staticcall(abi.encodeCall(consumer.checkedFamily, (s, hash, Families.V2)));
+        require(!ok, "V2 still requires original Registry staging");
+        registry.stageFinalityManifest(raw);
+        (bytes32 schema, bytes32 canon) = consumer.checkedFamily(s, hash, Families.V2);
+        require(schema == SCHEMA && canon == CANON, "same registered interpretation");
+        _checkFails(s, hash);
+        consumer.checked(statement, manifestHash);
+    }
+
+    function testV2FamilyRequiresBothExactProfileHashesAndRejectsUnknownFamilies() public view {
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s = statement;
+        for (uint256 i; i < 5; ++i) {
+            s = statement;
+            bytes32 family = Families.V2;
+            if (i == 1) s.entropy.snapshotProfileHash = SnapshotDefinitionsV2.PROFILE_HASH;
+            if (i == 2) s.entropy.referenceProfileHash = ReferenceDefinitionsV2.PROFILE_HASH;
+            if (i >= 3) {
+                s.entropy.snapshotProfileHash = SnapshotDefinitionsV2.PROFILE_HASH;
+                s.entropy.referenceProfileHash = ReferenceDefinitionsV2.PROFILE_HASH;
+                family = i == 3 ? bytes32(0) : keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_V1");
+            }
+            (bool ok,) =
+                address(consumer).staticcall(abi.encodeCall(consumer.encodedFamily, (s, family)));
+            require(!ok, "mixed or unknown family rejected before hashing");
+        }
+        s = statement;
+        s.entropy.snapshotProfileHash = SnapshotDefinitionsV2.PROFILE_HASH;
+        s.entropy.referenceProfileHash = ReferenceDefinitionsV2.PROFILE_HASH;
+        _shapeFails(s);
+        consumer.encodedFamily(s, Families.V2);
+        require(keccak256(consumer.encodedFamily(statement, Families.V1)) == manifestHash);
+    }
+
+    function testV2FamilyCannotBypassRetiredDefinitionsOrCanonicalBytes() public {
+        StreamFinalityPreservationPolicyInputManifestTypesV1.Statement memory s = statement;
+        s.entropy.snapshotProfileHash = SnapshotDefinitionsV2.PROFILE_HASH;
+        s.entropy.referenceProfileHash = ReferenceDefinitionsV2.PROFILE_HASH;
+        bytes memory raw = consumer.encodedFamily(s, Families.V2);
+        bytes memory trailing = bytes.concat(raw, bytes32(0));
+        (bytes32 bad,) = store.publishChunk(trailing);
+        registry.stageFinalityManifest(trailing);
+        (bool ok,) = address(consumer)
+            .staticcall(abi.encodeCall(consumer.checkedFamily, (s, bad, Families.V2)));
+        require(!ok, "canonical V2 envelope only");
+        (bytes32 hash,) = store.publishChunk(raw);
+        registry.stageFinalityManifest(raw);
+        consumer.checkedFamily(s, hash, Families.V2);
+        _retire(CANON);
+        (ok,) = address(consumer)
+            .staticcall(abi.encodeCall(consumer.checkedFamily, (s, hash, Families.V2)));
+        require(!ok, "V2 respects actual registered definition status");
     }
 
     function testOriginalPolicySchemasCannotBeRelabeledAsPreservationEvidence() public {

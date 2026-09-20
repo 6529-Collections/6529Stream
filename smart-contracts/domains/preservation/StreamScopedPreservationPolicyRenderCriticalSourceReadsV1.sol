@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -86,7 +92,16 @@ library StreamScopedPreservationPolicyRenderCriticalSourceReadsV1 {
         view
         returns (StreamScopedPreservationPolicySnapshotTypesV1.Dependencies memory sd)
     {
-        sd = ScopedOriginal.bindings(referenceBindings(d));
+        return snapshotBindings(d, Family.ORIGINAL_PROFILE);
+    }
+
+    function snapshotBindings(S.Dependencies memory d, bytes32 family)
+        public
+        view
+        returns (StreamScopedPreservationPolicySnapshotTypesV1.Dependencies memory sd)
+    {
+        if (!FamilyRead.valid(family)) revert T.InventorySourceChanged();
+        sd = ScopedOriginal.bindings(referenceBindings(d), family);
         if (sd.targets[9] != d.targets[10] || sd.codeHashes[9] != d.codeHashes[10]) {
             revert T.InventorySourceChanged();
         }
@@ -97,6 +112,20 @@ library StreamScopedPreservationPolicyRenderCriticalSourceReadsV1 {
         view
         returns (R.SourceFacts memory f)
     {
+        return sourceFacts(d, c, Family.ORIGINAL_PROFILE);
+    }
+
+    function sourceFacts(S.Dependencies memory d, Scoped.Context memory c, bytes32 family)
+        public
+        view
+        returns (R.SourceFacts memory f)
+    {
+        if (
+            !FamilyRead.valid(family)
+                || (family == Family.FAMILY_PROFILE
+                    && (c.snapshotSource.content.preservationProfile != family
+                        || c.snapshotSource.outputs.preservationProfile != family))
+        ) revert T.InventorySourceChanged();
         R.Dependencies memory rd = referenceBindings(d);
         bytes memory raw = IO.read(
             d.targets[6],
@@ -109,7 +138,13 @@ library StreamScopedPreservationPolicyRenderCriticalSourceReadsV1 {
         if (
             keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_SOURCES_V1"),
+                            (family == Family.FAMILY_PROFILE
+                                    ? keccak256(
+                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_SOURCES_V2"
+                                    )
+                                    : keccak256(
+                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_SOURCES_V1"
+                                    )),
                             d.chainId,
                             d.targets[6],
                             rd.targets,

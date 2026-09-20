@@ -26,8 +26,9 @@ precede the predicted resolver in the original deployment cycle; every operative
 graph read requires its actual runtime, capabilities and original anchors.
 Construction does not require a minted scope or a publication.
 
-Children zero through four are the existing preservation readiness, checkpoint,
-output, snapshot and reference deployments. Children five and six are the new
+Child zero is the existing preservation readiness deployment. Children one
+through four are fixed V2 checkpoint, output, snapshot and reference deployments.
+Children five and six are the new
 current-authority inventory and coverage hosts. Creation is bounded and
 append-only. Every current graph read rechecks the exact child runtimes,
 constructor hashes and entropy source plan. The Router's COLLECTION publication
@@ -44,11 +45,44 @@ its original hash and performs no new authority-dependency reads. Eight added
 regressions cover dispatch, missing capabilities, dependency corruption and
 noncanonical replies; they are ABI-checked, with native execution pending.
 
-These first five children retain the existing producer profile checks. The
-separate current-Artist preservation producer uses a distinct producer marker;
-its admission through checkpoint, reference and inventory readers is a pending
-integration step. This batch alone does not establish that producer's
-compatibility or preservation currentness after a succession.
+The new, undeployed current-authority factories select
+`6529STREAM_TOKEN_PRESERVATION_FAMILY_V2`. Their existing nominal V1 tuple types
+and factory domains remain fixed; original standard V1 factories still deploy
+only their original V1 children. Shared workers dispatch from authenticated
+Plans, manifests and root bindings. A caller-supplied family word does not
+authorize a producer.
+
+Each V2 row retains its actual admitted producer marker: either
+`6529STREAM_PRESERVATION_RENDER_V1` or
+`6529STREAM_CURRENT_ARTIST_PRESERVATION_RENDER_V1`. The family marker never
+replaces that row marker. VIEW and unknown producers reject. Currentness still
+rejoins the complete original Registry admission, producer binding and saved
+output. Actual current-Artist producer admission and the complete succession
+ceremony require separate composed runtime validation.
+
+## V2 interpretation and compatibility
+
+Collection and scoped checkpoint capabilities are respectively
+`6529STREAM_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2` and
+`6529STREAM_SCOPED_PRESERVATION_POLICY_CONTENT_CHECKPOINT_V2`. Both use the common
+`6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V2` output capability. Snapshot,
+reference and root interpretations have new governed V2 definitions and hash
+domains. Original V1 documents, default worker branches and historical hashes
+retain their meanings.
+
+Plan and output-row widths remain 448 and 1,152 bytes. The output manifest remains
+640 plus 1,152 bytes per row; collection and scoped root bindings remain 608 and
+800 bytes. Both families reuse the exact original six-field token-content leaf
+definition. Original content consent, one-use books, root histories and scoped
+aggregates remain shared. Stored-root readers recognize an exact V2 root-profile
+and family pair and preserve the original V1 branch.
+
+The finality input envelope is producer-neutral and retains its original schema
+and Registry input domain. Its existing snapshot and reference profile-hash
+fields must both match the selected family. Mixed V1/V2 profile hashes reject.
+Reference V2 hosts add an eighth immutable family pin; snapshot V2 hosts retain
+the original three immutables and select their family in constructor-only
+storage. Runtime prediction must use the corresponding compiler artifacts.
 
 ## Inventory and archive evidence
 
@@ -91,9 +125,12 @@ The original Artist remains the durable Finality anchor. Current sanction
 components resolve through the original Registry's authenticated authority
 route. Preservation statements retain their own typed manifests and complete
 current inventory checks. Original static branches remain separate. The new
-provider does not yet include the separate governed VIEW source-binding
-extension; that integration and distinct complete ceremony fixtures follow
-this production batch.
+provider also composes the shared, one-time governed VIEW source binding. Its
+four constructor arguments and original source-configuration hash remain
+unchanged. The binding validates the original declaration, source-factory
+dependencies and preservation snapshot reciprocities; the route-read budget
+comes from that bound declaration. VIEW keeps its separate producer profile and
+does not enter the token-preservation V2 family.
 
 Preservation excludes only sanction-derived display. It does not freeze or
 ignore C2PA, claims, corrections or other provenance changes. Such changes can
@@ -102,7 +139,9 @@ root never proves parity of changed full live JSON.
 
 ## Validation boundary
 
-Focused authored cases exercise root codecs and actual Archive/STOP loading,
+Focused authored cases exercise both V1 and V2 root publication codecs, exact
+definitions and domains, consent rollback/retry, mixed-family refusal,
+checkpoint/output/snapshot/reference dispatch, input envelopes, actual Archive/STOP loading,
 capture identity and staleness, phase ordering, retry rollback and coverage
 profiles. Some tests deliberately mock the already-authenticated source or
 receipt-admission readers so they can isolate those kernels. They do not prove

@@ -32,17 +32,17 @@ import {
     StreamScopedPreservationPolicyPublicationReadinessDeploymentV1 as Readiness
 } from "./StreamScopedPreservationPolicyPublicationReadinessDeploymentV1.sol";
 import {
-    StreamScopedPreservationPolicyPublicationCheckpointDeploymentV1 as Checkpoint
-} from "./StreamScopedPreservationPolicyPublicationCheckpointDeploymentV1.sol";
+    StreamScopedPreservationPolicyPublicationCheckpointDeploymentV2 as Checkpoint
+} from "./StreamScopedPreservationPolicyPublicationCheckpointDeploymentV2.sol";
 import {
-    StreamScopedPreservationPolicyPublicationOutputDeploymentV1 as Output
-} from "./StreamScopedPreservationPolicyPublicationOutputDeploymentV1.sol";
+    StreamScopedPreservationPolicyPublicationOutputDeploymentV2 as Output
+} from "./StreamScopedPreservationPolicyPublicationOutputDeploymentV2.sol";
 import {
-    StreamScopedPreservationPolicyPublicationSnapshotDeploymentV1 as Snapshot
-} from "./StreamScopedPreservationPolicyPublicationSnapshotDeploymentV1.sol";
+    StreamScopedPreservationPolicyPublicationSnapshotDeploymentV2 as Snapshot
+} from "./StreamScopedPreservationPolicyPublicationSnapshotDeploymentV2.sol";
 import {
-    StreamScopedPreservationPolicyPublicationReferenceDeploymentV1 as Reference
-} from "./StreamScopedPreservationPolicyPublicationReferenceDeploymentV1.sol";
+    StreamScopedPreservationPolicyPublicationReferenceDeploymentV2 as Reference
+} from "./StreamScopedPreservationPolicyPublicationReferenceDeploymentV2.sol";
 import {
     StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryDeploymentV1 as Inventory
 } from "./StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryDeploymentV1.sol";

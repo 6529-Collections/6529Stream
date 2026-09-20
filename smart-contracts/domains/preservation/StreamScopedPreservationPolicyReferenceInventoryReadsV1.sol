@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamScopedPreservationPolicyReferenceDefinitionsV2 as DefinitionsV2
+} from "../records/StreamScopedPreservationPolicyReferenceDefinitionsV2.sol";
+import {
+    StreamPreservationPolicyInventoryFamilyV2 as FamilyRead
+} from "./StreamPreservationPolicyInventoryFamilyV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     StreamRenderCriticalSourceTypes as S
 } from "../../interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
@@ -52,6 +61,17 @@ library StreamScopedPreservationPolicyReferenceInventoryReadsV1 {
         view
         returns (T.Item[] memory result, uint64 total)
     {
+        return items(d, c, start, maximum, Family.ORIGINAL_PROFILE);
+    }
+
+    function items(
+        S.Dependencies memory d,
+        Context memory c,
+        uint64 start,
+        uint64 maximum,
+        bytes32 family
+    ) public view returns (T.Item[] memory result, uint64 total) {
+        if (!FamilyRead.valid(family)) revert T.InventorySourceChanged();
         if (maximum == 0 || maximum > MAX_ROWS) revert T.InvalidInventorySegment();
         if (
             abi.decode(
@@ -62,7 +82,10 @@ library StreamScopedPreservationPolicyReferenceInventoryReadsV1 {
                         d.readGas
                     ),
                     (bytes32)
-                ) != keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V1")
+                )
+                != (family == Family.FAMILY_PROFILE
+                        ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V2")
+                        : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_V1"))
         ) revert T.InventorySourceChanged();
         bytes memory raw = IO.read(
             d.targets[6],
@@ -81,9 +104,18 @@ library StreamScopedPreservationPolicyReferenceInventoryReadsV1 {
                 || saved.scopeSubject != c.subject || p.collectionId != c.scope.collectionId
                 || p.snapshotRecordHash != c.snapshot.recordHash
                 || p.snapshotRevision != c.snapshot.revision
-                || receipt.schemaHash != Definitions.SCHEMA_HASH
-                || receipt.profileHash != Definitions.PROFILE_HASH
-                || receipt.canonicalizationHash != Definitions.CANON_HASH
+                || receipt.schemaHash
+                    != (family == Family.FAMILY_PROFILE
+                            ? DefinitionsV2.SCHEMA_HASH
+                            : Definitions.SCHEMA_HASH)
+                || receipt.profileHash
+                    != (family == Family.FAMILY_PROFILE
+                            ? DefinitionsV2.PROFILE_HASH
+                            : Definitions.PROFILE_HASH)
+                || receipt.canonicalizationHash
+                    != (family == Family.FAMILY_PROFILE
+                            ? DefinitionsV2.CANON_HASH
+                            : Definitions.CANON_HASH)
         ) revert T.InventorySourceChanged();
         uint256 count = 3 + p.environment.packageFiles.length
             + p.environment.platformPrerequisites.length + p.captures.length * 2;
@@ -115,8 +147,10 @@ library StreamScopedPreservationPolicyReferenceInventoryReadsV1 {
                     0,
                     payload
                 );
-                result[i].schemaId = Definitions.SCHEMA_ID;
-                result[i].canonicalizationId = Definitions.CANON_ID;
+                result[i].schemaId =
+                (family == Family.FAMILY_PROFILE ? DefinitionsV2.SCHEMA_ID : Definitions.SCHEMA_ID);
+                result[i].canonicalizationId =
+                (family == Family.FAMILY_PROFILE ? DefinitionsV2.CANON_ID : Definitions.CANON_ID);
             } else if (at == 1) {
                 result[i] = Items.bytesItem(
                     T.Kind.NATIVE_BYTES,

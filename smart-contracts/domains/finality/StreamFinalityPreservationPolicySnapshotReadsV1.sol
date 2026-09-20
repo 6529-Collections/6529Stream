@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationTokenProducerProfilesV1 as Producers
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
+} from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
+import {
     StreamFinalityScope,
     StreamFinalityScopeType
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
@@ -48,31 +54,19 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
         bytes32 hash,
         uint64 revision
     ) public view returns (Evidence memory e) {
-        if (
-            d.chainId != block.chainid || d.readGas < 50000 || d.validationGas < d.readGas
-                || scope.scopeType != StreamFinalityScopeType.COLLECTION || scope.collectionId == 0
-                || scope.tokenId != 0 || scope.scopeId != 0 || hash == 0 || revision == 0
-        ) revert InvalidPolicySnapshotEvidence();
-        _pin(d.core, d.coreCodeHash);
-        _pin(d.metadata, d.metadataCodeHash);
-        _pin(d.snapshots, d.snapshotsCodeHash);
-        if (
-            _word(d, abi.encodeCall(I.core, ())) != bytes32(uint256(uint160(d.core)))
-                || _word(d, abi.encodeCall(I.metadataHost, ()))
-                    != bytes32(uint256(uint160(d.metadata)))
-        ) revert InvalidPolicySnapshotEvidence();
-        if (
-            _word(d, abi.encodeWithSignature("supportsInterface(bytes4)", type(I).interfaceId))
-                    != bytes32(uint256(1))
-                || _word(d, abi.encodeCall(I.preservationPolicySnapshotProfile, ()))
-                    != keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V1")
-        ) revert InvalidPolicySnapshotEvidence();
-        bytes memory raw = Reads.dynamicRead(
-            d.snapshots, abi.encodeCall(I.snapshotRecord, (hash)), 4096, d.readGas
-        );
-        (S.Publication memory p, S.Receipt memory r) = abi.decode(raw, (S.Publication, S.Receipt));
-        _canonical(raw, abi.encode(p, r));
-        _original(d, scope, p, r, hash, revision);
+        return requireCurrent(d, scope, hash, revision, Producers.ORIGINAL_PROFILE);
+    }
+
+    function requireCurrent(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (Evidence memory e) {
+        SnapshotFamilies.version2(family);
+        (S.Publication memory p, S.Receipt memory r) = original(d, scope, hash, revision, family);
+        bytes memory raw;
         raw = Reads.read(
             d.snapshots,
             abi.encodeCall(I.requireCurrent, (scope, hash, revision)),
@@ -100,7 +94,7 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
         e.coordinatorInventoryPlan = p.coordinatorInventoryPlan;
         e.lockHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_FINALITY_PRESERVATION_POLICY_SNAPSHOT_LOCK_V1"),
+                SnapshotFamilies.finalityLockDomain(family, false),
                 d.chainId,
                 d.snapshots,
                 scope,
@@ -109,7 +103,7 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
         );
         e.inputHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_FINALITY_PRESERVATION_POLICY_SNAPSHOT_INPUT_V1"),
+                SnapshotFamilies.inputDomain(family, false),
                 d.chainId,
                 d.core,
                 d.metadata,
@@ -127,8 +121,64 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
         bytes32 hash,
         uint64 revision
     ) public view returns (Evidence memory e) {
-        e = requireCurrent(d, scope, hash, revision);
+        return requireLocked(d, scope, hash, revision, Producers.ORIGINAL_PROFILE);
+    }
+
+    function requireLocked(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (Evidence memory e) {
+        SnapshotFamilies.version2(family);
+        e = requireCurrent(d, scope, hash, revision, family);
         if (!e.locked) revert InvalidPolicySnapshotEvidence();
+    }
+
+    /// @notice Authenticates the immutable original; currentness is checked separately.
+    function original(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision
+    ) public view returns (S.Publication memory p, S.Receipt memory r) {
+        return original(d, scope, hash, revision, Producers.ORIGINAL_PROFILE);
+    }
+
+    function original(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (S.Publication memory p, S.Receipt memory r) {
+        SnapshotFamilies.version2(family);
+        if (
+            d.chainId != block.chainid || d.readGas < 50000 || d.validationGas < d.readGas
+                || scope.scopeType != StreamFinalityScopeType.COLLECTION || scope.collectionId == 0
+                || scope.tokenId != 0 || scope.scopeId != 0 || hash == 0 || revision == 0
+        ) revert InvalidPolicySnapshotEvidence();
+        _pin(d.core, d.coreCodeHash);
+        _pin(d.metadata, d.metadataCodeHash);
+        _pin(d.snapshots, d.snapshotsCodeHash);
+        if (
+            _word(d, abi.encodeCall(I.core, ())) != bytes32(uint256(uint160(d.core)))
+                || _word(d, abi.encodeCall(I.metadataHost, ()))
+                    != bytes32(uint256(uint160(d.metadata)))
+        ) revert InvalidPolicySnapshotEvidence();
+        if (
+            _word(d, abi.encodeWithSignature("supportsInterface(bytes4)", type(I).interfaceId))
+                    != bytes32(uint256(1))
+                || _word(d, abi.encodeCall(I.preservationPolicySnapshotProfile, ()))
+                    != SnapshotFamilies.profile(family, false)
+        ) revert InvalidPolicySnapshotEvidence();
+        bytes memory raw = Reads.dynamicRead(
+            d.snapshots, abi.encodeCall(I.snapshotRecord, (hash)), 4096, d.readGas
+        );
+        (p, r) = abi.decode(raw, (S.Publication, S.Receipt));
+        _canonical(raw, abi.encode(p, r));
+        _original(d, scope, p, r, hash, revision, family);
     }
 
     function _original(
@@ -137,7 +187,8 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
         S.Publication memory p,
         S.Receipt memory r,
         bytes32 hash,
-        uint64 revision
+        uint64 revision,
+        bytes32 family
     ) private pure {
         if (
             keccak256(abi.encode(p.scope)) != keccak256(abi.encode(scope))
@@ -153,9 +204,10 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
                 || (r.displayAuthorizationClass != 7 && r.displayAuthorizationClass != 8)
                 || r.grantRevision == 0 || r.displayGrantRevision == 0 || r.recordedAt == 0
                 || p.effectiveAt == 0 || p.effectiveAt > r.recordedAt || p.reasonHash == 0
-                || bytes(p.manifestURI).length > 2048 || r.schemaHash != Definitions.SCHEMA_HASH
-                || r.profileHash != Definitions.PROFILE_HASH
-                || r.canonicalizationHash != Definitions.CANON_HASH
+                || bytes(p.manifestURI).length > 2048
+                || r.schemaHash != SnapshotFamilies.hashes(family, false)[0]
+                || r.profileHash != SnapshotFamilies.hashes(family, false)[1]
+                || r.canonicalizationHash != SnapshotFamilies.hashes(family, false)[2]
         ) revert InvalidPolicySnapshotEvidence();
         bytes32 chainHash = r.chainHash;
         r.recordHash = 0;
@@ -163,7 +215,7 @@ library StreamFinalityPreservationPolicySnapshotReadsV1 {
         if (
             keccak256(
                     abi.encode(
-                        keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_RECORD_V1"),
+                        SnapshotFamilies.recordDomain(family, false),
                         d.chainId,
                         d.snapshots,
                         d.core,

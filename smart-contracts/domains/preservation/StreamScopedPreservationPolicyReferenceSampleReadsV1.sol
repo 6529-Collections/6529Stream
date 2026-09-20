@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceFamiliesV2 as F
+} from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
+import {
     StreamScopedPreservationPolicyReferenceTypesV1 as T
 } from "../../interfaces/stream/preservation/StreamScopedPreservationPolicyReferenceTypesV1.sol";
 import {
@@ -62,6 +69,20 @@ library StreamScopedPreservationPolicyReferenceSampleReadsV1 {
         R.Capture memory c,
         bool current
     ) public view returns (T.Sample memory result) {
+        return requireSample(d, source, scope, facts, index, c, current, Profiles.ORIGINAL_PROFILE);
+    }
+
+    function requireSample(
+        T.Dependencies memory d,
+        S.Dependencies memory source,
+        StreamFinalityScope memory scope,
+        S.Source memory facts,
+        uint64 index,
+        R.Capture memory c,
+        bool current,
+        bytes32 family
+    ) public view returns (T.Sample memory result) {
+        F.isV2(family);
         uint256 token = abi.decode(
             Reads.read(
                 source.targets[5],
@@ -113,7 +134,7 @@ library StreamScopedPreservationPolicyReferenceSampleReadsV1 {
             revert T.InvalidScopedPolicyReference();
         }
         _renderer(d, row);
-        _preservation(d, row, output);
+        _preservation(d, row, output, family);
         result.preservation = output.preservation;
         result.preservationAdmission = output.preservationAdmission;
         raw = Reads.read(
@@ -229,13 +250,16 @@ library StreamScopedPreservationPolicyReferenceSampleReadsV1 {
     function _preservation(
         T.Dependencies memory d,
         Selection.TokenSelection memory row,
-        Content.Output memory output
+        Content.Output memory output,
+        bytes32 family
     ) private view {
         P.Binding memory saved = output.preservation;
         P.Admission memory admission = output.preservationAdmission;
         if (
-            saved.profile != keccak256("6529STREAM_PRESERVATION_RENDER_V1")
-                || saved.core != d.targets[0] || saved.metadataRouter != d.targets[4]
+            (family == Profiles.ORIGINAL_PROFILE
+                        ? saved.profile != Profiles.ORIGINAL_PROFILE
+                        : !Profiles.isSupported(saved.profile)) || saved.core != d.targets[0]
+                || saved.metadataRouter != d.targets[4]
         ) revert T.InvalidScopedPolicyReference();
         Binding.requireCurrent(saved, row, d.readGas);
         bytes memory raw = Reads.read(
