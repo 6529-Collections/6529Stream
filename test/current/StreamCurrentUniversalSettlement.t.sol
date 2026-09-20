@@ -10,6 +10,7 @@ import {
     StreamPrimarySaleSettlement
 } from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import { StreamERC20PrimarySettlementAdapter } from "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
+import { IStreamPinnedPermit2 } from "../../smart-contracts/interfaces/stream/revenue/IStreamPinnedPermit2.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
 
 contract CurrentUniversalRecipient is IERC721Receiver {
