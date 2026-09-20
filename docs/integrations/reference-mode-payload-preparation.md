@@ -308,3 +308,50 @@ fit: publisher 22,449 runtime / 26,823 creation bytes; WritePreparation 18,963 /
 18,995. The 131-source ABI bridge retains all 98 public host entries and all 17
 recursive storage rows. The full publisher still requires its separately
 frozen acceptance run with original caps and the unchanged genuine context.
+
+
+## Canonical Publication tail reuse and measured limit
+
+Native12 retained the native11 graph, original nine cases, seventeen fixtures,
+genuine native5 context and transaction caps. It again passed five cases and
+failed four publication-dependent cases. The combined WritePreparation/hash
+call saved 522,174 gas against the two native11 calls, rather than the much
+larger isolated earlier comparison. Final publication still ran out of gas
+after manifest binding and mode-evidence retention, before its remaining facts,
+receipt, history and events completed. The trace does not locate the individual
+failing storage write. Native12 remains negative complete-flow evidence.
+
+The next bounded transport reuses the writer's existing compiler-produced
+abi.encode(p). Its original record preimage has a 26-word (832-byte) head:
+domain, chain, actual host, Core, Metadata, Publication offset, and twenty
+Receipt words. It copies that same canonical Publication tail after the head,
+stripping only the encoding's initial 32-byte outer offset. Nested offsets and
+all Publication bytes remain unchanged. The same four receipt fields are
+completed at the same point; host state, authority, source admission, ordering
+and caps are unchanged. This internal helper checks copy-envelope bounds,
+alignment and the outer offset. It does not admit arbitrary encoded tuples:
+nested validity follows from the writer's own compiler encoding of its fully
+validated input. StateReads and the prior literal internal encoder remain
+unchanged.
+
+The frozen 118-source successor passed thirteen focused tests, including two
+256-input fuzz cases. New controls compare literal original bytes and both old
+codecs across empty/nonempty rows, both retention branches, all twenty receipt
+words, domain mutations, the 524,288-byte upper bound and malformed outer
+offset/length envelopes. The original five preimage tests remain unchanged.
+The first cost test ran the new path after the old allocation in one memory
+frame; that failed cost assertion is retained with its twelve passing controls.
+The corrected test invokes each path in a separate fresh frame after identical
+decoding and canonical Publication encoding, verifies both input and output
+hashes, and has no external call inside either measured hash operation.
+
+For the retained 1,048-package/102-platform corpus, those equivalent-frame
+measurements are 1,265,158 gas for the old re-encoding and 1,226,878 for canonical
+tail reuse: only 38,280 gas saved. These are execution-only hash measurements,
+not transaction envelopes or complete publisher savings. This small reduction
+does not establish that the prior publication failure is repaired and does not
+justify a full publisher retry by itself. The original captures and caps remain
+unchanged. Selected sizes fit: writer 19,212 runtime / 19,244 creation bytes,
+publisher unchanged at 22,449 / 26,823. All 98 publisher ABI entries and 17
+recursive storage rows remain exact. No native13, current-head/full37,
+complete cold-read-set, live RPC or deployability acceptance is claimed here.
