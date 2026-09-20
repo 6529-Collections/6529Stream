@@ -113,6 +113,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Fit the joined Artist Payout owner by factoring six original structured reads
+  into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
+
 - Add offline correspondence between frozen universal or DIRECT first-sale
   RIGHTS commitments and original public RIGHTS records, receipts and selected
   history. Preserve both captures, flag superseded selections and keep historical

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayoutReadEncoding } from "./StreamArtistPayoutReadEncoding.sol";
 import { StreamArtistRecoveredPayoutTransport } from "./StreamArtistRecoveredPayoutTransport.sol";
 import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
 import "./StreamArtistPayoutHydration.sol";
@@ -63,17 +64,17 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
     function payoutRewindInventoryV3(bytes32 artistId)
         external
         view
-        returns (RewindTypes.PayoutInventoryV3 memory)
+        returns (RewindTypes.PayoutInventoryV3 calldata)
     {
-        return Rewind.inventory(_recoveryRewind, _payouts, _pending, artistId);
+        _payoutRead();
     }
 
     function payoutRecoveryRecordStatusV3(bytes32 recordHash)
         external
         view
-        returns (RewindTypes.StatusV3 memory)
+        returns (RewindTypes.StatusV3 calldata)
     {
-        return _recoveryRewind.statuses[recordHash];
+        _payoutRead();
     }
 
     function payoutDesignationRecoveryContinuationV3(bytes32 recordHash)
@@ -87,9 +88,9 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
     function payoutRecoveryContinuationV3(bytes32 continuationHash)
         external
         view
-        returns (RewindTypes.PayoutContinuationV3 memory)
+        returns (RewindTypes.PayoutContinuationV3 calldata)
     {
-        return _recoveryRewind.continuations[continuationHash];
+        _payoutRead();
     }
 
     function applyRecoveryRewindV3(
@@ -143,30 +144,39 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         return (p.account, p.recordHash);
     }
 
-    function designationRecord(bytes32 record) external view returns (T.PayoutDesignation memory) {
-        return _records[record];
+    function designationRecord(bytes32 record)
+        external
+        view
+        returns (T.PayoutDesignation calldata)
+    {
+        _payoutRead();
     }
 
     function payoutDesignationProvisionalAssociation(bytes32 record)
         external
         view
-        returns (R.ProvisionalAssociation memory)
+        returns (R.ProvisionalAssociation calldata)
     {
-        return _associations[record];
+        _payoutRead();
     }
 
     function payoutCandidates(bytes32 artistId)
         external
         view
         returns (
-            T.Payout memory stable,
-            T.Payout memory candidate,
-            R.ProvisionalAssociation memory association
+            T.Payout calldata stable,
+            T.Payout calldata candidate,
+            R.ProvisionalAssociation calldata association
         )
     {
-        stable = _payouts[artistId];
-        candidate = _pending[artistId];
-        association = _associations[candidate.recordHash];
+        _payoutRead();
+    }
+
+    function _payoutRead() private view {
+        bytes memory result = StreamArtistPayoutReadEncoding.read(
+            _payouts, _pending, _records, _associations, _recoveryRewind, msg.data
+        );
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     function recordDesignationWithTransition(
