@@ -151,6 +151,17 @@ shared-interface decisions; the Museum lead owns offchain source, schema and
 assembly work. Root coordinates settlement ownership where a sale gate joins
 these components.
 
+## Historical preservation consumer
+
+The [historical preservation capture](museum-historical-preservation-capture.md)
+uses the existing master selection, recorded-manifest, external-coverage and
+prospective-publication APIs at `905bbe2a`. Its additive V5 assembly joins saved
+release evidence to original native preimages and publication chronology.
+Current archive liveness and current source do not replace original commitments.
+An empty media inventory still requires a historical association that no slot
+selection retains; that case remains explicitly unresolved. No native getter,
+compiler run or deployment is introduced by this consumer batch.
+
 ## Historical producer gaps at the recorded source
 
 | Requirement | Missing producer or consumer | Accountable owner | Required acceptance evidence |

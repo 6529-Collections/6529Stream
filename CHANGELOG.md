@@ -356,6 +356,12 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add native media-master and prospective-reference capture with historical
+  release joins over an unchanged V5 packet. Reconcile nine source captures,
+  preserve original manifest and publication histories, and distinguish saved
+  evidence from current archive liveness, source state and later replacements.
+  Generic preservation labels and complete packet acceptance remain qualified.
+
 - Add native attribution and sanction capture with exact offline replay and an
   additive V5 packet join. Preserve original confirmation, latest association
   sanction and later dispute restoration separately, reconcile seven source

@@ -86,6 +86,12 @@ acquisition conformance.
 
 ## Commands
 
+The additive [historical preservation assembly](museum-historical-preservation-capture.md)
+accepts the attribution-enriched packet and adds native master and pre-sale
+reference evidence. It preserves the original packet bytes and compares saved
+release commitments with historical source inputs. Generic preservation labels,
+archive delivery, post-mint finality and complete source coverage remain qualified.
+
 ```powershell
 .\.venv-museum\Scripts\python.exe -m tools.metadata.acquisition_packet_v5 --check
 

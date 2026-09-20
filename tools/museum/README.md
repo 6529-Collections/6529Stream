@@ -1,5 +1,12 @@
 # Museum offline tooling
 
+[Historical preservation capture](../../docs/museum-historical-preservation-capture.md)
+retains native media-master revisions and original pre-sale simulation records.
+Its V5 join reconciles nine captures and compares saved release hashes with
+original evidence, selection chronology and source gas. Current archive liveness,
+post-mint reference renders, finality and generic preservation labels remain
+separate from these historical native joins.
+
 [Native attribution and sanction capture](../../docs/museum-attribution-sanction-capture.md)
 adds current native authority observations, original sanction archives and
 generation-specific state history. Its V5 join reconciles seven captures while
