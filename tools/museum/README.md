@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Original governance transaction evidence](../../docs/museum-governance-transaction-evidence.md)
+recovers ordered call and action-ID preimages from original Executor inputs,
+receipts and events. It adds a separate evidence report while preserving the
+whole V6 package and packet bytes. Missing inputs remain partial; historical
+authority and complete acquisition coverage remain unresolved.
+
 [Original native finality and token proof V6](../../docs/museum-acquisition-finality-v6.md)
 captures the original collection receipt, typed manifest, complete preserved
 leaf bytes and ordered Merkle proof. The V6 export preserves every title V5

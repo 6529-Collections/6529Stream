@@ -5,6 +5,13 @@ independent JSON fixtures for the developing typed record consumers. The
 definitions are proposed registration inputs; generated files are not evidence
 of onchain registration or accepted finality.
 
+The standalone [original governance transaction fragment](../../docs/museum-governance-transaction-evidence.md)
+retains exact transaction/receipt/header observations and reconstructs ordered
+call and action-ID preimages. Generate/check only its new definition with
+`python -m tools.metadata.acquisition_governance_transactions_v1` and `--check`.
+V5/V6 and native finality bytes remain unchanged. Recovered preimages do not
+establish complete historical authority.
+
 [Packet V6 and its native finality fragment](../../docs/museum-acquisition-finality-v6.md)
 add paired native collection finality and token-content proof branches while
 preserving all nineteen groups and the frozen V5 definition. Generate/check
