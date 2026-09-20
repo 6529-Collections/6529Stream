@@ -105,6 +105,9 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+- Add delegated Artist attestation callers with original signatures, authenticated
+  subject reads, scoped finality/economics and durable record evidence.
+
 - Extend Mint policy-grace review to exact mode-2 consent with an explicit
   reviewed Manager capability, retaining the historical mode-1/3 behavior.
 

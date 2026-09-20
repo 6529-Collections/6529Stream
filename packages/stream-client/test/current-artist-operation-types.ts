@@ -5,7 +5,8 @@ import { currentArtistOperationTypedData, normalizeCurrentArtistAction, normaliz
   type CurrentArtistDelegationGrant, type CurrentArtistDelegationRevocation,
   type CurrentArtistDelegatedPolicyConsent, type CurrentArtistDelegatedSaleConsent,
   type CurrentArtistDelegatedEconomicsConsent, type CurrentArtistDelegatedRoyaltyFreeze,
-  type CurrentArtistFixedEconomicsCandidate } from "../src/current-artist-operation.js";
+  type CurrentArtistFixedEconomicsCandidate, type CurrentArtistDelegatedAttestation,
+  type CurrentArtistAttestationSubject } from "../src/current-artist-operation.js";
 
 declare const address: Address;
 declare const hash: Hex;
@@ -148,3 +149,49 @@ prepareCurrentArtistAction({ ...request, kind: "delegatedRoyaltyFreeze", message
 prospectivePlan.request.details.candidate.frozen = true;
 // @ts-expect-error the reviewed supplemental collection cannot change after preparation
 economicsPlan.request.details.collectionId = 2n;
+
+declare const attestation: CurrentArtistDelegatedAttestation;
+const subject: CurrentArtistAttestationSubject = { scopeType: 1n, tokenId: 1n, scopeId: hash, resolver: address };
+const attestationRequest: CurrentArtistOperationRequest<"delegatedAttestation"> = {
+  ...request, kind: "delegatedAttestation", message: attestation,
+  details: { grant: hash, statementURI: "ipfs://statement", statement: hash },
+};
+const scopedRequest: CurrentArtistOperationRequest<"delegatedScopedAttestation"> = {
+  ...request, kind: "delegatedScopedAttestation", message: attestation,
+  details: { grant: hash, statementURI: "", statement: hash, subject },
+};
+const attestationPlan = prepareCurrentArtistAction(attestationRequest);
+const scopedPlan = prepareCurrentArtistAction(scopedRequest);
+const attestationTime: bigint = attestationPlan.payload.message.signedAt;
+const originalSubject: CurrentArtistAttestationSubject = scopedPlan.request.details.subject;
+currentArtistOperationTypedData("delegatedAttestation", 1n, address, attestation);
+normalizeCurrentArtistAction(scopedPlan);
+void attestationTime; void originalSubject;
+// @ts-expect-error original attestation uses signedAt, never a deadline
+currentArtistOperationTypedData("delegatedAttestation", 1n, address, { ...attestation, deadline: 1n });
+// @ts-expect-error signed time is exact uint64 bigint
+currentArtistOperationTypedData("delegatedAttestation", 1n, address, { ...attestation, signedAt: 1 });
+// @ts-expect-error original subject kind is uint8 bigint
+currentArtistOperationTypedData("delegatedAttestation", 1n, address, { ...attestation, subjectKind: 4 });
+// @ts-expect-error the original unsigned subject locator is not a typed-data field
+currentArtistOperationTypedData("delegatedScopedAttestation", 1n, address, { ...attestation, subject });
+// @ts-expect-error scoped calldata requires its exact original subject tuple
+prepareCurrentArtistAction({ ...scopedRequest, details: { grant: hash, statement: hash, statementURI: "" } });
+// @ts-expect-error unscoped transport has no user-supplied subject tuple
+prepareCurrentArtistAction({ ...attestationRequest, details: { ...attestationRequest.details, subject } });
+// @ts-expect-error submitted raw bytes must be hex rather than a mutable byte array
+prepareCurrentArtistAction({ ...attestationRequest, details: { ...attestationRequest.details, statement: new Uint8Array() } });
+// @ts-expect-error the statement URI is original text, not an extra URI-hash calldata field
+prepareCurrentArtistAction({ ...attestationRequest, details: { ...attestationRequest.details, statementURIHash: hash } });
+// @ts-expect-error original Subject token ID remains full-width bigint
+prepareCurrentArtistAction({ ...scopedRequest, details: { ...scopedRequest.details, subject: { ...subject, tokenId: 1 } } });
+// @ts-expect-error Subject scopeId is bytes32, distinct from its uint256 tokenId
+prepareCurrentArtistAction({ ...scopedRequest, details: { ...scopedRequest.details, subject: { ...subject, scopeId: 1n } } });
+// @ts-expect-error scopeType is an original uint8 bigint
+prepareCurrentArtistAction({ ...scopedRequest, details: { ...scopedRequest.details, subject: { ...subject, scopeType: 1 } } });
+// @ts-expect-error no claimed current revenue class is added to the original locator
+prepareCurrentArtistAction({ ...scopedRequest, details: { ...scopedRequest.details, subject: { ...subject, revenueClass: hash } } });
+// @ts-expect-error frozen subject locator cannot change after review
+scopedPlan.request.details.subject.tokenId = 3n;
+// @ts-expect-error submitted dated authorization is immutable
+attestationPlan.payload.message.signedAt = 3n;

@@ -1,9 +1,9 @@
-import { Interface, ZeroAddress, ZeroHash, getAddress, id, isHexString, keccak256, toUtf8Bytes } from "ethers";
+import { AbiCoder, Interface, ZeroAddress, ZeroHash, getAddress, id, isHexString, keccak256, toUtf8Bytes } from "ethers";
 import type { Address, Hex } from "./generated/contracts.js";
 import type { UnsignedCall } from "./binding.js";
 import type { SigningPayload } from "./signing.js";
 import { buildSigningPayload } from "./signing-payload.js";
-import { currentArtistTypedData, type CurrentArtistPolicyConsent, type CurrentArtistEconomicsConsent } from "./current-artist.js";
+import { currentArtistTypedData, type CurrentArtistPolicyConsent, type CurrentArtistEconomicsConsent, type CurrentArtistAttestation } from "./current-artist.js";
 
 interface DeadlineAuthorization { readonly nonce: bigint; readonly deadline: bigint }
 export interface CurrentArtistBindingRefusal extends DeadlineAuthorization {
@@ -49,6 +49,11 @@ export type CurrentArtistDelegatedPolicyConsent = CurrentArtistPolicyConsent;
 export type CurrentArtistDelegatedSaleConsent = CurrentArtistSaleConsent;
 export type CurrentArtistDelegatedEconomicsConsent = CurrentArtistEconomicsConsent;
 export type CurrentArtistDelegatedRoyaltyFreeze = CurrentArtistRoyaltyFreeze;
+export type CurrentArtistDelegatedAttestation = CurrentArtistAttestation;
+/** Original unsigned subject locator. It never extends the Attestation signed schema. */
+export interface CurrentArtistAttestationSubject {
+  readonly scopeType: bigint; readonly tokenId: bigint; readonly scopeId: Hex; readonly resolver: Address;
+}
 /** Original fixed candidate. Its actual resolver preview must match the signed assignmentHash. */
 export interface CurrentArtistFixedEconomicsCandidate {
   readonly profileHash: Hex; readonly policyHash: Hex; readonly royaltyBps: bigint; readonly frozen: boolean;
@@ -67,6 +72,8 @@ export interface CurrentArtistOperationMessages {
   delegatedEconomicsConsent: CurrentArtistDelegatedEconomicsConsent;
   delegatedProspectiveEconomicsConsent: CurrentArtistDelegatedEconomicsConsent;
   delegatedRoyaltyFreeze: CurrentArtistDelegatedRoyaltyFreeze;
+  delegatedAttestation: CurrentArtistDelegatedAttestation;
+  delegatedScopedAttestation: CurrentArtistDelegatedAttestation;
 }
 export type CurrentArtistOperationKind = keyof CurrentArtistOperationMessages;
 export interface CurrentArtistOperationDetails {
@@ -87,6 +94,9 @@ export interface CurrentArtistOperationDetails {
   delegatedEconomicsConsent: { readonly collectionId: bigint; readonly grant: Hex };
   delegatedProspectiveEconomicsConsent: { readonly collectionId: bigint; readonly grant: Hex; readonly candidate: CurrentArtistFixedEconomicsCandidate };
   delegatedRoyaltyFreeze: { readonly grant: Hex };
+  /** Raw statement and URI must match their original signed hashes. */
+  delegatedAttestation: { readonly grant: Hex; readonly statementURI: string; readonly statement: Hex };
+  delegatedScopedAttestation: { readonly grant: Hex; readonly statementURI: string; readonly statement: Hex; readonly subject: CurrentArtistAttestationSubject };
 }
 interface OperationContext {
   readonly chainId: bigint;
@@ -125,6 +135,11 @@ const economicsTerms = "(uint256 collectionId,address resolver,bytes32 revenueCl
 const royaltySigning = ["StreamArtistRoyaltyFreeze", "address core,address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash,uint256 nonce,uint64 deadline"] as const;
 const royaltyTerms = "(address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash)";
 const candidateTuple = "(bytes32 profileHash,bytes32 policyHash,uint16 royaltyBps,bool frozen)";
+const attestationSigning = ["StreamArtistAttestation", "address core,uint256 collectionId,uint8 subjectKind,bytes32 subjectId,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,bytes32 statementURIHash,uint256 nonce,uint64 signedAt"] as const;
+const attestationTerms = "(uint256 collectionId,uint8 subjectKind,bytes32 subjectId,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,string statementURI)";
+export const CURRENT_ARTIST_ATTESTATION_SUBJECT_TUPLE = "(uint8 scopeType,uint256 tokenId,bytes32 scopeId,address resolver)" as const;
+/** Canonical abi.encode(uint16(1), Publication) is the original 416-byte statement for kinds 7/8. */
+export const CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE = "(address metadataHost,address recorder,uint256 collectionId,bytes32 subjectId,bytes32 recordType,bytes32 schemaId,bytes32 canonicalizationId,uint16 payloadAlgorithm,bytes32 payloadHash,bytes32 uriHash,uint64 effectiveAt,bytes32 candidateRecordHash)" as const;
 const schemes = {
   bindingRefusal: ["StreamArtistBindingRefusal", "address core,uint256 collectionId,uint64 bindingGeneration,bytes32 bindingHash,bytes32 reasonHash,uint256 nonce,uint64 deadline", 3n, "refuseArtistBinding", "bindingRefusalDigest", "(uint256 collectionId,uint64 generation,bytes32 bindingHash,bytes32 reasonHash,string reasonURI)"],
   saleConsent: [...saleSigning, 16n, "recordSaleConsent", "saleConsentDigest", saleTerms],
@@ -139,26 +154,36 @@ const schemes = {
   delegatedEconomicsConsent: [...economicsSigning, 15n, "recordDelegatedEconomicsConsent", "economicsConsentDigest", economicsTerms],
   delegatedProspectiveEconomicsConsent: [...economicsSigning, 15n, "recordDelegatedProspectiveEconomicsConsent", "economicsConsentDigest", economicsTerms],
   delegatedRoyaltyFreeze: [...royaltySigning, 20n, "authorizeDelegatedRoyaltyFreeze", "royaltyFreezeDigest", royaltyTerms],
+  delegatedAttestation: [...attestationSigning, 24n, "recordDelegatedArtistAttestation", "attestationDigest", attestationTerms],
+  delegatedScopedAttestation: [...attestationSigning, 24n, "recordDelegatedArtistScopedAttestation", "attestationDigest", attestationTerms],
 } as const;
 const authorization = "(uint256 nonce,uint64 time,bytes signature)";
-const delegatedMethods = new Set<string>(["recordDelegatedPolicyConsent", "recordDelegatedSaleConsent", "recordDelegatedEconomicsConsent", "recordDelegatedProspectiveEconomicsConsent", "authorizeDelegatedRoyaltyFreeze"]);
+const delegatedMethods = new Set<string>(["recordDelegatedPolicyConsent", "recordDelegatedSaleConsent", "recordDelegatedEconomicsConsent", "recordDelegatedProspectiveEconomicsConsent", "authorizeDelegatedRoyaltyFreeze", "recordDelegatedArtistAttestation", "recordDelegatedArtistScopedAttestation"]);
+const attestationMethods = new Set<string>(["recordDelegatedArtistAttestation", "recordDelegatedArtistScopedAttestation"]);
 /** Original Artist write/getter variants, with each supported delegated transport kept explicit. */
 export const CURRENT_ARTIST_OPERATION_ABI: readonly string[] = Object.freeze([...new Set(Object.values(schemes).flatMap(([, , , method, getter, tuple]) => [
-  `function ${method}(${tuple},${method === "recordDelegatedProspectiveEconomicsConsent" ? `${candidateTuple},` : ""}${delegatedMethods.has(method) ? "bytes32 grant," : ""}${authorization}${method === "recordIdentityRevision" ? ",bytes document,string displayName" : ""}) returns (bytes32)`,
+  `function ${method}(${tuple},${method === "recordDelegatedProspectiveEconomicsConsent" ? `${candidateTuple},` : method === "recordDelegatedArtistScopedAttestation" ? `${CURRENT_ARTIST_ATTESTATION_SUBJECT_TUPLE},` : ""}${delegatedMethods.has(method) ? "bytes32 grant," : ""}${authorization}${method === "recordIdentityRevision" ? ",bytes document,string displayName" : attestationMethods.has(method) ? ",bytes statement" : ""}) returns (bytes32)`,
   `function ${getter}(${tuple},${authorization}) view returns (bytes32)`,
 ]))]);
 const operations = new Interface(CURRENT_ARTIST_OPERATION_ABI);
+const coder = AbiCoder.defaultAbiCoder();
 const royaltyClass = id("ROYALTY_ERC2981");
+const publicationSchema = id("6529STREAM_ARTIST_RECORD_PUBLICATION_V1");
+const deploymentSchema = id("6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1");
+const personhoodSchemas = [id("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1"), id("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1")];
+function isAttestation(kind: CurrentArtistOperationKind): boolean {
+  return kind === "delegatedAttestation" || kind === "delegatedScopedAttestation";
+}
 
 function exact(input: unknown, keys: readonly string[], label: string): asserts input is Record<string, unknown> {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error(`${label} must be an object`);
   const own = Reflect.ownKeys(input);
   if (own.length !== keys.length || own.some(key => typeof key !== "string" || !keys.includes(key))) throw new Error(`${label} has unexpected fields`);
 }
-function address(input: unknown, label: string): Address {
+function address(input: unknown, label: string, allowZero = false): Address {
   if (typeof input !== "string") throw new Error(`${label} must be an address`);
   const result = getAddress(input) as Address;
-  if (result === ZeroAddress) throw new Error(`${label} must be nonzero`);
+  if (result === ZeroAddress && !allowZero) throw new Error(`${label} must be nonzero`);
   return result;
 }
 function nonzeroHash(input: unknown, label: string): Hex {
@@ -204,6 +229,8 @@ export function currentArtistOperationTypedData<K extends CurrentArtistOperation
     ? currentArtistTypedData("artistPolicyConsent", chainId, facade, message as CurrentArtistPolicyConsent)
     : kind === "delegatedEconomicsConsent" || kind === "delegatedProspectiveEconomicsConsent"
       ? currentArtistTypedData("artistEconomicsConsent", chainId, facade, message as CurrentArtistEconomicsConsent)
+    : isAttestation(kind)
+      ? currentArtistTypedData("artistAttestation", chainId, facade, message as CurrentArtistAttestation)
     : buildSigningPayload(chainId, facade, "6529StreamArtistRegistry", scheme.primaryType,
       scheme.fields, message, kind === "contentFreeze" ? { lockClasses: { minimum: 1, maximum: 16 } } : {})) as SigningPayload<CurrentArtistOperationMessages[K]>;
   const m = payload.message as unknown as Record<string, unknown>;
@@ -211,7 +238,8 @@ export function currentArtistOperationTypedData<K extends CurrentArtistOperation
     if (field.type === "address") address(m[field.name], field.name);
     const zeroAllowed = field.name === "revokedDigest" || (kind === "delegationGrant" && field.name === "constraintsHash")
       || (kind === "delegationRevocation" && field.name === "reasonHash")
-      || (kind === "delegatedProspectiveEconomicsConsent" && field.name === "assignmentHash");
+      || (kind === "delegatedProspectiveEconomicsConsent" && field.name === "assignmentHash")
+      || (isAttestation(kind) && m.subjectKind === 8n && field.name === "subjectStateHash");
     if (field.type === "bytes32" && !zeroAllowed) nonzeroHash(m[field.name], field.name);
   }
   if (kind !== "delegationGrant" && "collectionId" in m && (m.collectionId as bigint) === 0n) throw new Error("collectionId must be positive");
@@ -239,7 +267,55 @@ export function currentArtistOperationTypedData<K extends CurrentArtistOperation
     if (m.capabilities === 0n || ((m.capabilities as bigint) & ~1143n) !== 0n) throw new Error("Delegation capabilities must be a nonzero subset of 1143");
     if ((m.expiresAt as bigint) <= (m.notBefore as bigint)) throw new Error("Delegation expiresAt must follow notBefore");
   }
+  if (isAttestation(kind)) {
+    if (m.subjectKind === 0n || (m.subjectKind as bigint) > 10n) throw new Error("Unsupported original attestation subject kind");
+    if (kind === "delegatedScopedAttestation" && m.subjectKind !== 4n && m.subjectKind !== 6n) throw new Error("Scoped attestation requires finality or economics subject");
+    if ((m.subjectKind === 7n || m.subjectKind === 8n) && m.schemaId !== publicationSchema) throw new Error("Publication attestation requires the original envelope schema");
+    if (m.subjectKind === 8n && m.subjectStateHash !== ZeroHash) throw new Error("Kind 8 publication requires zero subjectStateHash");
+    if (m.subjectKind === 9n && (m.schemaId !== deploymentSchema || BigInt(m.subjectId as Hex) !== BigInt(m.core as Address))) throw new Error("Invalid deployment attestation subject");
+    if (m.subjectKind === 10n && !personhoodSchemas.includes(m.schemaId as Hex)) throw new Error("Only original personhood schemas are supported; C2PA credentials are deferred");
+    if ((m.subjectKind === 2n || m.subjectKind === 3n || (m.subjectKind === 4n && kind === "delegatedAttestation"))
+      && BigInt(m.subjectId as Hex) !== m.collectionId) throw new Error("Attestation subjectId must equal the collection coordinate");
+    if (m.subjectKind === 6n && kind === "delegatedAttestation" && BigInt(m.subjectId as Hex) >= 1n << 160n) throw new Error("Unscoped economics subjectId must be a padded resolver address");
+  }
   return payload;
+}
+
+function attestationSubject(input: CurrentArtistAttestationSubject, message: CurrentArtistAttestation): CurrentArtistAttestationSubject {
+  exact(input, ["scopeType", "tokenId", "scopeId", "resolver"], "Attestation subject");
+  const subject = Object.freeze({ scopeType: uint(input.scopeType, 8, "scopeType"), tokenId: uint(input.tokenId, 256, "tokenId"),
+    scopeId: bytes32(input.scopeId, "scopeId"), resolver: address(input.resolver, "subject resolver", message.subjectKind === 4n) });
+  if (message.subjectKind === 4n) {
+    if (subject.resolver !== ZeroAddress || subject.scopeType > 4n
+      || (subject.scopeType === 0n && (subject.tokenId !== 0n || subject.scopeId !== ZeroHash))
+      || (subject.scopeType === 1n && (subject.tokenId === 0n || subject.scopeId !== ZeroHash))
+      || (subject.scopeType >= 2n && (subject.tokenId !== 0n || subject.scopeId === ZeroHash))) throw new Error("Invalid finality subject coordinates");
+    const subjectId = keccak256(coder.encode(["bytes32", "(uint8,uint256,uint256,bytes32)"],
+      [id("6529STREAM_ARTIST_FINALITY_ATTESTATION_SUBJECT_V1"), [subject.scopeType, message.collectionId, subject.tokenId, subject.scopeId]]));
+    if (subjectId !== message.subjectId) throw new Error("Scoped finality subjectId differs from original scope hash");
+  } else if (subject.scopeType > 2n || subject.tokenId !== 0n
+    || (subject.scopeType === 0n && subject.scopeId !== ZeroHash)
+    || (subject.scopeType === 1n && BigInt(subject.scopeId) !== message.collectionId)
+    || (subject.scopeType === 2n && subject.scopeId === ZeroHash)) throw new Error("Invalid economics subject coordinates");
+  // Economics IDs also bind the selected resolver's live revenue class, established by the original subject read.
+  return subject;
+}
+
+function publicationStatement(message: CurrentArtistAttestation, statement: Hex, signer: Address): void {
+  if ((statement.length - 2) / 2 !== 416) throw new Error("Publication statement must be the original 416-byte envelope");
+  const types = ["uint16", CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE];
+  const [version, p] = coder.decode(types, statement);
+  if (version !== 1n || coder.encode(types, [version, p]) !== statement) throw new Error("Noncanonical publication statement");
+  if (p.metadataHost === ZeroAddress || p.recorder !== signer || p.collectionId !== message.collectionId || p.subjectId !== message.subjectId
+    || p.schemaId === ZeroHash || p.canonicalizationId === ZeroHash || p.payloadAlgorithm !== 1n || p.payloadHash === ZeroHash
+    || p.candidateRecordHash === ZeroHash || p.uriHash !== message.statementURIHash) throw new Error("Publication fields differ from the original attestation");
+  const intent = (p.recordType === id("ARTIST_INTENT") && p.schemaId === id("STREAM_ARTIST_INTENT_V1"))
+    || (p.recordType === id("ARTIST_INTENT_WAIVER") && p.schemaId === id("STREAM_ARTIST_INTENT_WAIVER_V1"));
+  const statementFamily = (p.recordType === id("ARTIST_SEMANTIC_ASSERTION") && p.schemaId === id("STREAM_SEMANTIC_ASSERTION_V1"))
+    || (p.recordType === id("WORK_DESCRIPTION") && p.schemaId === id("STREAM_WORK_DESCRIPTION_V1"))
+    || (p.recordType === id("ARTIST_STATEMENT") && p.schemaId !== id("STREAM_ARTIST_INTENT_V1") && p.schemaId !== id("STREAM_ARTIST_INTENT_WAIVER_V1"));
+  if (intent ? message.subjectKind !== 7n || message.subjectStateHash !== p.candidateRecordHash
+    : !statementFamily || message.subjectKind !== 8n || message.subjectStateHash !== ZeroHash) throw new Error("Unsupported publication family or subject state");
 }
 
 /** Copy all signed and supplemental fields before any asynchronous read or wallet interaction. */
@@ -256,6 +332,8 @@ export function normalizeCurrentArtistOperationRequest<K extends CurrentArtistOp
   if ((input.mode === "direct") !== direct) throw new Error("Authorization mode differs from the actual caller/signature predicate");
   exact(input.details, input.kind === "bindingRefusal" ? ["reasonURI"]
     : input.kind === "identityRevision" ? ["identityRecordURI", "document", "displayName"]
+      : input.kind === "delegatedAttestation" ? ["grant", "statementURI", "statement"]
+        : input.kind === "delegatedScopedAttestation" ? ["grant", "statementURI", "statement", "subject"]
       : input.kind === "delegatedEconomicsConsent" ? ["collectionId", "grant"]
         : input.kind === "delegatedProspectiveEconomicsConsent" ? ["collectionId", "grant", "candidate"]
           : input.kind === "delegatedPolicyConsent" || input.kind === "delegatedSaleConsent" || input.kind === "delegatedRoyaltyFreeze" ? ["grant"] : [], "Artist operation details");
@@ -294,6 +372,21 @@ export function normalizeCurrentArtistOperationRequest<K extends CurrentArtistOp
       details = Object.freeze({ collectionId, grant, candidate });
     }
   }
+  if (isAttestation(input.kind)) {
+    const original = input.details as CurrentArtistOperationDetails["delegatedScopedAttestation"];
+    const m = payload.message as CurrentArtistAttestation;
+    const grant = nonzeroHash(original.grant, "grant"), statementURI = text(original.statementURI, "statementURI", 0, 2048);
+    if (typeof original.statement !== "string" || !isHexString(original.statement, true)
+      || original.statement.length < 4 || original.statement.length > 2 + 8192 * 2) throw new Error("Statement must contain 1..8192 bytes");
+    const statement = original.statement.toLowerCase() as Hex;
+    if (keccak256(statement) !== m.statementHash || keccak256(toUtf8Bytes(statementURI)) !== m.statementURIHash) throw new Error("Statement or URI differs from its original signed hash");
+    if (!direct && m.signedAt === 0n) throw new Error("Signed attestation requires positive signedAt");
+    if (m.subjectKind === 10n && m.subjectId !== artistId) throw new Error("Personhood subject differs from the Artist locator");
+    if (m.subjectKind === 7n || m.subjectKind === 8n) publicationStatement(m, statement, signer);
+    details = input.kind === "delegatedScopedAttestation"
+      ? Object.freeze({ grant, statementURI, statement, subject: attestationSubject(original.subject, m) })
+      : Object.freeze({ grant, statementURI, statement });
+  }
   if ("artistId" in payload.message && payload.message.artistId.toLowerCase() !== artistId) throw new Error("Signed artistId differs from the authority/replay locator");
   if (input.kind === "delegationGrant" && (payload.message as CurrentArtistDelegationGrant).delegate === signer) throw new Error("Artist cannot delegate to its own grantor address");
   return Object.freeze({ kind: input.kind, chainId: input.chainId, registry: payload.domain.verifyingContract as Address,
@@ -324,9 +417,12 @@ export function prepareCurrentArtistAction<K extends CurrentArtistOperationKind>
     case "delegatedPolicyConsent": terms = [m.collectionId, m.phaseId, m.policyHash]; break;
     case "delegatedEconomicsConsent":
     case "delegatedProspectiveEconomicsConsent": terms = [(request.details as CurrentArtistOperationDetails["delegatedEconomicsConsent"]).collectionId, m.resolver, m.revenueClass, m.scope, m.scopeId, m.assignmentHash]; break;
+    case "delegatedAttestation":
+    case "delegatedScopedAttestation": terms = [m.collectionId, m.subjectKind, m.subjectId, m.subjectStateHash, m.schemaId, m.statementHash,
+      (request.details as CurrentArtistOperationDetails["delegatedAttestation"]).statementURI]; break;
     default: throw new Error("Unknown current Artist operation kind");
   }
-  const time = request.kind === "delegationGrant" ? 0n : request.kind === "identityRevision" ? m.signedAt : m.deadline;
+  const time = request.kind === "delegationGrant" ? 0n : request.kind === "identityRevision" || isAttestation(request.kind) ? m.signedAt : m.deadline;
   const call = (method: string, signature: Hex): UnsignedCall => {
     const args: unknown[] = [terms, [m.nonce, time, signature]];
     if (delegatedMethods.has(method) && method === scheme.method) {
@@ -334,6 +430,12 @@ export function prepareCurrentArtistAction<K extends CurrentArtistOperationKind>
     }
     if (request.kind === "delegatedProspectiveEconomicsConsent" && method === scheme.method) {
       args.splice(1, 0, (request.details as CurrentArtistOperationDetails["delegatedProspectiveEconomicsConsent"]).candidate);
+    }
+    if (request.kind === "delegatedScopedAttestation" && method === scheme.method) {
+      args.splice(1, 0, (request.details as CurrentArtistOperationDetails["delegatedScopedAttestation"]).subject);
+    }
+    if (isAttestation(request.kind) && method === scheme.method) {
+      args.push((request.details as CurrentArtistOperationDetails["delegatedAttestation"]).statement);
     }
     if (request.kind === "identityRevision" && method === scheme.method) {
       const details = request.details as CurrentArtistOperationDetails["identityRevision"];

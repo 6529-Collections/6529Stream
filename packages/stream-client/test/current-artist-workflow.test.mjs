@@ -5,7 +5,8 @@ import { AbiCoder, Interface, ZeroAddress, ZeroHash, getAddress, id, keccak256 }
 import * as pure from '../dist/current-artist-operation.js';
 import * as flow from '../dist/current-artist-workflow.js';
 const f = JSON.parse(readFileSync(new URL('./fixtures/current-artist-operation-current-abi.json', import.meta.url), 'utf8'));
-const abi = new Interface(Object.values(f.abis).flat());
+const attestationFixture = JSON.parse(readFileSync(new URL('./fixtures/current-artist-attestation-abi.json', import.meta.url), 'utf8'));
+const abi = new Interface([...Object.values(f.abis).flat(), ...Object.values(attestationFixture.abis).flat()]);
 const coder = AbiCoder.defaultAbiCoder();
 const A = n => getAddress('0x' + BigInt(n).toString(16).padStart(40, '0'));
 const code = n => '0x60' + n.toString(16).padStart(2, '0');
@@ -70,7 +71,10 @@ function binding(q) {
   return [q.artistId, A(101), id('identity'), id('binding'), 2n, isDelegated(q) ? 2n : 1n, 1n, 0n, A(102), q.kind !== 'bindingRefusal'];
 }
 function isDelegated(q) {
-  return q.kind === 'delegatedPolicyConsent' || q.kind === 'delegatedSaleConsent' || economicKinds.includes(q.kind);
+  return q.kind === 'delegatedPolicyConsent' || q.kind === 'delegatedSaleConsent' || economicKinds.includes(q.kind) || isAttestation(q);
+}
+function isAttestation(q) {
+  return q.kind === 'delegatedAttestation' || q.kind === 'delegatedScopedAttestation';
 }
 function isEconomics(q) {
   return q.kind === 'delegatedEconomicsConsent' || q.kind === 'delegatedProspectiveEconomicsConsent';
@@ -88,7 +92,7 @@ function candidateEvidence(q) {
 function creationGrant(q) {
   return {
     grant: { artistId: q.artistId, delegate: q.signer, collectionId: 7n,
-      capabilities: q.kind === 'delegatedPolicyConsent' ? 2n : q.kind === 'delegatedSaleConsent' ? 1024n : q.kind === 'delegatedRoyaltyFreeze' ? 32n : 4n,
+      capabilities: q.kind === 'delegatedPolicyConsent' ? 2n : q.kind === 'delegatedSaleConsent' ? 1024n : q.kind === 'delegatedRoyaltyFreeze' ? 32n : isAttestation(q) ? (q.message.subjectKind === 7n ? 64n : 1n) : 4n,
       notBefore: 1000n, expiresAt: 2000n, maxUses: 5n, constraintsHash: id('uninterpreted-constraints') },
     grantor: A(201), nonce: 6n, uses: 1n, revoked: false, revocationRecordHash: ZeroHash
   };
@@ -115,10 +119,10 @@ function grantHash(record) {
     g.capabilities, g.notBefore, g.expiresAt, g.maxUses, g.constraintsHash, record.nonce]));
 }
 function effectiveDigest(q, time) {
-  if (q.kind !== 'identityRevision' || q.message.signedAt !== 0n) {
+  if ((q.kind !== 'identityRevision' && !isAttestation(q)) || q.message.signedAt !== 0n) {
     return pure.prepareCurrentArtistAction(q).payload.digest;
   }
-  return pure.currentArtistOperationTypedData('identityRevision', q.chainId, q.registry, {
+  return pure.currentArtistOperationTypedData(q.kind, q.chainId, q.registry, {
     ...q.message, signedAt: time
   }).digest;
 }
@@ -142,7 +146,7 @@ function provider(q, opt = {}) {
           return result;
         }
       }
-      return [A(20), A(30)].includes(target) || d.components.some(x => x.address === target) ? code(Number(BigInt(target))) : '0xef0100' + A(200).slice(2);
+      return [A(20), A(30), A(40), A(41), A(42), A(43), A(44)].includes(target) || d.components.some(x => x.address === target) ? code(Number(BigInt(target))) : '0xef0100' + A(200).slice(2);
     }, async call(tx) {
       calls.push(tx);
       const desc = abi.parseTransaction({ data: tx.data });
@@ -156,6 +160,8 @@ function provider(q, opt = {}) {
       if (replacement !== undefined) {
         return abi.encodeFunctionResult(name, replacement);
       }
+      const subjectResult = isAttestation(q) ? attestationRead(q, name, args, tx) : undefined;
+      if (subjectResult !== undefined) return abi.encodeFunctionResult(name, subjectResult);
       let value;
       switch (name) {
         case 'reads': value = [A(30)]; break;
@@ -245,7 +251,7 @@ function provider(q, opt = {}) {
           value = [[false, false, false, false, 1]];
           break;
         default: if (name === action.digestMethod) {
-          value = [q.kind === 'identityRevision'
+          value = [q.kind === 'identityRevision' || isAttestation(q)
               ? pure.currentArtistOperationTypedData(q.kind, q.chainId, q.registry, {
                 ...q.message, signedAt: args[1].time
               }).digest
@@ -277,6 +283,14 @@ function record(c, time, executedPayout = c.economics?.payout ?? payout) {
   const cl = isDelegated(q) ? 2n : c.authority.authorityClass;
   const n = m.nonce;
   const common = [d.chainId, A(8)];
+  if (isAttestation(q)) {
+    return keccak256(coder.encode(
+      ['bytes32', 'uint256', 'address', 'address', 'uint256', 'uint8', 'bytes32', 'bytes32', 'bytes32', 'bytes32', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'],
+      [id('6529STREAM_ARTIST_ATTESTATION_RECORD_V1'), ...common, core, m.collectionId, m.subjectKind,
+        m.subjectId, m.subjectStateHash, m.schemaId, m.statementHash, m.statementURIHash,
+        q.artistId, q.signer, 2n, n, m.signedAt === 0n ? time : m.signedAt]
+    ));
+  }
   if (q.kind === 'delegationGrant') {
     const [grant] = abi.decodeFunctionData(c.action.method, c.action.call.data);
     return grantHash({
@@ -322,12 +336,12 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, exe
   const fn = abi.getFunction(c.action.method);
   const decodedCall = abi.decodeFunctionData(fn, c.action.call.data);
   const t = decodedCall[0];
-  const authIndex = q.kind === 'delegatedProspectiveEconomicsConsent' ? 3 : isDelegated(q) ? 2 : 1;
+  const authIndex = q.kind === 'delegatedProspectiveEconomicsConsent' || q.kind === 'delegatedScopedAttestation' ? 3 : isDelegated(q) ? 2 : 1;
   const auth = decodedCall[authIndex];
   const economicsAssociation = isEconomics(q) ? [q.artistId, 2n, id('binding'), keccak256(coder.encode([fn.inputs[0]], [t])), originalRecord ?? rh] : null;
   let types = q.kind === 'authorizationRevocation' ? [fn.inputs[0], fn.inputs[1], P] : [B, fn.inputs[0], fn.inputs[1], P];
   let values = q.kind === 'authorizationRevocation' ? [t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']] : [binding(q), t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']];
-  const effectiveTime = q.kind === 'identityRevision' ? (m.signedAt === 0n ? time : m.signedAt) : time;
+  const effectiveTime = q.kind === 'identityRevision' || isAttestation(q) ? (m.signedAt === 0n ? time : m.signedAt) : time;
   const digest = effectiveDigest(q, time);
   const proof = [q.signer, digest, q.mode === 'direct'];
   if (q.kind === 'identityRevision') {
@@ -346,7 +360,15 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, exe
       }
     }
   }
-  if (economicKinds.includes(q.kind)) {
+  if (isAttestation(q)) {
+    types = [B, fn.inputs[0], fn.inputs[authIndex], fn.inputs[authIndex], P, 'bytes', pure.CURRENT_ARTIST_ATTESTATION_SUBJECT_TUPLE,
+      'bool', abi.getFunction('recordAuthenticatedAttestation').inputs[3], abi.getFunction('delegationRecord').outputs[0], 'bytes'];
+    const admission = [[q.artistId, c.authority.address, 1n, c.authority.status], q.signer, m.nonce,
+      effectiveTime, q.details.grant, c.attestation.operativeIdentity, c.attestation.fact];
+    values = [binding(q), t, auth, [auth.nonce, effectiveTime, auth.signature], proof, q.details.statement,
+      attestationDescriptor(q), q.kind === 'delegatedScopedAttestation', admission, c.delegation, c.attestation.subjectEvidence];
+  }
+  else if (economicKinds.includes(q.kind)) {
     const innerTypes = isEconomics(q)
       ? [B, fn.inputs[0], '(address account,bytes32 recordHash)', fn.inputs[authIndex], P, 'bytes', abi.getFunction('economicsRecordAssociation').outputs[0]]
       : [B, fn.inputs[0], fn.inputs[authIndex], P];
@@ -372,8 +394,8 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, exe
     values.push(coder.encode(['address', 'bytes32', 'bytes32', 'bytes32', 'bytes4', 'uint256', 'bytes32'], [A(80), id('registrycode'), id('adaptercode'), id('kind'), '0x12345678', m.collectionId, m.saleConfigHash]));
   }
   const identityOnly = ['authorizationRevocation', 'identityRevision', 'delegationGrant', 'delegationRevocation'].includes(q.kind);
-  const mask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : isEconomics(q) ? 119 : 87;
-  const writeMask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : 68;
+  const mask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : isAttestation(q) ? 23 : isEconomics(q) ? 119 : 87;
+  const writeMask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : isAttestation(q) ? 20 : 68;
   const snap = after => domains.map((domain, i) => {
     const written = Boolean(after && (writeMask & (1 << i)));
     return mask & (1 << i) ? [domain, written ? 2 : 1, id('state' + i + written), id('tip' + i + written)] : [ZeroHash, 0, ZeroHash, ZeroHash];
@@ -384,6 +406,12 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, exe
   const eid = keccak256(coder.encode(['bytes32', 'uint256', 'address', 'address', 'uint16', 'address', 'bytes32'], [id('6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1'), d.chainId, A(8), A(20), c.action.operationId, q.caller, rh]));
   const specs = [];
   switch (q.kind) {
+    case 'delegatedAttestation':
+    case 'delegatedScopedAttestation':
+      specs.push([A(5), 'ArtistAttestationRecorded', [1, m.collectionId, m.subjectKind, q.signer,
+        m.subjectId, m.subjectStateHash, m.schemaId, m.statementHash, m.statementURIHash, 2, m.nonce, effectiveTime, rh]],
+      [A(5), 'ArtistAttestationDelegation', [1, rh, q.details.grant, q.artistId, q.signer]]);
+      break;
     case 'identityRevision':
       specs.push([A(3), 'ArtistIdentityRevisionRecorded', [1, q.artistId, q.signer, m.previousRecordHash, m.revisedRecordHash, q.details.identityRecordURI, cl, m.nonce, effectiveTime, rh]], [A(3), 'ArtistIdentityDisplayNameStored', [q.artistId, m.revisedRecordHash, q.details.displayName]]);
       break;
@@ -422,7 +450,7 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, exe
   if (q.kind === 'delegatedRoyaltyFreeze') {
     specs.push([A(7), 'ArtistRecordDelegation', [1, rh, q.details.grant, q.artistId, t.resolver, t.revenueClass, 2]]);
   }
-  else if (isDelegated(q) && !isEconomics(q)) {
+  else if (isDelegated(q) && !isEconomics(q) && !isAttestation(q)) {
     specs.push([A(7),'ArtistConsentDelegationRecorded',[1,rh,q.details.grant,q.artistId,c.action.operationId]]);
   }
   specs.push([A(9), 'ArtistArchiveEvidenceAppendedV2', [eid, 1, keccak256(raw), A(201), (raw.length - 2) / 2]]);
@@ -466,6 +494,15 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, exe
         return replacement;
       }
       switch (name) {
+        case 'attestationRecord': return [[rh, m.subjectStateHash, m.schemaId, m.statementHash, 2n, effectiveTime, q.signer]];
+        case 'attestationAuthorityClass': return [2n];
+        case 'statementBytes': return [q.details.statement];
+        case 'attestationAssociation': return [[q.artistId, id('binding'), 2n, q.details.grant, c.attestation.fact]];
+        case 'publicationAttestation': {
+          const [, publication] = coder.decode(['uint16', pure.CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE], q.details.statement);
+          return [[publication, [rh, q.artistId, id('binding'), 2n, q.signer, 2n, m.subjectKind === 7n ? 64n : 1n,
+            effectiveTime, keccak256(coder.encode([pure.CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE], [publication]))], c.attestation.fact.ownerCodeHash]];
+        }
         case 'designationRecord': return [[q.artistId, executedPayout.account, ZeroHash]];
         case 'economicsRecord': return [originalRecord ?? rh];
         case 'economicsRecordForBinding': return [rh];
@@ -1687,4 +1724,391 @@ test('economics receipts reject wrong delegation transport and source/Safe event
   r.receipt.logs.unshift(r.receipt.logs.pop());
   r.receipt.logs.forEach((l, index) => { l.index = index; });
   await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'safe' }), /Safe success must follow/);
+});
+
+function attestationDescriptor(q) {
+  return q.details.subject ?? { scopeType: 0n, tokenId: 0n, scopeId: ZeroHash, resolver: ZeroAddress };
+}
+function attestationRequest(subjectKind = 9n, subject) {
+  const uri = 'ipfs://original-attestation-statement';
+  let statement = '0x123456';
+  let subjectId = coder.encode(['uint256'], [7n]);
+  let subjectStateHash = id('subject-state-' + subjectKind);
+  let schemaId = id('subject-schema');
+  if (subjectKind === 1n) {
+    subjectId = id('snapshot-id'); subjectStateHash = id('snapshot-manifest');
+  }
+  if (subjectKind === 4n && subject) {
+    subjectId = keccak256(coder.encode(['bytes32', '(uint8,uint256,uint256,bytes32)'],
+      [id('6529STREAM_ARTIST_FINALITY_ATTESTATION_SUBJECT_V1'), [subject.scopeType, 7n, subject.tokenId, subject.scopeId]]));
+  }
+  if (subjectKind === 5n) subjectId = id('phase');
+  if (subjectKind === 6n) {
+    const resolver = subject?.resolver ?? A(14);
+    subjectId = subject ? keccak256(coder.encode(['bytes32', 'uint256', 'address', 'bytes32', 'uint8', 'uint256'],
+      [id('6529STREAM_ARTIST_ECONOMICS_ATTESTATION_SUBJECT_V1'), 7n, resolver, resolver === A(14) ? id('primary') : id('ROYALTY_ERC2981'), subject.scopeType, BigInt(subject.scopeId)]))
+      : coder.encode(['address'], [resolver]);
+  }
+  if (subjectKind === 7n || subjectKind === 8n) {
+    subjectId = id('publication-subject'); schemaId = id('6529STREAM_ARTIST_RECORD_PUBLICATION_V1');
+    subjectStateHash = subjectKind === 7n ? id('candidate') : ZeroHash;
+    const publication = [A(43), signer, 7n, subjectId,
+      id(subjectKind === 7n ? 'ARTIST_INTENT' : 'WORK_DESCRIPTION'),
+      id(subjectKind === 7n ? 'STREAM_ARTIST_INTENT_V1' : 'STREAM_WORK_DESCRIPTION_V1'),
+      id('canonicalization'), 1n, id('payload'), keccak256(new TextEncoder().encode(uri)), 0n, id('candidate')];
+    statement = coder.encode(['uint16', pure.CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE], [1n, publication]);
+  }
+  if (subjectKind === 9n) {
+    subjectId = coder.encode(['address'], [A(10)]);
+    subjectStateHash = keccak256(coder.encode(['bytes32', 'uint256', 'address', 'uint256', 'bytes32', 'uint64', 'bytes32'],
+      [id('6529STREAM_ARTIST_DEPLOYMENT_FACTS_V1'), d.chainId, A(10), 7n, artist, 2n, id('binding')]));
+    schemaId = id('6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1');
+  }
+  if (subjectKind === 10n) {
+    subjectId = artist; subjectStateHash = id('identity'); schemaId = id('6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1');
+  }
+  const q = {
+    kind: subject ? 'delegatedScopedAttestation' : 'delegatedAttestation', chainId: d.chainId,
+    registry: A(8), caller: signer, signer, artistId: artist, mode: 'direct', signature: '0x',
+    message: { core: A(10), collectionId: 7n, subjectKind, subjectId, subjectStateHash, schemaId,
+      statementHash: keccak256(statement), statementURIHash: keccak256(new TextEncoder().encode(uri)), nonce: 1n, signedAt: 0n },
+    details: { grant: ZeroHash, statementURI: uri, statement, ...(subject ? { subject } : {}) }
+  };
+  q.details.grant = grantHash(creationGrant(q));
+  return q;
+}
+function attestationRead(q, name, args) {
+  const descriptor = attestationDescriptor(q), kind = q.message.subjectKind;
+  switch (name) {
+    case 'finalityRegistry': return [A(40)];
+    case 'finalityRegistryCodeHash': return [pin(40).codeHash];
+    case 'scopeEvidenceProvider': return [A(41)];
+    case 'scopeEvidenceProviderCodeHash': return [pin(41).codeHash];
+    case 'snapshotHost': return [A(42)];
+    case 'metadataRouter': return [A(13)];
+    case 'nativeConfiguration': {
+      const targets = Array(22).fill(ZeroAddress), hashes = Array(22).fill(ZeroHash);
+      for (const [index, target] of [[0, 10], [2, 13], [8, 42], [11, 8], [12, 40]]) {
+        targets[index] = A(target); hashes[index] = pin(target).codeHash;
+      }
+      return [[targets, hashes, d.chainId, 500000n, 1000000n, 200000n, id('inventory')]];
+    }
+    case 'currentSnapshot': return [[id('snapshot-record'), 7n, id('snapshot-id'), ZeroHash, 1n, id('chain'), id('snapshot-manifest'), 5n,
+      id('source'), id('inventory'), A(80), 1n, 0n, 1n, 0n, 900n, 900n, ZeroHash, id('schema'), id('profile'), id('canonical')]];
+    case 'latestSnapshotHash':
+    case 'snapshotHash': return [id('snapshot-manifest')];
+    case 'scriptManifestHash': return [id('subject-state-2')];
+    case 'mediaManifestHash': return [id('subject-state-3')];
+    case 'collectionFinalityRecord': return [[true, id('subject-state-4'), id('manifest'), id('uri'), '', id('components'), A(40), 900n]];
+    case 'artworkScopeFinalityRecord': return [[true, args[0], id('subject-state-4'), id('manifest'), id('uri'), id('components'), '', A(40), 900n]];
+    case 'phase': return [true, [false, 0n, 0n, 10n, id('config'), id('metadata')]];
+    case 'phasePolicyHash': return [id('subject-state-5')];
+    case 'primaryEconomicsFacts':
+    case 'resolvePrimaryAssignment': return [[true, q.details.subject ? descriptor.scopeType : 1n,
+      q.details.subject ? BigInt(descriptor.scopeId) : 7n, 1n, id('profile'), ZeroHash, ZeroHash, id('subject-state-6'), false]];
+    case 'royaltyEconomicsFacts':
+    case 'resolveRoyaltyAssignment': {
+      const result = [[A(15), id('ROYALTY_ERC2981'), q.details.subject ? descriptor.scopeType : 1n,
+        q.details.subject ? BigInt(descriptor.scopeId) : 7n, id('subject-state-6')], [A(70), 500n, true, false, 1n, id('profile')]];
+      return name === 'resolveRoyaltyAssignment' ? [...result, id('royalty-policy')] : result;
+    }
+    case 'streamModuleType': return [id('COLLECTION_METADATA')];
+    case 'streamModuleInterfaceId': return ['0x12345678'];
+    case 'supportsInterface':
+    case 'isModuleEligible': return [true];
+    case 'requireArtistRecordCandidate': return [id('candidate'), kind];
+    case 'getSatellitePointer': {
+      const selected = args[0] === id('COLLECTION_METADATA') ? 43 : args[0] === id('MODULE_REGISTRY') ? 44 : undefined;
+      if (selected) return [A(selected), pin(selected).codeHash, false, args[0], '0x12345678', A(44), 1n, id('manifest'), id('deployment'), 1n];
+      break;
+    }
+  }
+}
+
+test('delegated attestation captures all ten original subject profiles through exact owner reads', async () => {
+  for (let kind = 1n; kind <= 10n; kind++) {
+    const q = attestationRequest(kind), rpc = provider(q);
+    const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+    assert.equal(c.action.operationId, 24n);
+    assert.equal(c.attestation.fact.subjectId, q.message.subjectId);
+    assert.equal(c.attestation.fact.stateHash, q.message.subjectStateHash);
+    assert(c.attestation.dependencies.length >= 1 && c.attestation.dependencies.length <= 3);
+    assert(Object.isFrozen(c.attestation.dependencies));
+    assert.equal(c.delegation.grant.capabilities, kind === 7n ? 64n : 1n);
+    const simulated = await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+    assert.equal(simulated.recordHash, record(c, 1010n));
+    assert.equal(rpc.calls.at(-1).from, q.caller);
+  }
+});
+
+test('all ten delegated attestation receipts retain exact records, subject associations and flat Archive payloads', async () => {
+  for (let kind = 1n; kind <= 10n; kind++) {
+    const q = attestationRequest(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+    const r = mined(c, { safe: kind % 2n === 0n, indexed: kind % 3n === 0n });
+    const result = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: kind % 2n === 0n ? 'safe' : 'direct' });
+    assert.equal(result.recordHash, record(c, 1011n));
+    assert.equal(result.effectiveDigest, effectiveDigest(q, 1011n));
+    assert.deepEqual(result.attestation.fact, c.attestation.fact);
+    assert.equal(result.attestation.subjectEvidence, c.attestation.subjectEvidence);
+    assert(result.events.some(e => e.event === 'ArtistAttestationDelegation'));
+  }
+});
+
+test('scoped finality and economics retain exact scope identities across supported owners', async () => {
+  const cases = [
+    ...[0n, 1n, 2n, 3n, 4n].map(scopeType => [4n, { scopeType, tokenId: scopeType === 1n ? 99n : 0n,
+      scopeId: scopeType >= 2n ? id('scope-' + scopeType) : ZeroHash, resolver: ZeroAddress }]),
+    ...[A(14), A(15)].flatMap(resolver => [0n, 1n, 2n].map(scopeType => [6n, { scopeType, tokenId: 0n,
+      scopeId: coder.encode(['uint256'], [scopeType === 0n ? 0n : scopeType === 1n ? 7n : 99n]), resolver }]))
+  ];
+  for (const [kind, descriptor] of cases) {
+    const q = attestationRequest(kind, descriptor);
+    const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+    const r = mined(c, { safe: true, indexed: true });
+    const out = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'safe' });
+    assert.equal(out.attestation.fact.subjectId, q.message.subjectId);
+  }
+});
+
+test('delegated attestation direct past dates remain valid while direct zero is block-specific and future/relayzero reject', async () => {
+  const q = attestationRequest();
+  q.message.signedAt = 900n;
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const r = mined(c);
+  const out = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' });
+  assert.equal(out.effectiveDigest, c.action.payload.digest);
+  assert.equal(out.recordHash, record(c, 900n));
+  q.message.signedAt = 1011n;
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 }), /signedAt/);
+  q.message.signedAt = 0n; q.caller = A(110); q.mode = 'signature';
+  assert.throws(() => pure.prepareCurrentArtistAction(q), /signedAt|zero|time/i);
+  q.message.signedAt = 900n;
+  const relay = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  await flow.simulateCurrentArtistCall(provider(q), relay, { blockTag: 10 });
+});
+
+test('attestation subject reads reject contradictory native facts, scope, metadata admission and gas policy', async () => {
+  const cases = [
+    [1n, 'nativeConfiguration', (q, args) => {
+      const result = attestationRead(q, 'nativeConfiguration', args);
+      result[0][2]++;
+      return result;
+    }, /configuration differs/],
+    [1n, 'latestSnapshotHash', () => [id('different-snapshot')], /snapshot identity/],
+    [2n, 'scriptManifestHash', () => [id('different-script')], /subject.*differ/i],
+    [3n, 'core', () => [A(999)], /Core|binding/],
+    [4n, 'collectionFinalityRecord', (q, args) => {
+      const result = attestationRead(q, 'collectionFinalityRecord', args);
+      result[0][0] = false;
+      return result;
+    }, /not finalized/],
+    [4n, 'collectionFinalityRecord', (q, args) => {
+      const result = attestationRead(q, 'collectionFinalityRecord', args);
+      result[0][7] = 1011n;
+      return result;
+    }, /not finalized/],
+    [5n, 'phase', (q, args) => {
+      const result = attestationRead(q, 'phase', args);
+      result[0] = false;
+      return result;
+    }, /phase differs/],
+    [6n, 'resolvePrimaryAssignment', (q, args) => {
+      const result = attestationRead(q, 'resolvePrimaryAssignment', args);
+      result[0][0] = false;
+      return result;
+    }, /Missing primary/],
+    [7n, 'requireArtistRecordCandidate', () => [id('other-candidate'), 7n], /candidate differs/],
+    [8n, 'isModuleEligible', () => [false], /not eligible/],
+    [10n, 'operativeIdentityRecord', () => [id('later-identity')], /subject.*differ/i]
+  ];
+  for (const [kind, method, replacement, expected] of cases) {
+    const q = attestationRequest(kind);
+    const rpc = provider(q, { read: (name, args) => name === method ? replacement(q, args) : undefined });
+    await assert.rejects(flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 }), expected);
+  }
+  const q = attestationRequest();
+  for (const gas of [[0n, 0n, 2n, 1n], [1n << 255n, 0n, 2n, 1n], [90000n, 90000n, 1n, 1n], [90000n, 90000n, 2n, 0n]]) {
+    await assert.rejects(flow.captureCurrentArtistOperation(provider(q, {
+      read: name => name === 'gasParameterInfo' ? gas : undefined
+    }), d, q, { blockTag: 10 }), /gas policy/);
+  }
+  const scoped = attestationRequest(6n, { scopeType: 2n, scopeId: coder.encode(['uint256'], [99n]), tokenId: 0n, resolver: A(15) });
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(scoped, { read: (name, args) => {
+    if (name !== 'royaltyEconomicsFacts') return;
+    const result = attestationRead(scoped, name, args);
+    result[0][3] = 98n;
+    return result;
+  } }), d, scoped, { blockTag: 10 }), /scope differs/);
+});
+
+test('attestation captures enforce canonical dynamic reads, runtime pins, immutable inputs and original schema bounds', async () => {
+  const q = attestationRequest(1n);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: (name, args) => name === 'nativeConfiguration'
+    ? { raw: abi.encodeFunctionResult(name, attestationRead(q, name, args)) + '00' } : undefined
+  }), d, q, { blockTag: 10 }), /Noncanonical|invalid length/);
+  for (const runtime of ['0x', '0xef0100' + A(200).slice(2)]) {
+    await assert.rejects(flow.captureCurrentArtistOperation(provider(q, {
+      code: target => target === A(41) ? runtime : undefined,
+      read: name => name === 'scopeEvidenceProviderCodeHash' ? [keccak256(runtime)] : undefined
+    }), d, q, { blockTag: 10 }), /owner runtime/);
+  }
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { reorg: true }), d, q, { blockTag: 10 }), /Pinned block/);
+  const submitted = attestationRequest(4n, { scopeType: 1n, tokenId: 99n, scopeId: ZeroHash, resolver: ZeroAddress });
+  const mutable = structuredClone(submitted);
+  const capture = await flow.captureCurrentArtistOperation(provider(submitted, { mutate() {
+    mutable.details.subject.tokenId = 100n;
+    mutable.details.statement = '0x00';
+  } }), d, mutable, { blockTag: 10 });
+  assert.equal(capture.action.request.details.subject.tokenId, 99n);
+  assert.equal(capture.action.request.details.statement, submitted.details.statement);
+  const forged = structuredClone(capture);
+  forged.attestation.fact.stateHash = id('forged');
+  assert.throws(() => flow.createCurrentArtistSafePlan([forged], 'Forged subject'), /facts changed/);
+  await assert.rejects(flow.simulateCurrentArtistCall(provider(submitted), forged, { blockTag: 10 }), /facts changed/);
+  const c2pa = attestationRequest(10n);
+  c2pa.message.schemaId = id('deferred-C2PA-schema');
+  assert.throws(() => pure.prepareCurrentArtistAction(c2pa), /C2PA.*deferred/);
+});
+
+test('historical attestation receipts retain original facts after latest subjects and grant eligibility change', async () => {
+  const liveReads = new Set(['currentSnapshot', 'latestSnapshotHash', 'snapshotHash', 'scriptManifestHash',
+    'mediaManifestHash', 'collectionFinalityRecord', 'artworkScopeFinalityRecord', 'phase', 'phasePolicyHash',
+    'primaryEconomicsFacts', 'resolvePrimaryAssignment', 'royaltyEconomicsFacts', 'resolveRoyaltyAssignment',
+    'requireArtistRecordCandidate', 'operativeIdentityRecord', 'attestation', 'delegationState',
+    'delegationEpochState', 'requireRecordPublication']);
+  for (let kind = 1n; kind <= 10n; kind++) {
+    const q = attestationRequest(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+    const r = mined(c, { afterRead(name) {
+      if (liveReads.has(name)) throw Error('Receipt consulted mutable latest state: ' + name);
+      if (name === 'delegationRecord') return [{ ...c.delegation, uses: c.delegation.uses + 2n,
+        revoked: true, revocationRecordHash: id('later-revocation') }];
+    } });
+    const out = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' });
+    assert.equal(out.attestation.fact.stateHash, q.message.subjectStateHash);
+    assert.equal(out.effectiveDigest, effectiveDigest(q, 1011n));
+  }
+});
+
+function mutateAttestationArchive(envelope, q, change) {
+  const fn = abi.getFunction(pure.prepareCurrentArtistAction(q).method);
+  const auth = fn.inputs[q.kind === 'delegatedScopedAttestation' ? 3 : 2];
+  const types = [B, fn.inputs[0], auth, auth, P, 'bytes', pure.CURRENT_ARTIST_ATTESTATION_SUBJECT_TUPLE,
+    'bool', abi.getFunction('recordAuthenticatedAttestation').inputs[3], abi.getFunction('delegationRecord').outputs[0], 'bytes'];
+  const values = Array.from(coder.decode(types, envelope[7]));
+  change(values);
+  envelope[7] = coder.encode(types, values);
+}
+
+test('attestation flat Archive rejects changed effective proof, statement, scope, grant and owner snapshots', async () => {
+  const q = attestationRequest(4n, { scopeType: 1n, tokenId: 99n, scopeId: ZeroHash, resolver: ZeroAddress });
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const changes = [
+    values => { values[3] = [q.message.nonce, 1010n, '0x']; },
+    values => { values[4] = [q.signer, c.action.payload.digest, true]; },
+    values => { values[5] = '0x00'; },
+    values => { values[6] = [1n, 100n, ZeroHash, ZeroAddress]; },
+    values => { values[7] = false; },
+    values => { const admission = Array.from(values[8]); admission[4] = id('other-grant'); values[8] = admission; },
+    values => { const prior = Array.from(values[9]); prior[3] = prior[3] + 1n; values[9] = prior; },
+    values => { values[10] += '00'; }
+  ];
+  for (const change of changes) {
+    const r = mined(c, { mutateArchive: e => mutateAttestationArchive(e, q, change) });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), /Archive|attestation|Noncanonical|delegation/i);
+  }
+  const r = mined(c, { mutateArchive: e => { e[6][1][1] = 2n; } });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), /read-only owner/);
+});
+
+test('attestation durable record, publication envelope and immutable finality lineage reject contradictory readback', async () => {
+  const q = attestationRequest(7n);
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  for (const afterRead of [
+    name => name === 'attestationAuthorityClass' ? [1n] : undefined,
+    name => name === 'statementBytes' ? ['0x00'] : undefined,
+    name => name === 'attestationRecord' ? [[id('wrong-record'), q.message.subjectStateHash, q.message.schemaId,
+      q.message.statementHash, 2n, 1011n, q.signer]] : undefined,
+    name => name === 'attestationAssociation' ? [[q.artistId, id('wrong-binding'), 2n, q.details.grant, c.attestation.fact]] : undefined,
+    name => {
+      if (name !== 'publicationAttestation') return;
+      const [, publication] = coder.decode(['uint16', pure.CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE], q.details.statement);
+      return [[publication, [record(c, 1011n), q.artistId, id('binding'), 2n, q.signer, 2n, 1n,
+        1011n, keccak256(coder.encode([pure.CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE], [publication]))], c.attestation.fact.ownerCodeHash]];
+    }
+  ]) {
+    const r = mined(c, { afterRead });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), /attestation|Attestation|publication|Publication/);
+  }
+  for (const kind of [1n, 4n]) {
+    const subject = attestationRequest(kind);
+    const captured = await flow.captureCurrentArtistOperation(provider(subject), d, subject, { blockTag: 10 });
+    const wrong = mined(captured, { afterRead: name => name === 'finalityRegistry' ? [A(43)]
+      : name === 'finalityRegistryCodeHash' ? [pin(43).codeHash] : undefined });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(wrong.rpc, captured, { transactionHash: wrong.txHash, execution: 'direct' }), /finality|lineage/i);
+    const empty = mined(captured, { afterRead: name => name === 'finalityRegistryCodeHash' ? [keccak256('0x')] : undefined });
+    const getCode = empty.rpc.getCode;
+    empty.rpc.getCode = (target, tag) => target === A(40) && tag === 11 ? '0x' : getCode(target, tag);
+    await assert.rejects(flow.inspectCurrentArtistReceipt(empty.rpc, captured, { transactionHash: empty.txHash, execution: 'direct' }), /finality runtime|owner runtime/i);
+  }
+  const snapshot = attestationRequest(1n);
+  const captured = await flow.captureCurrentArtistOperation(provider(snapshot), d, snapshot, { blockTag: 10 });
+  const delegatedRuntime = '0xef0100' + A(222).slice(2);
+  const runtimeHash = keccak256(delegatedRuntime);
+  const result = mined(captured, {
+    afterRead: name => name === 'scopeEvidenceProviderCodeHash' ? [runtimeHash] : undefined,
+    mutateArchive: envelope => mutateAttestationArchive(envelope, snapshot, values => {
+      const evidenceTypes = ['address', 'address', 'bytes32', abi.getFunction('currentSnapshot').outputs[0]];
+      const evidence = Array.from(coder.decode(evidenceTypes, values[10]));
+      evidence[2] = runtimeHash;
+      values[10] = coder.encode(evidenceTypes, evidence);
+    })
+  });
+  const getCode = result.rpc.getCode;
+  result.rpc.getCode = (target, tag) => target === A(41) && tag === 11 ? delegatedRuntime : getCode(target, tag);
+  await assert.rejects(flow.inspectCurrentArtistReceipt(result.rpc, captured, { transactionHash: result.txHash, execution: 'direct' }), /lineage/i);
+});
+
+test('attestation Safe plans share delegate nonce lanes and preserve order-aware grant and known digest conflicts', async () => {
+  const q = attestationRequest();
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  for (const kind of ['delegatedPolicyConsent', 'delegatedSaleConsent', 'delegatedEconomicsConsent', 'delegatedRoyaltyFreeze']) {
+    const other = request(kind);
+    const captured = await flow.captureCurrentArtistOperation(provider(other), economicKinds.includes(kind) ? economicsDeployment : d, other, { blockTag: 10 });
+    assert.throws(() => flow.createCurrentArtistSafePlan([c, captured], 'Shared delegate nonce'), /Duplicate Artist authorization nonce/);
+  }
+  const revokeGrant = request('delegationRevocation', { signer: c.delegation.grantor, caller: c.delegation.grantor });
+  revokeGrant.message.delegate = q.signer;
+  revokeGrant.message.delegationRecordHash = q.details.grant;
+  const revocation = await flow.captureCurrentArtistOperation(provider(revokeGrant, {
+    read: name => name === 'delegationRecord' ? [c.delegation] : undefined
+  }), d, revokeGrant, { blockTag: 10 });
+  assert.equal(flow.createCurrentArtistSafePlan([c, revocation], 'Record then revoke').steps.length, 2);
+  assert.throws(() => flow.createCurrentArtistSafePlan([revocation, c], 'Revoke then record'), /follows its grant revocation/);
+  const revokeDigest = request('authorizationRevocation');
+  revokeDigest.message.revokedNonce = 0n;
+  revokeDigest.message.revokedDigest = c.action.payload.digest;
+  const zeroDigest = await flow.captureCurrentArtistOperation(provider(revokeDigest), d, revokeDigest, { blockTag: 10 });
+  assert.equal(flow.createCurrentArtistSafePlan([c, zeroDigest], 'Unknown future effective digest').steps.length, 2);
+  q.message.signedAt = 900n;
+  const dated = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  revokeDigest.message.revokedDigest = dated.action.payload.digest;
+  const knownDigest = await flow.captureCurrentArtistOperation(provider(revokeDigest), d, revokeDigest, { blockTag: 10 });
+  assert.throws(() => flow.createCurrentArtistSafePlan([dated, knownDigest], 'Known digest conflict'), /Conflicting Artist revocation target/);
+});
+
+test('attestation receipt enforces Attribution to Archive to Safe event order for both Safe layouts', async () => {
+  const q = attestationRequest();
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  for (const indexed of [false, true]) {
+    const r = mined(c, { safe: true, indexed });
+    [r.receipt.logs[0], r.receipt.logs[1]] = [r.receipt.logs[1], r.receipt.logs[0]];
+    r.receipt.logs.forEach((log, index) => { log.index = index; });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'safe' }), /event order/i);
+    const earlySuccess = mined(c, { safe: true, indexed });
+    earlySuccess.receipt.logs.unshift(earlySuccess.receipt.logs.pop());
+    earlySuccess.receipt.logs.forEach((log, index) => { log.index = index; });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(earlySuccess.rpc, c, { transactionHash: earlySuccess.txHash, execution: 'safe' }), /Safe success must follow/);
+  }
 });

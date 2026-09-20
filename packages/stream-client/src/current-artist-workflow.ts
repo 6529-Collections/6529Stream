@@ -86,6 +86,19 @@ export interface CurrentArtistEconomicsAssociation {
   readonly payloadHash: Hex;
   readonly originalRecord: Hex;
 }
+export interface CurrentArtistAttestationFact {
+  readonly owner: Address;
+  readonly ownerCodeHash: Hex;
+  readonly subjectId: Hex;
+  readonly stateHash: Hex;
+}
+export interface CurrentArtistAttestationObservation {
+  readonly fact: CurrentArtistAttestationFact;
+  readonly operativeIdentity: Hex;
+  readonly subjectEvidence: Hex;
+  /** Code pins derived from original Core/facade/provider bindings at the observed block. */
+  readonly dependencies: readonly CurrentArtistCodePin[];
+}
 export interface CurrentArtistCapture {
   readonly deployment: CurrentArtistDeployment;
   readonly action: Action;
@@ -104,6 +117,7 @@ export interface CurrentArtistCapture {
   readonly delegation: CurrentArtistDelegationRecord | null;
   readonly delegated: CurrentArtistDelegatedObservation | null;
   readonly economics: CurrentArtistEconomicsObservation | null;
+  readonly attestation: CurrentArtistAttestationObservation | null;
   /** Authority/replay observation only; exact write simulation performs operation-specific admission. */
   readonly simulationRequired: true;
   readonly captureHash: Hex;
@@ -128,6 +142,8 @@ export interface CurrentArtistReceipt {
   readonly effectiveDigest: Hex;
   /** Actual archived economics facts at execution, independently of later operative payout changes. */
   readonly economics: (CurrentArtistEconomicsObservation & { readonly association: CurrentArtistEconomicsAssociation }) | null;
+  /** Historical subject evidence; does not assert that this subject or publication is still current. */
+  readonly attestation: Omit<CurrentArtistAttestationObservation, "dependencies"> | null;
 }
 type Reader = Pick<Provider, "getNetwork" | "getBlock" | "getCode" | "call">;
 type ReceiptReader = Reader & Pick<Provider, "getTransaction" | "getTransactionReceipt">;
@@ -145,6 +161,20 @@ const C = "(bytes32 profileHash,bytes32 policyHash,uint16 royaltyBps,bool frozen
 const AF = "(address resolver,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 assignmentHash)";
 const PAYOUT = "(address account,bytes32 recordHash)";
 const EA = "(bytes32 artistId,uint64 bindingGeneration,bytes32 bindingHash,bytes32 payloadHash,bytes32 originalRecord)";
+const AT = "(uint256 collectionId,uint8 subjectKind,bytes32 subjectId,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,string statementURI)";
+const SUBJECT = "(uint8 scopeType,uint256 tokenId,bytes32 scopeId,address resolver)";
+const FACT = "(address owner,bytes32 ownerCodeHash,bytes32 subjectId,bytes32 stateHash)";
+const ADMISSION = `(${F} authority,address signer,uint256 nonce,uint64 signedAt,bytes32 delegation,bytes32 operativeIdentity,${FACT} fact)`;
+const AT_ASSOCIATION = `(bytes32 artistId,bytes32 bindingHash,uint64 generation,bytes32 delegation,${FACT} fact)`;
+const PUBLICATION = "(address metadataHost,address recorder,uint256 collectionId,bytes32 subjectId,bytes32 recordType,bytes32 schemaId,bytes32 canonicalizationId,uint16 payloadAlgorithm,bytes32 payloadHash,bytes32 uriHash,uint64 effectiveAt,bytes32 candidateRecordHash)";
+const PUBLICATION_EVIDENCE = "(bytes32 attestationRecordHash,bytes32 artistId,bytes32 bindingHash,uint64 bindingGeneration,address signer,uint8 authorityClass,uint32 requiredCapability,uint64 signedAt,bytes32 publicationHash)";
+const FINALITY_SCOPE = "(uint8 scopeType,uint256 collectionId,uint256 tokenId,bytes32 scopeId)";
+const COLLECTION_FINALITY = "(bool finalized,bytes32 finalityRecordHash,bytes32 manifestContentHash,bytes32 manifestURIHash,string finalityManifestURI,bytes32 componentsHash,address manifestPointer,uint64 finalizedAt)";
+const SCOPED_FINALITY = `(bool finalized,${FINALITY_SCOPE} scope,bytes32 finalityRecordHash,bytes32 manifestContentHash,bytes32 manifestURIHash,bytes32 componentsHash,string finalityManifestURI,address manifestPointer,uint64 finalizedAt)`;
+const SNAPSHOT_RECEIPT = "(bytes32 recordHash,uint256 collectionId,bytes32 snapshotId,bytes32 predecessor,uint64 revision,bytes32 recordChainHash,bytes32 manifestHash,uint32 manifestBytes,bytes32 sourceHash,bytes32 inventoryPlan,address publisher,uint8 authorizationClass,uint64 grantRevision,uint8 displayAuthorizationClass,uint64 displayGrantRevision,uint64 effectiveAt,uint64 recordedAt,bytes32 reasonHash,bytes32 schemaDefinitionHash,bytes32 profileDefinitionHash,bytes32 canonicalizationDefinitionHash)";
+const NATIVE_CONFIG = "(address[22] targets,bytes32[22] codeHashes,uint256 chainId,uint256 readGas,uint256 sourceGas,uint256 componentSourceGas,bytes32 inventoryDependencyHash)";
+const PRIMARY_ASSIGNMENT = "(bool exists,uint8 scope,uint256 scopeId,uint8 assignmentType,bytes32 profileId,bytes32 templateId,bytes32 policyHash,bytes32 assignmentHash,bool frozen)";
+const ROYALTY_CONFIG = "(address wallet,uint16 royaltyBps,bool configured,bool frozen,uint64 revision,bytes32 profileId)";
 const terms = {
   bindingRefusal: "(uint256 collectionId,uint64 generation,bytes32 bindingHash,bytes32 reasonHash,string reasonURI)",
   saleConsent: "(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash)",
@@ -157,10 +187,44 @@ const terms = {
   delegatedEconomicsConsent: E,
   delegatedProspectiveEconomicsConsent: E,
   delegatedRoyaltyFreeze: "(address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash)",
+  delegatedAttestation: AT,
+  delegatedScopedAttestation: AT,
   delegationGrant: G,
   delegationRevocation: "(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash)"
 } as const;
 const abi = new Interface([...CURRENT_ARTIST_OPERATION_ABI,
+  "function finalityRegistry() view returns(address)",
+  "function finalityRegistryCodeHash() view returns(bytes32)",
+  "function scopeEvidenceProvider() view returns(address)",
+  "function scopeEvidenceProviderCodeHash() view returns(bytes32)",
+  "function snapshotHost() view returns(address)",
+  `function nativeConfiguration() view returns(${NATIVE_CONFIG})`,
+  "function metadataRouter() view returns(address)",
+  `function currentSnapshot(uint256) view returns(${SNAPSHOT_RECEIPT})`,
+  "function latestSnapshotHash(uint256) view returns(bytes32)",
+  "function snapshotHash(uint256,bytes32) view returns(bytes32)",
+  "function scriptManifestHash(uint256) view returns(bytes32)",
+  "function mediaManifestHash(uint256) view returns(bytes32)",
+  `function collectionFinalityRecord(uint256) view returns(${COLLECTION_FINALITY})`,
+  `function artworkScopeFinalityRecord(${FINALITY_SCOPE}) view returns(${SCOPED_FINALITY})`,
+  "function phase(uint256,bytes32) view returns(bool,(bool paused,uint64 startTime,uint64 endTime,uint32 maxBatchQuantity,bytes32 configHash,bytes32 metadataHash))",
+  "function phasePolicyHash(uint256,bytes32) view returns(bytes32)",
+  `function primaryEconomicsFacts(uint256,uint8,uint256) view returns(${PRIMARY_ASSIGNMENT})`,
+  `function resolvePrimaryAssignment(uint256,uint256,bytes32) view returns(${PRIMARY_ASSIGNMENT})`,
+  `function royaltyEconomicsFacts(uint256,uint8,uint256) view returns(${AF},${ROYALTY_CONFIG})`,
+  `function resolveRoyaltyAssignment(uint256,uint256) view returns(${AF},${ROYALTY_CONFIG},bytes32)`,
+  "function streamModuleType() view returns(bytes32)",
+  "function streamModuleInterfaceId() view returns(bytes4)",
+  "function supportsInterface(bytes4) view returns(bool)",
+  "function isModuleEligible(address,bytes32,bytes4) view returns(bool)",
+  `function requireArtistRecordCandidate(${PUBLICATION}) view returns(bytes32,uint8)`,
+  `function attestationAssociation(bytes32) view returns(${AT_ASSOCIATION})`,
+  "function attestationRecord(bytes32) view returns((bytes32 recordHash,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,uint64 bindingGeneration,uint64 signedAt,address signer))",
+  "function attestationAuthorityClass(bytes32) view returns(uint8)",
+  "function statementBytes(bytes32) view returns(bytes)",
+  `function publicationAttestation(bytes32) view returns((${PUBLICATION} publication,${PUBLICATION_EVIDENCE} evidence,bytes32 metadataHostCodeHash))`,
+  "event ArtistAttestationRecorded(uint16 schemaVersion,uint256 indexed collectionId,uint8 indexed subjectKind,address indexed signer,bytes32 subjectId,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,bytes32 statementURIHash,uint8 authorityClass,uint256 nonce,uint64 signedAt,bytes32 attestationRecordHash)",
+  "event ArtistAttestationDelegation(uint16 schemaVersion,bytes32 indexed recordHash,bytes32 indexed delegationRecordHash,bytes32 indexed artistId,address signer)",
   "function reads() view returns(address)",
   `function acceptedBinding(uint256) view returns(${B})`,
   `function defensiveBinding(uint256) view returns(${B})`,
@@ -416,7 +480,7 @@ function captureHash(v: unknown): Hex {
   return keccak256(new TextEncoder().encode(stable(v))) as Hex;
 }
 function saved(v: CurrentArtistCapture): CurrentArtistCapture {
-  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "delegated", "economics", "simulationRequired", "captureHash"]);
+  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "delegated", "economics", "attestation", "simulationRequired", "captureHash"]);
   const d = deployment(v.deployment);
   const a = normalizeCurrentArtistAction(v.action);
   const c = copy(v);
@@ -434,11 +498,14 @@ function delegatedConsent(q: CurrentArtistOperationRequest): q is Extract<Curren
 function economicsOperation(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" }> {
   return q.kind === "delegatedEconomicsConsent" || q.kind === "delegatedProspectiveEconomicsConsent";
 }
+function attestationOperation(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedAttestation" | "delegatedScopedAttestation" }> {
+  return q.kind === "delegatedAttestation" || q.kind === "delegatedScopedAttestation";
+}
 function economicsOrFreeze(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" | "delegatedRoyaltyFreeze" }> {
   return economicsOperation(q) || q.kind === "delegatedRoyaltyFreeze";
 }
-function delegatedOperation(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedPolicyConsent" | "delegatedSaleConsent" | "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" | "delegatedRoyaltyFreeze" }> {
-  return delegatedConsent(q) || economicsOrFreeze(q);
+function delegatedOperation(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedPolicyConsent" | "delegatedSaleConsent" | "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" | "delegatedRoyaltyFreeze" | "delegatedAttestation" | "delegatedScopedAttestation" }> {
+  return delegatedConsent(q) || economicsOrFreeze(q) || attestationOperation(q);
 }
 function collectionId(q: CurrentArtistOperationRequest): bigint | undefined {
   return economicsOperation(q) ? q.details.collectionId : "collectionId" in q.message ? q.message.collectionId : undefined;
@@ -484,6 +551,15 @@ function timing(action: Action, timestamp: bigint): CurrentArtistTiming {
     return {
       kind: "nonce-only", submittedTime: 0n, effectiveTime: 0n, effectiveDigest: action.payload.digest
     };
+  }
+  if (attestationOperation(q)) {
+    const submittedTime = q.message.signedAt;
+    const effectiveTime = q.mode === "direct" && submittedTime === 0n ? timestamp : submittedTime;
+    if (effectiveTime === 0n || effectiveTime > timestamp) {
+      throw Error("Attestation signedAt exceeds execution timing");
+    }
+    const effectiveDigest = currentArtistOperationTypedData(q.kind, q.chainId, q.registry, { ...q.message, signedAt: effectiveTime }).digest;
+    return { kind: "dated", submittedTime, effectiveTime, effectiveDigest };
   }
   if (q.kind === "identityRevision") {
     const submittedTime = q.message.signedAt;
@@ -533,6 +609,186 @@ function validateDelegation(d: CurrentArtistDeployment, record: CurrentArtistDel
     throw Error("Original delegation record differs");
   }
 }
+function subjectDescriptor(q: Extract<CurrentArtistOperationRequest, { kind: "delegatedAttestation" | "delegatedScopedAttestation" }>) {
+  return q.kind === "delegatedScopedAttestation" ? q.details.subject
+    : { scopeType: 0n, tokenId: 0n, scopeId: ZeroHash as Hex, resolver: ZeroAddress as Address };
+}
+function attestationFact(v: any): CurrentArtistAttestationFact {
+  return { owner: address(v.owner), ownerCodeHash: hash(v.ownerCodeHash), subjectId: hash(v.subjectId), stateHash: hash(v.stateHash, true) };
+}
+function deploymentSubjectHash(d: CurrentArtistDeployment, cid: bigint, b: CurrentArtistBinding): Hex {
+  return keccak256(coder.encode(["bytes32", "uint256", "address", "uint256", "bytes32", "uint64", "bytes32"],
+    [id("6529STREAM_ARTIST_DEPLOYMENT_FACTS_V1"), d.chainId, d.components[9]!.address, cid,
+      b.artistId, b.generation, b.bindingHash])) as Hex;
+}
+/** Original subject dispatch; each dynamic owner is derived from its pinned native binding. */
+async function attestationSubject(p: Reader, d: CurrentArtistDeployment,
+  q: Extract<CurrentArtistOperationRequest, { kind: "delegatedAttestation" | "delegatedScopedAttestation" }>,
+  b: CurrentArtistBinding, tag: number, timestamp: bigint): Promise<CurrentArtistAttestationObservation> {
+  const m = q.message, descriptor = subjectDescriptor(q), scoped = q.kind === "delegatedScopedAttestation";
+  const core = d.components[9]!.address;
+  const dependencies: CurrentArtistCodePin[] = [];
+  const runtime = async (target: unknown, expected?: unknown): Promise<CurrentArtistCodePin> => {
+    const owner = address(target), code = bytes(await p.getCode(owner, tag), 65536);
+    if (code === "0x" || (code.length === 48 && code.startsWith("0xef0100"))) throw Error("Invalid attestation owner runtime");
+    const codeHash = keccak256(code) as Hex;
+    if (expected !== undefined && !same(codeHash, hash(expected))) throw Error("Attestation owner code pin differs");
+    const pin = { address: owner, codeHash };
+    if (!dependencies.some(v => same(v.address, owner))) dependencies.push(pin);
+    return pin;
+  };
+  const selected = async (kind: string, expected?: Address) => {
+    const pointer = await read(p, core, "getSatellitePointer", [id(kind)], tag);
+    if (expected && !same(pointer[0], expected)) throw Error("Attestation selected owner differs");
+    return runtime(pointer[0], pointer[1]);
+  };
+  const finality = async () => runtime((await read(p, d.registry.address, "finalityRegistry", [], tag))[0],
+    (await read(p, d.registry.address, "finalityRegistryCodeHash", [], tag))[0]);
+  let fact: CurrentArtistAttestationFact;
+  let subjectEvidence: Hex = "0x";
+  let operativeIdentity = ZeroHash as Hex;
+  const make = (pin: CurrentArtistCodePin, subjectId: Hex, stateHash: Hex) => ({
+    owner: pin.address, ownerCodeHash: pin.codeHash, subjectId, stateHash
+  });
+  const gas = await read(p, d.registry.address, "gasParameterInfo", [id("6529STREAM_GGP_ARTIST_RECORD_PUBLICATION_READ_GAS")], tag);
+  if (gas[0] === 0n || gas[0] > ((1n << 256n) - 1n) / 2n || gas[2] !== 2n || gas[3] === 0n) {
+    throw Error("Invalid attestation subject read gas policy");
+  }
+  switch (m.subjectKind) {
+    case 1n: {
+      const registry = await finality();
+      const provider = await runtime((await read(p, registry.address, "scopeEvidenceProvider", [], tag))[0],
+        (await read(p, registry.address, "scopeEvidenceProviderCodeHash", [], tag))[0]);
+      const host = address((await read(p, provider.address, "snapshotHost", [], tag))[0]);
+      const [config] = await read(p, provider.address, "nativeConfiguration", [], tag);
+      if (config.chainId !== d.chainId || !same(config.targets[0], core)
+        || !same(config.targets[2], d.components[12]!.address) || !same(config.targets[11], d.registry.address)
+        || !same(config.targets[12], registry.address) || !same(config.targets[8], host)) {
+        throw Error("Snapshot provider configuration differs");
+      }
+      const owner = await runtime(host, config.codeHashes[8]);
+      if (!same((await read(p, host, "core", [], tag))[0], core)
+        || !same((await read(p, host, "metadataRouter", [], tag))[0], d.components[12]!.address)) {
+        throw Error("Snapshot owner binding differs");
+      }
+      const [r] = await read(p, host, "currentSnapshot", [m.collectionId], tag);
+      if (r.collectionId !== m.collectionId || r.snapshotId === ZeroHash || r.recordHash === ZeroHash
+        || r.revision === 0n || r.manifestHash === ZeroHash
+        || !same(r.manifestHash, (await read(p, host, "latestSnapshotHash", [m.collectionId], tag))[0])
+        || !same(r.manifestHash, (await read(p, host, "snapshotHash", [m.collectionId, r.snapshotId], tag))[0])) {
+        throw Error("Current snapshot identity differs");
+      }
+      fact = make(owner, r.snapshotId, r.manifestHash);
+      subjectEvidence = coder.encode(["address", "address", "bytes32", SNAPSHOT_RECEIPT],
+        [registry.address, provider.address, provider.codeHash, r]) as Hex;
+      break;
+    }
+    case 2n:
+    case 3n: {
+      const owner = await selected("COLLECTION_METADATA");
+      if (!same((await read(p, owner.address, "core", [], tag))[0], core)) throw Error("Manifest owner Core differs");
+      const value = hash((await read(p, owner.address, m.subjectKind === 2n ? "scriptManifestHash" : "mediaManifestHash", [m.collectionId], tag))[0]);
+      fact = make(owner, coder.encode(["uint256"], [m.collectionId]) as Hex, value);
+      subjectEvidence = coder.encode(["uint8", FACT], [m.subjectKind, fact]) as Hex;
+      break;
+    }
+    case 4n: {
+      const owner = await finality();
+      const scope = [descriptor.scopeType, m.collectionId, descriptor.tokenId, descriptor.scopeId];
+      const [r] = descriptor.scopeType === 0n
+        ? await read(p, owner.address, "collectionFinalityRecord", [m.collectionId], tag)
+        : await read(p, owner.address, "artworkScopeFinalityRecord", [scope], tag);
+      if (!r.finalized || r.finalizedAt === 0n || r.finalizedAt > timestamp
+        || (descriptor.scopeType !== 0n && !same(coder.encode([FINALITY_SCOPE], [r.scope]), coder.encode([FINALITY_SCOPE], [scope])))) {
+        throw Error("Finality subject is not finalized for this exact scope");
+      }
+      const key = scoped ? keccak256(coder.encode(["bytes32", FINALITY_SCOPE],
+        [id("6529STREAM_ARTIST_FINALITY_ATTESTATION_SUBJECT_V1"), scope])) as Hex : coder.encode(["uint256"], [m.collectionId]) as Hex;
+      fact = make(owner, key, hash(r.finalityRecordHash));
+      subjectEvidence = descriptor.scopeType === 0n ? coder.encode([FINALITY_SCOPE, COLLECTION_FINALITY], [scope, r]) as Hex
+        : coder.encode([SCOPED_FINALITY], [r]) as Hex;
+      break;
+    }
+    case 5n: {
+      const owner = await runtime(d.components[10]!.address, d.components[10]!.codeHash);
+      if (!same((await read(p, owner.address, "core", [], tag))[0], core)
+        || (await read(p, owner.address, "phase", [m.collectionId, m.subjectId], tag))[0] !== true) {
+        throw Error("Original Mint Manager phase differs");
+      }
+      fact = make(owner, m.subjectId, hash((await read(p, owner.address, "phasePolicyHash", [m.collectionId, m.subjectId], tag))[0]));
+      subjectEvidence = coder.encode([FACT], [fact]) as Hex;
+      break;
+    }
+    case 6n: {
+      const resolver = scoped ? descriptor.resolver : address("0x" + m.subjectId.slice(-40));
+      if ((!scoped && !same(coder.encode(["address"], [resolver]), m.subjectId))
+        || (!same(resolver, d.components[13]!.address) && !same(resolver, d.components[14]!.address))) {
+        throw Error("Attestation economics resolver differs");
+      }
+      let assignment: any;
+      let owner: CurrentArtistCodePin;
+      if (same(resolver, d.components[13]!.address)) {
+        owner = await runtime(resolver, d.components[13]!.codeHash);
+        if (!same((await read(p, resolver, "core", [], tag))[0], core)) throw Error("Primary resolver Core differs");
+        const [suite] = await read(p, d.coordinator.address, "suiteConfiguration", [], tag);
+        const [r] = scoped ? await read(p, resolver, "primaryEconomicsFacts", [m.collectionId, descriptor.scopeType, BigInt(descriptor.scopeId)], tag)
+          : await read(p, resolver, "resolvePrimaryAssignment", [m.collectionId, 0n, suite.primaryRevenueClass], tag);
+        if (!r.exists) throw Error("Missing primary attestation assignment");
+        assignment = { resolver, revenueClass: suite.primaryRevenueClass, scope: r.scope, scopeId: r.scopeId, assignmentHash: r.assignmentHash };
+        subjectEvidence = coder.encode([PRIMARY_ASSIGNMENT], [r]) as Hex;
+      } else {
+        owner = await selected("ROYALTY_RESOLVER", resolver);
+        const result = scoped ? await read(p, resolver, "royaltyEconomicsFacts", [m.collectionId, descriptor.scopeType, BigInt(descriptor.scopeId)], tag)
+          : await read(p, resolver, "resolveRoyaltyAssignment", [m.collectionId, 0n], tag);
+        assignment = result[0];
+        if (!result[1].configured || !same(assignment.resolver, resolver) || !same(assignment.revenueClass, id("ROYALTY_ERC2981"))) {
+          throw Error("Missing royalty attestation assignment");
+        }
+        subjectEvidence = coder.encode([AF, ROYALTY_CONFIG], [assignment, result[1]]) as Hex;
+      }
+      if (scoped && (assignment.scope !== descriptor.scopeType || assignment.scopeId !== BigInt(descriptor.scopeId))) {
+        throw Error("Attestation economics scope differs");
+      }
+      const key = scoped ? keccak256(coder.encode(["bytes32", "uint256", "address", "bytes32", "uint8", "uint256"],
+        [id("6529STREAM_ARTIST_ECONOMICS_ATTESTATION_SUBJECT_V1"), m.collectionId, resolver,
+          assignment.revenueClass, assignment.scope, assignment.scopeId])) as Hex : m.subjectId;
+      fact = make(owner, key, hash(assignment.assignmentHash));
+      break;
+    }
+    case 7n:
+    case 8n: {
+      const [, publication] = decode(["uint16", PUBLICATION], q.details.statement);
+      const owner = await selected("COLLECTION_METADATA", publication.metadataHost);
+      const modules = await selected("MODULE_REGISTRY");
+      const kind = (await read(p, owner.address, "streamModuleType", [], tag))[0];
+      const interfaceId = (await read(p, owner.address, "streamModuleInterfaceId", [], tag))[0];
+      if (!same((await read(p, owner.address, "core", [], tag))[0], core) || !same(kind, id("COLLECTION_METADATA"))
+        || interfaceId === "0x00000000" || interfaceId === "0xffffffff"
+        || (await read(p, modules.address, "isModuleEligible", [owner.address, kind, interfaceId], tag))[0] !== true
+        || (await read(p, owner.address, "supportsInterface", [abi.getFunction("requireArtistRecordCandidate")!.selector], tag))[0] !== true) {
+        throw Error("Publication metadata owner is not eligible");
+      }
+      const [candidate, family] = await read(p, owner.address, "requireArtistRecordCandidate", [publication], tag);
+      if (!same(candidate, publication.candidateRecordHash) || candidate === ZeroHash || family !== m.subjectKind) {
+        throw Error("Publication candidate differs");
+      }
+      fact = make(owner, m.subjectId, m.subjectStateHash);
+      subjectEvidence = coder.encode([PUBLICATION, "bytes32"], [publication, owner.codeHash]) as Hex;
+      break;
+    }
+    case 9n:
+      fact = make(await runtime(core, d.components[9]!.codeHash), coder.encode(["address"], [core]) as Hex, deploymentSubjectHash(d, m.collectionId, b));
+      break;
+    case 10n:
+      operativeIdentity = hash((await read(p, d.components[2]!.address, "operativeIdentityRecord", [q.artistId], tag))[0]);
+      fact = make(await runtime(d.components[2]!.address, d.components[2]!.codeHash), q.artistId, operativeIdentity);
+      break;
+    default: throw Error("Unsupported attestation profile");
+  }
+  if (!same(fact.subjectId, m.subjectId) || !same(fact.stateHash, m.subjectStateHash)
+    || (m.subjectKind !== 8n && fact.stateHash === ZeroHash)) throw Error("Signed attestation subject differs");
+  return { fact, operativeIdentity, subjectEvidence, dependencies };
+}
 /** Pinned authority/replay/digest observation; adapter, content and royalty admission is established by exact-call simulation. */
 export async function captureCurrentArtistOperation(p: Reader, input: CurrentArtistDeployment, request: CurrentArtistOperationRequest, options: {
   readonly blockTag: number;
@@ -559,7 +815,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   }
   const observedTiming = timing(action, h.timestamp);
   let b: CurrentArtistBinding | null = null;
-  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze", "delegatedPolicyConsent", "delegatedSaleConsent"].includes(q.kind) || economicsOrFreeze(q) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
+  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze", "delegatedPolicyConsent", "delegatedSaleConsent"].includes(q.kind) || economicsOrFreeze(q) || attestationOperation(q) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
     if ((await read(p, d.components[9]!.address, "collectionExists", [cid], tag))[0] !== true) {
       throw Error("Unknown collection");
     }
@@ -595,7 +851,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
       const name = q.kind === "delegatedRoyaltyFreeze" ? "defensiveBinding" : "acceptedBinding";
       equal(binding((await read(p, d.reads!.address, name, [cid], tag))[0]), b, "Reads binding differs");
     }
-    if (q.kind === "saleConsent" || q.kind === "contentFreeze" || q.kind === "delegatedSaleConsent") {
+    if (q.kind === "saleConsent" || q.kind === "contentFreeze" || q.kind === "delegatedSaleConsent" || attestationOperation(q)) {
       const [t] = await read(p, d.components[0]!.address, "bindingTerms", [m.collectionId, b.generation], tag);
       if (![1n, 2n].includes(b.consentMode) || t.mode !== 0n || t.threshold !== 0n || t.count > 32n || (await read(p, d.components[1]!.address, "acceptedCount", [b.bindingHash], tag))[0] !== t.count) {
         throw Error("Collaborator/consent profile is not ready");
@@ -632,6 +888,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
       economics = { payout, candidateEvidence };
     }
   }
+  const attestation = attestationOperation(q) ? await attestationSubject(p, d, q, b!, tag, h.timestamp) : null;
   const raw = await read(p, d.components[2]!.address, "authorityState", [q.artistId], tag);
   const authority = {
     address: address(raw[0]), authorityClass: raw[1] as bigint, status: raw[2] as bigint, identityRecordHash: hash(raw[3])
@@ -657,7 +914,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   if (delegatedOperation(q)) {
     delegation = delegationRecord((await read(p, d.components[2]!.address, "delegationRecord", [q.details.grant], tag))[0]);
     validateDelegation(d, delegation, q.details.grant);
-    const capability = q.kind === "delegatedPolicyConsent" ? 2n : q.kind === "delegatedSaleConsent" ? 1024n : q.kind === "delegatedRoyaltyFreeze" ? 32n : 4n;
+    const capability = q.kind === "delegatedPolicyConsent" ? 2n : q.kind === "delegatedSaleConsent" ? 1024n : q.kind === "delegatedRoyaltyFreeze" ? 32n : attestationOperation(q) ? (q.message.subjectKind === 7n ? 64n : 1n) : 4n;
     if (!same(delegation.grant.artistId, q.artistId) || !same(delegation.grant.delegate, q.signer)
       || (delegation.grant.collectionId !== 0n && delegation.grant.collectionId !== collectionId(q))
       || (delegation.grant.capabilities & capability) !== capability || !liveDelegation(delegation, h.timestamp)) {
@@ -725,7 +982,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   }
   await unchanged(p, h);
   const body = {
-    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, delegated, economics, simulationRequired: true as const
+    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, delegated, economics, attestation, simulationRequired: true as const
   };
   return freeze({
     ...body, captureHash: captureHash(body)
@@ -753,6 +1010,7 @@ export async function simulateCurrentArtistCall(p: Reader, input: CurrentArtistC
   equal(fresh.delegation, c.delegation, "Delegation state changed; capture again");
   equal(fresh.delegated, c.delegated, "Delegate replay or epoch changed; capture again");
   equal(fresh.economics, c.economics, "Economics admission facts changed; capture again");
+  equal(fresh.attestation, c.attestation, "Attestation subject facts changed; capture again");
   const raw = await p.call({
     ...c.action.call, from: c.action.request.caller, blockTag: tag
   });
@@ -791,7 +1049,7 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
       throw Error("Duplicate Artist authorization nonce in Safe plan");
     }
     authorizations.add(nonceKey);
-    if (c.action.request.kind === "identityRevision" && c.action.request.mode === "direct" && c.action.request.message.signedAt === 0n) {
+    if ((c.action.request.kind === "identityRevision" || attestationOperation(c.action.request)) && c.action.request.mode === "direct" && c.action.request.message.signedAt === 0n) {
     }
     else {
       authorizationDigests.add(lane(c) + ":digest:" + c.action.payload.digest.toLowerCase());
@@ -839,6 +1097,13 @@ function originalRecord(c: CurrentArtistCapture, time: bigint, payoutHash?: Hex)
   let types: string[];
   let values: unknown[];
   switch (q.kind) {
+    case "delegatedAttestation":
+    case "delegatedScopedAttestation":
+      types = ["bytes32", "uint256", "address", "address", "uint256", "uint8", "bytes32", "bytes32", "bytes32", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
+      values = [id("6529STREAM_ARTIST_ATTESTATION_RECORD_V1"), chain, host, core, t.collectionId,
+        t.subjectKind, t.subjectId, t.subjectStateHash, t.schemaId, t.statementHash,
+        keccak256(new TextEncoder().encode(q.details.statementURI)), artist, signer, 2n, n, timing(c.action, time).effectiveTime];
+      break;
     case "bindingRefusal":
       types = ["bytes32", "uint256", "address", "address", "uint256", "uint64", "bytes32", "bytes32", "address", "uint8", "bytes32", "uint256", "uint64"];
       values = ["0x61e2c527c98d65328522fa0ac36862f52a59a2035e3e2ca4a0bfd5da13ee95ed", ...common, core, t.collectionId, t.generation, t.bindingHash, artist, signer, cl, t.reasonHash, n, time];
@@ -909,6 +1174,79 @@ function saleFacts(raw: Hex, terms: any): void {
   hash(facts[2]);
   hash(facts[3]);
 }
+function historicalSubjectEvidence(d: CurrentArtistDeployment,
+  q: Extract<CurrentArtistOperationRequest, { kind: "delegatedAttestation" | "delegatedScopedAttestation" }>,
+  b: CurrentArtistBinding, fact: CurrentArtistAttestationFact, operativeIdentity: Hex,
+  raw: Hex, timestamp: bigint, primaryRevenueClass: Hex): void {
+  const m = q.message, descriptor = subjectDescriptor(q), scoped = q.kind === "delegatedScopedAttestation";
+  if (!same(fact.subjectId, m.subjectId) || !same(fact.stateHash, m.subjectStateHash)
+    || (m.subjectKind !== 10n && operativeIdentity !== ZeroHash)) throw Error("Archived attestation subject differs");
+  switch (m.subjectKind) {
+    case 1n: {
+      const [registry, provider, providerHash, r] = decode(["address", "address", "bytes32", SNAPSHOT_RECEIPT], raw);
+      address(registry); address(provider); hash(providerHash);
+      if (r.collectionId !== m.collectionId || !same(r.snapshotId, m.subjectId) || r.recordHash === ZeroHash
+        || r.revision === 0n || !same(r.manifestHash, fact.stateHash)) throw Error("Archived snapshot differs");
+      break;
+    }
+    case 2n:
+    case 3n:
+      if (!same(raw, coder.encode(["uint8", FACT], [m.subjectKind, fact]))) throw Error("Archived manifest evidence differs");
+      break;
+    case 4n: {
+      const scope = [descriptor.scopeType, m.collectionId, descriptor.tokenId, descriptor.scopeId];
+      let r: any;
+      if (descriptor.scopeType === 0n) {
+        const values = decode([FINALITY_SCOPE, COLLECTION_FINALITY], raw);
+        if (!same(coder.encode([FINALITY_SCOPE], [values[0]]), coder.encode([FINALITY_SCOPE], [scope]))) throw Error("Archived collection finality scope differs");
+        r = values[1];
+      } else {
+        [r] = decode([SCOPED_FINALITY], raw);
+        if (!same(coder.encode([FINALITY_SCOPE], [r.scope]), coder.encode([FINALITY_SCOPE], [scope]))) throw Error("Archived finality scope differs");
+      }
+      if (!r.finalized || r.finalizedAt === 0n || r.finalizedAt > timestamp || !same(r.finalityRecordHash, fact.stateHash)) {
+        throw Error("Archived finalized subject differs");
+      }
+      break;
+    }
+    case 5n:
+      if (!same(fact.owner, d.components[10]!.address) || !same(raw, coder.encode([FACT], [fact]))) throw Error("Archived phase subject differs");
+      break;
+    case 6n: {
+      let assignment: any;
+      if (same(fact.owner, d.components[13]!.address)) {
+        const [r] = decode([PRIMARY_ASSIGNMENT], raw);
+        if (!r.exists) throw Error("Archived primary assignment missing");
+        assignment = { resolver: fact.owner, revenueClass: primaryRevenueClass, scope: r.scope, scopeId: r.scopeId, assignmentHash: r.assignmentHash };
+      } else if (same(fact.owner, d.components[14]!.address)) {
+        const values = decode([AF, ROYALTY_CONFIG], raw);
+        assignment = values[0];
+        if (!values[1].configured || !same(assignment.resolver, fact.owner) || !same(assignment.revenueClass, id("ROYALTY_ERC2981"))) throw Error("Archived royalty assignment missing");
+      } else throw Error("Archived economics owner differs");
+      const key = scoped ? keccak256(coder.encode(["bytes32", "uint256", "address", "bytes32", "uint8", "uint256"],
+        [id("6529STREAM_ARTIST_ECONOMICS_ATTESTATION_SUBJECT_V1"), m.collectionId, fact.owner, assignment.revenueClass, assignment.scope, assignment.scopeId]))
+        : coder.encode(["address"], [fact.owner]);
+      if (!same(key, m.subjectId) || !same(assignment.assignmentHash, fact.stateHash)
+        || (scoped && (assignment.scope !== descriptor.scopeType || assignment.scopeId !== BigInt(descriptor.scopeId) || !same(fact.owner, descriptor.resolver)))) {
+        throw Error("Archived economics subject differs");
+      }
+      break;
+    }
+    case 7n:
+    case 8n: {
+      const [, publication] = decode(["uint16", PUBLICATION], q.details.statement);
+      if (!same(fact.owner, publication.metadataHost)
+        || !same(raw, coder.encode([PUBLICATION, "bytes32"], [publication, fact.ownerCodeHash]))) throw Error("Archived publication candidate differs");
+      break;
+    }
+    case 9n:
+      if (!same(fact.owner, d.components[9]!.address) || !same(fact.stateHash, deploymentSubjectHash(d, m.collectionId, b)) || raw !== "0x") throw Error("Archived deployment subject differs");
+      break;
+    case 10n:
+      if (!same(fact.owner, d.components[2]!.address) || !same(operativeIdentity, m.subjectStateHash) || raw !== "0x") throw Error("Archived personhood subject differs");
+      break;
+  }
+}
 /** Verify a singleton direct or ordinary Safe CALL, original owner records and exact Archive evidence. */
 export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: CurrentArtistCapture, evidence: {
   readonly transactionHash: Hex;
@@ -927,7 +1265,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   const m = q.message as any;
   const decodedCall = abi.decodeFunctionData(a.method, a.call.data);
   const t = decodedCall[0];
-  const auth = decodedCall[q.kind === "delegatedProspectiveEconomicsConsent" ? 3 : delegatedOperation(q) ? 2 : 1];
+  const auth = decodedCall[q.kind === "delegatedProspectiveEconomicsConsent" || q.kind === "delegatedScopedAttestation" ? 3 : delegatedOperation(q) ? 2 : 1];
   equal(await captureCurrentArtistOperation(p, d, q, { blockTag: c.blockNumber }), c, "Historical capture differs");
   const [tx, r] = await Promise.all([p.getTransaction(transactionHash), p.getTransactionReceipt(transactionHash)]);
   if (!tx || !r || !same(tx.hash, transactionHash) || !same(r.hash, transactionHash) || r.status !== 1 || tx.chainId !== d.chainId || tx.blockNumber === null || r.blockNumber !== tx.blockNumber || !same(tx.blockHash, r.blockHash) || !same(tx.from, r.from) || !same(tx.to, r.to) || tx.value !== 0n || r.blockNumber <= c.blockNumber) {
@@ -1006,7 +1344,45 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   let revokedReadback: CurrentArtistDelegationRecord | null = null;
   let economicsAssociation: CurrentArtistEconomicsAssociation | null = null;
   let economics: CurrentArtistReceipt["economics"] = null;
+  let attestation: CurrentArtistReceipt["attestation"] = null;
+  let historicalAttestationFact: CurrentArtistAttestationFact | null = null;
   switch (q.kind) {
+    case "delegatedAttestation":
+    case "delegatedScopedAttestation": {
+      const attribution = d.components[4]!.address;
+      const first = event(attribution, "ArtistAttestationRecorded", [1, t.collectionId, t.subjectKind, q.signer,
+        t.subjectId, t.subjectStateHash, t.schemaId, t.statementHash, keccak256(new TextEncoder().encode(q.details.statementURI)),
+        2, n, executedTiming.effectiveTime, recordHash]);
+      const last = event(attribution, "ArtistAttestationDelegation", [1, recordHash, q.details.grant, q.artistId, q.signer]);
+      if (last <= first) throw Error("Attestation delegation event order differs");
+      const [record] = await read(p, attribution, "attestationRecord", [recordHash], tag);
+      equal(Array.from(record), [recordHash, t.subjectStateHash, t.schemaId, t.statementHash, c.binding!.generation,
+        executedTiming.effectiveTime, q.signer], "Historical attestation record differs");
+      if ((await read(p, attribution, "attestationAuthorityClass", [recordHash], tag))[0] !== 2n
+        || !same((await read(p, attribution, "statementBytes", [t.statementHash], tag))[0], q.details.statement)) {
+        throw Error("Historical attestation class/statement differs");
+      }
+      const [association] = await read(p, attribution, "attestationAssociation", [recordHash], tag);
+      historicalAttestationFact = attestationFact(association.fact);
+      if (!same(coder.encode([AT_ASSOCIATION], [association]), coder.encode([AT_ASSOCIATION],
+        [[q.artistId, c.binding!.bindingHash, c.binding!.generation, q.details.grant, historicalAttestationFact]]))) {
+        throw Error("Historical attestation association differs");
+      }
+      const code = bytes(await p.getCode(historicalAttestationFact.owner, tag), 65536);
+      if (code === "0x" || (code.length === 48 && code.startsWith("0xef0100")) || !same(keccak256(code), historicalAttestationFact.ownerCodeHash)) {
+        throw Error("Historical attestation owner runtime differs");
+      }
+      if (t.subjectKind === 7n || t.subjectKind === 8n) {
+        const [, publication] = decode(["uint16", PUBLICATION], q.details.statement);
+        const [stored] = await read(p, attribution, "publicationAttestation", [recordHash], tag);
+        const expected = [publication, [recordHash, q.artistId, c.binding!.bindingHash, c.binding!.generation,
+          q.signer, 2, t.subjectKind === 7n ? 64 : 1, executedTiming.effectiveTime,
+          keccak256(coder.encode([PUBLICATION], [publication]))], historicalAttestationFact.ownerCodeHash];
+        const type = abi.getFunction("publicationAttestation")!.outputs![0]!;
+        if (!same(coder.encode([type], [stored]), coder.encode([type], [expected]))) throw Error("Historical publication attestation differs");
+      }
+      break;
+    }
     case "identityRevision": {
       const first = event(identityOwner, "ArtistIdentityRevisionRecorded", [1, q.artistId, q.signer,
         t.previousRecordHash, t.revisedRecordHash, t.identityRecordURI, cl, n, executedTiming.effectiveTime, recordHash]);
@@ -1182,8 +1558,8 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     throw Error("Archive operation envelope differs");
   }
   const identityOnly = ["identityRevision", "delegationGrant", "delegationRevocation", "authorizationRevocation"].includes(q.kind);
-  const mask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : economicsOperation(q) ? 119 : 87;
-  const writeMask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : 68;
+  const mask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : attestationOperation(q) ? 23 : economicsOperation(q) ? 119 : 87;
+  const writeMask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : attestationOperation(q) ? 20 : 68;
   for (let i = 0; i < 7; i++) {
     const before = v[5][i];
     const after = v[6][i];
@@ -1214,10 +1590,10 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   let payloadValues: unknown[];
   let priorGrant: CurrentArtistDelegationRecord | null = null;
   if (delegatedOperation(q)) {
-    const decoded = economicsOrFreeze(q)
+    const decoded = attestationOperation(q) ? decode([B, AT, A, A, P, "bytes", SUBJECT, "bool", ADMISSION, D, "bytes"], v[7]) : economicsOrFreeze(q)
       ? decode(["bytes", "bytes32", D], v[7])
       : decode([B, terms[q.kind], A, P, "bytes32", D, "bytes"], v[7]);
-    const prior = delegationRecord(decoded[economicsOrFreeze(q) ? 2 : 5]);
+    const prior = delegationRecord(decoded[attestationOperation(q) ? 9 : economicsOrFreeze(q) ? 2 : 5]);
     validateDelegation(d, prior, q.details.grant);
     if (!liveDelegation(prior, h.timestamp) || prior.uses < c.delegation!.uses
       || !same(prior.grantor, c.delegation!.grantor) || prior.nonce !== c.delegation!.nonce
@@ -1232,7 +1608,49 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     }
     priorGrant = prior;
   }
-  if (economicsOrFreeze(q)) {
+  if (attestationOperation(q)) {
+    payloadTypes = [B, AT, A, A, P, "bytes", SUBJECT, "bool", ADMISSION, D, "bytes"];
+    const values = decode(payloadTypes, v[7]);
+    const admission = values[8];
+    if (!same(admission.authority.artistId, q.artistId) || admission.authority.authorityClass !== 1n
+      || ![1n, 2n].includes(admission.authority.status)) throw Error("Archived attestation principal differs");
+    address(admission.authority.authorityAddress);
+    const fact = historicalAttestationFact!;
+    const operativeIdentity = hash(admission.operativeIdentity, true), subjectEvidence = bytes(values[10]);
+    const [suite] = await read(p, d.coordinator.address, "suiteConfiguration", [], tag);
+    historicalSubjectEvidence(d, q, c.binding!, fact, operativeIdentity, subjectEvidence, h.timestamp, suite.primaryRevenueClass);
+    if (t.subjectKind === 1n || t.subjectKind === 4n) {
+      const registry = address((await read(p, d.registry.address, "finalityRegistry", [], tag))[0]);
+      const registryHash = hash((await read(p, d.registry.address, "finalityRegistryCodeHash", [], tag))[0]);
+      const registryCode = bytes(await p.getCode(registry, tag), 65536);
+      if (registryCode === "0x" || (registryCode.length === 48 && registryCode.startsWith("0xef0100"))
+        || !same(keccak256(registryCode), registryHash)) throw Error("Immutable finality runtime differs");
+      if (t.subjectKind === 4n && (!same(fact.owner, registry) || !same(fact.ownerCodeHash, registryHash))) {
+        throw Error("Archived finality owner differs from immutable binding");
+      }
+      if (t.subjectKind === 1n) {
+        const [savedRegistry, savedProvider, savedProviderHash] = decode(["address", "address", "bytes32", SNAPSHOT_RECEIPT], subjectEvidence);
+        const provider = address((await read(p, registry, "scopeEvidenceProvider", [], tag))[0]);
+        const providerHash = hash((await read(p, registry, "scopeEvidenceProviderCodeHash", [], tag))[0]);
+        const host = address((await read(p, provider, "snapshotHost", [], tag))[0]);
+        const [config] = await read(p, provider, "nativeConfiguration", [], tag);
+        const providerCode = bytes(await p.getCode(provider, tag), 65536);
+        if (!same(savedRegistry, registry) || !same(savedProvider, provider) || !same(savedProviderHash, providerHash)
+          || providerCode === "0x" || (providerCode.length === 48 && providerCode.startsWith("0xef0100"))
+          || !same(keccak256(providerCode), providerHash)
+          || !same(host, fact.owner) || config.chainId !== d.chainId || !same(config.targets[0], d.components[9]!.address)
+          || !same(config.targets[2], d.components[12]!.address) || !same(config.targets[11], d.registry.address)
+          || !same(config.targets[12], registry) || !same(config.targets[8], host) || !same(config.codeHashes[8], fact.ownerCodeHash)) {
+          throw Error("Archived snapshot immutable lineage differs");
+        }
+      }
+    }
+    const expectedAdmission = [admission.authority, q.signer, n, executedTiming.effectiveTime, q.details.grant, operativeIdentity, fact];
+    payloadValues = [bindingArray(c.binding!), t, auth, [auth.nonce, executedTiming.effectiveTime, auth.signature], proof,
+      q.details.statement, subjectDescriptor(q), q.kind === "delegatedScopedAttestation", expectedAdmission, priorGrant, subjectEvidence];
+    attestation = { fact, operativeIdentity, subjectEvidence };
+  }
+  else if (economicsOrFreeze(q)) {
     payloadTypes = ["bytes", "bytes32", D];
     const [inner] = decode(payloadTypes, v[7]);
     let expectedInner: Hex;
@@ -1346,7 +1764,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   }
   await unchanged(p, h);
   return freeze({
-    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, observedDelegated, effectiveDigest: executedTiming.effectiveDigest, economics
+    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, observedDelegated, effectiveDigest: executedTiming.effectiveDigest, economics, attestation
   });
 }
 

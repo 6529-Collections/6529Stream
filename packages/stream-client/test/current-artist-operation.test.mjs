@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { AbiCoder, Interface, ZeroAddress, ZeroHash, concat, id, keccak256, toBeHex, zeroPadValue } from 'ethers';
+import { AbiCoder, Interface, ZeroAddress, ZeroHash, concat, id, keccak256, toBeHex, toUtf8Bytes, zeroPadValue } from 'ethers';
 import { CURRENT_ARTIST_OPERATION_ABI, currentArtistOperationTypedData, normalizeCurrentArtistAction,
   normalizeCurrentArtistOperationRequest, prepareCurrentArtistAction } from '../dist/current-artist-operation.js';
 import { buildSigningPayload } from '../dist/signing-payload.js';
@@ -624,4 +624,243 @@ test('economic requests freeze nested candidates and reconstruct every unsigned 
   assert.deepEqual(normalized.request.details.candidate, fixedCandidate);
   assert.throws(() => normalizeCurrentArtistAction(detached), /reconstruction/);
   assert.throws(() => prepareCurrentArtistAction(economicRequest('delegatedEconomicsConsent', { details: { collectionId, grant: h(705), candidate: fixedCandidate } })), /unexpected fields/);
+});
+
+// Original IStreamArtistAttestationWriter at ed4d557246a98698167d6986bc4266d9e375d558.
+const attestTerms = '(uint256 collectionId,uint8 subjectKind,bytes32 subjectId,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,string statementURI)';
+const attestSubject = '(uint8 scopeType,uint256 tokenId,bytes32 scopeId,address resolver)';
+const attestAuth = '(uint256 nonce,uint64 time,bytes signature)';
+const attestSource = new Interface([
+  `function recordDelegatedArtistAttestation(${attestTerms},bytes32 grant,${attestAuth},bytes statement) returns(bytes32)`,
+  `function recordDelegatedArtistScopedAttestation(${attestTerms},${attestSubject},bytes32 grant,${attestAuth},bytes statement) returns(bytes32)`,
+  `function attestationDigest(${attestTerms},${attestAuth}) view returns(bytes32)`,
+]);
+const statement = '0xff0102', statementURI = 'ipfs://statement-🖼';
+const attestationMessage = { core, collectionId, subjectKind: 5n, subjectId: h(801), subjectStateHash: h(802),
+  schemaId: h(803), statementHash: keccak256(statement), statementURIHash: keccak256(toUtf8Bytes(statementURI)), nonce, signedAt: 17n };
+const finalitySubject = { scopeType: 1n, tokenId: (1n << 240n) + 7n, scopeId: ZeroHash, resolver: ZeroAddress };
+function finalityId(subject, cid = collectionId) {
+  return keccak256(coder.encode(['bytes32','(uint8,uint256,uint256,bytes32)'],
+    [id('6529STREAM_ARTIST_FINALITY_ATTESTATION_SUBJECT_V1'),[subject.scopeType,cid,subject.tokenId,subject.scopeId]]));
+}
+function attestationRequest(kind = 'delegatedAttestation', changes = {}) {
+  const scoped = kind === 'delegatedScopedAttestation';
+  return { kind, chainId, registry, caller, signer: a(804), artistId, mode: 'signature', signature: '0x7788',
+    message: { ...attestationMessage, ...(scoped ? { subjectKind: 4n, subjectId: finalityId(finalitySubject) } : {}) },
+    details: { grant: h(805), statementURI, statement, ...(scoped ? { subject: { ...finalitySubject } } : {}) }, ...changes };
+}
+
+test('delegated attestations use the original dated schema and actual facade domain', () => {
+  for (const kind of ['delegatedAttestation','delegatedScopedAttestation']) {
+    const input = attestationRequest(kind), m = input.message;
+    const struct = body('StreamArtistAttestation(address core,uint256 collectionId,uint8 subjectKind,bytes32 subjectId,bytes32 subjectStateHash,bytes32 schemaId,bytes32 statementHash,bytes32 statementURIHash,uint256 nonce,uint64 signedAt)',
+      ['address','uint256','uint8','bytes32','bytes32','bytes32','bytes32','bytes32','uint256','uint64'],
+      [core,collectionId,m.subjectKind,m.subjectId,m.subjectStateHash,m.schemaId,m.statementHash,m.statementURIHash,nonce,m.signedAt]);
+    const payload = currentArtistOperationTypedData(kind, chainId, registry, m);
+    assert.equal(payload.digest, typed(struct));
+    assert.deepEqual(payload, currentArtistTypedData('artistAttestation', chainId, registry, m));
+    assert.notEqual(payload.digest, typed(struct,chainId + 1n));
+    assert.notEqual(payload.digest, typed(struct,chainId,a(804)));
+    for (const key of ['grant','subject','scoped','artistId','delegate','deadline','statement','statementURI']) {
+      assert.throws(() => currentArtistOperationTypedData(kind, chainId, registry, { ...m, [key]: h(806) }), /unexpected fields/);
+    }
+  }
+});
+
+test('attestation writes keep grant and scoped locator before original authorization and raw statement', () => {
+  const local = new Interface(CURRENT_ARTIST_OPERATION_ABI);
+  for (const [kind,method,selector] of [
+    ['delegatedAttestation','recordDelegatedArtistAttestation','0x36854c8f'],
+    ['delegatedScopedAttestation','recordDelegatedArtistScopedAttestation','0xfcb1f760'],
+  ]) {
+    const input = attestationRequest(kind), plan = prepareCurrentArtistAction(input), m = input.message;
+    const terms = [collectionId,m.subjectKind,m.subjectId,m.subjectStateHash,m.schemaId,m.statementHash,statementURI];
+    const args = [terms,...(kind === 'delegatedScopedAttestation' ? [finalitySubject] : []),h(805),[nonce,17n,'0x7788'],statement];
+    assert.equal(plan.operationId,24n); assert.equal(plan.method,method); assert.equal(plan.digestMethod,'attestationDigest');
+    assert.deepEqual(plan.call, { to: registry, value: 0n, data: attestSource.encodeFunctionData(method,args) });
+    assert.deepEqual(plan.digestCall, { to: registry, value: 0n, data: attestSource.encodeFunctionData('attestationDigest',[terms,[nonce,17n,'0x']]) });
+    assert.equal(local.getFunction(method).selector,selector);
+    assert.equal(local.getFunction(method).format('minimal'),attestSource.getFunction(method).format('minimal'));
+  }
+  assert.equal(local.getFunction('attestationDigest').selector,'0x9bf0ac77');
+  assert.equal(CURRENT_ARTIST_OPERATION_ABI.filter(s => s.startsWith('function attestationDigest(')).length,1);
+});
+
+test('delegated attestation direct zero is a submitted sentinel and explicit past dates remain valid inputs', () => {
+  for (const kind of ['delegatedAttestation','delegatedScopedAttestation']) {
+    const input = attestationRequest(kind), m = { ...input.message, nonce: 0n, signedAt: 0n };
+    const direct = prepareCurrentArtistAction({ ...input, caller: input.signer, mode: 'direct', signature: '0x', message: m });
+    const authIndex = kind === 'delegatedScopedAttestation' ? 3 : 2;
+    assert.equal(direct.payload.message.signedAt,0n);
+    assert.equal(attestSource.decodeFunctionData(direct.method,direct.call.data)[authIndex].time,0n);
+    assert.equal(attestSource.decodeFunctionData('attestationDigest',direct.digestCall.data)[1].time,0n);
+    assert.throws(() => prepareCurrentArtistAction({ ...input, message: m }), /positive signedAt/);
+    assert.throws(() => prepareCurrentArtistAction({ ...input, message: m, signature: '0x' }), /positive signedAt/);
+    for (const signedAt of [1n,(1n << 64n) - 1n]) {
+      const dated = prepareCurrentArtistAction({ ...direct.request, message: { ...m, signedAt } });
+      assert.equal(dated.payload.message.signedAt,signedAt);
+      assert.notEqual(dated.payload.digest,direct.payload.digest);
+    }
+    // Inclusion-time <= checks belong to the workflow; the pure normalizer does not substitute its local clock.
+    const relay = prepareCurrentArtistAction({ ...input, signature: '0x' });
+    assert.equal(relay.request.mode,'signature');
+    assert.throws(() => prepareCurrentArtistAction({ ...input, mode: 'direct', signature: '0x' }), /predicate/);
+    for (const signedAt of [1,-1n,1n << 64n]) assert.throws(() => prepareCurrentArtistAction({ ...input, message: { ...input.message, signedAt } }));
+  }
+});
+
+test('attestation statement bytes and URI are exact signed commitments with original bounds', () => {
+  const make = (statement, statementURI = '') => prepareCurrentArtistAction(attestationRequest('delegatedAttestation', {
+    message: { ...attestationMessage, statementHash: keccak256(statement), statementURIHash: keccak256(toUtf8Bytes(statementURI)) },
+    details: { grant: h(805), statement, statementURI },
+  }));
+  make('0xff'); make(`0x${'ff'.repeat(8192)}`,'é'.repeat(1024));
+  for (const statement of ['0x',`0x${'ff'.repeat(8193)}`]) assert.throws(() => make(statement), /1\.\.8192/);
+  assert.throws(() => make('0xff','é'.repeat(1025)), /2048/);
+  const input = attestationRequest();
+  for (const details of [{ ...input.details, statement: '0x12' }, { ...input.details, statementURI: '' }, { ...input.details, statement: '0x1' }]) {
+    assert.throws(() => prepareCurrentArtistAction({ ...input, details }));
+  }
+  for (const statementURI of ['\ud800','\udc00']) assert.throws(() => prepareCurrentArtistAction({ ...input, details: { ...input.details, statementURI } }), /Unicode/);
+  const uppercase = prepareCurrentArtistAction({ ...input, details: { ...input.details, statement: '0xFF0102' } });
+  assert.equal(uppercase.request.details.statement,statement);
+});
+
+test('original unscoped subject profiles preserve their IDs and explicitly defer C2PA credentials', () => {
+  const positive = [
+    { subjectKind: 1n }, { subjectKind: 2n, subjectId: h(collectionId) }, { subjectKind: 3n, subjectId: h(collectionId) },
+    { subjectKind: 4n, subjectId: h(collectionId) }, { subjectKind: 5n }, { subjectKind: 6n, subjectId: h(807) },
+    { subjectKind: 9n, subjectId: h(BigInt(core)), schemaId: id('6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1') },
+    { subjectKind: 10n, subjectId: artistId, schemaId: id('6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1') },
+    { subjectKind: 10n, subjectId: artistId, schemaId: id('6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1') },
+  ];
+  const make = m => prepareCurrentArtistAction(attestationRequest('delegatedAttestation', { message: { ...attestationMessage, ...m } }));
+  for (const m of positive) make(m);
+  for (const m of [{ subjectKind: 0n }, { subjectKind: 11n }, { subjectKind: 256n }, { subjectKind: 1 },
+    { subjectKind: 2n, subjectId: h(collectionId + 1n) }, { subjectKind: 4n, subjectId: finalityId(finalitySubject) },
+    { subjectKind: 6n, subjectId: h(1n << 160n) }, { subjectKind: 6n, subjectId: ZeroHash },
+    { subjectKind: 9n, subjectId: h(BigInt(core)) }, { subjectKind: 10n, subjectId: h(809), schemaId: id('6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1') },
+    { subjectKind: 5n, subjectStateHash: ZeroHash }]) assert.throws(() => make(m));
+  assert.throws(() => make({ subjectKind: 10n, subjectId: artistId, schemaId: id('6529STREAM_ARTIST_C2PA_CREDENTIALS_V1') }), /C2PA credentials are deferred/);
+  for (const subjectKind of [1n,2n,3n,5n,7n,8n,9n,10n]) {
+    assert.throws(() => currentArtistOperationTypedData('delegatedScopedAttestation',chainId,registry,{ ...attestationMessage,subjectKind }), /Scoped attestation/);
+  }
+});
+
+test('scoped finality derives the original full-width ID and enforces every zero-field branch', () => {
+  const subjects = [
+    { scopeType: 0n, tokenId: 0n, scopeId: ZeroHash, resolver: ZeroAddress }, finalitySubject,
+    ...[2n,3n,4n].map(scopeType => ({ scopeType,tokenId:0n,scopeId:h((1n << 255n) + scopeType),resolver:ZeroAddress })),
+  ];
+  const make = (subject, overrides = {}) => prepareCurrentArtistAction(attestationRequest('delegatedScopedAttestation', {
+    message: { ...attestationMessage,subjectKind:4n,subjectId:finalityId(subject),...overrides },
+    details: { grant:h(805),statementURI,statement,subject },
+  }));
+  for (const subject of subjects) assert.equal(make(subject).payload.message.subjectId,finalityId(subject));
+  assert.notEqual(finalityId(subjects[0]),h(collectionId));
+  const maximum = (1n << 256n) - 1n;
+  make({ ...finalitySubject,tokenId:maximum },{ collectionId:maximum,subjectId:finalityId({ ...finalitySubject,tokenId:maximum },maximum) });
+  for (const subject of [
+    { ...subjects[0],tokenId:1n }, { ...subjects[0],scopeId:h(1) }, { ...finalitySubject,tokenId:0n },
+    { ...finalitySubject,scopeId:h(1) }, { ...subjects[2],tokenId:1n }, { ...subjects[2],scopeId:ZeroHash },
+    { ...finalitySubject,scopeType:5n }, { ...finalitySubject,resolver:a(1) },
+  ]) assert.throws(() => make(subject), /finality subject/);
+  assert.throws(() => make(finalitySubject,{ subjectId:h(1) }), /scope hash/);
+  const input = attestationRequest('delegatedScopedAttestation');
+  for (const subject of [{ ...finalitySubject,tokenId:1 }, { ...finalitySubject,scopeType:1 },
+    { ...finalitySubject,tokenId:1n << 256n }, { ...finalitySubject,scopeId:'0x12' }, { ...finalitySubject,collectionId }]) {
+    assert.throws(() => prepareCurrentArtistAction({ ...input,details:{ ...input.details,subject } }));
+  }
+});
+
+test('scoped economics keeps token identity in scopeId and the live resolver class outside the signature', () => {
+  const input = attestationRequest('delegatedScopedAttestation', { message:{ ...attestationMessage,subjectKind:6n } });
+  const make = subject => prepareCurrentArtistAction({ ...input,details:{ ...input.details,subject } });
+  const subjects = [
+    { scopeType:0n,tokenId:0n,scopeId:ZeroHash,resolver:a(810) },
+    { scopeType:1n,tokenId:0n,scopeId:h(collectionId),resolver:a(810) },
+    { scopeType:2n,tokenId:0n,scopeId:h((1n << 256n) - 1n),resolver:a(810) },
+  ];
+  for (const subject of subjects) make(subject);
+  const first = make(subjects[2]), changed = make({ ...subjects[2],resolver:a(811) });
+  assert.equal(first.payload.digest,changed.payload.digest); assert.equal(first.digestCall.data,changed.digestCall.data);
+  assert.notEqual(first.call.data,changed.call.data); // Original live facts decide which descriptor actually resolves the signed ID/hash.
+  for (const subject of [
+    { ...subjects[0],scopeId:h(1) }, { ...subjects[1],scopeId:h(collectionId + 1n) }, { ...subjects[2],scopeId:ZeroHash },
+    { ...subjects[2],tokenId:1n }, { ...subjects[2],resolver:ZeroAddress }, { ...subjects[2],scopeType:3n },
+  ]) assert.throws(() => make(subject));
+});
+
+const publicationTuple = '(address metadataHost,address recorder,uint256 collectionId,bytes32 subjectId,bytes32 recordType,bytes32 schemaId,bytes32 canonicalizationId,uint16 payloadAlgorithm,bytes32 payloadHash,bytes32 uriHash,uint64 effectiveAt,bytes32 candidateRecordHash)';
+const publication = { metadataHost:a(812),recorder:a(804),collectionId,subjectId:h(813),recordType:id('ARTIST_INTENT'),
+  schemaId:id('STREAM_ARTIST_INTENT_V1'),canonicalizationId:h(814),payloadAlgorithm:1n,payloadHash:h(815),
+  uriHash:keccak256(toUtf8Bytes(statementURI)),effectiveAt:0n,candidateRecordHash:h(816) };
+function publicationRequest(p = publication, kind = 7n, overrides = {}, encoded = coder.encode(['uint16',publicationTuple],[1n,p])) {
+  return attestationRequest('delegatedAttestation', {
+    message: { ...attestationMessage,subjectKind:kind,subjectId:p.subjectId,subjectStateHash:kind === 7n ? p.candidateRecordHash : ZeroHash,
+      schemaId:id('6529STREAM_ARTIST_RECORD_PUBLICATION_V1'),statementHash:keccak256(encoded),...overrides },
+    details:{ grant:h(805),statementURI,statement:encoded },
+  });
+}
+
+test('original publication families use canonical envelopes and kind 8 keeps its required zero state', () => {
+  for (const [recordType,schemaId,kind] of [
+    ['ARTIST_INTENT','STREAM_ARTIST_INTENT_V1',7n], ['ARTIST_INTENT_WAIVER','STREAM_ARTIST_INTENT_WAIVER_V1',7n],
+    ['ARTIST_SEMANTIC_ASSERTION','STREAM_SEMANTIC_ASSERTION_V1',8n], ['WORK_DESCRIPTION','STREAM_WORK_DESCRIPTION_V1',8n],
+    ['ARTIST_STATEMENT','CUSTOM_STATEMENT_SCHEMA',8n],
+  ]) {
+    const p = { ...publication,recordType:id(recordType),schemaId:id(schemaId) }, plan = prepareCurrentArtistAction(publicationRequest(p,kind));
+    assert.equal((plan.request.details.statement.length - 2) / 2,416);
+    assert.equal(plan.payload.message.subjectStateHash,kind === 7n ? p.candidateRecordHash : ZeroHash);
+    assert.equal(plan.request.message.signedAt,17n); // Publication effectiveAt is a separate original field.
+  }
+  assert.throws(() => prepareCurrentArtistAction(publicationRequest(publication,7n,{subjectStateHash:h(817)})), /subject state/);
+  assert.throws(() => prepareCurrentArtistAction(publicationRequest({ ...publication,recordType:id('ARTIST_STATEMENT'),schemaId:h(818) },8n,{subjectStateHash:h(1)})), /zero subjectStateHash/);
+});
+
+test('publication decoding rejects noncanonical bytes, wrong families, recorder and signed commitment mismatches', () => {
+  for (const change of [
+    { metadataHost:ZeroAddress }, { recorder:a(819) }, { collectionId:collectionId + 1n }, { canonicalizationId:ZeroHash },
+    { payloadAlgorithm:2n }, { payloadHash:ZeroHash }, { candidateRecordHash:ZeroHash }, { uriHash:ZeroHash }, { schemaId:ZeroHash },
+    { recordType:id('UNKNOWN') }, { recordType:id('ARTIST_STATEMENT'),schemaId:id('STREAM_ARTIST_INTENT_V1') },
+  ]) {
+    const p = { ...publication,...change }, input = publicationRequest(p);
+    // The original message retains its collection context independently from the nested publication.
+    assert.throws(() => prepareCurrentArtistAction(input));
+  }
+  const canonical = coder.encode(['uint16',publicationTuple],[1n,publication]);
+  for (const encoded of [`${canonical}00`,canonical.slice(0,-2),coder.encode(['uint16',publicationTuple],[2n,publication]),
+    `0x${h((1n << 16n) + 1n).slice(2)}${canonical.slice(66)}`]) {
+    assert.throws(() => prepareCurrentArtistAction(publicationRequest(publication,7n,{},encoded)));
+  }
+  assert.throws(() => prepareCurrentArtistAction(publicationRequest(publication,7n,{subjectId:h(1)})), /Publication fields/);
+  assert.throws(() => prepareCurrentArtistAction(publicationRequest(publication,7n,{schemaId:h(1)})), /envelope schema/);
+  assert.throws(() => prepareCurrentArtistAction(publicationRequest(publication,8n)), /publication family/);
+});
+
+test('attestation grants and subject descriptors are immutable while statement hashes remain signed', () => {
+  for (const kind of ['delegatedAttestation','delegatedScopedAttestation']) {
+    const input = attestationRequest(kind), plan = prepareCurrentArtistAction(input);
+    const other = prepareCurrentArtistAction({ ...input,details:{ ...input.details,grant:h(820) } });
+    assert.equal(plan.payload.digest,other.payload.digest); assert.equal(plan.digestCall.data,other.digestCall.data);
+    assert.notEqual(plan.call.data,other.call.data);
+    assert.deepEqual(normalizeCurrentArtistAction(plan),plan);
+    input.details.grant = h(821); input.details.statement = '0x01'; input.message.signedAt = 0n;
+    assert.equal(plan.request.details.grant,h(805)); assert.equal(plan.request.details.statement,statement); assert.equal(plan.request.message.signedAt,17n);
+    assert.throws(() => { plan.request.details.statementURI = ''; },TypeError);
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan,request:other.request }), /reconstruction/);
+    for (const details of [{ ...plan.request.details,grant:ZeroHash }, { ...plan.request.details,capabilities:1n }, { ...plan.request.details,scoped:true }]) {
+      assert.throws(() => prepareCurrentArtistAction({ ...plan.request,details }));
+    }
+  }
+  const input = attestationRequest('delegatedScopedAttestation'), plan = prepareCurrentArtistAction(input);
+  input.details.subject.tokenId = 1n;
+  assert.equal(plan.request.details.subject.tokenId,finalitySubject.tokenId);
+  assert.throws(() => { plan.request.details.subject.resolver = a(1); },TypeError);
+  const detached = structuredClone(plan), normalized = normalizeCurrentArtistAction(detached);
+  detached.request.details.subject.tokenId = 1n;
+  assert.equal(normalized.request.details.subject.tokenId,finalitySubject.tokenId);
+  assert.throws(() => normalizeCurrentArtistAction(detached), /scope hash/);
+  const unscoped = attestationRequest();
+  assert.throws(() => prepareCurrentArtistAction({ ...unscoped,details:{ ...unscoped.details,subject:finalitySubject } }), /unexpected fields/);
 });

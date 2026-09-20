@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "sourceCommit": "44af244ed576cc4b26632b800fe70a068d577940",
-  "clientAuditCommit": "0d931d9b59e92c9780bc3d30a146f9cd59c417d5",
+  "clientAuditCommit": "b88b390483084353183cbbe52f93ddf640bf43a9",
   "scope": "Original operations 1-60 plus existing operation 61. Method variants are separate caller requirements; operation membership is not a claim of implemented workflow coverage. Delegated policy/sale methods retain IDs14/16; economics and royalty freeze retain IDs15/20. C2PA callers remain pending.",
   "signingHost": "StreamArtistOnboardingRegistry",
   "signingDomain": {
@@ -255,7 +255,11 @@
         "recordDelegatedArtistScopedAttestation"
       ],
       "coverage": "partial-existing",
-      "existingModules": "current-artist; current-artist-ceremony"
+      "existingModules": "current-artist; current-artist-ceremony; current-artist-operation; current-artist-workflow",
+      "implementedMethods": ["recordDelegatedArtistAttestation", "recordDelegatedArtistScopedAttestation"],
+      "pendingMethods": ["recordArtistAttestation", "recordArtistScopedAttestation"],
+      "implementedSourceCommit": "ed4d557246a98698167d6986bc4266d9e375d558",
+      "scope": "Original delegated op24 profiles only; C2PA caller and full principal workflows remain pending."
     },
     {
       "id": 25,

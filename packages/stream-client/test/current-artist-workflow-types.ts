@@ -28,8 +28,8 @@ void captured; void simulated; void plan; void inspected; void required; void no
 
 // @ts-expect-error captures require a concrete numeric block
 captureCurrentArtistOperation(provider, deployment, request, { blockTag: "latest" });
-// @ts-expect-error delegated attestation is outside this family
-captureCurrentArtistOperation(provider, deployment, { ...request, kind: "delegatedAttestation" }, { blockTag: 100 });
+// @ts-expect-error protocol-only Coordinator callbacks are outside this family
+captureCurrentArtistOperation(provider, deployment, { ...request, kind: "coordinateSubjectAttestation" }, { blockTag: 100 });
 // @ts-expect-error transaction execution is a direct call or ordinary Safe CALL
 inspectCurrentArtistReceipt(provider, capture, { transactionHash: hash, execution: "delegatecall" });
 // @ts-expect-error no broadcast method or signer enters a read helper
@@ -98,3 +98,15 @@ capture.deployment.reads!.codeHash = hash;
 capture.economics!.payout.account = address;
 // @ts-expect-error actual receipt association is immutable
 receipt.economics!.association.bindingGeneration = 99n;
+
+declare const attestationRequest: Extract<CurrentArtistOperationRequest, { kind: "delegatedAttestation" }>;
+const capturedAttestation: Promise<CurrentArtistCapture> = captureCurrentArtistOperation(provider, deployment, attestationRequest, { blockTag: 100 });
+const subjectOwner: Address | undefined = capture.attestation?.fact.owner;
+const historicalSubject: Hex | undefined = receipt.attestation?.subjectEvidence;
+void capturedAttestation; void subjectOwner; void historicalSubject;
+// @ts-expect-error attestation details must retain grant and exact statement evidence
+captureCurrentArtistOperation(provider, deployment, { ...attestationRequest, details: { grant: hash } }, { blockTag: 100 });
+// @ts-expect-error derived subject pins are immutable
+capture.attestation!.dependencies.push({ address, codeHash: hash });
+// @ts-expect-error historical subject state is immutable
+receipt.attestation!.fact.stateHash = hash;

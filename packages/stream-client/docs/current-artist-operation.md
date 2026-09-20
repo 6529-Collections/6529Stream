@@ -15,6 +15,8 @@ ratification payloads remain in their original client modules.
 | 20 | `authorizeArtistRoyaltyFreeze` | Authorize the specified royalty assignment freeze. |
 | 20 | `authorizeDelegatedRoyaltyFreeze` | Authorize that freeze using a scoped delegation. |
 | 21 | `authorizeArtistContentFreeze` | Authorize specified metadata locks at an exact state. |
+| 24 | `recordDelegatedArtistAttestation` | Attest to an original authenticated subject using a delegation. |
+| 24 | `recordDelegatedArtistScopedAttestation` | Attest to an exact finality or economics scope using a delegation. |
 | 25 | `recordIdentityRevision` | Extend the operative document with exact document bytes. |
 | 26 | `grantArtistDelegation` | Grant the original scoped capabilities and use/window limits. |
 | 27 | `revokeArtistDelegation` | Revoke an exact grant using its stored grantor. |
@@ -41,7 +43,8 @@ original write calldata and read-only digest call. Its exact request contains
 `royaltyFreeze`, `contentFreeze`, `authorizationRevocation`, `identityRevision`,
 `delegationGrant`, `delegationRevocation`, `delegatedPolicyConsent` and
 `delegatedSaleConsent`, `delegatedEconomicsConsent`,
-`delegatedProspectiveEconomicsConsent` and `delegatedRoyaltyFreeze`.
+`delegatedProspectiveEconomicsConsent`, `delegatedRoyaltyFreeze`,
+`delegatedAttestation` and `delegatedScopedAttestation`.
 
 The signing domain is `6529StreamArtistRegistry`, version `1`, with the actual
 chain and `StreamArtistOnboardingRegistry` facade address. Coordinator, owner,
@@ -52,7 +55,8 @@ use a deadline; their records use the transaction block timestamp. Refusal's `de
 calldata outside the signed schema, limited to 2,048 UTF-8 bytes. Identity revision
 details are described below. Delegated actions retain the nonzero `grant` record
 hash; economics adds its collection and prospective candidate as described below.
-The other details objects are empty. This client accepts Unicode URI text; it does not represent
+Attestation details are described below. The other details objects are empty.
+This client accepts Unicode URI text; it does not represent
 arbitrary non-UTF-8 Solidity string bytes. Content-freeze lock classes retain their supplied order and
 must be 1–16 strictly increasing, nonzero bytes32 values. Their signed commitment
 hashes packed words; the record preimage retains the original dynamic array.
@@ -183,6 +187,70 @@ operative payout to remain unchanged. Freeze joins its original authorization,
 `ArtistRecordDelegation` event and historical freeze record. Neither family uses
 the additive policy/sale `ArtistConsentDelegationRecorded` event.
 
+## Delegated attestation
+
+Both attestation variants retain original operation 24 and
+`CurrentArtistAttestation`: Core, collection, subject kind, subject ID, subject
+state hash, schema, statement hash, URI hash, nonce and `signedAt`. Details contain
+`grant`, `statementURI` and the exact `statement` bytes. Statements must be
+1–8,192 bytes; URIs are at most 2,048 UTF-8 bytes. Both must match their signed
+hashes. A scoped request adds `details.subject` with `scopeType`, `tokenId`,
+`scopeId` and `resolver`. The grant and descriptor remain outside the signature.
+
+Consent modes 1 and 2 are admitted with current principal authority class 1 and
+ordinary identity status 1 or 2. Subject kind 7 requires delegation capability
+`64`; every other supported kind requires `1`. Each creation consumes one grant
+use and the persistent Artist/delegate nonce lane shared with other delegated
+operations. The original grant epoch, scope, time window, use limit and estate
+restrictions must admit creation.
+
+For these delegated attestation methods, direct `signedAt: 0n` is replaced with
+the transaction timestamp. An explicit positive direct or relayed time may be
+earlier than execution, but cannot be later. A relayed zero time is invalid.
+This differs from the exact-timestamp rule for direct identity revision.
+
+Capture authenticates each subject through the original reads at one block:
+
+| Kind | Subject and evidence |
+| --- | --- |
+| 1 | Snapshot from the facade's finality registry and its pinned provider/configuration; current receipt and both snapshot hash getters agree. |
+| 2 / 3 | Script/media manifest hash on the Core-selected collection metadata host. |
+| 4 | Finalized collection or scoped finality record on the facade-bound finality registry. |
+| 5 | Existing phase and policy hash on the suite's original Mint Manager. |
+| 6 | Exact primary or royalty assignment, with the original resolver and scope checks. |
+| 7 / 8 | Original canonical publication envelope and the selected, eligible metadata host's candidate read. |
+| 9 | Original deployment facts reconstructed from chain, Core, collection and binding. |
+| 10 | Operative Identity document with the original personhood waiver/evidence schema. |
+
+Scoped calls are supported only for kinds 4 and 6. Finality uses scope 0 for the
+collection, 1 for a nonzero `tokenId`, and 2–4 for a nonzero `scopeId`; its
+resolver is zero. Economics always uses zero `tokenId`: scope 0 has zero
+`scopeId`, scope 1 encodes the collection ID in `scopeId`, and scope 2 has a
+nonzero `scopeId`. Economics names the suite's actual primary or royalty
+resolver. Signed subject IDs must match the original scope hash.
+
+Kinds 7 and 8 require the original 416-byte
+`abi.encode(uint16(1), Publication)` statement. The exact tuple is exported as
+`CURRENT_ARTIST_ATTESTATION_PUBLICATION_TUPLE`. It retains metadata host,
+recorder, collection, subject, record type, schema, canonicalization, payload
+algorithm/hash, URI hash, effective time and candidate record hash. The
+publication recorder must be the delegate. Kind 7 signs that candidate as its
+subject state; kind 8 requires a zero subject state. The actual metadata host
+still checks the record family, schema and canonical candidate.
+
+The receipt joins the Attribution owner's `ArtistAttestationRecorded` and
+`ArtistAttestationDelegation` events, record-by-hash, authority class, statement
+bytes, binding association and original flat eleven-field Archive payload.
+Publication kinds also join the stored publication evidence. Later latest-head,
+subject or grant changes do not erase a correctly recorded historical receipt.
+Subsequent detached publication separately rechecks the live grant epoch,
+window, revocation, succession, binding and candidate. Exhausting `maxUses` alone
+does not invalidate the already consumed publication use. This batch verifies
+attestation creation; it does not perform that later publication.
+
+C2PA schemas and the two principal attestation variants remain outside these new
+workflows. Their earlier payload helpers retain their existing scope.
+
 ## Authority and execution
 
 `captureCurrentArtistOperation(provider, deployment, request, { blockTag })`
@@ -213,10 +281,10 @@ a nonce.
 zero-value Safe CALLs. It accepts only supported original public methods through
 reconstructed requests. It rejects repeated authorization nonces, repeated grant
 revocation targets and known authorization-revocation conflicts in the same lane.
-A delegated consent cannot follow revocation of its grant in the supplied plan;
-consent followed by revocation remains permitted. Principal and delegate nonce
+A delegated action cannot follow revocation of its grant in the supplied plan;
+the action followed by revocation remains permitted. Principal and delegate nonce
 lanes stay separate.
-The future effective digest of a direct zero-time revision is unknown and is not
+The future effective digest of a direct zero-time revision or attestation is unknown and is not
 treated as a known digest conflict. Refresh timing and replay before execution.
 Each entry is a separate transaction. When one action
 changes the next action's nonce or other state, mine it and capture the dependent
@@ -245,7 +313,7 @@ validation. Protocol-only owner/Coordinator methods are not user-call targets.
 
 ## Frozen source and limits
 
-The fixture uses the retained `parallel-feature-batch52-20260920` ABI capture at
+The historical operation fixture uses the retained `parallel-feature-batch52-20260920` ABI capture at
 commit `44af244ed576cc4b26632b800fe70a068d577940`. All 2,212 literal input sources
 were verified byte-for-byte against that commit. It retains 322 production
 closure hashes, selected original ABI entries and twenty-three original source
@@ -253,6 +321,17 @@ texts for independent preimage tests. Verify without compiling Solidity:
 
 ```sh
 node scripts/generate-current-artist-operation-fixture.mjs \
+  /path/to/abi-input.json /path/to/abi-output.json --check
+```
+
+The additive attestation fixture uses `parallel-feature-batch56-20260920` at
+`ed4d557246a98698167d6986bc4266d9e375d558`, with all 2,241 input sources verified
+against Git. It retains 81 ABI entries in 26 selections, 368 closure hashes and
+12 source texts. The original ABI52 fixture remains unchanged. Check against
+the retained ABI56 input/output:
+
+```sh
+node scripts/generate-current-artist-attestation-fixture.mjs \
   /path/to/abi-input.json /path/to/abi-output.json --check
 ```
 
