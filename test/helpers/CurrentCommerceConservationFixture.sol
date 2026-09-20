@@ -12,7 +12,7 @@ import "../../smart-contracts/domains/revenue/StreamPrimarySaleFloorCall.sol";
 abstract contract CurrentCommerceConservationFixture is StreamCurrentSafeGovernanceFixture {
     uint256 internal constant FIXTURE_FLOOR_READ_GAS = 300_000;
     uint256 internal constant FIXTURE_FLOOR_PRODUCER_GAS = 1_000_000;
-    uint256 internal constant FIXTURE_FLOOR_CALL_GAS = 6_000_000;
+    uint256 internal constant FIXTURE_FLOOR_CALL_GAS = 2_000_000;
     bytes32 internal constant COMMERCE_WAIVED = keccak256("CONSERVATION_WAIVED");
     StreamConservationFloor internal commerceFloor;
     bytes32 private floorBindingAction;
@@ -80,6 +80,14 @@ abstract contract CurrentCommerceConservationFixture is StreamCurrentSafeGoverna
     /// while the real class-1 delay elapses. Scheduling does not bind or declare anything.
     function _prepareCommerceFloor() internal {
         require(address(commerceFloor) == address(0), "one fixture floor");
+        (uint256 callbackGas,,,) =
+            manager.gasParameterInfo(manager.GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT());
+        // Necessary reservation compatibility; this does not prove total callback gas usage.
+        require(callbackGas == 4_000_000, "original prepared callback genesis");
+        require(
+            FIXTURE_FLOOR_CALL_GAS + FIXTURE_FLOOR_CALL_GAS / 63 + 103_300 < callbackGas,
+            "waived floor reservation fits callback ceiling"
+        );
         commerceFloor = StreamConservationFloor(
             _artistArtifactCreate(
                 "smart-contracts/domains/metadata/StreamConservationFloor.sol:StreamConservationFloor",

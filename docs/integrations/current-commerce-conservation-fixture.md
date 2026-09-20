@@ -127,7 +127,7 @@ check covering these nine additional recipes and the prior migrated consumers;
 its native execution remains pending.
 
 The helper uses explicitly named **fixture** gas configuration: 300,000 for
-reads, 1,000,000 for producers and 6,000,000 for the floor call. These are not
+reads, 1,000,000 for producers and 2,000,000 for the floor call. These are not
 production defaults, a 500,000-gas acceptance, or measurements of transaction
 gas. Future execution must distinguish gas required for bounded-call admission
 from gas actually consumed.
@@ -137,3 +137,21 @@ MUSEUM_GRADE or MUSEUM_GRADE_LITE documentary completeness, genuine personhood
 evidence, all direct-sale/supplemental paths, or deployment readiness. See
 [ADR 0053](../adr/0053-durable-museum-anchors.md) for the durable declaration and
 permanent floor boundary.
+
+## Compatible initial WAIVED call reservations
+
+The fresh WAIVED fixture uses a two-million floor-call genesis and floor, inside
+Manager's unchanged four-million prepared callback. Both opt-in helper families
+check the actual Manager parameter and that the floor wrapper's EIP-150 reserve
+plus103,300 overhead is below that callback ceiling. The stateful helper inherits
+the same configuration. This is a necessary composition check, not a proof that
+all callback work fits. Actual prepared-auction execution is still required.
+
+The earlier frozen six-million fixture failed before calling the ledger because
+its required6,198,538 admission reserve cannot fit inside a four-million callback.
+Its five passing/one failing result remains valid for that source. A later initial
+configuration cannot lower or relabel that deployed raise-only parameter.
+Measured mixed/warm original floor calls cost547,610 inline and172,746 following
+optional preparation; these exclude other transaction work and are not cold
+500,000-gas acceptance. This WAIVED setup is not a general Artist/LITE/MUSEUM
+configuration or a reason to skip any original ledger work.

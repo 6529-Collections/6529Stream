@@ -31,6 +31,14 @@ abstract contract NativeCuratedCommerceConservationFixture is NativeCuratedSaleF
     bytes32 private constant WAIVED = keccak256("CONSERVATION_WAIVED");
 
     function _enableNativeCommerceFloor() internal {
+        uint256 floorCallGas = 2_000_000;
+        (uint256 callbackGas,,,) =
+            manager.gasParameterInfo(manager.GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT());
+        require(callbackGas == 4_000_000, "original prepared callback genesis");
+        require(
+            floorCallGas + floorCallGas / 63 + 103_300 < callbackGas,
+            "waived floor reservation fits callback ceiling"
+        );
         (address bound, bytes32 runtime) = core.conservationFloor();
         require(
             address(nativeCommerceFloor) == address(0) && bound == address(0) && runtime == 0
@@ -56,7 +64,7 @@ abstract contract NativeCuratedCommerceConservationFixture is NativeCuratedSaleF
             );
         IStreamGasParameterHost.GasParameterConfig memory callGas =
             IStreamGasParameterHost.GasParameterConfig(
-                "CONSERVATION_FLOOR_CALL_GAS", 6000000, 6000000, 2
+                "CONSERVATION_FLOOR_CALL_GAS", floorCallGas, floorCallGas, 2
             );
         require(
             type(StreamConservationFloor).creationCode.length
