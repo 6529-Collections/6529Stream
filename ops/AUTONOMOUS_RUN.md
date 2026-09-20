@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `a6af993b`: accepted histories, preservation graphs, all root facades, successor Rights/archive fixes and caller/export source integrated. ABI139: 3,679 / zero errors. Runtime and remaining feature acceptance remain open. |
+| Source checkpoint | `842eb31e`: reviewed current-authority STATIC/preservation graph, root dispatch, VIEW binding/reference and metric retention source integrated. ABI141: 3,779 / zero errors. Source-specific standard24, VIEW46 and Rights8 pass; full acceptance remains open. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,60 +29,57 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for source-specific results.
-Root owns integration, shared interfaces, architectural decisions and release
-closure. Keep builders implementing while frozen tests execute.
+Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact source and acceptance
+boundaries. Root owns shared interfaces, integration, architecture and delivery.
+Keep builders implementing while bounded frozen test batches run.
 
-- A: accepted-generation batch is integrated; complete signed dispute/resolution,
-  repudiation and remaining cross-era history transport next. Preserve B's direct
-  STATIC read getter ownership and existing signing/owner/replay semantics.
-- B: preservation producer/Registry admission is integrated. Build distinct
-  current-authority STATIC attribution with original ancestry/completion facts,
-  an explicit admitted successor roster and truthful C2PA/currentness changes.
-- C: VIEW output/snapshot/root source is integrated. Own VIEW reference,
-  inventory and finality continuation; one bounded 46-case frozen output run
-  uses the reviewed selected-codegen tooling. No shared Router edits.
-- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: archive correspondence fix and
-  independent accepted-generation review are complete; actual archive4 runtime
-  and original-current Mint acceptance remain. Coordinate next bounded batch.
-- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: complete actual preservation
-  construction/ceremony and once-only governed pending-to-bound VIEW source
-  binding on the single new combined provider. VIEW is unavailable while pending.
-  Old scoped27 native is stopped/incomplete; do not restart that capture.
-- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: V9 scoped capture/export is
-  integrated. Continue qualified original VIEW capture, then distinct new
-  preservation profiles; synthetic packages never establish chain acceptance.
-- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: scoped root/op17 source is
-  integrated; implement original scoped reference, inventory/archive callers
-  and Safe reconciliation. Keep new preservation ABI profiles separate.
-- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: compiler repair is integrated
-  as `3f39bb7b`. Own standard preservation24 frozen at `ae540f10` using paired
-  analysis/native capture, exact source and genuine linked runtime evidence.
-  One 1,800-second bound per native pass; no automatic repeated full795 run.
-- Capacity/Rights `01a0be37-2432-7a63-8820-fc42f159eb1d`: Rights source and both
-  root facade reviews are complete. Own focused Rights8 unit native; actual
-  current3 follows Prepared's graph adoption. Do not duplicate Testing24.
-- Metric retention `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: build fixed
-  same-call compact proof transport and metric-only chunk retention with owned
-  scratch memory. Keep generic retained-byte semantics and original caps exact.
-  This is separate from the interrupted ERC20 capture; do not resume that run.
-- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: caller/export/streaming
-  source is integrated. Own current-authority Rights graph creation, prediction
-  and introspection, plus appended creation kinds. Legacy graph stays intact.
-- Collector gas `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: experimental27 and
-  gas-capped compatibility7 pass separately. Own exact storage/opcode cost census
-  and larger representation proposal. No Core/Manager/Floor source writes yet.
+- A: finish complete dispute/repudiation and prior-era history transport.
+  Isolate remaining selected-worker codegen failure before a full native run;
+  four newly framed workers fit. Wider history composition remains required.
+- B: current-authority STATIC source is integrated. Own fixture-only native
+  loading repair, real cold A/B/C read checks and the distinct preservation
+  renderer/admission pair. No production size or read-budget waiver.
+- C: VIEW output46 passed. Reference source `df6363e5` is integrated as
+  `842eb31e`; build complete VIEW inventory and finality with Burn. Snapshot/root
+  and reference runtime campaigns remain distinct from the output result.
+- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: callback regression integrated;
+  actual Mint/archive acceptance remains. Fresh independent Museum preservation
+  review is the current bounded assignment.
+- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: actual preservation fixtures and
+  pending-to-bound VIEW provider source are integrated as `31117240`. Continue
+  genuine declaration/adoption/reference/inventory/finality ceremony; C owns
+  the underlying VIEW contracts. Original scoped27 remains stopped/incomplete.
+- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: V9 repair and original VIEW
+  capture pass root checks. Distinct preservation capture `a398077c` has 82
+  builder passes and fresh review pending. Build a wire oracle from the actual
+  completed native output46 without recompilation or synthetic finality claims.
+- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: scoped reference/VIEW source
+  passes root55. Complete original scoped inventory/archive callers and Safe
+  reconciliation; keep historical ABI129 and newer profiles explicit.
+- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 passed with exact
+  actual CREATE and retained-byte joins; finish independent seal/readback.
+  Launch the reviewed frozen metric48 next, one bounded capture, original caps.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: Rights8 passed; graph-reader
+  review and eight test-only cases integrated. Prepare the exact root16 native
+  selection before launch. Actual successor3 awaits completed Prepared helpers.
+- Metric retention `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: `53cfb5c1` source
+  is integrated as `401ede45`. Exact 155-source/48-case native selection reviewed;
+  Testing owns execution. Original publication22 stays closed until parity/size.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: current-authority graph is
+  integrated. Complete the explicitly versioned V2 token-producer family across
+  checkpoints, snapshots, references, inventory, factories and root writes.
+  Root owns ordinary COLLECTION/scoped stored-root read dispatch. Old V1
+  definitions remain literal; do not relabel the current-Artist producer as V1.
+- Collector gas `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: prior concrete packing
+  drafts do not meet 500,000. Cost a single late-published shared immutable
+  receipt with exact original callback and replay semantics before prototype
+  compilation. Experimental files only; no cap or payload reduction.
 
-Root metric native21 is eight passes/one gas failure. Original native22 stays
-closed until the new component passes source review, exact native parity and
-size checks. Root's ABI139 has complete committed-source readback; latest
-client54 passes against `a6af993b`; Museum has 119 passes and four fixture
-initialization errors under repair. Streaming package tests remain pending.
-The selected-codegen verifier also needs a narrow synthetic library immutable
-marker fix before completed Rights8 native output can reach execution; Testing
-owns that repair without repeating the completed native compile.
+Root ABI141 has complete committed-source readback at `842eb31e`; root120
+tooling regressions and 23 documentation regressions pass. No root compiler
+is left running. Check current owned PIDs before any launch or intervention.
 Full current/Safe/stateful/fuzz/gas/capacity/CI, candidate freeze and matching
-testnet remain. RC1 stays immutable. No funding or onchain action is needed.
+testnet remain. RC1 stays immutable. No new funding or onchain action is needed.
 
 ## Earlier source-specific assignments
 
