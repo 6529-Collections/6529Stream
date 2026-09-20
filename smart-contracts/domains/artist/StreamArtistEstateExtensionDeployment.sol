@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "./StreamArtistIdentityEstateExtension.sol";
+import "./StreamArtistCreationSource.sol";
 
 /// @notice Fixed linked construction for an explicitly bound future Identity host.
 library StreamArtistEstateExtensionDeployment {
@@ -12,10 +12,8 @@ library StreamArtistEstateExtensionDeployment {
         address core,
         address manager
     ) public returns (address) {
-        return address(
-            new StreamArtistIdentityEstateExtension(
-                host, registry, coordinator, archive, core, manager
-            )
+        return StreamArtistCreationSource.deploy(
+            2, abi.encode(host, registry, coordinator, archive, core, manager)
         );
     }
 }

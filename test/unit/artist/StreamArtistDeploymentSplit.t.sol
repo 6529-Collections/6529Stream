@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import { StreamArtistEstateCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+
 import "./ArtistOnboardingFixture.sol";
 import {
     StreamArtistExtensionAdmission
@@ -57,9 +60,23 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
     }
 
     function testEachActualFactoryChildAndHostFitsConservativeDeploymentEnvelope() public {
+        address[4] memory parts;
+        for (uint8 i; i < 4; ++i) {
+            uint256 beforePart = gasleft();
+            bytes memory partInit;
+            if (i < 2) {
+                parts[i] = address(new StreamArtistIdentityCreationPart(i));
+                partInit = bytes.concat(type(StreamArtistIdentityCreationPart).creationCode, abi.encode(i));
+            } else {
+                parts[i] = address(new StreamArtistEstateCreationPart(i - 2));
+                partInit = bytes.concat(type(StreamArtistEstateCreationPart).creationCode, abi.encode(i - 2));
+            }
+            _measure(bytes32(uint256(100 + i)), beforePart, partInit);
+            require(parts[i].code.length <= 24_576 && partInit.length <= 49_152, "part deployment bounds");
+        }
         uint256 started = gasleft();
-        StreamArtistExtensionFactory f = new StreamArtistExtensionFactory();
-        _measure(keccak256("factory"), started, type(StreamArtistExtensionFactory).creationCode);
+        StreamArtistExtensionFactory f = new StreamArtistExtensionFactory(parts);
+        _measure(keccak256("factory"), started, bytes.concat(type(StreamArtistExtensionFactory).creationCode, abi.encode(parts)));
         require(
             address(f).codehash == keccak256(type(StreamArtistExtensionFactory).runtimeCode)
                 && address(f).code.length <= 24_576,

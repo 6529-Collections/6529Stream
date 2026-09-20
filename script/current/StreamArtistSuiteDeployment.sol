@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityCreationPart } from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import { StreamArtistEstateCreationPart } from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+
 import {
     StreamArtistExtensionFactory
 } from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
@@ -84,7 +87,12 @@ abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
             )
         );
         address nextCoordinator = _reserveCurrentCoordinator(_artistDeploymentSender());
-        StreamArtistExtensionFactory artistExtensions = new StreamArtistExtensionFactory();
+        StreamArtistExtensionFactory artistExtensions = new StreamArtistExtensionFactory([
+            address(new StreamArtistIdentityCreationPart(0)),
+            address(new StreamArtistIdentityCreationPart(1)),
+            address(new StreamArtistEstateCreationPart(0)),
+            address(new StreamArtistEstateCreationPart(1))
+        ]);
         artistRegistry = _deploySplitArtistFacade(
             _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
             _artistDeploymentSender(),

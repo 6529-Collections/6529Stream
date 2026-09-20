@@ -6,6 +6,9 @@ import "./StreamArtistRecoveryExtensionDeployment.sol";
 import "./StreamArtistRegistryWriterDeployment.sol";
 import "./StreamArtistRegistryExtensionDeployment.sol";
 import "./StreamArtistFinalityReadDeployment.sol";
+import { StreamArtistIdentityWriterExtension } from "./StreamArtistIdentityWriterExtension.sol";
+import { StreamArtistEstateCreationHash } from "./StreamArtistEstateCreationHash.sol";
+import { StreamArtistCreationParts } from "./StreamArtistCreationParts.sol";
 
 /// @notice Permissionless fixed-code creation of immutable Artist extensions.
 /// @dev Receipts authenticate actual typed CREATEs; no host-wide reservation or mutable route exists.
@@ -19,6 +22,16 @@ contract StreamArtistExtensionFactory {
     }
     bytes32 private constant DOMAIN = keccak256("6529STREAM_ARTIST_EXTENSION_BIRTH_V1");
     mapping(address => Birth) private _births;
+
+    struct CreationImage {
+        address[2] parts;
+        bytes32[2] runtimeHashes;
+        uint256 length;
+        bytes32 imageHash;
+    }
+    // Constructor-only pins follow the original birth mapping; there is no replacement route.
+    mapping(uint8 => CreationImage) private _creationImages;
+    error InvalidCreationImage(uint8 kind);
     error InvalidExtensionBirth();
     event ExtensionCreated(
         address indexed child,
@@ -27,6 +40,77 @@ contract StreamArtistExtensionFactory {
         bytes32 bindingHash,
         bytes32 runtimeCodeHash
     );
+
+    /// @param parts Identity prefix/tail, then Estate prefix/tail; each starts with STOP.
+    constructor(address[4] memory parts) {
+        _pin(
+            1,
+            [parts[0], parts[1]],
+            keccak256(type(StreamArtistIdentityWriterExtension).creationCode)
+        );
+        _pin(2, [parts[2], parts[3]], StreamArtistEstateCreationHash.expected());
+    }
+
+    function creationImage(uint8 kind) external view returns (CreationImage memory) {
+        if (kind != 1 && kind != 2) revert InvalidCreationImage(kind);
+        return _creationImages[kind];
+    }
+
+    function extensionCreationCode(uint8 kind) external view returns (bytes memory creation) {
+        CreationImage memory image = _creationImages[kind];
+        if (image.imageHash == bytes32(0)) revert InvalidCreationImage(kind);
+        for (uint256 i; i < 2; ++i) {
+            if (image.parts[i].codehash != image.runtimeHashes[i]) {
+                revert InvalidCreationImage(kind);
+            }
+        }
+        creation = _image(kind, image.parts);
+        if (creation.length != image.length || keccak256(creation) != image.imageHash) {
+            revert InvalidCreationImage(kind);
+        }
+    }
+
+    function _pin(uint8 kind, address[2] memory parts, bytes32 expected) private {
+        bytes memory creation = _image(kind, parts);
+        if (keccak256(creation) != expected || creation.length + 192 > 49_152) {
+            revert InvalidCreationImage(kind);
+        }
+        _creationImages[kind] = CreationImage(
+            parts, [parts[0].codehash, parts[1].codehash], creation.length, expected
+        );
+    }
+
+    function _image(uint8 kind, address[2] memory parts)
+        private
+        view
+        returns (bytes memory creation)
+    {
+        uint256 first = parts[0].code.length;
+        uint256 second = parts[1].code.length;
+        if (
+            first != StreamArtistCreationParts.SPLIT + 1 || second <= 1
+                || second > StreamArtistCreationParts.SPLIT + 1
+        ) revert InvalidCreationImage(kind);
+        uint256 prefix0;
+        uint256 prefix1;
+        assembly ("memory-safe") {
+            extcodecopy(mload(parts), 0, 0, 1)
+            prefix0 := byte(0, mload(0))
+            extcodecopy(mload(add(parts, 32)), 0, 0, 1)
+            prefix1 := byte(0, mload(0))
+        }
+        if (prefix0 != 0 || prefix1 != 0) revert InvalidCreationImage(kind);
+        creation = new bytes(first + second - 2);
+        assembly ("memory-safe") {
+            extcodecopy(mload(parts), add(creation, 32), 1, sub(first, 1))
+            extcodecopy(
+                mload(add(parts, 32)),
+                add(add(creation, 32), sub(first, 1)),
+                1,
+                sub(second, 1)
+            )
+        }
+    }
 
     function birth(address child) external view returns (Birth memory) {
         return _births[child];

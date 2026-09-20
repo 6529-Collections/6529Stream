@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import { StreamArtistEstateCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+
 import { StreamArtistExtensionFactory } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 import "./StreamArtistGuardianHeadSelectionActual.t.sol";
 import {
@@ -164,7 +167,12 @@ abstract contract ArtistGuardianAppealFixture is StreamArtistGuardianHeadSelecti
         suite.primaryRevenueClass = PRIMARY;
         _deployEstateArchival(address(core), governance);
         sanctionFixture = new ArtistSanctionFinalityFixture();
-        artistExtensionFactory = new StreamArtistExtensionFactory();
+        artistExtensionFactory = new StreamArtistExtensionFactory([
+            address(new StreamArtistIdentityCreationPart(0)),
+            address(new StreamArtistIdentityCreationPart(1)),
+            address(new StreamArtistEstateCreationPart(0)),
+            address(new StreamArtistEstateCreationPart(1))
+        ]);
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);

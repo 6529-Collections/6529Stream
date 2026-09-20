@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import { StreamArtistEstateCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+
 import "../../helpers/ImmediateRevealFixture.sol";
 import "../../helpers/ArtistArtifactCreate.sol";
 import { StreamArtistExtensionFactory } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
@@ -2922,7 +2925,12 @@ abstract contract ArtistOnboardingFixture is
         suite.primaryRevenueClass = PRIMARY;
         _deployEstateArchival(address(core), governance);
         sanctionFixture = new ArtistSanctionFinalityFixture();
-        artistExtensionFactory = StreamArtistExtensionFactory(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistExtensionFactory.sol:StreamArtistExtensionFactory", abi.encode())));
+        address[4] memory creationParts;
+        creationParts[0] = _artistArtifactCreate("smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart", abi.encode(uint8(0)));
+        creationParts[1] = _artistArtifactCreate("smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart", abi.encode(uint8(1)));
+        creationParts[2] = _artistArtifactCreate("smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart", abi.encode(uint8(0)));
+        creationParts[3] = _artistArtifactCreate("smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart", abi.encode(uint8(1)));
+        artistExtensionFactory = StreamArtistExtensionFactory(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistExtensionFactory.sol:StreamArtistExtensionFactory", abi.encode(creationParts))));
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);

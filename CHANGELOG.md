@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Artist extension creation carriers
+
+- Replace the two oversized embedded-creation wrappers with authenticated,
+  compiler-generated initcode parts and the same Factory-context CREATE.
+- Retain original child bytes, constructor arguments, birth records and nonce
+  behavior; update all current deployment consumers for the explicit part profile.
+  Selected products fit; actual deployment and current-graph execution remain pending.
+
 ## Artist complete living record combinations
 
 - Add one witness-bearing multiple-Artist operation-60 capability for complete

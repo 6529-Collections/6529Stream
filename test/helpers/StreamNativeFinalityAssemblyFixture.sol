@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityCreationPart } from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import { StreamArtistEstateCreationPart } from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+
 import {
     StreamMintArtistConsent
 } from "../../smart-contracts/domains/mint/StreamMintArtistConsent.sol";
@@ -2261,7 +2264,12 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
             )
         );
         s.primaryRevenueClass = keccak256("PRIMARY_SALE");
-        assemblyArtistExtensions = new StreamArtistExtensionFactory();
+        assemblyArtistExtensions = new StreamArtistExtensionFactory([
+            address(new StreamArtistIdentityCreationPart(0)),
+            address(new StreamArtistIdentityCreationPart(1)),
+            address(new StreamArtistEstateCreationPart(0)),
+            address(new StreamArtistEstateCreationPart(1))
+        ]);
         assemblyArtists = _deploySplitArtistFacade(
             StreamNativeAssemblyCreation.creation(
                 StreamNativeAssemblyCreation.Kind.StreamArtistOnboardingRegistry
