@@ -447,6 +447,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified canonical native and ERC20 Dutch purchase callers with
+  inclusion-price quotes, separate reveal funding and original maximum permits.
+
 - Add source-qualified recipient Merkle distribution callers with published-list
   commitments, ordered allowance proofs and original direct/Safe NFT claims.
 

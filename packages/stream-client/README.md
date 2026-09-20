@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Canonical native and ERC20 Dutch purchases](docs/current-canonical-dutch.md)
+  covers original Sales-v1 authorization, mined-price reconciliation, maximum
+  token permits, native reveal allowances and local historical exits.
+
 - [Published recipient distribution allowances](docs/current-distribution-merkle.md)
   adds Manager-selected Merkle configuration, ordered recipient proofs and
   original distribution/claim workflows while preserving the STATIC profile.

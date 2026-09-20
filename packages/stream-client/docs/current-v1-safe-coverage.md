@@ -76,6 +76,10 @@ The [recipient Merkle distribution client](current-distribution-merkle.md)
 separately retains ABI117 for published recipient allowances and original
 distribution/claim CALLs. Earlier STATIC program hashes and evidence are preserved.
 
+The [canonical native/ERC20 Dutch clients](current-canonical-dutch.md) separately
+retain ABI121 for original purchase/payment entry points, pull refunds and
+historical Manager revocation. Carrier callbacks remain protocol-only.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a
