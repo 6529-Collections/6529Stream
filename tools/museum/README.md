@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Original VIEW preservation evidence](../../docs/museum-view-preservation-v1.md)
+adds a distinct capture of the full-output content tree, root-free snapshot and
+typed Router CONTENT_ROOT. It recovers the original checkpoint source from the
+saved snapshot and keeps provider, reference and finality integration separate.
+
 [Adopted VIEW policy output evidence](../../docs/museum-view-policy-output-v2.md)
 provides a separate read-only capture of original adoption, membership, policy,
 checkpoint and covered output records. It preserves the native refusal of VIEW

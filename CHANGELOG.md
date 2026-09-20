@@ -857,6 +857,11 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add a separate VIEW preservation capture with complete output Merkle trees,
+  original root-free snapshot payloads and typed Router CONTENT_ROOT history.
+  Exact offline replay joins distinct producer admission and retained source
+  preimages; full native provider/reference/finality acceptance remains separate.
+
 - Add separate adopted VIEW V2 output evidence capture with original tagged
   adoption history, sealed membership, full entropy policies and complete
   covered output parts/index. Exact offline replay retains historical evidence;
