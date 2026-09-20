@@ -593,6 +593,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified scoped-policy checkpoint, covered-output and root-free
+  snapshot publication clients with original authority and receipt boundaries.
+
 - Add source-qualified scoped-policy source and publication graph preparation
   callers with bounded child progress, Safe receipts and explicit currentness.
 

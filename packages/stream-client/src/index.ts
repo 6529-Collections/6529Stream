@@ -24,6 +24,8 @@ export * from "./current-tagged-policy-view-v2.js";
 export * from "./current-tagged-policy-view-v2-workflow.js";
 export * from "./current-scoped-policy-graph-v2.js";
 export * from "./current-scoped-policy-graph-v2-workflow.js";
+export * from "./current-scoped-policy-publication-v2.js";
+export * from "./current-scoped-policy-publication-v2-workflow.js";
 export * from "./current-manifests.js";
 export * from "./current-secondary.js";
 export * from "./current-native-sale-credits.js";

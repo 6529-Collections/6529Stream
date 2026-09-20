@@ -90,6 +90,11 @@ separately retains ABI129 for the original scoped source factory and fixed
 seven-child publication factory. Graph preparation grants no publication or
 finality authority and preserves the separate COLLECTION and VIEW profiles.
 
+The [scoped full-policy publication client](current-scoped-policy-publication-v2.md)
+extends that same ABI129 profile with original checkpoint, covered-output and
+root-free snapshot calls. Snapshot writer grants, Artist root consent and
+governance/finality authority remain separate requirements.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

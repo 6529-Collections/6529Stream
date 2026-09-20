@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Scoped full-policy publication](docs/current-scoped-policy-publication-v2.md)
+  covers genuine content checkpoints, covered-output verification and root-free
+  snapshot publication under ABI129, with original writer-grant boundaries.
+
 - [Scoped full-policy graph preparation](docs/current-scoped-policy-graph-v2.md)
   covers genuine source sets, bounded seven-child graph preparation, direct/Safe
   receipts and separate historical/current discovery under ABI129.
