@@ -50,6 +50,11 @@ Its separate populated-token recipe adds real owner/Metadata/deployment records
 on a Coordinator-owned fresh local chain, after a pinned compiler-source audit;
 native execution and acceptance remain pending.
 
+The [owner notice adapters](../../docs/museum-owner-notice-adapters.md) preserve
+original steward designations and recovery responses, registered interpretation
+bytes, native notice claims and executed-companion evidence in a separate
+offline-replayable dossier. Delivery claims remain distinct from recipient receipt.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full

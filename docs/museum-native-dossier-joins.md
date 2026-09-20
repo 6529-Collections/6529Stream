@@ -327,6 +327,10 @@ old source block by token-ID coincidence.
 
 ## Remaining acceptance
 
+The separate [owner notice semantic component](museum-owner-notice-adapters.md)
+interprets supported original steward/response records and retains notice/action
+evidence without changing this native-join profile or its original bytes.
+
 The broad owner, independent and token COMPLETE/HEADS requirements remain
 unresolved until applicable host, family and scope completeness is established.
 MetadataV1 alone does not cover every token attestation host. Transfer
