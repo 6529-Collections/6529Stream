@@ -399,7 +399,9 @@ contract StreamConservationPersonhoodReadsTest {
         this.read(2, ARTIST); // Exact-calldata boundary has no record for this collection.
         vm.expectRevert();
         this.read(1, keccak256("different requested Artist"));
-        uint256 originalChain = block.chainid;
+        // Restore the retained fixture value; the optimizer may rematerialize block.chainid
+        // across a cheatcode call because a real transaction cannot change its chain ID.
+        uint256 originalChain = dependencies.chainId;
         vm.chainId(originalChain + 1);
         _reject();
         vm.chainId(originalChain);
