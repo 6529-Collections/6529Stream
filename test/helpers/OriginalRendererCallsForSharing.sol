@@ -31,4 +31,3 @@ library OriginalRendererCallsForSharing {
         assembly ("memory-safe") { returndatacopy(add(result, 32), 0, size) }
     }
 }
-
