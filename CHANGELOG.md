@@ -226,6 +226,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add complete bounded current collection/token RIGHTS selection evidence and
+  offline item-7 composition with original publication blocks and receipt
+  authority. Preserve token precedence, explicit unspecified grants, native
+  selected absence and original schema/profile bytes.
+
 - Add original paid-mint and entropy-registration extraction plus an offline
   composer for complete bounded original-coordinator entropy/event captures.
   Preserve earlier examinations and explicitly retain unresolved entropy when

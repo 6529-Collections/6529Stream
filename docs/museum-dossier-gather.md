@@ -15,6 +15,10 @@ The additive [mint and entropy composer](museum-mint-entropy-evidence.md)
 extracts the retained paid mint and can join a complete original-coordinator
 capture without changing this profile or its historical packages.
 
+The [current RIGHTS composer](museum-current-rights-evidence.md) joins both
+native collection/token selections and their original publications to complete
+item 7 within its source profile, preserving this examination unchanged.
+
 ## Inputs and authority
 
 The original token fixture must pass its external manifest pin and complete

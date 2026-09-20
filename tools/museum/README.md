@@ -6,6 +6,10 @@ record bytes and citation manifests, and export a 19-item acquisition examinatio
 The additive executed-recovery `rec` qualifier preserves V1 definitions;
 unsupported complete-packet fields remain explicit.
 
+[Current collection and token RIGHTS](../../docs/museum-current-rights-evidence.md)
+replay both native selections, their histories and original publication authority,
+then compose the exact item-7 fragment into an unchanged token examination.
+
 [Owner-published exhibitions](../../docs/museum-owner-exhibitions.md) join
 original owner receipts to the same-block Core collection mapping and produce
 source-preserving Linked Art packages for the existing BagIt/OCFL consumers.
