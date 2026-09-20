@@ -310,7 +310,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
                 manifest
             )
         );
-        SecondaryInventory.SecondaryInventory memory saved = inventory.inventoryDetails(id);
+        SecondaryInventory.Inventory memory saved = inventory.inventoryDetails(id);
         require(
             saved.configHash == configHash && saved.inventoryHash == manifest
                 && keccak256(abi.encode(saved.tokenIds)) == keccak256(abi.encode(ids)),
