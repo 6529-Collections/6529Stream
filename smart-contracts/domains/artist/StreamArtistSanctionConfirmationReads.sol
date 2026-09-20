@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamFinalityCurrentAuthority
+} from "../../interfaces/stream/finality/IStreamFinalityCurrentAuthority.sol";
+import {
+    StreamArtistCurrentAuthorityTypes as CurrentAuthority
+} from "../../interfaces/stream/artist/StreamArtistCurrentAuthorityTypes.sol";
+import { StreamArtistCurrentFinalityRoute } from "./StreamArtistCurrentFinalityRoute.sol";
 
 import "./StreamArtistSanctionHashes.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
@@ -35,6 +42,23 @@ library StreamArtistSanctionConfirmationReads {
         view
         returns (Confirmation.Observation memory o)
     {
+        return _observe(suite, pins, collectionId, false);
+    }
+
+    function observeCurrentAuthority(
+        T.SuiteConfiguration memory suite,
+        Pins memory pins,
+        uint256 collectionId
+    ) public view returns (Confirmation.Observation memory o) {
+        return _observe(suite, pins, collectionId, true);
+    }
+
+    function _observe(
+        T.SuiteConfiguration memory suite,
+        Pins memory pins,
+        uint256 collectionId,
+        bool currentAuthority
+    ) private view returns (Confirmation.Observation memory o) {
         _pins(suite, pins);
         Trace memory trace = Trace(pins.readGas, bytes32(0));
         o.binding_ = _binding(suite, trace, collectionId);
@@ -53,7 +77,7 @@ library StreamArtistSanctionConfirmationReads {
         o.finalityRecord = _record(pins, trace, collectionId);
         o.components =
             _components(pins, trace, collectionId, o.finalityRecord.componentsHash, current);
-        _witnesses(suite, pins, trace, o);
+        _witnesses(suite, pins, trace, o, currentAuthority);
         _pins(suite, pins);
         o.rawReadHash = trace.hash;
     }
@@ -261,7 +285,8 @@ library StreamArtistSanctionConfirmationReads {
         T.SuiteConfiguration memory suite,
         Pins memory pins,
         Trace memory trace,
-        Confirmation.Observation memory o
+        Confirmation.Observation memory o,
+        bool currentAuthority
     ) private view {
         if (
             _address(
@@ -269,12 +294,32 @@ library StreamArtistSanctionConfirmationReads {
                         pins.finalityRegistry,
                         IStreamFinalityDeploymentBindings.coreReads.selector
                     ) != suite.core
-                || _address(
-                        trace,
-                        pins.finalityRegistry,
-                        IStreamFinalityDeploymentBindings.sanctionReads.selector
-                    ) != suite.registry
+                || (!currentAuthority
+                    && _address(
+                            trace,
+                            pins.finalityRegistry,
+                            IStreamFinalityDeploymentBindings.sanctionReads.selector
+                        ) != suite.registry)
         ) revert Confirmation.InvalidSanctionConfirmation();
+        if (currentAuthority) {
+            (bool supported, CurrentAuthority.Route memory expected) = StreamArtistCurrentFinalityRoute.resolve(
+                suite, block.chainid, o.sanction.terms.collectionId, pins.readGas
+            );
+            bytes memory route = _read(
+                trace,
+                pins.finalityRegistry,
+                abi.encodeCall(
+                    IStreamFinalityCurrentAuthority.currentArtistAuthority,
+                    (o.sanction.terms.collectionId)
+                ),
+                320
+            );
+            if (
+                !supported || expected.finalityRegistry != pins.finalityRegistry
+                    || expected.finalityCodeHash != pins.finalityCodeHash
+                    || keccak256(route) != keccak256(abi.encode(expected))
+            ) revert Confirmation.InvalidSanctionConfirmation();
+        }
         address artifact = _address(
             trace,
             pins.finalityRegistry,

@@ -16,11 +16,36 @@ library StreamArtistSanctionConfirmationOperations {
         address actor,
         uint256 collectionId
     ) public {
+        _confirm(x, pins, actor, collectionId, false);
+    }
+
+    function confirmCurrentAuthority(
+        D.CoordinatorContext memory x,
+        StreamArtistSanctionConfirmationReads.Pins memory pins,
+        address actor,
+        uint256 collectionId
+    ) public {
+        _confirm(x, pins, actor, collectionId, true);
+    }
+
+    function _confirm(
+        D.CoordinatorContext memory x,
+        StreamArtistSanctionConfirmationReads.Pins memory pins,
+        address actor,
+        uint256 collectionId,
+        bool currentAuthority
+    ) private {
         T.Snapshot[7] memory prior = _snapshots(x.suite);
-        Confirmation.Observation memory first =
-            StreamArtistSanctionConfirmationReads.observe(x.suite, pins, collectionId);
-        Confirmation.Observation memory second =
-            StreamArtistSanctionConfirmationReads.observe(x.suite, pins, collectionId);
+        Confirmation.Observation memory first = currentAuthority
+            ? StreamArtistSanctionConfirmationReads.observeCurrentAuthority(
+                x.suite, pins, collectionId
+            )
+            : StreamArtistSanctionConfirmationReads.observe(x.suite, pins, collectionId);
+        Confirmation.Observation memory second = currentAuthority
+            ? StreamArtistSanctionConfirmationReads.observeCurrentAuthority(
+                x.suite, pins, collectionId
+            )
+            : StreamArtistSanctionConfirmationReads.observe(x.suite, pins, collectionId);
         if (
             keccak256(abi.encode(first)) != keccak256(abi.encode(second))
                 || keccak256(abi.encode(prior)) != keccak256(abi.encode(_snapshots(x.suite)))

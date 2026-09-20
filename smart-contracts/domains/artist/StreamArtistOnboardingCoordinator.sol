@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCurrentFinalityRoute } from "./StreamArtistCurrentFinalityRoute.sol";
+import {
+    IStreamArtistCurrentFinality
+} from "../../interfaces/stream/artist/IStreamArtistCurrentFinality.sol";
+import {
+    StreamArtistCurrentAuthorityTypes as CurrentAuthority
+} from "../../interfaces/stream/artist/StreamArtistCurrentAuthorityTypes.sol";
 import "./StreamArtistBindingCorrectionOperations.sol";
 import {
     StreamArtistRecoveredHydrationTypes as Recovered
@@ -393,7 +400,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSanctionOperations.record(
-            _economicContext(), _sanctionPins(), actor, p, a
+            _economicContext(), _sanctionPins(p.terms.collectionId), actor, p, a
         );
     }
 
@@ -520,6 +527,24 @@ contract StreamArtistOnboardingCoordinator is
         operation
     {
         uint256 cap = _finalityReadGas();
+        if (StreamArtistCurrentFinalityRoute.isAnchoredCapability(
+                _suite.metadata, collectionId, cap
+            )) {
+            CurrentAuthority.Route memory route = currentFinalityRoute(collectionId);
+            StreamArtistSanctionConfirmationOperations.confirmCurrentAuthority(
+                _economicContext(),
+                StreamArtistSanctionConfirmationReads.Pins(
+                    route.finalityRegistry,
+                    route.finalityCodeHash,
+                    _runtimeHashes[9],
+                    _runtimeHashes[7],
+                    cap
+                ),
+                actor,
+                collectionId
+            );
+            return;
+        }
         StreamArtistSanctionConfirmationOperations.confirm(
             _economicContext(),
             StreamArtistSanctionConfirmationReads.Pins(
@@ -548,14 +573,45 @@ contract StreamArtistOnboardingCoordinator is
             StreamArtistHashes.Environment(
                 block.chainid, _suite.registry, _suite.core, _suite.mintManager
             ),
-            _sanctionPins(),
+            _sanctionPins(p.terms.collectionId),
             msg.data
         );
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
-    function _sanctionPins() private view returns (StreamArtistSanctionCandidate.Pins memory) {
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == 0x01ffc9a7 || id == type(IStreamArtistCurrentFinality).interfaceId;
+    }
+
+    function currentFinalityRoute(uint256 collectionId)
+        public
+        view
+        returns (CurrentAuthority.Route memory route)
+    {
+        bool supported;
+        (supported, route) = StreamArtistCurrentFinalityRoute.resolve(
+            _suite, deploymentChainId, collectionId, _finalityReadGas()
+        );
+        if (!supported) revert CurrentAuthority.InvalidCurrentAuthority();
+    }
+
+    function _sanctionPins(uint256 collectionId)
+        private
+        view
+        returns (StreamArtistSanctionCandidate.Pins memory)
+    {
         uint256 cap = _finalityReadGas();
+        (bool supported, CurrentAuthority.Route memory route) =
+            StreamArtistCurrentFinalityRoute.resolve(_suite, deploymentChainId, collectionId, cap);
+        if (supported) {
+            return StreamArtistSanctionCandidate.Pins(
+                route.finalityRegistry,
+                route.finalityCodeHash,
+                route.provider,
+                route.providerCodeHash,
+                cap
+            );
+        }
         return StreamArtistSanctionCandidate.Pins(
             finalityRegistry,
             finalityRegistryCodeHash,
