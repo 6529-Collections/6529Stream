@@ -603,6 +603,7 @@ contract StreamArtistIdentityAuthority is
                 _rotations,
                 _resolutions,
                 _estate,
+                _dormancy,
                 _ownerContext(),
                 msg.data
             )

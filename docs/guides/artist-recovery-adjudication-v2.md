@@ -121,6 +121,46 @@ requirements mature. Its original early marker and empty dismissal closure
 remain unchanged. This does not relax an ancestor's maturity or the eligibility
 required before a later rotation was actually staged.
 
+## Current living notice recovery
+
+The same V2 selectors also admit an original class1 compromise captured while
+a dormancy notice was open (`priorStatus == 2`). The cause must name its exact
+original operation41 notice, have no pending transition and belong to the
+authenticated living authority history. The notice may still be open, or may
+already have its original operation42 cancellation while the artist remains
+contested. A completed operation43 is a different authority origin.
+
+The reader checks the original notice terms, deadline, inactivity and notice
+durations, timing revision, incumbent, liveness and activity counter. It joins
+the cause, replay admission and native receipt, and checks the execution and
+staging boundaries at the original notice initiation time. Earlier challenges
+dismissed back to status2 retain their exact notice association and first
+closures. Passing the notice deadline does not complete the notice or resolve
+the compromise.
+
+After governance and the new Safe's acceptance succeed, operation35 installs
+the recovered living principal and invokes the original dormancy activity
+writer. An open notice receives one genuine cancellation by that accepted new
+principal, with its captured activity counter incremented once. The original
+notice and deadline remain immutable. The native operation42 receipt precedes
+the original adjacent operation35 primary/secondary pair, and cancellation and
+recovery replay share the same new owner revision. If a cancellation already
+exists, its terminal is retained and no second cancellation is created.
+
+Future V2 recovery authenticates a historical new-side cancellation through
+that exact admitted operation35, its consumed cause, notice association,
+vesting and receipt order. Ordinary incumbent cancellations keep their original
+rules. The current-notice context and selection source add tagged commitments
+to these facts; contexts with no new notice source retain their original bytes.
+The Archive preparation payload adds the original cause and notice state.
+Execution adds the exact before/after notice evidence inside the original
+operation envelope. An Archive failure rolls back acceptance, cancellation,
+recovery, replay, receipts and owner state together.
+
+Notice cancellation after preparation advances the owner revision and requires
+a newly anchored manifest and action. The existing retained-guardian veto and
+ARBITER/APPEAL rules apply unchanged.
+
 ## Compatibility and remaining domains
 
 V2 uses explicit selectors and separate evidence, context, preparation and
@@ -131,9 +171,9 @@ content or completing an external selection does not opt a V1 request into V2.
 The [original staging-family guide](artist-recovery-staging-family.md) describes
 those earlier selector paths.
 
-Current active-notice lifecycle recovery, class4/steward-to-living recovery,
-non-guardian record rewinds and broader hydration remain separate required
-domains. Their absence here does not amend the authority specification.
+Class4/steward-to-living recovery, non-guardian record rewinds and broader
+hydration remain separate required domains. Their absence here does not amend
+the authority specification.
 
 ## Authored validation
 
@@ -154,6 +194,13 @@ membership, exact calldata, acceptance, original receipt
 preimages, closure preservation, Archive failure with identical retry and
 replay rejection. The publisher and worker hosts separately exercise grammar,
 immutable bindings and bounded preparation controls.
+
+The separate
+[current-notice host](../../test/unit/artist/StreamArtistCurrentNoticeRecoveryActual.t.sol)
+uses original notice, compromise, dismissal, cancellation and recovery producers.
+It covers zero/32/prior35 ancestry, repeated notice challenges, retained phase2
+terminals, future recovery, exact cancellation and Archive evidence, stale
+preparation, guardian veto and atomic rollback with identical retry.
 
 Implementation validation uses source review and ABI/type checks. These checks
 do not establish runtime acceptance. Native execution, combined current-stack

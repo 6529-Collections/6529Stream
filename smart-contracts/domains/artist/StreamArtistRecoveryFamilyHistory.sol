@@ -10,6 +10,9 @@ import {
 } from "./StreamArtistIdentityResolutionState.sol";
 import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
 import {
+    StreamArtistCurrentNoticeRecoveryReads as CurrentNotice
+} from "./StreamArtistCurrentNoticeRecoveryReads.sol";
+import {
     StreamArtistRecoveryFamilyProfile as Profile
 } from "./StreamArtistRecoveryFamilyProfile.sol";
 import {
@@ -56,6 +59,9 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
+import {
+    IStreamArtistIdentityRecoveryOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import {
     IStreamArtistEstateOwner
 } from "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
@@ -109,6 +115,7 @@ library StreamArtistRecoveryFamilyHistory {
         Episode[] episodes;
         I.Record[] recoveries;
         bool adjudication;
+        bool withNotice;
     }
 
     /// @notice Full explicit adjudication history over caller-authenticated complete ancestry.
@@ -124,19 +131,55 @@ library StreamArtistRecoveryFamilyHistory {
         V.Snapshot memory bridge,
         R.TransitionState memory bridgeTransition
     ) public view returns (bytes32) {
+        return _readAdjudication(
+            recovery, rotations, resolutions, e, current, ancestry, bridge, bridgeTransition, false
+        );
+    }
+
+    function readAdjudicationWithNotice(
+        State.State storage recovery,
+        Rotations.State storage rotations,
+        Resolution.State storage resolutions,
+        Hashes.Environment memory e,
+        D.Cause memory current,
+        Ancestry.Facts memory ancestry,
+        V.Snapshot memory bridge,
+        R.TransitionState memory bridgeTransition
+    ) public view returns (bytes32) {
+        return _readAdjudication(
+            recovery, rotations, resolutions, e, current, ancestry, bridge, bridgeTransition, true
+        );
+    }
+
+    function _readAdjudication(
+        State.State storage recovery,
+        Rotations.State storage rotations,
+        Resolution.State storage resolutions,
+        Hashes.Environment memory e,
+        D.Cause memory current,
+        Ancestry.Facts memory ancestry,
+        V.Snapshot memory bridge,
+        R.TransitionState memory bridgeTransition,
+        bool withNotice
+    ) private view returns (bytes32) {
         Chain memory h;
         h.artistId = current.facts.artistId;
         h.current = current;
         h.bridge = bridge;
         h.bridgeTransition = bridgeTransition;
         h.adjudication = true;
+        h.withNotice = withNotice;
         h.members = ancestry.members;
         if (h.members.length == 0 || ancestry.proof == 0) {
             revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
         }
-        h.capture = Current.readFamily(
-            address(this), e.registry, e.chainId, current, h.members[0].transition
-        );
+        h.capture = withNotice && current.facts.priorStatus == 2
+            ? Current.readNotice(
+                address(this), e.registry, e.chainId, current, h.members[0].transition
+            )
+            : Current.readFamily(
+                address(this), e.registry, e.chainId, current, h.members[0].transition
+            );
         h.recoveries = new I.Record[](h.members.length);
         for (uint256 i; i < h.members.length; ++i) {
             if (h.members[i].vesting.operationId == 35) {
@@ -288,6 +331,9 @@ library StreamArtistRecoveryFamilyHistory {
         uint64 nextAt = h.current.facts.enteredAt;
         Dorm.Notice memory newer;
         bool activeBetween;
+        if (h.withNotice && h.current.facts.priorStatus == 2) {
+            newer = CurrentNotice.readCause(e, h.current).notice;
+        }
         for (uint256 i; i < count; ++i) {
             Episode memory x;
             x.cause = resolutions.causes[selected];
@@ -314,9 +360,13 @@ library StreamArtistRecoveryFamilyHistory {
                 ) {
                     revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
                 }
-                Current.Facts memory capture = Current.readConsumed(
-                    address(this), e.registry, e.chainId, x.cause, m.transition
-                );
+                Current.Facts memory capture = h.withNotice && x.cause.facts.priorStatus == 2
+                    ? Current.readConsumedNotice(
+                        address(this), e.registry, e.chainId, x.cause, m.transition
+                    )
+                    : Current.readConsumed(
+                        address(this), e.registry, e.chainId, x.cause, m.transition
+                    );
                 x.contest = capture.contest;
                 x.recoveryRecordHash = recovered.recordHash;
                 delete x.dismissal;
@@ -327,12 +377,32 @@ library StreamArtistRecoveryFamilyHistory {
                         _consumption(e, h.artistId, selected, recovered.recordHash)
                     )
                 );
+                if (h.withNotice && x.cause.facts.priorStatus == 2) {
+                    CurrentNotice.Facts memory notice = CurrentNotice.readCause(e, x.cause);
+                    if (
+                        notice.phase != 2
+                            || notice.cancellation.observedAt > recovered.fields.recoveredAt
+                    ) {
+                        revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
+                    }
+                    x.notice = notice.notice;
+                    x.cancellation = notice.cancellation;
+                    if (
+                        newer.recordHash != 0 && newer.recordHash != notice.notice.recordHash
+                            && (notice.notice.priorActivity >= newer.priorActivity
+                                || notice.cancellation.observedAt > newer.initiatedAt)
+                    ) {
+                        revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
+                    }
+                    newer = notice.notice;
+                    x.proof = keccak256(abi.encode(x.proof, notice.proof));
+                }
                 proof = keccak256(abi.encode(proof, x.proof, m.vesting, m.incumbent, m.before));
                 h.episodes[i] = x;
                 nextAt = x.cause.facts.enteredAt;
                 selected = x.cause.facts.previousCauseHash;
                 resolution = x.cause.facts.previousResolutionHash;
-                activeBetween = true;
+                activeBetween = !(h.withNotice && x.cause.facts.priorStatus == 2);
                 continue;
             }
             if (x.cause.facts.priorStatus == 2) {
@@ -353,6 +423,29 @@ library StreamArtistRecoveryFamilyHistory {
                         boundary
                     );
                     x.notice = h.notice;
+                } else if (h.withNotice && (phase == 1 || _recoveryCancelledNotice(noticeHash))) {
+                    (x.proof, x.contest, x.notice, x.cancellation) =
+                        NoticeHistory.selectedUncompleted(
+                            resolutions, e, selected, resolution, boundary
+                        );
+                    if (
+                        x.notice.incumbent != m.incumbent
+                            || x.notice.initiatedAt < m.transition.executedAt
+                            || x.cancellation.observedAt > m.before
+                    ) {
+                        revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
+                    }
+                    if (phase == 1) {
+                        (bytes32 currentNotice, uint8 currentPhase,) = IStreamArtistDormancyOwner(
+                                address(this)
+                            ).dormancyResolutionState(h.artistId, h.current.causeHash);
+                        if (
+                            h.current.facts.priorStatus != 2 || currentNotice != noticeHash
+                                || currentPhase != 1
+                        ) {
+                            revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
+                        }
+                    }
                 } else {
                     Cancelled.Facts memory old = Cancelled.readAt(
                         resolutions, e, h.artistId, selected, resolution, h.current.facts.enteredAt
@@ -445,6 +538,12 @@ library StreamArtistRecoveryFamilyHistory {
         revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
     }
 
+    function _recoveryCancelledNotice(bytes32 hash) private view returns (bool) {
+        (Dorm.Notice memory n, uint8 phase, Dorm.Terminal memory t) =
+            IStreamArtistDormancyOwner(address(this)).dormancyRecord(hash);
+        return phase == 2 && t.authorityClass == 1 && t.actor != n.incumbent;
+    }
+
     function _closures(
         Rotations.State storage rotations,
         Resolution.State storage resolutions,
@@ -510,6 +609,36 @@ library StreamArtistRecoveryFamilyHistory {
                     );
                 } else {
                     revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
+                }
+            }
+            if (h.withNotice) {
+                D.Cause memory noticeCause;
+                if (i == 0 && h.current.facts.priorStatus == 2) {
+                    noticeCause = h.current;
+                } else if (i != 0 && h.members[i - 1].vesting.operationId == 35) {
+                    I.Record memory childRecovery = IStreamArtistIdentityRecoveryOwner(
+                            address(this)
+                        ).identityRecoveryRecord(h.members[i - 1].transition.recordHash);
+                    D.Cause memory consumed =
+                        resolutions.causes[childRecovery.terms.expectedCauseHash];
+                    if (consumed.facts.priorStatus == 2) noticeCause = consumed;
+                }
+                if (noticeCause.causeHash != 0) {
+                    CurrentNotice.Facts memory notice = CurrentNotice.readCause(e, noticeCause);
+                    Stages.Head memory atNotice = Stages.beforeNotice(
+                        address(this), e.registry, e.chainId, h.artistId, notice.notice.recordHash
+                    );
+                    if (
+                        stage.recordHash != atNotice.recordHash
+                            || stage.operation != atNotice.operation
+                            || stage.ownerRevision != atNotice.ownerRevision
+                    ) {
+                        revert I.UnsupportedIdentityRecoveryProfile(h.artistId);
+                    }
+                    before = notice.notice.initiatedAt;
+                    _eligibleAt(resolutions, h, m.transition, before, atNotice.boundaryRevision);
+                    stage = atNotice;
+                    proof = keccak256(abi.encode(proof, notice.proof));
                 }
             }
             bytes32 staging = _staging(rotations, resolutions, e, h, m, stage, before);

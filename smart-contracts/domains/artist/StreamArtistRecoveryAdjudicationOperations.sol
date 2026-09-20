@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistIdentityDismissalOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import {
+    StreamArtistIdentityDismissalTypes as Resolution
+} from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
+import {
+    IStreamArtistDormancyOwner,
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 
 import { StreamArtistRecoveryActionReads as Reads } from "./StreamArtistRecoveryActionReads.sol";
 import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
@@ -166,6 +176,14 @@ library StreamArtistRecoveryAdjudicationOperations {
         bytes memory payload = abi.encode(
             p, acceptance, context, saved, count, history, selection, restored, state, evidence
         );
+        bytes memory notice = _noticeEvidence(identity, p.expectedCauseHash);
+        if (notice.length != 0) {
+            payload = abi.encode(
+                keccak256("6529STREAM_ARTIST_CURRENT_NOTICE_RECOVERY_PREPARATION_V1"),
+                payload,
+                notice
+            );
+        }
         _archive(x, actor, A.PREPARE_OPERATION, association, before_, payload);
     }
 
@@ -199,6 +217,7 @@ library StreamArtistRecoveryAdjudicationOperations {
             .identityRecoveryActionState(p.artistId, governance.actionId);
         if (prepared.associationHash != state.associationHash) revert T.InvalidRecord();
         T.SignerApproval memory proof = _verify(x, actor, p, acceptance, context.incumbent);
+        bytes memory noticeBefore = _noticeEvidence(identity, p.expectedCauseHash);
         record = owner.recoverIdentityV2(
             T.ActionContext(35, actor, before_[2]), p, acceptance, proof, governance, manifestHash
         );
@@ -207,14 +226,40 @@ library StreamArtistRecoveryAdjudicationOperations {
         if (item.recordHash != record || original.latestIdentityRecovery(p.artistId) != record) {
             revert T.InvalidRecord();
         }
-        _archive(
-            x,
-            actor,
-            35,
-            record,
-            before_,
-            abi.encode(p, acceptance, proof, governance, context, item, state, evidence)
-        );
+        bytes memory payload =
+            abi.encode(p, acceptance, proof, governance, context, item, state, evidence);
+        if (noticeBefore.length != 0) {
+            payload = abi.encode(
+                keccak256("6529STREAM_ARTIST_CURRENT_NOTICE_RECOVERY_EXECUTION_V1"),
+                payload,
+                noticeBefore,
+                _noticeEvidence(identity, p.expectedCauseHash)
+            );
+        }
+        _archive(x, actor, 35, record, before_, payload);
+    }
+
+    /// @dev Exact original source views accompany the owner-authenticated context. Archive
+    /// evidence records the lifecycle before and after; it never admits the recovery itself.
+    function _noticeEvidence(address identity, bytes32 causeHash)
+        private
+        view
+        returns (bytes memory)
+    {
+        Resolution.Cause memory cause =
+            IStreamArtistIdentityDismissalOwner(identity).identityContestCause(causeHash);
+        if (cause.facts.priorStatus != 2) return bytes("");
+        (bytes32 noticeHash, uint8 phase, bytes32 terminalHash) = IStreamArtistDormancyOwner(
+                identity
+            ).dormancyResolutionState(cause.facts.artistId, causeHash);
+        (Dorm.Notice memory notice, uint8 observedPhase, Dorm.Terminal memory terminal) =
+            IStreamArtistDormancyOwner(identity).dormancyRecord(noticeHash);
+        if (
+            cause.causeHash != causeHash || causeHash == 0 || noticeHash == 0
+                || notice.recordHash != noticeHash || notice.terms.artistId != cause.facts.artistId
+                || observedPhase != phase || terminal.recordHash != terminalHash
+        ) revert T.InvalidRecord();
+        return abi.encode(cause, notice, phase, terminal);
     }
 
     function _requireNotVetoed(

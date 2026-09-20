@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import {
+    StreamArtistCurrentNoticeRecoveryReads as CurrentNotice
+} from "./StreamArtistCurrentNoticeRecoveryReads.sol";
+import {
     StreamArtistIdentityResolutionState as Resolution
 } from "./StreamArtistIdentityResolutionState.sol";
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
@@ -46,6 +49,50 @@ library StreamArtistDormancyNoticeHistory {
         bytes32 previousResolution;
         bytes32 firstResolution;
         bytes32 closureProof;
+    }
+
+    /// @notice An original restored-status2 episode on a running or recovery-cancelled notice.
+    /// @dev No completed43 snapshot is synthesized; the full walker supplies actual membership.
+    function selectedUncompleted(
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        bytes32 causeHash,
+        bytes32 resolutionHash,
+        uint64 before
+    )
+        public
+        view
+        returns (
+            bytes32 proof,
+            Cont.Record memory contest,
+            Dorm.Notice memory notice,
+            Dorm.Terminal memory cancellation
+        )
+    {
+        D.Cause memory cause = resolutions.causes[causeHash];
+        CurrentNotice.Facts memory f = CurrentNotice.readCause(e, cause);
+        _causeExact(
+            e, f.notice, cause.facts.artistId, cause.facts.executedTransitionHash, cause, causeHash
+        );
+        D.Record memory dismissal = resolutions.records[resolutionHash];
+        _dismissal(e, cause, dismissal, resolutionHash, before);
+        if (f.phase == 2 && dismissal.dismissedAt > f.cancellation.observedAt) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(cause.facts.artistId);
+        }
+        contest = _contest(resolutions, e, cause);
+        notice = f.notice;
+        cancellation = f.cancellation;
+        proof = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_UNCOMPLETED_NOTICE_EPISODE_V1"),
+                f.proof,
+                cause,
+                dismissal,
+                contest,
+                before,
+                CurrentNotice.dismissalProof(e, f, cause, dismissal)
+            )
+        );
     }
 
     /// @notice One original phase3-notice episode selected by a complete cross-origin walker.
@@ -182,11 +229,24 @@ library StreamArtistDormancyNoticeHistory {
         D.Cause memory cause,
         bytes32 expected
     ) private view {
+        _causeExact(
+            e, notice, origin.artistId, origin.previousTransitionRecordHash, cause, expected
+        );
+    }
+
+    function _causeExact(
+        StreamArtistHashes.Environment memory e,
+        Dorm.Notice memory notice,
+        bytes32 artistId,
+        bytes32 execution,
+        D.Cause memory cause,
+        bytes32 expected
+    ) private view {
         if (
-            expected == 0 || cause.causeHash != expected || cause.facts.artistId != origin.artistId
+            expected == 0 || cause.causeHash != expected || cause.facts.artistId != artistId
                 || cause.facts.kind != 1 || cause.facts.authorityClass != 1
                 || cause.facts.priorStatus != 2 || cause.facts.pendingTransitionHash != 0
-                || cause.facts.executedTransitionHash != origin.previousTransitionRecordHash
+                || cause.facts.executedTransitionHash != execution
                 || cause.facts.incumbent != notice.incumbent || cause.facts.actor == address(0)
                 || cause.facts.referenceHash == 0 || cause.facts.evidenceHash == 0
                 || cause.facts.reasonHash == 0 || cause.facts.enteredAt < notice.initiatedAt
@@ -200,7 +260,7 @@ library StreamArtistDormancyNoticeHistory {
                             cause.facts
                         )
                     )
-        ) revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
     }
 
     function _dismissal(

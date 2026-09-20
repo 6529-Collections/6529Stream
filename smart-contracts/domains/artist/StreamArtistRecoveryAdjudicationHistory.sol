@@ -9,6 +9,10 @@ import {
     StreamArtistIdentityResolutionState as Resolution
 } from "./StreamArtistIdentityResolutionState.sol";
 import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
+import { StreamArtistDormancyState as Dormancy } from "./StreamArtistDormancyState.sol";
+import {
+    StreamArtistCurrentNoticeRecoveryReads as CurrentNotice
+} from "./StreamArtistCurrentNoticeRecoveryReads.sol";
 import {
     StreamArtistCurrentCompromiseReads as Current
 } from "./StreamArtistCurrentCompromiseReads.sol";
@@ -98,6 +102,30 @@ library StreamArtistRecoveryAdjudicationHistory {
         Hashes.Environment memory e,
         D.Cause memory current
     ) public view returns (Facts memory f) {
+        return _read(recovery, rotations, resolutions, e, current, false);
+    }
+
+    /// @notice Additive current-notice and consumed-notice source family; ordinary proofs stay exact.
+    function readWithNotice(
+        State.State storage recovery,
+        Rotations.State storage rotations,
+        Resolution.State storage resolutions,
+        Dormancy.State storage dormancy,
+        Hashes.Environment memory e,
+        D.Cause memory current
+    ) public view returns (Facts memory f, CurrentNotice.Facts memory notice) {
+        if (current.facts.priorStatus == 2) notice = CurrentNotice.read(dormancy, e, current);
+        f = _read(recovery, rotations, resolutions, e, current, true);
+    }
+
+    function _read(
+        State.State storage recovery,
+        Rotations.State storage rotations,
+        Resolution.State storage resolutions,
+        Hashes.Environment memory e,
+        D.Cause memory current,
+        bool withNotice
+    ) private view returns (Facts memory f) {
         bytes32 artistId = current.facts.artistId;
         IStreamArtistOwner owner = IStreamArtistOwner(address(this));
         if (
@@ -113,7 +141,9 @@ library StreamArtistRecoveryAdjudicationHistory {
         }
         R.TransitionState memory executed = IStreamArtistRotationReads(address(this))
             .artistTransitionState(rotations.latestExecution[artistId]);
-        f.capture = Current.readFamily(address(this), e.registry, e.chainId, current, executed);
+        f.capture = withNotice && current.facts.priorStatus == 2
+            ? Current.readNotice(address(this), e.registry, e.chainId, current, executed)
+            : Current.readFamily(address(this), e.registry, e.chainId, current, executed);
         f.nativeCauseProof = keccak256(
             abi.encode(
                 f.capture.proof,
@@ -241,9 +271,13 @@ library StreamArtistRecoveryAdjudicationHistory {
         if (successor != address(0) || noticeEnds != 0 || pendingEstate != 0) {
             revert I.UnsupportedIdentityRecoveryProfile(artistId);
         }
-        bytes32 history = Family.readAdjudication(
-            recovery, rotations, resolutions, e, current, ancestry, f.origin, originTransition
-        );
+        bytes32 history = withNotice
+            ? Family.readAdjudicationWithNotice(
+                recovery, rotations, resolutions, e, current, ancestry, f.origin, originTransition
+            )
+            : Family.readAdjudication(
+                recovery, rotations, resolutions, e, current, ancestry, f.origin, originTransition
+            );
         // The internal final zero member proves the genuine initial authority boundary. It is
         // deliberately absent from the public manifest-membership set and cannot be declared.
         f.members = new Ancestry.Member[](ancestry.members.length - 1);

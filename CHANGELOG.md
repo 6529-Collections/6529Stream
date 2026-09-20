@@ -51,6 +51,12 @@ the release policy in `docs/release-policy.md`.
   DISABLED/NOT_REQUIRED token registration, preserving the legacy ASYNC profile.
   Nonrandom consumer integrations and INSTANT support remain separate work;
   current-stack runtime acceptance is pending.
+- Extend Artist recovery V2 to current living notice compromises, retaining
+  original notice and dismissal history. Accepted recovery cancels an open
+  notice through the original activity writer; Archive evidence and later
+  recovery authenticate the exact cancellation and native receipts. Authored
+  regression cases await coordinated native/current-stack validation.
+
 - Add explicit evidence-bound Artist recovery V2 for original class1/class3
   C1/C2 histories, earliest declared vesting cutoffs, hostile-guardian APPEAL
   evidence and complete guardian selection, including authenticated empty results.

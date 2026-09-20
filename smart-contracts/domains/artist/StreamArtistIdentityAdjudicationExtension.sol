@@ -109,6 +109,7 @@ contract StreamArtistIdentityAdjudicationExtension is
             _rotations,
             _resolutions,
             _estate,
+            _dormancy,
             _replay,
             StreamArtistIdentityRecoveryState.PrepareInput(
                 _ownerContext(), c, p, a, witness, previousAssociation, previousTerminal
@@ -173,6 +174,7 @@ contract StreamArtistIdentityAdjudicationExtension is
                 _rotations,
                 _resolutions,
                 _estate,
+                _dormancy,
                 _replay,
                 StreamArtistIdentityRecoveryState.Input(
                     _ownerContext(),

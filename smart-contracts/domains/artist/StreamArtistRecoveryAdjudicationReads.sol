@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyState as Dormancy } from "./StreamArtistDormancyState.sol";
 import {
     StreamArtistRecoveryAdjudicationContext as Context
 } from "./StreamArtistRecoveryAdjudicationContext.sol";
@@ -40,6 +41,7 @@ library StreamArtistRecoveryAdjudicationReads {
         Rotations.State storage rotations,
         Resolutions.State storage resolutions,
         Estate.State storage estate,
+        Dormancy.State storage dormancy,
         Identity.OwnerContext memory o,
         bytes calldata data
     ) public view returns (bytes memory) {
@@ -55,7 +57,9 @@ library StreamArtistRecoveryAdjudicationReads {
         if (selector == SelectionOwner.recoverySelectionBasisV2.selector) {
             bytes32 hash = abi.decode(data[4:], (bytes32));
             return abi.encode(
-                Context.base(s, supplemental, identity, rotations, resolutions, estate, o, hash)
+                Context.base(
+                    s, supplemental, identity, rotations, resolutions, estate, dormancy, o, hash
+                )
                 .selectionBasis
             );
         }
@@ -72,6 +76,7 @@ library StreamArtistRecoveryAdjudicationReads {
                 rotations,
                 resolutions,
                 estate,
+                dormancy,
                 o,
                 request,
                 acceptance,

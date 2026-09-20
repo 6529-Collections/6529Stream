@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyState as Dormancy } from "./StreamArtistDormancyState.sol";
+import { StreamArtistIdentityActivityMutation } from "./StreamArtistIdentityActivityMutation.sol";
 
 import {
     StreamArtistRecoveryAdjudicationContext as Context
@@ -49,6 +51,7 @@ library StreamArtistRecoveryAdjudicationMutation {
         Rotations.State storage rotations,
         Resolutions.State storage resolutions,
         Estate.State storage estate,
+        Dormancy.State storage dormancy,
         mapping(bytes32 => T.ReplayCell) storage replay,
         Recovery.PrepareInput memory i,
         bytes32 manifestHash
@@ -60,6 +63,7 @@ library StreamArtistRecoveryAdjudicationMutation {
             rotations,
             resolutions,
             estate,
+            dormancy,
             i.owner,
             i.request,
             i.acceptance,
@@ -143,6 +147,7 @@ library StreamArtistRecoveryAdjudicationMutation {
         Rotations.State storage rotations,
         Resolutions.State storage resolutions,
         Estate.State storage estate,
+        Dormancy.State storage dormancy,
         mapping(bytes32 => T.ReplayCell) storage replay,
         Recovery.Input memory i,
         bytes32 manifestHash
@@ -161,6 +166,7 @@ library StreamArtistRecoveryAdjudicationMutation {
             rotations,
             resolutions,
             estate,
+            dormancy,
             i.owner,
             i.request,
             i.acceptance,
@@ -201,6 +207,13 @@ library StreamArtistRecoveryAdjudicationMutation {
         m = Mutation.recoverAdjudicated(
             s, identity, rotations, estate, replay, i, f.context, f.selected.recordHash
         );
+        if (f.source.notice.notice.recordHash != 0) {
+            // New-side acceptance has succeeded and installed this actual living principal.
+            // Original activity creates operation42 before the adjacent native operation35 pair.
+            (m.state, m.replay) = StreamArtistIdentityActivityMutation.noteDormancy(
+                dormancy, identity, i.owner, replay, i.request.artistId, i.request.newAddress, 1, m
+            );
+        }
         m.action = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_ADJUDICATION_WRITE_V2"), m.action, evidence

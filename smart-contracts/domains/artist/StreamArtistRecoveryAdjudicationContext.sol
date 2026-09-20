@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyState as Dormancy } from "./StreamArtistDormancyState.sol";
+import {
+    StreamArtistCurrentNoticeRecoveryReads as CurrentNotice
+} from "./StreamArtistCurrentNoticeRecoveryReads.sol";
 
 import {
     StreamArtistIdentityRecoveryState as Recovery
@@ -60,6 +64,7 @@ library StreamArtistRecoveryAdjudicationContext {
         D.Cause cause;
         Ancestry.Facts ancestry;
         SelectionV2.Basis selectionBasis;
+        CurrentNotice.Facts notice;
     }
 
     struct Facts {
@@ -77,6 +82,7 @@ library StreamArtistRecoveryAdjudicationContext {
         Rotations.State storage rotations,
         Resolutions.State storage resolutions,
         Estate.State storage estate,
+        Dormancy.State storage dormancy,
         Identity.OwnerContext memory o,
         bytes32 manifestHash
     ) public view returns (Base memory b) {
@@ -94,7 +100,11 @@ library StreamArtistRecoveryAdjudicationContext {
                 || b.principal.authorityAddress != b.cause.facts.incumbent
                 || b.principal.authorityClass != b.cause.facts.authorityClass
                 || (b.principal.authorityClass != 1 && b.principal.authorityClass != 3)
-                || b.cause.facts.priorStatus != b.principal.authorityClass
+                || (b.cause.facts.priorStatus != b.principal.authorityClass
+                    && !(b.principal.authorityClass == 1
+                        && b.cause.facts.kind == 1
+                        && b.cause.facts.priorStatus == 2
+                        && b.cause.facts.pendingTransitionHash == 0))
                 || identity.activeIdentity[b.principal.authorityAddress] != m.artistId
                 || resolutions.latestResolution[m.artistId] != m.resolutionHash
                 || b.cause.facts.previousResolutionHash != m.resolutionHash
@@ -102,7 +112,8 @@ library StreamArtistRecoveryAdjudicationContext {
                 || b.cause.facts.executedTransitionHash != m.executedHead
                 || rotations.pending[m.artistId] != 0
         ) revert E.InvalidRecoveryManifest(manifestHash);
-        b.ancestry = Ancestry.read(s, rotations, resolutions, o.environment, b.cause);
+        (b.ancestry, b.notice) =
+            Ancestry.readWithNotice(s, rotations, resolutions, dormancy, o.environment, b.cause);
         if (b.ancestry.delegationEpoch != estate.delegationEpoch[m.artistId]) {
             revert E.InvalidRecoveryManifest(manifestHash);
         }
@@ -138,6 +149,15 @@ library StreamArtistRecoveryAdjudicationContext {
                 b.selectionBasis.history
             )
         );
+        if (b.notice.notice.recordHash != 0) {
+            b.selectionBasis.sourceCommitment = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CURRENT_NOTICE_SOURCE_V1"),
+                    b.selectionBasis.sourceCommitment,
+                    b.notice
+                )
+            );
+        }
     }
 
     function read(
@@ -147,12 +167,15 @@ library StreamArtistRecoveryAdjudicationContext {
         Rotations.State storage rotations,
         Resolutions.State storage resolutions,
         Estate.State storage estate,
+        Dormancy.State storage dormancy,
         Identity.OwnerContext memory o,
         I.Request memory p,
         T.Authorization memory acceptance,
         bytes32 manifestHash
     ) public view returns (Facts memory f) {
-        f.source = base(s, supplemental, identity, rotations, resolutions, estate, o, manifestHash);
+        f.source = base(
+            s, supplemental, identity, rotations, resolutions, estate, dormancy, o, manifestHash
+        );
         E.ResolutionManifest memory m = f.source.manifest;
         if (
             p.artistId != m.artistId || p.expectedCauseHash != m.causeHash
@@ -229,6 +252,15 @@ library StreamArtistRecoveryAdjudicationContext {
                 c.delegationEpoch
             )
         );
+        if (f.source.notice.notice.recordHash != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CURRENT_NOTICE_CONTEXT_V1"),
+                    c.oldValueHash,
+                    f.source.notice
+                )
+            );
+        }
         c.newValueHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_INTENT_V2"),

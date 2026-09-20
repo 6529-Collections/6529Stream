@@ -104,7 +104,7 @@ library StreamArtistCurrentCompromiseReads {
         D.Cause memory current,
         R.TransitionState memory executed
     ) public view returns (Facts memory f) {
-        return _readFamily(owner, registry, chainId, current, executed, true);
+        return _readFamily(owner, registry, chainId, current, executed, true, false);
     }
 
     /// @notice Original cause consumed by a caller-authenticated admitted operation35.
@@ -117,7 +117,29 @@ library StreamArtistCurrentCompromiseReads {
         D.Cause memory current,
         R.TransitionState memory executed
     ) public view returns (Facts memory f) {
-        return _readFamily(owner, registry, chainId, current, executed, false);
+        return _readFamily(owner, registry, chainId, current, executed, false, false);
+    }
+
+    /// @dev The fixed notice reader separately authenticates the original phase1/2 lifecycle.
+    function readNotice(
+        address owner,
+        address registry,
+        uint256 chainId,
+        D.Cause memory current,
+        R.TransitionState memory executed
+    ) public view returns (Facts memory) {
+        return _readFamily(owner, registry, chainId, current, executed, true, true);
+    }
+
+    /// @dev The caller also proves the original35 consumption and notice cancellation.
+    function readConsumedNotice(
+        address owner,
+        address registry,
+        uint256 chainId,
+        D.Cause memory current,
+        R.TransitionState memory executed
+    ) public view returns (Facts memory) {
+        return _readFamily(owner, registry, chainId, current, executed, false, true);
     }
 
     function _readFamily(
@@ -126,7 +148,8 @@ library StreamArtistCurrentCompromiseReads {
         uint256 chainId,
         D.Cause memory current,
         R.TransitionState memory executed,
-        bool live
+        bool live,
+        bool notice
     ) private view returns (Facts memory f) {
         bytes32 artistId = current.facts.artistId;
         if (
@@ -135,14 +158,15 @@ library StreamArtistCurrentCompromiseReads {
                 || IStreamArtistOwner(owner).artistRegistry() != registry
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         Environment memory e = Environment(owner, registry, chainId);
-        _familyCause(e, current, executed, live);
+        _familyCause(e, current, executed, live, notice);
         bytes32 subject;
         bytes32 standing;
         bytes32 estateProof;
         if (current.facts.kind == 1) {
             f.contest = IStreamArtistIdentityContestOwner(owner)
                 .identityContestRecord(current.facts.referenceHash);
-            subject = _contestClass(e, current, f.contest, current.facts.authorityClass);
+            subject =
+                _contestClass(e, current, f.contest, notice ? 2 : current.facts.authorityClass);
         } else {
             standing = _standing(e, current);
         }
@@ -181,6 +205,13 @@ library StreamArtistCurrentCompromiseReads {
                     keccak256("6529STREAM_ARTIST_CURRENT_ESTATE_COMPROMISE_FACTS_V1"),
                     f.proof,
                     estateProof
+                )
+            );
+        }
+        if (notice) {
+            f.proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_CURRENT_NOTICE_COMPROMISE_FACTS_V1"), f.proof
                 )
             );
         }
@@ -241,13 +272,17 @@ library StreamArtistCurrentCompromiseReads {
         Environment memory e,
         D.Cause memory current,
         R.TransitionState memory executed,
-        bool live
+        bool live,
+        bool notice
     ) private view {
         D.CauseFacts memory c = current.facts;
         if (
             c.artistId == 0 || current.causeHash == 0 || (c.kind != 1 && c.kind != 2)
                 || (c.authorityClass != 1 && c.authorityClass != 3)
-                || c.priorStatus != c.authorityClass || c.incumbent == address(0)
+                || (notice
+                        ? c.kind != 1 || c.authorityClass != 1 || c.priorStatus != 2
+                        || c.pendingTransitionHash != 0
+                        : c.priorStatus != c.authorityClass) || c.incumbent == address(0)
                 || c.actor == address(0) || c.referenceHash == 0
                 || (c.kind == 1
                         ? c.evidenceHash == 0 || c.reasonHash == 0
