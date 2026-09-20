@@ -66,6 +66,16 @@ script profiles bind the full native script manifest and original finalized
 stored bytes; a nonzero library dependency is unavailable in this versioned
 profile rather than omitted from its denominator.
 
+For the original stable Router profile, an OFFCHAIN script has zero bytes and
+`scriptHash = keccak256("")`, matching the Router's exact empty-field hash
+convention. The provider retains those facts unchanged in source context while
+the semantic release's absent `scriptSourceHash` remains zero. A zero or opaque
+serving hash, nonzero OFFCHAIN script length, or OFFCHAIN chunked profile is
+unavailable; these are not alternate absent-script encodings. The focused
+regression calls the original Router facts library over explicit storage/Core
+boundaries; it does not establish Router write authorization or paid-flow
+acceptance.
+
 `currentReleaseContext(collectionId)` is a source diagnostic for prospective
 evidence preparation. It does not consume reference evidence or certify floor
 completion. `saleRelease` checks current supported semantic membership. Full

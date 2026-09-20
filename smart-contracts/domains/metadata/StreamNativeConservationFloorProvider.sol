@@ -322,7 +322,13 @@ contract StreamNativeConservationFloorProvider is
         bytes32 scriptManifest;
         if (r.scriptWork) {
             (r.scriptSourceHash, scriptManifest) = _script(sale.collectionId, serving);
-        } else if (serving.scriptHash != 0 || serving.scriptBytes != 0) {
+        } else if (
+            serving.scriptHash != keccak256("") || serving.scriptBytes != 0
+                || serving.presentationProfile
+                    != keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1")
+        ) {
+            // Original stable Router facts hash the exact empty bytes. Absence remains a
+            // zero derived script source; a chunked profile always describes an ONCHAIN bundle.
             revert NativeConservationScopeUnavailable();
         }
         r.membershipHash = keccak256(

@@ -5,6 +5,16 @@ import "./StreamConservationSelectionFixture.sol";
 import "../../../smart-contracts/domains/metadata/StreamRightsRecordSelection.sol";
 import "../../../smart-contracts/domains/metadata/StreamNativeConservationFloorProvider.sol";
 import {
+    StreamMetadataRouterCollectionReads
+} from "../../../smart-contracts/domains/metadata/StreamMetadataRouterCollectionReads.sol";
+import {
+    StreamMetadataRouter
+} from "../../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import { IStreamCore } from "../../../smart-contracts/interfaces/stream/core/IStreamCore.sol";
+import {
+    IStreamCoreCollectionView
+} from "../../../smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol";
+import {
     StreamArtistPersonhoodTypes as Personhood,
     IStreamArtistPersonhoodEvidence
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistPersonhoodEvidence.sol";
@@ -35,6 +45,7 @@ contract NativeConservationSourceBoundary {
         serving.configured = true;
         serving.mode = keccak256("OFFCHAIN");
         serving.presentationProfile = keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1");
+        serving.scriptHash = keccak256("");
     }
 
     function setOwner(address value) external {
@@ -80,9 +91,44 @@ contract NativeConservationSourceBoundary {
     }
 }
 
+/// @dev Actual original Router facts function over explicit storage and Core boundaries.
+/// This does not exercise Router write authorization, master production or paid settlement.
+contract NativeConservationOriginalRouterFacts {
+    address private immutable core;
+    address private immutable renderer;
+    mapping(uint256 => StreamMetadataRouter.CollectionMetadata) private collections;
+    mapping(uint256 => mapping(bytes32 => bool)) private contentLocks;
+    mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) private presentations;
+    mapping(uint256 => bool) private displayLocks;
+
+    constructor(address c, address r) {
+        core = c;
+        renderer = r;
+        collections[1].configured = true;
+        collections[1].animationScript = "";
+    }
+
+    function collectionServingFacts(uint256 collectionId)
+        external
+        view
+        returns (IStreamMetadataServingFacts.ServingFacts memory)
+    {
+        return StreamMetadataRouterCollectionReads.facts(
+            collections,
+            contentLocks,
+            presentations,
+            displayLocks,
+            IStreamCore(core),
+            collectionId,
+            renderer
+        );
+    }
+}
+
 /// @notice Actual original RIGHTS/Metadata/Schema/Store and conservation selection/receipt checks.
 /// @dev Core/Executor, Artist owners/platform declaration, Router, media and script reads are typed
 /// boundaries. No real personhood, full native graph or archive execution is claimed by this suite.
+/// One regression additionally executes the actual original Router serving-facts producer.
 contract StreamNativeConservationFloorProviderTest is ConservationSelectionFixture {
     bytes32 private constant _LITE = keccak256("MUSEUM_GRADE_LITE");
     bytes32 private constant _FULL = keccak256("MUSEUM_GRADE");
@@ -223,6 +269,122 @@ contract StreamNativeConservationFloorProviderTest is ConservationSelectionFixtu
                 && f.sourceContextHash == r.sourceContextHash,
             "explicit empty denominator and fresh source"
         );
+    }
+
+    function testProviderOriginalRouterEmptyOffchainScriptPreservesNoScriptRelease()
+        public
+        providerReady
+    {
+        StreamConservationFloorTypes.SaleContext memory sale = _sale();
+        StreamConservationFloorTypes.ReleaseContext memory typed = provider.saleRelease(sale);
+        NativeConservationOriginalRouterFacts original =
+            new NativeConservationOriginalRouterFacts(address(core), address(sources));
+        // The existing Core boundary owns collection existence; freeze is its only extra read here.
+        cvm.mockCall(
+            address(core),
+            abi.encodeCall(IStreamCoreCollectionView.collectionFreezeStatus, (uint256(1))),
+            abi.encode(false)
+        );
+        IStreamMetadataServingFacts.ServingFacts memory facts = original.collectionServingFacts(1);
+        require(
+            facts.configured && facts.mode == keccak256("OFFCHAIN")
+                && facts.presentationProfile
+                    == keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1")
+                && facts.scriptHash == keccak256("") && facts.scriptHash != 0
+                && facts.scriptBytes == 0,
+            "actual original Router empty-script facts"
+        );
+        StreamNativeConservationFloorProvider.Configuration memory c = _configuration();
+        c.targets[7] = address(original);
+        c.codeHashes[7] = address(original).codehash;
+        core.setPointer(keccak256("METADATA_ROUTER"), address(original));
+        StreamNativeConservationFloorProvider consumer =
+            new StreamNativeConservationFloorProvider(c);
+        StreamConservationFloorTypes.ReleaseContext memory release = consumer.saleRelease(sale);
+        require(
+            !release.scriptWork && release.scriptSourceHash == 0
+                && release.membershipHash == typed.membershipHash,
+            "empty source hash is not an executable script or a different semantic release"
+        );
+        require(
+            release.sourceContextHash
+                == keccak256(
+                    abi.encode(
+                        consumer.configurationHash(),
+                        sources.manifest(),
+                        bytes32(0),
+                        uint8(0),
+                        facts,
+                        release.membershipHash
+                    )
+                ),
+            "original source context retains the exact unmodified Router facts"
+        );
+    }
+
+    function testProviderOffchainRejectsZeroOpaqueAndContradictoryScriptFacts()
+        public
+        providerReady
+    {
+        StreamConservationFloorTypes.SaleContext memory sale = _sale();
+        IStreamMetadataServingFacts.ServingFacts memory original = sources.collectionServingFacts(1);
+        for (uint256 i; i < 7; ++i) {
+            IStreamMetadataServingFacts.ServingFacts memory bad =
+                abi.decode(abi.encode(original), (IStreamMetadataServingFacts.ServingFacts));
+            if (i == 0) bad.scriptHash = 0; // No original supported profile uses an all-zero empty hash.
+            if (i == 1) bad.scriptHash = keccak256("opaque unserved script");
+            if (i == 2) bad.scriptBytes = 1;
+            if (i == 3) {
+                bad.scriptHash = 0;
+                bad.scriptBytes = 1;
+            }
+            if (i == 4) {
+                bad.scriptHash = keccak256("nonempty script");
+                bad.scriptBytes = 1;
+            }
+            if (i == 5) {
+                bad.presentationProfile = keccak256("6529STREAM_ROUTER_CHUNKED_PRESENTATION_V1");
+            }
+            if (i == 6) bad.mode = keccak256("HYBRID");
+            sources.setServing(bad);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    StreamNativeConservationFloorProvider.NativeConservationScopeUnavailable
+                    .selector
+                )
+            );
+            provider.saleRelease(sale);
+        }
+        sources.setServing(original);
+        require(
+            provider.saleRelease(sale).scriptSourceHash == 0, "exact empty facts restore mapping"
+        );
+    }
+
+    function testProviderOnchainModeCannotUseEmptyScriptLengthOrHash() public providerReady {
+        bytes32 script = keccak256("actual nonempty script fixture");
+        _script(keccak256("original nonempty script manifest"), script, false, 0);
+        StreamConservationFloorTypes.SaleContext memory sale = _sale();
+        require(provider.saleRelease(sale).scriptWork, "valid original typed script control");
+        IStreamMetadataServingFacts.ServingFacts memory serving = sources.collectionServingFacts(1);
+        uint32 originalLength = serving.scriptBytes;
+        serving.scriptBytes = 0;
+        sources.setServing(serving);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamNativeConservationFloorProvider.NativeConservationScopeUnavailable.selector
+            )
+        );
+        provider.saleRelease(sale);
+        serving.scriptBytes = originalLength;
+        serving.scriptHash = keccak256("");
+        sources.setServing(serving);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamNativeConservationFloorProvider.NativeConservationScopeUnavailable.selector
+            )
+        );
+        provider.saleRelease(sale);
     }
 
     function testProviderUnknownCollectionAndUnallocatedTokenReject() public providerReady {

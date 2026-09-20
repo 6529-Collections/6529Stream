@@ -11,6 +11,16 @@ the release policy in `docs/release-policy.md`.
   blocked by 793 bytes. Author 13 owner-level regression cases; native/current-graph
   acceptance remains pending. The separately rejected replay-write proposal is inert.
 
+## Conservation provider original OFFCHAIN facts
+
+- Accept the original stable Router's exact empty-script facts: OFFCHAIN mode,
+  zero script bytes and the Keccak256 hash of empty bytes. Preserve the derived
+  release's zero script source hash and the original facts in source context.
+  Reject contradictory hash, length, mode and presentation-profile combinations.
+- Add a regression through the original Router facts library, with explicit
+  storage and Core boundaries. Source and selected-capacity checks pass;
+  focused runtime and complete Router/paid-flow acceptance remain separate.
+
 ## Artist personhood documentary references
 
 - Join the native conservation sale provider to current resolved personhood or
