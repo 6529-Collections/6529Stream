@@ -251,6 +251,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") == "recorded_independent_exhibition_package":
         from .exhibition_package import verify_exhibition_package
         return verify_exhibition_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_owner_exhibition_package":
+        from .owner_exhibition_package import verify_owner_exhibition_package
+        return verify_owner_exhibition_package(directory, expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "recorded_preservation_activity_graph_package":
         from .preservation_graph_package import verify_graph_package
         return verify_graph_package(directory, expected_manifest_hash)

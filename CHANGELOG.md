@@ -181,6 +181,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add an owner-published exhibition consumer with original receipt/schema
+  admission, same-block token/collection joins, attributed Linked Art resources
+  and complete offline package replay through the BagIt/OCFL workflow.
+  Preserve reported status, burned-token history and original schema meanings.
+
 - Add a complete offline Museum repository export/import workflow with explicit
   historical-version and external hash selection, full declared semantic replay,
   exact original bag restoration and atomic no-overwrite publication.

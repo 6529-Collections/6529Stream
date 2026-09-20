@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Owner-published exhibitions](../../docs/museum-owner-exhibitions.md) join
+original owner receipts to the same-block Core collection mapping and produce
+source-preserving Linked Art packages for the existing BagIt/OCFL consumers.
+
 [Repository export and historical import](../../docs/museum-repository-exchange.md)
 adds an offline round trip for explicitly pinned OCFL versions, complete
 declared semantic replay and atomic publication of exact original bag bytes.
