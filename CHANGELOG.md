@@ -24,6 +24,19 @@ the release policy in `docs/release-policy.md`.
   Reuse the unchanged 19-case attestation suite; scoped native and complete
   seven-owner/current-graph gas acceptance remain pending.
 
+## Merkle recipient allowances for operator distributions
+
+- Admit original Manager/Ledger `MERKLE_STATIC` beneficiary allowances while
+  preserving static phase supply limits, unit increments and existing shared
+  static recipient scopes. Each proven leaf refines the Program's cap ceiling.
+- Add a separate Merkle phase commitment binding the original Program hash,
+  recipient counter definition and nonzero full-list publication hash. Preserve
+  the original Program tuple, V1 hashes, distribution interface ID and slice
+  identity. Existing royalty policy composition wraps the selected commitment.
+- Author actual Manager/Ledger proof, duplicate-recipient, publication,
+  cross-slice and rollback regressions. Native execution, current-stack
+  composition, gas checks and release evidence remain pending.
+
 ## Same-leaf ERC20 price carrier
 
 - Add a dedicated signed one-token price carrier using the original Manager's

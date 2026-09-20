@@ -5,6 +5,7 @@ import "../../helpers/StreamDistributionFixture.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 import "../../../smart-contracts/interfaces/stream/mint/IStreamMintCounterPolicy.sol";
 import "../../../smart-contracts/interfaces/stream/mint/IStreamMintCounterReads.sol";
+import "../../../smart-contracts/interfaces/stream/mint/IStreamOperatorDistributionMerkle.sol";
 
 /// @notice Actual current Manager/Ledger and Safe; typed Core, Artist, registry and entropy boundaries.
 contract StreamOperatorDistributionTest is OfficialSafeFixture {
@@ -27,6 +28,20 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
     bytes32 private rootOverride;
     bytes32 private supplyConfigHash = keccak256("supply config");
     bytes32 private recipientConfigHash = keccak256("recipient config");
+    IStreamMintLedger.CounterCapMode private recipientCapMode =
+    IStreamMintLedger.CounterCapMode.STATIC;
+    bytes32 private constant EXTRA_RECIPIENT = keccak256("second distribution recipient list");
+    bytes32 private extraRecipientConfigHash;
+    bytes32 private applicationHashOverride;
+    bool private legacyMerkleHash;
+
+    struct RecipientList {
+        address first;
+        address second;
+        bytes32 root;
+        IStreamMintCounterPolicy.AllowlistProof firstProof;
+        IStreamMintCounterPolicy.AllowlistProof secondProof;
+    }
 
     function setUp() public {
         vm.warp(100);
@@ -515,6 +530,846 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
         }
     }
 
+    function testMerklePhaseCapsUseHeterogeneousOriginalLeavesAndProjectedDuplicates() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        address[] memory recipients = new address[](3);
+        recipients[0] = ALICE;
+        recipients[1] = BOB;
+        recipients[2] = BOB;
+        IStreamMintManager.MintBatch memory b =
+            _merkleBatch(recipients, list, IStreamMintCounterPolicy.CounterScope.PHASE);
+        bytes32 root = _merklePreflight(b);
+        require(
+            _resolvedCap(b, 0, list.firstProof) == 1 && _resolvedCap(b, 1, list.secondProof) == 3,
+            "leaf caps differ below registered ceiling"
+        );
+        (uint256[] memory ids, bytes32 actualRoot) = _send(b);
+        require(
+            actualRoot == root && ids.length == 3 && core.ownerOf(ids[0]) == ALICE
+                && core.ownerOf(ids[1]) == BOB && core.ownerOf(ids[2]) == BOB,
+            "ordered heterogeneous distribution"
+        );
+        require(
+            _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 1
+                && _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, BOB) == 2
+                && _count(SUPPLY, IStreamMintManager.CounterKeyMode.CONSTANT, address(0)) == 3,
+            "beneficiary counts and phase supply conserved"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleCollectionScopeUsesSharedRecipientKeyWithPhaseSupply() public {
+        RecipientList memory list = _recipientList(ALICE, 2, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, ALICE), list, IStreamMintCounterPolicy.CounterScope.COLLECTION
+        );
+        bytes32 root = _merklePreflight(b);
+        _send(b);
+        bytes32 subject = manager.previewSubjectKey(
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            1,
+            PHASE,
+            RECIPIENT,
+            address(0),
+            ALICE,
+            address(distribution),
+            address(0),
+            bytes32(0)
+        );
+        require(
+            ledger.counterValue(_valueKey(1, 0, RECIPIENT, subject)) == 2
+                && ledger.counterValue(_valueKey(1, PHASE, RECIPIENT, subject)) == 0,
+            "collection recipient scope is genuine"
+        );
+        require(
+            _count(SUPPLY, IStreamMintManager.CounterKeyMode.CONSTANT, address(0)) == 2,
+            "supply remains phase scoped"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleMissingBadAndReorderedRecipientProofsRollbackAndIdenticalRetry() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        bytes32 root = _merklePreflight(b);
+        bytes memory original = b.resolverData;
+        IStreamMintCounterPolicy.AllowlistProof[][] memory groups =
+            new IStreamMintCounterPolicy.AllowlistProof[][](0);
+        b.resolverData = abi.encode(groups);
+        _merkleReject(
+            b,
+            root,
+            0,
+            new bytes32[](0),
+            0,
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistProofCountMismatch.selector,
+                uint256(0),
+                uint256(1)
+            )
+        );
+        groups = abi.decode(original, (IStreamMintCounterPolicy.AllowlistProof[][]));
+        groups[0] = new IStreamMintCounterPolicy.AllowlistProof[](1);
+        groups[0][0] = list.firstProof;
+        b.resolverData = abi.encode(groups);
+        _merkleReject(
+            b,
+            root,
+            0,
+            new bytes32[](0),
+            0,
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistProofCountMismatch.selector,
+                uint256(1),
+                uint256(2)
+            )
+        );
+        groups = abi.decode(original, (IStreamMintCounterPolicy.AllowlistProof[][]));
+        groups[0][0].proof[0] = keccak256("incorrect original sibling");
+        b.resolverData = abi.encode(groups);
+        _merkleReject(b, root, 0, new bytes32[](0), 0, _proofError(ALICE));
+        groups = abi.decode(original, (IStreamMintCounterPolicy.AllowlistProof[][]));
+        groups[0][0] = list.secondProof;
+        groups[0][1] = list.firstProof;
+        b.resolverData = abi.encode(groups);
+        _merkleReject(b, root, 0, new bytes32[](0), 0, _proofError(ALICE));
+        b.resolverData = original;
+        require(_merklePreflight(b) == root, "same valid root after every failed witness");
+        (, bytes32 actualRoot) = _send(b);
+        require(actualRoot == root, "identical request succeeds after witness repair");
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleOtherPhaseLeafCannotAuthorizeCurrentBeneficiary() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        bytes32 wrongLeaf = _recipientLeaf(ALICE, 1, RECIPIENT, keccak256("other phase"));
+        list.root = _pair(wrongLeaf, list.firstProof.proof[0]);
+        list.secondProof.proof[0] = wrongLeaf;
+        require(
+            _pair(wrongLeaf, list.firstProof.proof[0]) == list.root,
+            "rejected proof genuinely belongs to the other phase"
+        );
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        // A correct-domain BOB leaf proves the actual counter configuration is usable.
+        require(_resolvedCap(b, 1, list.secondProof) == 3, "valid same-root current-domain sibling");
+        IStreamMintManager.MintBatch memory valid = _batch(_one(BOB));
+        valid.expectedPolicyHash = b.expectedPolicyHash;
+        _withRecipientProofs(valid, list);
+        bytes32 root = _merklePreflight(valid);
+        _merkleReject(b, root, 0, new bytes32[](0), 0, _proofError(ALICE));
+    }
+
+    function testMerkleZeroLeafRejectsEvenWithValidMembership() public {
+        _invalidRecipientCap(0);
+    }
+
+    function testMerkleOverCeilingLeafRejectsEvenWithValidMembership() public {
+        _invalidRecipientCap(4);
+    }
+
+    function testMerkleDuplicateProjectionRejectsBeforeAnyWrite() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, ALICE), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        require(
+            _resolvedCap(b, 0, list.firstProof) == 1 && _resolvedCap(b, 1, list.firstProof) == 1,
+            "both duplicate proofs individually valid"
+        );
+        IStreamMintManager.MintBatch memory single = _batch(_one(ALICE));
+        single.expectedPolicyHash = b.expectedPolicyHash;
+        _withRecipientProofs(single, list);
+        bytes32 root = _merklePreflight(single);
+        bytes32 subject = manager.previewSubjectKey(
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            1,
+            PHASE,
+            RECIPIENT,
+            address(0),
+            ALICE,
+            address(distribution),
+            address(0),
+            bytes32(0)
+        );
+        _merkleReject(
+            b,
+            root,
+            0,
+            new bytes32[](0),
+            0,
+            abi.encodeWithSelector(
+                IStreamMintLedger.CounterCapExceeded.selector,
+                manager.previewCounterValueKey(1, PHASE, RECIPIENT, subject),
+                uint256(2),
+                uint256(1)
+            )
+        );
+    }
+
+    function testMerkleCrossSliceCapAndReplayPreserveFirstConsumption() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        recipientCapMode = IStreamMintLedger.CounterCapMode.MERKLE_STATIC;
+        recipientConfigHash = _listDefinition(list, IStreamMintCounterPolicy.CounterScope.PHASE);
+        IStreamMintManager.MintBatch memory first = _batch(_recipients(ALICE, BOB));
+        IStreamMintManager.MintBatch memory second = _batch(_recipients(ALICE, BOB));
+        second.authorizationId = distribution.sliceAuthorization(1, PHASE, 1);
+        second.contextHash = distribution.sliceHash(1, second);
+        rootOverride = _pair(first.contextHash, second.contextHash);
+        _withRecipientProofs(first, list);
+        _withRecipientProofs(second, list);
+        _configure(first);
+        second.expectedPolicyHash = first.expectedPolicyHash;
+        bytes32 firstRoot = _merklePreflight(first);
+        bytes32 unusedSecondRoot = _merklePreflight(second);
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = second.contextHash;
+        distribution.distribute(program, 0, proof, first, "");
+        _merkleConsumed(first, firstRoot, 0);
+        _merkleReject(
+            first,
+            firstRoot,
+            0,
+            proof,
+            0,
+            abi.encodeWithSelector(
+                IStreamOperatorDistribution.DistributionSliceUsed.selector, uint256(0)
+            )
+        );
+        proof[0] = first.contextHash;
+        bytes32 subject = manager.previewSubjectKey(
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            1,
+            PHASE,
+            RECIPIENT,
+            address(0),
+            ALICE,
+            address(distribution),
+            address(0),
+            bytes32(0)
+        );
+        _merkleReject(
+            second,
+            unusedSecondRoot,
+            1,
+            proof,
+            0,
+            abi.encodeWithSelector(
+                IStreamMintLedger.CounterCapExceeded.selector,
+                manager.previewCounterValueKey(1, PHASE, RECIPIENT, subject),
+                uint256(2),
+                uint256(1)
+            )
+        );
+        require(
+            core.minted() == 2 && manager.nextOperationNonce() == 2
+                && !distribution.sliceUsed(1, PHASE, 1)
+                && !manager.isAuthorizationUsed(second.authorizationId)
+                && _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 1,
+            "later slice cannot reset earlier leaf use"
+        );
+        _merkleConsumed(first, firstRoot, 0);
+    }
+
+    function testMerkleConfiguredCounterOrderIsPreservedThroughDistribution() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        RecipientList memory extra = _recipientList(ALICE, 3, BOB, 2, EXTRA_RECIPIENT);
+        extraRecipientConfigHash =
+            _listDefinition(extra, IStreamMintCounterPolicy.CounterScope.PHASE);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        IStreamMintCounterPolicy.AllowlistProof[][] memory groups =
+            new IStreamMintCounterPolicy.AllowlistProof[][](2);
+        groups[0] = _proofGroup(b, list);
+        groups[1] = _proofGroup(b, extra);
+        b.resolverData = abi.encode(groups);
+        bytes memory original = b.resolverData;
+        bytes32 root = _merklePreflight(b);
+        groups[0] = _proofGroup(b, extra);
+        groups[1] = _proofGroup(b, list);
+        b.resolverData = abi.encode(groups);
+        _merkleReject(b, root, 0, new bytes32[](0), 0, _proofError(ALICE));
+        b.resolverData = original;
+        require(_merklePreflight(b) == root, "configured order restores exact original root");
+        _send(b);
+        require(
+            _count(EXTRA_RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 1
+                && _count(EXTRA_RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, BOB) == 1,
+            "both original Merkle counters consumed"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleDirectReceiverFailureRollsBackAndIdenticalBatchRetries() public {
+        program.deliveryMode = IStreamOperatorDistribution.DeliveryMode.DIRECT;
+        DistributionReceiver receiver = new DistributionReceiver(1);
+        RecipientList memory list = _recipientList(ALICE, 1, address(receiver), 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, address(receiver)), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        bytes32 root = _merklePreflight(b);
+        _merkleReject(
+            b, root, 0, new bytes32[](0), 0, abi.encodeWithSignature("Error(string)", "reject")
+        );
+        _rolledBack();
+        receiver.setMode(0);
+        require(_merklePreflight(b) == root, "receiver repair does not change original request");
+        (, bytes32 actualRoot) = _send(b);
+        require(
+            actualRoot == root && core.ownerOf(1) == ALICE && core.ownerOf(2) == address(receiver),
+            "exact DIRECT retry succeeds"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleLateRevealFundingFailureRollsBackAndIdenticalBatchRetries() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        entropy.setFee(1);
+        bytes32 root = _merklePreflight(b);
+        entropy.fail(true, false);
+        _merkleReject(
+            b,
+            root,
+            0,
+            new bytes32[](0),
+            2,
+            abi.encodeWithSelector(
+                IStreamImmediateSaleReveal.SaleRevealDependencyInvalid.selector, address(entropy)
+            )
+        );
+        _rolledBack();
+        entropy.fail(false, false);
+        require(
+            _merklePreflight(b) == root, "late funding failure restored exact operation identity"
+        );
+        (, bytes32 actualRoot) =
+            distribution.distribute{ value: 2 }(program, 0, new bytes32[](0), b, "");
+        require(
+            actualRoot == root && entropy.revealFeeEscrow(1) == 2 && entropy.requests() == 2
+                && address(distribution).balance == 0,
+            "each reveal obligation funded once"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleIsolatedClaimKeepsOriginalBeneficiaryCapAfterRedirection() public {
+        DistributionReceiver receiver = new DistributionReceiver(1);
+        RecipientList memory list = _recipientList(address(receiver), 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(address(receiver), BOB),
+            list,
+            IStreamMintCounterPolicy.CounterScope.COLLECTION
+        );
+        bytes32 root = _merklePreflight(b);
+        _send(b);
+        IStreamOperatorDistribution.NftClaim memory claim = distribution.nftClaim(1);
+        require(
+            claim.collectionId == 1 && claim.phaseId == PHASE
+                && claim.beneficiary == address(receiver)
+                && core.ownerOf(1) == address(distribution) && core.ownerOf(2) == BOB,
+            "exact failed element retained under original identity"
+        );
+        require(
+            _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, address(receiver)) == 1
+                && _count(
+                    RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, address(distribution)
+                ) == 0,
+            "custody does not own recipient allocation"
+        );
+        vm.expectPartialRevert(IStreamOperatorDistribution.DistributionClaimUnavailable.selector);
+        distribution.claimNft(1, ALICE);
+        registry.revoke(address(distribution));
+        manager.setPhasePaused(1, PHASE, true);
+        require(
+            receiver.claim(distribution, 1, ALICE),
+            "original beneficiary can redirect after phase revocation"
+        );
+        require(
+            core.ownerOf(1) == ALICE && distribution.nftClaim(1).beneficiary == address(0)
+                && _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 0
+                && _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, address(receiver))
+                == 1,
+            "claim delivery never migrates or consumes allocation twice"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerklePreparedConsumerKeepsOriginalManagerRootAndCaps() public {
+        program.prepared = true;
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b =
+            _merkleBatch(_one(ALICE), list, IStreamMintCounterPolicy.CounterScope.PHASE);
+        bytes32 root = _merklePreflight(b);
+        (, bytes32 actualRoot) = _send(b);
+        require(
+            actualRoot == root && core.ownerOf(1) == ALICE && manager.nextOperationNonce() == 1
+                && _count(RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, ALICE) == 1,
+            "prepared path consumes authenticated beneficiary cap"
+        );
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerklePublicationPreimageAndOriginalInterfaceRemainExact() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        (, IStreamMintCounterPolicy.Definition memory d) =
+            ledger.counterDefinition(recipientConfigHash);
+        bytes32 original = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_OPERATOR_DISTRIBUTION_CONFIG_V1"),
+                block.chainid,
+                address(distribution),
+                address(core),
+                address(manager),
+                uint256(1),
+                PHASE,
+                program
+            )
+        );
+        bytes32 published = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_OPERATOR_DISTRIBUTION_MERKLE_CONFIG_V1"),
+                original,
+                recipientConfigHash,
+                d.metadataHash
+            )
+        );
+        require(
+            d.capRoot == list.root && d.metadataHash != 0
+                && recipientConfigHash
+                    == keccak256(abi.encode(keccak256("6529STREAM_MINT_COUNTER_DEFINITION_V1"), d)),
+            "original definition preimage"
+        );
+        (, IStreamMintManager.MintPhaseConfig memory phase) = manager.phase(1, PHASE);
+        require(
+            distribution.programHash(1, PHASE, program) == original
+                && distribution.merkleProgramHash(1, PHASE, program, recipientConfigHash)
+                    == published && phase.configHash == published && published != original,
+            "additive literal publication binding"
+        );
+        bytes4 originalInterface = IStreamOperatorDistribution.programHash.selector
+            ^ IStreamOperatorDistribution.sliceHash.selector
+            ^ IStreamOperatorDistribution.sliceAuthorization.selector
+            ^ IStreamOperatorDistribution.distribute.selector
+            ^ IStreamOperatorDistribution.sliceUsed.selector
+            ^ IStreamOperatorDistribution.nftClaim.selector
+            ^ IStreamOperatorDistribution.claimNft.selector
+            ^ IStreamOperatorDistribution.claimNftFor.selector;
+        require(
+            originalInterface == type(IStreamOperatorDistribution).interfaceId
+                && distribution.supportsInterface(originalInterface)
+                && distribution.supportsInterface(
+                    type(IStreamOperatorDistributionMerkle).interfaceId
+                ),
+            "original interface remains separately advertised"
+        );
+        bytes32 root = _merklePreflight(b);
+        _send(b);
+        _merkleConsumed(b, root, 0);
+    }
+
+    function testMerkleLegacyProgramHashCannotOmitPublicationCommitment() public {
+        legacyMerkleHash = true;
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        bytes32 root = _merklePreflight(b);
+        require(
+            b.expectedPolicyHash == manager.phasePolicyHash(1, PHASE),
+            "actual current policy supplied"
+        );
+        _merkleReject(
+            b,
+            root,
+            0,
+            new bytes32[](0),
+            0,
+            abi.encodeWithSelector(
+                IStreamOperatorDistribution.DistributionCommitmentMismatch.selector
+            )
+        );
+    }
+
+    function testMerkleSameRootDifferentPublicationCannotReuseEarlierApplicationHash() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        bytes32 oldDefinition = _listDefinition(list, IStreamMintCounterPolicy.CounterScope.PHASE);
+        IStreamMintManager.MintBatch memory b = _batch(_recipients(ALICE, BOB));
+        program.slicesRoot = distribution.sliceHash(0, b);
+        // Getter is usable before any phase pins the registered definition.
+        applicationHashOverride = distribution.merkleProgramHash(1, PHASE, program, oldDefinition);
+        (, IStreamMintCounterPolicy.Definition memory changed) =
+            ledger.counterDefinition(oldDefinition);
+        changed.metadataHash = keccak256("different published recipient list bytes");
+        recipientConfigHash = ledger.registerCounterDefinition(changed);
+        recipientCapMode = IStreamMintLedger.CounterCapMode.MERKLE_STATIC;
+        _withRecipientProofs(b, list);
+        _configure(b);
+        bytes32 root = _merklePreflight(b);
+        require(
+            changed.capRoot == list.root && recipientConfigHash != oldDefinition
+                && distribution.merkleProgramHash(1, PHASE, program, recipientConfigHash)
+                    != applicationHashOverride
+                && manager.counterConfig(1, PHASE, RECIPIENT).counterConfigHash
+                == recipientConfigHash && b.expectedPolicyHash == manager.phasePolicyHash(1, PHASE),
+            "new actual definition and current policy cannot disguise old publication binding"
+        );
+        _merkleReject(
+            b,
+            root,
+            0,
+            new bytes32[](0),
+            0,
+            abi.encodeWithSelector(
+                IStreamOperatorDistribution.DistributionCommitmentMismatch.selector
+            )
+        );
+    }
+
+    function testMerkleGetterRejectsUnknownUnpublishedAndUnsupportedDefinitions() public {
+        _invalidMerkleDefinition(keccak256("unregistered distribution definition"));
+        IStreamMintCounterPolicy.Definition memory d = IStreamMintCounterPolicy.Definition(
+            IStreamMintCounterPolicy.CounterScope.PHASE,
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            keccak256("root"),
+            0
+        );
+        _invalidMerkleDefinition(ledger.registerCounterDefinition(d));
+        d.metadataHash = keccak256("published list");
+        d.keyMode = IStreamMintManager.CounterKeyMode.PAYER;
+        _invalidMerkleDefinition(ledger.registerCounterDefinition(d));
+        d.keyMode = IStreamMintManager.CounterKeyMode.RECIPIENT;
+        d.capRoot = 0;
+        _invalidMerkleDefinition(ledger.registerCounterDefinition(d));
+        d.keyMode = IStreamMintManager.CounterKeyMode.CONSTANT;
+        _invalidMerkleDefinition(ledger.registerCounterDefinition(d));
+        d.keyMode = IStreamMintManager.CounterKeyMode.RECIPIENT;
+        d.scope = IStreamMintCounterPolicy.CounterScope.GLOBAL;
+        _invalidMerkleDefinition(ledger.registerCounterDefinition(d));
+        require(
+            core.minted() == 0 && manager.nextOperationNonce() == 0,
+            "getter grants no mint authority"
+        );
+    }
+
+    function testMerkleGetterCannotReinterpretAnAbsentDefinitionPinnedByStaticPhase() public {
+        RecipientList memory list = _recipientList(ALICE, 1, BOB, 3, RECIPIENT);
+        IStreamMintCounterPolicy.Definition memory d = IStreamMintCounterPolicy.Definition(
+            IStreamMintCounterPolicy.CounterScope.PHASE,
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            list.root,
+            keccak256("late publication")
+        );
+        recipientConfigHash =
+            keccak256(abi.encode(keccak256("6529STREAM_MINT_COUNTER_DEFINITION_V1"), d));
+        IStreamMintManager.MintBatch memory b = _batch(_recipients(ALICE, BOB));
+        _configure(b);
+        require(
+            ledger.registerCounterDefinition(d) == recipientConfigHash,
+            "actual late definition registered"
+        );
+        (bool rawKnown,) = ledger.counterDefinition(recipientConfigHash);
+        (bool selected,) = ledger.counterDefinitionForManager(address(manager), recipientConfigHash);
+        require(rawKnown && !selected, "manager retains actual first-use absent interpretation");
+        _invalidMerkleDefinition(recipientConfigHash);
+        _send(b);
+        require(
+            core.ownerOf(1) == ALICE && core.ownerOf(2) == BOB, "original STATIC path remains valid"
+        );
+    }
+
+    function _invalidMerkleDefinition(bytes32 hash) private view {
+        (bool ok, bytes memory errorData) = address(distribution)
+            .staticcall(abi.encodeCall(distribution.merkleProgramHash, (1, PHASE, program, hash)));
+        require(
+            !ok
+                && keccak256(errorData)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamOperatorDistributionMerkle.DistributionMerkleDefinitionInvalid
+                            .selector,
+                            hash
+                        )
+                    ),
+            "exact invalid original definition rejection"
+        );
+    }
+
+    function _invalidRecipientCap(uint64 cap) private {
+        RecipientList memory list = _recipientList(ALICE, cap, BOB, 3, RECIPIENT);
+        IStreamMintManager.MintBatch memory b = _merkleBatch(
+            _recipients(ALICE, BOB), list, IStreamMintCounterPolicy.CounterScope.PHASE
+        );
+        require(
+            _pair(_recipientLeaf(ALICE, cap, RECIPIENT, PHASE), list.firstProof.proof[0])
+                == list.root,
+            "rejected cap still has authentic membership"
+        );
+        require(
+            _resolvedCap(b, 1, list.secondProof) == 3,
+            "valid in-ceiling sibling proves usable configuration"
+        );
+        IStreamMintManager.MintBatch memory valid = _batch(_one(BOB));
+        valid.expectedPolicyHash = b.expectedPolicyHash;
+        _withRecipientProofs(valid, list);
+        bytes32 root = _merklePreflight(valid);
+        _merkleReject(b, root, 0, new bytes32[](0), 0, _proofError(ALICE));
+    }
+
+    /// @dev Literal MPA-MERKLE preimage, independent of the production leaf helper.
+    function _recipientLeaf(address account, uint64 cap, bytes32 counterId, bytes32 phaseId)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            bytes.concat(
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_MINT_ALLOWLIST_LEAF_V1"),
+                        block.chainid,
+                        address(manager),
+                        uint256(1),
+                        phaseId,
+                        counterId,
+                        account,
+                        cap,
+                        false,
+                        uint256(0)
+                    )
+                )
+            )
+        );
+    }
+
+    function _pair(bytes32 a, bytes32 b) private pure returns (bytes32) {
+        return a < b ? keccak256(abi.encode(a, b)) : keccak256(abi.encode(b, a));
+    }
+
+    function _recipientList(
+        address first,
+        uint64 firstCap,
+        address second,
+        uint64 secondCap,
+        bytes32 counterId
+    ) private view returns (RecipientList memory list) {
+        list.first = first;
+        list.second = second;
+        bytes32 a = _recipientLeaf(first, firstCap, counterId, PHASE);
+        bytes32 b = _recipientLeaf(second, secondCap, counterId, PHASE);
+        list.root = _pair(a, b);
+        list.firstProof =
+            IStreamMintCounterPolicy.AllowlistProof(firstCap, false, 0, new bytes32[](1));
+        list.secondProof =
+            IStreamMintCounterPolicy.AllowlistProof(secondCap, false, 0, new bytes32[](1));
+        list.firstProof.proof[0] = b;
+        list.secondProof.proof[0] = a;
+    }
+
+    function _listDefinition(RecipientList memory list, IStreamMintCounterPolicy.CounterScope scope)
+        private
+        returns (bytes32)
+    {
+        // The original Program stays unchanged; the additive Merkle profile commits this
+        // actual definition and its published list hash through the phase application hash.
+        bytes32 publication = keccak256(
+            abi.encode(
+                "published distribution recipient list",
+                list.first,
+                list.firstProof.maxCount,
+                list.second,
+                list.secondProof.maxCount
+            )
+        );
+        return ledger.registerCounterDefinition(
+            IStreamMintCounterPolicy.Definition(
+                scope, IStreamMintManager.CounterKeyMode.RECIPIENT, list.root, publication
+            )
+        );
+    }
+
+    function _proofGroup(IStreamMintManager.MintBatch memory b, RecipientList memory list)
+        private
+        pure
+        returns (IStreamMintCounterPolicy.AllowlistProof[] memory proofs)
+    {
+        proofs = new IStreamMintCounterPolicy.AllowlistProof[](b.beneficiaries.length);
+        for (uint256 i; i < proofs.length; ++i) {
+            require(
+                b.beneficiaries[i] == list.first || b.beneficiaries[i] == list.second,
+                "fixture recipient belongs to original list"
+            );
+            proofs[i] = b.beneficiaries[i] == list.first ? list.firstProof : list.secondProof;
+        }
+    }
+
+    function _withRecipientProofs(IStreamMintManager.MintBatch memory b, RecipientList memory list)
+        private
+        pure
+    {
+        IStreamMintCounterPolicy.AllowlistProof[][] memory groups =
+            new IStreamMintCounterPolicy.AllowlistProof[][](1);
+        groups[0] = _proofGroup(b, list);
+        b.resolverData = abi.encode(groups);
+    }
+
+    function _merkleBatch(
+        address[] memory recipients,
+        RecipientList memory list,
+        IStreamMintCounterPolicy.CounterScope scope
+    ) private returns (IStreamMintManager.MintBatch memory b) {
+        recipientCapMode = IStreamMintLedger.CounterCapMode.MERKLE_STATIC;
+        recipientConfigHash = _listDefinition(list, scope);
+        b = _batch(recipients);
+        _withRecipientProofs(b, list);
+        _configure(b);
+    }
+
+    function _one(address recipient) private pure returns (address[] memory recipients) {
+        recipients = new address[](1);
+        recipients[0] = recipient;
+    }
+
+    function _merklePreflight(IStreamMintManager.MintBatch memory b)
+        private
+        returns (bytes32 root)
+    {
+        // Actual Manager authorization, proof verification, projected accounting and identity.
+        vm.prank(address(distribution));
+        bytes32[] memory ids;
+        if (program.prepared) (root, ids) = manager.previewPreparedNativeMintOperation(b, "");
+        else (root, ids) = manager.previewSingleStepMintOperation(b, "");
+        require(root != 0 && ids.length == b.beneficiaries.length, "valid actual Manager preflight");
+        require(
+            !manager.isAuthorizationUsed(b.authorizationId) && !manager.isOperationRootUsed(root),
+            "preflight reserves nothing"
+        );
+    }
+
+    function _resolvedCap(
+        IStreamMintManager.MintBatch memory b,
+        uint256 index,
+        IStreamMintCounterPolicy.AllowlistProof memory proof
+    ) private view returns (uint64) {
+        IStreamMintCounterReads.CounterKeyContext memory c;
+        c.collectionId = b.collectionId;
+        c.phaseId = b.phaseId;
+        c.counterId = RECIPIENT;
+        c.initialRecipient = b.initialRecipients[index];
+        c.beneficiary = b.beneficiaries[index];
+        c.executor = address(distribution);
+        c.tokenIndex = index;
+        c.contextHash = b.contextHash;
+        c.resolverData = abi.encode(proof);
+        IStreamMintCounterReads.CounterResolution memory r =
+            IStreamMintCounterReads(address(manager)).resolveCounter(c);
+        require(r.increment == 1 && r.resolutionHash != 0, "original resolved leaf accounting");
+        return r.effectiveCap;
+    }
+
+    function _merkleState(IStreamMintManager.MintBatch memory b, bytes32 root, uint256 index)
+        private
+        view
+        returns (bytes32 state)
+    {
+        state = keccak256(
+            abi.encode(
+                core.minted(),
+                manager.nextOperationNonce(),
+                distribution.sliceUsed(1, PHASE, index),
+                manager.isAuthorizationUsed(b.authorizationId),
+                manager.isOperationRootUsed(root),
+                ledger.isManagerOperationRootUsed(address(manager), root),
+                manager.phasePolicyHash(1, PHASE)
+            )
+        );
+        state = keccak256(
+            abi.encode(
+                state,
+                _count(SUPPLY, IStreamMintManager.CounterKeyMode.CONSTANT, address(0)),
+                core.balanceOf(address(distribution)),
+                address(this).balance,
+                address(distribution).balance,
+                address(entropy).balance,
+                entropy.revealFeeEscrow(1),
+                entropy.requests()
+            )
+        );
+        for (uint256 i; i < b.beneficiaries.length; ++i) {
+            state = keccak256(
+                abi.encode(
+                    state,
+                    core.balanceOf(b.beneficiaries[i]),
+                    _count(
+                        RECIPIENT, IStreamMintManager.CounterKeyMode.RECIPIENT, b.beneficiaries[i]
+                    ),
+                    distribution.nftClaim(i + 1)
+                )
+            );
+            if (extraRecipientConfigHash != 0) {
+                state = keccak256(
+                    abi.encode(
+                        state,
+                        _count(
+                            EXTRA_RECIPIENT,
+                            IStreamMintManager.CounterKeyMode.RECIPIENT,
+                            b.beneficiaries[i]
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    function _merkleReject(
+        IStreamMintManager.MintBatch memory b,
+        bytes32 root,
+        uint256 index,
+        bytes32[] memory sliceProof,
+        uint256 value,
+        bytes memory expected
+    ) private {
+        bytes32 beforeState = _merkleState(b, root, index);
+        (bool ok, bytes memory errorData) = address(distribution).call{ value: value }(
+            abi.encodeCall(distribution.distribute, (program, index, sliceProof, b, bytes("")))
+        );
+        require(
+            !ok && keccak256(errorData) == keccak256(expected), "exact intended Merkle rejection"
+        );
+        require(
+            _merkleState(b, root, index) == beforeState,
+            "all Merkle accounting and replay rolled back"
+        );
+    }
+
+    function _merkleConsumed(IStreamMintManager.MintBatch memory b, bytes32 root, uint256 index)
+        private
+        view
+    {
+        require(
+            distribution.sliceUsed(1, PHASE, index)
+                && manager.isAuthorizationUsed(b.authorizationId)
+                && manager.isOperationRootUsed(root)
+                && ledger.isManagerOperationRootUsed(address(manager), root),
+            "all original replay owners consumed"
+        );
+    }
+
+    function _proofError(address recipient) private pure returns (bytes memory) {
+        return abi.encodeWithSelector(
+            IStreamMintCounterPolicy.MintAllowlistProofInvalid.selector, RECIPIENT, recipient
+        );
+    }
+
     function _batch(address[] memory recipients)
         private
         view
@@ -548,11 +1403,12 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
     {
         require(msg.sender == address(this), "fixture only");
         program.slicesRoot = rootOverride == 0 ? distribution.sliceHash(0, batch) : rootOverride;
-        bytes32[] memory ids = new bytes32[](2);
+        uint256 count = extraRecipientConfigHash == 0 ? 2 : 3;
+        bytes32[] memory ids = new bytes32[](count);
         ids[0] = SUPPLY;
         ids[1] = RECIPIENT;
         IStreamMintManager.MintCounterConfig[] memory counters =
-            new IStreamMintManager.MintCounterConfig[](2);
+            new IStreamMintManager.MintCounterConfig[](count);
         counters[0] = IStreamMintManager.MintCounterConfig(
             true,
             IStreamMintManager.CounterKeyMode.CONSTANT,
@@ -565,19 +1421,32 @@ contract StreamOperatorDistributionTest is OfficialSafeFixture {
         counters[1] = IStreamMintManager.MintCounterConfig(
             true,
             IStreamMintManager.CounterKeyMode.RECIPIENT,
-            IStreamMintLedger.CounterCapMode.STATIC,
+            recipientCapMode,
             IStreamMintLedger.CounterDeltaMode.STATIC,
             program.perRecipientCap,
             1,
             recipientConfigHash
         );
+        if (count == 3) {
+            ids[2] = EXTRA_RECIPIENT;
+            counters[2] = IStreamMintManager.MintCounterConfig(
+                true,
+                IStreamMintManager.CounterKeyMode.RECIPIENT,
+                IStreamMintLedger.CounterCapMode.MERKLE_STATIC,
+                IStreamMintLedger.CounterDeltaMode.STATIC,
+                program.perRecipientCap,
+                1,
+                extraRecipientConfigHash
+            );
+        }
+        bytes32 applicationHash = distribution.programHash(1, PHASE, program);
+        if (recipientCapMode == IStreamMintLedger.CounterCapMode.MERKLE_STATIC && !legacyMerkleHash)
+        {
+            applicationHash = distribution.merkleProgramHash(1, PHASE, program, recipientConfigHash);
+        }
+        if (applicationHashOverride != 0) applicationHash = applicationHashOverride;
         IStreamMintManager.MintPhaseConfig memory phase = IStreamMintManager.MintPhaseConfig(
-            false,
-            0,
-            0,
-            10,
-            distribution.programHash(1, PHASE, program),
-            keccak256("published recipient manifest")
+            false, 0, 0, 10, applicationHash, keccak256("published recipient manifest")
         );
         IStreamMintManager.MintGateConfig memory gate;
         artist.consent(

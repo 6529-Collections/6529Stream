@@ -2,7 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/mint/IStreamOperatorDistribution.sol";
+import "../../interfaces/stream/mint/IStreamOperatorDistributionMerkle.sol";
 import "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
+import "../../interfaces/stream/mint/IStreamMintCounterPolicy.sol";
 import "../../interfaces/stream/mint/IStreamMintCounterReads.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -18,6 +20,7 @@ import "./StreamImmediateSaleReveal.sol";
 /// @dev No sale, settlement or buyer escrow exists. Phase policy remains the sole mint authority.
 contract StreamOperatorDistribution is
     IStreamOperatorDistribution,
+    IStreamOperatorDistributionMerkle,
     ERC165,
     IERC721Receiver,
     ReentrancyGuard,
@@ -25,6 +28,8 @@ contract StreamOperatorDistribution is
 {
     bytes32 public constant PROGRAM_DOMAIN =
         keccak256("6529STREAM_OPERATOR_DISTRIBUTION_CONFIG_V1");
+    bytes32 public constant MERKLE_PROGRAM_DOMAIN =
+        keccak256("6529STREAM_OPERATOR_DISTRIBUTION_MERKLE_CONFIG_V1");
     bytes32 public constant SLICE_DOMAIN = keccak256("6529STREAM_OPERATOR_DISTRIBUTION_SLICE_V1");
     bytes32 public constant AUTHORIZATION_DOMAIN =
         keccak256("6529STREAM_OPERATOR_DISTRIBUTION_AUTHORIZATION_V1");
@@ -103,6 +108,7 @@ contract StreamOperatorDistribution is
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamOperatorDistribution).interfaceId
+            || id == type(IStreamOperatorDistributionMerkle).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
 
@@ -126,6 +132,31 @@ contract StreamOperatorDistribution is
                 collectionId,
                 phaseId,
                 p
+            )
+        );
+    }
+
+    function merkleProgramHash(
+        uint256 collectionId,
+        bytes32 phaseId,
+        Program calldata p,
+        bytes32 recipientCounterConfigHash
+    ) public view override returns (bytes32) {
+        address ledger = address(IStreamMintReads(address(manager)).mintLedger());
+        (bool exists, IStreamMintCounterPolicy.Definition memory definition) = IStreamMintCounterPolicy(
+                ledger
+            ).counterDefinitionForManager(address(manager), recipientCounterConfigHash);
+        if (
+            !exists || definition.keyMode != IStreamMintManager.CounterKeyMode.RECIPIENT
+                || definition.scope == IStreamMintCounterPolicy.CounterScope.GLOBAL
+                || definition.capRoot == 0 || definition.metadataHash == 0
+        ) revert DistributionMerkleDefinitionInvalid(recipientCounterConfigHash);
+        return keccak256(
+            abi.encode(
+                MERKLE_PROGRAM_DOMAIN,
+                programHash(collectionId, phaseId, p),
+                recipientCounterConfigHash,
+                definition.metadataHash
             )
         );
     }
@@ -307,6 +338,13 @@ contract StreamOperatorDistribution is
         (bool exists, IStreamMintManager.MintPhaseConfig memory phase) =
             manager.phase(b.collectionId, b.phaseId);
         bytes32 config = programHash(b.collectionId, b.phaseId, p);
+        IStreamMintManager.MintCounterConfig memory recipientCounter =
+            manager.counterConfig(b.collectionId, b.phaseId, p.recipientCounterId);
+        if (recipientCounter.capMode == IStreamMintLedger.CounterCapMode.MERKLE_STATIC) {
+            config = merkleProgramHash(
+                b.collectionId, b.phaseId, p, recipientCounter.counterConfigHash
+            );
+        }
         IStreamMintRoyaltyPolicy.Policy memory royalty = IStreamMintRoyaltyPolicy(address(manager))
             .phaseRoyaltyPolicy(b.collectionId, b.phaseId);
         if (royalty.configured) {
@@ -357,8 +395,13 @@ contract StreamOperatorDistribution is
     ) private view {
         IStreamMintManager.MintCounterConfig memory c =
             manager.counterConfig(b.collectionId, b.phaseId, id);
+        // Recipient Merkle leaves refine the registered ceiling. Manager verifies
+        // the original resolverData proofs and aggregates beneficiary consumption.
+        bool supportedCap = c.capMode == IStreamMintLedger.CounterCapMode.STATIC
+            || (mode == IStreamMintManager.CounterKeyMode.RECIPIENT
+                && c.capMode == IStreamMintLedger.CounterCapMode.MERKLE_STATIC);
         if (
-            !c.enabled || c.keyMode != mode || c.capMode != IStreamMintLedger.CounterCapMode.STATIC
+            !c.enabled || c.keyMode != mode || !supportedCap
                 || c.deltaMode != IStreamMintLedger.CounterDeltaMode.STATIC || c.staticCap != cap
                 || c.staticIncrement != 1
         ) {

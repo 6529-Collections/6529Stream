@@ -10,13 +10,14 @@ interface IStreamOperatorDistribution {
         FAILURE_ISOLATED
     }
 
-    /// @dev Committed by phase.configHash, or by royalty Policy.applicationConfigHash.
+    /// @dev Committed by the V1 or additive Merkle phase/application config hash.
     struct Program {
         address operator;
         bytes32 slicesRoot;
         bytes32 supplyCounterId;
         bytes32 recipientCounterId;
         uint64 totalQuantity;
+        // STATIC recipient cap, or registered ceiling for MERKLE_STATIC leaves.
         uint64 perRecipientCap;
         DeliveryMode deliveryMode;
         bool prepared;

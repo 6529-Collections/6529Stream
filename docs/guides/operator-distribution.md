@@ -26,17 +26,22 @@ revenue credit.
    duplicate beneficiaries: they consume multiple units of that beneficiary's
    cap. Publish the complete ordered recipient/artwork manifest and proofs.
 4. Compute every `sliceHash` as specified below, then the sorted-pair Merkle root.
-   Store the root in `Program.slicesRoot`. Configure the dedicated phase with
+   Store the root in `Program.slicesRoot`. For `STATIC` recipient caps, configure
+   the dedicated phase with
    `configHash = distributor.programHash(collectionId, phaseId, program)`.
-   For an explicitly registered royalty snapshot policy, put this hash in
+   For `MERKLE_STATIC`, use the additive `merkleProgramHash` described below.
+   For an explicitly registered royalty snapshot policy, put the selected hash in
    `Policy.applicationConfigHash` and use the Manager's resulting
    `phaseRoyaltyConfigHash` as the phase `configHash`. The distributor and
    Manager both verify this composition.
 5. Configure the required phase-scoped supply counter with `CONSTANT` key mode,
    static cap equal to `Program.totalQuantity`, and static increment one.
-   Configure the recipient counter with `RECIPIENT` key mode, static cap equal
-   to `Program.perRecipientCap`, and static increment one. Enable only the
-   distributor as this phase's executor. Obtain the original Artist consent
+   Configure the recipient counter with `RECIPIENT` key mode, `STATIC` or
+   `MERKLE_STATIC` cap mode, registered `staticCap` equal to
+   `Program.perRecipientCap`, and static increment one. For Merkle allowances,
+   this registered cap is the maximum wallet allowance; each proven leaf sets
+   that beneficiary's effective cap. Enable only the distributor as this
+   phase's executor. Obtain the original Artist consent
    for both phase configuration and the executor-set policy update, then hand
    Manager administration back to governance.
 
@@ -48,9 +53,64 @@ retain their configured shared scope.
 
 The phase commits the program before execution; the distributor has no separate
 mutable program administrator. Current phase pause, expiry, executor approval,
-Artist consent and Ledger replay checks all remain in effect. The product uses
-static recipient caps; differentiated Merkle wallet caps are a separate Manager
-gate/counter composition and are not implied by the slice-membership proof.
+Artist consent and Ledger replay checks all remain in effect. The slice proof
+commits which tokens the operator may distribute. A recipient allowance proof
+separately establishes that beneficiary's cap through the Manager.
+
+## Merkle recipient allowances
+
+Publish the full allowlist file before the phase opens. Register an
+`IStreamMintCounterPolicy.Definition` on the Ledger with `RECIPIENT` key mode,
+`PHASE` or `COLLECTION` scope, the allowlist's nonzero `capRoot`, and the published
+file's nonzero content hash in `metadataHash`.
+Use the returned definition hash as the recipient counter's `counterConfigHash`.
+The Manager validates this definition and its cap mode during configuration;
+`GLOBAL` Merkle allowances are unsupported. Existing `STATIC` recipient counters
+retain their PHASE, COLLECTION or GLOBAL scope.
+
+After registering the definition, call
+`merkleProgramHash(collectionId, phaseId, program, recipientCounterConfigHash)`.
+This getter does not require the phase to exist. It reads the definition selected
+by the actual Manager's Ledger and rejects absent, unsupported or zero-publication
+definitions. Use its result as the phase `configHash`, or as the existing royalty
+policy's `applicationConfigHash` before computing `phaseRoyaltyConfigHash`.
+Admission recomputes this commitment from the phase's current recipient counter.
+Using the original V1 Program hash for a Merkle phase is rejected.
+
+The additive hash binds the original Program hash, the complete recipient
+definition hash and its full-list content hash. The Program commits the recipient
+counter ID and cap ceiling; the definition commits the root, scope, key mode and
+publication. Changing the file hash changes the phase commitment even when the
+Merkle root is unchanged. Manager policy independently binds the same counter
+configuration. The contract checks the commitment; operators remain responsible
+for publishing the matching file. Original Program fields, V1 hashes and slice
+hashes keep their original encoding. The getter is advertised through the separate
+`IStreamOperatorDistributionMerkle` interface; the original distribution interface
+ID and module registration remain unchanged.
+
+Build leaves using the exact double-hashed preimage in
+[MPA-MERKLE](../mint-policy-and-accounting.md#merkle-allowlist-cap-mode): chain ID,
+Manager, collection, phase, counter ID, beneficiary, `maxCount`,
+`hasPriceOverride` and `priceOverride`. `maxCount` must be nonzero and no greater
+than `Program.perRecipientCap`. For a free distribution, publish leaves with
+`hasPriceOverride = false` and `priceOverride = 0`; the Manager's accounting
+does not charge prices.
+
+Set `batch.resolverData = abi.encode(proofs)`, where `proofs` is the original
+`IStreamMintCounterPolicy.AllowlistProof[][]`. The outer array follows the
+phase's configured order of Merkle counters, omitting static counters. Each
+RECIPIENT inner array follows the complete ordered beneficiary array, including
+duplicates. The distributor forwards these bytes unchanged. The Manager checks
+each proof against the actual beneficiary and uses its proven cap when checking
+the complete batch's projected consumption. Two entries for the same beneficiary
+consume two units; prior slices consume the same applicable Ledger allowance.
+
+These allowance proofs are separate from `distribute`'s slice-membership proof.
+Changing a leaf's `maxCount`, beneficiary, counter or domain invalidates its
+allowlist proof. A failed proof, exceeded cap or later mint/funding failure rolls
+back slice use, authorization, operation root and counter consumption together.
+Failure-isolated NFT delivery still consumes the beneficiary's allowance and
+creates an owed NFT claim when delivery fails.
 
 ## Hashes and call construction
 
@@ -61,6 +121,7 @@ operation-root and token-operation-ID domains.
 | Getter | Exact preimage |
 | --- | --- |
 | `programHash(collectionId, phaseId, program)` | `keccak256("6529STREAM_OPERATOR_DISTRIBUTION_CONFIG_V1"), block.chainid, distributor, core, manager, collectionId, phaseId, program` |
+| `merkleProgramHash(collectionId, phaseId, program, recipientCounterConfigHash)` | `keccak256("6529STREAM_OPERATOR_DISTRIBUTION_MERKLE_CONFIG_V1"), programHash(collectionId, phaseId, program), recipientCounterConfigHash, selectedDefinition.metadataHash` |
 | `sliceHash(index, batch)` | `keccak256("6529STREAM_OPERATOR_DISTRIBUTION_SLICE_V1"), block.chainid, distributor, core, manager, batch.collectionId, batch.phaseId, index, batch.beneficiaries, batch.tokenData, batch.mintCommitments` |
 | `sliceAuthorization(collectionId, phaseId, index)` | `keccak256("6529STREAM_OPERATOR_DISTRIBUTION_AUTHORIZATION_V1"), block.chainid, distributor, core, manager, collectionId, phaseId, index` |
 
@@ -149,8 +210,11 @@ complete renderer/distribution composition remains part of combined acceptance.
 `test/unit/mint/StreamOperatorDistribution.t.sol` uses actual current Manager
 and Ledger contracts, actual Safe 1.4.1 bytecode and real ERC-721 receiver logic.
 Its Core, Artist, canonical registry, reveal coordinator and NFTDelegation read
-rows are explicitly typed fixtures. It covers commitment/replay, counters,
-direct rollback, delivery isolation, claims, delegated claims and fee custody.
+rows are explicitly typed fixtures. It covers commitment/replay, static and
+Merkle recipient counters, direct rollback, delivery isolation, claims,
+delegated claims and fee custody. Merkle regression cases are authored against
+the actual Manager/Ledger proof and projected-consumption paths; their native
+runtime result remains pending until the combined validation run.
 
 `test/current/StreamCurrentOperatorDistribution.t.sol` is the separate acceptance
 case with the actual current Core, Manager, Ledger, Artist, ModuleRegistry,
