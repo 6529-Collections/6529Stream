@@ -4,6 +4,9 @@ import {
     IStreamArtistRecoveredHydrationCoordinator
 } from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
 import {
+    IStreamArtistRecoveredConsentHydrationCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistRecoveredConsentHydration.sol";
+import {
     StreamArtistRecoveredHydrationTypes as Recovered
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
@@ -757,6 +760,14 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistRecoveredHydrationCoordinator(operationCoordinator)
             .coordinateHydrateRecoveredArtistAuthority(msg.sender, p);
+    }
+
+    function hydrateRecoveredArtistAuthorityWithConsents(
+        Recovered.Request calldata p,
+        T.RoyaltyFreeze[] calldata royaltyFreezes
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistRecoveredConsentHydrationCoordinator(operationCoordinator)
+            .coordinateHydrateRecoveredArtistAuthorityWithConsents(msg.sender, p, royaltyFreezes);
     }
 
     function hydrateMultipleArtistAuthorityWithRecords(

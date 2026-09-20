@@ -13,6 +13,9 @@ import {
 import {
     StreamArtistRecoveredHydrationCommit as Commit
 } from "./StreamArtistRecoveredHydrationCommit.sol";
+import {
+    StreamArtistOnboardingTypes as T
+} from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 /// @notice Additive operation60 profile selected only by the original guarded Coordinator.
 library StreamArtistRecoveredHydrationOperations {
@@ -21,6 +24,18 @@ library StreamArtistRecoveredHydrationOperations {
         returns (bytes32)
     {
         Commit.Prepared memory prepared = Prepared.collect(x.suite, request);
+        return Commit.execute(x.suite, x.configurationHash, actor, request, prepared);
+    }
+
+    function hydrate(
+        D.CoordinatorContext memory x,
+        address actor,
+        RH.Request memory request,
+        T.RoyaltyFreeze[] memory royaltyFreezes
+    ) public returns (bytes32) {
+        Commit.Prepared memory prepared = Prepared.collect(x.suite, request, royaltyFreezes);
+        // Every selector has been joined to an original record and is retained in prepared.data.
+        // The existing commitment and paged evidence already bind those complete typed payloads.
         return Commit.execute(x.suite, x.configurationHash, actor, request, prepared);
     }
 }

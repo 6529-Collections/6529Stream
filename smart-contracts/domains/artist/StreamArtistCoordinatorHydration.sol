@@ -4,6 +4,9 @@ import {
     IStreamArtistRecoveredHydrationCoordinator
 } from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
 import {
+    IStreamArtistRecoveredConsentHydrationCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistRecoveredConsentHydration.sol";
+import {
     StreamArtistRecoveredHydrationTypes as Recovered
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import {
@@ -82,8 +85,11 @@ library StreamArtistCoordinatorHydration {
             profile = 9;
         } else if (
             selector
-                == IStreamArtistRecoveredHydrationCoordinator.coordinateHydrateRecoveredArtistAuthority
-                    .selector
+                    == IStreamArtistRecoveredHydrationCoordinator.coordinateHydrateRecoveredArtistAuthority
+                        .selector
+                || selector
+                    == IStreamArtistRecoveredConsentHydrationCoordinator.coordinateHydrateRecoveredArtistAuthorityWithConsents
+                        .selector
         ) {
             profile = 10;
         } else {
@@ -97,6 +103,18 @@ library StreamArtistCoordinatorHydration {
         returns (bytes32)
     {
         if (profile == 10) {
+            if (
+                bytes4(data[:4])
+                    == IStreamArtistRecoveredConsentHydrationCoordinator.coordinateHydrateRecoveredArtistAuthorityWithConsents
+                        .selector
+            ) {
+                (
+                    address actor,
+                    Recovered.Request memory p,
+                    T.RoyaltyFreeze[] memory royaltyFreezes
+                ) = abi.decode(data[4:], (address, Recovered.Request, T.RoyaltyFreeze[]));
+                return StreamArtistRecoveredHydrationOperations.hydrate(x, actor, p, royaltyFreezes);
+            }
             (address actor, Recovered.Request memory p) =
                 abi.decode(data[4:], (address, Recovered.Request));
             return StreamArtistRecoveredHydrationOperations.hydrate(x, actor, p);

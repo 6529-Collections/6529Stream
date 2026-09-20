@@ -26,6 +26,12 @@ import {
 import {
     StreamArtistRecoveredAttestationFacts as Attestations
 } from "./StreamArtistRecoveredAttestationFacts.sol";
+import {
+    StreamArtistRecoveredContentConsentHydration as ContentH
+} from "./StreamArtistRecoveredContentConsentHydration.sol";
+import {
+    StreamArtistRecoveredContentConsentFacts as ContentFacts
+} from "./StreamArtistRecoveredContentConsentFacts.sol";
 
 /// @notice Complete original grant-use reconciliation across the fixed semantic owners.
 /// @dev The source certificate authenticates the original grant and consent maps. Policy and
@@ -57,6 +63,24 @@ library StreamArtistRecoveredDelegationConsentFacts {
         PubH.Row[] memory rows
     ) public pure {
         _validate(identity, consent, q, p, mode, Attestations.validate(identity, rows, q, p));
+    }
+
+    /// @notice Adds original delegated20 and24 uses to the unchanged14/15/16 reconciliation.
+    /// The new fixed owner6 codec validates the complete mixed journal before this join.
+    function validate(
+        IH.Bundle memory identity,
+        ContentH.Bundle memory consent,
+        AH.Query memory q,
+        RH.Provenance memory p,
+        uint8 mode,
+        PubH.Row[] memory rows
+    ) public pure {
+        uint256[] memory uses = ContentFacts.validate(identity, consent, q, p);
+        uint256[] memory attestations = Attestations.validate(identity, rows, q, p);
+        for (uint256 i; i < uses.length; ++i) {
+            uses[i] += attestations[i];
+        }
+        _validate(identity, consent.original, q, p, mode, uses);
     }
 
     function _validate(

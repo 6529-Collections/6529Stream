@@ -165,7 +165,7 @@ revision+1; non-native preparations and executions do not become native receipts
 The [recovered-authority guide](../guides/artist-recovered-authority-hydration.md)
 defines the source certificate, repeated-import chronology and remaining scope.
 The implementation is under development: the seven concrete owners advertise
-feature mask 255 for the first graph, economics, delegation and attestation
+feature mask 511 for the first graph, economics, delegation, attestation and content
 compositions below.
 Positive execution scenarios are authored, and ABI-only checks establish no
 runtime, Safe, capacity or release acceptance. Existing profiles remain strict.
@@ -202,9 +202,30 @@ latest subject maps, original personhood summaries and the independent C2PA and
 personhood heads. Existing summary/C2PA writers replay their documentary import
 path, never current signature authorization. Registration identity remains
 separate from each evidence record's saved operative identity, and current reads
-continue to assess live identity/notarization/dependency truth. Metadata's current
-one-successor selection limit remains a separate consumer composition gap.
+continue to assess live identity/notarization/dependency truth. Metadata's separate
+ancestor-selection consumer authenticates retained lineage; historical transport
+alone does not grant publication authority or reset consumption.
 Source/type evidence and authored cases do not establish runtime acceptance.
+
+The recovered content-consent composition adds bit 256 for original operations
+17 (content consent), 20 (royalty-freeze authorization) and 21 (content-freeze
+authorization). The additive `hydrateRecoveredArtistAuthorityWithConsents`
+entry point takes the unchanged recovered Request plus every original royalty
+term in operation-20 order. The fixed owner6 codec retains complete mixed
+14/15/16/17/20/21 journals, associations, current heads and replay origins.
+Identity signatures and complete nonce/replay state remain joined; delegated20
+uses reconcile with all original14/15/16/24 uses. Original17/21 admit only saved
+classes1/3, while original20 may retain its original delegate association.
+
+Original20 stores only a scope-keyed record, so supplied terms independently
+derive that exact key, not a missing record preimage. The authenticated fixed
+source, original native occurrence, signature inventory and complete guards prove
+the retained record. No missing signer, nonce or observed-time field is invented.
+Repeated17 terms and overlapping21 lock sets preserve their actual latest heads.
+Fresh estate permissions, defensive-status rules, grant eligibility and consumed
+scopes remain unchanged. Old31/63/127/255 feature constants and no-content codecs
+retain their exact meanings. Runtime, joined Registry/Coordinator capacity and
+broader authority/collection compositions remain pending.
 
 ## Original living delegation profile
 

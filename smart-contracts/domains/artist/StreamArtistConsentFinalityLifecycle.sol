@@ -5,6 +5,9 @@ import {
 } from "./StreamArtistRecoveredCollectionHydration.sol";
 import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
 import {
+    StreamArtistRecoveredContentConsentHydration as RecoveredContent
+} from "./StreamArtistRecoveredContentConsentHydration.sol";
+import {
     StreamArtistRecoveredEconomicsHydration
 } from "./StreamArtistRecoveredEconomicsHydration.sol";
 import {
@@ -569,7 +572,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.ATTESTATION_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.CONTENT_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -584,6 +587,29 @@ contract StreamArtistConsentFinalityLifecycle is
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 6)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (RecoveredContent.selected(p.typedState)) {
+                RecoveredContent.Bundle memory imported = RecoveredContent.importState(
+                    _policies,
+                    _economics,
+                    _associatedEconomicsRecords,
+                    _economicsAssociations,
+                    _recordDelegation,
+                    _saleRecords,
+                    _latestSaleConsents,
+                    q,
+                    p.typedState
+                );
+                RecoveredContent.importContent(
+                    _contentConsents,
+                    _latestContentConsent,
+                    _royaltyFreezes,
+                    _contentFreezes,
+                    _latestContentFreeze,
+                    _recordDelegation,
+                    imported
+                );
+                return;
+            }
             if (StreamArtistRecoveredDelegatedConsentHydration.selected(p.typedState)) {
                 StreamArtistRecoveredDelegatedConsentHydration.importState(
                     _policies,

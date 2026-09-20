@@ -2043,6 +2043,13 @@ contract StreamArtistOnboardingRegistry is
         _forwardRegistryWriter();
     }
 
+    function hydrateRecoveredArtistAuthorityWithConsents(
+        Recovered.Request calldata p,
+        T.RoyaltyFreeze[] calldata royaltyFreezes
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
     function hydrateMultipleArtistAuthorityWithRecords(
         StreamArtistMultipleRecordsTypes.Request calldata p
     ) external returns (bytes32) {

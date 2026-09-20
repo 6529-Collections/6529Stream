@@ -8,7 +8,7 @@ entry point. Its seven-owner masks remain `0x7f`. Existing hydration selectors
 keep their existing profiles and exclusions.
 
 This is a source implementation with ABI-only checks. The seven concrete owners
-advertise feature mask 255 for these graphs; the base owner stays disabled. The positive
+advertise feature mask 511 for these graphs; the base owner stays disabled. The positive
 import scenarios are authored but have not run. Safe execution, current-stack
 integration, bytecode size, gas, invariants and release acceptance remain pending.
 
@@ -20,6 +20,8 @@ The delegation extension carries all original grant versions and revocations wit
 complete direct/delegated operations 14/15/16, and admits consent modes 1 and 2.
 The attestation extension adds complete original operation-24 history, including
 personhood summaries, C2PA credentials and publication evidence, for that graph.
+The content-consent extension carries original operations17/20/21 with their
+complete mixed consent and Identity dependencies.
 Complete Identity and Payout histories are transported together. Class 4,
 multiple Artists or collections,
 collaborator graphs, corrected generations and broader collection histories
@@ -36,6 +38,7 @@ typed source restrictions.
 | 32 | Complete economics history, selected by actual native operation 15; delegated records also require bit 64 |
 | 64 | Retained grants, consent mode 2 or native sale-consent operation 16; complete mixed consent history |
 | 128 | Complete original operation-24 attestation history, including personhood and C2PA derived state |
+| 256 | Complete original operation-17 content consent, operation-20 royalty-freeze authorization or operation-21 content-freeze authorization history |
 
 Every source and destination owner must support the combined required mask.
 Pending requests, compromised status and unused preparations are included in
@@ -55,6 +58,15 @@ Either array is empty only when its original record family is absent. The actual
 complete journals select the required families; callers cannot omit one family
 to choose a smaller profile. Missing, extra, duplicate or reordered terms reject.
 Empty wrappers also reject.
+For operation20, use the additive
+`hydrateRecoveredArtistAuthorityWithConsents(Request, RoyaltyFreeze[])` interface.
+Its second argument contains every original royalty-freeze term in filtered
+operation-20 order, with no omissions, extras or reordered rows. The unchanged
+Request and collection witness still carry economics and attestation selectors.
+Operations17/21 need no extra caller selectors: their full records are read by
+hash from the complete fixed-source journal. The old recovered entry point is
+equivalent to an empty royalty array; it can carry17/21 but rejects a source with
+operation20. Both interfaces are advertised independently through ERC165.
 The request also names every expected source capability, the exact prior import
 commitment, and a nonzero expected semantic inventory.
 
@@ -71,6 +83,9 @@ checkpoint and external guard observations. The caller supplies this identifier
 as `expectedSemanticInventory`. The mutation route uses `collect`, which
 rejects a zero or changed identifier. This helper is a fixed Solidity library;
 the Registry does not expose a separate preparation endpoint.
+For the additive route, use the three-argument `prepare`/`collect` overload with
+the same ordered royalty terms. These terms become part of the typed owner6
+payload and therefore the existing semantic inventory and Archive evidence.
 
 ## Retained records and clocks
 
@@ -147,8 +162,9 @@ and assignment; class-3 authority still needs its original economics permission.
 
 Actual grant history, consent mode 2 or operation 16 selects feature bit 64 on all
 seven source and destination owners. The complete Consent journal must contain
-only operations 14/15/16; the extension preserves every policy, economics and sale
-record, its original grant association, and the latest sale lookup. An unused,
+only operations 14/15/16 without the content extension below; it preserves every
+policy, economics and sale record, its original grant association, and the latest
+sale lookup. An unused,
 revoked, expired or old-epoch grant remains part of the complete Identity history.
 Original grant versions, current heads, revocations, epochs, uses and all delegate
 nonce words survive import. Economics witnesses retain the same complete ordered
@@ -195,8 +211,9 @@ Other Attribution operations and corrected generations remain separate profiles.
 Identity's original nonce admission and consumed digest authenticate each
 attestation. Direct attestations also retain their original attestation-key
 guard; delegated attestations use the tagged delegate lane and recorded grant.
-Their uses join the complete 14/15/16 totals. Grant creation, revocation and
-replacement are ordered against the original Identity admission point. A signed
+Their uses join the complete 14/15/16 totals and delegated20 when present. Grant
+creation, revocation and replacement are ordered against the original Identity
+admission point. A signed
 time can legitimately precede submission and is not a replacement grant-liveness
 clock. Two delegate lanes can share a digest whose first observation precedes
 the later admission. No owner-4 replay cells are invented.
@@ -224,10 +241,52 @@ notarization head and live dependency pins. Kind-9 deployment facts use their
 unchanged original predicate; Registry cutover alone does not make them stale.
 
 Publication kinds 7/8 retain their full original Metadata evidence. Metadata's
-consumed-authorization map remains on its original host. The current Metadata
-selection bridge supports one immediate Artist successor only: preserving old
-publication evidence through A→B→C does not establish that C can consume it.
-That consumer extension remains separate from this historical transport.
+consumed-authorization map remains on its original host. The separate Metadata
+ancestor-selection consumer authenticates the complete retained lineage and the
+current suite's owner commitments. Historical transport alone does not authorize
+publication or reset a previously consumed authorization. That consumer's runtime
+and capacity acceptance remain separate from this transport's ABI-only evidence.
+
+## Content and freeze consent composition
+
+Actual operations17/20/21 select bit256 on all seven source and destination
+owners. The tagged owner6 bundle includes complete original14/15/16 history,
+every content consent, royalty-freeze record and content-freeze record, original
+delegation associations, current lookup heads and complete replay origins.
+No-content histories retain their prior codecs; feature constants31/63/127/255
+keep their exact original meanings after the combined mask becomes511.
+
+Operation17 permits repeated exact terms with different original authorizations.
+The latest lookup follows receipt order, while each record keeps its own replay
+key and original occurrence. Operation21 retains each ordered lock-class set and
+the latest record for each collection/generation/Metadata/lock-class lookup.
+Overlapping sets update only their included locks. Publication intent remains
+operation24 kind7; operation21 is content-freeze authorization.
+
+Original20 stores its record only under a key derived from the full royalty
+terms, Artist and generation. The ordered terms must derive the exact source
+scope and match its original native receipt and consumed replay cell. The
+original record does not retain signer, nonce, observed time or deadline;
+operations17/21 also omit those authorization preimages. The importer preserves
+their exact original hashes and signature bytes through the authenticated fixed
+source and complete Identity inventory. It does not claim an independent hash
+reconstruction from absent fields or substitute current assignment facts.
+
+Original17/21 records admit saved classes1/3 and no delegate association.
+Original20 can retain direct authorization or its original grant. The cross-owner
+join checks Artist, collection scope, royalty-freeze capability, original grant
+versions and cross-era creation/revocation/replacement order, then reconciles
+complete14/15/16/20/24 grant use. Within an era, the authenticated original producer
+establishes authorization ordering where a record lacks its Identity admission
+preimage; raw Consent and Identity revisions are never compared.
+
+The existing original54 revocation inventory and every principal/delegate nonce
+and replay cell survive import. This adds no new revocation mechanism. A fresh
+write still checks the current signature domain, authority status and grant.
+Class3 still needs capability128 for17/21 and32 for20; defensive status4 remains
+allowed only by the original20/21 rules. Delegated20 remains class1-only under
+the original mode1/2 and grant-capability32 rules. Retaining a freeze authorization
+does not itself execute a Metadata or Royalty Resolver freeze.
 
 ## Atomicity and transport bounds
 
@@ -250,6 +309,8 @@ The mixed consent extension separately admits at most 128 policies, 128 economic
 records and 128 sale records within the same complete transport bounds.
 The attestation extension admits at most 128 complete operation-24 records;
 personhood rows are the exact filtered subset, not an independently chosen list.
+The content extension separately bounds each of17/20/21 to128 records; each
+operation21 retains its original nonempty, strictly ordered set of at most16 locks.
 
 ## Validation boundary
 
@@ -324,6 +385,31 @@ payload guards, occupied destination state and rollback/retry. The canonical
 summary response and second-era certificates in those controls are explicitly
 synthetic; genuine notarization and repeated seven-owner imports belong to the
 actual-flow cases above.
+
+Five class1 content-consent cases use the original seven owners, Registry,
+Coordinator, Archive and Safe, with typed Core/governance/Metadata boundaries.
+They cover genuine recovery, original17/20/21 records, repeated17 terms, stale
+and current21 heads, original54 nonce revocation, A→B→C with fresh successor
+writes, exact old-domain/replay rejection, source-checkpoint preservation and
+late Archive rollback with identical Safe retry. The actual Royalty Resolver
+consumes a retained20 authorization; the Metadata fixture exercises its typed
+current-head selection boundary. Three class3 cases retain the original40/35
+lineage and capability160, and preserve original zero-capability rejection after
+the old no-content import path. They do not claim successful content-history
+transport under a zero capability mask.
+The delegated20 case uses a separate original Safe grant, preserves its exact
+current head, epoch, use count and sparse delegate nonce, and checks stale-domain
+and replay rejection. A late owner6 duplicate-scope failure must restore the
+tentative grant use and fresh delegate nonce; the real resolver then consumes
+the retained authorization.
+
+Fifteen pure cross-owner cases cover signature inventories, original grant
+chronology and combined14/15/16/20/24 use reconciliation. Nineteen codec cases
+use original Consent writers/native commits under a typed coordinator, including
+repeated17 terms, overlapping21 lock sets, source heads, malformed transport and
+two-phase rollback/retry. Their partial certificates and synthetic second era
+do not establish seven-owner execution. A separate capability case requires256
+on every owner while preserving old255 support.
 
 ABI-only compilation establishes source and type compatibility. It does not
 establish that these transactions execute, fit deployment limits or meet the

@@ -73,6 +73,9 @@ import {
 import {
     StreamArtistRecoveredAttestationFacts as AttestationFacts
 } from "./StreamArtistRecoveredAttestationFacts.sol";
+import {
+    StreamArtistRecoveredContentConsentHydration as ContentConsents
+} from "./StreamArtistRecoveredContentConsentHydration.sol";
 
 /// @notice Complete seven-owner certificate for the admitted recovered-authority graphs.
 /// @dev One recovered class1/class3 subject and one accepted generation-one binding without collaborators.
@@ -84,7 +87,15 @@ library StreamArtistRecoveredHydrationPrepared {
         view
         returns (Commit.Prepared memory prepared)
     {
-        prepared = prepare(destination, request);
+        return collect(destination, request, new T.RoyaltyFreeze[](0));
+    }
+
+    function collect(
+        T.SuiteConfiguration memory destination,
+        RH.Request memory request,
+        T.RoyaltyFreeze[] memory royaltyFreezes
+    ) public view returns (Commit.Prepared memory prepared) {
+        prepared = prepare(destination, request, royaltyFreezes);
         if (
             request.expectedSemanticInventory == 0
                 || request.expectedSemanticInventory != inventory(prepared)
@@ -101,6 +112,16 @@ library StreamArtistRecoveredHydrationPrepared {
         view
         returns (Commit.Prepared memory prepared)
     {
+        return prepare(destination, request, new T.RoyaltyFreeze[](0));
+    }
+
+    /// @notice Additional exact original royalty-freeze terms without changing the old Request.
+    /// @dev Complete source history selects the codec; caller witnesses cannot select a subset.
+    function prepare(
+        T.SuiteConfiguration memory destination,
+        RH.Request memory request,
+        T.RoyaltyFreeze[] memory royaltyFreezes
+    ) public view returns (Commit.Prepared memory prepared) {
         if (
             request.records.authority.artistIds.length != 1
                 || request.records.authority.collections.length != 1
@@ -146,9 +167,25 @@ library StreamArtistRecoveredHydrationPrepared {
         uint8 consentMode =
             Binding(c.source.owners[0]).binding(prepared.query.collectionId).consentMode;
         bool hasDelegation = _delegation(identity, c.provenance, consentMode);
+        bool hasContent = _content(c.provenance);
+        if (hasDelegation) features |= RH.DELEGATED_CONSENT;
         Delegated.Bundle memory delegated;
-        if (hasDelegation) {
-            features |= RH.DELEGATED_CONSENT;
+        ContentConsents.Bundle memory content;
+        if (hasContent) {
+            features |= RH.CONTENT_CONSENTS;
+            content = ContentConsents.collect(
+                c.source.owners[6],
+                prepared.query,
+                RH.ownerProvenance(c.provenance, 6),
+                economics,
+                royaltyFreezes
+            );
+            DelegationFacts.validate(
+                identity, content, prepared.query, c.provenance, consentMode, attestations.records
+            );
+        } else if (royaltyFreezes.length != 0) {
+            revert T.UnsupportedProfile();
+        } else if (hasDelegation) {
             delegated = Delegated.collect(
                 c.source.owners[6], prepared.query, RH.ownerProvenance(c.provenance, 6), economics
             );
@@ -192,6 +229,9 @@ library StreamArtistRecoveredHydrationPrepared {
                 // The joined validator binds original Identity35/nonce admission and retained
                 // Payout continuations; an owner-local export alone is insufficient here.
                 payload.semanticState = Payout.encode(payout, c.provenance);
+            } else if (i == 6 && hasContent) {
+                payload.semanticState =
+                    ContentConsents.encode(content, prepared.query, payload.provenance);
             } else if (i == 6 && hasDelegation) {
                 payload.semanticState =
                     Delegated.encode(delegated, prepared.query, payload.provenance);
@@ -209,6 +249,14 @@ library StreamArtistRecoveredHydrationPrepared {
             }
             prepared.data[i].typedState = Payload.encode(i, _header(i, features, payload), payload);
         }
+    }
+
+    function _content(RH.Provenance memory p) private pure returns (bool) {
+        for (uint256 i; i < p.journals[6].length; ++i) {
+            uint16 op = p.journals[6][i].receipt.operation;
+            if (op == 17 || op == 20 || op == 21) return true;
+        }
+        return false;
     }
 
     /// @dev Actual source history and immutable binding mode select the complete extension.

@@ -405,7 +405,7 @@ contract StreamArtistRecoveredDelegationAuthorityActualTest is
         );
     }
 
-    function _dcBaseline() private {
+    function _dcBaseline() internal {
         dcSale = new RecoveredDelegationSaleFacts(address(core));
         _saleRegister(
             saleModules,
@@ -660,7 +660,7 @@ contract StreamArtistRecoveredDelegationAuthorityActualTest is
         );
     }
 
-    function _dcRequest() private view returns (RH.Request memory p) {
+    function _dcRequest() internal view returns (RH.Request memory p) {
         p = _rhRequest();
         uint256 policies;
         uint256 economics;
@@ -736,7 +736,7 @@ contract StreamArtistRecoveredDelegationAuthorityActualTest is
         _rhImported(next, prepared, value);
     }
 
-    function _dcAssert(T.SuiteConfiguration memory target) private view {
+    function _dcAssert(T.SuiteConfiguration memory target) internal view {
         T.Binding memory b = Binding(target.owners[0]).binding(1);
         require(
             b.accepted && b.consentMode == 2 && b.saleConsentScope == 1,
@@ -957,7 +957,7 @@ contract StreamArtistRecoveredDelegationAuthorityActualTest is
         );
     }
 
-    function _dcScope() private view returns (InventoryScope memory) {
+    function _dcScope() internal view returns (InventoryScope memory) {
         return InventoryScope(dcGrants.length, dcAuthorizations.length, dcConsents.length);
     }
 
@@ -968,7 +968,7 @@ contract StreamArtistRecoveredDelegationAuthorityActualTest is
     // Freeze the exact original selectors, including empty direct signatures. Later B/C rows
     // must not grow A's oracle merely by appending absent-record lookups to the test arrays.
     function _dcSource(T.SuiteConfiguration memory target, InventoryScope memory scope)
-        private
+        internal
         view
         returns (bytes32 value)
     {

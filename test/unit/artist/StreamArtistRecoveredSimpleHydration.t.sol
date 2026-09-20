@@ -274,15 +274,15 @@ contract StreamArtistRecoveredSimpleHydrationTest {
         Adapter.decodeCollaborator(q, c, empty);
         assert(source.collaboratorOwner().authorityHydrationState(q).length == 0);
         assert(
-            source.bindingOwner().recoveredAuthorityHydrationCapability().supportedFeatures == 255
+            source.bindingOwner().recoveredAuthorityHydrationCapability().supportedFeatures == 511
         );
         assert(
             source.collaboratorOwner().recoveredAuthorityHydrationCapability().supportedFeatures
-                == 255
+                == 511
         );
         assert(
             source.acceptanceOwner().recoveredAuthorityHydrationCapability().supportedFeatures
-                == 255
+                == 511
         );
         // These are actual post-commit native writers, not a synthetic _native ordering.
         assert(source.bindingOwner().artistNativeReceiptRevisionAt(0) == 1);

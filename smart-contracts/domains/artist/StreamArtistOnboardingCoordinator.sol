@@ -1093,6 +1093,14 @@ contract StreamArtistOnboardingCoordinator is
         return _coordinateHydration();
     }
 
+    function coordinateHydrateRecoveredArtistAuthorityWithConsents(
+        address actor,
+        Recovered.Request calldata p,
+        T.RoyaltyFreeze[] calldata royaltyFreezes
+    ) external returns (bytes32) {
+        return _coordinateHydration();
+    }
+
     function coordinateHydrateMultipleArtistAuthorityWithRecords(
         address actor,
         StreamArtistMultipleRecordsTypes.Request calldata p
