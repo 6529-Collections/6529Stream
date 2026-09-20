@@ -40,6 +40,8 @@ import {
 import "../modules/StreamModuleBase.sol";
 import "./StreamMetadataRenderer.sol";
 import { StreamMetadataRouterContent } from "./StreamMetadataRouterContent.sol";
+import { StreamMetadataRouterConfigCodec } from "./StreamMetadataRouterConfigCodec.sol";
+import { StreamMetadataRouterRootCodec } from "./StreamMetadataRouterRootCodec.sol";
 import "./StreamMetadataArtistPresentation.sol";
 import "./StreamMetadataTokenRenderer.sol";
 import "./StreamMetadataTokenReads.sol";
@@ -340,7 +342,9 @@ contract StreamMetadataRouter is
         external
         returns (bytes32)
     {
-        return StaticConfiguration.set(_contentLayout(), _contentContext(), 0, 0, input);
+        return StreamMetadataRouterConfigCodec.write(
+            _contentLayout(), _contentContext(), 0, 0, msg.data
+        );
     }
 
     function activateStaticMetadata(uint256 collectionId, bytes32 expectedDefaultRecord) external {
@@ -355,7 +359,9 @@ contract StreamMetadataRouter is
         returns (bytes32)
     {
         _requireContentCollection(collectionId);
-        return StaticConfiguration.set(_contentLayout(), _contentContext(), collectionId, 0, input);
+        return StreamMetadataRouterConfigCodec.write(
+            _contentLayout(), _contentContext(), collectionId, 0, msg.data
+        );
     }
 
     function setTokenMetadataConfig(uint256 tokenId, Static.ConfigInput calldata input)
@@ -364,7 +370,9 @@ contract StreamMetadataRouter is
     {
         uint256 id = _staticCollection(tokenId);
         _requireContentCollection(id);
-        return StaticConfiguration.set(_contentLayout(), _contentContext(), id, tokenId, input);
+        return StreamMetadataRouterConfigCodec.write(
+            _contentLayout(), _contentContext(), id, tokenId, msg.data
+        );
     }
 
     function defaultMetadataConfig() external view returns (Static.ConfigRecord memory) {
@@ -412,7 +420,7 @@ contract StreamMetadataRouter is
         uint256 token,
         Static.ConfigInput calldata input
     ) external view returns (bytes32) {
-        return StaticConfiguration.preview(_contentContext(), id, token, input);
+        return StreamMetadataRouterConfigCodec.preview(_contentContext(), msg.data);
     }
 
     function previewStaticMetadataActivation(uint256 id, bytes32 expected)
@@ -586,7 +594,7 @@ contract StreamMetadataRouter is
         view
         returns (CollectionMetadata memory)
     {
-        return _collections[collectionId];
+        _collectionRead();
     }
 
     function lockArtistIdentity(uint256 collectionId) external override returns (bytes32) {
@@ -624,7 +632,7 @@ contract StreamMetadataRouter is
         override
         returns (ArtistPresentation memory)
     {
-        return _artistPresentation[collectionId];
+        _collectionRead();
     }
 
     function collectionServingFacts(uint256 collectionId)
@@ -633,41 +641,7 @@ contract StreamMetadataRouter is
         override
         returns (ServingFacts memory result)
     {
-        result = StreamMetadataRouterCollectionReads.facts(
-            _collections,
-            _artistContentLocks,
-            _artistPresentation,
-            _displayMetadataLocked,
-            core,
-            collectionId,
-            address(StreamMetadataTokenRenderer)
-        );
-        B.Selection memory selected = _scriptBundle(collectionId);
-        if (selected.bundleId != 0) {
-            B.Facts memory f = StreamMetadataBundleRenderer.facts(selected);
-            result.presentationProfile = StreamMetadataBundleRenderer.PROFILE;
-            result.mode = keccak256("ONCHAIN");
-            result.scriptHash = f.payloadHash;
-            result.scriptBytes = f.totalBytes;
-            result.renderer = address(StreamMetadataBundleRenderer);
-            result.rendererCodeHash = result.renderer.codehash;
-            result.dependenciesLocked = result.scriptLocked;
-        }
-        if (StaticState.activated(collectionId)) {
-            Static.ConfigRecord memory selectedConfig = StaticState.resolved(collectionId, 0);
-            // Old finality providers must reject this distinct profile. They cannot infer
-            // a new renderer's output from an old linked-renderer source tuple.
-            result.presentationProfile = keccak256("6529STREAM_STATIC_METADATA_SELECTION_V1");
-            result.renderer = selectedConfig.selection.renderer;
-            result.rendererCodeHash = selectedConfig.selection.rendererCodeHash;
-            result.mode = selectedConfig.config.mode == Renderer.MetadataMode.ONCHAIN
-                ? keccak256("ONCHAIN")
-                : selectedConfig.config.mode == Renderer.MetadataMode.OFFCHAIN
-                    ? keccak256("OFFCHAIN")
-                    : keccak256("HYBRID");
-            result.dependenciesLocked = selectedConfig.config.frozen
-                || _artistContentLocks[collectionId][StaticState.FAMILY];
-        }
+        _collectionRead();
     }
 
     function collectionScriptBundle(uint256 collectionId)
@@ -675,7 +649,7 @@ contract StreamMetadataRouter is
         view
         returns (B.Selection memory)
     {
-        return _scriptBundle(collectionId);
+        _collectionRead();
     }
 
     function _scriptBundle(uint256 collectionId) private view returns (B.Selection memory) {
@@ -688,10 +662,7 @@ contract StreamMetadataRouter is
         override
         returns (ServingSource memory)
     {
-        ServingSource memory result =
-            StreamMetadataRouterCollectionReads.source(_collections, core, collectionId);
-        if (_scriptBundle(collectionId).bundleId != 0) result.script = "";
-        return result;
+        _collectionRead();
     }
 
     function collectionLiveArtistStatus(uint256 collectionId)
@@ -700,10 +671,14 @@ contract StreamMetadataRouter is
         override
         returns (LiveArtistStatus memory)
     {
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
-        return StreamMetadataArtistPresentation.live(
-            address(core), address(artistRegistry), collectionId
+        _collectionRead();
+    }
+
+    function _collectionRead() private view {
+        bytes memory result = StreamMetadataRouterCollectionReads.read(
+            _contentLayout(), _artistPresentation, _contentContext(), msg.data
         );
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     /// @notice Exact current-router ONCHAIN content profile for first-release ratification.
@@ -823,16 +798,8 @@ contract StreamMetadataRouter is
         returns (bytes32)
     {
         _requireContentCollection(publication.collectionId);
-        bytes32 legacy =
-            StreamMetadataContentRoot.prepare(
-            _contentRoots,
-            StreamMetadataContentRoot.Context(address(core), address(artistRegistry)),
-            publication,
-            publisher
-        )
-        .stateHash;
-        return StreamMetadataScopedContentState.familyCurrent(
-            address(core), publication.collectionId, legacy
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
     }
 
@@ -842,20 +809,9 @@ contract StreamMetadataRouter is
         returns (bytes32 recordHash)
     {
         _requireContentCollection(publication.collectionId);
-        StreamMetadataContentRoot.Context memory ctx =
-            StreamMetadataContentRoot.Context(address(core), address(artistRegistry));
-        Record memory prepared =
-            StreamMetadataContentRoot.prepare(_contentRoots, ctx, publication, msg.sender);
-        (bytes32 consent, bytes32 ratification) = _authorizeContentWrite(
-            publication.collectionId,
-            CONTENT_ROOT,
-            StreamMetadataScopedContentState.familyCurrent(
-                address(core), publication.collectionId, prepared.stateHash
-            )
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
-        recordHash =
-            StreamMetadataContentRoot.publish(_contentRoots, ctx, publication, prepared, consent);
-        _recordContentApplication(publication.collectionId, CONTENT_ROOT, consent, ratification);
     }
 
     function previewPolicyContentRootPublication(
@@ -907,8 +863,8 @@ contract StreamMetadataRouter is
         address publisher
     ) external view returns (bytes32) {
         _requireContentCollection(publication.scope.collectionId);
-        return StreamMetadataScopedContent.preview(
-            _scopedContentRoots, _contentLayout(), _contentContext(), publication, publisher
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
     }
 
@@ -917,8 +873,8 @@ contract StreamMetadataRouter is
         returns (bytes32)
     {
         _requireContentCollection(publication.scope.collectionId);
-        return StreamMetadataScopedContent.publish(
-            _scopedContentRoots, _contentLayout(), _contentContext(), publication
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
     }
 
@@ -966,7 +922,8 @@ contract StreamMetadataRouter is
     }
 
     function contentRootRecord(bytes32 hash) external view override returns (Record memory) {
-        return StreamMetadataContentRoot.readRecord(_contentRoots, hash);
+        bytes memory result = StreamMetadataRouterRootCodec.readRecord(_contentRoots, hash);
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     function collectionContentRootHead(uint256 collectionId)
