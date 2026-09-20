@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add staged reference file-inventory clients with exact fixed-row parts,
+  original full identities, pinned gas quotes, receipt readback and Safe plans.
+
 - Preserve consumed token IDs and collection serials when a replacement Manager
   aborts a stranded prepared mint; ordinary transaction rollback is unchanged.
 

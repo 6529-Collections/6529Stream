@@ -336,6 +336,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Reference file-inventory preparation](docs/current-reference-inventory.md)
+  preserves original inventory identities through fixed 64-row parts, pinned
+  progress reads, gas quotes and separate uploader/preparer Safe calls.
 - [ERC20 paid burn-to-mint](docs/current-erc20-burn-mint.md) joins ordered source
   burns, original universal signatures and token payment; its [Safe calls](docs/current-erc20-burn-mint-safe.md)
   retain separate payer, executor and NFT-owner authority.
