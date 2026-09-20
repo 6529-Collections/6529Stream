@@ -92,6 +92,17 @@
 - New correction-history hydration and later consumed-Platform lineage composition
   remain required follow-ups; native acceptance is separate from source validation.
 
+## Authored: current full-policy publication ceremony
+
+- Add actual Safe/STATIC preparation, full output archive, original content-root
+  consent, V2 snapshot/reference, complete inventory/bundle and sanction/finality
+  candidate helpers beside the accepted current construction recipe.
+- Add the genuine factory private-manifest read regression. Preserve original
+  deployment defaults, governance authority and source profile encodings.
+- Record pending native/browser acceptance, fixture budgets above the transaction
+  envelope and the live-sanction metadata dependency that prevents claiming a
+  completed finality ceremony.
+
 ## Full-policy construction before the first mint
 
 - Add an immutable COLLECTION publication recipe and distinct factory-mode

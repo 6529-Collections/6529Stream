@@ -71,6 +71,16 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     GovernanceActionPolicyEntry[] private _foundationPolicies;
     uint64 private _fixtureCatalogRevision;
 
+    /// @dev Exact retained admission rows for additive current-stack ceremony fixtures.
+    /// The Executor exposes only their aggregate commitment; this does not reconstruct policy.
+    function _retainedFoundationPolicies()
+        internal
+        view
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        return _foundationPolicies;
+    }
+
     function _deployCurrentStack(address artist_, address platform) internal {
         artist = artist_;
         executor = StreamGovernanceExecutor(
@@ -381,7 +391,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         require(value == 600_000 && revision == 3, "actual second governed artist read expansion");
     }
 
-    function _configureMintPhase(bytes32 phase, address phaseExecutor) internal {
+    function _configureMintPhase(bytes32 phase, address phaseExecutor) internal virtual {
         bytes32[] memory counters = new bytes32[](1);
         counters[0] = keccak256("supply");
         IStreamMintManager.MintCounterConfig[] memory configs =

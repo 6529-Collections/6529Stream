@@ -9,6 +9,11 @@ The source batch adds actual-current construction tests. Native execution, produ
 sizes, cold call budgets, complete publication and finality acceptance remain
 pending. Do not use the provisional test budgets as launch settings.
 
+The additive [publication ceremony fixture](full-policy-publication-v2.md) uses
+complete STATIC output with explicitly larger fixture-only budgets. It records
+the transaction-envelope constraint and a live-sanction/output dependency cycle;
+the construction-only caps below do not establish complete-output acceptance.
+
 ## Why COLLECTION needs a factory
 
 The original COLLECTION policy source set requires a nonempty minted inventory

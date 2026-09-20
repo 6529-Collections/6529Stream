@@ -1493,7 +1493,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
                     address(assemblyArtists),
                     address(assemblyExecutor),
                     address(assemblyDiscovery),
-                    _gas("FINALITY_COMPONENT_READ_GAS", 30000000, 50000, 2),
+                    _gas("FINALITY_COMPONENT_READ_GAS", _assemblyRegistryComponentGas(), 50000, 2),
                     deployment
                 )
             )
@@ -1634,6 +1634,10 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
 
     function _assemblyComponentSourceGas() internal pure virtual returns (uint256) {
         return 4000000;
+    }
+
+    function _assemblyRegistryComponentGas() internal pure virtual returns (uint256) {
+        return 30000000;
     }
 
     function _assemblyManifestSourceGas() internal pure virtual returns (uint256) {

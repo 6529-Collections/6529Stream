@@ -267,7 +267,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
         override
         returns (bytes memory)
     {
-        d.componentGas = 20000000;
+        d.componentGas = _fullPolicyDiscoveryComponentGas();
         // The provider computes these hashes at its actual reserved address. Discovery pins
         // those exact accepted configurations, rather than the zero-hash constructor inputs.
         address provider = address(assemblyProvider);
@@ -313,6 +313,10 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
                 abi.encode(_fullPolicyScopedRecipe())
             )
         );
+    }
+
+    function _fullPolicyDiscoveryComponentGas() internal pure virtual returns (uint32) {
+        return 20000000;
     }
 
     function _fullPolicyStaticCompanions() private {
@@ -482,6 +486,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
     function _fullPolicyCollectionRecipe()
         internal
         view
+        virtual
         returns (StreamPolicyPublicationGraphTypesV2.Recipe memory r)
     {
         r.inventory = _assemblyInventoryDependencies();
