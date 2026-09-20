@@ -1949,3 +1949,35 @@ acceptance, permanent guardian exclusions, replay and receipt producers remain
 unchanged. Ordinary32 and cancellation preserve the epoch; each successful35
 advances it exactly once. The [caller guide](../guides/artist-living-recovery-history.md)
 records the authored cases and coordinated runtime validation still required.
+
+### Current compromise after aborting a pending living rotation
+
+AA-GUARD 4, 6 and 7 allow independently governed recovery to resolve a current
+compromise directly. A preliminary dismissal is not required merely because
+that operation33 captured and aborted a pending32. The original35 writer can
+consume that cause and retain it as the next recovery's saved baseline.
+
+A reusable fixed-owner current-compromise reader authenticates the exact
+current/keyed cause, original subject-bound Contest and captured execution. The
+captured pending32 must remain the actual last staging head, phase3, unexecuted,
+with its original compromise marker, captured guardian join and wholly empty
+closure. The live pending map is empty. Historical pending records continue to
+require actual dismissals; the exception applies only to the exact current
+capture. The full history reader proves the pending32's original staging
+predecessor and executed-head eligibility at that staging time.
+The complete cause order also identifies each execution's exact latest aborted
+staging predecessor. Validate that saved pointer separately because the original
+permanent rotation hash does not encode it; no historical hash domain changes.
+
+The same current proof supports guardian selection and supersession while the
+cutoff remains the actual executed35 or32. Shared admission is restricted to a
+prior living35 and current class1 compromise; initial recovery and class3
+profiles retain their previous guards. APPEAL preserves the original contest
+evidence separately from the new request's admitted document. A zero or
+historical subject does not replace the captured execution.
+
+Only newly admitted contexts add tagged proof wrappers. Previously supported
+context bytes and every original operation33/35 record, write, event, replay,
+epoch, acceptance and receipt boundary remain intact. The aborted32 acquires no
+dismissal closure or execution during recovery. Authored actual-owner cases
+remain subject to coordinated native, size, gas, capacity and full-CI validation.

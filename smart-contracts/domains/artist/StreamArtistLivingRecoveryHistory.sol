@@ -11,6 +11,9 @@ import {
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistLivingRecoveryReads as Living } from "./StreamArtistLivingRecoveryReads.sol";
 import {
+    StreamArtistCurrentCompromiseReads as Current
+} from "./StreamArtistCurrentCompromiseReads.sol";
+import {
     StreamArtistRecoveryRotationContinuation as Rotated
 } from "./StreamArtistRecoveryRotationContinuation.sol";
 import {
@@ -66,6 +69,8 @@ library StreamArtistLivingRecoveryHistory {
         D.Cause current;
         C.Record contest;
         Episode[] episodes;
+        R.RotationRecord pending;
+        bytes32 pendingProof;
     }
 
     struct Member {
@@ -94,8 +99,7 @@ library StreamArtistLivingRecoveryHistory {
         _cause(e, current, id, current.causeHash);
         if (
             current.facts.kind != 1 || current.facts.authorityClass != 1
-                || current.facts.priorStatus != 1 || current.facts.pendingTransitionHash != 0
-                || current.facts.enteredAt > block.timestamp
+                || current.facts.priorStatus != 1 || current.facts.enteredAt > block.timestamp
                 || current.facts.executedTransitionHash != h.head.transitionRecordHash
                 || current.facts.incumbent != h.head.newAddress || h.head.authorityClass != 1
                 || current.facts.actor == address(0) || current.facts.evidenceHash == 0
@@ -103,7 +107,19 @@ library StreamArtistLivingRecoveryHistory {
         ) revert I.UnsupportedIdentityRecoveryProfile(id);
         bytes32 ancestry =
             Rotated.ancestry(recovery, rotations, e, h.living.vesting, h.head.transitionRecordHash);
-        h.contest = Closed.compromiseRecord(resolutions, e, current, h.head.transitionRecordHash);
+        if (current.facts.pendingTransitionHash == 0) {
+            h.contest =
+                Closed.compromiseRecord(resolutions, e, current, h.head.transitionRecordHash);
+        } else {
+            R.TransitionState memory executed = h.head.transitionRecordHash == prior.recordHash
+                ? recovery.transitions[prior.recordHash]
+                : rotations.rotations[h.head.transitionRecordHash].transition;
+            Current.Facts memory captured =
+                Current.read(address(this), e.registry, e.chainId, current, executed);
+            h.contest = captured.contest;
+            h.pending = captured.pending;
+            h.pendingProof = captured.proof;
+        }
         bytes32 episodes = _episodes(recovery, rotations, resolutions, e, h);
         bytes32 closures = _closures(recovery, rotations, resolutions, e, h);
         f.proof = keccak256(
@@ -123,6 +139,15 @@ library StreamArtistLivingRecoveryHistory {
                 prior.terms.expectedResolutionHash
             )
         );
+        if (h.pendingProof != 0) {
+            f.proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_CURRENT_PENDING_LIVING_RECOVERY_HISTORY_V1"),
+                    f.proof,
+                    h.pendingProof
+                )
+            );
+        }
         f.legacyCompatible = _legacy(recovery, rotations, resolutions, h);
     }
 
@@ -231,7 +256,7 @@ library StreamArtistLivingRecoveryHistory {
         bytes32 execution
     ) private view returns (Member memory m) {
         bytes32 cursor = h.head.transitionRecordHash;
-        m.before = h.current.facts.enteredAt;
+        m.before = h.pendingProof == 0 ? h.current.facts.enteredAt : h.pending.transition.stagedAt;
         while (true) {
             m.vesting = recovery.vestingHistory.snapshots[cursor];
             m.transition = cursor == h.living.record.recordHash
@@ -256,11 +281,21 @@ library StreamArtistLivingRecoveryHistory {
         bytes32 cursor = h.head.transitionRecordHash;
         uint64 before = h.current.facts.enteredAt;
         bytes32 stage = rotations.latestTransition[h.head.artistId];
+        if (h.pendingProof != 0) {
+            // The current op33 aborted this exact pending32 without a dismissal. Its
+            // executed predecessor must have been eligible when it was originally staged.
+            // Any older aborted staging predecessor still requires its actual closure.
+            before = h.pending.transition.stagedAt;
+            stage = h.pending.terms.expectedPreviousTransitionRecordHash;
+        }
         while (true) {
             V.Snapshot memory v = recovery.vestingHistory.snapshots[cursor];
             R.TransitionState memory t = cursor == h.living.record.recordHash
                 ? recovery.transitions[cursor]
                 : rotations.rotations[cursor].transition;
+            if (stage != _stagingHead(h, cursor)) {
+                revert I.UnsupportedIdentityRecoveryProfile(h.head.artistId);
+            }
             bytes32 closed =
                 _closure(resolutions, h, t, before, cursor == h.head.transitionRecordHash);
             bytes32 pending;
@@ -277,6 +312,19 @@ library StreamArtistLivingRecoveryHistory {
             before = t.stagedAt;
             cursor = v.previousTransitionRecordHash;
         }
+    }
+
+    // Every unexecuted stage must be aborted before another stage can be admitted. The
+    // complete newest-first cause chain therefore identifies the exact last staging head,
+    // including same-time episodes. A record hash alone does not bind this saved pointer.
+    function _stagingHead(Chain memory h, bytes32 execution) private pure returns (bytes32) {
+        for (uint256 i; i < h.episodes.length; ++i) {
+            D.CauseFacts memory c = h.episodes[i].cause.facts;
+            if (c.executedTransitionHash == execution && c.pendingTransitionHash != 0) {
+                return c.pendingTransitionHash;
+            }
+        }
+        return execution;
     }
 
     function _closure(
@@ -434,7 +482,10 @@ library StreamArtistLivingRecoveryHistory {
     ) private view returns (bool) {
         bytes32 original = h.living.record.recordHash;
         bytes32 head = h.head.transitionRecordHash;
-        if (h.contest.terms.subjectRecordHash != head) return false;
+        if (h.current.facts.pendingTransitionHash != 0 || h.contest.terms.subjectRecordHash != head)
+        {
+            return false;
+        }
         bool rotated = head != original;
         if (
             !rotated

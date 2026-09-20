@@ -1499,4 +1499,387 @@ contract StreamArtistLivingHistoryRecoveryActualTest is
             "terminal32 and prior35 pending-C1 closures remain independently exact across further recovery"
         );
     }
+
+    function lhCaptureCurrentPending(bytes32 subject) external lhSelf returns (bytes32 pending) {
+        _lhMature();
+        _newRotationSafe(++lhSalt);
+        pending = _stageRotation(ingress.lastArtistTransition(artistId));
+        lhPendings.push(pending);
+        this.lhRecordSubject(subject);
+        Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
+        R.TransitionState memory t = ingress.rotationRecord(pending).transition;
+        require(
+            cause.facts.kind == 1 && cause.facts.priorStatus == 1
+                && cause.facts.executedTransitionHash == lhTerminal
+                && cause.facts.pendingTransitionHash == pending && t.phase == 3 && t.executedAt == 0
+                && t.postWindowEndsAt == 0 && t.stagedAt <= cause.facts.enteredAt
+                && t.contestedAt == cause.facts.enteredAt,
+            "fresh actual op33 aborts current pending32 while capturing separate vested execution"
+        );
+        _lhAssertEmptyPending(pending);
+        _missing(pending);
+    }
+
+    function _lhAssertEmptyPending(bytes32 pending) private view {
+        Dismissal.Closure memory empty;
+        require(
+            ingress.rotationRecord(pending).transition.phase == 3
+                && keccak256(abi.encode(ingress.identityTransitionClosure(artistId, pending)))
+                    == keccak256(abi.encode(empty)),
+            "original pending32 remains phase3 with wholly empty dismissal closure"
+        );
+    }
+
+    function _lhPendingFacts(bytes32 pending, bytes32 causeHash) private view returns (bytes32) {
+        Dismissal.Cause memory cause = ingress.identityContestCause(causeHash);
+        return keccak256(
+            abi.encode(
+                ingress.rotationRecord(pending),
+                ingress.identityTransitionClosure(artistId, pending),
+                cause,
+                ingress.identityContestRecord(cause.facts.referenceHash)
+            )
+        );
+    }
+
+    function _lhCauseReplayKey(bytes32 cause) private view returns (bytes32) {
+        IStreamArtistOwner owner = IStreamArtistOwner(suite.owners[2]);
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                suite.archive,
+                address(owner),
+                owner.domainId(),
+                keccak256("identity_authority.replay.contest_resolution"),
+                keccak256(abi.encode(artistId, cause))
+            )
+        );
+    }
+
+    function _lhPendingRecover(
+        IdentityRecovery.Request memory p,
+        T.Authorization memory a,
+        bytes32 pending,
+        bytes32 selected,
+        bool appeal
+    ) private returns (bytes32 record) {
+        bytes32 cause = p.expectedCauseHash;
+        bytes32 original = _lhPendingFacts(pending, cause);
+        bytes32 key = _lhCauseReplayKey(cause);
+        IStreamArtistOwner owner = IStreamArtistOwner(suite.owners[2]);
+        T.ReplayCell memory empty;
+        require(
+            keccak256(abi.encode(owner.replayCell(key))) == keccak256(abi.encode(empty)),
+            "current pending capture cause has not been consumed by another recovery"
+        );
+        _lhAssertEmptyPending(pending);
+        _lhRegister(p, a, appeal);
+        uint64 epoch = ingress.identityRecoveryContext(p, a).delegationEpoch;
+        this.rrAt(scheduled.notBefore);
+        scheduled.status = GovernanceActionStatus.EXECUTED;
+        _publish();
+        _lhRollback(p, a, epoch);
+        require(
+            keccak256(abi.encode(owner.replayCell(key))) == keccak256(abi.encode(empty))
+                && original == _lhPendingFacts(pending, cause),
+            "late Archive failure restores exact unconsumed current cause and pending facts"
+        );
+        _lhAssertEmptyPending(pending);
+        record = _lhRecover(p, a, selected, false);
+        T.ReplayCell memory consumed = owner.replayCell(key);
+        require(
+            consumed.commitment == record && consumed.status == 2 && consumed.kind == 1
+                && consumed.touchedRevision == _snapshot(record).ownerRevision
+                && ingress.identityRecoveryRecord(record).delegationEpoch == epoch + 1
+                && original == _lhPendingFacts(pending, cause),
+            "actual35 consumes original current cause exactly once without inventing a pending dismissal"
+        );
+        _lhAssertEmptyPending(pending);
+        _missing(pending);
+    }
+
+    // A default closure contains no nonzero anchor. Identify its observed first word by the
+    // typed getter's artistId response to one temporary sentinel, then restore every probe.
+    function _lhEmptyPendingClosureSlot(bytes32 pending) private returns (bytes32 slot) {
+        RepeatedDormancyStorageVm probe = RepeatedDormancyStorageVm(address(vm));
+        bytes memory getter = abi.encodeCall(ingress.identityTransitionClosure, (artistId, pending));
+        probe.record();
+        (bool ok,) = suite.owners[2].staticcall(getter);
+        require(ok, "actual empty pending closure read");
+        (bytes32[] memory reads,) = probe.accesses(suite.owners[2]);
+        bytes32 sentinel = keccak256("current pending original empty closure probe");
+        uint256 matches;
+        for (uint256 i; i < reads.length; ++i) {
+            if (vm.load(suite.owners[2], reads[i]) != 0) continue;
+            vm.store(suite.owners[2], reads[i], sentinel);
+            (bool healthy, bytes memory raw) = suite.owners[2].staticcall(getter);
+            vm.store(suite.owners[2], reads[i], 0);
+            if (healthy && raw.length == 192) {
+                Dismissal.Closure memory c = abi.decode(raw, (Dismissal.Closure));
+                if (
+                    c.artistId == sentinel && c.transitionRecordHash == 0
+                        && c.dismissalRecordHash == 0 && c.windowEndsAt == 0 && c.contestedAt == 0
+                        && !c.abandoned
+                ) {
+                    slot = reads[i];
+                    ++matches;
+                }
+            }
+        }
+        require(matches == 1, "one observed wholly empty closure artistId word");
+        _lhAssertEmptyPending(pending);
+    }
+
+    function _lhCurrentCausePointer(bytes32 current, bytes32 older) private returns (bytes32 slot) {
+        RepeatedDormancyStorageVm probe = RepeatedDormancyStorageVm(address(vm));
+        bytes memory getter = abi.encodeCall(ingress.currentIdentityContestCause, (artistId));
+        bytes32 olderBytes = keccak256(abi.encode(ingress.identityContestCause(older)));
+        require(current != older && current != 0 && older != 0, "two actual distinct cause records");
+        probe.record();
+        (bool ok,) = suite.owners[2].staticcall(getter);
+        require(ok, "actual current cause read");
+        (bytes32[] memory reads,) = probe.accesses(suite.owners[2]);
+        uint256 matches;
+        for (uint256 i; i < reads.length; ++i) {
+            if (vm.load(suite.owners[2], reads[i]) != current) continue;
+            vm.store(suite.owners[2], reads[i], older);
+            (bool healthy, bytes memory raw) = suite.owners[2].staticcall(getter);
+            vm.store(suite.owners[2], reads[i], current);
+            if (healthy && keccak256(raw) == olderBytes) {
+                slot = reads[i];
+                ++matches;
+            }
+        }
+        require(
+            matches == 1, "one observed current pointer selects the complete older canonical cause"
+        );
+    }
+
+    function testLivingHistoryCurrentPendingDirectRecoveryConsumesCauseAndRetainsBaselineAcross35And32()
+        public
+    {
+        this.lhSetup(false);
+        bytes32 execution = lhTerminal;
+        bytes32 pending = this.lhCaptureCurrentPending(execution);
+        (IdentityRecovery.Request memory p, T.Authorization memory a) = this.lhRequest(0, 0);
+        bytes32 cause = p.expectedCauseHash;
+        bytes32 facts = _lhPendingFacts(pending, cause);
+        (,,, bytes32 head) = ingress.guardianSet(artistId);
+        bytes32 first = _lhPendingRecover(p, a, pending, head, false);
+        require(
+            _snapshot(first).previousTransitionRecordHash == execution,
+            "vesting predecessor is actual35 execution, never aborted pending32"
+        );
+        _lhRound(0, true);
+        bytes32 third = _lhRound(1, true);
+        require(
+            ingress.identityRecoveryRecord(third).delegationEpoch == 4
+                && facts == _lhPendingFacts(pending, cause)
+                && IStreamArtistOwner(suite.owners[2])
+                .replayCell(_lhCauseReplayKey(cause))
+                .commitment == first,
+            "later35 and32 retain consumed original C/P baseline and exact first consumption"
+        );
+        _lhAssertEmptyPending(pending);
+    }
+
+    function testLivingHistoryCurrentPendingAfterCancelledHistoryAndRotationAcceptsZeroSubject()
+        public
+    {
+        this.lhSetup(true);
+        this.lhEpisode(lhNoticeStart + 1);
+        this.lhCancel(0, false);
+        this.lhRotate();
+        bytes32 execution = lhTerminal;
+        bytes32 pending = this.lhCaptureCurrentPending(0);
+        Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
+        require(
+            ingress.identityContestRecord(cause.facts.referenceHash).terms.subjectRecordHash == 0
+                && cause.facts.executedTransitionHash == execution,
+            "zero current subject does not replace captured actual execution or pending P"
+        );
+        (IdentityRecovery.Request memory p, T.Authorization memory a) = this.lhRequest(0, 0);
+        (,,, bytes32 head) = ingress.guardianSet(artistId);
+        bytes32 record = _lhPendingRecover(p, a, pending, head, false);
+        require(
+            _snapshot(record).previousTransitionRecordHash == execution && lhCancellationCount == 1,
+            "original cancelled-notice history remains distinct from current undismissed pending capture"
+        );
+    }
+
+    function testLivingHistoryCurrentPendingRetainsRealClosedHistoricalStagingPredecessor() public {
+        this.lhSetup(false);
+        bytes32 execution = lhTerminal;
+        bytes32 priorPending = this.lhAbortPendingWithCompromise(false);
+        bytes32 originalClosure = _lhClosure(priorPending);
+        bytes32 pending = this.lhCaptureCurrentPending(execution);
+        require(
+            ingress.rotationRecord(pending).terms.expectedPreviousTransitionRecordHash
+                == priorPending,
+            "actual current P stages after separately closed historical pending Q"
+        );
+        (IdentityRecovery.Request memory p, T.Authorization memory a) = this.lhRequest(0, 0);
+        (,,, bytes32 head) = ingress.guardianSet(artistId);
+        _lhPendingRecover(p, a, pending, head, false);
+        require(
+            originalClosure == _lhClosure(priorPending),
+            "old Q closure retained while current P has no dismissal"
+        );
+    }
+
+    function testLivingHistoryCurrentPendingHistoricalSubjectKeepsOriginalLateMarker() public {
+        this.lhSetup(false);
+        bytes32 living = lhPrior;
+        this.lhRotate();
+        bytes32 execution = lhTerminal;
+        bytes32 pending = this.lhCaptureCurrentPending(living);
+        uint64 marked = ingress.artistTransitionState(living).contestedAt;
+        require(
+            marked >= ingress.rotationRecord(pending).transition.stagedAt
+                && marked > ingress.artistTransitionState(execution).stagedAt
+                && ingress.identityTransitionClosure(artistId, living).dismissalRecordHash == 0,
+            "fresh op33 marks historical35 separately from current execution and aborted P"
+        );
+        (IdentityRecovery.Request memory p, T.Authorization memory a) = this.lhRequest(0, 0);
+        bytes32 context = keccak256(abi.encode(ingress.identityRecoveryContext(p, a)));
+        R.TransitionState memory old = ingress.artistTransitionState(living);
+        bytes32 slot = _lhSlot(
+            abi.encodeCall(ingress.artistTransitionState, (living)),
+            bytes32(uint256(marked) | uint256(old.phase) << 64)
+        );
+        _lhCorrupt(p, a, slot, bytes32(uint256(old.phase) << 64), context);
+        (,,, bytes32 head) = ingress.guardianSet(artistId);
+        _lhPendingRecover(p, a, pending, head, false);
+        require(
+            ingress.artistTransitionState(living).contestedAt == marked,
+            "historical subject marker remains exact after current pending recovery"
+        );
+    }
+
+    function testLivingHistoryCurrentPendingArbiterElectionUsesExecuted35Cutoff() public {
+        this.lhSetup(false);
+        bytes32 execution = lhTerminal;
+        bytes32 pending = this.lhCaptureCurrentPending(0);
+        require(
+            ingress.rotationRecord(pending).guardianSetRecordHash == lhProtected
+                && ingress.identityContestRecord(
+                        ingress.currentIdentityContestCause(artistId).facts.referenceHash
+                    ).terms.subjectRecordHash == 0,
+            "pending P captured the later operative guardian without creating a vesting cutoff"
+        );
+        (IdentityRecovery.Request memory p, T.Authorization memory a) =
+            this.lhRequest(lhProtected, 0);
+        _lhRole(p, Appeal27.ARBITER);
+        _lhElect(p, a, lhRetained);
+        bytes32 record = _lhPendingRecover(p, a, pending, lhRetained, false);
+        require(
+            _snapshot(record).previousTransitionRecordHash == execution
+                && _status(lhProtected).recoveryRecordHash == record,
+            "complete election excludes only later record using original execution's guardian prefix"
+        );
+    }
+
+    function testLivingHistoryCurrentPendingAppealElectionUsesExecuted32ProtectedPrefix() public {
+        this.lhSetup(false);
+        this.lhRotate();
+        bytes32 execution = lhTerminal;
+        bytes32 pending = this.lhCaptureCurrentPending(lhPrior);
+        require(
+            lhPrior != execution
+                && ingress.identityContestRecord(
+                        ingress.currentIdentityContestCause(artistId).facts.referenceHash
+                    ).terms.subjectRecordHash == lhPrior,
+            "current appeal compromise names actual historical35 subject separately from executed32 cutoff"
+        );
+        (IdentityRecovery.Request memory p, T.Authorization memory a) =
+            this.lhRequest(lhProtected, 0);
+        _lhRole(p, Appeal27.APPEAL);
+        vm.expectRevert(
+            abi.encodeWithSelector(Appeal27.InvalidGuardianAppeal.selector, p.evidenceHash)
+        );
+        ingress.identityRecoveryContext(p, a);
+        (p, a) = _lhAppeal(p, lhProtected);
+        _lhElect(p, a, lhRetained);
+        bytes32 record = _lhPendingRecover(p, a, pending, lhRetained, true);
+        require(
+            _snapshot(record).previousTransitionRecordHash == execution,
+            "exact appeal document and complete election bind executed32 snapshot rather than pending P"
+        );
+    }
+
+    function testLivingHistoryCurrentPendingRejectsAlteredPhaseTimeGuardianHashPredecessorAndClosureThenRetries()
+        public
+    {
+        this.lhSetup(false);
+        bytes32 execution = lhTerminal;
+        bytes32 priorPending = this.lhAbortPendingWithCompromise(false);
+        bytes32 pending = this.lhCaptureCurrentPending(execution);
+        (IdentityRecovery.Request memory p, T.Authorization memory a) = this.lhRequest(0, 0);
+        bytes32 context = keccak256(abi.encode(ingress.identityRecoveryContext(p, a)));
+        R.RotationRecord memory original = ingress.rotationRecord(pending);
+        bytes memory getter = abi.encodeCall(ingress.rotationRecord, (pending));
+        bytes memory transitionGetter = abi.encodeCall(ingress.artistTransitionState, (pending));
+        Dismissal.Cause memory current = ingress.currentIdentityContestCause(artistId);
+        bytes32 olderCause =
+            ingress.identityContestDismissalRecord(
+                ingress.identityTransitionClosure(artistId, priorPending).dismissalRecordHash
+            ).terms.expectedCauseHash;
+        _lhCorrupt(p, a, _lhCurrentCausePointer(current.causeHash, olderCause), olderCause, context);
+        _lhCorrupt(
+            p,
+            a,
+            _lhSlot(abi.encodeCall(ingress.identityContestCause, (current.causeHash)), pending),
+            priorPending,
+            context
+        );
+        _lhCorrupt(
+            p,
+            a,
+            _lhSlot(
+                abi.encodeCall(ingress.identityContestRecord, (current.facts.referenceHash)),
+                pending
+            ),
+            priorPending,
+            context
+        );
+        bytes32 marker = bytes32(
+            uint256(original.transition.contestedAt) | uint256(original.transition.phase) << 64
+        );
+        _lhCorrupt(
+            p,
+            a,
+            _lhSlot(transitionGetter, marker),
+            bytes32(uint256(original.transition.contestedAt) | uint256(1) << 64),
+            context
+        );
+        bytes32 timing = bytes32(
+            uint256(original.transition.stagedAt) | uint256(original.transition.contestEndsAt) << 64
+        );
+        _lhCorrupt(
+            p,
+            a,
+            _lhSlot(transitionGetter, timing),
+            bytes32(
+                uint256(original.transition.contestedAt + 1)
+                    | uint256(original.transition.contestEndsAt) << 64
+            ),
+            context
+        );
+        _lhCorruptHash(p, a, getter, original.guardianSetRecordHash, context);
+        bytes32 reasonSlot = _lhSlot(getter, original.terms.reasonHash);
+        bytes32 recordSlot = bytes32(uint256(reasonSlot) - 4);
+        require(
+            vm.load(suite.owners[2], recordSlot) == pending
+                && vm.load(suite.owners[2], bytes32(uint256(recordSlot) + 1)) == artistId,
+            "observed pending record hash and typed artist precede original reason field"
+        );
+        _lhCorrupt(p, a, recordSlot, bytes32(uint256(pending) ^ 1), context);
+        _lhCorrupt(p, a, _lhSlot(getter, priorPending), execution, context);
+        _lhCorrupt(p, a, _lhEmptyPendingClosureSlot(pending), artistId, context);
+        (,,, bytes32 head) = ingress.guardianSet(artistId);
+        _lhPendingRecover(p, a, pending, head, false);
+    }
 }

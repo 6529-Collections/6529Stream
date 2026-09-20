@@ -44,6 +44,11 @@ the release policy in `docs/release-policy.md`.
   preserving original small-record bytes, signatures, pointers and storage roots.
 - Compose the full-byte preservation and general attestation products with the
   original Artist/Metadata graph and explicit current Safe test recipes.
+- Admit repeated living recovery when the current compromise has already
+  aborted a pending rotation, using its original cause and empty dismissal
+  closure. Guardian election keeps the executed transition cutoff; native
+  validation is pending.
+
 - Extend repeated living recovery with a complete authenticated rotation,
   dismissal and closure history, including cancelled notices and retained
   standing vetoes. Existing supported context encodings and authority epochs

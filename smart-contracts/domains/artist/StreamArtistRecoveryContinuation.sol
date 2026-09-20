@@ -96,7 +96,7 @@ library StreamArtistRecoveryContinuation {
                 || p.expectedCauseHash != cause.causeHash || cause.causeHash == 0
                 || cause.facts.artistId != p.artistId || cause.facts.kind != 1
                 || cause.facts.executedTransitionHash != executed
-                || cause.facts.pendingTransitionHash != 0
+                || (cause.facts.pendingTransitionHash != 0 && cause.facts.authorityClass != 1)
                 || cause.facts.incumbent != principal.authorityAddress
                 || cause.facts.actor == address(0) || principal.status != 4
                 || principal.authorityClass != cause.facts.authorityClass
@@ -181,7 +181,7 @@ library StreamArtistRecoveryContinuation {
                 || contest.contester != cause.facts.actor
                 || contest.priorStatus != cause.facts.priorStatus
                 || contest.contestedAt != cause.facts.enteredAt
-                || contest.pendingTransitionRecordHash != 0
+                || contest.pendingTransitionRecordHash != cause.facts.pendingTransitionHash
                 || contest.executedTransitionRecordHash != executed
                 || contest.recordHash
                     != keccak256(

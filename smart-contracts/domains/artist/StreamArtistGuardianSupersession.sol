@@ -32,6 +32,12 @@ import {
 import { StreamArtistRotationState as Rotations } from "./StreamArtistRotationState.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import {
+    StreamArtistCurrentCompromiseReads as Current
+} from "./StreamArtistCurrentCompromiseReads.sol";
+import {
+    IStreamArtistRotationReads
+} from "../../interfaces/stream/artist/IStreamArtistRotation.sol";
+import {
     StreamArtistGuardianAppealTypes as Appeal
 } from "../../interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
 import { StreamArtistGuardianAppealReads } from "./StreamArtistGuardianAppealReads.sol";
@@ -118,6 +124,7 @@ library StreamArtistGuardianSupersession {
             s, history, rotations, request.artistId, request.supersededRecordHashes, cutoff, head
         );
         bool appeal = findings.length != 0;
+        bytes32 currentProof;
         if (appeal) {
             // Authenticate the original contest using its own evidence. The new request links the hostile document separately.
             Recovery.Request memory original = Recovery.Request(
@@ -130,13 +137,13 @@ library StreamArtistGuardianSupersession {
                 request.reasonHash,
                 request.supersededRecordHashes
             );
-            _contest(environment, original, cause, contest, transition);
+            currentProof = _currentContest(environment, original, cause, contest, transition);
         } else {
             if (cutoff.guardians.count >= head.count || cutoff.ownerRevision >= head.ownerRevision)
             {
                 revert S.InvalidGuardianSupersession(transition);
             }
-            _contest(environment, request, cause, contest, transition);
+            currentProof = _currentContest(environment, request, cause, contest, transition);
         }
         bytes32 selected = Rotations.operativeGuardian(rotations, request.artistId);
         R.GuardianRecord storage operative = rotations.guardians[selected];
@@ -153,6 +160,15 @@ library StreamArtistGuardianSupersession {
                 request.supersededRecordHashes
             )
         );
+        if (currentProof != 0) {
+            commitment = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_CURRENT_CONTEST_GUARDIAN_SUPERSESSION_V1"),
+                    commitment,
+                    currentProof
+                )
+            );
+        }
         if (appeal) {
             commitment = keccak256(
                 abi.encode(
@@ -533,6 +549,39 @@ library StreamArtistGuardianSupersession {
         if (indexedHead.count != head.count || indexedHead.historyCommitment != head.commitment) {
             revert S.IncompleteGuardianMembershipIndex(artistId);
         }
+    }
+
+    function _currentContest(
+        StreamArtistHashes.Environment memory e,
+        Recovery.Request memory p,
+        D.Cause memory cause,
+        C.Record memory c,
+        bytes32 transition
+    ) private view returns (bytes32) {
+        if (
+            cause.facts.authorityClass != 1
+                || (cause.facts.pendingTransitionHash == 0
+                    && c.terms.subjectRecordHash == transition)
+        ) {
+            _contest(e, p, cause, c, transition);
+            return 0;
+        }
+        if (
+            c.terms.artistId != p.artistId || c.terms.evidenceHash != p.evidenceHash
+                || c.terms.reasonHash != p.reasonHash || cause.facts.evidenceHash != p.evidenceHash
+                || cause.facts.reasonHash != p.reasonHash
+        ) revert S.InvalidGuardianSupersession(c.recordHash);
+        Current.Facts memory current = Current.read(
+            address(this),
+            e.registry,
+            e.chainId,
+            cause,
+            IStreamArtistRotationReads(address(this)).artistTransitionState(transition)
+        );
+        if (keccak256(abi.encode(current.contest)) != keccak256(abi.encode(c))) {
+            revert S.InvalidGuardianSupersession(c.recordHash);
+        }
+        return current.proof;
     }
 
     function _contest(
