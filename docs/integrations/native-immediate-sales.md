@@ -32,6 +32,10 @@ The separate [canonical native Dutch carrier](canonical-native-dutch-sales.md)
 uses the same authorization domain and setup with immutable schedules,
 maximum-price funding and optional declared free tiers.
 
+Use the [companion deployment and activation planners](canonical-native-sales-deployment.md)
+for explicit construction, registry admission, Recorder credit and ordered
+Artist-consented phase and signer setup across these three native hosts.
+
 ## Configure, register, obtain consent
 
 1. Deploy against the intended current Manager, recorder, Artist registry and

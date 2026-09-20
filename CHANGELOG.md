@@ -12,6 +12,17 @@ the release policy in `docs/release-policy.md`.
   fixed response checks, record meanings and read caps. Full-current migration
   and finality execution remain separate acceptance work.
 
+## Canonical native companion deployment and activation
+
+- Add separate construction and observed-state setup planners for canonical
+  fixed/open, claim/PWYW and Dutch hosts against the existing Recorder, with
+  explicit runtime/manifest pins and unchanged original 37-role inventory.
+- Preserve exact module admission, Recorder credit, Artist phase consent and
+  collection signer ordering. Distinguish actual Executor ownership from direct
+  Safe ownership; saved owner plans reject observed configuration drift.
+- Add an actual-current Safe configuration recipe. Native execution and
+  release evidence for these helpers remain separate from this source batch.
+
 ## Compact metric runtime proof
 
 - Reuse the exact four-word runtime prefix preimage and search required members
