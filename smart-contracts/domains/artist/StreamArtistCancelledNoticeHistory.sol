@@ -47,6 +47,112 @@ library StreamArtistCancelledNoticeHistory {
         uint256 activityCount;
     }
 
+    /// @notice Read an original cancelled episode before an authenticated current compromise.
+    /// @dev boundaryAt is the current cause's actual enteredAt, authenticated by the caller.
+    /// It is not the earlier selected episode's next-link time: a group can cancel after one of
+    /// its already-dismissed episodes. The caller separately checks episode/member ordering and
+    /// monotonic counters between notice groups. No later notice or authority installation is used.
+    function readAt(
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        bytes32 causeHash,
+        bytes32 resolutionHash,
+        uint64 boundaryAt
+    ) public view returns (Facts memory f) {
+        if (
+            artistId == 0 || boundaryAt == 0 || boundaryAt > block.timestamp
+                || e.chainId != block.chainid || e.registry == address(0)
+                || IStreamArtistOwner(address(this)).deploymentChainId() != e.chainId
+                || IStreamArtistOwner(address(this)).artistRegistry() != e.registry
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+
+        f.cause = resolutions.causes[causeHash];
+        _cause(e, f.cause, artistId, causeHash);
+        (bytes32 noticeHash, uint8 phase, bytes32 terminalHash) =
+            IStreamArtistDormancyOwner(address(this)).dormancyResolutionState(artistId, causeHash);
+        if (noticeHash == 0 || phase != 2 || terminalHash == 0) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+        (f.notice, phase, f.cancellation) =
+            IStreamArtistDormancyOwner(address(this)).dormancyRecord(noticeHash);
+        if (
+            phase != 2 || f.notice.recordHash != noticeHash
+                || f.cancellation.recordHash != terminalHash
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        f.activityCount =
+            _noticeAndCancellationAt(e, artistId, boundaryAt, f.notice, f.cancellation);
+        if (
+            f.cause.facts.incumbent != f.notice.incumbent
+                || f.cause.facts.enteredAt < f.notice.initiatedAt
+                || f.cause.facts.enteredAt > f.cancellation.observedAt
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        f.dismissal = resolutions.records[resolutionHash];
+        _dismissal(e, f.cause, f.dismissal, resolutionHash, boundaryAt);
+        if (f.dismissal.restoredStatus == 2
+                ? f.dismissal.dismissedAt > f.cancellation.observedAt
+                : f.dismissal.dismissedAt < f.cancellation.observedAt) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        f.contest = _contest(resolutions, e, f.cause);
+        f.proof = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_CANCELLED_NOTICE_EPISODE_AT_V1"),
+                e.chainId,
+                e.registry,
+                address(this),
+                artistId,
+                boundaryAt,
+                f.notice,
+                f.cancellation,
+                f.cause,
+                f.dismissal,
+                f.contest,
+                f.activityCount
+            )
+        );
+    }
+
+    function _noticeAndCancellationAt(
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        uint64 boundaryAt,
+        Dorm.Notice memory n,
+        Dorm.Terminal memory t
+    ) private view returns (uint256 count) {
+        if (
+            n.terms.artistId != artistId || n.incumbent == address(0) || n.terms.evidenceHash == 0
+                || bytes(n.terms.reasonURI).length == 0 || bytes(n.terms.reasonURI).length > 2048
+                || n.initiatedAt == 0 || n.inactivitySeconds < 365 days
+                || n.noticeSeconds < 180 days || n.timingRevision == 0 || n.actionId == 0
+                || n.witnessHash == 0
+                || uint256(n.noticeEndsAt) != uint256(n.initiatedAt) + n.noticeSeconds
+                || uint256(n.initiatedAt) < uint256(n.priorLivenessAt) + n.inactivitySeconds
+                || n.priorActivity == type(uint256).max || n.recordHash != _noticeHash(e, n)
+                || t.noticeHash != n.recordHash || t.actor == address(0)
+                || (t.authorityClass != 1 && t.authorityClass != 2 && t.authorityClass != 3)
+                || (t.authorityClass == 1 && t.actor != n.incumbent) || t.observedAt < n.initiatedAt
+                || t.observedAt > boundaryAt
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        count = n.priorActivity + 1;
+        Dorm.Terminal memory canonical;
+        canonical.noticeHash = n.recordHash;
+        canonical.actor = t.actor;
+        canonical.authorityClass = t.authorityClass;
+        canonical.observedAt = t.observedAt;
+        canonical.recordHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_DORMANCY_CANCELLATION_V1"),
+                e.chainId,
+                e.registry,
+                address(this),
+                canonical,
+                count
+            )
+        );
+        if (keccak256(abi.encode(t)) != keccak256(abi.encode(canonical))) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+    }
+
     function read(
         Resolution.State storage resolutions,
         StreamArtistHashes.Environment memory e,

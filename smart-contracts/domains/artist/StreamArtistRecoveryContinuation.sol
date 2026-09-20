@@ -26,6 +26,9 @@ import {
     StreamArtistRecoveryClosedContinuation as Closed
 } from "./StreamArtistRecoveryClosedContinuation.sol";
 import {
+    StreamArtistLivingRecoveryHistory as LivingHistory
+} from "./StreamArtistLivingRecoveryHistory.sol";
+import {
     StreamArtistRecoveryRotationContinuation as Rotated
 } from "./StreamArtistRecoveryRotationContinuation.sol";
 import {
@@ -110,8 +113,7 @@ library StreamArtistRecoveryContinuation {
             revert I.InvalidIdentityRecovery(p.artistId);
         }
         if (
-            (!rotated && rotations.latestTransition[p.artistId] != previous)
-                || rotations.pending[p.artistId] != 0 || estate.pending[p.artistId] != 0
+            rotations.pending[p.artistId] != 0 || estate.pending[p.artistId] != 0
                 || transition.artistId != p.artistId || transition.recordHash != previous
                 || transition.phase != 2 || transition.executedAt != prior.fields.recoveredAt
                 || transition.stagedAt != transition.executedAt
@@ -126,12 +128,24 @@ library StreamArtistRecoveryContinuation {
         }
         bytes32 rotationProof;
         bytes32 closureProof;
-        if (rotated) {
-            rotationProof = Rotated.proof(
-                s, rotations, resolutions, estate, o.environment, prior, transition, cause
-            );
-        } else {
-            closureProof = Closed.proof(resolutions, o.environment, prior, transition, cause);
+        bytes32 livingHistory;
+        if (principal.authorityClass == 1) {
+            LivingHistory.Facts memory history =
+                LivingHistory.read(s, rotations, resolutions, o.environment, prior, cause);
+            if (!history.legacyCompatible) livingHistory = history.proof;
+        }
+        if (livingHistory == 0) {
+            // Retain the original readers and exact wrappers for their supported shapes.
+            if (rotated) {
+                rotationProof = Rotated.proof(
+                    s, rotations, resolutions, estate, o.environment, prior, transition, cause
+                );
+            } else {
+                if (rotations.latestTransition[p.artistId] != previous) {
+                    revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
+                }
+                closureProof = Closed.proof(resolutions, o.environment, prior, transition, cause);
+            }
         }
         if (identity.activeIdentity[p.newAddress] != 0) {
             revert T.AddressAlreadyRegistered(p.newAddress);
@@ -154,14 +168,14 @@ library StreamArtistRecoveryContinuation {
             o.environment,
             prior,
             rotated ? s.vestingHistory.snapshots[previous] : cutoff,
-            !rotated
+            !rotated && livingHistory == 0
         );
         C.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
         if (
             contest.recordHash == 0 || contest.recordHash != cause.facts.referenceHash
                 || contest.terms.artistId != p.artistId
-                || contest.terms.subjectRecordHash != executed
+                || (livingHistory == 0 && contest.terms.subjectRecordHash != executed)
                 || contest.terms.evidenceHash != cause.facts.evidenceHash
                 || contest.terms.reasonHash != cause.facts.reasonHash
                 || contest.contester != cause.facts.actor
@@ -179,7 +193,7 @@ library StreamArtistRecoveryContinuation {
                             o.environment.registry,
                             p.artistId,
                             contest.contester,
-                            executed,
+                            contest.terms.subjectRecordHash,
                             contest.terms.evidenceHash,
                             contest.terms.reasonHash,
                             contest.contestedAt
@@ -278,6 +292,15 @@ library StreamArtistRecoveryContinuation {
                     keccak256("6529STREAM_ARTIST_CLOSED_REPEAT_RECOVERY_STATE_V1"),
                     c.oldValueHash,
                     closureProof
+                )
+            );
+        }
+        if (livingHistory != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RESOLVED_LIVING_REPEAT_RECOVERY_STATE_V1"),
+                    c.oldValueHash,
+                    livingHistory
                 )
             );
         }

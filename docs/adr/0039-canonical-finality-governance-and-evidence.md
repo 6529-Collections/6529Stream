@@ -1919,3 +1919,33 @@ cancelled episode remain unchanged. No live writer, authority rule, owner API,
 storage layout, original record domain, acceptance/replay, election or typed
 receipt producer changes. Native, linked size, capacity and full-graph validation
 remain pending; the caller guide records the authored source scenarios.
+
+### Complete resolved history before repeated living recovery
+
+The class1 repeat reader now authenticates every actual32 between the latest
+living35 and current execution, and every selected cause/dismissal back to that
+35's exact saved baseline pair. Reusable original record, rotation, selected
+ACTIVE/standing dismissal and cancelled-notice readers supply canonical evidence;
+no synthetic notice or authority transition substitutes for a missing boundary.
+Cancelled episodes bind their original phase2 terminal and captured activity
+counter to the actual fresh compromise time, retaining both restored-status2
+before cancellation and restored-status1 after cancellation histories.
+
+Each execution's immutable first closure must match the earliest applicable
+dismissal in the saved chain. Each earlier execution is checked at its own next
+rotation's staging time, with real pending-veto closures when staging names a
+different predecessor. Historical subjects require an exact original compromise
+and a mature earlier boundary. The separately authenticated fresh class1
+compromise may name zero or an older subject while capturing the current head.
+No early unresolved current compromise matures merely through waiting.
+
+Context selection examines the finite records consumed by the old direct and
+rotated readers. Supported old combinations retain those calls and exact
+encodings, even when a cancelled episode sits between supported active endpoints.
+New combinations use a single tagged resolved-living-history proof. The full
+chain is validated in either case. Class3 completed43/estate origin handling,
+original writers, owner API/storage, record/signature domains, current governance,
+acceptance, permanent guardian exclusions, replay and receipt producers remain
+unchanged. Ordinary32 and cancellation preserve the epoch; each successful35
+advances it exactly once. The [caller guide](../guides/artist-living-recovery-history.md)
+records the authored cases and coordinated runtime validation still required.

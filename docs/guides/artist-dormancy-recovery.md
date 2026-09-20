@@ -423,7 +423,8 @@ initial pair when no living35 exists. A fresh active-status contest followed by
 the **first** living35 could already absorb an older cancelled-notice history
 into that living35 baseline. That previously supported route is distinct from
 carrying the original cancelled history directly into a new notice without35.
-This increment does not claim support for every repeated living35 continuation.
+Repeated living35 continuations use the separate
+[living recovery history reader](artist-living-recovery-history.md).
 
 New history has its own tagged proof. Histories with no cancelled episode retain
 their previous proof encodings. Original owner/storage APIs, notice/contest/

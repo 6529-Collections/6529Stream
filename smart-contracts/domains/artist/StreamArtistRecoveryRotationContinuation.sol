@@ -35,6 +35,34 @@ import {
 /// vesting writer binds its actual prior head. An unchanged latest35 and epoch therefore
 /// authenticate the entire suffix without a caller-selected prefix or a history-depth limit.
 library StreamArtistRecoveryRotationContinuation {
+    /// @notice Authenticate every actual32 between an admitted35 and the current execution.
+    /// @dev Closure and cause chronology are separate. Existing proof() retains its exact tuple.
+    function ancestry(
+        RecoveryState.State storage recovery,
+        RotationState.State storage rotations,
+        StreamArtistHashes.Environment memory e,
+        V.Snapshot memory origin,
+        bytes32 head
+    ) public view returns (bytes32 history) {
+        if (head == 0 || recovery.vestingHistory.latest[origin.artistId] != head) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
+        }
+        bytes32 cursor = head;
+        while (cursor != origin.transitionRecordHash) {
+            V.Snapshot memory v = recovery.vestingHistory.snapshots[cursor];
+            R.RotationRecord memory r = rotations.rotations[cursor];
+            _pair(recovery, e, v, r, origin);
+            history = keccak256(abi.encode(history, v, r));
+            cursor = v.previousTransitionRecordHash;
+        }
+        if (
+            keccak256(abi.encode(recovery.vestingHistory.snapshots[cursor]))
+                != keccak256(abi.encode(origin))
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
+        }
+    }
+
     function proof(
         RecoveryState.State storage recovery,
         RotationState.State storage rotations,

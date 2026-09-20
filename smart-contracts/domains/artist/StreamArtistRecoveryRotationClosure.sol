@@ -147,8 +147,85 @@ library StreamArtistRecoveryRotationClosure {
         return _selectedCompromise(resolutions, e, boundary, previous, selected, resolutionHash);
     }
 
+    /// @notice Authenticate a resolved ACTIVE episode, including an op33-aborted pending rotation.
+    /// @dev Existing no-pending and standing-veto episodes retain their original proof bytes.
+    /// The caller separately proves the captured execution's ancestry and immutable first closure.
+    function selectedHistory(
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        R.TransitionState memory previous,
+        address incumbent,
+        uint64 boundaryAt,
+        bytes32 causeHash,
+        bytes32 resolutionHash
+    ) public view returns (bytes32) {
+        Dismissal.Cause memory cause = resolutions.causes[causeHash];
+        if (cause.facts.pendingTransitionHash == 0 || cause.facts.kind == 2) {
+            return selectedBeforeNext(
+                rotations,
+                resolutions,
+                e,
+                artistId,
+                previous,
+                incumbent,
+                boundaryAt,
+                causeHash,
+                resolutionHash
+            );
+        }
+        Dismissal.Record memory selected = resolutions.records[resolutionHash];
+        if (causeHash == 0 || selected.terms.expectedCauseHash != causeHash) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+        if (previous.recordHash == 0) {
+            R.TransitionState memory empty;
+            if (keccak256(abi.encode(previous)) != keccak256(abi.encode(empty))) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+        } else if (previous.artistId != artistId || previous.phase != 2 || previous.executedAt == 0)
+        {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+        Dismissal.CauseFacts memory boundary;
+        boundary.artistId = artistId;
+        boundary.authorityClass = 1;
+        boundary.incumbent = incumbent;
+        boundary.enteredAt = boundaryAt;
+        bytes32 episode = _selectedCompromisePending(
+            resolutions,
+            e,
+            boundary,
+            previous,
+            selected,
+            resolutionHash,
+            cause.facts.pendingTransitionHash
+        );
+        bytes32 pending = _abortedCompromise(rotations, resolutions, e, cause, selected, previous);
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_SELECTED_PENDING_COMPROMISE_V1"), episode, pending
+            )
+        );
+    }
+
     // Explicitly selected ACTIVE history may retain a zero or older op33 subject independently
     // from the actual execution captured by its cause. Original closure APIs keep their profile.
+    /// @notice Read the actual ACTIVE compromise independently of any later dismissal.
+    /// @dev The caller authenticates this cause and its captured execution/incumbent. Historical
+    /// and zero subjects keep their own original op33 commitment and marker provenance.
+    function compromiseRecord(
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        bytes32 execution
+    ) public view returns (Contest.Record memory contest) {
+        contest = IStreamArtistIdentityContestOwner(address(this))
+            .identityContestRecord(cause.facts.referenceHash);
+        _selectedContest(resolutions, e, cause, contest, execution);
+    }
+
     function _selectedCompromise(
         Resolution.State storage resolutions,
         StreamArtistHashes.Environment memory e,
@@ -156,6 +233,18 @@ library StreamArtistRecoveryRotationClosure {
         R.TransitionState memory t,
         Dismissal.Record memory r,
         bytes32 expected
+    ) private view returns (bytes32) {
+        return _selectedCompromisePending(resolutions, e, current, t, r, expected, bytes32(0));
+    }
+
+    function _selectedCompromisePending(
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.CauseFacts memory current,
+        R.TransitionState memory t,
+        Dismissal.Record memory r,
+        bytes32 expected,
+        bytes32 pending
     ) private view returns (bytes32) {
         Dismissal.Cause memory cause = resolutions.causes[r.terms.expectedCauseHash];
         if (
@@ -188,12 +277,12 @@ library StreamArtistRecoveryRotationClosure {
                 || cause.facts.referenceHash == 0 || cause.facts.enteredAt == 0
                 || cause.facts.enteredAt < t.executedAt || cause.facts.enteredAt > r.dismissedAt
                 || cause.facts.previousResolutionHash != r.terms.expectedResolutionHash
-                || cause.facts.pendingTransitionHash != 0 || cause.facts.evidenceHash == 0
+                || cause.facts.pendingTransitionHash != pending || cause.facts.evidenceHash == 0
                 || cause.facts.reasonHash == 0
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(current.artistId);
         Contest.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
-        _selectedContest(resolutions, e, cause, contest, t.recordHash);
+        _selectedContestPending(resolutions, e, cause, contest, t.recordHash, pending);
         return keccak256(abi.encode(r, cause, contest));
     }
 
@@ -204,12 +293,24 @@ library StreamArtistRecoveryRotationClosure {
         Contest.Record memory c,
         bytes32 execution
     ) private view {
+        _selectedContestPending(resolutions, e, cause, c, execution, bytes32(0));
+    }
+
+    function _selectedContestPending(
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Contest.Record memory c,
+        bytes32 execution,
+        bytes32 pending
+    ) private view {
         if (
             c.recordHash != cause.facts.referenceHash || c.terms.artistId != cause.facts.artistId
                 || c.terms.evidenceHash != cause.facts.evidenceHash
                 || c.terms.reasonHash != cause.facts.reasonHash || c.contester != cause.facts.actor
                 || c.contestedAt != cause.facts.enteredAt || c.priorStatus != 1
-                || c.pendingTransitionRecordHash != 0 || c.executedTransitionRecordHash != execution
+                || c.pendingTransitionRecordHash != pending
+                || c.executedTransitionRecordHash != execution
                 || c.recordHash
                     != keccak256(
                         abi.encode(
@@ -239,6 +340,36 @@ library StreamArtistRecoveryRotationClosure {
                 || subject.stagedAt > cause.facts.enteredAt
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(cause.facts.artistId);
         _selectedSubjectMarker(resolutions, cause, subject);
+    }
+
+    function _abortedCompromise(
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Dismissal.Record memory dismissal,
+        R.TransitionState memory executed
+    ) private view returns (bytes32) {
+        bytes32 hash = cause.facts.pendingTransitionHash;
+        R.RotationRecord memory r = rotations.rotations[hash];
+        _rotation(e, r, cause.facts.artistId, hash);
+        Dismissal.Closure memory closed = resolutions.closures[hash];
+        Contest.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
+            .identityContestRecord(cause.facts.referenceHash);
+        if (
+            hash == executed.recordHash || r.terms.oldAddress != cause.facts.incumbent
+                || r.transition.phase != 3 || r.transition.executedAt != 0
+                || r.transition.postWindowEndsAt != 0
+                || r.transition.contestedAt != cause.facts.enteredAt
+                || r.transition.contestedAt < r.transition.stagedAt
+                || r.transition.stagedAt < executed.executedAt
+                || contest.capturedGuardianSetRecordHash != r.guardianSetRecordHash
+                || closed.artistId != cause.facts.artistId || closed.transitionRecordHash != hash
+                || closed.dismissalRecordHash != dismissal.recordHash || !closed.abandoned
+                || closed.windowEndsAt != r.transition.contestEndsAt
+                || closed.contestedAt != r.transition.contestedAt
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(cause.facts.artistId);
+        return keccak256(abi.encode(dismissal, cause, contest, r, closed));
     }
 
     function _selectedSubjectMarker(
