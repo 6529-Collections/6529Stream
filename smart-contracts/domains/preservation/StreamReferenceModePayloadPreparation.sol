@@ -33,6 +33,13 @@ library StreamReferenceModePayloadPreparation {
         mapping(bytes32 => Bytes.Manifest) payloads;
     }
 
+    /// @dev Written only by the authorized publisher after fresh input validation. Each target
+    /// manifest is immutable: preparation only creates an empty ID or verifies an existing ID.
+    struct Binding {
+        bytes32 publicationId;
+        bytes32 payloadId;
+    }
+
     /// @dev Internal transport only; not a caller-selected publication argument.
     struct Selection {
         bytes32 publicationId;
@@ -208,8 +215,48 @@ library StreamReferenceModePayloadPreparation {
         bytes32 storeHash,
         Selection memory selected
     ) public {
+        PublicationCarrier storage saved =
+            _requireSelected(state, inventories, store, storeHash, selected);
+        Adoption.adopt(payloadDestination, state.payloads[selected.payloadId], store);
+        Adoption.adopt(publicationDestination, saved.canonical, store);
+    }
+
+    /// @notice Bind authenticated immutable carriers inside the original publication transition.
+    /// @dev This grants no authority to preparation. The selected IDs originate only in the
+    /// fresh full-input writer, and the host publishes no receipt/history until this succeeds.
+    function bind(
+        State storage state,
+        mapping(bytes32 => Bytes.Manifest) storage inventories,
+        Binding storage destination,
+        Bytes.Manifest storage oldPayload,
+        Bytes.Manifest storage oldPublication,
+        address store,
+        bytes32 storeHash,
+        Selection memory selected
+    ) public {
+        PublicationCarrier storage saved =
+            _requireSelected(state, inventories, store, storeHash, selected);
+        if (
+            destination.publicationId != 0 || destination.payloadId != 0
+                || oldPayload.byteLength != 0 || oldPublication.byteLength != 0
+        ) {
+            revert Bytes.InvalidSnapshotManifest();
+        }
+        Adoption.requireStoreIntact(state.payloads[selected.payloadId], store);
+        Adoption.requireStoreIntact(saved.canonical, store);
+        destination.publicationId = selected.publicationId;
+        destination.payloadId = selected.payloadId;
+    }
+
+    function _requireSelected(
+        State storage state,
+        mapping(bytes32 => Bytes.Manifest) storage inventories,
+        address store,
+        bytes32 storeHash,
+        Selection memory selected
+    ) private view returns (PublicationCarrier storage saved) {
         _pin(store, storeHash);
-        PublicationCarrier storage saved = state.publications[selected.publicationId];
+        saved = state.publications[selected.publicationId];
         P.PublicationDescriptor memory descriptor = saved.descriptor;
         if (
             selected.publicationId
@@ -229,8 +276,6 @@ library StreamReferenceModePayloadPreparation {
                 || environment.byteLength != descriptor.environmentBytes
         ) revert M.InvalidModeEvidence();
         Adoption.requireIntact(environment);
-        Adoption.adopt(payloadDestination, state.payloads[selected.payloadId], store);
-        Adoption.adopt(publicationDestination, saved.canonical, store);
     }
 
     function publicationEncoded(State storage state, bytes32 id)

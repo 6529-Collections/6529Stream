@@ -20,6 +20,13 @@ import { StreamReferenceModeDefinitions as D } from "../records/StreamReferenceM
 import { StreamRecordFamilies } from "../records/StreamRecordFamilies.sol";
 import { StreamMetadataRenderer } from "../metadata/StreamMetadataRenderer.sol";
 
+import {
+    IStreamReferenceModePublication
+} from "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
+
+import { StreamReferenceModeInput as Input } from "./StreamReferenceModeInput.sol";
+import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
+
 /// @notice Fixed original writer and finality encodings; the host retains all mutation/currentness guards.
 /// @dev Delegate context is the actual original producer, including address(this) and its code hash.
 library StreamReferenceModeStateReads {
@@ -102,6 +109,55 @@ library StreamReferenceModeStateReads {
             if (enabled && rev != 0) return (cls, rev);
         }
         revert R.ReferenceAuthority(actor);
+    }
+
+    /// @dev The complete original pair already passed the writer's canonical typed admission.
+    /// Decode its original Publication directly, keeping this full tuple encoder off the host.
+    function recordHash(
+        uint256 chainId,
+        address core,
+        address metadata,
+        R.Receipt memory receipt,
+        bytes calldata original
+    ) public view returns (bytes32) {
+        if (bytes4(original[:4]) != IStreamReferenceModePublication.publishModeReference.selector) {
+            revert R.InvalidReferenceRender();
+        }
+        R.Publication memory publication = abi.decode(original[4:], (R.Publication));
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_REFERENCE_MODE_RECORD_V1"),
+                chainId,
+                address(this),
+                core,
+                metadata,
+                publication,
+                receipt
+            )
+        );
+    }
+
+    function contextHash(R.Dependencies memory d, bytes calldata original)
+        public
+        view
+        returns (bytes32)
+    {
+        if (bytes4(original[:4]) != IStreamReferenceModePublication.modeContextHash.selector) {
+            revert R.InvalidReferenceRender();
+        }
+        return Input.contextHash(d, abi.decode(original[4:], (R.Publication)));
+    }
+
+    function retainPublication(
+        Bytes.Manifest storage destination,
+        address store,
+        bytes calldata original
+    ) public {
+        if (bytes4(original[:4]) != IStreamReferenceModePublication.publishModeReference.selector) {
+            revert R.InvalidReferenceRender();
+        }
+        R.Publication memory publication = abi.decode(original[4:], (R.Publication));
+        Bytes.retain(destination, store, abi.encode(publication));
     }
 
     function lock(

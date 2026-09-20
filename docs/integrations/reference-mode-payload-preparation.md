@@ -138,7 +138,7 @@ Native9 completed five cases and failed the four publication-dependent cases.
 The actual host's publication and payload preparation calls fit their bounded
 envelopes at 13,014,534 and 13,677,086 gas including intrinsic gas. Final
 publication still exhausted its call budget while reading the already prepared
-439,872-byte payload after fresh source and evidence validation. The trace's
+443,648-byte payload after fresh source and evidence validation. The trace's
 selector decoration was an out-of-gas failure, not a missing interface. The
 failed capture remains evidence of that unresolved complete-flow boundary.
 
@@ -192,3 +192,71 @@ remain separate: minimal-host adoption does not itself establish the complete
 writer/source, supplement, Safe retry, lock or inventory flow, nor current-head
 deployment capacity. The large aggregate harness gas includes many individual
 uploads and preparatory calls; it is not a single proposed transaction.
+
+## Immutable carrier bindings
+
+Native10 preserved the genuine native5 context and the exact predecessor graph,
+with only the reviewed manifest-adoption overlays. Five cases passed and four
+publication-dependent cases failed. Both actual-host preparation stages fit at
+13,014,541 and 13,677,066 gas including intrinsic gas. The first publication
+still exhausted its budget inside manifest adoption after all 55 Store lookups
+for its 443,648-byte payload. The second, 254,464-byte publication manifest had
+not yet been adopted. This call-level trace does not identify the final opcode;
+the complete operation still required copying every pointer/hash pair into
+fresh storage. The failed capture is retained, not replaced by the smaller
+worker's passing result.
+
+The successor appends one compiler-owned mapping from the accepted record hash
+to its immutable publication and payload preparation IDs. It writes those two
+IDs only inside the original authorized publication transition. It first
+performs the unchanged fresh input/source/evidence validation and the same
+publication, environment and payload integrity checks. The payload and original
+publication must both retain the pinned Store's exact pointers and lengths,
+STOP prefixes, ordered chunk hashes and complete byte hashes. A claimed ID is
+never an external publication argument. Existing bindings and mixed binding /
+legacy destinations reject instead of replacing a prior record.
+
+Preparation cannot mutate a bound carrier: an existing publication ID checks
+its exact descriptor and bytes, while an existing payload ID checks its bytes
+and returns without writing. The original chain/host/full-component identities
+remain unchanged. A new preparation under different inputs has a different ID;
+it cannot redirect an accepted record's binding. Only the actual validated
+publisher can create the binding, receipt and history entry atomically.
+
+Every original record, payload, currentness and metric-supplement reader uses
+the same private typed storage-reference selectors. A completely zero binding
+selects the original monolithic maps. A complete binding selects the original
+prepared manifests. Partial bindings and mixed legacy/bound manifests reject.
+Receipt/head/lock guards and byte-integrity reads stay at their original call
+sites; there is no caller-provided root or external routing target. All earlier
+storage rows and the public ABI are preserved; the new mapping is appended.
+
+The host's three complete Publication encoders move to its existing fixed
+StateReads worker: original record hashing, the original mode-context getter,
+and the monolithic publication retention branch. Each accepts only its exact
+original selector and decodes the same original Publication. Record hashing
+uses the actual delegate host, original chain/Core/Metadata and complete
+receipt. Fallback retention still uses the original Store and byte manifest
+reader/writer. No output, domain, authority, currentness or gas cap changes.
+The original complete preparation and live write-validation workers are
+unchanged.
+
+Focused regressions compare mixed legacy and bound records, reject changed
+scope/source/recorder/report/host/chain inputs, prove idempotent preparation
+cannot replace accepted bytes, and cover partial/mixed bindings, chunk order,
+whole hash, code length, STOP and data corruption. A failure after binding must
+roll back both IDs and record acceptance before an identical retry. Independent
+literal record/context preimages cover empty and nonempty dynamic rows; the
+fallback test compares exact bytes after a missing-chunk failure and retry.
+The 1,048-row corpus is measured separately with named host/Store/carrier
+cooling and calldata/intrinsic accounting. These worker recipes do not establish
+actual publisher authority, supplement/lock/inventory capacity or an RPC anchor.
+The final selected gate fits all four affected products: publisher 22,688 bytes
+(runtime) / 27,083 bytes (creation), fixed StateReads 8,457 / 8,492, payload
+preparation 18,469 / 18,503 and manifest verifier 2,085 / 2,120. The 132-source
+ABI check preserves all 98 host entries and all 16 earlier recursive storage
+rows; the new binding mapping starts at slot 42. The original complete
+Preparation and live WritePreparation workers are byte-identical to the prior
+adoption commit. Two earlier over-limit host size gates are preserved. The
+focused frozen runtime capture is separate from these source and size results;
+actual publisher/Safe/supplement/lock/inventory acceptance remains pending.

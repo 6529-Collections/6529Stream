@@ -78,6 +78,8 @@ contract StreamReferenceModePublication is
     mapping(bytes32 => StreamReferenceModeTypes.Facts) private _modeFacts;
     StreamReferenceMetricStorage.State private _metricSupplements;
     StreamReferenceModePayloadPreparation.State private _preparedModePayloads;
+    // Appended only. Original monolithic manifests and every earlier storage root stay intact.
+    mapping(bytes32 => StreamReferenceModePayloadPreparation.Binding) private _publishedCarriers;
 
     constructor(
         StreamReferenceRenderTypes.Dependencies memory d,
@@ -189,7 +191,7 @@ contract StreamReferenceModePublication is
         StreamReferenceMetricStorage.Context memory c =
             StreamReferenceMetricStorage.Context(dependencies(), r, msg.sender, cls, rev);
         return StreamReferenceMetricStorage.publish(
-            _metricSupplements, c, _publications[hash], _modeEvidence[hash], msg.data
+            _metricSupplements, c, _publicationForRecord(hash), _modeEvidence[hash], msg.data
         );
     }
 
@@ -214,7 +216,11 @@ contract StreamReferenceModePublication is
         StreamReferenceRenderTypes.Receipt memory r = _receipts[hash];
         requireCurrent(r.collectionId, hash, r.revision);
         bytes memory raw = StreamReferenceMetricStorage.requireEncoded(
-            _metricSupplements, dependencies(), hash, _publications[hash], _modeEvidence[hash]
+            _metricSupplements,
+            dependencies(),
+            hash,
+            _publicationForRecord(hash),
+            _modeEvidence[hash]
         );
         assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
@@ -243,7 +249,7 @@ contract StreamReferenceModePublication is
         override
         returns (bytes32)
     {
-        return StreamReferenceModeProof.contextHash(dependencies(), p);
+        return StreamReferenceModeStateReads.contextHash(dependencies(), msg.data);
     }
 
     function previewModeReference(
@@ -284,16 +290,8 @@ contract StreamReferenceModePublication is
             ? uint32(canonical.length)
             : result.selected.payloadBytes;
         r.recordedAt = uint64(block.timestamp);
-        hash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_REFERENCE_MODE_RECORD_V1"),
-                deploymentChainId,
-                address(this),
-                core,
-                metadataHost,
-                p,
-                r
-            )
+        hash = StreamReferenceModeStateReads.recordHash(
+            deploymentChainId, core, metadataHost, r, msg.data
         );
         r.recordHash = hash;
         r.recordChainHash = keccak256(
@@ -310,11 +308,14 @@ contract StreamReferenceModePublication is
         );
         if (result.selected.payloadId == 0) {
             StreamSnapshotManifestBytes.retain(_payloads[hash], d.targets[3], canonical);
-            StreamSnapshotManifestBytes.retain(_publications[hash], d.targets[3], abi.encode(p));
+            StreamReferenceModeStateReads.retainPublication(
+                _publications[hash], d.targets[3], msg.data
+            );
         } else {
-            StreamReferenceModePayloadPreparation.adopt(
+            StreamReferenceModePayloadPreparation.bind(
                 _preparedModePayloads,
                 _fileInventories,
+                _publishedCarriers[hash],
                 _payloads[hash],
                 _publications[hash],
                 d.targets[3],
@@ -396,8 +397,9 @@ contract StreamReferenceModePublication is
         )
     {
         _known(hash);
-        bytes memory raw =
-            StreamReferenceRenderRecordReads.recordBytes(_publications[hash], _receipts[hash]);
+        bytes memory raw = StreamReferenceRenderRecordReads.recordBytes(
+            _publicationForRecord(hash), _receipts[hash]
+        );
         assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
@@ -450,7 +452,7 @@ contract StreamReferenceModePublication is
 
     function referencePayload(bytes32 hash) external view override returns (bytes memory) {
         _known(hash);
-        return StreamSnapshotManifestBytes.read(_payloads[hash]);
+        return StreamSnapshotManifestBytes.read(_payloadForRecord(hash));
     }
 
     function referenceCount(uint256 cid) external view override returns (uint256) {
@@ -485,10 +487,10 @@ contract StreamReferenceModePublication is
         StreamReferenceModePreparation.requireCurrent(
             d,
             _modeBindings,
-            _publications[hash],
+            _publicationForRecord(hash),
             _modeEvidence[hash],
             _modeFacts[hash],
-            _payloads[hash],
+            _payloadForRecord(hash),
             _receipts[hash]
         );
     }
@@ -576,7 +578,11 @@ contract StreamReferenceModePublication is
 
     function _metricHash(bytes32 hash) private view returns (bytes32) {
         return StreamReferenceMetricStorage.requireHash(
-            _metricSupplements, dependencies(), hash, _publications[hash], _modeEvidence[hash]
+            _metricSupplements,
+            dependencies(),
+            hash,
+            _publicationForRecord(hash),
+            _modeEvidence[hash]
         );
     }
 
@@ -696,6 +702,44 @@ contract StreamReferenceModePublication is
     {
         _known(hash);
         return (_modeFacts[hash].mode, _modeFacts[hash].evidenceHash);
+    }
+
+    /// @dev Private compiler-typed aliases only; no supplied root, external read or fallback.
+    /// Original public callers retain their receipt/head checks before selecting either carrier.
+    function _publicationForRecord(bytes32 hash)
+        private
+        view
+        returns (StreamSnapshotManifestBytes.Manifest storage)
+    {
+        bytes32 id = _carrierBinding(hash).publicationId;
+        if (id == 0) return _publications[hash];
+        return _preparedModePayloads.publications[id].canonical;
+    }
+
+    function _payloadForRecord(bytes32 hash)
+        private
+        view
+        returns (StreamSnapshotManifestBytes.Manifest storage)
+    {
+        bytes32 id = _carrierBinding(hash).payloadId;
+        if (id == 0) return _payloads[hash];
+        return _preparedModePayloads.payloads[id];
+    }
+
+    function _carrierBinding(bytes32 hash)
+        private
+        view
+        returns (StreamReferenceModePayloadPreparation.Binding storage b)
+    {
+        b = _publishedCarriers[hash];
+        bool absent = b.publicationId == 0;
+        if (
+            absent != (b.payloadId == 0)
+                || (!absent
+                    && (_publications[hash].byteLength != 0 || _payloads[hash].byteLength != 0))
+        ) {
+            revert StreamReferenceModeTypes.InvalidModeEvidence();
+        }
     }
 
     function _head(uint256 cid) private view returns (bytes32) {

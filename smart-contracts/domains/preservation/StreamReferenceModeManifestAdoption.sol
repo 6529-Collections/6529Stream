@@ -11,6 +11,15 @@ library StreamReferenceModeManifestAdoption {
         return _verify(saved, address(0));
     }
 
+    /// @notice Authenticate the same original Store relation without duplicating storage arrays.
+    function requireStoreIntact(Bytes.Manifest storage saved, address store)
+        public
+        view
+        returns (bytes32)
+    {
+        return _verify(saved, store);
+    }
+
     function adopt(
         Bytes.Manifest storage destination,
         Bytes.Manifest storage original,

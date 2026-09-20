@@ -31,6 +31,13 @@ import {
     IStreamReferenceModePayloadPreparation as P
 } from "../../../smart-contracts/interfaces/stream/preservation/IStreamReferenceModePayloadPreparation.sol";
 import { ReferenceModeOriginalEncoding as Original } from "./ReferenceModeOriginalEncoding.sol";
+import {
+    StreamReferenceModeStateReads as StateReads
+} from "../../../smart-contracts/domains/preservation/StreamReferenceModeStateReads.sol";
+
+import {
+    IStreamReferenceModePublication
+} from "../../../smart-contracts/interfaces/stream/preservation/IStreamReferenceModePublication.sol";
 
 interface PayloadPreparationVm {
     struct Log {
@@ -58,6 +65,11 @@ contract ModePayloadPreparationHost {
     address public immutable store;
     bytes32 private immutable storeHash;
     bool private entered;
+    mapping(bytes32 => Preparation.Binding) private bindings;
+    mapping(bytes32 => Bytes.Manifest) private legacyPayloads;
+    mapping(bytes32 => Bytes.Manifest) private legacyPublications;
+    mapping(bytes32 => bool) private known;
+    bool public failAfterBinding;
 
     constructor(address s) {
         store = s;
@@ -170,6 +182,127 @@ contract ModePayloadPreparationHost {
             adoptedPayload.pointers.length,
             adoptedPublication.contentHash
         );
+    }
+
+    function bindByInput(
+        bytes32 record,
+        R.Publication memory p,
+        R.Receipt memory r,
+        R.SourceFacts memory s,
+        M.Evidence memory e,
+        M.Facts memory f
+    ) external guarded returns (bytes32) {
+        require(!known[record], "known record");
+        bytes memory raw = abi.encode(p);
+        Preparation.Selection memory selected =
+            Preparation.selectForWrite(prepared, keccak256(raw), uint32(raw.length), r, s, e, f);
+        require(selected.payloadId != 0, "no exact validated-input descriptor");
+        Preparation.bind(
+            prepared,
+            inventories,
+            bindings[record],
+            legacyPayloads[record],
+            legacyPublications[record],
+            store,
+            storeHash,
+            selected
+        );
+        require(!failAfterBinding, "late transition failure");
+        known[record] = true;
+        return selected.payloadHash;
+    }
+
+    function hashOriginalRecord(R.Publication memory p, R.Receipt memory r, M.Evidence memory e)
+        external
+        view
+        returns (bytes32)
+    {
+        bytes memory original = abi.encodeWithSelector(
+            IStreamReferenceModePublication.publishModeReference.selector, p, e
+        );
+        return StateReads.recordHash(block.chainid, address(101), address(102), r, original);
+    }
+
+    function hashOriginalContext(R.Dependencies memory d, R.Publication memory p)
+        external
+        view
+        returns (bytes32)
+    {
+        return StateReads.contextHash(
+            d, abi.encodeWithSelector(IStreamReferenceModePublication.modeContextHash.selector, p)
+        );
+    }
+
+    function retainOriginalPublication(bytes32 record, R.Publication memory p, M.Evidence memory e)
+        external
+    {
+        StateReads.retainPublication(
+            legacyPublications[record],
+            store,
+            abi.encodeWithSelector(
+                IStreamReferenceModePublication.publishModeReference.selector, p, e
+            )
+        );
+    }
+
+    function readOriginalPublication(bytes32 record) external view returns (bytes memory) {
+        return Bytes.read(legacyPublications[record]);
+    }
+
+    function setLateBindingFailure(bool value) external {
+        failAfterBinding = value;
+    }
+
+    function retainLegacy(bytes32 record, bytes memory payload, bytes memory publication) external {
+        require(!known[record]);
+        Bytes.retain(legacyPayloads[record], store, payload);
+        Bytes.retain(legacyPublications[record], store, publication);
+        known[record] = true;
+    }
+
+    function boundState(bytes32 record) external view returns (bytes32, bytes32, bool) {
+        return (bindings[record].publicationId, bindings[record].payloadId, known[record]);
+    }
+
+    function boundBytes(bytes32 record) external view returns (bytes memory, bytes memory) {
+        require(known[record], "unknown record");
+        return (Bytes.read(_payloadForRecord(record)), Bytes.read(_publicationForRecord(record)));
+    }
+
+    // The exact two private compiler-typed selectors used by the production publisher.
+    function _publicationForRecord(bytes32 hash) private view returns (Bytes.Manifest storage) {
+        bytes32 id = _carrierBinding(hash).publicationId;
+        if (id == 0) return legacyPublications[hash];
+        return prepared.publications[id].canonical;
+    }
+
+    function _payloadForRecord(bytes32 hash) private view returns (Bytes.Manifest storage) {
+        bytes32 id = _carrierBinding(hash).payloadId;
+        if (id == 0) return legacyPayloads[hash];
+        return prepared.payloads[id];
+    }
+
+    function _carrierBinding(bytes32 hash) private view returns (Preparation.Binding storage b) {
+        b = bindings[hash];
+        bool absent = b.publicationId == 0;
+        if (
+            absent != (b.payloadId == 0)
+                || (!absent
+                    && (legacyPublications[hash].byteLength != 0
+                        || legacyPayloads[hash].byteLength != 0))
+        ) {
+            revert M.InvalidModeEvidence();
+        }
+    }
+
+    function corruptBinding(
+        bytes32 hash,
+        bytes32 publicationId,
+        bytes32 payloadId,
+        uint32 oldLength
+    ) external {
+        bindings[hash] = Preparation.Binding(publicationId, payloadId);
+        legacyPayloads[hash].byteLength = oldLength;
     }
 
     function swapPreparedChunks(bytes32 id) external {
@@ -764,5 +897,261 @@ contract StreamReferenceModePayloadPreparationTest {
         require(keccak256(payload) == hash && keccak256(publication) == keccak256(abi.encode(p)));
         emit log_named_uint("adoptionWorkerWithIntrinsic", total);
         // This host demonstrates exact data transport only; real source/writer admission is separate.
+    }
+
+    function _emptyBinding(bytes32 record) private view {
+        (bytes32 publication, bytes32 payload, bool known) = host.boundState(record);
+        require(publication == 0 && payload == 0 && !known);
+    }
+
+    function testBindingMixedLegacyAndImmutablePreparedRecords() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+            bytes32 id
+        ) = _readyAdoption(false);
+        bytes32 oldRecord = keccak256("original monolithic record");
+        bytes32 record = keccak256("original newly authorized record");
+        host.retainLegacy(oldRecord, canonical, abi.encode(p));
+        (bool ok,) = address(host).call(abi.encodeCall(host.boundBytes, (record)));
+        require(!ok, "preparation cannot publish a record");
+        require(host.bindByInput(record, p, r, s, e, f) == keccak256(canonical));
+        (bytes memory payload, bytes memory publication) = host.boundBytes(record);
+        (bytes memory oldPayload, bytes memory oldPublication) = host.boundBytes(oldRecord);
+        require(
+            keccak256(payload) == keccak256(oldPayload)
+                && keccak256(payload) == keccak256(canonical)
+        );
+        require(
+            keccak256(publication) == keccak256(oldPublication)
+                && keccak256(publication) == keccak256(abi.encode(p))
+        );
+        (bytes32 pid, bytes32 savedId, bool known) = host.boundState(record);
+        require(known && savedId == id && pid == host.prepareModePublication(p));
+        require(id == host.prepareModePayload(pid, r, s, e, f));
+        host.corruptBinding(record, pid, 0, 0);
+        (ok,) = address(host).call(abi.encodeCall(host.boundBytes, (record)));
+        require(!ok);
+        host.corruptBinding(record, 0, id, 0);
+        (ok,) = address(host).call(abi.encodeCall(host.boundBytes, (record)));
+        require(!ok);
+        host.corruptBinding(record, pid, id, 1);
+        (ok,) = address(host).call(abi.encodeCall(host.boundBytes, (record)));
+        require(!ok);
+        host.corruptBinding(record, pid, id, 0);
+        // Changed inputs create a distinct immutable preparation; they cannot replace this binding.
+        p.collectionId += 1;
+        _upload(abi.encode(p), false);
+        require(host.prepareModePublication(p) != pid);
+        (payload, publication) = host.boundBytes(record);
+        require(keccak256(payload) == keccak256(canonical));
+        require(keccak256(publication) == keccak256(oldPublication));
+        (ok,) = address(host).call(abi.encodeCall(host.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        (ok,) = address(host).call(abi.encodeCall(host.bindByInput, (oldRecord, p, r, s, e, f)));
+        require(!ok);
+        (address pointer,) = store.chunk(keccak256(_part(canonical, 0)));
+        bytes memory original = pointer.code;
+        vm.etch(pointer, hex"00");
+        (ok,) = address(host).call(abi.encodeCall(host.boundBytes, (record)));
+        require(!ok, "binding cannot bypass historical byte integrity");
+        vm.etch(pointer, original);
+        (payload,) = host.boundBytes(record);
+        require(keccak256(payload) == keccak256(canonical));
+    }
+
+    function testBindingFreshInputHostChainAndScopeSubstitutions() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+        ) = _readyAdoption(false);
+        bytes32 record = keccak256("bound record");
+        bytes32 subject = s.subject;
+        s.subject = keccak256("changed fresh scope");
+        (bool ok,) = address(host).call(abi.encodeCall(host.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        _emptyBinding(record);
+        s.subject = subject;
+        address recorder = r.recorder;
+        r.recorder = address(99);
+        (ok,) = address(host).call(abi.encodeCall(host.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        _emptyBinding(record);
+        r.recorder = recorder;
+        bytes32 report = e.perceptual.reportHash;
+        e.perceptual.reportHash = bytes32(uint256(44));
+        (ok,) = address(host).call(abi.encodeCall(host.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        _emptyBinding(record);
+        e.perceptual.reportHash = report;
+        uint256 cid = p.collectionId;
+        p.collectionId += 1;
+        (ok,) = address(host).call(abi.encodeCall(host.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        _emptyBinding(record);
+        p.collectionId = cid;
+        vm.chainId(originalChain + 1);
+        (ok,) = address(host).call(abi.encodeCall(host.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        vm.chainId(originalChain);
+        _emptyBinding(record);
+        ModePayloadPreparationHost other = new ModePayloadPreparationHost(address(store));
+        (ok,) = address(other).call(abi.encodeCall(other.bindByInput, (record, p, r, s, e, f)));
+        require(!ok);
+        require(host.bindByInput(record, p, r, s, e, f) == keccak256(canonical));
+    }
+
+    function testBindingCorruptionAndLateFailureRollBackThenRetry() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+            bytes32 id
+        ) = _readyAdoption(false);
+        bytes32 record = keccak256("bound record");
+        bytes memory call_ = abi.encodeCall(host.bindByInput, (record, p, r, s, e, f));
+        host.swapPreparedChunks(id);
+        (bool ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyBinding(record);
+        host.swapPreparedChunks(id);
+        host.corruptPayloadHash(id, keccak256("forged whole bytes"));
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyBinding(record);
+        host.corruptPayloadHash(id, keccak256(canonical));
+        (address pointer,) = store.chunk(keccak256(_part(canonical, 0)));
+        bytes memory original = pointer.code;
+        vm.etch(pointer, hex"00");
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyBinding(record);
+        bytes memory changed = abi.encodePacked(original);
+        changed[0] = bytes1(uint8(1));
+        vm.etch(pointer, changed);
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyBinding(record);
+        changed[0] = 0;
+        changed[2] = bytes1(uint8(changed[2]) ^ 1);
+        vm.etch(pointer, changed);
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyBinding(record);
+        vm.etch(pointer, original);
+        host.setLateBindingFailure(true);
+        (ok,) = address(host).call(call_);
+        require(!ok);
+        _emptyBinding(record);
+        host.setLateBindingFailure(false);
+        (ok,) = address(host).call(call_);
+        require(ok);
+        (bytes memory payload, bytes memory publication) = host.boundBytes(record);
+        require(
+            keccak256(payload) == keccak256(canonical)
+                && keccak256(publication) == keccak256(abi.encode(p))
+        );
+        (ok,) = address(host).call(call_);
+        require(!ok, "immutable binding");
+    }
+
+    function testBinding1048CorpusTransactionEnvelope() public {
+        (
+            R.Publication memory p,
+            R.Receipt memory r,
+            R.SourceFacts memory s,
+            M.Evidence memory e,
+            M.Facts memory f,
+            bytes memory canonical,
+        ) = _readyAdoption(true);
+        bytes32 record = keccak256("bound full corpus record");
+        bytes memory call_ = abi.encodeCall(host.bindByInput, (record, p, r, s, e, f));
+        (bytes32 hash, uint256 total) = _bounded(call_, canonical);
+        require(hash == keccak256(canonical));
+        (bytes memory payload, bytes memory publication) = host.boundBytes(record);
+        require(keccak256(payload) == hash && keccak256(publication) == keccak256(abi.encode(p)));
+        emit log_named_uint("bindingWorkerWithIntrinsic", total);
+        // Actual fixed workers/Store; limited named cooling and no actual publisher authority claim.
+    }
+
+    function testFuzzOriginalRecordCodec(bytes calldata uri, bytes32 seed, uint64 time)
+        public
+        view
+    {
+        if (uri.length > 2048) return;
+        R.Publication memory p = _publication(false);
+        p.manifestURI = string(uri);
+        p.expectedSourcesHash = seed;
+        if (uint256(seed) & 1 == 0) {
+            p.captures = new R.Capture[](0);
+            p.environment.packageFiles = new R.PackageFile[](0);
+            p.environment.platformPrerequisites = new R.PackageFile[](0);
+        }
+        p.referenceId = keccak256(abi.encode(seed, time));
+        (R.Receipt memory r,, M.Evidence memory e,) = _fields();
+        r.sourcesHash = seed;
+        r.recordedAt = time;
+        r.payloadHash = keccak256(uri);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_REFERENCE_MODE_RECORD_V1"),
+                block.chainid,
+                address(host),
+                address(101),
+                address(102),
+                p,
+                r
+            )
+        );
+        require(host.hashOriginalRecord(p, r, e) == expected);
+        R.Dependencies memory d;
+        d.chainId = block.chainid;
+        d.targets[0] = address(101);
+        d.targets[6] = address(102);
+        d.codeHashes[0] = seed;
+        d.codeHashes[6] = keccak256(uri);
+        expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_REFERENCE_MODE_CONTEXT_V1"),
+                d.chainId,
+                address(host),
+                d.targets,
+                d.codeHashes,
+                p.collectionId,
+                p.referenceId,
+                p.snapshotRecordHash,
+                p.snapshotRevision,
+                p.captures,
+                p.environment
+            )
+        );
+        require(host.hashOriginalContext(d, p) == expected);
+    }
+
+    function testOriginalFallbackPublicationBytesAndMissingChunkRetry() public {
+        R.Publication memory p = _publication(false);
+        p.manifestURI = string(new bytes(13000));
+        (,, M.Evidence memory evidence,) = _fields();
+        bytes memory raw = abi.encode(p);
+        bytes32 record = keccak256("original fallback");
+        _upload(raw, true);
+        bytes memory input = abi.encodeCall(host.retainOriginalPublication, (record, p, evidence));
+        (bool ok,) = address(host).call(input);
+        require(!ok);
+        _upload(raw, false);
+        (ok,) = address(host).call(input);
+        require(ok);
+        require(keccak256(host.readOriginalPublication(record)) == keccak256(raw));
     }
 }
