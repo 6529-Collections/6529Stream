@@ -80,9 +80,9 @@ interface IStreamSplitFactory is IStreamGasParameterHost {
     /// @notice Deployment-wide asset policy registry pinned for split-wallet ERC-20 support.
     function assetPolicyRegistry() external view returns (IStreamAssetPolicyRegistry);
     /// @notice Returns the wallet creation-code hash used by CREATE2.
-    function splitWalletInitCodeHash() external pure returns (bytes32);
+    function splitWalletInitCodeHash() external view returns (bytes32);
     /// @notice Returns the wallet runtime-code hash accepted after deployment.
-    function splitWalletRuntimeCodeHash() external pure returns (bytes32);
+    function splitWalletRuntimeCodeHash() external view returns (bytes32);
     /// @notice Creates or reuses a split profile and deploys its wallet.
     function createProfile(
         IStreamSplitWallet.SplitEntry[] calldata entries,

@@ -9,6 +9,7 @@ import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitWallet.sol";
 import "../../helpers/Assertions.sol";
 import "../../helpers/RevenueV1TestBase.sol";
+import "../../helpers/SplitWalletInitializationHarness.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 
 contract StreamSplitWalletTest is RevenueV1TestBase {
@@ -450,7 +451,7 @@ contract StreamSplitWalletTest is RevenueV1TestBase {
     }
 
     function testWalletInitializationRejectsMismatchedEntriesHash() public {
-        StreamSplitWallet wallet = new StreamSplitWallet();
+        SplitWalletInitializationHarness initializer = new SplitWalletInitializationHarness();
         IStreamSplitWallet.SplitEntry[] memory entries = _twoEntryProfile();
         address[] memory accounts = _accounts(ACCOUNT_A, ACCOUNT_B);
         uint32[] memory shares = _shares(700_000, 300_000);
@@ -458,13 +459,13 @@ contract StreamSplitWalletTest is RevenueV1TestBase {
         vm.expectRevert(
             abi.encodeWithSelector(IStreamSplitWallet.InvalidInitializationInput.selector)
         );
-        wallet.initialize(
+        initializer.deployAndInitialize(
             keccak256("profile"), keccak256("wrong"), METADATA_HASH, entries, accounts, shares
         );
     }
 
     function testWalletInitializationRejectsMismatchedAggregateShares() public {
-        StreamSplitWallet wallet = new StreamSplitWallet();
+        SplitWalletInitializationHarness initializer = new SplitWalletInitializationHarness();
         IStreamSplitWallet.SplitEntry[] memory entries = _twoEntryProfile();
         address[] memory accounts = _accounts(ACCOUNT_A, ACCOUNT_B);
         uint32[] memory badShares = _shares(600_000, 400_000);
@@ -472,7 +473,7 @@ contract StreamSplitWalletTest is RevenueV1TestBase {
         vm.expectRevert(
             abi.encodeWithSelector(IStreamSplitWallet.InvalidInitializationInput.selector)
         );
-        wallet.initialize(
+        initializer.deployAndInitialize(
             keccak256("profile"),
             keccak256(abi.encode(entries)),
             METADATA_HASH,
@@ -509,7 +510,10 @@ contract StreamSplitWalletTest is RevenueV1TestBase {
         IStreamSplitWallet.SplitEntry[] memory entries = _twoEntryProfile();
         bytes32 profileId = factory.profileIdFor(entries, METADATA_HASH);
         address predictedWallet = factory.walletFor(profileId);
-        vm.etch(predictedWallet, type(StreamSplitWallet).runtimeCode);
+        vm.etch(
+            predictedWallet,
+            StreamSplitWalletDeployment.runtimeCode(factory.splitWalletImplementation())
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(

@@ -42,8 +42,16 @@ contract StreamSplitWallet is StreamReleaseAuthorization {
     /// @notice Last observed cumulative receipts value recorded through syncAsset or release.
     mapping(address => uint256) public override lastObservedReceived;
 
+    // Bound into the singleton implementation runtime, shared by its immutable clones.
+    address private immutable _initializingFactory;
+    address private immutable _implementation;
+
     constructor() {
+        _initializingFactory = msg.sender;
+        _implementation = address(this);
         factory = msg.sender;
+        // The implementation is never a user wallet. Clone storage starts at zero.
+        initialized = true;
     }
 
     /// @notice Accepts native ETH receipts passively for later pull release.
@@ -63,11 +71,16 @@ contract StreamSplitWallet is StreamReleaseAuthorization {
         address[] calldata accounts_,
         uint32[] calldata aggregateSharePpm_
     ) external override {
-        if (msg.sender != factory) {
+        if (msg.sender != _initializingFactory) {
             revert UnauthorizedInitializer(msg.sender);
         }
-        if (initialized) {
+        if (initialized || address(this) == _implementation) {
             revert AlreadyInitialized();
+        }
+        IStreamSplitFactory origin = IStreamSplitFactory(_initializingFactory);
+        // walletFor is CREATE2-derived, independent of the wallet field published after init.
+        if (!origin.profileExists(profileId_) || origin.walletFor(profileId_) != address(this)) {
+            revert InvalidInitializationInput();
         }
         if (entries_.length == 0 || accounts_.length == 0) {
             revert InvalidInitializationInput();
@@ -80,6 +93,7 @@ contract StreamSplitWallet is StreamReleaseAuthorization {
         }
 
         initialized = true;
+        factory = _initializingFactory;
         profileId = profileId_;
         entriesHash = entriesHash_;
         metadataURIHash = metadataURIHash_;

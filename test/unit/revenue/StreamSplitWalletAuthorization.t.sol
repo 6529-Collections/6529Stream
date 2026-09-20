@@ -90,7 +90,7 @@ contract StreamSplitWalletAuthorizationTest is RevenueV1TestBase, OfficialSafeFi
             address(wallet).codehash == factory.splitWalletRuntimeCodeHash(), "runtime identity"
         );
         require(factory.splitWalletExists(wallet.profileId()), "profile binding");
-        require(factory.WALLET_VERSION() == 3, "new wallet version");
+        require(factory.WALLET_VERSION() == 4, "new wallet version");
     }
 
     function testPinnedTypehashesAndERC5267Domain() public view {
