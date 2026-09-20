@@ -67,6 +67,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add durable Core conservation-tier capture and offline replay. Reconcile
+  declarations with complete allocation and completed-mint history, preserving
+  aborted and prepared identities and defaults after burns. Distinguish an
+  undeclared collection's public pre-mint zero tier from prospective LITE sale
+  enforcement; retain missing floor and packet-assembly evidence explicitly.
+
 - Add canonical condition-source capture and offline replay against the permanent
   Core-bound catalog. Retain replacement hosts and complete original lanes;
   select the latest owner and independent reports by receipt position, preserving

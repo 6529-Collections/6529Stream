@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Conservation tier provenance](../../docs/museum-conservation-tier-source.md)
+replays durable Core declarations and the first completed mint independently of
+Metadata replacement. A raw zero declaration before mint completion remains
+distinct from the prospective LITE sale rule; floor receipts are not inferred.
+
 [Canonical condition capture](../../docs/museum-condition-source.md) reads the
 permanent Core-bound source catalog and all retained owner/independent lanes.
 Receipt order determines latest; unsupported newest originals remain selected.

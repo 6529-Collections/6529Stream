@@ -9,6 +9,15 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [tier provenance capture](museum-conservation-tier-source.md) now reads the
+durable Core declaration and reconciles complete allocation, abort and completed
+mint history. It distinguishes raw zero, the post-completion LITE default, and
+the separate prospective LITE sale rule. Historical Metadata replacement cannot
+erase a Core declaration. This is an independent source capture; selected
+intent/interview evidence, genuine floor receipts and the additive native-tier
+packet representation remain separate joins. V1--V3 packet definitions are
+unchanged, and no generic metadata record is invented for a native tier event.
+
 The historical missing-producer table below describes its recorded source only.
 The canonical condition catalog is now frozen at
 `f7a05e0734b95f1e2ff1a038b73511c0d94b6f81`, with the permanent Core binding at
