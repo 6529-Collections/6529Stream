@@ -26,6 +26,9 @@ import {
     StreamArtistRecoveryClosedContinuation as Closed
 } from "./StreamArtistRecoveryClosedContinuation.sol";
 import {
+    StreamArtistRecoveryRotationContinuation as Rotated
+} from "./StreamArtistRecoveryRotationContinuation.sol";
+import {
     IStreamArtistIdentityRecoveryOwner
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import {
@@ -78,18 +81,20 @@ library StreamArtistRecoveryContinuation {
         D.Cause memory cause = resolutions.causes[resolutions.currentCause[p.artistId]];
         T.Identity memory principal = identity.identities[p.artistId];
         bytes32 previous = s.latest[p.artistId];
+        bytes32 executed = rotations.latestExecution[p.artistId];
+        bool rotated = executed != previous;
         I.Record memory prior = s.records[previous];
         R.TransitionState memory transition = s.transitions[previous];
         if (
             p.artistId == 0 || previous == 0 || prior.recordHash != previous
                 || p.expectedCauseHash != cause.causeHash || cause.causeHash == 0
                 || cause.facts.artistId != p.artistId || cause.facts.kind != 1
-                || cause.facts.executedTransitionHash != previous
+                || cause.facts.executedTransitionHash != executed
                 || cause.facts.pendingTransitionHash != 0
                 || cause.facts.incumbent != principal.authorityAddress
                 || cause.facts.actor == address(0) || principal.status != 4
                 || principal.authorityClass != cause.facts.authorityClass
-                || prior.fields.newAddress != principal.authorityAddress
+                || (!rotated && prior.fields.newAddress != principal.authorityAddress)
                 || identity.activeIdentity[principal.authorityAddress] != p.artistId
                 || p.vestedAuthorityClass != principal.authorityClass
                 || !((p.vestedAuthorityClass == 1 && cause.facts.priorStatus == 1)
@@ -102,8 +107,7 @@ library StreamArtistRecoveryContinuation {
             revert I.InvalidIdentityRecovery(p.artistId);
         }
         if (
-            rotations.latestExecution[p.artistId] != previous
-                || rotations.latestTransition[p.artistId] != previous
+            (!rotated && rotations.latestTransition[p.artistId] != previous)
                 || rotations.pending[p.artistId] != 0 || estate.pending[p.artistId] != 0
                 || transition.artistId != p.artistId || transition.recordHash != previous
                 || transition.phase != 2 || transition.executedAt != prior.fields.recoveredAt
@@ -117,7 +121,15 @@ library StreamArtistRecoveryContinuation {
         ) {
             revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        bytes32 closureProof = Closed.proof(resolutions, o.environment, prior, transition, cause);
+        bytes32 rotationProof;
+        bytes32 closureProof;
+        if (rotated) {
+            rotationProof = Rotated.proof(
+                s, rotations, resolutions, estate, o.environment, prior, transition, cause
+            );
+        } else {
+            closureProof = Closed.proof(resolutions, o.environment, prior, transition, cause);
+        }
         if (identity.activeIdentity[p.newAddress] != 0) {
             revert T.AddressAlreadyRegistered(p.newAddress);
         }
@@ -126,23 +138,34 @@ library StreamArtistRecoveryContinuation {
         );
         V.Snapshot memory cutoff =
             Cutoff.current(s.vestingHistory, s.guardianHistory, rotations, p.artistId, head);
-        if (cutoff.operationId != 35 || cutoff.newAddress != principal.authorityAddress) {
+        if (
+            cutoff.operationId != (rotated ? 32 : 35)
+                || cutoff.newAddress != principal.authorityAddress
+                || cutoff.authorityClass != principal.authorityClass
+        ) {
             revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        bytes32 predecessor = _prior(s, rotations, o.environment, prior, cutoff);
+        bytes32 predecessor = _prior(
+            s,
+            rotations,
+            o.environment,
+            prior,
+            rotated ? s.vestingHistory.snapshots[previous] : cutoff,
+            !rotated
+        );
         C.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
         if (
             contest.recordHash == 0 || contest.recordHash != cause.facts.referenceHash
                 || contest.terms.artistId != p.artistId
-                || contest.terms.subjectRecordHash != previous
+                || contest.terms.subjectRecordHash != executed
                 || contest.terms.evidenceHash != cause.facts.evidenceHash
                 || contest.terms.reasonHash != cause.facts.reasonHash
                 || contest.contester != cause.facts.actor
                 || contest.priorStatus != cause.facts.priorStatus
                 || contest.contestedAt != cause.facts.enteredAt
                 || contest.pendingTransitionRecordHash != 0
-                || contest.executedTransitionRecordHash != previous
+                || contest.executedTransitionRecordHash != executed
                 || contest.recordHash
                     != keccak256(
                         abi.encode(
@@ -153,7 +176,7 @@ library StreamArtistRecoveryContinuation {
                             o.environment.registry,
                             p.artistId,
                             contest.contester,
-                            previous,
+                            executed,
                             contest.terms.evidenceHash,
                             contest.terms.reasonHash,
                             contest.contestedAt
@@ -248,6 +271,15 @@ library StreamArtistRecoveryContinuation {
                 )
             );
         }
+        if (rotationProof != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_ROTATED_REPEAT_RECOVERY_STATE_V1"),
+                    c.oldValueHash,
+                    rotationProof
+                )
+            );
+        }
         c.newValueHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_INTENT_V2"),
@@ -265,7 +297,8 @@ library StreamArtistRecoveryContinuation {
         Rotations.State storage rotations,
         StreamArtistHashes.Environment memory e,
         I.Record memory r,
-        V.Snapshot memory v
+        V.Snapshot memory v,
+        bool currentRetirement
     ) private view returns (bytes32) {
         if (
             Hashes.record(e.chainId, e.registry, r.fields) != r.recordHash
@@ -285,7 +318,8 @@ library StreamArtistRecoveryContinuation {
                 || r.acceptanceDigest == 0 || r.acceptanceDeadline < r.fields.recoveredAt
                 || r.postContestSeconds < 72 hours || r.standingTailSeconds < 30 days
                 || r.timingRevision == 0 || r.delegationEpoch == 0
-                || rotations.retirement[v.artistId][v.oldAddress] != r.recordHash
+                || (currentRetirement
+                    && rotations.retirement[v.artistId][v.oldAddress] != r.recordHash)
         ) {
             revert I.UnsupportedIdentityRecoveryProfile(v.artistId);
         }

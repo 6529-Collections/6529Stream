@@ -57,8 +57,11 @@ import {
 import {
     StreamArtistRecoveryEstateRotationHistory as RotationHistory
 } from "./StreamArtistRecoveryEstateRotationHistory.sol";
+import {
+    StreamArtistRecoveryEstateRotationOrigin as RotationOrigin
+} from "./StreamArtistRecoveryEstateRotationOrigin.sol";
 
-/// @notice Immediate mature op32 continuation of an admitted original op40 estate.
+/// @notice Admitted op32 continuations of an original op40 estate.
 /// @dev Distinct origin/terminal proof; no historical authorization is replayed or synthesized.
 library StreamArtistRecoveryEstateRotation {
     struct Origin {
@@ -119,7 +122,9 @@ library StreamArtistRecoveryEstateRotation {
                 || cause.facts.pendingTransitionHash != 0
                 || f.execution.activationRecordHash != head || f.execution.coverageRecordHash == 0
                 || f.execution.executedAt < f.request.requestedAt
-                || f.execution.delegationEpoch == 0 || f.transition.recordHash != head
+                || f.execution.delegationEpoch == 0
+                || f.execution.delegationEpoch != estate.delegationEpoch[p.artistId]
+                || recovery.latest[p.artistId] != 0 || f.transition.recordHash != head
                 || f.transition.artistId != p.artistId || f.transition.phase != 2
                 || f.transition.stagedAt != f.request.requestedAt
                 || f.transition.contestEndsAt != f.request.noticeEndsAt
@@ -135,13 +140,6 @@ library StreamArtistRecoveryEstateRotation {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
             }
         } else if (f.execution.governanceActionId != 0 || f.execution.governanceWitnessHash != 0) {
-            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        }
-        Dismissal.Closure memory empty;
-        if (
-            keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))
-                || f.transition.contestedAt != 0
-        ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
         if (
@@ -179,6 +177,18 @@ library StreamArtistRecoveryEstateRotation {
         }
         Contest.Record memory contest = contests.records[cause.facts.referenceHash];
         _contest(e, cause, p, contest, terminal);
+        // Only op32 preserves this original epoch. Every authority producer appends its actual
+        // preceding vesting head atomically; no supplied prefix can omit an intervening 35/40/43.
+        // The original closure belongs to the original successor, independently of today's head.
+        bytes32 originProof = RotationOrigin.proof(
+            rotations,
+            resolutions,
+            contests,
+            e,
+            f.transition,
+            f.request.terms.successor,
+            rotations.rotations[terminal].transition.stagedAt
+        );
         bytes32 closureProof = EstateClosed.proof(
             rotations, resolutions, contests, e, cause, rotations.rotations[terminal].transition
         );
@@ -195,7 +205,7 @@ library StreamArtistRecoveryEstateRotation {
                 terminal,
                 closureProof
             )
-            : _terminal(recovery, rotations, e, cause, f, terminal, closureProof);
+            : _terminal(recovery, rotations, e, cause, f, terminal, closureProof, originProof);
         f.designation = succession.designations[f.request.designationRecordHash];
         if (
             f.request.designationRecordHash == 0
@@ -246,13 +256,22 @@ library StreamArtistRecoveryEstateRotation {
                 contest
             )
         );
-        if (closureProof == 0 && !continued) return factsHash;
+        if (closureProof != 0 || continued) {
+            factsHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ROTATED_ESTATE_FACTS_V1"),
+                    factsHash,
+                    closureProof,
+                    continued
+                )
+            );
+        }
+        if (originProof == 0) return factsHash;
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ROTATED_ESTATE_FACTS_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ORIGIN_ROTATED_ESTATE_FACTS_V1"),
                 factsHash,
-                closureProof,
-                continued
+                originProof
             )
         );
     }
@@ -264,7 +283,8 @@ library StreamArtistRecoveryEstateRotation {
         Dismissal.Cause memory cause,
         Origin memory origin,
         bytes32 head,
-        bytes32 closureProof
+        bytes32 closureProof,
+        bytes32 originProof
     ) private view returns (bytes32) {
         bytes32 artistId = cause.facts.artistId;
         R.RotationRecord memory r = rotations.rotations[head];
@@ -279,9 +299,10 @@ library StreamArtistRecoveryEstateRotation {
                 || r.terms.expectedPreviousTransitionRecordHash != origin.request.recordHash
                 || (closureProof == 0 && rotations.latestTransition[artistId] != head)
                 || retired != head || t.artistId != artistId || t.recordHash != head || t.phase != 2
-                || t.stagedAt < origin.transition.postWindowEndsAt || t.contestEndsAt < t.stagedAt
-                || t.executedAt < t.stagedAt || t.executedAt == 0 || r.effectiveWindow < 72 hours
-                || r.standingTail < 30 days || r.timingRevision == 0
+                || t.stagedAt < origin.transition.executedAt
+                || (originProof == 0 && t.stagedAt < origin.transition.postWindowEndsAt)
+                || t.contestEndsAt < t.stagedAt || t.executedAt < t.stagedAt || t.executedAt == 0
+                || r.effectiveWindow < 72 hours || r.standingTail < 30 days || r.timingRevision == 0
                 || (t.executedAt < t.contestEndsAt
                     && (r.approvalThreshold == 0 || r.guardianApprovals < r.approvalThreshold))
                 || uint256(t.postWindowEndsAt) != uint256(t.executedAt) + r.effectiveWindow

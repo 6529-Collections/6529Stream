@@ -1007,3 +1007,89 @@ typed Core/governance/role boundaries and aggregate CREATE semantics. The final
 campaign must copy the inherited fixture JSON data, then validate complete linked
 products and run the combined cases. No new native compiler was started for this
 batch. The earlier28-pass capture does not validate this newer source.
+
+## Recovery through later executed rotations
+
+The ART25 continuation admits a fresh operation-35 recovery after one or more
+executed operation-32 rotations of the previously recovered living or estate
+principal. The immutable latest operation-35 record remains the origin; the
+current operation-33 cause names the terminal rotation and its actual incumbent.
+Original record hashes, signatures, receipts and vesting commitments retain their
+original domains. Already-supported immediate and closed repeated-recovery
+contexts keep their existing hash bytes. Only the new rotated branch wraps its
+context in `6529STREAM_ARTIST_ROTATED_REPEAT_RECOVERY_STATE_V1`.
+
+The proof has constant work per read and accepts no caller-selected history.
+Completeness comes from the fixed owner's actual writers:
+
+| Executed operation | Authority effect | Delegation epoch | Vesting history |
+| --- | --- | --- | --- |
+| 32, ordinary rotation | Changes address, preserves class | Unchanged | Appends the actual preceding execution |
+| 35, identity recovery | Changes the recovered address | Checked increment | Appends the actual preceding execution; updates latest recovery |
+| 40, estate activation | Establishes class 3 | Checked increment | Appends the actual preceding execution |
+| 43, dormancy completion | Establishes class 3 or 4 | Checked increment | Appends the actual preceding execution |
+
+The writer rejects an omitted predecessor, a reused transition snapshot and a
+non-increasing owner revision. Each snapshot commits the complete guardian prefix
+and previous snapshot commitment. The reader authenticates the original recovery
+and vesting, requires that recovery still be the latest one, and requires its
+recorded delegation epoch to equal the current epoch. Since the other authority
+vestings increment that epoch, all intervening successful vestings must be
+ordinary rotations. The exact terminal rotation, its immediate executed parent,
+saved predecessor commitment, addresses, class, timing, guardian prefixes and
+current retirement are checked against those admitted records. This establishes
+the complete admitted chain without treating a partial list as complete or
+imposing a new total-depth ceiling.
+
+The current source has no epoch reset or decrement. Its identity hydration
+profile writes only an empty target's original living identity, activity and
+signature/nonce data; it does not import recovery, rotation, estate activation,
+vesting or delegation-epoch state. History verification records commitments and
+does not synthesize those mappings. These restrictions are part of this proof's
+scope. An expanded import or writer must preserve and re-establish the invariant
+before this continuation can accept its state. A historical record or matching
+address alone cannot replace it.
+
+An original recovery or estate activation may have an actual operation-41
+dismissal before the first later rotation. Its first closure is authenticated
+under the original appointed/recovered principal, independently from a later
+terminal closure under a different address. The original cause, dismissal,
+standing-removal terms and captured transition remain bound. A closure can be
+created only for the dismissal's captured current execution and cannot be
+rewritten after a later rotation; the admitted producer chain therefore proves
+the original closure preceded that rotation. A terminal staging timestamp is an
+additional upper bound, not a substitute for this writer invariant.
+
+Terminal compromise closures and standing vetoes retain distinct original
+records. If a rotation was staged after a dismissed pending rotation, its staging
+parent is checked separately from its executed vesting parent. Early abandoned
+cohorts stay abandoned. Waiting does not mature an unresolved in-window contest.
+The selected guardian still comes from complete current history, and lifetime
+veto membership and permanent supersession judgments remain effective. The new
+recovery uses a fresh registered action and new-side acceptance, increments the
+epoch once, and appends its vesting after the terminal rotation.
+
+The focused hosts are
+[`StreamArtistRotatedRepeatedRecoveryActual.t.sol`](../../test/unit/artist/StreamArtistRotatedRepeatedRecoveryActual.t.sol)
+and
+[`StreamArtistClosedEstateRotationRecoveryActual.t.sol`](../../test/unit/artist/StreamArtistClosedEstateRotationRecoveryActual.t.sol).
+They use actual Artist, threshold Safe and Archive contracts with explicit typed
+unit Core/governance boundaries. They cover original and terminal closures,
+returned addresses, intermediate guardians, lifetime vetoes, corrupted evidence
+and exact retry after an Archive failure. An actual intervening operation35
+rejects substitution of its older recovery anchor. The operation40/43 epoch
+controls simulate only the epoch change; they do not execute those intervening
+operations. Immediate and closed repeated-recovery compatibility cases rebuild
+the original context hash preimages from public records.
+
+Select only the new cases in each inherited host for the focused runtime batch:
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistRotatedRepeatedRecoveryActual.t.sol --match-test '^testRotatedRepeat' --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistClosedEstateRotationRecoveryActual.t.sol --match-test '^testClosed(Origin|AcceleratedOrigin)' --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```
+
+These authored cases await coordinated runtime execution. Source and ABI/type
+checks do not establish runtime, full current graph, linked-product size, cold
+gas or transaction-capacity acceptance. Held steward-to-living, collaborator and
+expanded hydration proposals remain outside this profile.

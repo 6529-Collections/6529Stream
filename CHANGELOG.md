@@ -9,6 +9,10 @@ the release policy in `docs/release-policy.md`.
   preserving original small-record bytes, signatures, pointers and storage roots.
 - Compose the full-byte preservation and general attestation products with the
   original Artist/Metadata graph and explicit current Safe test recipes.
+- Extend Artist recovery through executed rotations after an original recovery,
+  and after a dismissed original estate activation, while preserving historical
+  records, guardian standing and the original authority epoch boundaries.
+  Focused source recipes are authored; coordinated runtime acceptance is pending.
 
 - Add full-byte preservation records with original family authority, immutable
   record history and enumerable ordered chunk retention up to24,576 bytes.
