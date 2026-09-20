@@ -122,6 +122,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add a V2 Museum Artist C2PA Standing consumer that retains complete supplied
+  conflict histories and checks original historical acknowledgement guards.
+  Preserve V1 bytes, independent token/collection scopes and live Display;
+  governance authentication and native runtime validation remain separate.
+
 - Add bounded offline LoC PREMIS term snapshots and prospective profile-field
   bindings, retaining original bytes, dates, unresolved references and provenance
   with explicit ambiguity and freshness checks.

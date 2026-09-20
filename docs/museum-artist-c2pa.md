@@ -79,8 +79,10 @@ with the selected report and supplied current credential head, but this local
 agreement does not prove current dependency selection or authority. Provenance
 remains live: changed output JSON makes an earlier full-output evidence hash
 stale. This historical seam does not establish universal frozen JSON. The
-additive standing-conflict reader and original-operation clearing evidence are
-separate from the unchanged six-word Display and remain pending consumption.
+additive [V2 standing-conflict reader](museum-artist-c2pa-conflicts.md) checks
+supplied history and original acknowledgement guards separately from the
+unchanged six-word Display. Authenticated original-operation evidence remains
+a separate requirement.
 
 ## What the checks establish
 

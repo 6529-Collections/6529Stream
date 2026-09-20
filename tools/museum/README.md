@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Artist C2PA standing conflicts](../../docs/museum-artist-c2pa-conflicts.md)
+adds a separate V2 consumer for complete supplied conflict prefixes, original
+historical acknowledgement guards and independent token/collection Standing.
+Later disputes do not revive cleared rows; V1 profile bytes remain unchanged.
+
 [Retained LoC PREMIS terms](../../docs/museum-premis-authority-snapshot.md)
 preserve original term-record bytes, dates and provenance and check explicit
 profile-field bindings with ambiguity and freshness diagnostics.
