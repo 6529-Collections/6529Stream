@@ -58,6 +58,17 @@ library StreamArtistRecoveredHydrationOwnerPayload {
         validate(ownerIndex, header, payload);
     }
 
+    /// @notice Exact full validation with only the fields consumed by destination apply returned.
+    /// @dev The original decoder and all nonce/semantic/catalog checks run before projection.
+    function decodeForApply(bytes memory raw, uint8 ownerIndex)
+        public
+        pure
+        returns (RH.OwnerProvenance memory provenance, Publications.Row[] memory publications)
+    {
+        (, Payload memory payload) = decode(raw, ownerIndex);
+        return (payload.provenance, payload.publications);
+    }
+
     /// @notice Pure consistency check of this owner slice, header, typed-state hash and nonce shape.
     /// @dev semanticRecordCount counts ALL original native occurrences in this owner's journal,
     /// including primary/secondary35 rows. Auxiliary records are committed inside semanticState;

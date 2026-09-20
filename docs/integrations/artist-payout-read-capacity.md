@@ -47,8 +47,10 @@ full hydration, or current-stack acceptance.
 
 The first unfiltered 95-source native build failed in Yul code generation before
 tests. The selected production pair and both new test products compile separately.
-A separate frozen selective-artifact run preserves all 95 source bytes and every
-non-selection compiler setting, discovers the actual linked-library closure and
-forwards one complete genuine compiler output. Runtime status must be taken from
-that retained capture, not inferred from these source and size checks. No held
-replay-write relocation or authority change is part of this repair.
+An independently selected transitive dependency reproduced the compiler failure;
+the separate [recovered apply projection](artist-recovered-apply-projection.md)
+repairs only that pure decoding transport. Frozen selective-artifact runs preserve
+source bytes and every non-selection compiler setting, discover the complete
+linked-library closure, and forward genuine compiler output without modification.
+Runtime status must be taken from the retained capture, not inferred from source
+and size checks. No held replay-write relocation or authority change is included.

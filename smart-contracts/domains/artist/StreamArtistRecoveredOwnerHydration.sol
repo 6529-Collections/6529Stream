@@ -43,21 +43,21 @@ library StreamArtistRecoveredOwnerHydration {
                 || binding.domain != RH.ownerDomain(ownerIndex)
                 || c.expected.revision == type(uint64).max || data.nonces.length != 0
         ) revert RH.InvalidRecoveredHydrationProfile();
-        (, Payload.Payload memory payload) = Payload.decode(data.typedState, ownerIndex);
+        (RH.OwnerProvenance memory provenance, Publications.Row[] memory publications) =
+            Payload.decodeForApply(data.typedState, ownerIndex);
         RH.OriginEnvironment memory destination = Reads.environment(binding, ownerIndex);
-        RH.OriginEnvironment memory source =
-            payload.provenance.origins[payload.provenance.origins.length - 1];
+        RH.OriginEnvironment memory source = provenance.origins[provenance.origins.length - 1];
         if (
             source.chainId != destination.chainId || source.core != destination.core
                 || source.manager != destination.manager || source.registry == destination.registry
                 || source.coordinator == destination.coordinator
                 || source.owners[ownerIndex] == address(this)
         ) revert RH.InvalidRecoveredHydrationProvenance();
-        Imported.installOwnerPrefix(payload.provenance, ownerIndex, value, c.expected.revision + 1);
+        Imported.installOwnerPrefix(provenance, ownerIndex, value, c.expected.revision + 1);
         delta = Guards.applyGuards(replay, destination, ownerIndex, data, value);
         // Register originals before the typed importer stores documents or signatures, so
         // duplicate content retains the original carrier and catalog provenance.
-        Publications.applyCatalog(ownerIndex, payload.publications);
+        Publications.applyCatalog(ownerIndex, publications);
         nextState = keccak256(abi.encode(q, data, value));
     }
 }
