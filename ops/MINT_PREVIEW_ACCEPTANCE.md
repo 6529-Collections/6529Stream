@@ -47,13 +47,26 @@ all 192 Manager and 194 fallback ABI entries, adding only `canMint` and
 unchanged. The existing GasHost API remains usable without newly advertising
 its ERC165 interface, preserving the original capability answers.
 
-Native execution and full-current/Safe/fuzz/gas acceptance are pending. This
+The focused native cohort passes all 21 cases on immutable commit
+`b7378eeb281c3344a2d66d136d36c7dec1ce4e37`. Full-current/Safe/fuzz/gas acceptance
+is pending. This
 batch does not claim production readiness or complete the remaining original
 `rawCounterValue`, `remainingForCounter` and `resolveCounter` Read API surfaces.
 
 ## Selected size evidence
 
 Captures under ignored `artifacts/native-assembly/counter-scopes/` are immutable.
+`mint-preview-native-b7378eeb-1` binds 191 exact sources to commit
+`b7378eeb281c3344a2d66d136d36c7dec1ce4e37`, tree
+`3f5de9fba5c8ce46b9d10a2855d935ab66e1b891`. All 21 tests pass, exit zero in
+361.048 seconds, with no source mismatches or captured production-size failures.
+Native JSON SHA-256 is
+`322bac7fe9aa42fc551b888f907f2373d2bed164929def4fe1fc90e3b5313391`; its separate
+log is empty. The original native profile and test envelope are unchanged.
+Foundry reuses a copy of the validated freeze cache through ordinary dependency
+invalidation. Cached products outside this source closure are excluded from the
+new product-size claims. This evidence does not validate subsequent Read API work.
+
 `mint-preview-size-4` compiles 153 exact sources and seven selected products with
 Solidity 0.8.19, IR, optimizer 200, Paris, no CBOR/hash metadata. It completes in
 32.735 seconds with zero errors and no runtime/init cap violations.
