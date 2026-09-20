@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveryRewindState } from "./StreamArtistRecoveryRewindState.sol";
+import { StreamArtistRecoveryRewindReads } from "./StreamArtistRecoveryRewindReads.sol";
+import { StreamArtistRecoveryRewindInventory } from "./StreamArtistRecoveryRewindInventory.sol";
+import {
+    StreamArtistRecoveryRewindCapabilityReads
+} from "./StreamArtistRecoveryRewindCapabilityReads.sol";
+import {
+    IStreamArtistIdentityRecoveryOwnerV3 as RewindOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV3.sol";
+
 import { StreamArtistRecoveryAdjudicationReads } from "./StreamArtistRecoveryAdjudicationReads.sol";
 import { StreamArtistRecoveryAdjudicationState } from "./StreamArtistRecoveryAdjudicationState.sol";
 import {
@@ -91,6 +101,98 @@ library StreamArtistIdentityReadDispatch {
     struct Input {
         StreamArtistIdentityState.OwnerContext owner;
         bytes data;
+    }
+
+    function read(
+        StreamArtistIdentityState.State storage _identity,
+        StreamArtistDelegationState.State storage _delegations,
+        StreamArtistIdentityRevisionState.State storage _identityRevisions,
+        StreamArtistRotationState.State storage _rotations,
+        StreamArtistIdentityContestState.State storage _identityContests,
+        StreamArtistSuccessionState.State storage _succession,
+        StreamArtistIdentityResolutionState.State storage _resolutions,
+        StreamArtistEstateState.State storage _estate,
+        StreamArtistUnavailabilityState.State storage _unavailability,
+        StreamArtistIdentityRecoveryState.State storage _identityRecovery,
+        StreamArtistDormancyState.State storage _dormancy,
+        StreamArtistStewardSanctionState.State storage _stewardGrants,
+        StreamArtistStewardCapabilityState.State storage _stewardCapabilityGrants,
+        mapping(bytes32 => T.ReplayCell) storage _replay,
+        StreamArtistRecoveryAdjudicationState.State storage _recoveryAdjudication,
+        StreamArtistRecoveryRewindState.State storage _recoveryRewinds,
+        Input calldata input
+    ) public view returns (bytes memory) {
+        bytes calldata call_ = input.data;
+        bytes4 selector = bytes4(call_[:4]);
+        if (selector == bytes4(keccak256("currentAuthorityCapabilities(bytes32)"))) {
+            bytes32 artistId = abi.decode(call_[4:], (bytes32));
+            if (_recoveryRewinds.capabilityHead[artistId] != 0) {
+                return abi.encode(
+                    StreamArtistRecoveryRewindCapabilityReads.current(
+                        _recoveryRewinds, _identity, _estate, _dormancy, artistId
+                    )
+                );
+            }
+        }
+        if (
+            selector == RewindOwner.recoveryRewindInventoryV3.selector
+                || selector == RewindOwner.recoveryRecordStatusV3.selector
+                || selector == RewindOwner.recoveryStandingScopeV3.selector
+                || selector == RewindOwner.latestRecoveryCapabilityContinuationV3.selector
+                || selector == RewindOwner.recoveryCapabilityContinuationV3.selector
+                || selector == RewindOwner.identityRevisionRecoveryContinuationV3.selector
+                || selector == RewindOwner.recoveryRevisionContinuationV3.selector
+                || selector == RewindOwner.standingRevocationRecoveryContinuationV3.selector
+                || selector == RewindOwner.recoveryStandingContinuationV3.selector
+        ) {
+            return StreamArtistRecoveryRewindInventory.readEncoded(
+                _recoveryRewinds,
+                _identityRecovery,
+                _rotations,
+                _resolutions,
+                _identityRevisions,
+                _succession,
+                _stewardGrants,
+                call_
+            );
+        }
+        if (
+            selector == RewindOwner.recoveryRewindBasisV3.selector
+                || selector == RewindOwner.identityRecoveryEvidenceStateV3.selector
+                || selector == RewindOwner.identityRecoveryContextV3.selector
+                || selector == RewindOwner.guardianRecoveryAuthorityRoleV3.selector
+        ) {
+            return StreamArtistRecoveryRewindReads.read(
+                _identityRecovery,
+                _recoveryRewinds,
+                _identity,
+                _rotations,
+                _resolutions,
+                _estate,
+                _dormancy,
+                input.owner,
+                call_
+            );
+        }
+        // Preserve the exact prior public overload and every original selector path.
+        return read(
+            _identity,
+            _delegations,
+            _identityRevisions,
+            _rotations,
+            _identityContests,
+            _succession,
+            _resolutions,
+            _estate,
+            _unavailability,
+            _identityRecovery,
+            _dormancy,
+            _stewardGrants,
+            _stewardCapabilityGrants,
+            _replay,
+            _recoveryAdjudication,
+            input
+        );
     }
 
     function read(

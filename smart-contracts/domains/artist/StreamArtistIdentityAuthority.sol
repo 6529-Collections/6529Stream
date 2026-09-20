@@ -322,7 +322,7 @@ contract StreamArtistIdentityAuthority is
     function estateActivationRecord(bytes32 record)
         external
         view
-        returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
+        returns (Estate.RequestRecord calldata, uint8, Estate.ExecutionFacts calldata)
     {
         _forwardIdentityRead();
     }
@@ -338,13 +338,8 @@ contract StreamArtistIdentityAuthority is
     function currentAuthorityCapabilities(bytes32 artistId)
         external
         view
-        returns (Estate.AuthorityCapabilities memory)
+        returns (Estate.AuthorityCapabilities calldata)
     {
-        if (_recoveryRewinds.capabilityHead[artistId] != 0) {
-            return StreamArtistRecoveryRewindCapabilityReads.current(
-                _recoveryRewinds, _identity, _estate, _dormancy, artistId
-            );
-        }
         _forwardIdentityRead();
     }
 
@@ -425,7 +420,7 @@ contract StreamArtistIdentityAuthority is
     function successorDesignationRecord(bytes32 record)
         external
         view
-        returns (Succ.DesignationRecord memory)
+        returns (Succ.DesignationRecord calldata)
     {
         _forwardIdentityRead();
     }
@@ -433,7 +428,7 @@ contract StreamArtistIdentityAuthority is
     function estateDirectiveRecord(bytes32 record)
         external
         view
-        returns (Succ.DirectiveRecord memory)
+        returns (Succ.DirectiveRecord calldata)
     {
         _forwardIdentityRead();
     }
@@ -480,7 +475,7 @@ contract StreamArtistIdentityAuthority is
     function guardianVestingSnapshot(bytes32 artistId, bytes32 recordHash)
         external
         view
-        returns (V.Snapshot memory)
+        returns (V.Snapshot calldata)
     {
         _forwardIdentityRead();
     }
@@ -488,7 +483,7 @@ contract StreamArtistIdentityAuthority is
     function guardianHistoryState(bytes32 artistId, uint64 index, address actor, bytes32 actionId)
         external
         view
-        returns (GH.Head memory, GH.Entry memory, GH.Snapshot memory, uint64)
+        returns (GH.Head calldata, GH.Entry calldata, GH.Snapshot calldata, uint64)
     {
         _forwardIdentityRead();
     }
@@ -500,7 +495,7 @@ contract StreamArtistIdentityAuthority is
     function identityRecoveryActionState(bytes32 artistId, bytes32 actionId)
         external
         view
-        returns (RecoveryAction.Association memory, RecoveryAction.Veto memory, bytes32, uint64)
+        returns (RecoveryAction.Association calldata, RecoveryAction.Veto calldata, bytes32, uint64)
     {
         _forwardIdentityRead();
     }
@@ -545,7 +540,7 @@ contract StreamArtistIdentityAuthority is
     function identityRecoveryContext(
         IdentityRecovery.Request calldata p,
         T.Authorization calldata a
-    ) external view returns (IdentityRecovery.Context memory) {
+    ) external view returns (IdentityRecovery.Context calldata) {
         _forwardIdentityRead();
     }
 
@@ -559,24 +554,21 @@ contract StreamArtistIdentityAuthority is
             .recoveryRewindSelectionBinding();
     }
 
+    // These terminal-forwarded reads return worker bytes, never an implicit Solidity object.
     function recoveryRewindInventoryV3(bytes32 artistId)
         external
         view
-        returns (RewindTypes.IdentityInventoryV3 memory)
+        returns (RewindTypes.IdentityInventoryV3 calldata)
     {
-        return StreamArtistRecoveryRewindInventory.inventory(
-            _recoveryRewinds, _rotations, _identityRevisions, _succession, _stewardGrants, artistId
-        );
+        _forwardRewindInventoryRead();
     }
 
     function recoveryRecordStatusV3(RewindTypes.RecordKind kind, bytes32 recordHash)
         external
         view
-        returns (RewindTypes.StatusV3 memory)
+        returns (RewindTypes.StatusV3 calldata)
     {
-        return StreamArtistRecoveryRewindInventory.status(
-            _recoveryRewinds, _identityRecovery, kind, recordHash
-        );
+        _forwardRewindInventoryRead();
     }
 
     function recoveryStandingScopeV3(bytes32 artistId, address priorAddress)
@@ -584,15 +576,13 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, bytes32, bytes32, bytes32)
     {
-        return StreamArtistRecoveryRewindInventory.standing(
-            _recoveryRewinds, _rotations, _resolutions, artistId, priorAddress
-        );
+        _forwardRewindInventoryRead();
     }
 
     function recoveryRewindBasisV3(bytes32 manifestHash)
         external
         view
-        returns (RewindTypes.IdentityBasisV3 memory)
+        returns (RewindTypes.IdentityBasisV3 calldata)
     {
         _forwardRewindRead();
     }
@@ -600,7 +590,7 @@ contract StreamArtistIdentityAuthority is
     function identityRecoveryEvidenceStateV3(bytes32 artistId, bytes32 actionId)
         external
         view
-        returns (RewindTypes.EvidenceStateV3 memory)
+        returns (RewindTypes.EvidenceStateV3 calldata)
     {
         _forwardRewindRead();
     }
@@ -610,7 +600,7 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a,
         bytes32 manifestHash,
         RewindTypes.CrossOwnerFactsV3 calldata facts
-    ) external view returns (IdentityRecovery.Context memory) {
+    ) external view returns (IdentityRecovery.Context calldata) {
         _forwardRewindRead();
     }
 
@@ -653,15 +643,15 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return _recoveryRewinds.capabilityHead[artistId];
+        _forwardRewindInventoryRead();
     }
 
     function recoveryCapabilityContinuationV3(bytes32 record)
         external
         view
-        returns (RewindTypes.CapabilityContinuationV3 memory)
+        returns (RewindTypes.CapabilityContinuationV3 calldata)
     {
-        return _recoveryRewinds.capabilityContinuations[record];
+        _forwardRewindInventoryRead();
     }
 
     function identityRevisionRecoveryContinuationV3(bytes32 record)
@@ -669,15 +659,15 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return _recoveryRewinds.revisionRecordContinuations[record];
+        _forwardRewindInventoryRead();
     }
 
     function recoveryRevisionContinuationV3(bytes32 hash)
         external
         view
-        returns (RewindTypes.RevisionContinuationV3 memory)
+        returns (RewindTypes.RevisionContinuationV3 calldata)
     {
-        return _recoveryRewinds.revisionContinuations[hash];
+        _forwardRewindInventoryRead();
     }
 
     function standingRevocationRecoveryContinuationV3(bytes32 record)
@@ -685,31 +675,23 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return _recoveryRewinds.standingRecordContinuations[record];
+        _forwardRewindInventoryRead();
     }
 
     function recoveryStandingContinuationV3(bytes32 hash)
         external
         view
-        returns (RewindTypes.StandingContinuationV3 memory)
+        returns (RewindTypes.StandingContinuationV3 calldata)
     {
-        return _recoveryRewinds.standingContinuations[hash];
+        _forwardRewindInventoryRead();
+    }
+
+    function _forwardRewindInventoryRead() private view {
+        _forwardIdentityRead();
     }
 
     function _forwardRewindRead() private view {
-        _returnResolution(
-            StreamArtistRecoveryRewindReads.read(
-                _identityRecovery,
-                _recoveryRewinds,
-                _identity,
-                _rotations,
-                _resolutions,
-                _estate,
-                _dormancy,
-                _ownerContext(),
-                msg.data
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function _forwardRewindWriter() private {
@@ -738,7 +720,7 @@ contract StreamArtistIdentityAuthority is
         IdentityRecovery.Request calldata p,
         T.Authorization calldata a,
         bytes32 manifestHash
-    ) external view returns (IdentityRecovery.Context memory) {
+    ) external view returns (IdentityRecovery.Context calldata) {
         _forwardAdjudicationRead();
     }
 
@@ -753,7 +735,7 @@ contract StreamArtistIdentityAuthority is
     function identityRecoveryEvidenceState(bytes32 artistId, bytes32 actionId)
         external
         view
-        returns (RecoveryEvidence.EvidenceStateV2 memory)
+        returns (RecoveryEvidence.EvidenceStateV2 calldata)
     {
         _forwardAdjudicationRead();
     }
@@ -761,7 +743,7 @@ contract StreamArtistIdentityAuthority is
     function recoverySelectionBasisV2(bytes32 manifestHash)
         external
         view
-        returns (RecoverySelectionV2.Basis memory)
+        returns (RecoverySelectionV2.Basis calldata)
     {
         _forwardAdjudicationRead();
     }
@@ -808,7 +790,7 @@ contract StreamArtistIdentityAuthority is
     function identityRecoveryRecord(bytes32 record)
         external
         view
-        returns (IdentityRecovery.Record memory)
+        returns (IdentityRecovery.Record calldata)
     {
         _forwardIdentityRead();
     }
@@ -1047,7 +1029,7 @@ contract StreamArtistIdentityAuthority is
     function identityRevisionRecord(bytes32 record)
         external
         view
-        returns (StreamArtistIdentityRevisionTypes.Record memory)
+        returns (StreamArtistIdentityRevisionTypes.Record calldata)
     {
         _forwardIdentityRead();
     }
@@ -1660,6 +1642,7 @@ contract StreamArtistIdentityAuthority is
                 _stewardCapabilityGrants,
                 _replay,
                 _recoveryAdjudication,
+                _recoveryRewinds,
                 StreamArtistIdentityReadDispatch.Input(_ownerContext(), msg.data)
             )
         );
@@ -1747,7 +1730,7 @@ contract StreamArtistIdentityAuthority is
     function dormancyRecord(bytes32 n)
         external
         view
-        returns (Dorm.Notice memory, uint8, Dorm.Terminal memory)
+        returns (Dorm.Notice calldata, uint8, Dorm.Terminal calldata)
     {
         _forwardIdentityRead();
     }
@@ -1755,7 +1738,7 @@ contract StreamArtistIdentityAuthority is
     function dormancyInitiationContext(Dorm.Initiation calldata p)
         external
         view
-        returns (Dorm.Context memory)
+        returns (Dorm.Context calldata)
     {
         _forwardIdentityRead();
     }
@@ -1763,7 +1746,7 @@ contract StreamArtistIdentityAuthority is
     function dormancyCompletionContext(Dorm.Completion calldata p)
         external
         view
-        returns (Dorm.Context memory, Dorm.Plan memory)
+        returns (Dorm.Context calldata, Dorm.Plan calldata)
     {
         _forwardIdentityRead();
     }

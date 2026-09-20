@@ -24,8 +24,61 @@ import {
     StreamArtistIdentityDismissalTypes as D
 } from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
 
+import {
+    IStreamArtistIdentityRecoveryOwnerV3 as Owner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV3.sol";
+
 /// @notice Exact raw pointer and supplemental evidence reads for the fixed V3 selector.
 library StreamArtistRecoveryRewindInventory {
+    /// @dev Closed view-only codec over the declared original/V3 roots. All typed
+    /// inventory/status/standing bodies below remain the original implementations.
+    function readEncoded(
+        Rewind.State storage rewind,
+        Recovery.State storage recovery,
+        Rotations.State storage rotations,
+        Resolutions.State storage resolutions,
+        Revisions.State storage revisions,
+        Succession.State storage succession,
+        Grants.State storage grants,
+        bytes calldata data
+    ) public view returns (bytes memory) {
+        bytes4 selector = bytes4(data[:4]);
+        if (selector == Owner.recoveryRewindInventoryV3.selector) {
+            bytes32 id = abi.decode(data[4:], (bytes32));
+            return abi.encode(inventory(rewind, rotations, revisions, succession, grants, id));
+        }
+        if (selector == Owner.recoveryRecordStatusV3.selector) {
+            (W.RecordKind kind, bytes32 record) = abi.decode(data[4:], (W.RecordKind, bytes32));
+            return abi.encode(status(rewind, recovery, kind, record));
+        }
+        if (selector == Owner.recoveryStandingScopeV3.selector) {
+            (bytes32 id, address account) = abi.decode(data[4:], (bytes32, address));
+            (bytes32 retirement, bytes32 revocation, bytes32 judgment, bytes32 continuation) =
+                standing(rewind, rotations, resolutions, id, account);
+            return abi.encode(retirement, revocation, judgment, continuation);
+        }
+        bytes32 key = abi.decode(data[4:], (bytes32));
+        if (selector == Owner.latestRecoveryCapabilityContinuationV3.selector) {
+            return abi.encode(rewind.capabilityHead[key]);
+        }
+        if (selector == Owner.recoveryCapabilityContinuationV3.selector) {
+            return abi.encode(rewind.capabilityContinuations[key]);
+        }
+        if (selector == Owner.identityRevisionRecoveryContinuationV3.selector) {
+            return abi.encode(rewind.revisionRecordContinuations[key]);
+        }
+        if (selector == Owner.recoveryRevisionContinuationV3.selector) {
+            return abi.encode(rewind.revisionContinuations[key]);
+        }
+        if (selector == Owner.standingRevocationRecoveryContinuationV3.selector) {
+            return abi.encode(rewind.standingRecordContinuations[key]);
+        }
+        if (selector == Owner.recoveryStandingContinuationV3.selector) {
+            return abi.encode(rewind.standingContinuations[key]);
+        }
+        revert W.InvalidRecoveryRewindRecord(key);
+    }
+
     function inventory(
         Rewind.State storage rewind,
         Rotations.State storage rotations,

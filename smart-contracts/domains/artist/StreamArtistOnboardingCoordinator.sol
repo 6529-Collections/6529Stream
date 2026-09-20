@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
 
-import { StreamArtistRecoveryRewindOperations } from "./StreamArtistRecoveryRewindOperations.sol";
+import { StreamArtistRecoveryRewindTransport } from "./StreamArtistRecoveryRewindTransport.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "./StreamArtistDelegatedConsentOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegatedConsent.sol";
@@ -369,14 +369,14 @@ contract StreamArtistOnboardingCoordinator is
         bytes32 evidence,
         bytes32 reason,
         bool correction
-    ) external view returns (PW.Context memory) {
+    ) external view returns (PW.Context calldata) {
         bytes memory encoded = StreamArtistPlatformOperations.contextEncoded(
             _economicContext(), msg.data[4:]
         );
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
-    function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {
+    function suiteConfiguration() external view returns (T.SuiteConfiguration calldata) {
         bytes memory encoded = StreamArtistCoordinatorRecoveryRead.suiteEncoded(_suite);
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
@@ -439,7 +439,7 @@ contract StreamArtistOnboardingCoordinator is
     function prepareEntropyUnavailabilityFinding(
         Recovery.FindingRequest calldata request,
         EU.Target calldata target
-    ) external view returns (U.Context memory) {
+    ) external view returns (U.Context calldata) {
         _unavailabilityPins();
         bytes memory encoded =
             StreamArtistEntropyUnavailabilityOperations.prepareEncoded(_suite, msg.data);
@@ -472,7 +472,7 @@ contract StreamArtistOnboardingCoordinator is
     function prepareUnavailabilityFinding(
         Recovery.FindingRequest calldata p,
         U.Target calldata target
-    ) external view returns (U.Context memory) {
+    ) external view returns (U.Context calldata) {
         _unavailabilityPins();
         bytes memory encoded =
             StreamArtistCoordinatorRecoveryRead.prepareEncoded(_suite, finalityRegistry, msg.data);
@@ -522,7 +522,11 @@ contract StreamArtistOnboardingCoordinator is
         );
     }
 
-    function prepareArtistSanction(Q.Request calldata p) external view returns (Q.Prepared memory) {
+    function prepareArtistSanction(Q.Request calldata p)
+        external
+        view
+        returns (Q.Prepared calldata)
+    {
         if (
             _suite.core.codehash != _runtimeHashes[9]
                 || _suite.registry.codehash != _runtimeHashes[7]
@@ -567,7 +571,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         bytes32 manifestHash
     ) external operation returns (bytes32) {
-        return StreamArtistRecoveryRewindOperations.prepare(_economicContext(), msg.data);
+        return StreamArtistRecoveryRewindTransport.execute(_economicContext(), msg.data);
     }
 
     function coordinateRecoverArtistIdentityV3(
@@ -576,9 +580,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         bytes32 manifestHash
     ) external operation returns (bytes32) {
-        return StreamArtistRecoveryRewindOperations.recover(
-            _economicContext(), actor, p, a, manifestHash
-        );
+        return StreamArtistRecoveryRewindTransport.execute(_economicContext(), msg.data);
     }
 
     function coordinateRegisterIdentityRecoveryActionV2(
@@ -1113,7 +1115,7 @@ contract StreamArtistOnboardingCoordinator is
         return _coordinateHydration();
     }
 
-    function authorityHydrationSuite() external view returns (T.SuiteConfiguration memory) {
+    function authorityHydrationSuite() external view returns (T.SuiteConfiguration calldata) {
         if (block.chainid != deploymentChainId) revert T.InvalidBinding();
         for (uint256 j; j < 16; ++j) {
             if (_targets[j].codehash != _runtimeHashes[j]) revert T.ComponentChanged(_targets[j]);
