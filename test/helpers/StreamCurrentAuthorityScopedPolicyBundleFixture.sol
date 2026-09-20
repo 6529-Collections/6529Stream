@@ -62,6 +62,12 @@ abstract contract StreamCurrentAuthorityScopedPolicyBundleFixture is
         AuthorityScopedEndpoint endpoint;
     }
 
+    struct AuthorityScopedPackageInputs {
+        bool fromFiles;
+        AuthorityScopedPackageProof[] objects;
+        string[] paths;
+    }
+
     struct AuthorityScopedBundle {
         address host;
         ScopedBundleEvidence.BundleEvidence evidence;
@@ -86,9 +92,54 @@ abstract contract StreamCurrentAuthorityScopedPolicyBundleFixture is
         AuthorityScopedPackageProof[] memory packageProofs,
         AuthorityScopedEndpoint[] memory largeByteProofs
     ) internal returns (AuthorityScopedBundle memory result) {
+        AuthorityScopedPackageInputs memory packages =
+            AuthorityScopedPackageInputs(false, packageProofs, new string[](0));
+        return _scopedBundleCover(
+            publication, referenceResult, inventoryResult, retainedBytes, packages, largeByteProofs
+        );
+    }
+
+    /// @notice Streams explicitly supplied fresh package proof files, retaining only B.Proof rows.
+    /// @dev One path per nonempty original file, in original package order. The caller chooses
+    /// task-owned paths under its Foundry filesystem permissions; there is no directory discovery,
+    /// fallback path or automatic claim that a file's timestamp proves a fresh browser capture.
+    /// The flat JSON fields are packageIndex, path, contentHash, sha256Digest, arweaveDataRoot,
+    /// byteSize, firstDataPath, lastDataPath, firstChunkRaw and lastChunkRaw. Each file is read only
+    /// inside a separate self-call; no complete package endpoint array enters the parent frame.
+    /// Retained bytes and rare large-source endpoints still use the bounded in-memory API.
+    function _authorityCoverScopedBundle(
+        AuthorityScopedPublication memory publication,
+        AuthorityScopedReference memory referenceResult,
+        AuthorityScopedInventory memory inventoryResult,
+        bytes[] memory retainedBytes,
+        string[] memory packageProofPaths,
+        AuthorityScopedEndpoint[] memory largeByteProofs
+    ) internal returns (AuthorityScopedBundle memory result) {
+        AuthorityScopedPackageInputs memory packages = AuthorityScopedPackageInputs(
+            true, new AuthorityScopedPackageProof[](0), packageProofPaths
+        );
+        return _scopedBundleCover(
+            publication, referenceResult, inventoryResult, retainedBytes, packages, largeByteProofs
+        );
+    }
+
+    function _scopedBundleCover(
+        AuthorityScopedPublication memory publication,
+        AuthorityScopedReference memory referenceResult,
+        AuthorityScopedInventory memory inventoryResult,
+        bytes[] memory retainedBytes,
+        AuthorityScopedPackageInputs memory packages,
+        AuthorityScopedEndpoint[] memory largeByteProofs
+    ) private returns (AuthorityScopedBundle memory result) {
         ScopedBundleHost host = _scopedBundleHost(publication, referenceResult, inventoryResult);
         result.host = address(host);
-        _scopedBundleInputs(retainedBytes, packageProofs, largeByteProofs);
+        _scopedBundleInputs(retainedBytes, packages.objects, largeByteProofs);
+        uint256 packageCount = packages.fromFiles ? packages.paths.length : packages.objects.length;
+        if (packages.fromFiles) {
+            for (uint256 i; i < packages.paths.length; ++i) {
+                _scopedBundleProofPath(packages.paths[i]);
+            }
+        }
         bool[] memory usedLarge = new bool[](largeByteProofs.length);
         bool[] memory usedBytes = new bool[](retainedBytes.length);
         result.proofs = new ScopedBundle.Proof[][](inventoryResult.rows.length);
@@ -110,18 +161,19 @@ abstract contract StreamCurrentAuthorityScopedPolicyBundleFixture is
                     } else {
                         require(
                             item.kind == ScopedBundleItems.Kind.EXTERNAL_REFERENCE
-                                && nextPackage < packageProofs.length
+                                && nextPackage < packageCount
                         );
-                        AuthorityScopedPackageProof memory proof = packageProofs[nextPackage++];
-                        require(
-                            proof.packageIndex == item.sourceIndex
-                                && keccak256(bytes(proof.path)) == keccak256(bytes(file.path))
-                                && proof.endpoint.byteSize == file.byteSize
-                                && proof.endpoint.sha256Digest == file.sha256Digest,
-                            "fresh endpoint object is this exact declared uncompressed member"
-                        );
-                        result.proofs[i][j] =
-                            this.coverAuthorityScopedEndpoint(item, proof.endpoint);
+                        if (packages.fromFiles) {
+                            result.proofs[i][j] = this.coverAuthorityScopedPackageFile(
+                                item, file, packages.paths[nextPackage]
+                            );
+                        } else {
+                            AuthorityScopedPackageProof memory proof = packages.objects[nextPackage];
+                            _scopedBundlePackageProof(item, file, proof);
+                            result.proofs[i][j] =
+                                this.coverAuthorityScopedEndpoint(item, proof.endpoint);
+                        }
+                        ++nextPackage;
                         ++result.packageMembers;
                     }
                 } else if (item.kind == ScopedBundleItems.Kind.STATE_BUNDLE) {
@@ -153,7 +205,7 @@ abstract contract StreamCurrentAuthorityScopedPolicyBundleFixture is
             }
         }
         require(
-            nextPackage == packageProofs.length && nextFile == files.length
+            nextPackage == packageCount && nextFile == files.length
                 && result.packageMembers + result.emptyPackageMembers == files.length,
             "every original package member has exactly one ordered occurrence"
         );
@@ -170,13 +222,95 @@ abstract contract StreamCurrentAuthorityScopedPolicyBundleFixture is
         _scopedBundleCurrent(publication, inventoryResult);
     }
 
-    /// @dev A fresh external frame releases large endpoint buffers between occurrences.
+    /// @dev The object-array route releases this frame's copies; its caller still retains inputs.
     function coverAuthorityScopedEndpoint(
         ScopedBundleItems.Item calldata item,
         AuthorityScopedEndpoint calldata endpoint
     ) external returns (ScopedBundle.Proof memory) {
         require(msg.sender == address(this), "fixture self-call only");
         return _scopedBundleExternal(item, endpoint);
+    }
+
+    /// @dev Filesystem read and JSON/endpoint allocations remain in this single-member frame.
+    /// The original item/file identity is already checked against the real retained reference;
+    /// every field below is also checked before the production native verifier is called.
+    function coverAuthorityScopedPackageFile(
+        ScopedBundleItems.Item calldata item,
+        ScopedBundleReference.PackageFile calldata file,
+        string calldata proofPath
+    ) external returns (ScopedBundle.Proof memory) {
+        require(msg.sender == address(this), "fixture self-call only");
+        _scopedBundleProofPath(proofPath);
+        string memory json = assemblyVm.readFile(proofPath);
+        // Two maximum native chunks are about 1 MiB when hex encoded. Leave explicit room
+        // for both bounded 64-level paths and metadata; no unbounded package document parser.
+        require(bytes(json).length != 0 && bytes(json).length <= 2 * 1024 * 1024);
+        AuthorityScopedPackageProof memory proof;
+        proof.packageIndex = assemblyVm.parseJsonUint(json, ".packageIndex");
+        proof.path = assemblyVm.parseJsonString(json, ".path");
+        proof.endpoint.contentHash = _scopedBundleJSONHash(json, ".contentHash");
+        proof.endpoint.sha256Digest = _scopedBundleJSONHash(json, ".sha256Digest");
+        proof.endpoint.arweaveDataRoot = _scopedBundleJSONHash(json, ".arweaveDataRoot");
+        uint256 size = assemblyVm.parseJsonUint(json, ".byteSize");
+        require(size != 0 && size <= type(uint64).max, "exact positive uint64 object size");
+        proof.endpoint.byteSize = uint64(size);
+        _scopedBundlePackageProof(item, file, proof);
+        proof.endpoint.firstDataPath = safeVm.parseJsonBytes(json, ".firstDataPath");
+        proof.endpoint.lastDataPath = safeVm.parseJsonBytes(json, ".lastDataPath");
+        proof.endpoint.firstChunkRaw = safeVm.parseJsonBytes(json, ".firstChunkRaw");
+        proof.endpoint.lastChunkRaw = safeVm.parseJsonBytes(json, ".lastChunkRaw");
+        _scopedBundleEndpointShape(proof.endpoint.firstDataPath, proof.endpoint.firstChunkRaw);
+        _scopedBundleEndpointShape(proof.endpoint.lastDataPath, proof.endpoint.lastChunkRaw);
+        return _scopedBundleExternal(item, proof.endpoint);
+    }
+
+    function _scopedBundlePackageProof(
+        ScopedBundleItems.Item memory item,
+        ScopedBundleReference.PackageFile memory file,
+        AuthorityScopedPackageProof memory proof
+    ) private pure {
+        require(
+            item.kind == ScopedBundleItems.Kind.EXTERNAL_REFERENCE
+                && item.role == keccak256("RUNNABLE_PACKAGE_MEMBER") && item.algorithm == 2
+                && item.canonicalizationId == keccak256("RAW_BYTES") && item.digest.length == 32
+                && item.byteSize == file.byteSize
+                && keccak256(item.digest) == keccak256(abi.encodePacked(file.sha256Digest))
+                && keccak256(bytes(item.uri)) == keccak256(bytes(file.path))
+                && proof.packageIndex == item.sourceIndex
+                && keccak256(bytes(proof.path)) == keccak256(bytes(file.path))
+                && proof.endpoint.byteSize == file.byteSize && file.byteSize != 0
+                && proof.endpoint.sha256Digest == file.sha256Digest,
+            "fresh endpoint object is this exact declared uncompressed member"
+        );
+    }
+
+    function _scopedBundleProofPath(string memory path) private pure {
+        bytes memory raw = bytes(path);
+        require(raw.length != 0 && raw.length <= 4096, "bounded explicit proof file path");
+        for (uint256 i; i < raw.length; ++i) {
+            require(raw[i] != 0, "proof path has no NUL byte");
+        }
+    }
+
+    function _scopedBundleJSONHash(string memory json, string memory key)
+        private
+        pure
+        returns (bytes32 value)
+    {
+        bytes memory raw = safeVm.parseJsonBytes(json, key);
+        require(raw.length == 32, "exact 32-byte object identity");
+        value = abi.decode(raw, (bytes32));
+        require(value != 0, "nonzero object identity");
+    }
+
+    function _scopedBundleEndpointShape(bytes memory path, bytes memory chunk) private pure {
+        // Match StreamArweaveObjectInclusion's finite native path/chunk envelope. Its real
+        // verifier still authenticates interval, root and first/last endpoint placement.
+        require(
+            path.length >= 64 && path.length <= 64 + 96 * 64 && (path.length - 64) % 96 == 0
+                && chunk.length != 0 && chunk.length <= 262144,
+            "bounded native endpoint proof"
+        );
     }
 
     function coverAuthorityScopedRetainedBytes(

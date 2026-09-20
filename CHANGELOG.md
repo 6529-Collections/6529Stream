@@ -53,6 +53,9 @@
   source-inventory helpers. Preserve original hosts, exact receipts and full
   output currentness; document the remaining production integration joins in
   the [ceremony guide](docs/integrations/current-authority-scoped-static-ceremony.md).
+- Add explicit local export/resume and A/B/C coverage entrypoints, an
+  authenticated original source-byte collector and per-member package proof
+  files that avoid retaining every endpoint buffer in one parent frame.
 - Source/type checks remain separate from native execution, fresh browser
   observations, complete archival coverage, Finality and gas acceptance.
 

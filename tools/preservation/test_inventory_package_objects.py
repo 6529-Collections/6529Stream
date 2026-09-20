@@ -1,11 +1,16 @@
 import copy
 import hashlib
+import io
+import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from tools.preservation.inventory_package_objects import member_abi, reconstruct
-from tools.preservation.reference_package import _write_zip
+from tools.preservation.inventory_package_objects import main, member_abi, reconstruct
+from tools.preservation.reference_archive import MAX_CHUNK, inspect
+from tools.preservation.reference_package import _write_zip, canonical
 
 
 class PackageObjectTests(unittest.TestCase):
@@ -104,6 +109,167 @@ class PackageObjectTests(unittest.TestCase):
                 self.assertEqual(wire[base + 128:base + 160].hex(), member["arweaveDataRoot"][2:])
         self.assertEqual(previous_end, len(wire))
         self.assertEqual(member_abi([]), "0x" + (bytes(31) + b"\x20" + bytes(32)).hex())
+
+    def test_endpoint_export_preserves_default_result_and_complete_manifest(self):
+        original = reconstruct(self.path, self.rows, self.anchor)
+        directory = Path(self.temp.name) / "endpoints"
+        result = reconstruct(self.path, self.rows, self.anchor, endpoint_dir=directory)
+        proof_paths = result.pop("packageProofPaths")
+        manifest_path = Path(result.pop("endpointManifest"))
+        self.assertEqual(result, original)
+        self.assertEqual(canonical(result), canonical(original))
+        self.assertEqual(len(proof_paths), 2)
+        manifest = json.loads(manifest_path.read_bytes())
+        self.assertTrue(manifest["complete"])
+        self.assertEqual(manifest["packageProofPaths"], proof_paths)
+        self.assertEqual(manifest["archiveSha256"], self.anchor)
+        self.assertEqual(manifest["inventorySha256"], original["inventorySha256"])
+        self.assertEqual((manifest["memberCount"], manifest["nonemptyMemberCount"]), (3, 2))
+        self.assertFalse(manifest["storageInclusionEstablished"])
+        self.assertFalse(manifest["receiptAuthorityEstablished"])
+        self.assertFalse((directory / "manifest.pending").exists())
+        expected_fields = {"packageIndex", "path", "contentHash", "sha256Digest",
+                           "arweaveDataRoot", "byteSize", "firstDataPath", "lastDataPath",
+                           "firstChunkRaw", "lastChunkRaw"}
+        for index, (proof_path, entry) in enumerate(zip(proof_paths, manifest["files"]), 1):
+            raw = Path(proof_path).read_bytes()
+            proof = json.loads(raw)
+            self.assertEqual(set(proof), expected_fields)
+            self.assertEqual(proof["packageIndex"], index)
+            self.assertEqual(proof["path"], self.files[index][0])
+            self.assertIs(type(proof["byteSize"]), int)
+            self.assertEqual(proof["byteSize"], len(self.files[index][1]))
+            for key in ("contentHash", "sha256Digest", "arweaveDataRoot", "firstDataPath", "lastDataPath"):
+                self.assertEqual(proof[key], original["members"][index][key])
+            self.assertTrue(Path(proof_path).is_absolute())
+            self.assertEqual(Path(proof_path).parent, directory.resolve())
+            self.assertEqual(entry, {"packageIndex": index, "path": Path(proof_path).name,
+                                     "sha256": hashlib.sha256(raw).hexdigest()})
+        self.assertNotIn("firstChunkRaw", original["members"][1])
+        self.assertNotIn("lastChunkRaw", original["members"][1])
+
+    def test_native_endpoint_intervals_include_exact_multiple_zero_leaf_rules(self):
+        cases = [(MAX_CHUNK - 1, MAX_CHUNK - 1, MAX_CHUNK - 1, 1),
+                 (MAX_CHUNK, MAX_CHUNK, MAX_CHUNK, 1),
+                 (MAX_CHUNK * 2, MAX_CHUNK, MAX_CHUNK, 2),
+                 (MAX_CHUNK + 17, 131081, 131080, 2),
+                 (MAX_CHUNK * 2 + 17, MAX_CHUNK, 131080, 3)]
+        for size, first_size, last_size, count in cases:
+            with self.subTest(size=size):
+                raw = (bytes(range(251)) * ((size + 250) // 251))[:size]
+                path = Path(self.temp.name) / f"native-{size}.zip"
+                _write_zip(path, [("engine.bin", raw)])
+                row = {"path": "engine.bin", "byteSize": str(size),
+                       "sha256Digest": "0x" + hashlib.sha256(raw).hexdigest()}
+                result = reconstruct(path, [row], hashlib.sha256(path.read_bytes()).hexdigest(),
+                                     endpoint_dir=Path(self.temp.name) / f"native-{size}")
+                proof = json.loads(Path(result["packageProofPaths"][0]).read_bytes())
+                first = bytes.fromhex(proof["firstChunkRaw"][2:])
+                last = bytes.fromhex(proof["lastChunkRaw"][2:])
+                self.assertEqual(first, raw[:first_size])
+                self.assertEqual(last, raw[-last_size:])
+                self.assertEqual(result["members"][0]["nativeChunkCount"], count)
+                for payload, field, end in ((first, "firstDataPath", first_size),
+                                             (last, "lastDataPath", size)):
+                    data_path = bytes.fromhex(proof[field][2:])
+                    self.assertEqual(data_path[-64:-32], hashlib.sha256(payload).digest())
+                    self.assertEqual(int.from_bytes(data_path[-32:], "big"), end)
+                    self.assertGreater(len(payload), 0)
+                if size == MAX_CHUNK:
+                    self.assertEqual(proof["firstDataPath"], proof["lastDataPath"])
+
+    def test_empty_index_gaps_and_proof_path_order_preserve_original_inventory(self):
+        files = [(f"nested/{i:02d}.bin", b"" if i in (0, 2, 12) else bytes([i])) for i in range(14)]
+        _write_zip(self.path, files)
+        rows = [{"path": name, "byteSize": str(len(raw)),
+                 "sha256Digest": "0x" + hashlib.sha256(raw).hexdigest()} for name, raw in files]
+        directory = Path(self.temp.name) / "ordered"
+        result = reconstruct(self.path, rows, hashlib.sha256(self.path.read_bytes()).hexdigest(),
+                             endpoint_dir=directory)
+        proofs = [json.loads(Path(path).read_bytes()) for path in result["packageProofPaths"]]
+        indices = [i for i, (_, raw) in enumerate(files) if raw]
+        self.assertEqual([proof["packageIndex"] for proof in proofs], indices)
+        self.assertEqual([proof["path"] for proof in proofs], [files[i][0] for i in indices])
+        self.assertEqual(result["packageProofPaths"], sorted(result["packageProofPaths"]))
+        self.assertFalse((directory / "nested").exists())
+        self.assertEqual(len(list(directory.glob("member-*.json"))), len(indices))
+
+    def test_late_member_identity_failure_leaves_only_unmarked_partial_files(self):
+        rows = copy.deepcopy(self.rows)
+        rows[-1]["sha256Digest"] = "0x" + "00" * 32
+        directory = Path(self.temp.name) / "partial"
+        with self.assertRaisesRegex(ValueError, "original member bytes differ"):
+            reconstruct(self.path, rows, self.anchor, endpoint_dir=directory)
+        self.assertEqual(len(list(directory.glob("member-*.json"))), 1)
+        self.assertFalse((directory / "manifest.json").exists())
+        self.assertFalse((directory / "manifest.pending").exists())
+        # A failed directory cannot silently become a new export on retry.
+        with self.assertRaises(FileExistsError):
+            reconstruct(self.path, self.rows, self.anchor, endpoint_dir=directory)
+
+    def test_missing_member_and_malformed_identity_never_publish_completion(self):
+        malformed = copy.deepcopy(self.rows)
+        malformed[0]["byteSize"] = "01"
+        for name, rows in (("missing", self.rows[:-1]), ("malformed", malformed)):
+            directory = Path(self.temp.name) / name
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                reconstruct(self.path, rows, self.anchor, endpoint_dir=directory)
+            self.assertFalse((directory / "manifest.json").exists())
+            self.assertEqual(list(directory.glob("member-*.json")), [])
+
+    def test_existing_directory_or_file_is_refused_without_overwrite(self):
+        for name, is_directory in (("existing-dir", True), ("existing-file", False)):
+            path = Path(self.temp.name) / name
+            if is_directory:
+                path.mkdir()
+                sentinel = path / "manifest.json"
+            else:
+                sentinel = path
+            sentinel.write_bytes(b"existing owner content")
+            with self.subTest(name=name), self.assertRaises(FileExistsError):
+                reconstruct(self.path, self.rows, self.anchor, endpoint_dir=path)
+            self.assertEqual(sentinel.read_bytes(), b"existing owner content")
+
+    def test_same_size_archive_change_with_restored_timestamp_cannot_mark_complete(self):
+        directory = Path(self.temp.name) / "changed"
+        before = self.path.stat()
+        calls = 0
+
+        def inspect_and_change(path):
+            nonlocal calls
+            result = inspect(path)
+            calls += 1
+            if calls == 2:
+                changed = bytearray(self.path.read_bytes())
+                changed[-1] ^= 1
+                self.path.write_bytes(changed)
+                os.utime(self.path, ns=(before.st_atime_ns, before.st_mtime_ns))
+            return result
+
+        with patch("tools.preservation.inventory_package_objects.inspect", side_effect=inspect_and_change):
+            with self.assertRaisesRegex(ValueError, "archive changed during endpoint reconstruction"):
+                reconstruct(self.path, self.rows, self.anchor, endpoint_dir=directory)
+        self.assertEqual(len(list(directory.glob("member-*.json"))), 2)
+        self.assertFalse((directory / "manifest.json").exists())
+
+    def test_cli_opt_in_exports_paths_without_overwriting_export_files(self):
+        inventory = Path(self.temp.name) / "inventory.json"
+        output = Path(self.temp.name) / "result.json"
+        directory = Path(self.temp.name) / "cli-endpoints"
+        inventory.write_bytes(canonical(self.rows))
+        arguments = ["inventory_package_objects", "--archive", str(self.path), "--inventory", str(inventory),
+                     "--expected-zip-sha256", self.anchor, "--output", str(output),
+                     "--endpoint-dir", str(directory)]
+        with patch("sys.argv", arguments), patch("sys.stdout", new_callable=io.StringIO):
+            main()
+        result = json.loads(output.read_bytes())
+        self.assertEqual(len(result["packageProofPaths"]), 2)
+        bad_directory = Path(self.temp.name) / "reserved"
+        arguments[-1] = str(bad_directory)
+        arguments[arguments.index("--output") + 1] = str(bad_directory / "manifest.json")
+        with patch("sys.argv", arguments), self.assertRaisesRegex(ValueError, "outside the fresh"):
+            main()
+        self.assertFalse(bad_directory.exists())
 
 
 if __name__ == "__main__":

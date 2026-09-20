@@ -93,10 +93,78 @@ each saved item, proof and origin, then bounded and full coverage diagnostics.
 Schema and canonicalization identifiers remain unchanged when proving byte
 correspondence. No missing coverage, zero receipt, sample or skipped row can
 stand for a completed bundle. A complete caller collecting these byte witnesses
-and fresh browser inputs, and its actual execution, remain integration work.
-The current in-memory proof API also retains all package endpoint buffers in
-its parent frame. A large-package caller needs streaming proof preparation;
-external self-calls alone do not release those retained parent buffers.
+is provided by the [local recipe](../../test/helpers/StreamCurrentAuthorityScopedPolicyLocalRecipe.sol).
+Fresh browser inputs and actual execution remain integration work.
+
+The [source-byte collector](../../test/helpers/StreamCurrentAuthorityScopedPolicyBytesFixture.sol)
+first authenticates the ordered stored segments and regenerates the complete
+expected occurrences with the production source readers. It uses the
+inventory's captured current authority and the reference's retained source
+facts, including the full entropy and policy records. Every occurrence must
+match its original role, source, record, index, schema and canonicalization;
+only then are identical complete byte objects deduplicated. Four original
+Archive authorization occurrences retain their separate state-bundle path.
+Unknown source roles fail. The collector is bounded to this one/two-token,
+full-Intent/PRESENT-Interview recipe.
+
+The bundle's streaming overload accepts an ordered list of explicit JSON proof
+paths. Each nonempty package member is read in its own external self-call and
+returns only the compact proof. The parent retains paths, not all endpoint
+buffers. Each JSON object contains `packageIndex`, `path`, `contentHash`,
+`sha256Digest`, `arweaveDataRoot`, numeric `byteSize`, `firstDataPath`,
+`lastDataPath`, `firstChunkRaw` and `lastChunkRaw`. The original package index
+includes empty members; empty members require no endpoint file. All identities
+must match the original complete package inventory. File paths are bounded and
+explicit. Each JSON file is read whole before its two-MiB size check; this is
+not a streaming JSON parser. The existing array API remains available and
+retains its parent buffers. Large non-package byte proofs also remain explicit
+in-memory inputs. None of these source changes establishes measured memory or
+transaction gas acceptance.
+
+The existing [package reconstruction tool](../../tools/preservation/inventory_package_objects.py)
+can write these endpoint files with `--endpoint-dir`, alongside its ordinary
+complete member report. Supply the original ZIP, complete ordered inventory and
+expected whole-ZIP SHA256. The tool derives first/last payload chunks from the
+actual native tree, including rebalanced tails and the zero-leaf rule at exact
+chunk multiples. It emits `packageProofPaths` in original nonempty-member order
+and writes `manifest.json` only after every member and the final whole-ZIP hash
+check pass. Existing endpoint directories are refused; partial files without a
+completion manifest do not represent successful reconstruction. Keep the
+summary `--output` outside that directory. This remains a local fixity check,
+not an upload or storage-receipt attestation.
+
+## Concrete local entrypoints
+
+`exportScopedSources(kind, directory, label)` constructs the actual original A
+graph and exports its current scope sources. Use a fresh fixture and output
+directory. Capture the exported HTML with the explicitly selected engine and
+retain the complete runtime package, environment and repeated PNG observations.
+The export creates no browser facts or archival attestations.
+
+After capture, call `coverExportedScopedSources(sourceABI, era, files,
+largeByteProofs)` on that same fixture instance in the local simulation. Decode
+`source-identity.abi.hex` to raw bytes for `sourceABI`. The fixture accepts only
+the exact canonical envelope whose hash it saved after successful export; this
+binds its instance, chain, Core, original publication and exported token bytes.
+`files` supplies explicit environment, browser-package and capture JSON paths
+plus the ordered package proof paths. `era` selects original A (`0`), current B
+(`1`) or current C (`2`). The shared path publishes the genuine original A
+Reference before migration, then performs actual scope record publication,
+sealing, inventory, byte collection and complete bundle coverage. In C, the
+recipe preserves B Rights and appends C WORK, Interview and Intent successors.
+
+The export can be consumed once. A failed call rolls back the consumption
+marker and protocol writes; exact retry also requires restoring the local VM
+clock/environment. Browser and filesystem observations are separate state.
+The alternative `coverScopedSources` entrypoint replays setup only when the
+fixture address, deployer nonce, linked artifacts, chain and initial EVM state
+are identical to the export. Deploying another fixture in the same EVM does
+not satisfy that requirement.
+
+These are explicit local simulation entrypoints, not broadcast scripts or
+default tests with optional skips. Their return value identifies the actual
+records, inventory, authority capture and bundle evidence. They do not yet
+compose sanction publication or terminal Finality acceptance.
 
 ## Integration and validation boundaries
 
