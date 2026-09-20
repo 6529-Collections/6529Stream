@@ -29,7 +29,12 @@ evidence digest, including exact restoration. Their Evidence and Identity
 boundary is explicitly typed; they do not claim actual Coordinator, Safe,
 Archive or recovered authority admission.
 
-The 98-source focused ABI check is clean. The existing nine Payout read/write
-cases and four complete-decoder projection cases remain unchanged. Runtime
-validation of the resulting complete linked closure is pending; previous
-failed native captures remain separate evidence.
+The 98-source focused ABI check is clean. All four evidence cases passed with
+the unchanged nine Payout read/write cases and four complete-decoder projection
+cases: **17 passed, including two 256-run fuzz tests**. The frozen source is
+`c05a2dc1ddd22b77bead6765f85d4223898f8e2d`. All 98 sources match Git, and all 32
+artifacts plus 1,174 metadata source-hash joins match the genuine native output.
+All 27 production products in the complete linked closure fit the original
+runtime and creation limits. The tests reused those artifacts without compiler
+invocation or artifact changes. Previous failed native captures remain separate
+evidence; full recovery and current-stack acceptance remain outside this run.

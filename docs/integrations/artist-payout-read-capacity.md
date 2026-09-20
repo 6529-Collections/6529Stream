@@ -36,7 +36,7 @@ bytecode changes from 26,729 to 25,567 bytes. The new helper is 1,662 runtime /
 `70c0d9c3` 25,800-byte Payout result is separate evidence. New deployment source
 and linked-library identities must be captured together.
 
-Nine focused tests are authored and ABI-checked. They cover literal outer return
+Nine focused tests passed, including 256 fuzz cases. They cover literal outer return
 words, all populated typed recovery fields, missing records, candidate association
 selection, malformed calldata, caller independence, actual original Payout18
 writes, authorization/stale-snapshot refusal and atomic rollback with exact retry.
@@ -52,5 +52,21 @@ the separate [recovered apply projection](artist-recovered-apply-projection.md)
 repairs only that pure decoding transport. Frozen selective-artifact runs preserve
 source bytes and every non-selection compiler setting, discover the complete
 linked-library closure, and forward genuine compiler output without modification.
-Runtime status must be taken from the retained capture, not inferred from source
-and size checks. No held replay-write relocation or authority change is included.
+The first complete linked build then stopped at its strict size gate on the
+inherited recovered-Payout codec. The separate
+[evidence read extraction](artist-recovered-payout-evidence-read.md) repairs that
+dependency without changing its original validation body.
+
+The frozen `c05a2dc1ddd22b77bead6765f85d4223898f8e2d` campaign passed all 17
+cases: these nine, four decoder-projection cases and four evidence-read cases,
+including two 256-run fuzz tests. Its 98 source files match Git; all 32 artifacts
+and 1,174 metadata source-hash joins match the genuine final native output. All
+27 production products in the linked closure fit the original size limits.
+The cached test run invoked no compiler and changed no artifacts.
+
+On that later integrated source, which also includes the independently delivered
+pure replay-key encoder, Payout is 23,520 runtime / 24,671 creation bytes. This
+does not replace the earlier isolated 24,311 measurement or attribute all later
+savings to the six-read extraction. The complete linked build took 131.17 seconds;
+the cached tests took 1.40 seconds. No held replay-write relocation or authority
+change is included.

@@ -27,4 +27,7 @@ including populated and empty publication rows and fuzzed bytes. They also requi
 identical refusal bytes for invalid omitted semantic/nonce fields, wrong owner,
 trailing envelope data, duplicate catalog entries and altered provenance. Their
 synthetic inputs do not establish source-owner or stored-carrier authority.
-Native execution status is recorded separately from the source/codegen evidence.
+All four cases passed in the frozen `c05a2dc` focused campaign, including 256
+fuzz runs. That complete linked build and its artifact verification establish
+that the repaired dependency compiles in the actual Payout test closure. They do
+not establish actual recovered-owner import or complete authority hydration.
