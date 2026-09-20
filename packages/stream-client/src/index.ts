@@ -67,3 +67,5 @@ export * from "./current-artist-authority-hydration.js";
 export * from "./current-artist-authority-hydration-workflow.js";
 export * from "./current-metadata-citation.js";
 export * from "./current-metadata-citation-workflow.js";
+export * from "./current-entropy-collection-policy.js";
+export * from "./current-entropy-collection-policy-workflow.js";

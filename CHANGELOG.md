@@ -186,6 +186,10 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+
+- Add explicit collection entropy policy clients with original Artist content
+  consent and class-1 configuration/class-2 freeze governance workflows.
+
 - Add current metadata citation admission and read clients with exact retained
   evidence, original class-1 governance calls and Safe receipt verification.
 

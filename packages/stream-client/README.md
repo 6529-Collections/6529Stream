@@ -337,6 +337,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Explicit collection entropy policy](docs/current-entropy-collection-policy.md)
+  preserves original Artist consent, governed configuration and terminal freeze.
+
 - [Current metadata citation](docs/current-metadata-citation.md) preserves the
   separate governed admission, retained evidence and current rendering profile.
 
