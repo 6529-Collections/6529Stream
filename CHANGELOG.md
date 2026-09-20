@@ -87,6 +87,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add separate typed DIRECT conservation capture and offline replay, joining
+  original adapter paid receipts to shared first-sale and release evidence.
+  Retain both known sale families in ledger discovery and reject unsupported
+  mixed target histories without changing frozen universal capture formats.
+
 - Add a native conservation packet representation and offline composition of
   frozen tier, selected intent/interview and universal floor captures. Reconcile
   shared RPC observations and preserve historical tier timing, four distinct

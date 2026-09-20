@@ -9,6 +9,16 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [typed DIRECT capture](museum-direct-conservation-source.md) follows original
+adapter receipts and shared floor evidence at source
+`8bb6dfe2957542f641b0d558e1cfd48e1b39ae98`. It discovers both known receipt
+families before selecting a collection and supports DIRECT-only target history;
+target universal or mixed history fails closed. Original bindings, paid facts,
+hashes and events remain typed DIRECT evidence. This capture changes neither
+the original universal formats nor V4, and makes no packet-compatibility,
+personhood, all-paid-route or actual-chain acceptance claim. Family-aware
+packet composition and original documentary closure remain required.
+
 The [native conservation composition](museum-acquisition-conservation.md) joins
 the three frozen source captures at one common anchor and reconciles shared RPC
 observations, headers, receipts and retained matching logs. Its additive packet

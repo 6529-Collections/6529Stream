@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Typed DIRECT conservation capture](../../docs/museum-direct-conservation-source.md)
+retains original fixed-price or auction paid receipts, adapter events and shared
+first-sale/release evidence. It keeps DIRECT identities separate from universal
+settlements and rejects unsupported mixed target histories. Packet composition
+and complete documentary evidence remain separate requirements.
+
 [Native conservation composition](../../docs/museum-acquisition-conservation.md)
 replays tier, selected intent/interview and universal floor captures at one
 shared source state. It produces the additive native packet fragment, retains
