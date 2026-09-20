@@ -82,7 +82,25 @@ governance boundaries. They include independent literal encoding/record domains,
 drift, real carrier corruption, late rollback/exact retry and codec fuzz. ABI
 checking passes over the 180-source test closure. One original-settings selected
 41-source gate measures host 12,512, read worker 13,624 and encoder 2,847 runtime
-bytes; all three fit. Manifest native test execution remains pending.
+bytes; all three fit.
+
+The frozen 180-source manifest capture subsequently passed all thirteen focused
+cases and 256 fuzz runs. Its 97.703-second genuine build verified 24 selected
+artifacts and 22 nonempty production products; EVM tests took 1.391 seconds,
+skipped compilation and preserved source, settings and artifacts. The actual
+test-embedded manifest has a 12,183-byte runtime and 13,915-byte creation including
+384 constructor argument bytes. Its creation is authenticated inside the genuine
+parent test artifact and its compiler-declared library links match the deployed
+libraries. The separate selected 12,512-byte host is a different genuine optimizer
+context, not byte-equivalent; the failed template comparison is retained. No
+artifact or compiler output was rewritten or substituted.
+
+This evidence exercises actual Manifest, Schema, Store and ArtifactCoverage with
+the typed boundaries above. The largest test bodies perform multiple operations
+and are not per-transaction capacity measurements. The 16,384-row case checks the
+final-part and complete-index codec bounds, not full-scope runtime acceptance.
+Current governance, complete adopted checkpoint-to-manifest integration and the
+remaining snapshot/reference/provider/finality ceremony are not established.
 
 Parts solve carrier completeness. They do not make a cold 16,384-token checkpoint
 seal/current call fit the unchanged 16,777,216 transaction budget. The current
