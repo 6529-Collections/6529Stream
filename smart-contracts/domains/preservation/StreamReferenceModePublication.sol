@@ -290,9 +290,7 @@ contract StreamReferenceModePublication is
             ? uint32(canonical.length)
             : result.selected.payloadBytes;
         r.recordedAt = uint64(block.timestamp);
-        hash = StreamReferenceModeStateReads.recordHash(
-            deploymentChainId, core, metadataHost, r, msg.data
-        );
+        hash = result.recordHash;
         r.recordHash = hash;
         r.recordChainHash = keccak256(
             abi.encode(

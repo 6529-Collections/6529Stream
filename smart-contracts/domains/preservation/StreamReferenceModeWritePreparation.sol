@@ -28,6 +28,7 @@ library StreamReferenceModeWritePreparation {
         bytes canonical;
         bytes evidence;
         Payload.Selection selected;
+        bytes32 recordHash;
     }
 
     function prepare(
@@ -39,7 +40,7 @@ library StreamReferenceModeWritePreparation {
         bytes calldata original
     ) public view returns (Prepared memory result) {
         // Exact original _validate write sequence. The caller still owns candidate, writer,
-        // selected dependency definitions, receipt construction, record hashes and all mutations.
+        // selected dependency definitions, receipt construction and all mutations; the original record hash reuses this frame below.
         (R.Publication memory p, M.Evidence memory evidence) =
             abi.decode(original[4:], (R.Publication, M.Evidence));
         R.SourceFacts memory source = Sources.requireModeSourceInputs(d, Sources.project(p), false);
@@ -69,6 +70,38 @@ library StreamReferenceModeWritePreparation {
                 p, receipt, source, evidence, result.mode, _environment(inventories, p.environment)
             );
         }
+        result.recordHash = completedRecordHash(d, p, receipt, result);
+    }
+
+    /// @dev Literal original record preimage over this frame's already authenticated full p.
+    /// Complete the same final receipt fields the host sets after prepare returns. All other
+    /// original receipt words remain unchanged; no prepared carrier substitutes for actual p.
+    /// The host still owns candidate/writer checks, these same receipt assignments and mutations.
+    function completedRecordHash(
+        R.Dependencies memory d,
+        R.Publication memory p,
+        R.Receipt memory receipt,
+        Prepared memory result
+    ) internal view returns (bytes32) {
+        receipt.sourcesHash = result.sourcesHash;
+        receipt.payloadHash = result.selected.payloadId == 0
+            ? keccak256(result.canonical)
+            : result.selected.payloadHash;
+        receipt.payloadBytes = result.selected.payloadId == 0
+            ? uint32(result.canonical.length)
+            : result.selected.payloadBytes;
+        receipt.recordedAt = uint64(block.timestamp);
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_REFERENCE_MODE_RECORD_V1"),
+                d.chainId,
+                address(this),
+                d.targets[0],
+                d.targets[1],
+                p,
+                receipt
+            )
+        );
     }
 
     function _environment(

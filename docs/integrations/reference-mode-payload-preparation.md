@@ -271,3 +271,40 @@ and 13,461,773. This is the fixed-worker/Store host result, with the explicitly
 named cooling above. The actual publisher's fresh authority/source validation,
 Safe retry, supplement, lock and inventory transaction envelopes remain a
 separate pending capture. Native10's complete-flow failures remain recorded.
+
+## Reusing the validated record preimage
+
+Native11 retained the native10 predecessor graph and genuine native5 replay
+context, adding only the reviewed immutable carrier-binding files. Five cases
+passed and four publication-dependent cases failed. Both large manifests now
+passed their original Store, STOP, ordered-chunk and whole-byte verification
+and binding. The one-chunk mode-evidence retention also returned. The actual
+publication still exhausted its unchanged envelope before completing the
+remaining receipt, facts, history and event writes. The call trace reports
+14,591,720 execution gas before failure; it does not identify the final opcode.
+The retained native11 capture remains negative evidence for actual publication,
+Safe retry, supplement, locking and complete inventory acceptance.
+
+The next correction reuses the complete Publication already decoded and
+authenticated in the fixed WritePreparation worker. After its original live
+source, evidence and prepared-carrier checks, it computes the literal original
+record preimage over that same Publication and receipt. It completes the same
+source hash, payload hash, payload length and recorded time that the host still
+assigns at its original positions. The host uses the returned hash, then keeps
+its original record/chain, binding or monolithic retention, storage and event
+ordering. No caller descriptor replaces actual input. The original StateReads
+record encoder remains available and unchanged; the publisher ABI and every
+storage row are unchanged.
+
+The frozen 117-source focused capture passed five tests, including 256 fuzz
+inputs. A literal original ABI preimage, the unchanged StateReads encoder and
+the reused-frame encoder agree for empty/nonempty dynamic data, both retention
+branches, every receipt word and domain/component mutations. The retained
+1,048-package/102-platform corpus measured 3,561,201 gas for the repeated
+decode/hash and 628,474 for hashing the already decoded frame. These are
+isolated execution measurements inside one harness, not transaction envelopes
+or a prediction of the complete publisher's saving. Selected production sizes
+fit: publisher 22,449 runtime / 26,823 creation bytes; WritePreparation 18,963 /
+18,995. The 131-source ABI bridge retains all 98 public host entries and all 17
+recursive storage rows. The full publisher still requires its separately
+frozen acceptance run with original caps and the unchanged genuine context.
