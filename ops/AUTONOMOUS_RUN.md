@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `17e299ba`: scoped STATIC source snapshots, recovery through rotations, full 37-role construction, actual Artist offer recipes, clone wallets, incident-gap consumers, entropy and mint fallbacks, full-byte records, current mint/Safe recipes, record-product composition and client fallback workflows are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
+| Source checkpoint | `53c21f0f`: delegated consent, dormancy guardian supersession, mint grace, full37 activation helpers, scoped content roots, Museum catalog and original Artist callers are source-integrated. See [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) for exact passing checks, size/gas failures and pending runtime acceptance. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,57 +29,41 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns shared architecture, integration and final candidate delivery.
-  All 2,191 sources pass the ABI/type/storage check at `17e299ba`; complete
-  native acceptance remains separate from focused and historical evidence.
-- The protocol lead is implementing C2PA credential/key-history reconciliation
-  in an isolated Artist branch. Actual launch-budget entropy registration,
-  receiver rollback and low-budget rejection pass three cases. The observed
-  hook cost is 131,789 gas; final EC-REGGAS floor calibration remains required.
-- The revenue lead completed clone wallets, preservation records and
-  MetadataV1 capacity, with 84, nine and 23 scoped passes respectively. It now
-  implements delegated Artist policy/sale consent (ART42), preserving original
-  signing domains and the permanent effect of already-recorded exact consents.
-- The metadata lead completed staged inventories, publication transport and
-  exact environment preparation (`5066ef97`). It owns the frozen actual
-  publisher capacity repair: five tests pass, four fail; complete preview
-  exceeds the transaction envelope. Scoped source snapshots (`17e299ba`)
-  are integrated; original scoped CONTENT_ROOT authority and VIEW follow.
-- The mint task completed 13 focused recovery cases and nine authored current
-  Safe recipes. Six actual Artist ticket cases and ordinary-profile rollback
-  are integrated in `262cc158`; seven curated auction/purchase cases follow in
-  `5eeee268`. Seven actual-Artist native/ERC20 offer cases follow in
-  `770ccea5`, closing the four authored entrypoint-family gaps. Native
-  runtime is pending. The task found the missing Manager policy-grace
-  producer and is adding it under original bounded Ledger semantics; root
-  owns its exact delayed-governance selector in the shared catalogs.
-- The burn task has 14 Core, 18 inventory and 49 finality/preservation
-  consumer passes across recorded source closures. The original Router size
-  blocker remains. ART25 rotation/recovery histories are source-integrated
-  in `7a274c04`, with 27 cases authored. The task now builds ART27
-  dormancy-origin supersession and records later mixed-history gaps.
-- The Museum task delivered general/native Artist/notarization records and
-  offline dossiers (`9677f5bf`), passing 86 root checks. Its accepted-profile
-  15-case native cohort passes with exact source/artifact evidence recorded.
-  General capacity is now source-integrated (`2e0c3443`), with 64 affected
-  root replay checks and 25 passes from its own frozen native successor. Museum now
-  builds the complete 29-name genesis schema catalog and worked examples.
-- The client task completed fallback, clone and staged-environment workflows,
-  with 655 root package passes and exact frozen ABI/corpus checks. It now audits
-  and builds the missing original 60-operation Artist signing/recomputation
-  families. No duplicate owed-export implementation is needed.
-- The testing task composed genuine role27/28 records (`6292287b`) with
-  eight current/Safe cases authored. Full 37-role construction (`24d3c0f1`)
-  adds six candidate cases and a ninth record case, with genuine clone
-  and fallback products. It now builds the actual delayed activation plan. STATIC composition (`8d1672ac`)
-  adds six authored current/Safe cases; the narrow legacy-admin compatibility
-  adapter (`0125573d`) remains distinct from the full-byte preservation host.
+- Root owns architecture, integration and delivery. ABI52 covers all2,212 sources
+  at `44af244e`; source integration remains separate from native acceptance.
+- The Artist lead finishes ART38 standing-conflict retention against exact
+  original op46 evidence. Live adverse provenance stays live; historical
+  full-output checks stale on changed annotation bytes. No blanket freeze rewrite.
+- The revenue lead delivered delegated consent (`6d333842`,20 cases authored),
+  then independently reviewed scoped content, client and catalog boundaries.
+  Estate deployment runtime24,765 and earlier Artist size blockers remain.
+- The metadata lead delivered scoped snapshots (`17e299ba`) and CONTENT_ROOT
+  (`51be4289`,seven authored cases). It repairs full publication capacity by
+  removing redundant large-tuple copies. Frozen native8 is complete5PASS/4FAIL;
+  its full preview uses35,360,587 gas. Router runtime40,944 remains blocked.
+- Mint delivered original Manager grace (`8c60b099`,21 authored cases); root
+  wired exact delayed policies (`9dd5aeaa`). It extracts the unchanged mutation
+  into the existing policy worker to repair Manager/fallback25,030/25,166-byte
+  runtimes. Earlier actual Artist mint/offer recipes await native execution.
+- Burn delivered ART25 rotations and first dormancy guardian supersession
+  (`91e223f5`,16 cases authored). It builds repeated dormancy-origin recovery,
+  then repairs three retained active-action test mocks separately and continues
+  the later mixed-history gap. Class4/held changes remain separate.
+- Museum delivered all29 genesis schemas (`8b3f01f8`): root89 tests, six
+  generators and complete catalog checks pass. Its historical ART38 decoder
+  handoff is under integration review; broader PREMIS/source joins continue.
+- Clients delivered original principal and identity/delegation workflows
+  (`92a0a687`, `be596707`): root719 package tests and exact ABI49 fixture pass.
+  Delegated mode and mint grace now use retained ABI52 for the next batch.
+- Testing delivered full37 construction and original activation helpers
+  (`24d3c0f1`, `9ad53bd4`) with15 and11 cases authored. Finite Renderer roles
+  (`8ba14f65`, `48f229f5`) preserve bounds and evidence requirements. Actual
+  C2PA composition/read inventory and complete joined acceptance remain.
 
-Keep builders implementing while isolated frozen tests run. Do not duplicate
-source writers or broad compilers. Exact approval-review denials remain in
-force; no rejected patch is applied. Preserve RC1 and all original captures.
-Complete Safe/fuzz/gas/CI and matching testnet evidence follow the stabilized
-full-feature implementation.
+Keep builders implementing while frozen tests run. No duplicate broad compilers
+or competing source writers. Exact rejected artifacts remain unapplied. Preserve
+RC1 and retained failures. Complete current-stack/Safe/fuzz/gas/CI acceptance and
+matching new testnet evidence follow the stabilized full-feature implementation.
 
 ## Reboot recovery assignments: 19 September
 

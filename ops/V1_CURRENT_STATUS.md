@@ -151,13 +151,18 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   history and unchanged authority epoch to authenticate the rotation chain.
   Twenty-seven focused cases are authored; independent source review and
   ABI checks pass, while native execution and changed-product sizes remain
-  pending. Dormancy-origin supersession is the next active recovery batch.
+  pending. First designated-dormancy guardian supersession is now source-integrated
+  as `91e223f5`, with 16 actual-Artist/Archive/Safe cases authored. Repeated
+  dormancy-origin recovery and later mixed histories remain active work.
 - TOKEN/RELEASE/SEASON STATIC source snapshots are integrated as `17e299ba`.
   They bind complete membership, original selected sources, retained bytes,
   writer grants and exact scope history. Independent production review and
   ABI checks pass; nine cases are authored and native remains pending.
-  This does not yet supply Artist-authorized scoped CONTENT_ROOT, retained
-  rendered output, VIEW or complete scoped finality; those joins are active.
+  Artist-authorized scoped CONTENT_ROOT is now source-integrated as
+  `51be4289`, preserving original op17 consent, nine existing content roots
+  and old hashes before the first scoped publication. Seven cases are authored.
+  Retained rendered output, VIEW and complete scoped finality remain open.
+  Selected new workers fit; Router runtime is 40,944 bytes and remains blocked.
   A separate test-only correction (`a5493f0a`) checks the original 13-word
   recovery receipt commitment instead of equating it to a semantic record.
 - Original STATIC renderer/companion/registry composition is integrated as
@@ -165,8 +170,43 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   fixture analysis and partial direct read rosters are explicitly synthetic.
   Complete transitive analysis, goldens and joined runtime remain required.
 
-The latest complete-source ABI/type/storage pass at `17e299ba` covers 2,191
-sources in 19.5 seconds with no errors. It does not generate bytecode or
+- Delegated Artist policy and sale consent is source-integrated as `6d333842`.
+  Mode2 uses original op14/16 records, signing domains and exact consent
+  semantics. Sixteen Artist and four current paid-Safe cases are authored;
+  independent source review is clear, native execution remains pending.
+  The Estate deployment helper is 24,765 bytes, 189 over the runtime limit;
+  this and earlier Artist size failures still require repair.
+- Original Artist principal callers (`92a0a687`) and identity/delegation
+  callers (`be596707`) pass all 719 root client package tests, generation,
+  build, strict types and their exact retained ABI49 fixture check. These
+  clients explicitly target their frozen original producer; delegated-mode
+  and policy-grace caller additions are still being built against ABI52.
+- Mint policy grace is source-integrated as `8c60b099`, with root's exact
+  delayed-governance selector catalogs in `9dd5aeaa`. Sixteen focused and
+  five actual-Safe cases are authored. Exact accepted-profile sizing finds
+  Manager/fallback runtime 25,030/25,166 bytes, above the 24,576 limit.
+  The two-path extraction into the existing policy worker is active;
+  complete native acceptance is pending and no limit is relaxed.
+- Full-v1 activation helpers (`9ad53bd4`) add original delayed module and
+  policy plans, recorder/binding/provider setup and explicit ordered schema
+  admission inputs. Eleven current Governor-Safe cases are authored and
+  independently source-reviewed. Construction and planning are not completed
+  native activation or complete transitive STATIC evidence.
+- The full 29-name Museum schema catalog and worked examples (`8b3f01f8`)
+  pass 89 root tests, all six profile generators and complete catalog checks.
+  Independent review verifies all 19 preexisting schema bytes are unchanged
+  and the prospective plan's 51 documents/78 ordered chunks. Full admission,
+  institutional semantics and Museum conformance remain separate work.
+- Finite named Artist/C2PA Renderer roles (`8ba14f65`, clarified `48f229f5`)
+  preserve existing target/read bounds and admission evidence. Five tests are
+  authored; actual transitive analysis and native admission remain pending.
+  ART38 remains in its isolated branch while a standing-conflict correction
+  is built. Mandatory live provenance can stale historical full-output
+  evidence; existing hashes are not rewritten or silently reinterpreted.
+
+The combined-source ABI/type/storage pass at `44af244e` covers 2,212
+sources in 20.203 seconds with no errors. Later finite Renderer role labels
+have a separate 19-source ABI check; later source is not covered implicitly. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different

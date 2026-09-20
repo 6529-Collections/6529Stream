@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
+  plans; current tests are authored and coordinated execution remains pending.
+- Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
+  live provenance semantics, exact analysis and golden-evidence requirements.
+
 - Add consent-gated mint executor policy rotations with bounded predecessor
   grace through an additive Manager capability. Preserve current authority,
   counters and replay; focused and actual Safe recipes await native execution.
