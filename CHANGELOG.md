@@ -22,6 +22,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Artist recovered authority hydration
 
+- Extend the recovered profile with complete direct economics history and exact
+  original binding associations, signatures and replay origins. Add class-3 V3
+  and repeated V3 import/continuation scenarios. Execution and capacity evidence
+  remain pending.
 - Add operation-60 profile10 for complete recovered class-1/class-3 Identity
   and Payout histories in the first accepted generation-one PRIMARY_ONLY graph.
   Retain original hashes, clocks, nonce/replay guards, publication carriers,

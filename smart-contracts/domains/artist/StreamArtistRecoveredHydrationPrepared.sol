@@ -49,8 +49,11 @@ import {
 import {
     StreamArtistRecoveredPayoutHydration as Payout
 } from "./StreamArtistRecoveredPayoutHydration.sol";
+import {
+    StreamArtistRecoveredEconomicsHydration as Economics
+} from "./StreamArtistRecoveredEconomicsHydration.sol";
 
-/// @notice Complete seven-owner certificate for the first recovered-authority graph.
+/// @notice Complete seven-owner certificate for the admitted recovered-authority graphs.
 /// @dev One recovered class1/class3 subject and one accepted generation-one PRIMARY_ONLY binding.
 /// Fixed typed exporters reject unsupported histories; every native occurrence, replay cell and
 /// nonce tree must be accounted for. No request witness can replace original producer state.
@@ -77,12 +80,9 @@ library StreamArtistRecoveredHydrationPrepared {
         view
         returns (Commit.Prepared memory prepared)
     {
-        // This first graph does not consume economics or attestation witnesses. Reject them,
-        // including empty per-collection wrappers, rather than silently narrowing the request.
         if (
             request.records.authority.artistIds.length != 1
                 || request.records.authority.collections.length != 1
-                || request.records.witnesses.length != 0
         ) revert T.UnsupportedProfile();
         prepared.admission = Admission.collect(destination, request);
         Admission.Certificate memory c = prepared.admission;
@@ -91,6 +91,7 @@ library StreamArtistRecoveredHydrationPrepared {
         // Identity retains signatures for the entire original artist lane, including secondary
         // occurrences. Collection owners read their exact typed selectors from the same query.
         prepared.query.records = c.artists[0].records;
+        T.EconomicsConsent[] memory economics = _economics(c, request);
         IH.Bundle memory identity = Identity.collect(
             c.source.owners[2], prepared.query, RH.ownerProvenance(c.provenance, 2)
         );
@@ -108,6 +109,7 @@ library StreamArtistRecoveredHydrationPrepared {
                 )
         ) revert RH.InvalidRecoveredHydrationProvenance();
         uint256 features = requiredFeatures(identity, payout, c.provenance.eras.length);
+        if (economics.length != 0) features |= RH.DIRECT_ECONOMICS;
         for (uint8 i; i < 7; ++i) {
             _capabilities(
                 c.source.owners[i],
@@ -128,11 +130,49 @@ library StreamArtistRecoveredHydrationPrepared {
                 // The joined validator binds original Identity35/nonce admission and retained
                 // Payout continuations; an owner-local export alone is insufficient here.
                 payload.semanticState = Payout.encode(payout, c.provenance);
+            } else if (i == 6 && economics.length != 0) {
+                payload.semanticState = Economics.encode(
+                    Economics.collect(
+                        c.source.owners[i], prepared.query, payload.provenance, economics
+                    ),
+                    prepared.query,
+                    payload.provenance
+                );
             } else {
                 payload.semanticState = Owner(c.source.owners[i])
                     .recoveredAuthorityHydrationState(prepared.query, payload.provenance);
             }
             prepared.data[i].typedState = Payload.encode(i, _header(i, features, payload), payload);
+        }
+    }
+
+    /// @dev Native history selects the extension. Witnesses supply exact retained terms,
+    /// never authority or a projection of a larger source. No live assignment is rechecked.
+    function _economics(Admission.Certificate memory c, RH.Request memory request)
+        private
+        pure
+        returns (T.EconomicsConsent[] memory terms)
+    {
+        uint256 count;
+        for (uint256 i; i < c.provenance.journals[6].length; ++i) {
+            if (c.provenance.journals[6][i].receipt.operation == 15) ++count;
+        }
+        if (count == 0) {
+            if (request.records.witnesses.length != 0) revert T.UnsupportedProfile();
+            return new T.EconomicsConsent[](0);
+        }
+        if (
+            count > 128 || request.records.witnesses.length != 1
+                || request.records.witnesses[0].collectionId != c.collections[0].collectionId
+                || request.records.witnesses[0].economics.length != count
+                || request.records.witnesses[0].attestations.length != 0
+        ) revert T.UnsupportedProfile();
+        terms = request.records.witnesses[0].economics;
+        for (uint256 i; i < terms.length; ++i) {
+            if (
+                terms[i].resolver != c.source.primaryResolver
+                    && terms[i].resolver != c.source.royaltyResolver
+            ) revert T.UnsupportedProfile();
         }
     }
 

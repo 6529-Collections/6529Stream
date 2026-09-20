@@ -155,12 +155,18 @@ import {
 import {
     IStreamArtistIdentityRevisionReads
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
+import {
+    StreamArtistEstateTypes as Estate
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistEstateTypes.sol";
+import {
+    IStreamArtistEstateOwner
+} from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistEstateOwner.sol";
 
 /// @notice Actual six-family V3 rewind source followed by seven-owner profile10 transport.
 /// @dev Invokes the existing real mixed-plan/Safe/APPEAL/Archive source recipe unchanged.
 /// Its inherited typed Core and governance facts remain the explicit boundaries, including
 /// its source rollback probes. Capabilities, source checkpoints and semantic records are real.
-/// The concrete owners advertise the first-graph mask31; native execution and gas evidence remain pending.
+/// Concrete owners advertise the required graph features; native execution and gas evidence remain pending.
 contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryRewindsActualTest {
     bytes32 private constant RH_LEAF =
         0xea04da6644046a7c731e99312c32df311e81aa7e137dfc2a49c2116bb325195d;
@@ -197,6 +203,18 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
     bytes32 private vrStanding;
     address private vrRetired;
     bytes32 private vrRetirement;
+    bytes32 private vrEstate;
+
+    struct ContinuationUse {
+        bytes32 document;
+        bytes32 payout;
+        bytes32 revisionScope;
+        bytes32 payoutScope;
+        T.ReplayCell revisionCell;
+        T.ReplayCell payoutCell;
+        RH.Point revisionPoint;
+        RH.Point payoutPoint;
+    }
 
     function testRecoveredV3MixedPlanImportPreservesSixFamilyOriginalsAndRetries() external {
         _vrBaseline();
@@ -338,34 +356,201 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
         );
     }
 
+    function testRecoveredV3ClassThreeImportKeepsOriginal40AndFreshSigned25() external {
+        // Unchanged public source recipe: actual36/38/40, two signed class3 revisions,
+        // original33, then registered V3/35 excluding only the second revision.
+        testRewindFutureActualClass3RevisionStoresHashedAuthorityClass();
+        _vrIdentifyRecovery(3, 1);
+        vrEstate = ingress.currentAuthorityCapabilities(artistId).activationRecordHash;
+        vrRevision =
+        RewindOwner(suite.owners[2]).recoveryRewindInventoryV3(artistId).revisionContinuationHash;
+        require(vrRevision != 0 && _snapshot(vrEstate).operationId == 40, "real class3 V3 source");
+        _vrWitnesses();
+        bytes32 originals = _vrOriginals(suite.owners[2], suite.owners[5]);
+        bytes32 estate = _vrEstateFacts(suite.owners[2]);
+        bytes32 operative = _vrOperative(suite.owners[2], suite.owners[5]);
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        Successor memory next = _rhCutover();
+        RH.Request memory request = _rhRequest();
+        Commit.Prepared memory prepared =
+            Prepared.prepare(next.coordinator.suiteConfiguration(), request);
+        request.expectedSemanticInventory = Prepared.inventory(prepared);
+        uint256 requests;
+        uint256 recoveries;
+        RH.JournalEntry[] memory journal = prepared.admission.provenance.journals[2];
+        for (uint256 i; i < journal.length; ++i) {
+            require(
+                journal[i].receipt.operation != 40,
+                "original40 stays auxiliary, never synthetic native"
+            );
+            if (journal[i].receipt.operation == 38 && journal[i].receipt.recordHash == vrEstate) {
+                ++requests;
+                require(
+                    journal[i].position.point.ownerRevision < _snapshot(vrEstate).ownerRevision,
+                    "original38 request precedes original40 vesting"
+                );
+            }
+            if (journal[i].receipt.operation == 35) ++recoveries;
+        }
+        require(
+            requests == 1 && recoveries == 2, "exact original38 and adjacent35 occurrence count"
+        );
+        bytes32 value = Recovered(address(next.registry)).hydrateRecoveredArtistAuthority(request);
+        _rhImported(next, prepared, value);
+        _rhAdopt(next);
+        require(
+            _vrOriginals(suite.owners[2], suite.owners[5]) == originals
+                && _vrEstateFacts(suite.owners[2]) == estate
+                && _vrOperative(suite.owners[2], suite.owners[5]) == operative
+                && keccak256(abi.encode(ingress.currentAuthorityCapabilities(artistId)))
+                    == keccak256(abi.encode(rights)),
+            "class3 original authority, full plan and estate facts imported exactly"
+        );
+        uint64 beforeRevision = Owner(suite.owners[2]).ownerStateSnapshotV2().revision;
+        W.RevisionContinuationV3 memory continuation =
+            RewindOwner(suite.owners[2]).recoveryRevisionContinuationV3(vrRevision);
+        bytes32 document = _reviseDocument(bytes("fresh imported class3 V3 document"));
+        Doc.Record memory record = ingress.identityRevisionRecord(document);
+        require(
+            record.authorityClass == 3 && record.signer == address(artist)
+                && RewindOwner(suite.owners[2]).identityRevisionRecoveryContinuationV3(document)
+                    == vrRevision
+                && ingress.identityRevisionProvisionalAssociation(document).transitionRecordHash
+                == rhRecovery,
+            "genuine current class3 signed25 consumes retained V3 continuation under original35"
+        );
+        _vrConsumed(
+            2,
+            "identity_authority.replay.identity_revision_recovery_continuation",
+            keccak256(
+                abi.encode(
+                    artistId,
+                    continuation.stableRevisionRecordHash,
+                    continuation.stableDocumentHash,
+                    vrRevision
+                )
+            ),
+            document,
+            beforeRevision + 1
+        );
+        require(
+            Native(suite.owners[2]).artistNativeReceiptCount() == 1
+                && Native(suite.owners[2]).artistNativeReceiptAt(0).recordHash == document
+                && NativeClock(suite.owners[2]).artistNativeReceiptRevisionAt(0)
+                    == beforeRevision + 1
+                && _vrOriginals(suite.owners[2], suite.owners[5]) == originals
+                && _vrEstateFacts(suite.owners[2]) == estate,
+            "only genuine current25 appended; original40/35 and exclusions remain unchanged"
+        );
+    }
+
+    function testRecoveredV3SecondImportKeepsSpentContinuationsAndFreshCurrentWrites() external {
+        _vrBaseline();
+        address originalIdentity = suite.owners[2];
+        address originalPayout = suite.owners[5];
+        uint256 originalCount = vrRecords.length;
+        bytes32 originalFacts = _vrOriginals(originalIdentity, originalPayout);
+        Successor memory middle = _rhCutover();
+        RH.Request memory request = _rhRequest();
+        Commit.Prepared memory first =
+            Prepared.prepare(middle.coordinator.suiteConfiguration(), request);
+        request.expectedSemanticInventory = Prepared.inventory(first);
+        bytes32 firstValue =
+            Recovered(address(middle.registry)).hydrateRecoveredArtistAuthority(request);
+        _rhImported(middle, first, firstValue);
+        _rhAdopt(middle);
+        ContinuationUse memory used = _vrUseContinuations();
+        require(
+            _vrOriginalsThrough(originalIdentity, originalPayout, originalCount) == originalFacts,
+            "sealed A originals unchanged"
+        );
+        bytes32 allOriginals = _vrOriginals(suite.owners[2], suite.owners[5]);
+        bytes32 operative = _vrOperative(suite.owners[2], suite.owners[5]);
+        Successor memory last = _rhCutover();
+        request = _rhRequest();
+        require(request.expectedSourceImportCommitment == firstValue, "real B import certificate");
+        Commit.Prepared memory second =
+            Prepared.prepare(last.coordinator.suiteConfiguration(), request);
+        _vrFlattened(first, second, firstValue, used);
+        request.expectedSemanticInventory = Prepared.inventory(second);
+        bytes32 destinationBefore = _rhDestinationHash(last);
+        request.expectedSemanticInventory = bytes32(uint256(request.expectedSemanticInventory) ^ 1);
+        avm.expectRevert(RH.InvalidRecoveredHydrationProfile.selector);
+        Recovered(address(last.registry)).hydrateRecoveredArtistAuthority(request);
+        require(_rhDestinationHash(last) == destinationBefore, "stale second inventory is atomic");
+        request.expectedSemanticInventory = Prepared.inventory(second);
+        bytes32 middleBefore = _rhSourceHash();
+        bytes32 value = Recovered(address(last.registry)).hydrateRecoveredArtistAuthority(request);
+        _rhImported(last, second, value);
+        require(
+            _rhSourceHash() == middleBefore,
+            "second import leaves all B source checkpoints and catalogs unchanged"
+        );
+        _rhAdopt(last);
+        require(
+            _vrOriginals(suite.owners[2], suite.owners[5]) == allOriginals
+                && _vrOperative(suite.owners[2], suite.owners[5]) == operative,
+            "C retains A originals, B continuation consumers and exact heads"
+        );
+        _vrSpentContinuations(used);
+        uint64 end = ingress.artistTransitionState(rhRecovery).postWindowEndsAt;
+        if (block.timestamp < end) vm.warp(end);
+        bytes32 document = _reviseDocument(bytes("fresh C document after retained B child matured"));
+        bytes32 payment = _dismissalPayout(address(0x1703));
+        require(
+            RewindOwner(suite.owners[2]).identityRevisionRecoveryContinuationV3(document) == 0
+                && RewindPayout(suite.owners[5]).payoutDesignationRecoveryContinuationV3(payment)
+                    == 0,
+            "fresh C writes use ordinary current chains, never reuse consumed A continuations"
+        );
+        Doc.Record memory doc = ingress.identityRevisionRecord(document);
+        require(
+            doc.previousRevisionRecord == used.document
+                && IStreamArtistPayoutOwner(suite.owners[5])
+                .designationRecord(payment)
+                .previousDesignationRecordHash == used.payout,
+            "fresh current signed writes continue the retained B records"
+        );
+        _vrConsumed(
+            2,
+            "identity_authority.replay.identity_revision_chain",
+            keccak256(abi.encode(artistId, used.document, doc.previousRecordHash)),
+            document,
+            NativeClock(suite.owners[2]).artistNativeReceiptRevisionAt(0)
+        );
+        bytes32 payoutKey = _rhSourceKey(
+            5,
+            AH.Origin(
+                keccak256("payout_lifecycle.replay.designation_chain"),
+                keccak256(abi.encode(artistId))
+            )
+        );
+        T.ReplayCell memory payoutCell = Owner(suite.owners[5]).replayCell(payoutKey);
+        require(
+            payoutCell.commitment == payment && payoutCell.kind == 3 && payoutCell.status == 1
+                && payoutCell.touchedRevision
+                    == NativeClock(suite.owners[5]).artistNativeReceiptRevisionAt(0),
+            "ordinary Payout mutable-chain cell retains its original kind and status"
+        );
+        _vrCurrentPoint(5, payoutKey, payoutCell.touchedRevision);
+        _vrSpentContinuations(used);
+        require(
+            Native(suite.owners[2]).artistNativeReceiptCount() == 1
+                && Native(suite.owners[5]).artistNativeReceiptCount() == 1
+                && Native(suite.owners[2]).artistNativeReceiptAt(0).recordHash == document
+                && Native(suite.owners[5]).artistNativeReceiptAt(0).recordHash == payment
+                && _vrOriginals(suite.owners[2], suite.owners[5]) == allOriginals
+                && _vrOriginalsThrough(originalIdentity, originalPayout, originalCount)
+                    == originalFacts,
+            "only C original25/18 appended; all A and B originals remain unchanged"
+        );
+    }
+
     function _vrBaseline() private {
         // This accepted fixture authors all six non-guardian families and a protected guardian,
         // publishes genuine V3/APPEAL evidence and executes the original registered35 pair.
         testRewindMixedPlanSelectsAllFamiliesAgainstOneOriginalSource();
-        rhRecovery = ingress.latestIdentityRecovery(artistId);
-        Recovery.Record memory recovered = ingress.identityRecoveryRecord(rhRecovery);
-        rhOriginalAction = recovered.fields.governanceActionId;
-        (RecoveryAction.Association memory action,, bytes32 execution,) = IStreamArtistRecoveryActionOwner(
-                suite.owners[2]
-            ).identityRecoveryActionState(artistId, rhOriginalAction);
-        require(
-            rhRecovery != 0 && execution == rhRecovery
-                && recovered.fields.vestedAuthorityClass == 1,
-            "actual executed V3 original35 source"
-        );
-        rhGuardian = action.guardian.recordHash;
-        W.EvidenceStateV3 memory state = RewindOwner(suite.owners[2])
-            .identityRecoveryEvidenceStateV3(artistId, rhOriginalAction);
-        (address publisher, bytes32 publisherPin) =
-            RewindOwner(suite.owners[2]).recoveryRewindEvidenceBinding();
-        require(
-            publisher.codehash == publisherPin && publisherPin != 0, "fixed source V3 publisher"
-        );
-        (W.ResolutionManifestV3 memory manifest,,) =
-            RewindPublisher(publisher).resolutionManifestV3(state.manifestHash);
-        require(
-            manifest.supersededRecords.length == 7, "all six non-guardian families plus guardian"
-        );
+        W.ResolutionManifestV3 memory manifest = _vrIdentifyRecovery(1, 7);
         W.IdentityInventoryV3 memory identity =
             RewindOwner(suite.owners[2]).recoveryRewindInventoryV3(artistId);
         W.PayoutInventoryV3 memory payout =
@@ -383,6 +568,35 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
         }
         _vrContinuations(suite.owners[2], suite.owners[5]);
         _vrWitnesses();
+    }
+
+    function _vrIdentifyRecovery(uint8 authorityClass, uint256 exclusions)
+        private
+        returns (W.ResolutionManifestV3 memory manifest)
+    {
+        rhRecovery = ingress.latestIdentityRecovery(artistId);
+        Recovery.Record memory recovered = ingress.identityRecoveryRecord(rhRecovery);
+        rhOriginalAction = recovered.fields.governanceActionId;
+        (RecoveryAction.Association memory action,, bytes32 execution,) = IStreamArtistRecoveryActionOwner(
+                suite.owners[2]
+            ).identityRecoveryActionState(artistId, rhOriginalAction);
+        require(
+            rhRecovery != 0 && execution == rhRecovery
+                && recovered.fields.vestedAuthorityClass == authorityClass,
+            "actual executed V3 original35 source"
+        );
+        rhGuardian = action.guardian.recordHash;
+        W.EvidenceStateV3 memory state = RewindOwner(suite.owners[2])
+            .identityRecoveryEvidenceStateV3(artistId, rhOriginalAction);
+        (address publisher, bytes32 publisherPin) =
+            RewindOwner(suite.owners[2]).recoveryRewindEvidenceBinding();
+        require(
+            publisher.codehash == publisherPin && publisherPin != 0, "fixed source V3 publisher"
+        );
+        (manifest,,) = RewindPublisher(publisher).resolutionManifestV3(state.manifestHash);
+        require(
+            manifest.supersededRecords.length == exclusions, "exact original V3 exclusion count"
+        );
     }
 
     function _vrContinuations(address identity, address payout) private view {
@@ -418,6 +632,10 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
                 && cell.touchedRevision == revision,
             "genuine original writer consumed current-domain continuation replay once"
         );
+        _vrCurrentPoint(owner, key, revision);
+    }
+
+    function _vrCurrentPoint(uint8 owner, bytes32 key, uint64 revision) private view {
         RH.Point memory point =
             RecoveredOwner(suite.owners[owner]).recoveredHydrationReplayPoint(key);
         RH.OriginEnvironment memory original =
@@ -466,31 +684,33 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
         }
         count = Native(suite.owners[5]).artistNativeReceiptCount();
         for (uint256 i; i < count; ++i) {
-            HT.Receipt memory row = Native(suite.owners[5]).artistNativeReceiptAt(i);
-            require(
-                row.operation == 18 && row.artistId == artistId,
-                "bounded original Payout source graph"
-            );
-            (,, T.SignerApproval memory p, T.Authorization memory effective,,,) = abi.decode(
-                _operationPayload(18, address(this), row.recordHash),
-                (
-                    T.PayoutDesignation,
-                    T.Authorization,
-                    T.SignerApproval,
-                    T.Authorization,
-                    R.TransitionState,
-                    R.TransitionState,
-                    Dismissal.PayoutResolutionFacts
-                )
-            );
-            _rhAuthorization(p.digest, effective.nonce);
-            vrRecords.push(W.RecordReference(W.RecordKind.PAYOUT_DESIGNATION, row.recordHash));
+            _vrPayoutWitness(Native(suite.owners[5]).artistNativeReceiptAt(i));
         }
         _rhCandidate(
             5, "payout_lifecycle.replay.designation_chain", keccak256(abi.encode(artistId))
         );
         _rhCandidate(5, "payout_lifecycle.replay.recovery_rewind", rhRecovery);
         _rhCandidate(2, "identity_authority.replay.one_way_cutover_latch", 0);
+    }
+
+    function _vrPayoutWitness(HT.Receipt memory row) private {
+        require(
+            row.operation == 18 && row.artistId == artistId, "bounded original Payout source graph"
+        );
+        (,, T.SignerApproval memory p, T.Authorization memory effective,,,) = abi.decode(
+            _operationPayload(18, address(this), row.recordHash),
+            (
+                T.PayoutDesignation,
+                T.Authorization,
+                T.SignerApproval,
+                T.Authorization,
+                R.TransitionState,
+                R.TransitionState,
+                Dismissal.PayoutResolutionFacts
+            )
+        );
+        _rhAuthorization(p.digest, effective.nonce);
+        vrRecords.push(W.RecordReference(W.RecordKind.PAYOUT_DESIGNATION, row.recordHash));
     }
 
     function _vrIdentityWitness(HT.Receipt memory row) private {
@@ -511,6 +731,8 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
             vrRecords.push(W.RecordReference(W.RecordKind.GUARDIAN_SET, hash));
         } else if (row.operation == 29) {
             _vrRotationWitness(hash);
+        } else if (row.operation == 38) {
+            _vrEstateWitness(hash);
         } else if (row.operation == 33) {
             Contest.Record memory r = ingress.identityContestRecord(hash);
             if (r.recordHash == 0) {
@@ -618,6 +840,61 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
         }
     }
 
+    function _vrEstateWitness(bytes32 hash) private {
+        (Estate.RequestRecord memory item, uint8 phase, Estate.ExecutionFacts memory execution) =
+            ingress.estateActivationRecord(hash);
+        require(
+            hash == vrEstate && item.recordHash == hash && phase == 2
+                && execution.activationRecordHash == hash,
+            "actual original38 and executed40"
+        );
+        bytes32 digest = ingress.estateActivationDigest(item.terms, item.authorization);
+        _rhCandidate(
+            2,
+            "identity_authority.replay.authorization_consumed_digest",
+            keccak256(abi.encode(artistId, digest))
+        );
+        _rhCandidate(
+            2,
+            "identity_authority.replay.nonce_allocator",
+            keccak256(
+                abi.encode(
+                    "estate_activation", artistId, item.terms.successor, item.authorization.nonce
+                )
+            )
+        );
+        _rhCandidate(2, "identity_authority.replay.activation_request_key", hash);
+        _rhCandidate(2, "identity_authority.replay.activation_execution_key", hash);
+        _rhCandidate(
+            2,
+            "identity_authority.replay.standing_retirement",
+            keccak256(abi.encode(artistId, item.incumbent, hash))
+        );
+    }
+
+    function _vrEstateFacts(address owner) private view returns (bytes32) {
+        (Estate.RequestRecord memory item, uint8 phase, Estate.ExecutionFacts memory execution) =
+            IStreamArtistEstateOwner(owner).estateActivationRecord(vrEstate);
+        (address prior, bytes32 guardian, uint64 tail) =
+            IStreamArtistEstateOwner(owner).estateTransitionStanding(vrEstate);
+        return keccak256(
+            abi.encode(
+                item,
+                phase,
+                execution,
+                IStreamArtistRotationReads(owner).artistTransitionState(vrEstate),
+                IStreamArtistGuardianVestingHistory(owner)
+                    .guardianVestingSnapshot(artistId, vrEstate),
+                IStreamArtistIdentityDismissalOwner(owner)
+                    .identityTransitionClosure(artistId, vrEstate),
+                prior,
+                guardian,
+                tail,
+                RewindOwner(owner).recoveryCapabilityContinuationV3(rhRecovery)
+            )
+        );
+    }
+
     function _vrRotationWitness(bytes32 hash) private {
         (
             R.Rotation memory p,
@@ -721,7 +998,157 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
         );
     }
 
-    function _vrOriginals(address identity, address payout) private view returns (bytes32 value) {
+    function _vrUseContinuations() private returns (ContinuationUse memory used) {
+        W.RevisionContinuationV3 memory revision =
+            RewindOwner(suite.owners[2]).recoveryRevisionContinuationV3(vrRevision);
+        W.PayoutContinuationV3 memory payout =
+            RewindPayout(suite.owners[5]).payoutRecoveryContinuationV3(vrPayout);
+        used.document = _reviseDocument(bytes("B signed25 consumes original A continuation"));
+        used.payout = _dismissalPayout(address(0x1702));
+        require(
+            RewindOwner(suite.owners[2]).identityRevisionRecoveryContinuationV3(used.document)
+                    == vrRevision
+                && RewindPayout(suite.owners[5])
+                    .payoutDesignationRecoveryContinuationV3(used.payout) == vrPayout,
+            "B real writers consume each original A continuation"
+        );
+        used.revisionScope = keccak256(
+            abi.encode(
+                artistId, revision.stableRevisionRecordHash, revision.stableDocumentHash, vrRevision
+            )
+        );
+        used.payoutScope = keccak256(abi.encode(artistId, vrPayout, payout.stable.recordHash));
+        bytes32 revisionKey = _rhSourceKey(
+            2,
+            AH.Origin(
+                keccak256("identity_authority.replay.identity_revision_recovery_continuation"),
+                used.revisionScope
+            )
+        );
+        bytes32 payoutKey = _rhSourceKey(
+            5,
+            AH.Origin(keccak256("payout_lifecycle.replay.recovery_continuation"), used.payoutScope)
+        );
+        used.revisionCell = Owner(suite.owners[2]).replayCell(revisionKey);
+        used.payoutCell = Owner(suite.owners[5]).replayCell(payoutKey);
+        used.revisionPoint =
+            RecoveredOwner(suite.owners[2]).recoveredHydrationReplayPoint(revisionKey);
+        used.payoutPoint = RecoveredOwner(suite.owners[5]).recoveredHydrationReplayPoint(payoutKey);
+        _vrConsumed(
+            2,
+            "identity_authority.replay.identity_revision_recovery_continuation",
+            used.revisionScope,
+            used.document,
+            NativeClock(suite.owners[2]).artistNativeReceiptRevisionAt(0)
+        );
+        _vrConsumed(
+            5,
+            "payout_lifecycle.replay.recovery_continuation",
+            used.payoutScope,
+            used.payout,
+            NativeClock(suite.owners[5]).artistNativeReceiptRevisionAt(0)
+        );
+        _rhCandidate(
+            2,
+            "identity_authority.replay.identity_revision_recovery_continuation",
+            used.revisionScope
+        );
+        _rhCandidate(5, "payout_lifecycle.replay.recovery_continuation", used.payoutScope);
+        _vrIdentityWitness(Native(suite.owners[2]).artistNativeReceiptAt(0));
+        _vrPayoutWitness(Native(suite.owners[5]).artistNativeReceiptAt(0));
+    }
+
+    function _vrSpentContinuations(ContinuationUse memory used) private view {
+        bytes32 revisionKey = _rhSourceKey(
+            2,
+            AH.Origin(
+                keccak256("identity_authority.replay.identity_revision_recovery_continuation"),
+                used.revisionScope
+            )
+        );
+        bytes32 payoutKey = _rhSourceKey(
+            5,
+            AH.Origin(keccak256("payout_lifecycle.replay.recovery_continuation"), used.payoutScope)
+        );
+        require(
+            keccak256(abi.encode(Owner(suite.owners[2]).replayCell(revisionKey)))
+                    == keccak256(abi.encode(used.revisionCell))
+                && keccak256(abi.encode(Owner(suite.owners[5]).replayCell(payoutKey)))
+                    == keccak256(abi.encode(used.payoutCell))
+                && keccak256(
+                    abi.encode(
+                        RecoveredOwner(suite.owners[2]).recoveredHydrationReplayPoint(revisionKey)
+                    )
+                ) == keccak256(abi.encode(used.revisionPoint))
+                && keccak256(
+                    abi.encode(
+                        RecoveredOwner(suite.owners[5]).recoveredHydrationReplayPoint(payoutKey)
+                    )
+                ) == keccak256(abi.encode(used.payoutPoint)),
+            "already-spent B continuation cells keep their ultimate B chronology in C"
+        );
+        require(
+            RewindOwner(suite.owners[2]).identityRevisionRecoveryContinuationV3(used.document)
+                    == vrRevision
+                && RewindPayout(suite.owners[5])
+                    .payoutDesignationRecoveryContinuationV3(used.payout) == vrPayout,
+            "B original records retain exact A continuation associations"
+        );
+    }
+
+    function _vrFlattened(
+        Commit.Prepared memory first,
+        Commit.Prepared memory second,
+        bytes32 firstValue,
+        ContinuationUse memory used
+    ) private pure {
+        RH.Provenance memory a = first.admission.provenance;
+        RH.Provenance memory b = second.admission.provenance;
+        require(
+            b.origins.length == 2 && b.eras.length == 2
+                && keccak256(abi.encode(b.origins[0])) == keccak256(abi.encode(a.origins[0]))
+                && keccak256(abi.encode(b.eras[0])) == keccak256(abi.encode(a.eras[0]))
+                && b.eras[1].priorImportCommitment == firstValue,
+            "flat original A era followed by authenticated B prefix and real import certificate"
+        );
+        for (uint8 owner; owner < 7; ++owner) {
+            uint256 extra = owner == 2 || owner == 5 ? 1 : 0;
+            require(
+                b.journals[owner].length == a.journals[owner].length + extra
+                    && b.eras[1].lowerRevisions[owner]
+                        == first.admission.before_[owner].revision + 1,
+                "exact original journal length and actual B import boundary"
+            );
+            for (uint256 i; i < a.journals[owner].length; ++i) {
+                require(
+                    keccak256(abi.encode(b.journals[owner][i]))
+                        == keccak256(abi.encode(a.journals[owner][i])),
+                    "every A native position and original receipt retained including secondary35"
+                );
+            }
+            if (extra == 0) continue;
+            RH.JournalEntry memory row = b.journals[owner][a.journals[owner].length];
+            RH.Point memory point = owner == 2 ? used.revisionPoint : used.payoutPoint;
+            require(
+                row.receipt.recordHash == (owner == 2 ? used.document : used.payout)
+                    && row.receipt.operation == (owner == 2 ? 25 : 18)
+                    && row.position.nativeIndex == 0
+                    && keccak256(abi.encode(row.position.point)) == keccak256(abi.encode(point))
+                    && point.environmentHash == b.eras[1].originHash,
+                "B genuine occurrence preserves local index, revision and ultimate environment"
+            );
+        }
+    }
+
+    function _vrOriginals(address identity, address payout) private view returns (bytes32) {
+        return _vrOriginalsThrough(identity, payout, vrRecords.length);
+    }
+
+    function _vrOriginalsThrough(address identity, address payout, uint256 count)
+        private
+        view
+        returns (bytes32 value)
+    {
         value = keccak256(
             abi.encode(
                 _rhRecoveryFacts(identity),
@@ -731,7 +1158,7 @@ contract StreamArtistRecoveredRewindAuthorityActualTest is StreamArtistRecoveryR
                 RewindPayout(payout).payoutRecoveryContinuationV3(vrPayout)
             )
         );
-        for (uint256 i; i < vrRecords.length; ++i) {
+        for (uint256 i; i < count; ++i) {
             W.RecordReference memory r = vrRecords[i];
             W.StatusV3 memory status = r.kind == W.RecordKind.PAYOUT_DESIGNATION
                 ? RewindPayout(payout).payoutRecoveryRecordStatusV3(r.recordHash)

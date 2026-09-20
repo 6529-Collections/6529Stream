@@ -113,7 +113,7 @@ contract StreamArtistRecoveredHydrationPreparedTest {
         identity.actions[0].evidenceV2.manifestHash = keccak256("V2");
         payout.continuations = new P.ContinuationRow[](1);
         for (uint256 eras = 2; eras <= RH.MAX_ERAS; ++eras) {
-            assert(Prepared.requiredFeatures(identity, payout, eras) == RH.KNOWN_FEATURES);
+            assert(Prepared.requiredFeatures(identity, payout, eras) == RH.FIRST_GRAPH_FEATURES);
         }
     }
 

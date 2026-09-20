@@ -165,9 +165,18 @@ revision+1; non-native preparations and executions do not become native receipts
 The [recovered-authority guide](../guides/artist-recovered-authority-hydration.md)
 defines the source certificate, repeated-import chronology and remaining scope.
 The implementation is under development: the seven concrete owners advertise
-the first graph's feature mask31, positive execution scenarios are authored,
-and ABI-only checks establish no
+feature mask 63 for the first graph and direct economics composition below.
+Positive execution scenarios are authored, and ABI-only checks establish no
 runtime, Safe, capacity or release acceptance. Existing profiles remain strict.
+
+The next bounded composition adds complete direct economics operation-15 history
+for that same recovered binding. Actual native history selects capability bit 32;
+the caller supplies every original economics term in order. A fixed typed worker
+retains payload and binding-association maps, original occurrence/replay points
+and all consumed guards through repeated imports. Current payout or assignment
+eligibility is not reapplied to historical approvals. Existing direct-policy
+encoding remains unchanged when no economics history exists. Delegated economics,
+corrections, broader collections and class 4 remain separate full-v1 work.
 
 ## Original living delegation profile
 

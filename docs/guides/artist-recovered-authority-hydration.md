@@ -8,14 +8,16 @@ entry point. Its seven-owner masks remain `0x7f`. Existing hydration selectors
 keep their existing profiles and exclusions.
 
 This is a source implementation with ABI-only checks. The seven concrete owners
-advertise feature mask 31 for this graph; the base owner stays disabled. The positive
+advertise feature mask 63 for these graphs; the base owner stays disabled. The positive
 import scenarios are authored but have not run. Safe execution, current-stack
 integration, bytecode size, gas, invariants and release acceptance remain pending.
 
 The first graph is one recovered class-1 or class-3 Artist, one accepted
 generation-one PRIMARY_ONLY collection, no collaborators, base Attribution,
-and complete direct operation-14 policy history. Complete Identity and Payout
-histories are transported together. Class 4, multiple Artists or collections,
+and complete direct operation-14 policy history. An explicit economics extension
+also carries complete direct operation-15 history for that same binding.
+Complete Identity and Payout histories are transported together. Class 4,
+multiple Artists or collections,
 collaborator graphs, corrected generations and broader collection histories
 remain separate full-v1 obligations. A capability bit does not bypass these
 typed source restrictions.
@@ -27,6 +29,7 @@ typed source restrictions.
 | 4 | Retained V2 preparation evidence |
 | 8 | Retained V3 evidence or recovery continuations |
 | 16 | More than one retained import era |
+| 32 | Complete direct economics history, selected by actual native operation 15 |
 
 Every source and destination owner must support the combined required mask.
 Pending requests, compromised status and unused preparations are included in
@@ -37,8 +40,11 @@ authority capability mask, including a zero mask, remains unchanged.
 ## Request and source admission
 
 `Request.records.authority` supplies the complete Artist and collection
-selectors, expected source checkpoints and logical replay-key preimages. This
-first graph rejects `records.witnesses`, including empty per-collection wrappers.
+selectors, expected source checkpoints and logical replay-key preimages. Without
+economics history, `records.witnesses` must remain empty. A source with
+operation-15 records requires exactly one witness for the selected collection,
+containing all economics terms in original operation-15 order and no attestations.
+Missing, extra, duplicate or reordered terms reject. Empty wrappers also reject.
 The request also names every expected source capability, the exact prior import
 commitment, and a nonzero expected semantic inventory.
 
@@ -103,6 +109,29 @@ execution authorization. New authorizations use the destination's existing
 signer and governance domains; retained history is read under its original
 producer domain.
 
+## Direct economics composition
+
+The economics extension requires capability bit 32 on every source and destination
+owner. The complete original Consent-owner journal must contain only direct
+operations 14 and 15. Economics terms are limited to the original fixed primary
+or royalty resolver, generation 1 and the exact accepted Artist/binding pair.
+Delegated and corrected-generation economics remain separate profiles.
+
+The fixed source authenticates each economics record through its original payload
+lookup, exact binding association, native occurrence and consumed replay cell.
+All three economics maps survive import. The retained row does not contain the
+signer, nonce, observed time or historical payout hash, so the importer does not
+invent those fields or reconstruct the record from current facts. The complete
+Identity export separately retains the original signature and nonce admissions;
+the complete Payout export retains its own history. Their revisions are separate
+owner clocks and are never equated.
+
+Every old economics replay cell remains consumed in every later import era, with
+its original admission point. Historical approvals remain recorded when current
+payouts or assignments change. Import does not rerun mutable assignment checks.
+Fresh operation 15 still checks the current principal, signature domain, payout
+and assignment; class-3 authority still needs its original economics permission.
+
 ## Atomicity and transport bounds
 
 Each original owner import commits exactly once at its actual revision + 1.
@@ -118,6 +147,8 @@ lane. Evidence uses at most 128 pages of 20,480 bytes. These bounds reject an
 oversized new import; they do not cap future original writes or runtime reads
 after a successful import. A destination may operate with the maximum imported
 prefix plus its own additional current era.
+The economics extension admits at most 128 complete operation-15 records and
+128 direct policy selectors for the selected collection.
 
 ## Validation boundary
 
@@ -137,6 +168,19 @@ with identical retry, and fresh operations 25/18 consuming the original
 continuations under genuine destination clocks. The source retirement remains
 contested, so fresh operation 51 must retain its exact original rejection;
 these cases do not establish a positive operation-51 flow.
+Additional V3 scenarios transport class-3 authority with a fresh signed operation
+25, and import A→B→C after B consumes A's revision and payout continuations. C keeps
+those cells spent and authors ordinary current-chain writes after the original
+recovery window matures.
+Three economics cases author genuine mature recovery, signed payout and mixed
+primary/policy/royalty consents before import. They cover A→B→C with a fresh
+prospective economics consent in B, retained approvals under C's current domain,
+exact replay rejection with nonce rollback, malformed witnesses, and a late
+Archive failure followed by an identical Safe retry. Thirteen component cases
+cover the economics codec, maps, complete journal, aliases, counters and old/new
+feature dispatch; their typed coordinator and synthetic second-era cases do not
+establish full-host authorization. A separate capability case rejects economics
+imports on any owner advertising only the first-graph features.
 Core and governance fixtures remain explicitly typed unit boundaries.
 
 ABI-only compilation establishes source and type compatibility. It does not

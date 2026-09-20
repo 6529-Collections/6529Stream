@@ -148,7 +148,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
     }
     AH.Origin[][7] private rhCandidates;
     bytes32 private rhGuardian;
-    bytes32 private rhRecovery;
+    bytes32 internal rhRecovery;
     bytes32 private rhOriginalAction;
 
     function testRecoveredActualSecondImportFlattensOriginalPrefixAndFreshNativeSuffix() external {
@@ -513,11 +513,11 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         return executeSafe(rotationSafe, rotationKeys, target, 0, data, 0);
     }
 
-    function _rhCandidate(uint8 owner, string memory surface, bytes32 scope) private {
+    function _rhCandidate(uint8 owner, string memory surface, bytes32 scope) internal {
         rhCandidates[owner].push(AH.Origin(keccak256(bytes(surface)), scope));
     }
 
-    function _rhAuthorization(bytes32 digest, uint256 nonce) private {
+    function _rhAuthorization(bytes32 digest, uint256 nonce) internal {
         _rhCandidate(
             2,
             "identity_authority.replay.authorization_consumed_digest",
@@ -528,7 +528,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         );
     }
 
-    function _rhBaseline() private {
+    function _rhBaseline() internal {
         _rhCandidate(
             0, "binding_lifecycle.replay.proposal_key", keccak256(abi.encode(uint256(1), uint64(1)))
         );
@@ -641,7 +641,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         );
     }
 
-    function _rhRequest() private view returns (RH.Request memory p) {
+    function _rhRequest() internal view returns (RH.Request memory p) {
         (, p.expectedSourceImportCommitment,) =
             RecoveredOwner(suite.owners[2]).recoveredHydrationImportedPrefix();
         p.records.authority.artistIds = new bytes32[](1);
@@ -685,7 +685,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
     }
 
     function _rhImported(Successor memory next, Commit.Prepared memory prepared, bytes32 value)
-        private
+        internal
         view
     {
         require(value != 0, "actual operation60 commitment");
@@ -831,7 +831,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         }
     }
 
-    function _rhRecoveryFacts(address owner) private view returns (bytes32) {
+    function _rhRecoveryFacts(address owner) internal view returns (bytes32) {
         (bytes32 primary, bytes32 occurrence, bytes32 secondary) =
             IStreamArtistIdentityRecoveryOwner(owner).identityRecoveryReceipts(rhRecovery);
         // The fourth return is today's lifetime guardian count, which a fresh28 must increase.
@@ -934,7 +934,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         );
     }
 
-    function _rhDestinationHash(Successor memory next) private view returns (bytes32 hash) {
+    function _rhDestinationHash(Successor memory next) internal view returns (bytes32 hash) {
         T.SuiteConfiguration memory s = next.coordinator.suiteConfiguration();
         for (uint8 i; i < 7; ++i) {
             (RH.OwnerProvenance memory prefix, bytes32 value, uint64 importedAt) =
@@ -961,7 +961,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
 
     // Original operation55/56 root/leaf recipes below are copied from AuthorityHydrationTest.
     // They admit actual predecessor lanes; no imported authority is installed by these steps.
-    function _rhCutover() private returns (Successor memory next) {
+    function _rhCutover() internal returns (Successor memory next) {
         next = _rhNext();
         HT.Leaf[] memory rows = _rhLeaves(History(address(ingress)));
         (bytes32 root,) = _rhProof(address(ingress), rows, 0);
@@ -1142,7 +1142,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         );
     }
 
-    function _rhAdopt(Successor memory next) private {
+    function _rhAdopt(Successor memory next) internal {
         ingress = next.registry;
         coordinator = next.coordinator;
         archive = next.archive;

@@ -31,6 +31,44 @@ import {
 
 /// @notice Synthetic transport vectors, not an actual recovered-state admission or import host.
 contract StreamArtistRecoveredHydrationOwnerPayloadTest {
+    function checkCapability(RH.Capability memory capability, uint8 index, uint256 features)
+        external
+        pure
+    {
+        Codec.requireCapability(capability, index, features);
+    }
+
+    function testOwnerCapabilityRequiresExplicitEconomicsSupportOnEveryOwner() external view {
+        for (uint8 index; index < 7; ++index) {
+            RH.Capability memory capability = RH.Capability(
+                RH.PROFILE,
+                RH.VERSION,
+                index,
+                RH.ownerDomain(index),
+                RH.CHECKPOINT,
+                RH.ownerTag(index),
+                RH.FIRST_GRAPH_FEATURES
+            );
+            // The frozen first graph remains sufficient for its original histories.
+            Codec.requireCapability(capability, index, RH.FIRST_GRAPH_FEATURES);
+            (bool ok, bytes memory reason) = address(this)
+                .staticcall(
+                    abi.encodeCall(
+                        this.checkCapability, (capability, index, RH.ECONOMICS_GRAPH_FEATURES)
+                    )
+                );
+            assert(!ok);
+            assert(
+                keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)
+                    )
+            );
+            capability.supportedFeatures = RH.ECONOMICS_GRAPH_FEATURES;
+            Codec.requireCapability(capability, index, RH.ECONOMICS_GRAPH_FEATURES);
+        }
+    }
+
     function check(uint8 index, RH.ExportHeader memory header, Payload.Payload memory p)
         external
         pure
@@ -201,7 +239,7 @@ contract StreamArtistRecoveredHydrationOwnerPayloadTest {
     function testOwnerPayloadRejectsUnsupportedFeatureAndNativeBoundaryCorruption() external {
         Payload.Payload memory p = _payload(2);
         RH.ExportHeader memory h = _header(2, p);
-        h.requiredFeatures |= 32;
+        h.requiredFeatures |= 64;
         _reject(h, p);
         p = _repeated();
         p.provenance.journal[2].position.point.ownerRevision = 3;
