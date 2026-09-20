@@ -68,28 +68,11 @@ contract DirectFloorAdapterBoundary is IStreamDirectPrimarySaleReceipt {
             D.Bindings(core_, core_.codehash, manager, manager.codehash, block.chainid, kind);
     }
 
-    function supportsInterface(bytes4 id) external pure override returns (bool) {
+    // Original products expose ERC165 and the receipt interface, without optional IStreamModule
+    // self-report getters. Registry admission supplies their exact role/version/runtime identity.
+    function supportsInterface(bytes4 id) external view override returns (bool) {
+        if (badIdentity) return false;
         return id == 0x01ffc9a7 || id == type(IStreamDirectPrimarySaleReceipt).interfaceId;
-    }
-
-    function streamModuleType() external view returns (bytes32) {
-        return badIdentity ? bytes32(0) : D.MODULE_TYPE;
-    }
-
-    function streamModuleVersion() external pure returns (bytes32) {
-        return D.MODULE_VERSION;
-    }
-
-    function streamModuleInterfaceId() external pure returns (bytes4) {
-        return type(IStreamDirectPrimarySaleReceipt).interfaceId;
-    }
-
-    function streamModuleCodeHash() external view returns (bytes32) {
-        return address(this).codehash;
-    }
-
-    function streamModuleDeploymentManifestHash() external pure returns (bytes32) {
-        return bytes32(uint256(1));
     }
 
     function setBindings(D.Bindings calldata value) external {
@@ -218,6 +201,17 @@ contract StreamDirectPrimaryConservationFloorTest is CharacterizationTestBase {
     }
 
     function testNativeDirectReceiptAndEventRetainExactOriginalTypedOutcome() public {
+        bytes4[5] memory unsupported = [
+            bytes4(keccak256("streamModuleType()")),
+            bytes4(keccak256("streamModuleVersion()")),
+            bytes4(keccak256("streamModuleInterfaceId()")),
+            bytes4(keccak256("streamModuleCodeHash()")),
+            bytes4(keccak256("streamModuleDeploymentManifestHash()"))
+        ];
+        for (uint256 i; i < unsupported.length; ++i) {
+            (bool ok,) = address(nativeAdapter).staticcall(abi.encodeWithSelector(unsupported[i]));
+            require(!ok, "original product has no optional module self-report API");
+        }
         D.Receipt memory sale = _sale();
         bytes32 id = bytes32(uint256(1));
         vm.recordLogs();
@@ -357,7 +351,7 @@ contract StreamDirectPrimaryConservationFloorTest is CharacterizationTestBase {
         }
     }
 
-    function testOriginalAdapterHashAndLiveModuleIdentityMustMatch() public {
+    function testOriginalAdapterHashAndLiveERC165MustMatch() public {
         nativeAdapter.setFaults(true, false, 0);
         vm.expectRevert();
         nativeAdapter.record(floor, bytes32(uint256(1)), _sale());

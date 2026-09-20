@@ -5,7 +5,6 @@ import "./StreamConservationFloorReads.sol";
 import "../revenue/StreamDirectPrimarySaleHash.sol";
 import "../../interfaces/stream/revenue/IStreamDirectPrimarySaleReceipt.sol";
 import "../../interfaces/stream/metadata/IStreamDirectPrimaryConservationFloor.sol";
-import "../../interfaces/stream/modules/IStreamModule.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
 
 /// @notice Bounded authentication of an original DIRECT adapter's actual immutable paid outcome.
@@ -145,31 +144,6 @@ library StreamConservationDirectReads {
                         abi.encodeCall(IERC165.supportsInterface, (bytes4(0xffffffff))),
                         cap
                     ) != 0
-                || bytes32(
-                        StreamConservationFloorReads.word(
-                            adapter, abi.encodeCall(IStreamModule.streamModuleType, ()), cap
-                        )
-                    ) != bytes32(row[2])
-                || bytes32(
-                        StreamConservationFloorReads.word(
-                            adapter, abi.encodeCall(IStreamModule.streamModuleVersion, ()), cap
-                        )
-                    ) != bytes32(row[3])
-                || StreamConservationFloorReads.word(
-                        adapter, abi.encodeCall(IStreamModule.streamModuleInterfaceId, ()), cap
-                    ) != row[4]
-                || bytes32(
-                        StreamConservationFloorReads.word(
-                            adapter, abi.encodeCall(IStreamModule.streamModuleCodeHash, ()), cap
-                        )
-                    ) != adapter.codehash
-                || bytes32(
-                        StreamConservationFloorReads.word(
-                            adapter,
-                            abi.encodeCall(IStreamModule.streamModuleDeploymentManifestHash, ()),
-                            cap
-                        )
-                    ) != bytes32(row[7])
         ) revert IStreamConservationFloor.ConservationFloorAuthority(adapter);
     }
 
