@@ -4,6 +4,9 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/mint/IStreamImmediateSaleReveal.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
+import {
+    StreamImmediateSaleEntropyPolicy as EntropyPolicy
+} from "./StreamImmediateSaleEntropyPolicy.sol";
 
 /// @notice Linked current-coordinator fee funding and failure-isolated AT_MINT requests.
 /// @dev The caller owns credits and replay. Fixed-size reads and bounded return copies keep
@@ -44,6 +47,14 @@ library StreamImmediateSaleReveal {
             ),
             (uint256[5])
         );
+        uint8 terminal = EntropyPolicy.terminalStatus(q.coordinator, collectionId);
+        if (terminal == 1) {
+            // The canonical DISABLED policy has no reveal promise or fee. Do not invent one.
+            if (words[0] != 0 || words[1] != 0 || words[2] != 0 || words[3] != 0 || words[4] != 0) {
+                revert IStreamImmediateSaleReveal.SaleRevealDependencyInvalid(q.coordinator);
+            }
+            return q;
+        }
         if (words[0] != 1 || words[1] > 1 || words[3] > type(uint64).max) {
             revert IStreamImmediateSaleReveal.SaleRevealDependencyInvalid(q.coordinator);
         }
@@ -61,7 +72,7 @@ library StreamImmediateSaleReveal {
         if (allowance < fee) {
             revert IStreamImmediateSaleReveal.SaleRevealFeeBelowRequired(allowance, fee);
         }
-        if (q.policy.requestMode == 0) _requireGas(cap);
+        if (q.policy.declared && q.policy.requestMode == 0) _requireGas(cap);
         return allowance - fee;
     }
 
@@ -76,6 +87,13 @@ library StreamImmediateSaleReveal {
     ) public {
         _requireSelected(core, q);
         address target = q.coordinator;
+        bool terminal = EntropyPolicy.requireTerminalToken(core, target, collectionId, tokenId);
+        if (
+            !q.policy.declared
+                && (!terminal || EntropyPolicy.terminalStatus(target, collectionId) != 1)
+        ) {
+            revert IStreamImmediateSaleReveal.SaleRevealDependencyInvalid(target);
+        }
         uint256 fee = q.policy.revealFeePerTokenWei;
         if (fee != 0) {
             bytes memory readData =
@@ -97,7 +115,7 @@ library StreamImmediateSaleReveal {
                 revert IStreamImmediateSaleReveal.SaleRevealAccountingMismatch();
             }
         }
-        if (q.policy.requestMode == 0) {
+        if (!terminal && q.policy.requestMode == 0) {
             _requireGas(cap);
             bytes memory data = abi.encodeCall(IStreamEntropyCoordinator.requestEntropy, (tokenId));
             uint256[2] memory result;

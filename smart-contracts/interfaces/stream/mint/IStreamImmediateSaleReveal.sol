@@ -40,7 +40,7 @@ interface IStreamImmediateSaleReveal {
         uint256 amount
     );
 
-    /// @notice Live policy, including SLO and fee. An undeclared policy is an error.
+    /// @notice Live policy, including SLO and fee. Only explicit DISABLED returns an undeclared all-zero policy.
     function saleRevealQuote(bytes32 saleId) external view returns (RevealQuote memory);
     function refundableBalance(bytes32 saleId, address payer) external view returns (uint256);
     function refundLiability() external view returns (uint256);

@@ -29,6 +29,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Support explicit terminal non-random tokens in shared immediate sale reveal
+  handling, retaining ASYNC fee accounting and original token identity. Add
+  focused rollback, malformed-evidence and fee/refund fuzz coverage.
+
 - Include dedicated ERC-20 burn programs in collection freeze/finality warnings,
   with immutable gate/carrier bindings and source/target impact checks.
 
