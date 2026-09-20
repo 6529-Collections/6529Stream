@@ -73,3 +73,5 @@ export * from "./current-entropy-instant.js";
 export * from "./current-entropy-instant-workflow.js";
 export * from "./current-artist-recovery-adjudication.js";
 export * from "./current-artist-recovery-adjudication-workflow.js";
+export * from "./current-artist-recovery-rewind.js";
+export * from "./current-artist-recovery-rewind-workflow.js";

@@ -59,6 +59,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add Artist recovery rewind V3 callers with typed exclusions, complete dual-owner
+  selection, worker preparation seals and atomic Identity/Payout receipt checks.
+
 - Bind a permanent conservation-floor receipt ledger through an additive Core
   interface and exact one-time delayed governance, preserving receipts across
   Metadata/recorder replacement. Native floor enforcement remains in progress.

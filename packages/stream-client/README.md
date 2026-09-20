@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Artist recovery record rewinds V3](docs/current-artist-recovery-rewind.md)
+  adds typed family exclusions, complete Identity/Payout selection, preparation
+  seals and atomic recovery evidence with original governance and Safe calls.
+
 - [Artist recovery adjudication](docs/current-artist-recovery-adjudication.md)
   adds V2 publication, complete guardian selection and original operation-35
   governance with current living-notice evidence.
