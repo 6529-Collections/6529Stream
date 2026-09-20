@@ -18,9 +18,51 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `822b0dc7`. All 2,329 sources pass the combined
-ABI/type/storage check in 21.875 seconds. This does not generate bytecode or
-establish complete-system acceptance. Original RC1 remains unchanged.
+Latest Solidity source checkpoint: `5310fc7b`. All 2,381 sources pass the combined
+ABI/type/storage check in 22.656 seconds. This does not establish complete-system
+acceptance. Original RC1 remains unchanged.
+
+- Explicit Artist-consented entropy configuration and terminal non-random token
+  registration are integrated (`e7b509ca`), with 29 authored cases. Shared
+  immediate sale handling (`2e3744a6`) passes 13 focused cases and 256 fee/refund
+  fuzz inputs against typed Core/Coordinator boundaries. DISABLED charges no
+  reveal fee; ASYNC NOT_REQUIRED retains its declared fee and scope obligations
+  without attempting a token request. Actual-current execution remains pending.
+- Complete original living-record hydration (`75ad082d`) and evidence-bound
+  recovery adjudication V2 (`5310fc7b`) are source-integrated. Independent
+  production reviews are clear; their 20 and 44 authored cases are unexecuted.
+  The joined six-product size check catches Registry 24,919, Coordinator 24,938
+  and Identity 25,760-byte runtimes above EIP-170. The other three selected
+  products fit. The Artist lead owns the three-host repair; earlier separate
+  branch size passes do not establish joined deployability.
+- Current default artwork citations (`84c69bc3`) preserve original token identity
+  and explicit historical render entries. Ten isolated output-codec cases pass.
+  C2PA lifecycle (`1bc06f5b`) and the citation test join (`e1190d7b`) add genuine
+  current admission and old-checkpoint/history drift recipes; they have not run
+  natively. Current-output changes correctly invalidate old checkpoint
+  currentness while retaining its original rows and hashes.
+- Museum original-mint/entropy composition (`1216379d`) passes 41 new root cases;
+  complete selected-rights evidence (`5975396a`) passes 31. These close their
+  stated source-profile fields, not the complete acquisition packet. Their
+  strict genesis-history limit cannot capture current Sepolia; an additive
+  bounded public-chain log/receipt capture profile is being built, with its
+  provider-completeness trust stated explicitly.
+- Combined Artist delegation clients (`318e16e1`) and citation admission/Safe
+  callers (`91a61b68`) pass the joined 1,044-case client package in 38.091 seconds,
+  including generation, build and strict types. The immutable citation fixture
+  check passes. Simulated RPC/receipt tests remain separate from actual Safe
+  execution and operational gas evidence.
+- Actual-publisher native12 retains five passes/four failures. Reusing the decoded
+  publication saves 522,174 gas in the actual call, but final publication still
+  exceeds the original limit. A separate exact encoded-preimage reuse repair is
+  being tested; no cap was raised and no publication success is claimed.
+
+Current builders continue INSTANT and direct STATIC-compatible entropy reads,
+terminal rendering/finality, current-notice recovery and record rewinds,
+public-chain Museum capture, entropy policy clients and actual Safe cases.
+Personhood linkage is designed; three-host Artist capacity repair has priority.
+Full-v1 remains incomplete; matching runtime, full CI, freeze and testnet evidence
+are still required after implementation stabilizes.
 
 - Combined multiple-Artist delegation hydration (`588341d2`) is integrated.
   Independent production and all fourteen test-oracle reviews are clear. Root

@@ -21,13 +21,46 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `822b0dc7`: combined Artist delegation hydration, recovery staging families and current STATIC test recipes are source-integrated; Museum gathering and hydration/burn clients follow at `3879d3e1`. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `5310fc7b`: explicit entropy, terminal sales, complete original living records, adjudication V2, citation recipes/clients and Museum mint/rights evidence integrated. ABI73 has2,381 sources/zero errors; actual acceptance remains scoped. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-20 UTC` |
 
 ## Active continuation: 20 September
+
+Latest intake is `5310fc7b` (ABI73, 2,381 sources, zero errors). Root client
+package passes 1,044 cases; new Museum mint/entropy and RIGHTS cohorts pass41/31.
+Root terminal sale helpers pass13 cases plus256 fuzz inputs; only typed surrounding
+Core/Coordinator boundaries were used. The immutable citation fixture also checks.
+Native publisher12 is complete5PASS/4FAIL: 522,174 gas saved, original limit still
+exceeded. C owns an isolated encoded-preimage repair and the preserved scoped
+inventory draft; no native13 is authorized yet.
+
+Current ownership supersedes older historical next-batch statements below:
+
+- A: repair exact joined Registry24,919/Coordinator24,938/Identity25,760 runtime
+  overruns from hydration+adjudication, preserving both interfaces; then implement
+  original-op24 selected personhood/notarization reference proof.
+- B: terminal metadata/STATIC/full-policy finality consumers. New direct source
+  getter is required because original Coordinator read workers delegatecall;
+  Mint owns that producer, B owns the consumer and distinct admission profile.
+- C: encoded publication preimage cost repair and scoped inventory completion.
+- Mint: required LOW_SECURITY INSTANT profile and direct16-word
+  `staticTerminalEntropyFacts` producer. Keep original policy/source domains.
+- Burn: current-notice continuation first; complete six-family non-guardian
+  rewinds follow under a distinct typed plan. Class4 remains required.
+- Museum: usable bounded public-chain filtered-log/receipt history and
+  RIGHTS/ownership capture, preserving original strict profiles and stating
+  provider-log-completeness trust. A owns personhood producer; no duplicate writer.
+- Clients: exact `d7fb4212` collection-policy/Artist consent/governance Safe calls.
+- Testing: independent Safe9 review, then actual-current terminal collection
+  policy/native sale/distribution recipes. Native runs remain source-specific.
+
+Root owns common interfaces, integration and joined size/acceptance. No new
+funding or onchain action is needed. Remaining full-feature implementation,
+latest current Safe/fuzz/gas/CI, source freeze and matching testnet are required.
+
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329
   sources at `822b0dc7`; clients retain explicit historical ABI52 and mode-2 ABI56.
@@ -163,9 +196,9 @@ ownership assignments where it transfers a queue.
 
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
-| Artist authority | Held Artist proposals isolated; STATIC scan capacity and curated-client/finality-worker reviews complete; requirements reconciliation complete | Independent source review; preserve exact outputs and full gas guard; Router deployment repair remains separate. |
-| Commerce and revenue | Curated shared seam and actual recorder tests integrated; independent carrier review complete; metric runtime packaging/replay integrated; actual combined browser package join underway | Own revenue boundaries, fixed transport review and original identities; held Royalty proposal remains unapplied. |
-| Metadata, records and museum | Finality corrections integrated 5e6c6140; size preflight passes, test-codegen failure isolated in parallel with new metric supplement | Own onchain schema/inventory/admission; revenue lead owns metric runtime packaging/replay; visible museum owns native object-dossier evidence adapters and assembly. |
+| Artist authority | Joined three-host size repair, then typed personhood evidence linkage | Preserve original records/ABI/storage; held artifacts stay separate. |
+| Commerce and revenue | Terminal rendering/finality consumers and independent cross-domain source review | Full original entropy policy and separate admitted STATIC profile; held Royalty proposal remains unapplied. |
+| Metadata, records and museum | Exact publication gas repair and scoped inventory/provider completion | Preserve original output/record hashes; visible Museum owns offchain public-chain capture and dossiers. |
 | Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |
 
 Each lead owns requirements through source, tests and usable public entrypoints.
@@ -192,11 +225,11 @@ can inspect any task, while the coordinator manages handoffs and decisions.
 
 | Task | ID | Owned feature group |
 | --- | --- | --- |
-| Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger and required ERC20 primary-offer admission/gates; completed native offer, cap and continuity work remains pinned |
-| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Required ERC20 primary OFFER_SALE carrier using existing payer-bound token settlement, coordinated with mint; accepted native batch remains pinned |
+| Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger plus explicit entropy policy, INSTANT provider and direct STATIC source getters |
+| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Artist recovery adjudication, current-notice and six-family rewind batches; completed burn/commerce evidence remains pinned |
 | Stream — museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters and full object-dossier inventory/history/assembly; preserve completed scoped token replay |
 | Stream — developer clients and Safe workflows | `01a0a68e-8f38-7a33-95b6-45d8ac943569` | Client package, typed ceremonies, Safe CALL plans, exact-template and commerce/operator caller recipes |
-| Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | CI/test throughput improvements preserving final acceptance gates, plus independent ERC20 offer review and final current/Safe/fuzz orchestration |
+| Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | Actual current Safe/version matrix, terminal collection flow recipes and final integration/fuzz orchestration |
 
 The local Artist lead retains Artist contracts and the raw STATIC display
 transport. The local revenue lead retains economic/Resolver/escrow contracts.
