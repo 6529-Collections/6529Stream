@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `a8a36e0f`: canonical native/ERC20 Dutch and setup, Artist direct generation histories, current identity/migration recipes, scoped snapshot/root, retained consent and museum title joined. ABI123:3,064 / zero errors with exact Git bridge; clients1,678 pass, current identity22 pass. Metric native18 remains8/9. Source and runtime boundaries below remain distinct. |
+| Source checkpoint | `426c97ce`: imported receipts, Museum V6 and retained primary offers joined. ABI127:3,171/zero errors. Clients1,739, VIEW33, Immediate25, helper13, Dutch26 and compact35 pass on separately recorded sources; complete current acceptance remains open. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,42 +29,36 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact current evidence.
-Root owns integration, shared architecture, metric transaction gas and release
-closure. Builders continue coherent implementation while frozen tests run.
+Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for source-specific results.
+Root owns integration, shared architecture, metric publication and release closure.
+Keep builders implementing while frozen tests execute.
 
-- A: pending-generation grants/mode2 composition; direct content and direct
-  no-content consent batches are integrated. Keep original codecs and writes.
-- B: complete the frozen canonical ERC20 Dutch26 verification/execution, then
-  separate helper13 acceptance. Helpers are source integrated; no broadcasts.
-- C: finish tagged full-policy VIEW serving size repairs, then the authenticated
-  bounded checkpoint adapter; preserve original Router FULL_VIEW_GAS.
-- Mint: complete the runnable canonical native companion entrypoint if missing;
-  earlier helper10 is integrated. Preserve known Immediate fixture repairs.
-- Burn: first scoped snapshot/root26 source is integrated; finish reference,
-  inventory, bundle and acyclic immutable recipe factory/provider/discovery.
-- Museum: title39 source is integrated after historical preservation97;
-  build original finality/manifest/token-proof capture with honest typed authority.
-- Clients: Merkle callers are integrated and root1,678 pass. Build original
-  canonical native/ERC20 Dutch workflows against exact ABI121 or later capture.
-- Testing: identity22 passes with all54 selected production products fitting.
-  Next frozen compact metric35 uses only Proof/test `a8a36e0f` over native2.
-  Retain current108 and its exact AST/dependency plans; no broad refreeze yet.
-- Capacity task `01a0be37-2432-7a63-8820-fc42f159eb1d`: wrapper and Scan/Finish
-  fit; finish handed-over RecordReads repair, then measured Continuations
-  overrun and one remaining reached LivingRecoveryReads. No repeated inventories.
-- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: retained-consent fix and
-  six current settlement cases are integrated. Trace delegated retained-closeout
-  requirements separately; preserve ACTIVE-only new-admission routes.
-- Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: actual55-60 four-case
-  recipe is integrated. Trace actual historical preservation/archive identity
-  joins after succession with real bytes, before proposing a producer repair.
+- A: governed post-revocation binding producer and bytecode fit, then complete
+  accepted histories and multiple-Artist composition. Preserve original records.
+- B: retained-offer reviews and first two existing protected Royalty import/cutover
+  recipes; the separate held fresh-mint royalty consumer remains unapplied.
+- C: bounded VIEW checkpoint adapter native acceptance and independent review
+  of Burn's fixed per-plan COLLECTION topology. Original VIEW33 is accepted.
+- Mint: one frozen native claim/PWYW and Dutch41 campaign; helper16 remains
+  explicit full-current work. Immediate25 has passed its source/artifact gate.
+- Burn: frozen scoped provider27, plus acyclic COLLECTION factory-mode graph
+  construction and actual activation recipe; original fixed profiles unchanged.
+- Museum: original schedule/execution transaction evidence; preserve qualified
+  V5/V6 and later required scoped/STATIC/policyV2/VIEW coverage.
+- Clients: tagged VIEW final review/package suite, then scoped publication.
+- Testing: four original actual Core/Safe migration recipes frozen9bdabdf2;
+  reuse only source-matched genuine artifacts, coordinate capacity below.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: exact reached deployment
+  frontier for Testing's four recipes; no duplicate test compiler.
+- ERC20 `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: secondary custody continuity;
+  primary26 is source-integrated. Carry root426c97ce explicit import fix.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: complete original-domain
+  multi-origin Archive worker/inventory/coverage/lineage providers, then expanded24.
 
-The original metric9 remains8 pass/1 gas failure; the next scratch repair has
-source review/type checks, not runtime acceptance. Root clients1,678 and museum
-preservation97 pass; root title39 also passes. Full actual current/Safe/stateful,
-whole-graph capacity, CI, source freeze and matching testnet remain. No funding
-or onchain action is needed; RC1 remains immutable.
+Root owns original publication native19; all nine original cases/17 fixtures
+and caps remain unchanged. Compact35, clients1,739 and root Museum63 pass.
+Full current/Safe/stateful/fuzz/capacity/CI, candidate freeze and matching testnet
+remain. RC1 stays immutable. No funding or onchain action is needed.
 
 ## Earlier source-specific assignments
 

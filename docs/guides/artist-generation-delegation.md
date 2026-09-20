@@ -1,7 +1,7 @@
 # Recovered pending generations with complete grants and delegated consents
 
 This operation60 composition retains one original class1/class3 recovered Artist and one
-PRIMARY_ONLY collection with 2â€“128 original pending binding generations. Earlier generations
+PRIMARY_ONLY collection with 2-128 original pending binding generations. Earlier generations
 must be refused or withdrawn; only the final generation is accepted. Original mode1 and mode2
 rows may coexist. Complete Identity grants, replacements, revocations, both nonce kinds and
 original direct/delegated policy, economics, sale, royalty-freeze and attestation records are
@@ -77,7 +77,7 @@ its dependency joins are implemented; original supported metadata/recovery conte
 ## Focused evidence and remaining scope
 
 The authored suite covers empty mode2, shared grants across14/16/20/24, sparse delegated nonce
-words, replacement/revocation/expiry/exhaustion, prior mode2 with final mode1, Aâ†’Bâ†’C imports and
+words, replacement/revocation/expiry/exhaustion, prior mode2 with final mode1, A-to-B-to-C imports and
 fresh successor grants, missing complete replay inventory, wrong tags/modes/generations,
 foreign grant/use counts and counted late Archive failure with identical Safe retry. Two prior
 unused-grant refusal cases now exercise the explicitly supported complete base/content profile.
