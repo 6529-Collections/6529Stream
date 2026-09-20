@@ -387,8 +387,9 @@ contract StreamMintPolicyGraceTest is MintEngineTestBase {
         uint64 until = uint64(block.timestamp + 1 days);
         vm.recordLogs();
         bytes32 current = _rotate(EXTRA, true, until);
+        Vm.Log[] memory registrationLogs = vm.getRecordedLogs();
         _receipt(
-            vm.getRecordedLogs(),
+            registrationLogs,
             address(ledger),
             keccak256(
                 "MintLedgerPolicyGraceSet(uint16,uint256,bytes32,address,bytes32,bytes32,uint64)"
@@ -397,6 +398,15 @@ contract StreamMintPolicyGraceTest is MintEngineTestBase {
             PHASE,
             bytes32(uint256(uint160(address(manager)))),
             abi.encode(uint16(1), oldHash, current, until)
+        );
+        _receipt(
+            registrationLogs,
+            address(manager),
+            keccak256("MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)"),
+            bytes32(uint256(1)),
+            PHASE,
+            bytes32(uint256(uint160(EXTRA))),
+            abi.encode(true, current, address(this))
         );
         (bytes32 previous, uint64 revision, uint64 deadline) = _grace();
         require(

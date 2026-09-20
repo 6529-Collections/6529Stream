@@ -57,6 +57,9 @@ contract StreamMintManager is
     ERC165,
     StreamGasParameterHost
 {
+    /// @notice Retains the original public error ABI when the fixed policy worker rejects grace.
+    error InvalidPolicyGrace(uint64 graceUntil);
+
     bytes32 public constant GGP_ARTIST_AUTHORITY_GAS_LIMIT =
         keccak256("6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT");
     bytes32 public constant GGP_MINT_REVOCATION_ERC1271_GAS_LIMIT =
@@ -354,21 +357,22 @@ contract StreamMintManager is
         uint64 graceUntil
     ) private {
         _requireConfiguredPhase(collectionId, phaseId);
-        if (!StreamMintPhaseState.setExecutor(
-                phaseExecutor[collectionId][phaseId],
-                _phaseExecutors[collectionId][phaseId],
-                _phaseExecutorIndex[collectionId][phaseId],
+        StreamMintManagerPolicy.updateExecutor(
+            _phases[collectionId][phaseId],
+            _phaseGateConfigs[collectionId][phaseId],
+            _phaseCounterIds[collectionId][phaseId],
+            _counterConfigs[collectionId][phaseId],
+            phaseExecutor[collectionId][phaseId],
+            _phaseExecutors[collectionId][phaseId],
+            _phaseExecutorIndex[collectionId][phaseId],
+            phasePolicyHash[collectionId],
+            StreamMintManagerPolicy.ExecutorUpdate(
+                StreamMintManagerPolicy.Context(_policyContext(collectionId, phaseId), address(core)),
                 executor,
                 allowed,
+                graceUntil,
                 MAX_PHASE_EXECUTORS
-            )) {
-            if (graceUntil != 0) revert IStreamMintLedger.InvalidPolicyGrace(graceUntil);
-            return;
-        }
-
-        bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId, graceUntil);
-        emit MintPhaseExecutorUpdated(
-            collectionId, phaseId, executor, allowed, policyHash, msg.sender
+            )
         );
     }
 
@@ -796,20 +800,7 @@ contract StreamMintManager is
         address authorizer,
         bytes32 contextHash
     ) external view override returns (bytes32) {
-        StreamMintOperationIdentity.SubjectContext memory context =
-            StreamMintOperationIdentity.SubjectContext({
-                chainId: block.chainid,
-                ledger: address(mintLedger),
-                collectionId: collectionId,
-                phaseId: phaseId,
-                counterId: counterId,
-                payer: payer,
-                recipient: recipient,
-                executor: executor,
-                authorizer: authorizer,
-                contextHash: contextHash
-            });
-        return StreamMintManagerAccounting.previewSubject(keyMode, context);
+        return StreamMintManagerViews.subject(msg.data[4:], address(mintLedger));
     }
 
     /// @notice Previews the canonical ledger value key for a derived subject.
@@ -951,22 +942,6 @@ contract StreamMintManager is
 
     function _reserveOperationNonces(uint256 firstOperationNonce, uint256 quantity) private {
         nextOperationNonce = firstOperationNonce + quantity;
-    }
-
-    function _refreshLedgerPolicy(uint256 collectionId, bytes32 phaseId, uint64 graceUntil)
-        private
-        returns (bytes32 policyHash)
-    {
-        return StreamMintManagerPolicy.refresh(
-            _phases[collectionId][phaseId],
-            _phaseGateConfigs[collectionId][phaseId],
-            _phaseCounterIds[collectionId][phaseId],
-            _counterConfigs[collectionId][phaseId],
-            _phaseExecutors[collectionId][phaseId],
-            phasePolicyHash[collectionId],
-            StreamMintManagerPolicy.Context(_policyContext(collectionId, phaseId), address(core)),
-            graceUntil
-        );
     }
 
     /// @notice Computes the exact prospective policy so the artist can consent before registration.

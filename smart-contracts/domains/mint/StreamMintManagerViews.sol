@@ -2,12 +2,47 @@
 pragma solidity ^0.8.19;
 import "./StreamMintOperationIdentity.sol";
 import "./StreamMintPhaseState.sol";
+import "./StreamMintManagerAccounting.sol";
 import "../../interfaces/stream/mint/StreamPreparedNativeContentTypes.sol";
 import "../../interfaces/stream/revenue/StreamPreparedNativeSettlementTypes.sol";
 import "../../interfaces/stream/revenue/StreamPreparedNativeRightsTypes.sol";
 
-/// @notice Fixed decoding for the retained policy preview ABI, outside Manager runtime headroom.
+/// @notice Fixed decoding for retained Manager preview ABIs, outside Manager runtime headroom.
 library StreamMintManagerViews {
+    struct SubjectPreview {
+        IStreamMintManager.CounterKeyMode keyMode;
+        uint256 collectionId;
+        bytes32 phaseId;
+        bytes32 counterId;
+        address payer;
+        address recipient;
+        address executor;
+        address authorizer;
+        bytes32 contextHash;
+    }
+
+    /// @notice Decodes the original static subject-preview request at the actual Manager.
+    /// @dev Enum/address decoding remains strict; the fixed linked accounting call retains
+    ///      Manager identity for its counter-config read and the original immutable Ledger.
+    function subject(bytes calldata arguments, address ledger) external view returns (bytes32) {
+        SubjectPreview memory p = abi.decode(arguments, (SubjectPreview));
+        return StreamMintManagerAccounting.previewSubject(
+            p.keyMode,
+            StreamMintOperationIdentity.SubjectContext(
+                block.chainid,
+                ledger,
+                p.collectionId,
+                p.phaseId,
+                p.counterId,
+                p.payer,
+                p.recipient,
+                p.executor,
+                p.authorizer,
+                p.contextHash
+            )
+        );
+    }
+
     function preparedEncoded(StreamPreparedNativeSettlementTypes.Facts storage facts)
         external view returns (bytes memory) { return abi.encode(facts); }
 

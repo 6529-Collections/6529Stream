@@ -366,6 +366,7 @@ contract StreamCurrentMintPolicyGraceTest is CurrentMintPolicyGraceFixture {
         uint64 deadline
     ) private view {
         uint256 count;
+        uint256 updates;
         for (uint256 i; i < logs.length; ++i) {
             if (
                 logs[i].emitter == address(ledger) && logs[i].topics.length == 4
@@ -383,7 +384,23 @@ contract StreamCurrentMintPolicyGraceTest is CurrentMintPolicyGraceFixture {
                     "complete original Ledger grace event"
                 );
             }
+            if (
+                logs[i].emitter == address(manager) && logs[i].topics.length == 4
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)"
+                        )
+            ) {
+                ++updates;
+                require(
+                    uint256(logs[i].topics[1]) == 1 && logs[i].topics[2] == GRACE_PHASE
+                        && address(uint160(uint256(logs[i].topics[3]))) == address(graceNextSafe)
+                        && keccak256(logs[i].data)
+                            == keccak256(abi.encode(true, newPolicy, address(executor))),
+                    "original Manager emitter and actual Executor admin survive fixed worker"
+                );
+            }
         }
-        require(count == 1, "one grace registration event");
+        require(count == 1 && updates == 1, "one grace and original executor update event");
     }
 }

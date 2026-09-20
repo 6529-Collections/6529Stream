@@ -72,7 +72,7 @@ deliberately rejecting recipient are explicit test boundaries.
    original signed Safe batch. Reverted logs identify the attempted root;
    only the successful retry supplies committed receipt evidence.
 
-## Checks and remaining work
+## Producer-batch checks and remaining work
 
 The combined ABI/type check is clean across 995 sources and finds all 21 authored
 tests. Its final retained capture is
@@ -103,3 +103,116 @@ remain pending. In particular the inherited fallback previously had limited
 runtime headroom; this source addition is not a size acceptance claim. The
 coordinator chooses the joined source including the exact governance row and
 retains all prior frozen captures.
+
+## Selected runtime-size follow-up
+
+The coordinator integrated the producer in `8c60b099` and its exact governance
+catalog rows in `9dd5aeaa4f0620a3684e5431dbac7cd37a2c9d19`. A bounded native size
+capture at that source found both original Manager products exceed the
+24,576-byte runtime limit. The comparison baseline is the pre-grace integration
+`91e223f522f69191ca96cb6e180b5d498e265a81`; it is not the immediate Git parent of
+`9dd5aeaa`. Their complete selected import closures differ only in the three
+grace production paths.
+
+| Selected runtime | Pre-grace baseline | Integrated grace | Fixed-worker extraction | Flat-tuple experiment |
+| --- | ---: | ---: | ---: | ---: |
+| `StreamMintManager` | 24,174 | 25,030 | 24,611 | 25,050 |
+| `StreamMintManagerFallback` | 24,310 | 25,166 | 24,732 | 25,171 |
+| `StreamMintManagerPolicy` | 1,943 | 1,988 | 2,570 | 2,637 |
+| `StreamMintPhaseState` | 8,440 | 8,440 | 8,440 | 8,440 |
+| `StreamMintFallbackRecovery` | 5,142 | 5,142 | 5,142 | 5,142 |
+
+The better fixed-worker extraction is retained as part of the final repair. It moves the
+existing executor mutation, no-op handling, policy refresh and original event
+into the already-linked Policy library. Host ownership, reentrancy and
+configured-phase guards remain in Manager; all eight storage references and
+the original context come directly from that host. Delegatecalls preserve
+Manager identity and the actual owner/Executor caller. The exact
+`InvalidPolicyGrace(uint64)` declaration is retained in Manager's compiled ABI.
+Direct and actual Governor Safe cases additionally assert the original event
+emitter, indexed fields, policy and admin. Hash, consent, write and Ledger
+registration order are unchanged.
+
+By itself this extraction remains **35 bytes over for Manager and 156 bytes over
+for fallback** and cannot close the size gate. The
+flat-tuple experiment made size worse and was restored byte-for-byte to the
+better extraction; its failed capture is retained. No test execution or gas
+conformance follows from these size measurements.
+
+These four captures use the same original five selected products, Solidity
+`0.8.19+commit.7dd6d404`, via IR, optimizer 200, Paris, no CBOR and no bytecode
+metadata hash. Source closure counts are 147 before grace and 148 after it.
+Independent verification matches both baseline/integrated Git blobs and 738
+artifact metadata source references, compiler settings and every fixed-width
+library-link placeholder. No broad native build was run.
+
+Retained directories under `artifacts/native-assembly/counter-scopes/`:
+
+- `mint-grace-size-parent-91e223f5-1`: exact pre-grace baseline.
+- `mint-grace-size-9dd5aeaa-1`: integrated grace failure.
+- `mint-grace-size-repair-1`: retained fixed-worker extraction; output SHA-256
+  `9c0954b28679d5bde416b0fd9e8325430320e51bc3bd6054cef619029a901310`.
+- `mint-grace-size-flat-1`: larger abandoned tuple; output SHA-256
+  `5236f5b031b92f49d217f575654e676d67ac45877f87585211d0d0c8bdf0a721`.
+- `mint-grace-size-repair-abi-final`: all 21 retained test ABIs type-check in
+  the 1,002-source integrated closure. Test runtime remains pending.
+
+### Final bounded repair
+
+The final repair additionally moves the original nine-field `previewSubjectKey`
+decoding and context construction into the already-linked Views library.
+Manager retains the exact public signature and passes its immutable Ledger.
+The static tuple retains strict enum/address decoding. The original Accounting
+worker still reads counter configuration and Manager-scoped Ledger definitions
+at the actual Manager, normalizes the same scope and computes the same subject
+formula. No new phase-admission rule or mutable dependency is introduced.
+
+The selected native capture `mint-grace-size-subject-1` compiles the exact
+148-source integrated closure with only Manager, Policy and Views changed.
+It uses the same settings above and selects Views in addition to the original
+five products. Compilation completes without errors; all six selected products
+fit the runtime limit:
+
+| Product | Runtime bytes | Remaining bytes |
+| --- | ---: | ---: |
+| `StreamMintManager` | 24,331 | 245 |
+| `StreamMintManagerFallback` | 24,452 | 124 |
+| `StreamMintManagerPolicy` | 2,570 | 22,006 |
+| `StreamMintManagerViews` | 4,069 | 20,507 |
+| `StreamMintPhaseState` | 8,440 | 16,136 |
+| `StreamMintFallbackRecovery` | 5,142 | 19,434 |
+
+- Size input SHA-256:
+  `959d4c3a9af16f47377533102f26350d42194a06b5e17f9c593ffa66273fa76e`.
+- Size output SHA-256:
+  `5d59a9fe74ee40a74d66e1c77d9aef0b8dd5479f6cab4373a3f49f05cfaaa68f`.
+- Independent source/artifact verification confirms all 148 baseline blobs,
+  exactly three permitted overlays, six outputs, 397 metadata source hashes,
+  168 fixed-width library links and 71 bounded immutable slots. PhaseState and
+  Recovery runtime artifacts remain identical to the integrated baseline.
+- `mint-grace-subject-compatibility-1/result.json` compares both original hosts
+  with `9dd5aeaa`: exact public ABIs (183 Manager and 185 fallback entries) and
+  all 19 storage entries, slots, offsets and recursively expanded types match.
+- `mint-grace-subject-abi-final-1/result.json` type-checks 1,003 sources and all
+  28 authored cases. Every source matches the working checkout after newline
+  normalization; the 145 shared size/test sources match each other. Fallback,
+  Recovery and its interface are checked in the separate selected size closure.
+  ABI input SHA-256 is
+  `a29fbff11b7951ea4e2ace4370a99cacd88de4ccc10a823edc59b2cca59f7d21`;
+  output SHA-256 is
+  `923583511fa11b60e067619ff5e0c0837228d8e5bda9ae21e208572f33d22e1d`.
+
+The seven new [subject-preview cases](../test/unit/mint/StreamMintSubjectPreview.t.sol)
+compare the copied original function and actual Manager on identical inputs,
+including exact returndata/revert bytes and independently written hash formulas.
+They cover all valid modes, missing subjects, three scopes, unknown/zero phase
+coordinates, invalid enum/address words, truncated/trailing calldata, an external
+caller advertising different configuration, immutable Ledger and current-chain
+identity. Definitions are registered before use so both comparison hosts select
+the same Manager-scoped definition history; this reference host does not claim
+to reproduce distinct late-definition histories.
+
+This establishes the bounded runtime-size result, with only 124 bytes of
+fallback headroom. Execution of the 28 tests, gas/fuzz checks, broad native/CI
+validation, regenerated release evidence and full candidate acceptance remain
+pending. Earlier failures and intermediate captures remain unchanged.
