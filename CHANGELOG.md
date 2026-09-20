@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add dedicated ERC20 paid burn-to-mint clients, original universal signing,
+  independent source approvals, four funding routes and ordinary Safe CALL plans.
+
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
 

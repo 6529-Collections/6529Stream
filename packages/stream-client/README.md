@@ -336,6 +336,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [ERC20 paid burn-to-mint](docs/current-erc20-burn-mint.md) joins ordered source
+  burns, original universal signatures and token payment; its [Safe calls](docs/current-erc20-burn-mint-safe.md)
+  retain separate payer, executor and NFT-owner authority.
 - [ERC20 primary offers](docs/current-erc20-primary-offer.md) preserve original
   Sales signatures and separate token-payer consent; [Safe calls](docs/current-erc20-primary-offer-safe.md)
   cover all user-entry writes with zero native value.
