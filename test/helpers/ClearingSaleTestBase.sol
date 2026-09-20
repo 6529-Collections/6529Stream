@@ -62,6 +62,7 @@ abstract contract ClearingSaleTestBase is DutchSaleTestBase {
             IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
         );
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
+        _bindNativeSaleConservationFloor();
         _producer(true);
         refundRoles = new StreamRoleRegistry(address(revenueAuthority));
         RefundRuntimeAuthority(address(revenueAuthority)).setRoleRegistry(address(refundRoles));

@@ -56,6 +56,7 @@ contract StreamNativeClearingTemplatesTest is ClearingSaleTestBase {
         artists.accept(artist);
         refundArtist.setPayout(address(first));
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
+        _bindNativeSaleConservationFloor();
         _producer(true);
         clearingSale = new StreamNativeClearingSale(_clearingDeployment());
         _register(

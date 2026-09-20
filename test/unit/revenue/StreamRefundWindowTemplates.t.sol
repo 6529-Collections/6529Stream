@@ -50,6 +50,7 @@ contract StreamRefundWindowTemplatesTest is RefundWindowTestBase {
         artists.accept(artist);
         refundArtist.setPayout(address(firstSafe));
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
+        _bindNativeSaleConservationFloor();
         _producer(true);
         refundSale = new StreamNativeRefundWindowSale(_deployment());
         _register(

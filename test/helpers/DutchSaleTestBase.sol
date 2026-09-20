@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./UniversalSettlementTestBase.sol";
+import "./NativeSaleConservationFixture.sol";
 import "./RefundWindowTestMocks.sol";
 import "../../smart-contracts/domains/mint/StreamNativeDutchSale.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 
 /// @dev Actual registry, role registry, split wallets, official recorder and Safe contracts.
 ///      Core, artist, Manager, fee endpoint and target-side governance are explicit domain doubles.
-abstract contract DutchSaleTestBase is UniversalSettlementTestBase {
+abstract contract DutchSaleTestBase is NativeSaleConservationFixture {
     StreamNativeDutchSale internal dutchSale;
     RefundRuntimeCore internal refundCore;
     RefundRuntimeManager internal refundManager;
@@ -48,6 +48,7 @@ abstract contract DutchSaleTestBase is UniversalSettlementTestBase {
         refundArtist.setPayout(artist);
         _approveCurrentPrimaryEconomics();
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
+        _bindNativeSaleConservationFloor();
         _producer(true);
         refundRoles = new StreamRoleRegistry(address(revenueAuthority));
         RefundRuntimeAuthority(address(revenueAuthority)).setRoleRegistry(address(refundRoles));

@@ -65,6 +65,7 @@ contract StreamNativeDutchTemplatesTest is DutchSaleTestBase {
         artists.accept(artist);
         refundArtist.setPayout(address(firstSafe));
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
+        _bindNativeSaleConservationFloor();
         _producer(true);
         dutchSale = new StreamNativeDutchSale(_deployment());
         _register(

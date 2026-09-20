@@ -24,6 +24,28 @@ contract RefundRuntimeCore {
     bool public limited;
     uint256 public cap;
     uint256 public minted;
+    address private immutable floorController = msg.sender;
+    address private floorLedger;
+    bytes32 private floorRuntime;
+    bytes32 private conservationTier;
+
+    /// @dev Explicit Core/Metadata declaration seam; no fixture receipt or ledger substitute.
+    function configureConservationFloor(address ledger, bytes32 tier) external {
+        require(msg.sender == floorController && floorLedger == address(0)
+            && ledger.code.length != 0 && tier == keccak256("CONSERVATION_WAIVED"),
+            "one explicit native fixture floor and tier before sale");
+        floorLedger = ledger;
+        floorRuntime = ledger.codehash;
+        conservationTier = tier;
+    }
+
+    function conservationFloor() external view returns (address, bytes32) {
+        return (floorLedger, floorRuntime);
+    }
+
+    function declaredConservationTier(uint256 collectionId) external view returns (bytes32) {
+        return collectionId == 1 ? conservationTier : bytes32(0);
+    }
 
     function setPointer(bytes32 kind, address target) external {
         pointers[kind] = target;
