@@ -336,6 +336,8 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Current split profiles and clone wallets](docs/current-split-factory.md) bind
+  each factory's implementation, preserve profile identity and verify lazy deployment.
 - [Reference file-inventory preparation](docs/current-reference-inventory.md)
   preserves original inventory identities through fixed 64-row parts, pinned
   progress reads, gas quotes and separate uploader/preparer Safe calls.

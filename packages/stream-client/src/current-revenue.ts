@@ -43,7 +43,7 @@ export interface PrimaryTemplateHashContext {
 type RPC = Pick<Provider, "call" | "getNetwork" | "getBlock" | "getCode">;
 const coder = AbiCoder.defaultAbiCoder();
 // Accepted IStreamSplitFactory getters; exact ABI is checked against the compiler fixture.
-const templateFactory = new Interface(["function assetPolicyRegistry() view returns(address)", "function splitWalletRuntimeCodeHash() pure returns(bytes32)"]);
+const templateFactory = new Interface(["function assetPolicyRegistry() view returns(address)", "function splitWalletRuntimeCodeHash() view returns(bytes32)"]);
 const PRIMARY = id("PRIMARY_SALE") as Hex, ROYALTY = id("ROYALTY_ERC2981") as Hex;
 export const primaryAccountSources = Object.freeze({ artist: id("COLLECTION_ARTIST") as Hex, poster: id("SALE_POSTER") as Hex });
 function uint(v: unknown, bits = 256): bigint { if (typeof v !== "bigint" || v < 0n || v >= 1n << BigInt(bits)) throw Error(`Expected uint${bits} bigint`); return v; }

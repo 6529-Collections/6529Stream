@@ -5,6 +5,7 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+<<<<<<< HEAD
 - Add full-byte preservation records with original family authority, immutable
   record history and enumerable ordered chunk retention up to24,576 bytes.
 - Compose original STATIC renderer products with explicit retained-document
@@ -32,6 +33,10 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+=======
+- Add current split-factory clients with per-factory clone predictions, immutable
+  profile readback, lazy deployment and original wallet-domain release payloads.
+>>>>>>> e3e3dd5c (Add current split-factory clone client)
 
 - Add mint Manager fallback ceremony clients with original governance commitments,
   retirement classification, genuine imports and atomic activation/recovery review.
