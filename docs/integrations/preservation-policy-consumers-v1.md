@@ -121,7 +121,8 @@ every producer row through the complete output root. Historical payload access
 does not imply that the same snapshot remains current.
 
 New factory and provider binding interfaces identify the matching preservation
-graph explicitly. Concrete factory/provider construction remains pending.
+graph explicitly. Concrete factories create the seven matching children from
+fixed recipes, with bounded resumable construction and runtime pins.
 
 ## References and inventories
 
@@ -147,6 +148,27 @@ document facts. Neither a typed boundary test nor a passed ABI check proves
 the complete six-stage inventory or actual sanction ceremony.
 
 Provider and graph-factory profiles must select only these matching consumers.
+
+## Fixed graph and provider selection
+
+`StreamFinalityFullPreservationPolicyEvidenceProviderV1` and its discovery
+catalogue select the new COLLECTION or scoped factory through explicit
+preservation capabilities. Root bindings carry 19 or 25 words, including the
+common Router and preservation output profile. Unknown nonzero profiles,
+malformed responses, foreign graphs and stale runtime pins fail closed.
+Original static routes retain their original base-provider implementation.
+
+Separate COLLECTION and scoped input manifest documents identify the new
+interpretation. The provider retains all nine non-sanction component families,
+the complete ten input joins, original entropy policy and full membership.
+Sanction and archive evidence remain independently derived. Provider selection
+does not authorize a producer outside its actual Registry admission.
+
+The Collection graph uses the original generic bundle host. The scoped graph
+uses a separate preservation bundle profile with the same complete ordered
+occurrence coverage. Shared archive correspondence must include the exact new
+snapshot and reference schema/canonicalization tuples. Construction and typed
+boundary tests do not establish actual full-ceremony acceptance.
 
 The original full-output ceremony remains intact as the sanction-cycle
 regression. A new ceremony must separately prove unchanged preservation

@@ -38,6 +38,16 @@
   consumption maps. Typed writer/producer and full publication acceptance remain
   separate; see the [state boundary](docs/integrations/view-content-root-state.md).
 
+## Preservation graph factories and evidence providers
+
+- Add separate fixed COLLECTION and scoped preservation publication factories,
+  scoped bundle coverage, evidence provider and discovery catalogue.
+- New roots select their exact admitted preservation graph; original static
+  paths retain their existing interpretation. Separate input manifests retain
+  original policy, capture, authority and sanction joins.
+- Forty-seven authored cases and reviewed ABI-checked source accompany this
+  batch. Current-stack ceremony execution, transaction gas and size remain pending.
+
 ## Preservation references and complete admitted-source inventories
 
 - Add separate COLLECTION and TOKEN/RELEASE/SEASON reference publishers that
