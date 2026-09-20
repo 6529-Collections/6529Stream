@@ -707,21 +707,31 @@ contract StreamNativeImmediateSalesTest is NativeImmediateSalesFixture {
         registry.registerModule(registration);
         _clearContext();
         bytes32 phase = keccak256("actual gated phase is unsupported");
+        bytes32[] memory ids = manager.phaseCounterIds(1, PHASE);
+        IStreamMintManager.MintCounterConfig[] memory counters =
+            new IStreamMintManager.MintCounterConfig[](ids.length);
+        for (uint256 i; i < ids.length; ++i) {
+            counters[i] = manager.counterConfig(1, PHASE, ids[i]);
+        }
         manager.configurePhase(
             1,
             phase,
             IStreamMintManager.MintPhaseConfig(false, 0, 0, 1, MANIFEST, MANIFEST),
             IStreamMintManager.MintGateConfig(address(gate), gate.gateConfigHash(), 0, 0, 0, 0),
-            new bytes32[](0),
-            new IStreamMintManager.MintCounterConfig[](0)
+            ids,
+            counters
         );
         manager.setPhaseExecutor(1, phase, address(immediate), true);
         S.Configuration memory config = _configuration(2, 0, address(0), 0);
         config.phaseId = phase;
         config.mintPolicyHash = manager.phasePolicyHash(1, phase);
-        _rejectConfiguration(config);
+        uint256 saleNonce = immediate.nextSaleNonce();
+        vm.expectRevert(abi.encodeWithSelector(S.InvalidImmediateSale.selector));
+        vm.prank(address(revenueAuthority));
+        immediate.registerSale(config);
         require(
-            manager.phaseGate(1, phase).gate == address(gate) && core.collectionMintedEver(1) == 0,
+            manager.phaseGate(1, phase).gate == address(gate) && core.collectionMintedEver(1) == 0
+                && immediate.nextSaleNonce() == saleNonce,
             "real configured gate rejected before payment"
         );
     }
