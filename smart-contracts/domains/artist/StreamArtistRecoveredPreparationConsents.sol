@@ -20,6 +20,10 @@ import {
     StreamArtistRecoveredGenerationConsents as Generation
 } from "./StreamArtistRecoveredGenerationConsents.sol";
 
+import {
+    StreamArtistRecoveredGenerationBaseConsents as GenerationBase
+} from "./StreamArtistRecoveredGenerationBaseConsents.sol";
+
 /// @notice Fixed typed stage of recovered-authority preparation.
 /// @dev Intermediate bytes are ABI encodings of the named complete bundle, never caller-selected calls.
 library StreamArtistRecoveredPreparationConsents {
@@ -42,6 +46,16 @@ library StreamArtistRecoveredPreparationConsents {
         T.EconomicsConsent[] memory economics
     ) public view returns (bytes memory) {
         return abi.encode(Delegated.collect(source, query, provenance, economics));
+    }
+
+    /// @notice Explicit no-content generation route; no grant or content capability is invented.
+    function encodeGenerationBase(
+        bytes memory raw,
+        AH.Query memory query,
+        RH.OwnerProvenance memory provenance
+    ) public pure returns (bytes memory) {
+        ContentConsents.Bundle memory b = abi.decode(raw, (ContentConsents.Bundle));
+        return GenerationBase.encode(b, query, provenance, GenerationBase.generation(b));
     }
 
     function encode(

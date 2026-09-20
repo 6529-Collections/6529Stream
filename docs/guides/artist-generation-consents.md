@@ -57,13 +57,14 @@ authority and fresh successor-domain signatures; imported nonce guards stay used
 
 Generation1 entry points, old nominal Bundle/schema/selectors and encoded bytes
 remain unchanged. Prior generation-only14/24 histories keep their existing codec.
-This slice does not support generation-aware economics/sale-only histories without
-17/20/21, mode2/delegations, accepted-binding corrections53, collaborators, class4
-or wider collection/Artist graphs. Those remain separate required compositions.
-The new entropy configuration family is explicitly refused. Artist op17 retention
-does not claim to import a Metadata Router's separate V2 VIEW profile map or grant
-fresh authority to that external state; its own tagged continuity needs a separate
-complete dependency join. Original V1 authorization records and domains are kept.
+Generation-aware economics/sale-only histories without17/20/21 use the separate
+[base-consent generation profile](artist-generation-base-consents.md). Mode2/delegations,
+accepted-binding corrections53, collaborators, class4 and wider collection/Artist
+combinations remain separate required compositions.
+The new entropy configuration family is explicitly refused. Original Artist op17
+terms, records and domains are retained; they do not grant fresh external authority.
+Operation60 keeps the same selected Router, so its VIEW profile map is not copied by
+Artist migration. A genuine Router replacement has its own tagged continuity scope.
 
 ## Verification scope
 

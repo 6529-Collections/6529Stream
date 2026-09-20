@@ -118,8 +118,12 @@ library StreamArtistRecoveredPreparation {
         (context.hasDelegation, context.hasContent) =
             Selection.flagsForMode(consentMode, hasIdentityDelegations, c.provenance.journals[6]);
         if (context.hasDelegation) context.features |= RH.DELEGATED_CONSENT;
-        if (context.hasContent) {
-            context.features |= RH.CONTENT_CONSENTS;
+        if (
+            context.hasContent
+                || (context.hasGenerations
+                    && (context.hasDelegation || context.economics.length != 0))
+        ) {
+            if (context.hasContent) context.features |= RH.CONTENT_CONSENTS;
             if (context.hasGenerations) {
                 context.consent = GenerationStage.content(
                     c.source.owners[6],

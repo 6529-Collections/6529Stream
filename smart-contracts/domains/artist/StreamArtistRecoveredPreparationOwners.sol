@@ -89,6 +89,13 @@ library StreamArtistRecoveredPreparationOwners {
                 // The joined validator binds original Identity35/nonce admission and retained
                 // Payout continuations; an owner-local export alone is insufficient here.
                 payload.semanticState = PayoutStage.encode(c.payout, c.provenance);
+            } else if (
+                i == 6 && c.hasGenerations && !c.hasContent
+                    && (c.hasDelegation || c.economics.length != 0)
+            ) {
+                payload.semanticState = ConsentStage.encodeGenerationBase(
+                    c.consent, c.query, payload.provenance
+                );
             } else if (i == 6 && c.hasContent) {
                 payload.semanticState =
                     ConsentStage.encode(c.consent, true, c.query, payload.provenance);

@@ -1,5 +1,14 @@
 # Changelog
 
+## Added: recovered generation histories without content writes
+
+- Add the explicit generation-base consent codec for complete direct14/15/16 histories with
+  no17/20/21, preserving original pending-generation14/24 bytes and seven-owner atomic import.
+- Retain exact original economics/sale associations, full grant-free Identity history and
+  capability selection; author actual Artist/Safe, malformed-profile and Archive retry cases.
+- Runtime and full-current acceptance remain pending; no authority, storage-layout or cap change.
+
+
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 

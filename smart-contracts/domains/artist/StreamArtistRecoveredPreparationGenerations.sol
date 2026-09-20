@@ -43,6 +43,13 @@ import {
     StreamArtistRecoveredContentConsentHydration as ContentH
 } from "./StreamArtistRecoveredContentConsentHydration.sol";
 
+import {
+    StreamArtistRecoveredGenerationBaseConsents as GenerationBase
+} from "./StreamArtistRecoveredGenerationBaseConsents.sol";
+import {
+    StreamArtistRecoveredGenerationBaseConsentFacts as BaseFacts
+} from "./StreamArtistRecoveredGenerationBaseConsentFacts.sol";
+
 /// @notice Original bounded generation selection and complete source joins before attestations.
 library StreamArtistRecoveredPreparationGenerations {
     function collect(
@@ -65,8 +72,6 @@ library StreamArtistRecoveredPreparationGenerations {
         // witnesses must separately match every original20 occurrence, never a projection.
         bool needsWitness = provenance.journals[4].length != 0;
         uint256 royalties;
-        bool content;
-        bool extraConsent;
         for (uint256 i; i < provenance.journals[4].length; ++i) {
             if (provenance.journals[4][i].receipt.operation != 24) revert T.UnsupportedProfile();
         }
@@ -74,16 +79,13 @@ library StreamArtistRecoveredPreparationGenerations {
             uint16 op = provenance.journals[6][i].receipt.operation;
             if (op == 15) needsWitness = true;
             if (op == 20) ++royalties;
-            if (op == 17 || op == 20 || op == 21) content = true;
-            if (op == 15 || op == 16) extraConsent = true;
             if (op != 14 && op != 15 && op != 16 && op != 17 && op != 20 && op != 21) {
                 revert T.UnsupportedProfile();
             }
         }
-        if (
-            witnessCount != (needsWitness ? 1 : 0) || royaltyFreezeCount != royalties
-                || (extraConsent && !content)
-        ) revert T.UnsupportedProfile();
+        if (witnessCount != (needsWitness ? 1 : 0) || royaltyFreezeCount != royalties) {
+            revert T.UnsupportedProfile();
+        }
         Generations.Bundle memory generations =
             Generations.collect(source.owners[0], query, RH.ownerProvenance(provenance, 0));
         encoded = abi.encode(generations);
@@ -154,6 +156,17 @@ library StreamArtistRecoveredPreparationGenerations {
         ) {
             revert RH.InvalidRecoveredHydrationProfile();
         }
+        bool hasContent;
+        for (uint256 i; i < provenance.journal.length; ++i) {
+            uint16 op = provenance.journal[i].receipt.operation;
+            if (op == 17 || op == 20 || op == 21) hasContent = true;
+        }
+        if (!hasContent) {
+            if (royalties.length != 0) revert RH.InvalidRecoveredHydrationProfile();
+            return abi.encode(
+                GenerationBase.collect(source, query, provenance, economics, b.current.generation)
+            );
+        }
         return abi.encode(
             GenerationConsents.collect(
                 source, query, provenance, economics, royalties, b.current.generation
@@ -169,23 +182,26 @@ library StreamArtistRecoveredPreparationGenerations {
         bytes memory records
     ) public view {
         ContentH.Bundle memory b = abi.decode(consent, (ContentH.Bundle));
-        uint64 generation = GenerationConsents.generation(b);
+        bool baseOnly = b.consents.length == 0 && b.royalties.length == 0 && b.freezes.length == 0;
+        uint64 generation =
+            baseOnly ? GenerationBase.generation(b) : GenerationConsents.generation(b);
         if (generation < 2 || generation > 128) revert RH.InvalidRecoveredHydrationProfile();
-        if (address(ConsentFacts).code.length == 0) assembly ("memory-safe") { revert(0, 0) }
-        (bool ok, bytes memory result) = address(ConsentFacts)
-            .staticcall(
-                bytes.concat(
-                    ConsentFacts.validate.selector,
-                    Tuple.fourModeAndRows(
-                        identity,
-                        consent,
-                        abi.encode(query),
-                        abi.encode(provenance),
-                        uint8(generation),
-                        records
-                    )
+        address validator = baseOnly ? address(BaseFacts) : address(ConsentFacts);
+        bytes4 selector = baseOnly ? BaseFacts.validate.selector : ConsentFacts.validate.selector;
+        if (validator.code.length == 0) assembly ("memory-safe") { revert(0, 0) }
+        (bool ok, bytes memory result) = validator.staticcall(
+            bytes.concat(
+                selector,
+                Tuple.fourModeAndRows(
+                    identity,
+                    consent,
+                    abi.encode(query),
+                    abi.encode(provenance),
+                    uint8(generation),
+                    records
                 )
-            );
+            )
+        );
         Tuple.result(ok, result);
     }
 

@@ -207,7 +207,11 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         assert(selected && keccak256(raw) == keccak256(abi.encode(f.generations)));
         _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
         f.provenance.journals[6][0].receipt.operation = 15;
-        _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        // The exact witness count is now admitted into the complete base-consent sibling.
+        _mockProofWorkers(f);
+        (raw,, selected) = Stage.collect(f.source, f.query, f.provenance, f.identity, false, 1, 0);
+        assert(selected && keccak256(raw) == keccak256(abi.encode(f.generations)));
+        _reject(f, false, 0, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
     }
 
     function testGenerationSuccessTransportsCompleteTypedArguments() public {
