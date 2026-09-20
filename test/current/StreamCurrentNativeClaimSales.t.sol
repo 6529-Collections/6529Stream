@@ -118,14 +118,14 @@ contract CurrentClaimReceiver {
 /// WAIVED is explicit and supplies no documentary evidence. These aggregate scenarios do not
 /// establish cold transaction gas capacity, other rights profiles or public randomness security.
 contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture {
-    bytes32 private constant CLAIM_PHASE = keccak256("current native claims phase");
+    bytes32 internal constant CLAIM_PHASE = keccak256("current native claims phase");
     uint256 private constant PRICE = 1000;
-    uint256 private constant REVEAL_FEE = 100;
+    uint256 internal constant REVEAL_FEE = 100;
     bytes32 private constant MERKLE_PHASE = keccak256("current claim beneficiary allowlist");
     bytes32 private constant PRICE_COUNTER = keccak256("current claim price counter");
     uint256 private constant SURPLUS = 77;
-    StreamNativeClaimSales private claims;
-    StreamPrimarySaleSettlement private recorder;
+    StreamNativeClaimSales internal claims;
+    StreamPrimarySaleSettlement internal recorder;
     OfficialSafe private artistSafe;
     OfficialSafe private payerSafe;
     uint256[] private artistKeys;
@@ -701,7 +701,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
     }
 
     function _register(uint8 mode, uint8 kind, uint64 cap, bytes32 phase)
-        private
+        internal
         returns (bytes32 id)
     {
         Claim.Configuration memory c;
@@ -862,7 +862,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
     }
 
     function _purchase(bytes32 id, uint256 tag, uint256 chosen)
-        private
+        internal
         view
         returns (Claim.Purchase memory p)
     {
@@ -878,7 +878,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
     }
 
     function _authorization(Claim.Purchase memory p, uint256 nonce, uint256 minimum)
-        private
+        internal
         view
         returns (Sales.SaleAuthorization memory a)
     {
@@ -918,7 +918,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         a.deadline = this.claimsScenarioTime() + 30 days;
     }
 
-    function _literalDigest(Sales.SaleAuthorization memory a) private view returns (bytes32) {
+    function _literalDigest(Sales.SaleAuthorization memory a) internal view returns (bytes32) {
         bytes32 domain = keccak256(
             abi.encode(
                 keccak256(
@@ -941,7 +941,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         return keccak256(abi.encodePacked(hex"1901", domain, body));
     }
 
-    function _authorizationId(bytes32 digest) private pure returns (bytes32) {
+    function _authorizationId(bytes32 digest) internal pure returns (bytes32) {
         return keccak256(abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest));
     }
 
@@ -969,7 +969,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
     }
 
     function _saleProof(Sales.SaleAuthorization memory a)
-        private
+        internal
         returns (IStreamPrivateSaleAdapter.Signature memory)
     {
         return IStreamPrivateSaleAdapter.Signature(
@@ -981,7 +981,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         );
     }
 
-    function _signedSafeCall(uint256 value, bytes memory data) private returns (bytes memory) {
+    function _signedSafeCall(uint256 value, bytes memory data) internal returns (bytes memory) {
         bytes memory signatures = safeThresholdSignature(
             payerKeys,
             payerSafe.getTransactionHash(
@@ -1005,7 +1005,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         );
     }
 
-    function _executeSaved(bytes memory callData) private {
+    function _executeSaved(bytes memory callData) internal {
         (bool ok, bytes memory result) = address(payerSafe).call(callData);
         require(
             ok && result.length == 32 && abi.decode(result, (bool)), "actual threshold Safe CALL"
@@ -1045,7 +1045,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         bytes32 auth,
         bytes32 digest,
         uint256 credit
-    ) private view {
+    ) internal view {
         require(
             r.saleId == p.mint.saleId && r.executionId == c.executionBinding.executionId
                 && r.authorizationId == auth && r.saleAuthorizationDigest == digest
@@ -1189,7 +1189,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         );
     }
 
-    function _assertFreeEvents(Vm.Log[] memory logs, Immediate.Receipt memory r) private view {
+    function _assertFreeEvents(Vm.Log[] memory logs, Immediate.Receipt memory r) internal view {
         uint256 seen;
         for (uint256 i; i < logs.length; ++i) {
             require(
@@ -1215,7 +1215,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
     }
 
     function _assertMoney(uint256 payerBefore, uint256 revenue, uint256 count, uint256 credit)
-        private
+        internal
         view
     {
         require(
@@ -1259,7 +1259,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         return manager.previewCounterValueKey(1, phase, counter, subject);
     }
 
-    function _counter(Claim.Purchase memory p) private view returns (uint64) {
+    function _counter(Claim.Purchase memory p) internal view returns (uint64) {
         return ledger.counterValue(_counterKey(p));
     }
 
@@ -1377,7 +1377,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         Claim.Purchase memory p,
         Native.NativeSettlementCandidate memory c,
         bytes32 auth
-    ) private returns (bytes memory reason) {
+    ) internal returns (bytes memory reason) {
         bytes32 before_ = _purchaseState(p, c, auth);
         bool ok;
         (ok, reason) = address(payerSafe).call(saved);
@@ -1387,7 +1387,7 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         );
     }
 
-    function _assertSafeTargetFailure(bytes memory reason) private pure {
+    function _assertSafeTargetFailure(bytes memory reason) internal pure {
         require(
             keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
             "actual threshold Safe reached reverting target call"
