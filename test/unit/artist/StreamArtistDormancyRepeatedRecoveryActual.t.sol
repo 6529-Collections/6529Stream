@@ -909,7 +909,7 @@ contract StreamArtistDormancyRepeatedRecoveryActualTest is
         _adoptRotatedSafe();
     }
 
-    function testRepeatedDormancyLiving35ThenDesignated43RemainsOutsideThisHistoryFamily() public {
+    function testRepeatedDormancyLiving35ThenDesignated43AdmitsFreshClass3Context() public {
         _deployAppealSuite();
         _accept();
         _payout();
@@ -927,17 +927,23 @@ contract StreamArtistDormancyRepeatedRecoveryActualTest is
             _snapshot(rrOrigin).previousTransitionRecordHash == rrPrevious
                 && _snapshot(rrOrigin).authorityClass == 3
                 && ingress.latestIdentityRecovery(artistId) == rrPrevious,
-            "actual living35 then designated43, not the admitted designated43 then35 family"
+            "actual living35 precedes the new designated43 authority and remains the latest recovery"
         );
         this.rrCompromise(rrWindow);
         (IdentityRecovery.Request memory p, T.Authorization memory a) = this.rrRequest();
         bytes32 roots = _roots();
-        vm.expectRevert();
-        ingress.identityRecoveryContext(p, a);
+        IdentityRecovery.Context memory context = ingress.identityRecoveryContext(p, a);
+        (,, Dormancy27.Terminal memory terminal) =
+            IStreamArtistDormancy(address(ingress)).dormancyRecord(notice);
         (bool used,) = ingress.rotationAcceptanceNonceState(artistId, p.newAddress, a.nonce);
         require(
-            !used && roots == _roots() && ingress.latestIdentityRecovery(artistId) == rrPrevious,
-            "held gap3 remains closed and original living receipt unchanged"
+            !used && roots == _roots() && ingress.latestIdentityRecovery(artistId) == rrPrevious
+                && context.incumbent == address(artist)
+                && context.delegationEpoch == terminal.delegationEpoch
+                && context.delegationEpoch
+                    == ingress.identityRecoveryRecord(rrPrevious).delegationEpoch + 1
+                && context.oldValueHash != 0 && context.newValueHash != 0,
+            "fresh class3 context retains old living35 and uses the original43 epoch without consuming acceptance"
         );
     }
 }

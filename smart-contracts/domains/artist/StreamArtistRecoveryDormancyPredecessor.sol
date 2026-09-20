@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistLivingDormancyBoundary as LivingBoundary
+} from "./StreamArtistLivingDormancyBoundary.sol";
 
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
@@ -126,7 +129,7 @@ library StreamArtistRecoveryDormancyPredecessor {
                 || f.terminal.plan.designation == 0 || f.terminal.plan.stewardGrantRecordHash != 0
                 || f.terminal.plan.postSeconds < 72 hours || f.terminal.plan.standingTail < 30 days
                 || estate.authorityActivation[p.artistId] != 0 || estate.pending[p.artistId] != 0
-                || recovery.latest[p.artistId] != 0 || rotations.pending[p.artistId] != 0
+                || rotations.pending[p.artistId] != 0
                 || rotations.latestExecution[p.artistId] != head
                 || cause.facts.executedTransitionHash != head
                 || cause.facts.pendingTransitionHash != 0 || f.transition.artistId != p.artistId
@@ -158,10 +161,28 @@ library StreamArtistRecoveryDormancyPredecessor {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
+        LivingBoundary.Facts memory boundary = LivingBoundary.facts(
+            recovery, rotations, resolutions, e, f.notice, f.terminal, f.vesting, cause
+        );
         bytes32 closureProof = rotations.latestTransition[p.artistId] == head
-            ? DormClosure.proof(resolutions, e, f.transition, cause)
-            : DormStanding.proof(rotations, resolutions, contests, e, f.transition, cause);
-        _previous(recovery, rotations, e, f);
+            ? DormClosure.proof(
+                resolutions, e, f.transition, cause, boundary.cause, boundary.resolution
+            )
+            : DormStanding.proof(
+                rotations,
+                resolutions,
+                contests,
+                e,
+                f.transition,
+                cause,
+                boundary.cause,
+                boundary.resolution
+            );
+        if (boundary.proof == 0) {
+            _previous(recovery, rotations, e, f);
+        } else {
+            f.previous = recovery.vestingHistory.snapshots[f.vesting.previousTransitionRecordHash];
+        }
         f.guardians = DormGuardians.prefix(
             recovery.guardianHistory,
             rotations,
@@ -227,6 +248,15 @@ library StreamArtistRecoveryDormancyPredecessor {
                     keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_DORMANCY_FACTS_V1"),
                     proof,
                     closureProof
+                )
+            );
+        }
+        if (boundary.proof != 0) {
+            proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERED_LIVING_DORMANCY_FACTS_V1"),
+                    proof,
+                    boundary.proof
                 )
             );
         }

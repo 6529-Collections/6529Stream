@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistLivingDormancyReads as LivingDormancy
+} from "./StreamArtistLivingDormancyReads.sol";
 
 import {
     StreamArtistIdentityRecoveryState as State
@@ -114,16 +117,15 @@ library StreamArtistRecoveryDormancyOrigin {
         if (v.previousTransitionRecordHash == 0) {
             if (v.previousCommitment != 0) revert I.UnsupportedIdentityRecoveryProfile(artistId);
         } else {
-            // First designated dormancy already admitted this living rotation. A later living35
-            // followed by43 is a different history family, not admitted by this continuation.
+            // Original class1 evidence remains distinct from today's recovered class3 authority.
             V.Snapshot memory previous =
                 recovery.vestingHistory.snapshots[v.previousTransitionRecordHash];
             if (
                 previous.artistId != artistId
                     || previous.transitionRecordHash != v.previousTransitionRecordHash
-                    || previous.operationId != 32 || previous.authorityClass != 1
-                    || previous.newAddress != v.oldAddress || previous.commitment == 0
-                    || previous.commitment != v.previousCommitment
+                    || (previous.operationId != 32 && previous.operationId != 35)
+                    || previous.authorityClass != 1 || previous.newAddress != v.oldAddress
+                    || previous.commitment == 0 || previous.commitment != v.previousCommitment
                     || previous.commitment != _vestingHash(e, previous)
                     || previous.ownerRevision >= v.ownerRevision
                     || previous.executedAt > n.initiatedAt
@@ -132,7 +134,7 @@ library StreamArtistRecoveryDormancyOrigin {
             ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
             _prefix(recovery, previous);
         }
-        return keccak256(
+        bytes32 proof = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_DORMANCY_ORIGIN_V1"),
                 e.chainId,
@@ -145,6 +147,19 @@ library StreamArtistRecoveryDormancyOrigin {
                 latestRecovery
             )
         );
+        (, bytes32 livingProof) = LivingDormancy.beforeDormancy(
+            address(this), e.registry, e.chainId, n, t, v, bytes32(0)
+        );
+        if (livingProof != 0) {
+            proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERED_LIVING_DORMANCY_ORIGIN_V1"),
+                    proof,
+                    livingProof
+                )
+            );
+        }
+        return proof;
     }
 
     function _prefix(State.State storage recovery, V.Snapshot memory v) private view {

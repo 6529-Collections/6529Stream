@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistLivingDormancyReads as LivingDormancy
+} from "./StreamArtistLivingDormancyReads.sol";
 
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import {
@@ -48,7 +51,6 @@ library StreamArtistDormancyVestingReads {
             chainId != block.chainid || owner.code.length == 0 || artistId == 0 || record == 0
                 || IStreamArtistOwner(owner).deploymentChainId() != chainId
                 || IStreamArtistOwner(owner).artistRegistry() != registry
-                || IStreamArtistIdentityRecoveryOwner(owner).latestIdentityRecovery(artistId) != 0
         ) revert S.InvalidGuardianSupersession(record);
         (bytes32 noticeHash, uint8 phase, bytes32 terminalHash) =
             IStreamArtistDormancyOwner(owner).dormancyNotice(artistId);
@@ -108,6 +110,14 @@ library StreamArtistDormancyVestingReads {
                 || v.ownerRevision == 0 || v.ownerRevision <= v.guardians.ownerRevision
                 || v.commitment == 0 || v.commitment != _vestingHash(owner, registry, chainId, v)
         ) revert S.InvalidGuardianSupersession(record);
+        bytes32 latestLiving =
+            IStreamArtistIdentityRecoveryOwner(owner).latestIdentityRecovery(artistId);
+        if (latestLiving != 0) {
+            t.recordHash = record;
+            (, bytes32 ancestry) =
+                LivingDormancy.beforeDormancy(owner, registry, chainId, n, t, v, latestLiving);
+            if (ancestry == 0) revert S.InvalidGuardianSupersession(record);
+        }
     }
 
     function _noticeHash(address owner, address registry, uint256 chainId, Dorm.Notice memory n)

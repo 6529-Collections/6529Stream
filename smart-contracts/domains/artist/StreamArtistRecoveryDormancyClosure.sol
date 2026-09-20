@@ -29,7 +29,9 @@ library StreamArtistRecoveryDormancyClosure {
         Resolution.State storage resolutions,
         StreamArtistHashes.Environment memory e,
         R.TransitionState memory t,
-        D.Cause memory current
+        D.Cause memory current,
+        bytes32 previousCause,
+        bytes32 previousResolution
     ) public view returns (bytes32) {
         bytes32 artistId = t.artistId;
         D.Closure memory closed = resolutions.closures[t.recordHash];
@@ -39,8 +41,8 @@ library StreamArtistRecoveryDormancyClosure {
             if (
                 t.contestedAt != current.facts.enteredAt
                     || current.facts.enteredAt < t.postWindowEndsAt
-                    || current.facts.previousCauseHash != 0
-                    || current.facts.previousResolutionHash != 0
+                    || current.facts.previousCauseHash != previousCause
+                    || current.facts.previousResolutionHash != previousResolution
             ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
             return 0;
         }
@@ -59,8 +61,8 @@ library StreamArtistRecoveryDormancyClosure {
         D.Cause memory firstCause = resolutions.causes[original.terms.expectedCauseHash];
         if (
             firstCause.facts.enteredAt != closed.contestedAt
-                || firstCause.facts.previousCauseHash != 0
-                || firstCause.facts.previousResolutionHash != 0
+                || firstCause.facts.previousCauseHash != previousCause
+                || firstCause.facts.previousResolutionHash != previousResolution
                 || (!abandoned && original.dismissedAt < t.postWindowEndsAt)
         ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
 

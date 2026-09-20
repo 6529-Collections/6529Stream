@@ -74,6 +74,35 @@ library StreamArtistRecoveryRotationClosure {
         return _closure(rotations, resolutions, e, atNext, previous);
     }
 
+    /// @notice Authenticate one actual saved dismissal before a later authority boundary.
+    /// @dev The caller proves this execution belongs to the admitted vesting ancestry and
+    /// separately checks its first closure. This selects an immutable dismissal, not today's head.
+    function resolvedBeforeNext(
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        R.TransitionState memory previous,
+        address incumbent,
+        uint64 boundaryAt,
+        bytes32 causeHash,
+        bytes32 resolutionHash
+    ) public view returns (bytes32) {
+        Dismissal.Record memory selected = resolutions.records[resolutionHash];
+        if (causeHash == 0 || selected.terms.expectedCauseHash != causeHash) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(previous.artistId);
+        }
+        Dismissal.Cause memory boundary;
+        boundary.facts.artistId = previous.artistId;
+        boundary.facts.authorityClass = 1;
+        boundary.facts.incumbent = incumbent;
+        boundary.facts.enteredAt = boundaryAt;
+        boundary.facts.previousCauseHash = causeHash;
+        boundary.facts.previousResolutionHash = resolutionHash;
+        bytes32 proof = _closure(rotations, resolutions, e, boundary, previous);
+        if (proof == 0) revert Recovery.UnsupportedIdentityRecoveryProfile(previous.artistId);
+        return proof;
+    }
+
     function pendingBeforeNext(
         StreamArtistRotationState.State storage rotations,
         Resolution.State storage resolutions,

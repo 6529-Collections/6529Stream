@@ -31,7 +31,9 @@ library StreamArtistRecoveryDormancyRotationOrigin {
         StreamArtistHashes.Environment memory e,
         R.TransitionState memory origin,
         address appointed,
-        uint64 terminalStagedAt
+        uint64 terminalStagedAt,
+        bytes32 previousCause,
+        bytes32 previousResolution
     ) public view returns (bytes32) {
         D.Closure memory closed = resolutions.closures[origin.recordHash];
         D.Closure memory empty;
@@ -46,7 +48,8 @@ library StreamArtistRecoveryDormancyRotationOrigin {
         // Preserve the first designated-dormancy closure's complete prior-episode boundary and
         // actual actor-retirement removal terms. Canonical class/kind/record/timing follows below.
         if (
-            cause.facts.previousCauseHash != 0 || cause.facts.previousResolutionHash != 0
+            cause.facts.previousCauseHash != previousCause
+                || cause.facts.previousResolutionHash != previousResolution
                 || (first.terms.removePriorStanding
                         ? first.terms.expectedRetirementHash == 0
                         || first.terms.expectedRetirementHash != cause.facts.actorRetirementHash

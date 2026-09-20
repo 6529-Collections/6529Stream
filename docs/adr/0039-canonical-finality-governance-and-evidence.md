@@ -1828,3 +1828,34 @@ size, capacity and complete current-graph acceptance remain pending.
 
 The reverse family, living35 followed by designated43 and elected recovery,
 remains separate. This increment does not admit class4 or expanded hydration.
+
+### Designated dormancy after an admitted living recovery
+
+The next ART27 profile admits original living35 followed by designated43, optional
+class1 rotations before the notice, optional class3 rotations after43, and elected
+class3 recovery. The original living35 proof joins its canonical record/terms,
+transition, vesting, saved action association and execution, frozen complete
+prefix, standing guardian and original receipt pair/occurrence. Original43 must
+increment that exact living35 epoch once. Actual vesting links, canonical32
+records and strict revision/address/time joins authenticate intervening ancestry.
+Earlier eligible living35-associated guardians and plans remain usable through a
+later living35; a mutable retired-authority map cannot substitute for history.
+
+The first class3 cause's saved previous pointers select the pre43 cause/resolution
+boundary. Canonical saved class3 links find it through later dismissed32 episodes.
+Actual pre-notice class1 cause/dismissal pairs must terminate at the exact pair
+recorded in living35. Each pair uses its own executed ancestor and incumbent;
+first closures, independent intermediate closures and abandoned pending staging
+predecessors remain separately authenticated. No cause or resolution is cleared
+or synthesized. Dismissed prior-status2 contests during an active notice remain
+outside this bounded profile.
+
+Context and preparation consume the same new tagged proof. Earlier zero/32
+first-dormancy and ordinary living/estate context bytes remain unchanged. Direct43
+cutoff/election reads use the original fixed owner even through immutable selection
+preparation. Later repeated class3 recovery authenticates the same living ancestry
+under the original43 capability origin. No owner API/storage, original43 domains,
+operation35 mutation, acceptance/replay, election or typed receipt producer changes.
+Class4/steward-to-living and expanded hydration are excluded. The source scenarios
+and validation limits are in the [caller guide](../guides/artist-dormancy-recovery.md);
+native, current-stack, linked size and capacity acceptance remain pending.

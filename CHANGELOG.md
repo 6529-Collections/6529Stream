@@ -28,6 +28,9 @@ the release policy in `docs/release-policy.md`.
   preserving original small-record bytes, signatures, pointers and storage roots.
 - Compose the full-byte preservation and general attestation products with the
   original Artist/Metadata graph and explicit current Safe test recipes.
+- Admit designated dormancy after a prior living recovery, retaining original
+  recovery actions, receipts, guardian history and cause/resolution boundaries
+  through first and subsequent class-3 recoveries. Native acceptance is pending.
 
 - Admit repeated recovery after a designated-dormancy recovery and later
   rotations while preserving the original dormancy capability origin and epoch

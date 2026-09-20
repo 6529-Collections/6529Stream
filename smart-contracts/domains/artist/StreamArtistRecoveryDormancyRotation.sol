@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistLivingDormancyBoundary as LivingBoundary
+} from "./StreamArtistLivingDormancyBoundary.sol";
 
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
@@ -130,8 +133,7 @@ library StreamArtistRecoveryDormancyRotation {
                 || f.terminal.plan.designation == 0 || f.terminal.plan.stewardGrantRecordHash != 0
                 || f.terminal.plan.postSeconds < 72 hours || f.terminal.plan.standingTail < 30 days
                 || estate.authorityActivation[p.artistId] != 0 || estate.pending[p.artistId] != 0
-                || recovery.latest[p.artistId] != 0 || rotations.pending[p.artistId] != 0
-                || terminal == 0 || terminal == head
+                || rotations.pending[p.artistId] != 0 || terminal == 0 || terminal == head
                 || cause.facts.executedTransitionHash != terminal
                 || cause.facts.pendingTransitionHash != 0 || f.transition.artistId != p.artistId
                 || f.transition.recordHash != head || f.transition.phase != 2
@@ -162,6 +164,9 @@ library StreamArtistRecoveryDormancyRotation {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
+        LivingBoundary.Facts memory boundary = LivingBoundary.facts(
+            recovery, rotations, resolutions, e, f.notice, f.terminal, f.vesting, cause
+        );
         bytes32 originProof = RotationOrigin.proof(
             rotations,
             resolutions,
@@ -169,7 +174,9 @@ library StreamArtistRecoveryDormancyRotation {
             e,
             f.transition,
             f.terminal.plan.authority,
-            rotations.rotations[terminal].transition.stagedAt
+            rotations.rotations[terminal].transition.stagedAt,
+            boundary.cause,
+            boundary.resolution
         );
         bytes32 closureProof = Closed.proof(
             rotations, resolutions, contests, e, cause, rotations.rotations[terminal].transition
@@ -186,7 +193,11 @@ library StreamArtistRecoveryDormancyRotation {
             terminal,
             closureProof
         );
-        _previous(recovery, rotations, e, f);
+        if (boundary.proof == 0) {
+            _previous(recovery, rotations, e, f);
+        } else {
+            f.previous = recovery.vestingHistory.snapshots[f.vesting.previousTransitionRecordHash];
+        }
         f.guardians = DormGuardians.prefix(
             recovery.guardianHistory,
             rotations,
@@ -264,6 +275,15 @@ library StreamArtistRecoveryDormancyRotation {
                     keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ORIGIN_ROTATED_DORMANCY_FACTS_V1"),
                     proof,
                     originProof
+                )
+            );
+        }
+        if (boundary.proof != 0) {
+            proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERED_LIVING_DORMANCY_FACTS_V1"),
+                    proof,
+                    boundary.proof
                 )
             );
         }

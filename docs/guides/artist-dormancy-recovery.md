@@ -32,8 +32,8 @@ cause or resolution. The additive closed profile below authenticates admitted
 kind-1 dismissals. The standing-history profile below additionally admits
 closed, unexecuted rotation attempts. The executed-rotation and guardian
 supersession profiles below extend those histories. A later section covers
-repeated recovery after the first dormancy recovery. Living operation35 before
-the original43 and steward-origin authority remain separate unfinished work.
+repeated recovery after the first dormancy recovery and designated dormancy
+after a living recovery. Steward-origin authority remains separate unfinished work.
 
 ## Guardians, authority and execution
 
@@ -308,9 +308,49 @@ use, including one epoch increment and atomic Archive rollback.
 Archive scenarios for this history. Source review and ABI/type checks do not
 establish runtime acceptance, linked product size or transaction capacity.
 
-ART27 remains incomplete: living recovery35 followed by designated43 and elected
-recovery still needs separate origin, epoch and prior-record admission. Held
-steward-to-living/class4 and expanded hydration remain outside these profiles.
+## Living recovery before designated dormancy
+
+The additional history is `living35 -> [living32*] -> designated43 -> [class3 32*]
+-> 33 -> class3 35`. The latest living recovery remains an original class1 record.
+It must precede the actual notice, and original43 must increment that exact
+recovery epoch once. The original43 epoch then remains current until the first
+class3 recovery. A later class3 recovery uses the repeated-recovery proof above
+and retains the same original43 capability origin.
+
+A fixed-owner reader joins the original living35 record and terms, canonical
+transition and vesting, saved action execution/association/context, frozen
+guardian prefix, saved standing guardian and original receipt pair/occurrence.
+It checks each original prefix against the complete owner history. Actual
+class1 vesting links and rotation records connect that recovery to original43;
+strict revision, time and address joins prevent a substitute ancestor. Historical
+admission does not depend on today's retired-address mapping or role membership.
+An eligible guardian or designation associated with an earlier living35 may
+survive another living35 before dormancy.
+
+The saved cause and resolution boundary is authenticated separately. Original
+class3 causes retain the entry pointers, including when later rotations and
+dismissals intervene. Any pre-notice class1 dismissals must link back to the
+exact pair saved in living35. Each episode joins its own executed ancestor and
+original incumbent, first closure, actual dismissal and compromise or pending
+standing veto. Independent intermediate and pending closures remain bound.
+Early unresolved contests cannot become valid merely by waiting. Contests and
+dismissals during an active notice (prior status2) remain unsupported here.
+
+Only this new history adds the living-dormancy proof wrapper. Earlier zero/32
+first-dormancy contexts and ordinary living/estate recovery contexts retain
+their bytes. Both context and preparation use the same proof. Direct43 cutoff
+and election preparation read the original fixed owner's living ancestry;
+post43 rotations retain their own cutoff. APPEAL/ARBITER classification,
+lifetime veto, original mutation, owner API/storage, notice/completion domains,
+acceptance, replay and typed receipts are unchanged. Class4/steward-to-living
+and expanded hydration remain outside these profiles.
+
+`StreamArtistRecoveredLivingDormancyActual.t.sol` authors actual Artist/Safe/
+Archive scenarios for direct and rotated recovery, earlier35 associations,
+closed living35 and independent later closures, adjudication/election, retained
+veto, repeated class3 recovery, corrupted history refusal/restoration and atomic
+Archive retry. Source review and ABI/type checks are distinct from native,
+complete current-stack, linked size and transaction-capacity acceptance.
 
 ## Validation
 
@@ -355,6 +395,8 @@ For first-dormancy supersession use
 `--match-path test/unit/artist/StreamArtistDormancyGuardianSupersessionActual.t.sol --match-test '^testArt27'`.
 For subsequent recoveries with the original dormancy origin use
 `--match-path test/unit/artist/StreamArtistDormancyRepeatedRecoveryActual.t.sol --match-test '^testRepeatedDormancy'`.
+For living recovery before dormancy use
+`--match-path test/unit/artist/StreamArtistRecoveredLivingDormancyActual.t.sol --match-test '^testRecoveredLivingDormancy'`.
 These authored ART27 cohorts still await native execution.
 
 Include all reached fixture JSON data in frozen captures. The aggregate fixture's

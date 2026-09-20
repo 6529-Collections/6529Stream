@@ -56,7 +56,7 @@ library StreamArtistDormancyRecovery {
         Recovery.Request memory p,
         T.Authorization memory acceptance
     ) public view returns (Recovery.Context memory) {
-        if (dormancy.activation[p.artistId] == 0 || s.latest[p.artistId] != 0) {
+        if (!_firstAfterDormancy(s, dormancy, p.artistId)) {
             return RecoveryState.contextWithEstate(
                 s, identity, rotations, resolutions, estate, succession, contests, o, p, acceptance
             );
@@ -148,7 +148,7 @@ library StreamArtistDormancyRecovery {
         mapping(bytes32 => T.ReplayCell) storage replay,
         RecoveryState.PrepareInput memory i
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 associationHash) {
-        if (dormancy.activation[i.request.artistId] == 0 || s.latest[i.request.artistId] != 0) {
+        if (!_firstAfterDormancy(s, dormancy, i.request.artistId)) {
             return RecoveryState.prepareWithEstate(
                 s, identity, rotations, resolutions, estate, succession, contests, replay, i
             );
@@ -181,6 +181,22 @@ library StreamArtistDormancyRecovery {
         return StreamArtistIdentityRecoveryMutation.prepareWithGuardian(
             s, rotations, replay, i, c, guardian
         );
+    }
+
+    // This only selects the reader. That reader authenticates the original living35 and43,
+    // their exact epoch boundary and complete ancestry before admitting the new profile.
+    function _firstAfterDormancy(
+        RecoveryState.State storage s,
+        StreamArtistDormancyState.State storage dormancy,
+        bytes32 artistId
+    ) private view returns (bool) {
+        bytes32 activation = dormancy.activation[artistId];
+        if (activation == 0) return false;
+        bytes32 latest = s.latest[artistId];
+        return latest == 0
+            || (s.records[latest].fields.vestedAuthorityClass == 1
+                && s.records[latest].delegationEpoch
+                    < dormancy.terminals[activation].delegationEpoch);
     }
 
     function _facts(
@@ -262,7 +278,6 @@ library StreamArtistDormancyRecovery {
             p.vestedAuthorityClass != 3 || cause.facts.authorityClass != 3
                 || cause.facts.priorStatus != 3 || rotations.pending[p.artistId] != bytes32(0)
                 || cause.facts.pendingTransitionHash != bytes32(0)
-                || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         (bytes32 predecessor, R.GuardianRecord memory guardian) = _facts(
             s,

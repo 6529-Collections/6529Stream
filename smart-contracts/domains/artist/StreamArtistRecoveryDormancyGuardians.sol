@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistLivingRecoveryReads as Living } from "./StreamArtistLivingRecoveryReads.sol";
+import {
+    IStreamArtistIdentityRecoveryOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 
 import { StreamArtistGuardianHistory as History } from "./StreamArtistGuardianHistory.sol";
 import { StreamArtistRotationState as RotationState } from "./StreamArtistRotationState.sol";
@@ -207,6 +211,24 @@ library StreamArtistRecoveryDormancyGuardians {
         if (a.transitionRecordHash == 0) return a.windowEndsAt == 0;
         if (estate.previousTransitionRecordHash == 0 || estate.previousCommitment == 0) {
             return false;
+        }
+        // A retained living guardian may precede more than one admitted living recovery.
+        // Authenticate its own saved operation35; today's latest recovery is not its signer.
+        if (
+            IStreamArtistIdentityRecoveryOwner(address(this))
+                .identityRecoveryRecord(a.transitionRecordHash)
+                .recordHash != 0
+        ) {
+            Living.Facts memory living = Living.read(
+                address(this), e.registry, e.chainId, artistId, a.transitionRecordHash
+            );
+            return living.record.fields.newAddress == g.signer
+                && living.record.fields.recoveredAt <= g.signedAt
+                && living.vesting.ownerRevision < estate.ownerRevision
+                && living.vesting.guardians.count <= estate.guardians.count
+                && g.signedAt < a.windowEndsAt
+                && living.transition.postWindowEndsAt == a.windowEndsAt
+                && RotationState.eligible(rotations, artistId, a);
         }
         R.RotationRecord memory r = rotations.rotations[a.transitionRecordHash];
         return r.recordHash == a.transitionRecordHash && r.terms.artistId == artistId

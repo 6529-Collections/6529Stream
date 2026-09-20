@@ -31,7 +31,9 @@ library StreamArtistRecoveryDormancyStanding {
         ContestState.State storage contests,
         StreamArtistHashes.Environment memory e,
         R.TransitionState memory terminal,
-        D.Cause memory current
+        D.Cause memory current,
+        bytes32 previousCause,
+        bytes32 previousResolution
     ) public view returns (bytes32) {
         bytes32 artistId = terminal.artistId;
         bytes32 latestTransition = rotations.latestTransition[artistId];
@@ -40,8 +42,9 @@ library StreamArtistRecoveryDormancyStanding {
         D.Cause memory firstCause = resolutions.causes[first.terms.expectedCauseHash];
         if (
             latestTransition == 0 || latestTransition == terminal.recordHash
-                || original.dismissalRecordHash == 0 || firstCause.facts.previousCauseHash != 0
-                || firstCause.facts.previousResolutionHash != 0
+                || original.dismissalRecordHash == 0
+                || firstCause.facts.previousCauseHash != previousCause
+                || firstCause.facts.previousResolutionHash != previousResolution
         ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
 
         // Retain the existing dormancy profile's exact retirement/removal relation for every
