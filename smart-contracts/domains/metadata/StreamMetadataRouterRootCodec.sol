@@ -38,6 +38,13 @@ import {
     StreamMetadataScopedPreservationPolicyContentV1 as ScopedPreservation
 } from "./StreamMetadataScopedPreservationPolicyContentV1.sol";
 
+import {
+    IStreamViewPreservationContentRootV1 as VP
+} from "../../interfaces/stream/metadata/IStreamViewPreservationContentRootV1.sol";
+import {
+    StreamMetadataViewPreservationContentV1 as ViewPreservation
+} from "./StreamMetadataViewPreservationContentV1.sol";
+
 /// @notice Fixed codecs around the original publication workers and original Router storage.
 /// @dev No record cache or new state. Delegate execution retains the actual caller and Router.
 library StreamMetadataRouterRootCodec {
@@ -70,6 +77,11 @@ library StreamMetadataRouterRootCodec {
             (S.Publication memory publication, address publisher) =
                 abi.decode(input[4:], (S.Publication, address));
             return ScopedPolicy.preview(scoped, layout, context, publication, publisher);
+        }
+        if (selector == VP.previewViewPreservationContentRoot.selector) {
+            (S.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (S.Publication, address));
+            return ViewPreservation.preview(scoped, layout, context, publication, publisher);
         }
         if (selector == SP.previewScopedPreservationPolicyContentRootPublication.selector) {
             (S.Publication memory publication, address publisher) =
@@ -135,6 +147,10 @@ library StreamMetadataRouterRootCodec {
         if (selector == SV.publishScopedPolicyContentRootPublication.selector) {
             S.Publication memory publication = abi.decode(input[4:], (S.Publication));
             return ScopedPolicy.publish(scoped, layout, context, publication);
+        }
+        if (selector == VP.publishViewPreservationContentRoot.selector) {
+            S.Publication memory publication = abi.decode(input[4:], (S.Publication));
+            return ViewPreservation.publish(scoped, layout, context, publication);
         }
         if (selector == SP.publishScopedPreservationPolicyContentRootPublication.selector) {
             S.Publication memory publication = abi.decode(input[4:], (S.Publication));
@@ -207,5 +223,18 @@ library StreamMetadataRouterRootCodec {
             return abi.encode(ScopedPreservation.readBinding(hash));
         }
         revert R.InvalidContentRootPublication();
+    }
+
+    /// @notice The VIEW binding authenticates its original record and historical aggregate.
+    function readView(ScopedState.State storage scoped, address core, bytes calldata input)
+        public
+        view
+        returns (bytes memory)
+    {
+        if (bytes4(input[:4]) != VP.viewPreservationContentRootBinding.selector) {
+            revert R.InvalidContentRootPublication();
+        }
+        bytes32 hash = abi.decode(input[4:], (bytes32));
+        return abi.encode(ViewPreservation.readBinding(scoped, core, hash));
     }
 }

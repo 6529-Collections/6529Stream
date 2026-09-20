@@ -1,5 +1,12 @@
 # Changelog
 
+## VIEW preservation root facade
+
+- Connect the explicit VIEW root worker to the public Router while retaining
+  separate CONTENT_ROOT consent. Authenticate VIEW common reads against the
+  full immutable binding and historical aggregate. Add three dispatch and
+  corruption regressions; combined runtime acceptance remains pending.
+
 ## Preservation root facade integration
 
 - Expose separate COLLECTION and scoped preservation root interfaces through

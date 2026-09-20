@@ -31,6 +31,10 @@ import {
     StreamPreservationPolicyOutputSchemasV1 as PreservationOutput
 } from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
 
+import {
+    StreamMetadataViewPreservationContentV1 as ViewPreservation
+} from "./StreamMetadataViewPreservationContentV1.sol";
+
 /// @notice Fixed original-Router scoped write transport. Uses the original consent and
 /// ratification maps; the only new authority state is the compiler-owned scoped aggregate.
 library StreamMetadataScopedContent {
@@ -75,6 +79,9 @@ library StreamMetadataScopedContent {
         bytes4 selector = bytes4(input[:4]);
         if (selector == R.scopedContentRootHead.selector) {
             StreamFinalityScope memory scope = abi.decode(input[4:], (StreamFinalityScope));
+            if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+                return ViewPreservation.read(state, core, input);
+            }
             bytes32 hash = state.heads[State.subject(core, scope)];
             _policyProfile(state, hash, scope);
             return abi.encode(hash);
@@ -83,10 +90,16 @@ library StreamMetadataScopedContent {
             bytes32 hash = abi.decode(input[4:], (bytes32));
             R.Record memory record = state.records[hash];
             if (record.publisher == address(0)) revert R.ScopedContentRootUnknown(hash);
+            if (record.publication.scope.scopeType == StreamFinalityScopeType.VIEW) {
+                return ViewPreservation.read(state, core, input);
+            }
             return abi.encode(record);
         }
         if (selector == R.scopedTokenContentRoot.selector) {
             StreamFinalityScope memory scope = abi.decode(input[4:], (StreamFinalityScope));
+            if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+                return ViewPreservation.read(state, core, input);
+            }
             bytes32 hash = state.heads[State.subject(core, scope)];
             R.Record memory record = state.records[hash];
             bytes32 profile = _policyProfile(state, hash, scope);

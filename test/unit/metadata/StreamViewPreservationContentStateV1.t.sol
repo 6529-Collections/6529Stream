@@ -23,6 +23,13 @@ import {
 } from "../../../smart-contracts/domains/metadata/StreamMetadataSubjects.sol";
 import "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
+import {
+    StreamMetadataScopedContent as CommonReads
+} from "../../../smart-contracts/domains/metadata/StreamMetadataScopedContent.sol";
+import {
+    StreamMetadataRouterRootCodec as Codec
+} from "../../../smart-contracts/domains/metadata/StreamMetadataRouterRootCodec.sol";
+
 /// @dev Actual original state and new immutable binding. Source/Artist authorization is explicitly
 /// supplied at this unit boundary; the probe is not an alternate production writer.
 interface ViewContentTestVm {
@@ -52,6 +59,14 @@ contract ViewContentBindingProbe {
 
     function binding(bytes32 key) external view returns (B.Binding memory) {
         return Saved.binding(state, CORE, key);
+    }
+
+    function common(bytes calldata input) external view returns (bytes memory) {
+        return CommonReads.read(state, CORE, input);
+    }
+
+    function codec(bytes calldata input) external view returns (bytes memory) {
+        return Codec.readView(state, CORE, input);
     }
 
     function required(bytes32 key) external view returns (B.Binding memory) {
@@ -316,5 +331,96 @@ contract StreamViewPreservationContentStateV1Test is CharacterizationTestBase {
             keccak256(abi.encode(probe.required(key))) == keccak256(abi.encode(b)),
             "historical aggregate retained"
         );
+    }
+
+    function testCommonViewReadsAndBindingCodecRetainExactPreimages() public {
+        StreamFinalityScope memory scope = _scope(keccak256("routed view"));
+        (bytes32 key, B.Binding memory b) = _commit(scope, 19);
+        require(
+            abi.decode(probe.common(abi.encodeCall(R.scopedContentRootHead, (scope))), (bytes32))
+                == key,
+            "head dispatcher"
+        );
+        (bytes32 content, uint64 count, bytes32 schema) = abi.decode(
+            probe.common(abi.encodeCall(R.scopedTokenContentRoot, (scope))),
+            (bytes32, uint64, bytes32)
+        );
+        R.Record memory r = probe.record(key);
+        require(
+            content == r.contentRoot && count == r.leafCount
+                && schema == keccak256("STREAM_VIEW_PRESERVATION_CONTENT_LEAF_V1"),
+            "closed VIEW leaf"
+        );
+        require(
+            keccak256(probe.common(abi.encodeCall(R.scopedContentRootRecord, (key))))
+                == keccak256(abi.encode(r)),
+            "record dispatcher"
+        );
+        bytes memory raw = probe.codec(abi.encodeCall(B.viewPreservationContentRootBinding, (key)));
+        require(raw.length == 896 && keccak256(raw) == keccak256(abi.encode(b)), "all28words");
+        _commit(scope, 20);
+        require(
+            keccak256(probe.codec(abi.encodeCall(B.viewPreservationContentRootBinding, (key))))
+                == keccak256(raw),
+            "historic binding"
+        );
+    }
+
+    function testCommonViewReadsRejectCorruptedBindingAndPreserveEmptyScope() public {
+        StreamFinalityScope memory scope = _scope(keccak256("routed view"));
+        require(
+            abi.decode(probe.common(abi.encodeCall(R.scopedContentRootHead, (scope))), (bytes32))
+                == 0,
+            "empty head"
+        );
+        (bytes32 content, uint64 count, bytes32 schema) = abi.decode(
+            probe.common(abi.encodeCall(R.scopedTokenContentRoot, (scope))),
+            (bytes32, uint64, bytes32)
+        );
+        require(content == 0 && count == 0 && schema == 0, "empty root");
+        (bytes32 key,) = _commit(scope, 1);
+        bytes32 slot = keccak256(
+            abi.encode(key, keccak256("6529STREAM_ROUTER_VIEW_PRESERVATION_CONTENT_BINDINGS_V1"))
+        );
+        bytes32 original = vm.load(address(probe), slot);
+        vm.store(address(probe), slot, bytes32(0));
+        (bool ok,) = address(probe)
+            .staticcall(
+                abi.encodeCall(probe.common, (abi.encodeCall(R.scopedContentRootHead, (scope))))
+            );
+        require(!ok, "missing binding head accepted");
+        (ok,) = address(probe)
+            .staticcall(
+                abi.encodeCall(probe.common, (abi.encodeCall(R.scopedTokenContentRoot, (scope))))
+            );
+        require(!ok, "missing binding root accepted");
+        (ok,) = address(probe)
+            .staticcall(
+                abi.encodeCall(probe.common, (abi.encodeCall(R.scopedContentRootRecord, (key))))
+            );
+        require(!ok, "missing binding record accepted");
+        vm.store(address(probe), slot, original);
+        require(
+            abi.decode(probe.common(abi.encodeCall(R.scopedContentRootHead, (scope))), (bytes32))
+                == key,
+            "restore"
+        );
+    }
+
+    function testViewBindingCodecCannotInterpretOtherSelector() public {
+        (bool ok,) = address(probe)
+            .staticcall(
+                abi.encodeCall(
+                    probe.codec, (abi.encodeCall(R.scopedContentRootRecord, (bytes32(uint256(1)))))
+                )
+            );
+        require(!ok, "foreign selector");
+        B.Binding memory absent = abi.decode(
+            probe.codec(
+                abi.encodeCall(B.viewPreservationContentRootBinding, (bytes32(uint256(1))))
+            ),
+            (B.Binding)
+        );
+        require(absent.profileId == 0, "explicit absent binding");
     }
 }

@@ -71,6 +71,9 @@ import "./StreamMetadataTokenReads.sol";
 import "./StreamMetadataImageURI.sol";
 import "./StreamMetadataContentRoot.sol";
 import {
+    IStreamViewPreservationContentRootV1 as ViewPreservationRootInterface
+} from "../../interfaces/stream/metadata/IStreamViewPreservationContentRootV1.sol";
+import {
     IStreamPreservationPolicyContentRootPublicationV1 as PreservationRootInterface
 } from "../../interfaces/stream/metadata/IStreamPreservationPolicyContentRootPublicationV1.sol";
 import {
@@ -373,6 +376,7 @@ contract StreamMetadataRouter is
             || id == type(ScopedPolicyRootInterface).interfaceId
             || id == type(PreservationRootInterface).interfaceId
             || id == type(ScopedPreservationRootInterface).interfaceId
+            || id == type(ViewPreservationRootInterface).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
@@ -1068,6 +1072,37 @@ contract StreamMetadataRouter is
         returns (ScopedPreservationRootInterface.Binding calldata)
     {
         _rootRead();
+    }
+
+    function previewViewPreservationContentRoot(
+        ScopedRoot.Publication calldata publication,
+        address publisher
+    ) external view returns (bytes32) {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function publishViewPreservationContentRoot(ScopedRoot.Publication calldata publication)
+        external
+        returns (bytes32 recordHash)
+    {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function viewPreservationContentRootBinding(bytes32 recordHash)
+        external
+        view
+        returns (ViewPreservationRootInterface.Binding calldata)
+    {
+        bytes memory raw = StreamMetadataRouterRootCodec.readView(
+            _scopedContentRoots, address(core), msg.data
+        );
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
     function scopedContentRootHead(StreamFinalityScope calldata) external view returns (bytes32) {
