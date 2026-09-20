@@ -213,16 +213,30 @@ contract StreamNativeConservationFloorProvider is
     {
         _collection(sale.collectionId);
         if (sale.tokenId != 0) {
-            (bool allocated, uint256 cid,, bool burned) = abi.decode(
+            bytes memory identity = _read(
+                core,
+                abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (sale.tokenId)),
+                128,
+                _gasParameterValue(READ_GAS)
+            );
+            (bool allocated, uint256 cid, uint256 serial, bool burned) =
+                abi.decode(identity, (bool, uint256, uint256, bool));
+            uint256 lifecycle = abi.decode(
                 _read(
                     core,
-                    abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (sale.tokenId)),
-                    128,
+                    abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (sale.tokenId)),
+                    32,
                     _gasParameterValue(READ_GAS)
                 ),
-                (bool, uint256, uint256, bool)
+                (uint256)
             );
-            if (!allocated || cid != sale.collectionId || burned) {
+            // Collection membership survives an allowed receiver callback burn. Allocation
+            // may also be prospective; the paid floor independently requires completion.
+            if (
+                keccak256(identity) != keccak256(abi.encode(allocated, cid, serial, burned))
+                    || !allocated || cid != sale.collectionId || serial == 0 || lifecycle == 0
+                    || lifecycle > 3 || burned != (lifecycle == 3)
+            ) {
                 revert NativeConservationScopeUnavailable();
             }
         }

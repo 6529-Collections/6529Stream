@@ -244,7 +244,47 @@ contract StreamNativeConservationFloorProviderTest is ConservationSelectionFixtu
             provider.saleRelease(sale).scopeSubject == subject,
             "real typed allocation belongs to correct collection"
         );
-        core.setToken(13, address(this), 3);
+    }
+
+    function testProviderCompletedBurnRetainsCollectionReleaseAndRejectsInconsistentIdentity()
+        public
+        providerReady
+    {
+        StreamConservationFloorTypes.SaleContext memory sale = _sale();
+        sale.tokenId = 13;
+        core.setToken(13, address(this), 2);
+        StreamConservationFloorTypes.ReleaseContext memory before_ = provider.saleRelease(sale);
+        core.setToken(13, address(0), 3);
+        StreamConservationFloorTypes.ReleaseContext memory after_ = provider.saleRelease(sale);
+        require(
+            keccak256(abi.encode(before_)) == keccak256(abi.encode(after_)),
+            "completed callback burn retains the entire collection release"
+        );
+        require(
+            provider.requireReleaseFloor(sale, after_, _LITE).mediaEvidenceHash != 0,
+            "burn never substitutes for missing release proof"
+        );
+        cvm.mockCall(
+            address(core),
+            abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (sale.tokenId)),
+            abi.encode(uint8(2))
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamNativeConservationFloorProvider.NativeConservationScopeUnavailable.selector
+            )
+        );
+        provider.saleRelease(sale);
+        cvm.mockCall(
+            address(core),
+            abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (sale.tokenId)),
+            abi.encode(uint8(3))
+        );
+        cvm.mockCall(
+            address(core),
+            abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (sale.tokenId)),
+            abi.encode(true, uint256(2), uint256(13), true)
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 StreamNativeConservationFloorProvider.NativeConservationScopeUnavailable.selector
