@@ -17,6 +17,8 @@ import subprocess
 import sys
 import tempfile
 
+from tools.build.scoped_standard_json import bind_build_capture, verify_pair
+
 ROOT = Path(__file__).resolve().parents[2]
 CREATION_SOURCE = "test/helpers/StreamNativeAssemblyCreation.sol"
 CREATION_NAME = "StreamNativeAssemblyCreation"
@@ -63,16 +65,19 @@ def select_build(cache: dict, hosts: tuple | None = None) -> str:
     raise ValueError("No current graph test host is built; run the current profile build first")
 
 
-def source_closure(build: dict, roots: set[str]) -> set[str]:
+def source_closure(build: dict, roots: set[str], *, analysis: dict | None = None) -> set[str]:
     """Resolve transitive source imports from this compilation's actual ASTs."""
+    if analysis is not None:
+        verify_pair(analysis["input"], analysis["output"], build["input"], build["output"])
+    evidence = analysis if analysis is not None else build
     selected: set[str] = set(); pending = list(roots)
     while pending:
         source = pending.pop()
         if source in selected:
             continue
-        if source not in build['input']['sources'] or source not in build['output']['sources']:
+        if source not in build['input']['sources'] or source not in evidence['output']['sources']:
             raise ValueError(f'Compiler dependency missing: {source}')
-        ast = build['output']['sources'][source].get('ast')
+        ast = evidence['output']['sources'][source].get('ast')
         if not isinstance(ast, dict):
             raise ValueError(f'Compiler AST missing: {source}; rebuild with build_info=true and ast=true')
         if ast['absolutePath'] != source:
@@ -81,7 +86,8 @@ def source_closure(build: dict, roots: set[str]) -> set[str]:
         pending.extend(node['absolutePath'] for node in ast['nodes'] if node['nodeType'] == 'ImportDirective')
     return selected
 
-def validate_sources(project: Path, build: dict, *, source_roots: set[str] | None = None) -> list[str]:
+def validate_sources(project: Path, build: dict, *, source_roots: set[str] | None = None,
+                     analysis: dict | None = None) -> list[str]:
     if build["solcVersion"] != "0.8.19":
         raise ValueError("Current graph requires Solidity 0.8.19")
     settings = build["input"]["settings"]
@@ -90,7 +96,7 @@ def validate_sources(project: Path, build: dict, *, source_roots: set[str] | Non
     if settings.get("optimizer") != {"enabled": True, "runs": 200}:
         raise ValueError("Current graph requires optimizer 200")
     transports = []
-    selected = set(build["input"]["sources"]) if source_roots is None else source_closure(build, source_roots)
+    selected = set(build["input"]["sources"]) if source_roots is None else source_closure(build, source_roots, analysis=analysis)
     for name in sorted(selected):
         item = build["input"]["sources"][name]
         path = PurePosixPath(name)
@@ -130,7 +136,8 @@ def retain_exports(exports: Path, artifact_root: Path, build_id: str) -> Path:
 
 def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             cache_dir: Path | None = None, campaign: bool = False,
-            selected_hosts: tuple[tuple[str, str], ...] | None = None) -> dict:
+            selected_hosts: tuple[tuple[str, str], ...] | None = None,
+            compiler_captures: dict[str, Path] | None = None) -> dict:
     project = project.resolve()
     out = (project / (out or 'out/current')).resolve()
     cache_dir = (project / (cache_dir or 'cache/current')).resolve()
@@ -163,6 +170,9 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
         products = json.loads(products_path.read_bytes())
         if not products or any(not source.startswith('smart-contracts/') for source in products.values()):
             raise ValueError('Graph product inventory must name production sources')
+        captures = compiler_captures or {}
+        if set(captures) - set(coordinates.values()):
+            raise ValueError('Compiler capture does not match a selected native build')
         contexts = {}; transports = set()
         for ident in sorted(set(coordinates.values())):
             path = out / 'build-info' / (ident + '.json')
@@ -171,12 +181,16 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             raw = path.read_bytes(); build = json.loads(raw)
             if build['id'] != ident:
                 raise ValueError('Build-info identity differs from its selected cache entry')
+            analysis = None; capture_evidence = None
+            if ident in captures:
+                build, analysis, capture_evidence = bind_build_capture(build, captures[ident])
             helpers = {name: source for name, source in helper.items() if coordinates[name] == ident}
             inventory = products if ident == build_id else {}
             roots = set(helpers.values()) | set(inventory.values())
-            transports.update(validate_sources(project, build, source_roots=roots))
+            transports.update(validate_sources(project, build, source_roots=roots, analysis=analysis))
             contexts[ident] = {'path': path, 'raw': raw, 'build': build, 'helpers': helpers,
-                               'products': inventory, 'roots': roots}
+                               'products': inventory, 'roots': roots, 'analysis': analysis,
+                               'compilerCapture': captures.get(ident), 'captureEvidence': capture_evidence}
         with tempfile.TemporaryDirectory(prefix='prepare-', dir=artifact_root) as temporary:
             temp = Path(temporary)
             for ident, context in contexts.items():
@@ -188,19 +202,26 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
                            '--project', str(project), '--build-id', ident, '--products', str(inventory_path),
                            '--helpers', str(helper_path), '--out', str(out), '--cache-path', str(cache_dir),
                            '--output', str(exports)]
+                if context['compilerCapture'] is not None:
+                    command += ['--compiler-capture', str(context['compilerCapture'])]
                 subprocess.run(command, check=True)
                 context['retained'] = retain_exports(exports, artifact_root, ident)
             spec = importlib.util.spec_from_file_location(
                 'stream_native_artifact_projection', ROOT / 'test/helpers/native_assembly_artifacts.py')
             module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
             owner = contexts[build_id]; projected = temp / 'compiled'
-            report = module.project(owner['path'], owner['retained'], projected, products, True)
+            report = module.project(owner['path'], owner['retained'], projected, products, True,
+                                    compiler_capture=owner['compilerCapture'])
             if cache_path.read_bytes() != cache_raw:
                 raise ValueError('Compiler cache changed during graph preparation')
             for context in contexts.values():
                 if context['path'].read_bytes() != context['raw']:
                     raise ValueError('Compiler output changed during graph preparation')
-                validate_sources(project, context['build'], source_roots=context['roots'])
+                if context['compilerCapture'] is not None:
+                    _, _, evidence = bind_build_capture(json.loads(context['raw']), context['compilerCapture'])
+                    if evidence != context['captureEvidence']:
+                        raise ValueError('Compiler capture changed during preparation')
+                validate_sources(project, context['build'], source_roots=context['roots'], analysis=context['analysis'])
             # A cached literal creation library owns the embedded product bytes.
             # Changed test hosts are authenticated in their own compiler contexts;
             # unadopted dependency emissions never replace that creation owner.
@@ -220,7 +241,8 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
                       'out': str(out), 'cache': str(cache_dir), 'hosts': helper,
                       'helperBuildIds': coordinates,
                       'compilerContexts': {ident: {'buildInfoSha256': sha(ctx['raw']),
-                          'nativeExports': str(ctx['retained']), 'sourceRoots': sorted(ctx['roots'])}
+                          'nativeExports': str(ctx['retained']), 'sourceRoots': sorted(ctx['roots']),
+                          'compilerCapture': ctx['captureEvidence']}
                           for ident, ctx in contexts.items()},
                       'projectionManifestSha256': sha((projected / 'manifest.json').read_bytes()),
                       'qualification': 'Native fixture projections from the cached creation owner; separately bound test hosts. No tests, deployment or release accepted.'}
@@ -238,11 +260,20 @@ def main() -> int:
     parser.add_argument("--campaign", action="store_true", help="Bind both executed fuzz/invariant hosts")
     parser.add_argument("--host", action="append", type=host_coordinate,
                         help="Exact test/path.t.sol:ContractName to authenticate (repeatable)")
+    parser.add_argument("--compiler-capture", action="append", default=[], metavar="BUILD_ID=PATH",
+                        help="Verified split native capture for an actual selected Forge build (repeatable)")
     args = parser.parse_args()
     try:
+        captures = {}
+        for value in args.compiler_capture:
+            ident, separator, folder = value.partition("=")
+            if not separator or not ident or not folder or ident in captures:
+                raise ValueError("Expected unique BUILD_ID=PATH compiler captures")
+            captures[ident] = Path(folder).resolve()
         print(json.dumps(prepare(args.project, args.products, out=args.out,
                                  cache_dir=args.cache_path, campaign=args.campaign,
-                                 selected_hosts=tuple(args.host) if args.host else None), indent=2))
+                                 selected_hosts=tuple(args.host) if args.host else None,
+                                 compiler_captures=captures), indent=2))
         return 0
     except (AssertionError, KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Graph preparation failed: {exc}", file=sys.stderr)

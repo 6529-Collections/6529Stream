@@ -22,6 +22,7 @@ from tools.build.prepare_current_graph import CREATION_SOURCE, host_coordinate
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = (
     "tools/build/prepare_current_graph.py",
+    "tools/build/scoped_standard_json.py",
     "test/helpers/native_assembly_native_exports.py",
     "test/helpers/native_assembly_artifacts.py",
     "tools/development/run_current_acceptance.py",

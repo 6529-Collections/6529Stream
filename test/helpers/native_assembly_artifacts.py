@@ -25,16 +25,25 @@ def object_hex(value: str) -> str:
 
 
 def project(build_info: Path, artifact_root: Path, destination: Path,
-            products: dict[str, str], current_native_exports: bool = False) -> dict:
+            products: dict[str, str], current_native_exports: bool = False, *, compiler_capture: Path | None = None) -> dict:
     raw_build = build_info.read_bytes()
     build = json.loads(raw_build)
     assert build["solcVersion"] == "0.8.19", "original native compiler"
+    capture_evidence = None
+    if compiler_capture is not None:
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+        from tools.build.scoped_standard_json import bind_build_capture
+        build, _, capture_evidence = bind_build_capture(build, compiler_capture)
     compiler_input, output = build["input"], build["output"]
     context = sha(canonical(compiler_input))
     declarations: dict[int, dict] = {}
     by_source: dict[str, dict[str, dict]] = {}
     for source, result in output["sources"].items():
-        ast = result["ast"]
+        ast = result.get("ast")
+        if ast is None:
+            assert compiler_capture is not None, "missing native AST without verified split capture"
+            continue  # Analysis-only imported ASTs never become bytecode evidence.
         assert ast["absolutePath"] == source and source in compiler_input["sources"]
         table: dict[str, dict] = {}
         for contract in ast["nodes"]:
@@ -55,6 +64,7 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
 
     report = {"buildInfo": str(build_info.resolve()), "buildInfoSha256": sha(raw_build),
               "compilerInputSha256": context, "generatorSha256": sha(Path(__file__).read_bytes()),
+              "compilerCapture": capture_evidence,
               "artifactInputKind": "current-native-export" if current_native_exports else "forge-physical",
               "products": {}, "productionRuntimeSizes": {},
               "qualification": "Fixture-only projection. No CREATE, runtime, gas, or deployment acceptance."}
@@ -62,6 +72,9 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
         if not source.startswith("smart-contracts/"):
             continue
         for name, contract in contracts.items():
+            if "evm" not in contract or "deployedBytecode" not in contract["evm"]:
+                assert compiler_capture is not None, "missing native runtime without verified split capture"
+                continue  # Explicit analysis-field outputs are not measured runtime products.
             runtime = object_hex(contract["evm"]["deployedBytecode"]["object"])
             assert len(runtime) % 2 == 0
             size = len(runtime) // 2

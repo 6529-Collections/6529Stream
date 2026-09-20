@@ -24,6 +24,15 @@
   [correspondence guide](docs/integrations/canonical-archive-correspondence.md)
   for profile boundaries and remaining integrated acceptance.
 
+## Separate analysis from selected native code generation
+
+- Split whole-source AST analysis from explicit bytecode outputs with identical
+  sources, compiler and settings. Bind native declaration IDs and original Forge
+  cache owners without rewriting compiler outputs or weakening runtime checks.
+- Add bounded capture records, refusal/cleanup regressions and a small native
+  output-parity proof. Full current-stack acceptance and timing gains remain
+  unmeasured; see the [maintainer procedure](docs/reference/tooling/scoped-codegen.md).
+
 ## Canonical metadata subjects for published scopes
 
 - Keep Metadata deployable by extracting only typed subject writes; preserve the

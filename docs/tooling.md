@@ -115,7 +115,11 @@ every executed host explicitly. Missing selected hosts fail preparation; the
 presence of another cached suite cannot stand in for them. `--host` and
 `--campaign` are mutually exclusive. A build without full build-info or ASTs
 must be rebuilt with the current profile before preparation; granting file
-permissions alone cannot recover that compiler evidence.
+permissions alone cannot recover that compiler evidence. Selected code-generation
+captures may instead bind their separate full-source analysis and native AST
+outputs with `--compiler-capture BUILD_ID=PATH`; follow the
+[selected compilation procedure](reference/tooling/scoped-codegen.md). The adapter
+retains the actual native input identity and leaves Forge artifacts unchanged.
 
 This requires no machine-specific snapshot directory. Re-run preparation after
 rebuilding changed contracts or graph fixtures. Its command lock protects the

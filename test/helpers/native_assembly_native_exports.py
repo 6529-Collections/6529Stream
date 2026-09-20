@@ -13,12 +13,19 @@ p.add_argument('--products',type=Path)
 p.add_argument('--helpers',type=Path)
 p.add_argument('--out',type=Path)
 p.add_argument('--cache-path',type=Path)
+p.add_argument('--compiler-capture',type=Path)
 a=p.parse_args()
 base=a.out or a.project/'out/current'
 cache_path=(a.cache_path or a.project/'cache/current')/'solidity-files-cache.json'
 cache_raw=cache_path.read_bytes();cache=json.loads(cache_raw)
 current_path=base/'build-info'/(a.build_id+'.json');current_raw=current_path.read_bytes();current=json.loads(current_raw)
 assert current['id']==a.build_id and current['solcVersion']=='0.8.19'
+capture_evidence=None
+if a.compiler_capture:
+    import sys
+    sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
+    from tools.build.scoped_standard_json import bind_build_capture, forge_ast_transport, forge_storage_transport
+    current,_,capture_evidence=bind_build_capture(current,a.compiler_capture)
 products=json.loads((a.products or a.project/'projection-products.json').read_bytes())
 helpers={'StreamNativeAssemblyCreation':'test/helpers/StreamNativeAssemblyCreation.sol', 'StreamNativeFinalityAssemblyTest':'test/current/StreamNativeFinalityAssembly.t.sol'}
 if a.helpers: helpers=json.loads(a.helpers.read_bytes())
@@ -27,7 +34,7 @@ prior_builds={};exports={}
 report={'currentBuildInfo':str(current_path),'currentBuildInfoSha256':sha(current_raw),
         'currentCompilerInputSha256':sha(canonical(current['input'])),
         'cacheSha256':sha(cache_raw),'generatorSha256':sha(Path(__file__).read_bytes()),
-        'priorBuilds':{},'products':{},
+        'priorBuilds':{},'products':{},'compilerCapture':capture_evidence,
         'qualification':'Complete product exports copied from retained current native compiler output. Original cached physical artifacts are untouched and authenticated against their exact cache-named original full compilations. Differences are explicit; no cached/current executable equivalence is inferred. No compiler or runtime is executed here.'}
 for name,source in sorted(products.items()):
     path=base/Path(source).name/(name+'.json');raw=path.read_bytes();physical=json.loads(raw)
@@ -39,6 +46,8 @@ for name,source in sorted(products.items()):
         bp=base/'build-info'/(ident+'.json');br=bp.read_bytes();build=json.loads(br)
         assert build['id']==ident and build['solcVersion']=='0.8.19'
         assert all(k in build['input']['sources'] for k in build['output']['sources'])
+        if a.compiler_capture and ident==a.build_id:
+            build,_,_=bind_build_capture(build,a.compiler_capture)
         prior_builds[ident]=build
         report['priorBuilds'][ident]={'path':str(bp),'sha256':sha(br),
             'compilerInputSha256':sha(canonical(build['input'])),
@@ -50,9 +59,16 @@ for name,source in sorted(products.items()):
     assert physical['metadata']['settings']['compilationTarget']=={source:name}
     assert physical['methodIdentifiers']==native_old['evm']['methodIdentifiers']
     # Non-emission is not evidence of an empty storage layout.
+    physical_transports=[]
     if 'storageLayout' in native_old:
-        assert physical['storageLayout']==native_old['storageLayout']
-    assert physical['ast']==old['output']['sources'][source]['ast']
+        if a.compiler_capture and ident==a.build_id:
+            physical_transports.extend(forge_storage_transport(native_old['storageLayout'],physical['storageLayout']))
+        else:
+            assert physical['storageLayout']==native_old['storageLayout']
+    if a.compiler_capture and ident==a.build_id:
+        physical_transports.extend(forge_ast_transport(old['output']['sources'][source]['ast'],physical['ast']))
+    else:
+        assert physical['ast']==old['output']['sources'][source]['ast']
     assert physical['id']==old['output']['sources'][source]['id']
     for field in ['bytecode','deployedBytecode']:
         x,y=physical[field],native_old['evm'][field]
@@ -92,6 +108,7 @@ for name,source in sorted(products.items()):
         'originalAuthorityBuildId':ident,'currentBuildId':a.build_id,'physicalVsCurrent':comparison,
         'currentExport':relative,'currentNativeExportSha256':sha(payload),
         'storageLayoutEmitted':{'physical':'storageLayout' in physical,'current':'storageLayout' in native},
+        'physicalSerializationTransports':physical_transports,
         'creationBytes':len(code(native['evm']['bytecode']['object']))//2,
         'runtimeBytes':len(code(native['evm']['deployedBytecode']['object']))//2}
 a.output.mkdir(parents=True,exist_ok=False)
