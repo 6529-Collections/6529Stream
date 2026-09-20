@@ -382,7 +382,9 @@ contract StreamCurrentEntropyPolicySuccessionTest is StreamCurrentGovernanceStag
         records[0] = StreamEntropyFallbackPlan.record(target, 500000);
         (batch.calls, batch.callDatas) =
             StreamCurrentStackPlan.registrationCalls(configuration.registry, records);
-        _run(_build(REASON, _withTail(batch)));
+        // The five-leaf foundation has no registerModule tail trigger. An unsolicited
+        // class-1 publication is invalid; initial pointer selection publishes the new host.
+        _run(_build(REASON, batch));
     }
 
     function _admitCatalog() private {
