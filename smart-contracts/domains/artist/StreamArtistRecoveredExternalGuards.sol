@@ -46,6 +46,9 @@ import {
 import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
 import { StreamArtistRecoveryHashes as RecoveryHashes } from "./StreamArtistRecoveryHashes.sol";
 
+import "./StreamArtistRecoveredFinalityGuards.sol";
+import "./StreamArtistRecoveredEntropyGuards.sol";
+
 /// @notice Exact external guard observations for the first recovered-authority graph.
 /// @dev collect receives an authenticated complete provenance and fixed-owner Identity bundle.
 /// These observations never install or reset external state and are not new authorizations.
@@ -106,7 +109,7 @@ library StreamArtistRecoveredExternalGuards {
     error RecoveredExternalDependencyChanged(address target);
     error RecoveredExternalReadFailed(address target);
 
-    function collect(RH.Provenance memory p, IH.Bundle memory b)
+    function collect(RH.Provenance calldata p, IH.Bundle calldata b)
         public
         view
         returns (Snapshot memory s)
@@ -203,63 +206,11 @@ library StreamArtistRecoveredExternalGuards {
         view
         returns (FinalityGuard memory f)
     {
-        EU.Admission memory emptyEntropy;
-        U.Admission memory a = row.admission;
-        if (
-            keccak256(abi.encode(row.entropyAdmission)) != keccak256(abi.encode(emptyEntropy))
-                || row.entropyOrigin != address(0) || a.target.recoveryRegistry == address(0)
-                || a.target.recoveryActionId == 0 || a.target.originalFinalityRecordHash == 0
-                || a.target.recoveryManifestHash == 0 || a.recoveryIntentFactsHash == 0
-                || a.governanceWitnessHash == 0
-                || a.target.scope.collectionId != row.record.terms.collectionId
-        ) {
-            revert InvalidRecoveredExternalGuard(row.record.recordHash);
-        }
-        f.findingRecordHash = row.record.recordHash;
-        f.origin = row.position;
-        f.core = origin.core;
-        f.target = a.target;
-        f.registryCodeHash = a.recoveryRegistryCodeHash;
-        _pin(f.target.recoveryRegistry, f.registryCodeHash);
-        f.executor = _address(f.target.recoveryRegistry, abi.encodeCall(FB.governanceAuthority, ()));
-        f.executorCodeHash = f.executor.codehash;
-        return _finalityCurrent(f);
+        return StreamArtistRecoveredFinalityGuards.collect(row, origin);
     }
 
     function _finalityCurrent(FinalityGuard memory f) private view returns (FinalityGuard memory) {
-        address target = f.target.recoveryRegistry;
-        _pin(target, f.registryCodeHash);
-        if (
-            _address(target, abi.encodeCall(FB.core, ())) != f.core
-                || _address(target, abi.encodeCall(FB.governanceAuthority, ())) != f.executor
-        ) {
-            revert RecoveredExternalDependencyChanged(target);
-        }
-        _pin(f.executor, f.executorCodeHash);
-        f.action = _facts(f.executor, f.target.recoveryActionId);
-        if (f.action.actionClass != 2) revert InvalidRecoveredExternalGuard(f.findingRecordHash);
-        f.actionTerminal = _terminal(f.action.status);
-        bytes memory raw =
-            _read(target, abi.encodeCall(F.finalityRecoveryRecord, (f.target.recoveryActionId)), 0);
-        f.record = abi.decode(raw, (StreamFinalityRecoveryRecord));
-        if (keccak256(raw) != keccak256(abi.encode(f.record))) {
-            revert RecoveredExternalReadFailed(target);
-        }
-        if (f.record.executed) {
-            if (
-                f.record.recoveryId != f.target.recoveryActionId
-                    || f.record.originalFinalityRecordHash != f.target.originalFinalityRecordHash
-                    || f.record.recoveryManifest.contentHash != f.target.recoveryManifestHash
-                    || keccak256(abi.encode(f.record.scope))
-                        != keccak256(abi.encode(f.target.scope))
-            ) {
-                revert InvalidRecoveredExternalGuard(f.findingRecordHash);
-            }
-        } else {
-            StreamFinalityRecoveryRecord memory empty;
-            _same(abi.encode(f.record), abi.encode(empty), f.findingRecordHash);
-        }
-        return f;
+        return StreamArtistRecoveredFinalityGuards.requireCurrent(f);
     }
 
     function _entropy(IH.FindingRow memory row, RH.OriginEnvironment memory origin)
@@ -267,63 +218,11 @@ library StreamArtistRecoveredExternalGuards {
         view
         returns (EntropyGuard memory e)
     {
-        U.Admission memory emptyFinality;
-        EU.Admission memory a = row.entropyAdmission;
-        if (
-            keccak256(abi.encode(row.admission)) != keccak256(abi.encode(emptyFinality))
-                || row.entropyOrigin != origin.registry || a.target.intentHash == 0
-                || a.target.unavailableEvidenceHash == 0 || a.governanceWitnessHash == 0
-                || a.intent.oldRequestKey == 0 || a.intent.newRequestKey == 0
-                || a.intent.oldRequestKey != a.target.recovery.oldRequestKey
-                || a.intent.collectionId != row.record.terms.collectionId
-                || a.target.intentHash != EU.intentHash(a.target.coordinator, origin.core, a.intent)
-                || row.record.terms.evidenceHash
-                    != EU.evidenceHash(
-                        origin.registry, origin.core, a.target, a.intent, a.coordinatorCodeHash
-                    )
-        ) {
-            revert InvalidRecoveredExternalGuard(row.record.recordHash);
-        }
-        e.findingRecordHash = row.record.recordHash;
-        e.origin = row.position;
-        e.core = origin.core;
-        e.coordinator = a.target.coordinator;
-        e.coordinatorCodeHash = a.coordinatorCodeHash;
-        e.oldRequestKey = a.intent.oldRequestKey;
-        e.newRequestKey = a.intent.newRequestKey;
-        return _entropyCurrent(e);
+        return StreamArtistRecoveredEntropyGuards.collect(row, origin);
     }
 
     function _entropyCurrent(EntropyGuard memory e) private view returns (EntropyGuard memory) {
-        _pin(e.coordinator, e.coordinatorCodeHash);
-        if (_address(e.coordinator, abi.encodeCall(FB.core, ())) != e.core) {
-            revert RecoveredExternalDependencyChanged(e.coordinator);
-        }
-        e.terminal = abi.decode(
-            _read(
-                e.coordinator,
-                abi.encodeCall(EUHost.entropyRecoveryIntentTerminal, (e.oldRequestKey)),
-                32
-            ),
-            (bool)
-        );
-        e.receipt = abi.decode(
-            _read(
-                e.coordinator, abi.encodeCall(EHost.freshRecoveryReceipt, (e.newRequestKey)), 288
-            ),
-            (EHost.RecoveryReceipt)
-        );
-        e.evidence = abi.decode(
-            _read(
-                e.coordinator,
-                abi.encodeCall(EUHost.entropyUnavailabilityEvidence, (e.newRequestKey)),
-                96
-            ),
-            (EntropyEvidence)
-        );
-        // A later finding may consume the same intent. Capture the actual receipt/evidence,
-        // not a fabricated boolean saying this particular old finding was unused or consumed.
-        return e;
+        return StreamArtistRecoveredEntropyGuards.requireCurrent(e);
     }
 
     function _finding(RH.Provenance memory p, bytes32 artist, IH.FindingRow memory row)
