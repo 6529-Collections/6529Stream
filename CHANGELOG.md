@@ -9,6 +9,10 @@ the release policy in `docs/release-policy.md`.
   grace through an additive Manager capability. Preserve current authority,
   counters and replay; focused and actual Safe recipes await native execution.
 
+
+- Correct Artist delegation documentation to the integrated capability mask,
+  mode-2 policy/sale consent and consent-time grant checks, with current-state
+  admission and pending validation limits retained.
 - Retain complete 24,576-byte Metadata records through ordered immutable chunks,
   preserving original small-record bytes, signatures, pointers and storage roots.
 - Compose the full-byte preservation and general attestation products with the

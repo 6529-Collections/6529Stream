@@ -5,8 +5,9 @@ profile. Its address is the identity used in artist IDs, EIP712 domains, binding
 records, owner configuration, and archive evidence. `StreamArtistRegistryV2`
 remains the earlier immutable directory; it does not own these new records.
 
-The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up to 32
-collaborator rows, no capability overrides, and operator-set sale parameters.
+The original onboarding profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up
+to 32 collaborator rows, no capability overrides, and operator-set sale
+parameters. The mode-2 policy/sale delegation increment is described below.
 Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 25, 26, 27,
 28, 29, 30, 31, 32, 51, 52, and 54 have typed entrypoints.
 The full 57-operation API is not
@@ -28,7 +29,8 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Append-only identity revision and operative or historical document reads | `IStreamArtistIdentityRevision` |
 | Guardians, two-sided address rotation and prior-address standing | `IStreamArtistRotation` |
 | Exact governed artist seconds parameters | `IStreamArtistWindows` |
-| Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
+| Scoped capability grants, revocation and exact grant witnesses | `IStreamArtistDelegation` |
+| Delegated mint-policy and sale consent for mode-2 bindings | `IStreamArtistDelegatedConsent` |
 | Refuse or withdraw a pending proposal; accept exact queued proposal terms | `IStreamArtistBindingLifecycle` |
 | Accepted artist identity and current explicit payout designation | `IStreamArtistBeneficiaryFacts` |
 | Two-sided collaborator registration, row acceptance, and generation-scoped reads | `IStreamArtistCollaboratorLifecycle` |
@@ -258,10 +260,13 @@ Neither this record nor prospective consent substitutes for governance on
 ordinary assignment changes. `StreamArtistEconomicsHashes` is a linked pure
 hashing library; authorization and replay storage remain in their domain owners.
 
-The artist can grant a delegate `CAP_ECONOMICS_CONSENT` (4),
-`CAP_ROYALTY_FREEZE` (32), or both. Every other capability is currently rejected,
-including the permanently nondelegable payout and identity powers. A grant can
-cover one collection or all collections belonging to that artist identity.
+At source `6d333842`, the grant capability mask is `1143`: `CAP_ATTEST` (1),
+`CAP_POLICY_CONSENT` (2), `CAP_ECONOMICS_CONSENT` (4), `CAP_DISPUTE` (16),
+`CAP_ROYALTY_FREEZE` (32), `CAP_INTENT_RECORDS` (64), and
+`CAP_SALE_CONSENT` (1024). Bits outside that mask remain rejected, including
+the nondelegable payout and identity powers. Admitting a grant does not bypass
+an action's own authority, scope or binding-mode checks. A grant can cover one
+collection or all collections belonging to that artist identity.
 Only one unexpired, unrevoked and unexhausted grant per artist/delegate pair is
 admitted; a future grant reserves that pair too. `notBefore` is inclusive and
 `expiresAt` exclusive. `maxUses = 0` is unlimited only within that finite window;
@@ -270,12 +275,28 @@ records narrative constraints, not additional executable restrictions.
 
 The grant's `active` read describes its time window, revocation and use limit.
 Every actual action also checks the accepted artist binding, collection scope
-and capability. Only the original stored grantor can revoke. Revocation blocks
-future actions and preserves already recorded consent/freeze authorizations.
+and capability. Only the original stored grantor can revoke. Revocation, expiry
+or exhaustion prevents a new delegated action without erasing an exact consent
+already recorded under that grant. In particular, consuming a one-use grant
+does not invalidate the consent just created. Later consent consumers retain
+their original current binding, attribution, generation, policy, economics and
+readiness checks; a changed policy hash, sale ID or sale configuration needs its
+own consent.
 Each successful delegated record stores `AUTH_DELEGATE` and an exact grant
 witness, readable with `recordDelegation`; its event supplies the same witness.
 Delegation never changes the artist's payout or substitutes for governance on
 ordinary resolver mutations.
+
+Operation 14 mint-policy consent and operation 16 sale consent admit delegates
+only for accepted `ARTIST_DELEGATED` bindings (`consentMode = 2`), with live
+capability 2 or 1024 respectively when the consent is created. Principal
+consent remains allowed in mode 2. Mode 1 rejects these delegated methods even
+when the grant carries the required bits. Their original signatures, Artist
+identity, record hashes and Archive operation identities are unchanged; current
+operation-60 import profiles still reject these mode-2 states. The
+[delegated-consent guide](../../../docs/integrations/artist-delegated-consent.md)
+records the precise API, source-authored tests and remaining runtime and
+deployment-capacity limits.
 
 Delegate nonces have a separate persistent artist/delegate lane. Replacement
 grants cannot reset used nonces or the bounded allocator. The permanent action
@@ -283,9 +304,12 @@ digest does not include a grant ID, so an unused, still-valid action signature
 can be submitted under a later matching grant. Every successful use advances
 the counter atomically with the Identity replay cell, Consent record and Archive
 append. A later failure rolls them all back. Delegated actions do not advance
-the artist's liveness timestamp or consume the artist's nonce lane. Automatic
-revocation on succession/dormancy remains a required seam before those future
-operations can be enabled.
+the artist's liveness timestamp or consume the artist's nonce lane. Creation
+also checks the current estate delegation epoch and original succession
+restrictions. A pending succession restriction or a later epoch change cannot
+authorize a new action under an ineligible grant. These creation checks do not
+retroactively revoke recorded consent; its use still depends on the original
+current-state checks described above.
 
 `StreamArtistIdentityState` and `StreamArtistDelegationState` are linked storage
 helpers operating on the Identity owner's original and appended slots.
