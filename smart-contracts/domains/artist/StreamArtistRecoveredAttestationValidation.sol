@@ -81,10 +81,11 @@ library StreamArtistRecoveredAttestationValidation {
             b.provenance != RH.ownerProvenanceHash(p, 4) || q.artistId == 0
                 || b.artistId != q.artistId || q.collectionId == 0
                 || b.collectionId != q.collectionId || q.bindingHash == 0
-                || b.bindingHash != q.bindingHash || b.item.state != 2 || b.item.generation != 1
+                || b.bindingHash != q.bindingHash || b.item.state != 2
+                || (b.item.generation == 0 || b.item.generation > 128)
                 || b.records.length != p.journal.length || p.aliases.length != 0
         ) _invalid();
-        _eras(p);
+        _eras(p, b.item.generation);
         uint256 personhood;
         C2PA.Head memory head;
         for (uint256 i; i < b.records.length; ++i) {
@@ -101,10 +102,10 @@ library StreamArtistRecoveredAttestationValidation {
                 }
             }
             RH.OriginEnvironment memory o = _origin(p, entry.position.point.environmentHash);
-            _row(q, o, row);
+            _row(q, o, row, b.item.generation);
             if (_personhood(row.attestation.input.terms)) {
                 if (personhood >= b.personhood.length) _invalid();
-                _summary(q, o, row.attestation, b.personhood[personhood++]);
+                _summary(q, o, row.attestation, b.personhood[personhood++], b.item.generation);
             }
             if (_credential(row.attestation.input.terms)) {
                 head = _nextHead(head, b, row.attestation, o.registry);
@@ -113,10 +114,12 @@ library StreamArtistRecoveredAttestationValidation {
         if (personhood != b.personhood.length) _invalid();
     }
 
-    function _row(AH.Query memory q, RH.OriginEnvironment memory o, PubH.Row memory row)
-        private
-        pure
-    {
+    function _row(
+        AH.Query memory q,
+        RH.OriginEnvironment memory o,
+        PubH.Row memory row,
+        uint64 generation
+    ) private pure {
         ReadinessH.AttestationRow memory r = row.attestation;
         T.Attestation memory t = r.input.terms;
         T.AttestationRecord memory record = r.record;
@@ -124,9 +127,10 @@ library StreamArtistRecoveredAttestationValidation {
         if (
             t.collectionId != q.collectionId || t.subjectKind == 0 || t.subjectKind > 10
                 || (r.authorityClass != 1 && r.authorityClass != 2 && r.authorityClass != 3)
-                || record.recordHash == 0 || record.generation != 1 || record.signer == address(0)
-                || record.signedAt == 0 || r.statement.length == 0 || r.statement.length > 8192
-                || bytes(t.statementURI).length > 2048 || t.statementHash != keccak256(r.statement)
+                || record.recordHash == 0 || record.generation != generation
+                || record.signer == address(0) || record.signedAt == 0 || r.statement.length == 0
+                || r.statement.length > 8192 || bytes(t.statementURI).length > 2048
+                || t.statementHash != keccak256(r.statement)
                 || record.statementHash != t.statementHash || record.schemaId != t.schemaId
                 || record.subjectStateHash != t.subjectStateHash
                 || record.recordHash
@@ -148,7 +152,7 @@ library StreamArtistRecoveredAttestationValidation {
                     || keccak256(abi.encode(a)) != keccak256(abi.encode(empty))
             ) _invalid();
         } else if (
-            a.artistId != q.artistId || a.bindingHash != q.bindingHash || a.generation != 1
+            a.artistId != q.artistId || a.bindingHash != q.bindingHash || a.generation != generation
                 || (r.authorityClass == 2 ? a.delegation == 0 : a.delegation != 0)
                 || a.fact.owner == address(0) || a.fact.ownerCodeHash == 0
                 || a.fact.subjectId != t.subjectId || a.fact.stateHash != t.subjectStateHash
@@ -160,7 +164,7 @@ library StreamArtistRecoveredAttestationValidation {
         } else if (t.subjectKind == 9) {
             T.Binding memory binding_;
             binding_.artistId = q.artistId;
-            binding_.generation = 1;
+            binding_.generation = generation;
             binding_.bindingHash = q.bindingHash;
             if (
                 (a.artistId != 0 && a.fact.owner != o.core)
@@ -179,10 +183,15 @@ library StreamArtistRecoveredAttestationValidation {
             ) _invalid();
             if (_credential(t)) Credentials.decode(r.statement, q.artistId, t.subjectStateHash);
         }
-        _publication(q, row, publication);
+        _publication(q, row, publication, generation);
     }
 
-    function _publication(AH.Query memory q, PubH.Row memory row, bool publication) private pure {
+    function _publication(
+        AH.Query memory q,
+        PubH.Row memory row,
+        bool publication,
+        uint64 generation
+    ) private pure {
         PublicationOwner.Record memory saved = row.publication;
         if (!publication) {
             PublicationOwner.Record memory empty;
@@ -197,7 +206,7 @@ library StreamArtistRecoveredAttestationValidation {
             saved.metadataHostCodeHash == 0
                 || keccak256(abi.encode(saved.publication)) != keccak256(abi.encode(p))
                 || e.attestationRecordHash != r.record.recordHash || e.artistId != q.artistId
-                || e.bindingHash != q.bindingHash || e.bindingGeneration != 1
+                || e.bindingHash != q.bindingHash || e.bindingGeneration != generation
                 || e.signer != r.record.signer || e.signer != p.recorder
                 || e.authorityClass != r.authorityClass || e.requiredCapability != capability
                 || e.signedAt != r.record.signedAt || e.publicationHash != keccak256(abi.encode(p))
@@ -213,7 +222,8 @@ library StreamArtistRecoveredAttestationValidation {
         AH.Query memory q,
         RH.OriginEnvironment memory o,
         ReadinessH.AttestationRow memory r,
-        Original.PersonhoodRow memory row
+        Original.PersonhoodRow memory row,
+        uint64 generation
     ) private pure {
         if (row.recordHash != r.record.recordHash || row.originalRegistry != o.registry) _invalid();
         bool canonical;
@@ -233,7 +243,7 @@ library StreamArtistRecoveredAttestationValidation {
         if (
             s.version != 1 || s.chainId != o.chainId || s.nativeRecordHash != r.record.recordHash
                 || s.statementHash != r.record.statementHash || s.artistId != q.artistId
-                || s.bindingHash != q.bindingHash || s.generation != 1
+                || s.bindingHash != q.bindingHash || s.generation != generation
                 || s.collectionId != q.collectionId
                 || s.identityRecordHash != r.record.subjectStateHash
                 || ref_.artistRegistry != o.registry || ref_.artistId != q.artistId
@@ -262,18 +272,18 @@ library StreamArtistRecoveredAttestationValidation {
             b.artistId,
             b.collectionId,
             b.bindingHash,
-            1,
+            b.item.generation,
             r.record.subjectStateHash,
             r.record.statementHash,
             registry
         );
     }
 
-    function _eras(RH.OwnerProvenance memory p) private pure {
+    function _eras(RH.OwnerProvenance memory p, uint64 generation) private pure {
         uint256 cursor;
         for (uint256 i; i < p.eras.length; ++i) {
             RH.OwnerEra memory e = p.eras[i];
-            uint256 base = i == 0 ? 2 : 1;
+            uint256 base = i == 0 ? 2 * uint256(generation) : 1;
             if (
                 e.lowerRevision != (i == 0 ? 0 : 1)
                     || uint256(e.checkpoint.ownerState.revision) != base + e.nativeCount

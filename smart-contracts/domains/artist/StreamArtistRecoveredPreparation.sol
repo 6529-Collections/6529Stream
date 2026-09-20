@@ -154,7 +154,15 @@ library StreamArtistRecoveredPreparation {
                 context.hasAttestations
             );
         } else if (context.hasAttestations) {
-            Joins.attestations(context.identity, attestationRecords, prepared.query, c.provenance);
+            if (context.hasGenerations) {
+                GenerationStage.attestations(
+                    context.identity, context.attestations, prepared.query, c.provenance
+                );
+            } else {
+                Joins.attestations(
+                    context.identity, attestationRecords, prepared.query, c.provenance
+                );
+            }
         }
         prepared.data = Owners.collect(context);
         return Seal.encode(prepared, requireInventory, request.expectedSemanticInventory);

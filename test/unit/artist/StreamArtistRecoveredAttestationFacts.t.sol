@@ -314,6 +314,110 @@ contract StreamArtistRecoveredAttestationFactsTest {
         _combinedReject(f, c, 2, true);
     }
 
+    function checkGeneration(Fixture memory f, uint64 generation)
+        external
+        pure
+        returns (uint256[] memory)
+    {
+        return Facts.validateGeneration(f.identity, f.rows, f.query, f.provenance, generation);
+    }
+
+    function testFuzzGenerationAttestationFactsDirectClassesAndOriginalClocks(uint64 seed)
+        external
+        view
+    {
+        uint64 generation = uint64(2 + seed % 127);
+        Fixture memory f = _generationFixture(generation);
+        uint256[] memory uses = this.checkGeneration(f, generation);
+        assert(
+            uses.length == 0 && f.rows[0].attestation.authorityClass == 1
+                && f.rows[1].attestation.authorityClass == 3
+        );
+        assert(
+            f.provenance.journals[4][0].position.point.environmentHash
+                != f.provenance.journals[4][1].position.point.environmentHash
+        );
+        // The original entry continues to mean generation one, even with otherwise exact rows.
+        _reject(f);
+    }
+
+    function testGenerationAttestationFactsRejectWrongGenerationAndOutOfRange() external view {
+        Fixture memory f = _generationFixture(3);
+        this.checkGeneration(f, 3);
+        _rejectGeneration(f, 0);
+        _rejectGeneration(f, 1);
+        _rejectGeneration(f, 2);
+        _rejectGeneration(f, 129);
+        f.rows[1].attestation.record.generation = 2;
+        _rejectGeneration(f, 3);
+        f.rows[1].attestation.record.generation = 3;
+        this.checkGeneration(f, 3);
+    }
+
+    function testGenerationAttestationFactsRetainNonceSignatureAndOriginalDomainChecks()
+        external
+        view
+    {
+        Fixture memory original = _generationFixture(2);
+        this.checkGeneration(original, 2);
+        Fixture memory f = _copy(original);
+        ++f.rows[0].attestation.input.nonce;
+        _rejectGeneration(f, 2);
+        f = _copy(original);
+        f.identity.signatures = new IH.SignatureRow[](0);
+        _rejectGeneration(f, 2);
+        f = _copy(original);
+        f.provenance.journals[4][0].position.point.environmentHash = f.provenance.eras[1].originHash;
+        _rejectGeneration(f, 2);
+        f = _copy(original);
+        f.provenance.aliases[2] = new RH.ReplayAlias[](0);
+        _rejectGeneration(f, 2);
+    }
+
+    function testGenerationAttestationFactsDoesNotAdmitExistingDelegatedProfileByRelabeling()
+        external
+        view
+    {
+        Fixture memory f = _fixture();
+        this.check(f);
+        for (uint256 i; i < f.rows.length; ++i) {
+            f.rows[i].attestation.record.generation = 2;
+            if (f.rows[i].attestation.association.artistId != 0) {
+                f.rows[i].attestation.association.generation = 2;
+            }
+        }
+        _rejectGeneration(f, 2);
+    }
+
+    /// @dev Two exact pre-existing direct records from separate original eras. This is a pure
+    /// row-join vector, not a complete source certificate; actual-owner tests cover that join.
+    function _generationFixture(uint64 generation) private pure returns (Fixture memory f) {
+        f = _fixture();
+        PubH.Row[] memory rows = new PubH.Row[](2);
+        RH.JournalEntry[] memory entries = new RH.JournalEntry[](2);
+        rows[0] = f.rows[0];
+        rows[1] = f.rows[2];
+        entries[0] = f.provenance.journals[4][0];
+        entries[1] = f.provenance.journals[4][2];
+        f.rows = rows;
+        f.provenance.journals[4] = entries;
+        f.identity.delegations = new IH.DelegationRow[](0);
+        f.rows[0].attestation.record.generation = generation;
+        f.rows[1].attestation.record.generation = generation;
+    }
+
+    function _rejectGeneration(Fixture memory f, uint64 generation) private view {
+        (bool ok, bytes memory reason) =
+            address(this).staticcall(abi.encodeCall(this.checkGeneration, (f, generation)));
+        assert(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)
+                    )
+        );
+    }
+
     function _fixture() private pure returns (Fixture memory f) {
         f.query.artistId = keccak256("component artist");
         f.query.collectionId = 7;

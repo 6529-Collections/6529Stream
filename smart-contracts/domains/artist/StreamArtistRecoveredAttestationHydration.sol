@@ -57,9 +57,13 @@ import {
 } from "./StreamArtistPersonhoodDefinitions.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
-import { StreamArtistRecoveredAttestationValidation as Validation } from "./StreamArtistRecoveredAttestationValidation.sol";
+import {
+    StreamArtistRecoveredAttestationValidation as Validation
+} from "./StreamArtistRecoveredAttestationValidation.sol";
 
-import { StreamArtistRecoveredAttestationCollection as Collection } from "./StreamArtistRecoveredAttestationCollection.sol";
+import {
+    StreamArtistRecoveredAttestationCollection as Collection
+} from "./StreamArtistRecoveredAttestationCollection.sol";
 
 /// @notice Complete original op24 history for a singleton accepted generation-one Attribution.
 /// @dev Fixed source maps and flattened native provenance authenticate history. Original Identity
@@ -136,6 +140,9 @@ library StreamArtistRecoveredAttestationHydration {
         (RH.ExportHeader memory h, Payload.Payload memory payload) = Payload.decode(outer, 4);
         if ((h.requiredFeatures & RH.ATTESTATIONS) == 0 || payload.nonces.length != 0) _invalid();
         Bundle memory b = decode(q, payload.provenance, payload.semanticState);
+        if (b.item.generation > 1 && (h.requiredFeatures & RH.BINDING_GENERATIONS) == 0) {
+            _invalid();
+        }
         _empty(s, b);
         s.attributions[q.collectionId] = b.item;
         uint256 personhood;
@@ -189,14 +196,6 @@ library StreamArtistRecoveredAttestationHydration {
                     != personhoodHead.recordHash
         ) _invalid();
     }
-
-
-
-
-
-
-
-
 
     function _empty(AS.State storage s, Bundle memory b) private view {
         T.AttestationRecord memory emptyRecord;
@@ -252,14 +251,12 @@ library StreamArtistRecoveredAttestationHydration {
             b.artistId,
             b.collectionId,
             b.bindingHash,
-            1,
+            b.item.generation,
             r.record.subjectStateHash,
             r.record.statementHash,
             registry
         );
     }
-
-
 
     function _origin(RH.OwnerProvenance memory p, bytes32 hash)
         private
@@ -271,8 +268,6 @@ library StreamArtistRecoveredAttestationHydration {
         }
         _invalid();
     }
-
-
 
     function _key(T.Attestation memory p) private pure returns (bytes32) {
         return keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId));

@@ -60,6 +60,30 @@ library StreamArtistRecoveredAttestationFactRows {
         Scope memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
+        return _validateRows(identity, rows, q, p, 1);
+    }
+
+    /// @notice Final accepted PRIMARY_ONLY generation after complete pending-history admission.
+    /// @dev The caller joins the generation bundle before this leaf. Historical signer evidence
+    /// remains the original Identity nonce/signature, never a new current-authority check.
+    function validateGenerationRows(
+        IdentityRows memory identity,
+        PubH.Row[] memory rows,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory uses) {
+        if (generation < 2 || generation > 128 || identity.delegations.length != 0) _invalid();
+        return _validateRows(identity, rows, q, p, generation);
+    }
+
+    function _validateRows(
+        IdentityRows memory identity,
+        PubH.Row[] memory rows,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) private pure returns (uint256[] memory uses) {
         if (
             q.artistId == 0 || identity.artistId != q.artistId || q.collectionId == 0
                 || q.bindingHash == 0 || rows.length != p.journals[4].length
@@ -80,7 +104,7 @@ library StreamArtistRecoveredAttestationFactRows {
             }
             RH.OriginEnvironment memory origin =
                 Provenance.environment(p, native_.position.point.environmentHash);
-            bytes32 digest = _record(row, q, origin);
+            bytes32 digest = _record(row, q, origin, generation);
             _signature(identity, row.record.recordHash);
             RH.Point memory admitted;
             if (row.authorityClass == 2) {
@@ -115,11 +139,12 @@ library StreamArtistRecoveredAttestationFactRows {
     function _record(
         Ready.AttestationRow memory row,
         Scope memory q,
-        RH.OriginEnvironment memory origin
+        RH.OriginEnvironment memory origin,
+        uint64 generation
     ) private pure returns (bytes32 digest) {
         if (
             row.record.recordHash == 0 || row.record.signer == address(0)
-                || row.record.signedAt == 0 || row.record.generation != 1
+                || row.record.signedAt == 0 || row.record.generation != generation
                 || row.input.terms.collectionId != q.collectionId
                 || row.input.terms.subjectKind == 0 || row.input.terms.subjectKind > 10
                 || row.record.subjectStateHash != row.input.terms.subjectStateHash
@@ -137,7 +162,7 @@ library StreamArtistRecoveredAttestationFactRows {
             row.association.delegation != 0
                 && (row.association.artistId != q.artistId
                     || row.association.bindingHash != q.bindingHash
-                    || row.association.generation != 1)
+                    || row.association.generation != generation)
         ) _invalid();
         Hashes.Environment memory e =
             Hashes.Environment(origin.chainId, origin.registry, origin.core, origin.manager);

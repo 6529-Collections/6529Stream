@@ -23,7 +23,9 @@ personhood summaries, C2PA credentials and publication evidence, for that graph.
 The content-consent extension carries original operations17/20/21 with their
 complete mixed consent and Identity dependencies.
 The pending-generation extension carries earlier refusals and withdrawals before
-one final accepted binding, with direct policy history and base Attribution.
+one final accepted binding, with direct policy history. The generation/attestation
+composition additionally retains complete original operation-24 history for that
+final binding, using both existing feature bits128 and512.
 Complete Identity and Payout histories are transported together. Class 4,
 multiple Artists or collections,
 collaborator graphs, wider generation-aware records and broader collection histories
@@ -41,7 +43,7 @@ typed source restrictions.
 | 64 | Retained grants, consent mode 2 or native sale-consent operation 16; complete mixed consent history |
 | 128 | Complete original operation-24 attestation history, including personhood and C2PA derived state |
 | 256 | Complete original operation-17 content consent, operation-20 royalty-freeze authorization or operation-21 content-freeze authorization history |
-| 512 | Two to128 pending binding generations, each earlier generation refused or withdrawn before final acceptance; mode1, base Attribution and direct policy history only |
+| 512 | Two to128 pending binding generations, each earlier generation refused or withdrawn before final acceptance; mode1, base Attribution or complete bit128 history, and direct policy history only |
 
 Every source and destination owner must support the combined required mask.
 Pending requests, compromised status and unused preparations are included in
@@ -209,7 +211,8 @@ publication evidence and latest subject pointers. Each record's terms, nonce,
 signer, class and signed time reproduce its hash under its ultimate original
 Registry domain. Saved classes 1, 2 and 3 remain historical facts. The importer
 does not substitute today's principal, operative identity or grant liveness.
-Other Attribution operations and corrected generations remain separate profiles.
+Other Attribution operations and corrections of accepted bindings remain separate
+profiles. Pending-generation composition is described below.
 
 Identity's original nonce admission and consumed digest authenticate each
 attestation. Direct attestations also retain their original attestation-key
@@ -309,8 +312,8 @@ Withdrawals change state and replay guards but create no native receipt; proposa
 and refusal receipts retain their actual native order. Later import-only eras
 retain those original points and the complete rekeyed replay inventory.
 
-Owner4 retains the matching accepted generation and base Attribution. Its original
-2N mutation count does not create a native journal. Identity documents bind every
+Without operation24, owner4 retains the matching accepted generation and base
+Attribution. Its original2N mutation count does not create a native journal. Identity documents bind every
 proposal's original identity hash; refusal and final-acceptance signatures remain
 in the full Identity inventory. Original2/3 did not retain record-keyed Identity
 admission or signer/nonce/deadline preimages. The source producer, exact maps and
@@ -319,11 +322,15 @@ cross-owner revision ordering is invented.
 
 Complete existing Identity, original25 document revisions, recovery and Payout
 histories continue through repeated imports. Consent is limited to direct14;
-grants, mode2,15/16/17/20/21 and Attribution24 are excluded from this generation
-profile. Request and entry points are unchanged, witnesses and royalty terms are
-empty, and the current accepted hash selects the complete earlier history.
+grants, mode2 and15/16/17/20/21 remain excluded from this generation profile.
+Request and entry points are unchanged. With no operation24 the witnesses remain
+empty; otherwise exactly one exhaustive attestation witness is required. Royalty
+terms remain empty, and the current accepted hash selects the complete earlier
+history.
 Old feature constants31/63/127/255/511 and generation-one codecs keep their exact
-meanings. Wider generation-aware record compositions remain separate work.
+meanings. See [generation/attestation composition](artist-generation-attestations.md)
+for the exact original row, per-era revision and import constraints. Wider
+generation-aware record compositions remain separate work.
 
 ## Atomicity and transport bounds
 

@@ -37,4 +37,21 @@ library StreamArtistRecoveredAttestationFacts {
             p
         );
     }
+
+    /// @notice Additive generation-bound join; the original validate selector stays generation one.
+    function validateGeneration(
+        IH.Bundle calldata identity,
+        PubH.Row[] calldata rows,
+        AH.Query calldata q,
+        RH.Provenance calldata p,
+        uint64 generation
+    ) public pure returns (uint256[] memory uses) {
+        return Rows.validateGenerationRows(
+            Rows.IdentityRows(identity.artistId, identity.signatures, identity.delegations),
+            rows,
+            Rows.Scope(q.artistId, q.collectionId, q.bindingHash),
+            p,
+            generation
+        );
+    }
 }

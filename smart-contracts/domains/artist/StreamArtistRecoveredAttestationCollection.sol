@@ -200,7 +200,7 @@ library StreamArtistRecoveredAttestationCollection {
             b.artistId,
             b.collectionId,
             b.bindingHash,
-            1,
+            b.item.generation,
             r.record.subjectStateHash,
             r.record.statementHash,
             registry

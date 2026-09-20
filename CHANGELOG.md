@@ -22,6 +22,17 @@ the release policy in `docs/release-policy.md`.
 - Preserve production behavior and shared fixtures. ABI/source review is
   separate from pending native execution and complete scoped-finality acceptance.
 
+## Recovered pending-generation attestation composition
+
+- Compose complete original operation24 history with original refused/withdrawn
+  binding generations and one final accepted mode1 binding under operation60.
+  Retain original record domains, per-era clocks, complete nonce/signature joins,
+  seven-owner commitment and atomic Archive behavior.
+- Reuse original requests, nominal bundles and capability bits128/512. Preserve
+  generation-one behavior and explicitly refuse unsupported generation-aware
+  grants, economics, sale and content histories. Add ten focused authored
+  regression cases; combined runtime and full-current acceptance remain pending.
+
 ## Current burn-redemption acceptance recipes
 
 - Add actual current Core, Manager, Artist, registry and delayed-governance

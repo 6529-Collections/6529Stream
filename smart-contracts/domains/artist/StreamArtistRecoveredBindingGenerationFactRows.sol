@@ -45,8 +45,21 @@ library StreamArtistRecoveredBindingGenerationFactRows {
                 || bindings.current.bindingHash != q.bindingHash || !bindings.current.accepted
                 || keccak256(abi.encode(bindings.current))
                     != keccak256(abi.encode(bindings.rows[count - 1].item))
-                || p.journals[3].length != 1 || p.journals[4].length != 0
+                || p.journals[3].length != 1
         ) _invalid();
+
+        // Only complete original op24 history can extend this final accepted generation.
+        // Its complete typed records and original Identity admissions are joined separately
+        // before any import. Disputes, corrections and other attribution mutations stay refused.
+        for (uint256 i; i < p.journals[4].length; ++i) {
+            RH.JournalEntry memory row = p.journals[4][i];
+            if (
+                row.receipt.operation != 24 || row.receipt.artistId != q.artistId
+                    || row.receipt.collectionId != q.collectionId
+                    || row.position.point.ownerIndex != 4
+            ) _invalid();
+            Chronology.validatePoint(p, row.position.point);
+        }
 
         RH.Point memory finalProposal;
         for (uint256 i; i < count; ++i) {

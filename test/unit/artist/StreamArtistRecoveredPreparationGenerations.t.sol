@@ -162,6 +162,21 @@ contract StreamArtistRecoveredPreparationGenerationsTest {
         _reject(f, false, 0, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
     }
 
+    function testGenerationStageAdmitsExactlyOneCompleteAttestationWitness() public {
+        Fixture memory f = _fixture(2, 1);
+        f.provenance.journals[4] = new RH.JournalEntry[](2);
+        f.provenance.journals[4][0].receipt.operation = 24;
+        f.provenance.journals[4][1].receipt.operation = 24;
+        _mockProofWorkers(f);
+        (bytes memory encoded, uint8 mode, bool selected) =
+            Stage.collect(f.source, f.query, f.provenance, f.identity, false, 1, 0);
+        assert(selected && mode == 1 && keccak256(encoded) == keccak256(abi.encode(f.generations)));
+        _reject(f, false, 0, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        _reject(f, false, 2, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        f.provenance.journals[4][1].receipt.operation = 44;
+        _reject(f, false, 1, 0, abi.encodeWithSelector(T.UnsupportedProfile.selector));
+    }
+
     function testGenerationSuccessTransportsCompleteTypedArguments() public {
         Fixture memory f = _fixture(2, 1);
         _mockProofWorkers(f);
