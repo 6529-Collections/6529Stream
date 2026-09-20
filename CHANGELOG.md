@@ -3,6 +3,17 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Same-leaf ERC20 price carrier
+
+- Add a dedicated signed one-token price carrier using the original Manager's
+  PAYER/RECIPIENT Merkle leaf, fixed collection PROFILE rights, and sole-spender
+  Payment adapter. Declared zero tiers use a separate free-mint entry.
+- Keep ERC20 price and native reveal allowance separate; only the authenticated
+  executor owns excess pull refunds. Existing Universal/Payment source is unchanged.
+- Apply the exact reviewed v8 packet; ABI/type and recursive layouts pass.
+  Author 35 focused unit cases and seven zero-native current-stack recipes;
+  selected size and runtime acceptance remain pending.
+
 ## Bounded repeated Artist selection for original Metadata
 
 - Authenticate repeated Artist ancestry through one governed read frame and an
