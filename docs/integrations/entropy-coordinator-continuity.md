@@ -5,6 +5,12 @@ This profile implements the pending-request exception in
 It retains original request records, entropy domains, fulfillment and refund
 ownership. It does not migrate existing subjects to the new coordinator.
 
+The current Core also requires complete collection-policy import evidence
+([ADR0052](../adr/0052-entropy-policy-succession.md)). The pending-request layer
+below is necessary but no longer sufficient for replacement. Exact legacy and
+explicit imports, original-provider relay and their atomic activation plan are
+being completed; manual backup configuration alone does not satisfy that gate.
+
 ## Replacement policy
 
 The original `FreshRecoveryPolicy` and `FreshRecoveryStep` tuples, V1 hash and
@@ -61,6 +67,16 @@ execution, including after a saved governance plan was scheduled:
 2. Exact 32-byte `core()` responses identify this Core on both contracts.
 3. The original coordinator returns an exact 32-byte zero uncovered count for
    the selected candidate address and runtime.
+4. Its direct `entropyPolicyInventory()` returns exactly 96 bytes: full-width
+   count, canonical uint64 mutation serial and ordered collection-ID digest.
+5. The candidate's `entropyPolicyImportReady` returns exactly the canonical
+   32-byte true word for that source/runtime, current pointer revision and all
+   three header fields. Even an empty inventory requires authenticated readiness.
+
+Readiness binds a complete SEALED import. The same class-3 governed batch must
+replace the Core pointer and activate that import at the incremented revision;
+a later activation failure rolls the batch back. Missing export/readiness
+interfaces refuse replacement; old finalized reads remain on their original host.
 
 Malformed, missing, reverting and nonzero responses fail closed. A historical
 coordinator without the new read is not implicitly admitted by a missing-read
@@ -89,7 +105,13 @@ registry. It does not select or register it. This is the supported ordinary
 backup profile for the genesis `ENTROPY_COORDINATOR_FALLBACK` instance; it is not
 a cheaper registration-only safe-mode implementation.
 
-`StreamEntropyFallbackPlan` supplies the domain-specific assembly:
+`StreamEntropyFallbackPlan` retains the earlier domain-specific assembly below.
+Its manually configured candidate/checkpoint does not prove complete policy
+import and is not sufficient for the current Core replacement gate. The new
+import/relay activation plan must replace that manual cutover path; do not treat
+the retained historical recipe as executable current-source acceptance.
+
+The earlier assembly is:
 
 1. `deploymentConfig` and `requirePair` bind the distinct instances to the same
    foundation.
@@ -115,6 +137,13 @@ required collections and original token/scope subjects, retain the bytes and
 include the checkpoint in its deployment evidence.
 
 ## Verification boundary
+
+The current complete-policy Core gate (`4b6e05ea`) passes eight focused read
+controls, including two256-input fuzz properties, on a60-source capture.
+All16 nonempty production products fit; Core is19,630/23,068 runtime/init bytes.
+The controls use typed source/candidate fault boundaries and do not execute the
+real import/relay or an actual governed pointer/activation batch. The earlier
+captures below retain their original source and simpler admission boundary.
 
 `StreamEntropyContinuity.t.sol` uses actual coordinator workers and official
 threshold Safe execution with explicit typed Core, Artist, role and provider
