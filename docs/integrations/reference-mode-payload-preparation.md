@@ -260,3 +260,14 @@ Preparation and live WritePreparation workers are byte-identical to the prior
 adoption commit. Two earlier over-limit host size gates are preserved. The
 focused frozen runtime capture is separate from these source and size results;
 actual publisher/Safe/supplement/lock/inventory acceptance remains pending.
+
+The frozen successor focused run passed all 20 tests, including three 256-input
+fuzz cases. Its 55 sources, one fixture and 62 current artifacts were attested
+with 588 exact metadata source-hash comparisons. For the retained 1,048/102 corpus
+and the same extra 13,000-byte URI boundary, binding used 7,070,296 gas including
+calldata and intrinsic gas; the retained pointer-copy adoption control used
+11,281,902 in the same run. Original preparation envelopes passed at 12,915,696
+and 13,461,773. This is the fixed-worker/Store host result, with the explicitly
+named cooling above. The actual publisher's fresh authority/source validation,
+Safe retry, supplement, lock and inventory transaction envelopes remain a
+separate pending capture. Native10's complete-flow failures remain recorded.
