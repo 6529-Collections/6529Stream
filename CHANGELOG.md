@@ -191,6 +191,9 @@ the release policy in `docs/release-policy.md`.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
 
+- Add a separate LOW_SECURITY INSTANT entropy client with original policy and
+  delayed request workflows, retained provenance and direct explicit-state reads.
+
 - Add explicit collection entropy policy clients with original Artist content
   consent and class-1 configuration/class-2 freeze governance workflows.
 

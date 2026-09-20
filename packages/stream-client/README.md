@@ -337,6 +337,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [LOW_SECURITY INSTANT entropy](docs/current-entropy-instant.md) adds the
+  separate delayed request profile and exact direct sixteen-word state read.
+
 - [Explicit collection entropy policy](docs/current-entropy-collection-policy.md)
   preserves original Artist consent, governed configuration and terminal freeze.
 

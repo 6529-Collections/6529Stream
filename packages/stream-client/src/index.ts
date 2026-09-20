@@ -69,3 +69,5 @@ export * from "./current-metadata-citation.js";
 export * from "./current-metadata-citation-workflow.js";
 export * from "./current-entropy-collection-policy.js";
 export * from "./current-entropy-collection-policy-workflow.js";
+export * from "./current-entropy-instant.js";
+export * from "./current-entropy-instant-workflow.js";
