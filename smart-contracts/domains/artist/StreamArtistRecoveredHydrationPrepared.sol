@@ -1,18 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredExternalGuards as External
-} from "./StreamArtistRecoveredExternalGuards.sol";
-import {
-    StreamArtistRecoveredPayloadHydration as Publications
-} from "./StreamArtistRecoveredPayloadHydration.sol";
-
-import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
-import {
-    StreamArtistAuthorityHydrationTypes as AH
-} from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -23,71 +13,31 @@ import {
     StreamArtistRecoveredPayoutTypes as P
 } from "../../interfaces/stream/artist/StreamArtistRecoveredPayoutTypes.sol";
 import {
-    IStreamArtistRecoveredHydrationOwner as Owner
-} from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
-import {
-    IStreamArtistRecoveredTimingInventory
-} from "../../interfaces/stream/artist/StreamArtistRecoveredTimingTypes.sol";
-import {
-    StreamArtistRecoveredHydrationAdmission as Admission
-} from "./StreamArtistRecoveredHydrationAdmission.sol";
-import {
     StreamArtistRecoveredHydrationCommit as Commit
 } from "./StreamArtistRecoveredHydrationCommit.sol";
 import {
-    StreamArtistRecoveredHydrationOwnerPayload as Payload
-} from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
+    StreamArtistRecoveredPreparation as Preparation
+} from "./StreamArtistRecoveredPreparation.sol";
+
 import {
-    StreamArtistRecoveredHydrationGuards as Guards
-} from "./StreamArtistRecoveredHydrationGuards.sol";
-import {
-    StreamArtistRecoveredHydrationCodec as Codec
-} from "./StreamArtistRecoveredHydrationCodec.sol";
-import {
-    StreamArtistRecoveredIdentityHydrationSource as Identity
-} from "./StreamArtistRecoveredIdentityHydrationSource.sol";
-import {
-    StreamArtistRecoveredPayoutHydration as Payout
-} from "./StreamArtistRecoveredPayoutHydration.sol";
-import {
-    StreamArtistRecoveredEconomicsHydration as Economics
-} from "./StreamArtistRecoveredEconomicsHydration.sol";
-import {
-    StreamArtistRecoveredDelegatedConsentHydration as Delegated
-} from "./StreamArtistRecoveredDelegatedConsentHydration.sol";
-import {
-    StreamArtistRecoveredDelegationConsentFacts as DelegationFacts
-} from "./StreamArtistRecoveredDelegationConsentFacts.sol";
-import {
-    IStreamArtistBindingOwner as Binding
-} from "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
-import {
-    StreamArtistMultipleRecordsTypes as MR
-} from "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
-import {
-    StreamArtistRecoveredRecordWitnesses as Witnesses
-} from "./StreamArtistRecoveredRecordWitnesses.sol";
-import {
-    StreamArtistRecoveredAttestationHydration as Attestations
-} from "./StreamArtistRecoveredAttestationHydration.sol";
-import {
-    StreamArtistRecoveredAttestationFacts as AttestationFacts
-} from "./StreamArtistRecoveredAttestationFacts.sol";
-import {
-    StreamArtistRecoveredContentConsentHydration as ContentConsents
-} from "./StreamArtistRecoveredContentConsentHydration.sol";
+    StreamArtistRecoveredPreparationInventory as Inventory
+} from "./StreamArtistRecoveredPreparationInventory.sol";
 
 /// @notice Complete seven-owner certificate for the admitted recovered-authority graphs.
 /// @dev One recovered class1/class3 subject and one accepted generation-one binding without collaborators.
 /// Fixed typed exporters reject unsupported histories; every native occurrence, replay cell and
 /// nonce tree must be accounted for. No request witness can replace original producer state.
 library StreamArtistRecoveredHydrationPrepared {
+    // Preserve the original error ABI; these errors now bubble from the fixed stages.
+    error InvalidRecord();
+    error InvalidRecoveredHydrationProvenance();
+
     function collect(T.SuiteConfiguration memory destination, RH.Request memory request)
         public
         view
         returns (Commit.Prepared memory prepared)
     {
-        return collect(destination, request, new T.RoyaltyFreeze[](0));
+        _return(Preparation.encode(destination, request, new T.RoyaltyFreeze[](0), true));
     }
 
     function collect(
@@ -95,13 +45,7 @@ library StreamArtistRecoveredHydrationPrepared {
         RH.Request memory request,
         T.RoyaltyFreeze[] memory royaltyFreezes
     ) public view returns (Commit.Prepared memory prepared) {
-        prepared = prepare(destination, request, royaltyFreezes);
-        if (
-            request.expectedSemanticInventory == 0
-                || request.expectedSemanticInventory != inventory(prepared)
-        ) {
-            revert RH.InvalidRecoveredHydrationProfile();
-        }
+        _return(Preparation.encode(destination, request, royaltyFreezes, true));
     }
 
     /// @notice Read-only certificate construction so callers can compute the expected inventory.
@@ -112,7 +56,7 @@ library StreamArtistRecoveredHydrationPrepared {
         view
         returns (Commit.Prepared memory prepared)
     {
-        return prepare(destination, request, new T.RoyaltyFreeze[](0));
+        _return(Preparation.encode(destination, request, new T.RoyaltyFreeze[](0), false));
     }
 
     /// @notice Additional exact original royalty-freeze terms without changing the old Request.
@@ -122,174 +66,26 @@ library StreamArtistRecoveredHydrationPrepared {
         RH.Request memory request,
         T.RoyaltyFreeze[] memory royaltyFreezes
     ) public view returns (Commit.Prepared memory prepared) {
-        if (
-            request.records.authority.artistIds.length != 1
-                || request.records.authority.collections.length != 1
-        ) revert T.UnsupportedProfile();
-        prepared.admission = Admission.collect(destination, request);
-        Admission.Certificate memory c = prepared.admission;
-        prepared.query = c.collections[0];
-        if (prepared.query.artistId != c.artists[0].artistId) revert T.InvalidRecord();
-        // Identity retains signatures for the entire original artist lane, including secondary
-        // occurrences. Collection owners read their exact typed selectors from the same query.
-        prepared.query.records = c.artists[0].records;
-        MR.CollectionWitness memory witnesses =
-            Witnesses.collect(c.source, c.provenance, prepared.query, request.records.witnesses);
-        T.EconomicsConsent[] memory economics = witnesses.economics;
-        IH.Bundle memory identity = Identity.collect(
-            c.source.owners[2], prepared.query, RH.ownerProvenance(c.provenance, 2)
-        );
-        P.Bundle memory payout =
-            Payout.collect(c.source.owners[5], prepared.query.artistId, c.provenance);
-        prepared.externalGuards = External.collect(c.provenance, identity);
-        prepared.timing = identity.timing.checkpoint;
-        if (
-            keccak256(abi.encode(prepared.timing))
-                != keccak256(
-                    abi.encode(
-                        IStreamArtistRecoveredTimingInventory(c.source.owners[2])
-                            .recoveredTimingCheckpoint()
-                    )
-                )
-        ) revert RH.InvalidRecoveredHydrationProvenance();
-        uint256 features = requiredFeatures(identity, payout, c.provenance.eras.length);
-        if (economics.length != 0) features |= RH.DIRECT_ECONOMICS;
-        Attestations.Bundle memory attestations;
-        if (witnesses.attestations.length != 0) {
-            features |= RH.ATTESTATIONS;
-            attestations = Attestations.collect(
-                c.source.owners[4],
-                prepared.query,
-                RH.ownerProvenance(c.provenance, 4),
-                witnesses.attestations
-            );
-        }
-        uint8 consentMode =
-            Binding(c.source.owners[0]).binding(prepared.query.collectionId).consentMode;
-        bool hasDelegation = _delegation(identity, c.provenance, consentMode);
-        bool hasContent = _content(c.provenance);
-        if (hasDelegation) features |= RH.DELEGATED_CONSENT;
-        Delegated.Bundle memory delegated;
-        ContentConsents.Bundle memory content;
-        if (hasContent) {
-            features |= RH.CONTENT_CONSENTS;
-            content = ContentConsents.collect(
-                c.source.owners[6],
-                prepared.query,
-                RH.ownerProvenance(c.provenance, 6),
-                economics,
-                royaltyFreezes
-            );
-            DelegationFacts.validate(
-                identity, content, prepared.query, c.provenance, consentMode, attestations.records
-            );
-        } else if (royaltyFreezes.length != 0) {
-            revert T.UnsupportedProfile();
-        } else if (hasDelegation) {
-            delegated = Delegated.collect(
-                c.source.owners[6], prepared.query, RH.ownerProvenance(c.provenance, 6), economics
-            );
-            if (witnesses.attestations.length == 0) {
-                DelegationFacts.validate(
-                    identity, delegated, prepared.query, c.provenance, consentMode
-                );
-            } else {
-                DelegationFacts.validate(
-                    identity,
-                    delegated,
-                    prepared.query,
-                    c.provenance,
-                    consentMode,
-                    attestations.records
-                );
-            }
-        } else if (witnesses.attestations.length != 0) {
-            AttestationFacts.validate(identity, attestations.records, prepared.query, c.provenance);
-        }
-        for (uint8 i; i < 7; ++i) {
-            _capabilities(
-                c.source.owners[i],
-                destination.owners[i],
-                i,
-                features,
-                request.expectedCapabilities[i]
-            );
-            Payload.Payload memory payload;
-            payload.provenance = RH.ownerProvenance(c.provenance, i);
-            payload.publications = Publications.collect(c.source.owners[i], i);
-            (prepared.data[i], payload.nonces) =
-                Guards.collect(c.provenance, i, request.records.authority.replayOrigins[i]);
-            if (i == 2) {
-                _nonces(identity, payload.nonces);
-                payload.semanticState = Identity.encode(identity, payload.provenance);
-            } else if (i == 4 && witnesses.attestations.length != 0) {
-                payload.semanticState =
-                    Attestations.encode(attestations, prepared.query, payload.provenance);
-            } else if (i == 5) {
-                // The joined validator binds original Identity35/nonce admission and retained
-                // Payout continuations; an owner-local export alone is insufficient here.
-                payload.semanticState = Payout.encode(payout, c.provenance);
-            } else if (i == 6 && hasContent) {
-                payload.semanticState =
-                    ContentConsents.encode(content, prepared.query, payload.provenance);
-            } else if (i == 6 && hasDelegation) {
-                payload.semanticState =
-                    Delegated.encode(delegated, prepared.query, payload.provenance);
-            } else if (i == 6 && economics.length != 0) {
-                payload.semanticState = Economics.encode(
-                    Economics.collect(
-                        c.source.owners[i], prepared.query, payload.provenance, economics
-                    ),
-                    prepared.query,
-                    payload.provenance
-                );
-            } else {
-                payload.semanticState = Owner(c.source.owners[i])
-                    .recoveredAuthorityHydrationState(prepared.query, payload.provenance);
-            }
-            prepared.data[i].typedState = Payload.encode(i, _header(i, features, payload), payload);
-        }
-    }
-
-    function _content(RH.Provenance memory p) private pure returns (bool) {
-        for (uint256 i; i < p.journals[6].length; ++i) {
-            uint16 op = p.journals[6][i].receipt.operation;
-            if (op == 17 || op == 20 || op == 21) return true;
-        }
-        return false;
-    }
-
-    /// @dev Actual source history and immutable binding mode select the complete extension.
-    /// Grants remain relevant even when expired, revoked, unused or invalidated by recovery.
-    function _delegation(IH.Bundle memory identity, RH.Provenance memory p, uint8 mode)
-        private
-        pure
-        returns (bool)
-    {
-        if (identity.delegations.length != 0 || mode == 2) return true;
-        for (uint256 i; i < p.journals[6].length; ++i) {
-            if (p.journals[6][i].receipt.operation == 16) return true;
-        }
-        return false;
+        _return(Preparation.encode(destination, request, royaltyFreezes, false));
     }
 
     /// @notice Canonical inventory identifier, independent of the caller's expected value.
     /// @dev Includes complete typed payloads, nonce words, source guards and the timing checkpoint.
-    function inventory(Commit.Prepared memory p) public pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_RECOVERED_SEMANTIC_INVENTORY_V1"),
-                RH.VERSION,
-                RH.provenanceHash(p.admission.provenance),
-                p.query,
-                p.data,
-                p.timing,
-                p.externalGuards
-            )
-        );
+    function inventory(Commit.Prepared calldata p) public pure returns (bytes32) {
+        return Inventory.inventory(p);
     }
 
-    function requiredFeatures(IH.Bundle memory identity, P.Bundle memory payout, uint256 eras)
+    /// @dev The fixed preparation worker returns abi.encode(Commit.Prepared), exactly the
+    /// declared single-tuple return ABI. Forwarding those bytes avoids decoding and re-encoding
+    /// the complete certificate in all four entry points. This terminates only this library call;
+    /// collect's inventory check has already run inside the fixed worker before it returns.
+    function _return(bytes memory encoded) private pure {
+        assembly ("memory-safe") {
+            return(add(encoded, 0x20), mload(encoded))
+        }
+    }
+
+    function requiredFeatures(IH.Bundle calldata identity, P.Bundle calldata payout, uint256 eras)
         public
         pure
         returns (uint256 features)
@@ -316,57 +112,5 @@ library StreamArtistRecoveredHydrationPrepared {
         if (authorityClass == 1) return RH.CLASS_ONE;
         if (authorityClass == 3) return RH.CLASS_THREE;
         revert T.UnsupportedProfile();
-    }
-
-    function _capabilities(
-        address source,
-        address destination,
-        uint8 i,
-        uint256 features,
-        RH.Capability memory expected
-    ) private view {
-        RH.Capability memory actual = Owner(source).recoveredAuthorityHydrationCapability();
-        if (keccak256(abi.encode(actual)) != keccak256(abi.encode(expected))) {
-            revert RH.InvalidRecoveredHydrationProfile();
-        }
-        Codec.requireCapability(actual, i, features);
-        Codec.requireCapability(
-            Owner(destination).recoveredAuthorityHydrationCapability(), i, features
-        );
-    }
-
-    function _nonces(IH.Bundle memory b, RH.NonceInventory[] memory nonces) private pure {
-        if (b.nonces.length != nonces.length) revert RH.InvalidRecoveredHydrationProvenance();
-        for (uint256 i; i < nonces.length; ++i) {
-            if (
-                b.nonces[i].kind != nonces[i].index.kind || b.nonces[i].key != nonces[i].index.key
-                    || keccak256(abi.encode(b.nonces[i].words))
-                        != keccak256(abi.encode(nonces[i].words))
-            ) {
-                revert RH.InvalidRecoveredHydrationProvenance();
-            }
-        }
-    }
-
-    function _header(uint8 i, uint256 features, Payload.Payload memory p)
-        private
-        pure
-        returns (RH.ExportHeader memory h)
-    {
-        RH.OwnerEra memory last = p.provenance.eras[p.provenance.eras.length - 1];
-        h = RH.ExportHeader(
-            RH.PROFILE,
-            RH.VERSION,
-            i,
-            last.originHash,
-            last.priorImportCommitment,
-            keccak256(p.semanticState),
-            RH.ownerProvenanceHash(p.provenance, i),
-            RH.aliasesHash(i, p.provenance.aliases),
-            features,
-            p.provenance.journal.length,
-            p.provenance.aliases.length,
-            p.provenance.eras.length
-        );
     }
 }
