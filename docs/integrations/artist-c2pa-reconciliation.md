@@ -128,6 +128,61 @@ authorship consistency are separate enum fields. Consistent means reconciliation
 under this explicit selected-verifier profile, not universal cryptographic or
 human-authorship truth.
 
+## Standing conflicts and original dispute disposition
+
+An adopted divergent authorship report also appends an immutable `Conflict` in
+`IStreamC2PAConflicts`. Report supersession, credential withdrawal, media drift
+and a later consistent report cannot remove that conflict. `standingConflict`
+is a direct stored read, independent of the report's currentness. It returns
+`(conflictId, chainHash, recordHash, selectionHash, revision, unresolvedCount)`.
+The first, third and fourth fields identify the latest unresolved conflict; the
+chain and revision commit the entire conflict history, including acknowledged
+records. When the count becomes zero those three identifiers are zero, while
+the historical chain and revision remain. `conflictAt`, `conflictRecord` and
+`conflictResolution` expose every immutable row and disposition.
+
+The conflict identity commits this chain, companion, Core, original Artist,
+collection/subject, Artist/binding/generation, original report and selection,
+previous conflict and timestamp. A separate rolling hash commits ordered
+conflict IDs and revisions. O(1) unresolved-list updates do not change those
+historical records. A new divergence always creates a new conflict, even after
+an earlier one was acknowledged.
+
+Clearing is a permissionless acknowledgement of an existing original operation
+46 disposition, not another authority decision. Obtain the exact bytes from
+`resolutionNarrative(conflictId)`, retain them in the original Store, and bind
+their hash as the narrative of the original six-word `AD.Evidence`. That
+evidence must have the original collection archival coverage and be the evidence
+of a successfully executed original attribution dispute resolution. The typed
+narrative is `abi.encode(DISPOSITION, chainId, companion, core, artistRegistry,
+collectionId, subjectId, artistId, bindingHash, generation, conflictId,
+conflictChainHash, recordHash, selectionHash, uint8(1))`, where `DISPOSITION` is
+`keccak256("6529STREAM_C2PA_DISPUTE_DISPOSITION_V1")`. Value 1 expressly resolves
+this adverse record; a generic narrative or resolution of a different conflict
+is insufficient.
+
+`clearStandingConflict(conflictId, originalActionId)` verifies the pinned
+original Attribution owner, exact current closed Head/action/opening for the
+conflict's original collection/generation, original
+resolution class and tuple, matching artist/binding/generation, exact retained
+evidence/narrative and original archival coverage. It appends the disposition
+and removes only that conflict from the unresolved list. It does not write to
+the Artist or change its operation, nonce, replay or signing domains. All reads
+precede the local writes; failure retains the entire conflict state and permits
+an identical retry. A later open dispute, replaced closed head, unrelated action,
+old action or mismatched generation cannot be used to acknowledge a conflict.
+The latest collection binding may have advanced since that original disposition;
+acknowledgement does not make the historical generation current or grant it any
+write authority.
+
+An acknowledgement states what the original closed disposition established at
+that time. It is not perpetual adjudication-currentness: this profile does not
+automatically revive an acknowledged conflict when a later dispute opens.
+Original live Artist dispute/revocation disclosure remains independent, and a
+new adopted divergence appends a new standing conflict. Consumers must retain
+that distinction rather than interpret an acknowledged row as current Artist
+authority or universal media truth.
+
 ## Optional STATIC rendering
 
 The original attribution companion and its old renderer output remain unchanged
@@ -147,6 +202,13 @@ and trailing bytes. The new JSON fields are generated only from those typed
 facts. No report text or URI is inserted as JSON, and no report can replace the
 original Artist attribution object.
 
+The successor wrapper also advertises `IStreamStaticC2PAConflicts` with
+`attributionC2PAConflicts(collectionId, tokenId)`. It returns the token and
+collection `Standing` tuples independently (384 bytes total); a token report
+cannot hide a collection conflict. The original six-word `Display` and original
+capability remain unchanged. The renderer checks exact sizes, narrow integer
+words and tuple consistency before consuming the optional conflict response.
+
 The fixed Encoding worker's `Prepared` tuple is extended, so its linked
 `render` selector and runtime change. Deploy and register the new Renderer and
 Encoding together with their exact new read-roster entries. Existing Renderer
@@ -155,21 +217,53 @@ in-place code replacement. The public original Renderer ABI and source methods
 remain available.
 
 Fields are siblings under `properties.provenance`: `c2pa_validation_status`,
-`c2pa_authorship_status`, `c2pa_attribution_divergence` (null when unevaluated),
+`c2pa_authorship_status`, `c2pa_attribution_divergence`,
 `c2pa_basis`, `c2pa_report_current`, `c2pa_read_unavailable`, `c2pa_record` and
 `c2pa_subject`. Absent evidence adds no fields. A failed optional read produces
 an explicit unavailable/unevaluated display. C2PA never changes executable HTML.
+
+With the standing-conflict capability, divergence is true while either scope
+has an unresolved conflict, even when the report itself is stale/unevaluated or
+has been replaced by a consistent report. A failed conflict read is explicitly
+unavailable and never asserts clearance. The JSON includes
+`c2pa_conflict_state` (`standing`, `acknowledged`, `none` or `unavailable`),
+`c2pa_conflict_read_unavailable`, and each scope's latest unresolved conflict,
+divergence record, complete chain and unresolved count. Acknowledgement does not
+rewrite the original report's validation/authorship status. Report status and
+standing-disposition status therefore can differ. Without this new capability,
+the original optional report fields retain their exact byte behavior; without
+either optional capability the original renderer bytes remain exact.
 
 The admitted renderer read roster must explicitly include the new wrapper,
 reconciliation companion and their runtimes/selectors, the unchanged original
 attribution companion's full transitive roster, current Core pointer reads,
 Artist `staticDisplayRead` with its original owner roster, the direct Attribution
 credential head, Metadata `latestCollectionRecordHashFor`, and Router
-`staticRenderSource`. Constructor pins are not a substitute for the transitive
+`staticRenderSource`. The successor roster additionally names the wrapper's
+`attributionC2PAConflicts` and reconciliation's direct `standingConflict` reads.
+These serving reads do not execute the mutation/acknowledgement library.
+Constructor pins are not a substitute for the transitive
 analysis report or actual golden-vector admission. Adoption's historical receipt,
 Store and payload reads are not on the STATIC serving path. Parent/callee GGP
 budgets must be calibrated through the actual composed route; merely increasing
 a fixture budget is not transaction-cap acceptance.
+
+### Live annotations and existing full-output commitments
+
+MRR-ATTRIBUTION rules 3, 5 and 6 require live staleness, dispute/revocation and
+standing C2PA divergence. AA-DISPLAY7 likewise keeps authority disclosure live;
+CMC-C2PA10/11 preserve validation history and use the original attribution
+dispute surface. This profile does not freeze away those disclosures.
+
+Existing `StreamStaticContentCheckpoint` and `StreamStaticOutputManifest`
+commit and revalidate the full tokenJSON bytes. A report, credential, conflict
+or acknowledgement change can therefore make a historical **current-full**
+checkpoint stale, while its original retained bytes and hashes remain unchanged.
+No field is silently stripped from hashing, no artwork-only digest is relabeled
+as the original full-output digest, and no claim is made that all finalized
+JSON stays identical. A separately specified stable-artwork/live-annotation
+commitment would require an explicit new schema and consumer profile; it is
+outside this correction. There are no Router, finality or governance changes.
 
 ## Evidence boundary and remaining work
 

@@ -32,6 +32,10 @@ import {
 import {
     IStreamC2PAReconciliation as C2PA
 } from "../../interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
+import {
+    IStreamC2PAConflicts as Conflicts,
+    IStreamStaticC2PAConflicts
+} from "../../interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 /// @notice Versioned STATIC rendering API and full executable reads from exact pinned sources.
 /// @dev RenderRequest is an input, not a claim of token existence. The actual Router builds it
@@ -72,6 +76,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     RendererManifest private _manifest;
     bytes32 private immutable _encodingCodeHash;
     bool public immutable c2paAttributionEnabled;
+    bool public immutable c2paConflictsEnabled;
 
     function encodingBinding() external view returns (address, bytes32) {
         return (address(Encoding), _encodingCodeHash);
@@ -106,7 +111,10 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         ) revert InvalidStaticRender();
         if (address(Encoding).code.length == 0) revert InvalidStaticRender();
         _encodingCodeHash = address(Encoding).codehash;
-        c2paAttributionEnabled = _c2paCapability(d.sources.attribution);
+        c2paAttributionEnabled =
+            _c2paCapability(d.sources.attribution, type(C2PAAttribution).interfaceId);
+        c2paConflictsEnabled = c2paAttributionEnabled
+            && _c2paCapability(d.sources.attribution, type(IStreamStaticC2PAConflicts).interfaceId);
         _sources = d.sources;
         address[6] memory a = [
             d.sources.core,
@@ -290,6 +298,11 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         if (c2paAttributionEnabled) {
             (p.artist, p.c2pa, p.c2paSubject, p.c2paUnavailable) =
                 _attributionWithC2PA(r.collectionId, r.tokenId);
+            if (c2paConflictsEnabled) {
+                p.c2paConflictsEnabled = true;
+                (p.c2paTokenConflict, p.c2paCollectionConflict, p.c2paConflictsUnavailable) =
+                    _c2paConflicts(r.collectionId, r.tokenId);
+            }
         } else {
             p.artist = _attribution(r.collectionId, r.tokenId);
         }
@@ -493,9 +506,8 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         }
     }
 
-    function _c2paCapability(address target) private view returns (bool result) {
-        bytes memory input =
-            abi.encodeWithSignature("supportsInterface(bytes4)", type(C2PAAttribution).interfaceId);
+    function _c2paCapability(address target, bytes4 capability) private view returns (bool result) {
+        bytes memory input = abi.encodeWithSignature("supportsInterface(bytes4)", capability);
         uint256 cap = _gasParameterValue(READ_GAS);
         if (gasleft() <= cap + cap / 63 + 10000) revert InvalidStaticRender();
         bool ok;
@@ -510,6 +522,53 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         if (!ok || size == 0) return false; // Original companion has no optional interface.
         if (size != 32 || value > 1) revert InvalidStaticRender();
         return value == 1;
+    }
+
+    function _c2paConflicts(uint256 id, uint256 token)
+        private
+        view
+        returns (Conflicts.Standing memory t, Conflicts.Standing memory c, bool unavailable)
+    {
+        address a = _sources.attribution;
+        uint256 cap = _gasParameterValue(ATTRIBUTION_GAS);
+        if (
+            a.codehash != _codeHashes[5] || a.code.length == 0
+                || gasleft() <= cap + cap / 63 + 200000
+        ) return (t, c, true);
+        bytes memory input =
+            abi.encodeCall(IStreamStaticC2PAConflicts.attributionC2PAConflicts, (id, token));
+        bytes memory raw = new bytes(384);
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, a, add(input, 32), mload(input), add(raw, 32), 384)
+            size := returndatasize()
+        }
+        if (!ok || size != 384) return (t, c, true);
+        // Check narrow words before abi.decode so malformed optional data degrades, never reverts rendering.
+        for (uint256 i; i < 2; ++i) {
+            uint256 revision;
+            uint256 count;
+            assembly ("memory-safe") {
+                revision := mload(add(add(raw, 160), mul(i, 192)))
+                count := mload(add(add(raw, 192), mul(i, 192)))
+            }
+            if (revision > type(uint64).max || count > revision) return (t, c, true);
+        }
+        (Conflicts.Standing memory t_, Conflicts.Standing memory c_) =
+            abi.decode(raw, (Conflicts.Standing, Conflicts.Standing));
+        if (!_validConflict(t_) || !_validConflict(c_) || (token == 0 && t_.revision != 0)) {
+            return (t, c, true);
+        }
+        return (t_, c_, false);
+    }
+
+    function _validConflict(Conflicts.Standing memory v) private pure returns (bool) {
+        if ((v.revision == 0) != (v.chainHash == 0)) return false;
+        if (v.unresolvedCount == 0) {
+            return v.conflictId == 0 && v.recordHash == 0 && v.selectionHash == 0;
+        }
+        return v.conflictId != 0 && v.recordHash != 0 && v.selectionHash != 0;
     }
 
     function _attributionWithC2PA(uint256 id, uint256 token)

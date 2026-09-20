@@ -7,6 +7,9 @@ import {
     IStreamC2PAReconciliation as C2PA
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
 import {
+    IStreamC2PAConflicts as CF
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAConflicts.sol";
+import {
     IStreamGasParameterHost as G
 } from "../../../smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import {
@@ -37,6 +40,15 @@ contract C2PAReportsBoundary {
     address public router;
     address public artist;
     mapping(bytes32 => C2PA.Display) private facts;
+    mapping(bytes32 => CF.Standing) private conflicts;
+
+    function setConflict(bytes32 subject, CF.Standing memory v) external {
+        conflicts[subject] = v;
+    }
+
+    function standingConflict(uint256, bytes32 subject) external view returns (CF.Standing memory) {
+        return conflicts[subject];
+    }
 
     constructor(address a) {
         core = a;
@@ -114,6 +126,35 @@ contract StreamStaticC2PACompanionTest {
             G.GasParameterConfig("C2PA_STATIC_ARTIST_GAS", 200000, 100000, 2),
             G.GasParameterConfig("C2PA_STATIC_REPORT_GAS", 300000, 100000, 2)
         );
+    }
+
+    function testBothScopesRemainVisibleDespiteTokenReportPrecedenceAndStaleness() public {
+        CF.Standing memory token = CF.Standing(
+            keccak256("token conflict"),
+            keccak256("token chain"),
+            keccak256("token record"),
+            keccak256("token selection"),
+            2,
+            1
+        );
+        CF.Standing memory collection = CF.Standing(
+            keccak256("collection conflict"),
+            keccak256("collection chain"),
+            keccak256("collection record"),
+            keccak256("collection selection"),
+            4,
+            2
+        );
+        reports.setConflict(_subject(true), token);
+        reports.setConflict(_subject(false), collection);
+        reports.set(_subject(true), _display(keccak256("current consistent token"), true));
+        (CF.Standing memory t, CF.Standing memory c) = companion.attributionC2PAConflicts(1, 91);
+        require(keccak256(abi.encode(t, c)) == keccak256(abi.encode(token, collection)));
+        reports.set(_subject(true), _display(keccak256("stale token"), false));
+        (t, c) = companion.attributionC2PAConflicts(1, 91);
+        require(keccak256(abi.encode(t, c)) == keccak256(abi.encode(token, collection)));
+        (t, c) = companion.attributionC2PAConflicts(1, 0);
+        require(t.revision == 0 && c.conflictId == collection.conflictId);
     }
 
     function _display(bytes32 record, bool current) private pure returns (C2PA.Display memory d) {

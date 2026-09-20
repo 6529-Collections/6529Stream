@@ -44,6 +44,11 @@ the release policy in `docs/release-policy.md`.
 - Compose original STATIC renderer products with explicit retained-document
   admission and current Safe test recipes; complete analysis remains separate.
 
+- Retain C2PA standing conflicts independently of live report currentness, with
+  immutable history and exact covered original op46 acknowledgement. Optional
+  STATIC disclosure includes token and collection conflicts without changing
+  the original report ABI or full-output commitment semantics.
+
 - Add original Artist op24 C2PA credential history with independent personhood
   heads and complete supported-profile hydration, plus exact offline report
   reconciliation, pinned selected-verifier Metadata evidence and optional typed

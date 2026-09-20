@@ -7,20 +7,45 @@ import {
 import {
     IStreamC2PAReconciliation as C2PAReport
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
+import {
+    IStreamC2PAConflicts as CF,
+    IStreamStaticC2PAConflicts as SCF
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 /// @dev Deliberately adversarial typed source, not a report verifier or original Artist producer.
 contract C2PARenderSourceBoundary {
     address public core;
     address public router;
     bytes private response;
+    bool private conflictsEnabled;
+    bytes private conflictResponse;
+
+    function enableConflicts() external {
+        conflictsEnabled = true;
+    }
+
+    function setConflicts(bytes memory raw) external {
+        conflictResponse = raw;
+    }
+
+    function attributionC2PAConflicts(uint256, uint256)
+        external
+        view
+        returns (CF.Standing memory, CF.Standing memory)
+    {
+        bytes memory raw = conflictResponse;
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
 
     constructor(address c, address r) {
         core = c;
         router = r;
     }
 
-    function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == type(OptionalC2PA).interfaceId;
+    function supportsInterface(bytes4 id) external view returns (bool) {
+        return
+            id == type(OptionalC2PA).interfaceId
+                || (conflictsEnabled && id == type(SCF).interfaceId);
     }
 
     function setResponse(bytes memory raw) external {
@@ -138,7 +163,12 @@ contract StreamStaticC2PARenderingTest is StaticMetadataRoutingFixture {
     }
 
     function _optional() private returns (C2PARenderSourceBoundary boundary) {
+        return _optionalMode(false);
+    }
+
+    function _optionalMode(bool conflicts) private returns (C2PARenderSourceBoundary boundary) {
         boundary = new C2PARenderSourceBoundary(address(core), address(router));
+        if (conflicts) boundary.enableConflicts();
         StreamRendererV1.Deployment memory d;
         (d.sources,) = renderer.sourceBindings();
         d.sources.attribution = address(boundary);
@@ -155,6 +185,59 @@ contract StreamStaticC2PARenderingTest is StaticMetadataRoutingFixture {
         versions = new StaticRouteVersions(address(executor), address(schemas), address(renderer));
         modules = new StaticRouteModules(address(metadata), address(versions));
         core.setPointer(keccak256("MODULE_REGISTRY"), address(modules));
+    }
+
+    function testStandingCollectionConflictCannotBeHiddenByCurrentTokenReport() public {
+        C2PARenderSourceBoundary boundary = _optionalMode(true);
+        CF.Standing memory empty;
+        CF.Standing memory standing = CF.Standing(
+            keccak256("conflict"),
+            keccak256("chain"),
+            keccak256("record"),
+            keccak256("selection"),
+            1,
+            1
+        );
+        boundary.setResponse(_encoded(_display()));
+        boundary.setConflicts(abi.encode(empty, standing));
+        _activate();
+        _mint();
+        string memory output = router.tokenJSON(91);
+        require(_has(output, '"c2pa_attribution_divergence":true'));
+        require(_has(output, '"c2pa_authorship_status":"consistent"'));
+        require(_has(output, '"attribution":{"state":"disputed"}'));
+        // Credential/report staleness changes live status but cannot erase a standing record.
+        C2PAReport.Display memory stale = _display();
+        stale.current = false;
+        stale.validation = C2PAReport.ValidationStatus.UNEVALUATED;
+        stale.authorship = C2PAReport.AuthorshipStatus.UNEVALUATED;
+        boundary.setResponse(_encoded(stale));
+        require(_has(router.tokenJSON(91), '"c2pa_attribution_divergence":true'));
+    }
+
+    function testMalformedConflictTupleDegradesWithoutSilentlyClaimingClear() public {
+        C2PARenderSourceBoundary boundary = _optionalMode(true);
+        boundary.setResponse(_encoded(_display()));
+        CF.Standing memory empty;
+        bytes memory good = abi.encode(empty, empty);
+        boundary.setConflicts(good);
+        _activate();
+        _mint();
+        uint256[4] memory offsets = [uint256(128), 160, 320, 352];
+        for (uint256 i; i < 4; ++i) {
+            bytes memory bad = abi.decode(abi.encode(good), (bytes));
+            uint256 at = offsets[i];
+            assembly ("memory-safe") { mstore(add(add(bad, 32), at), not(0)) }
+            boundary.setConflicts(bad);
+            string memory output = router.tokenJSON(91);
+            require(_has(output, '"c2pa_conflict_read_unavailable":true'));
+            require(_has(output, '"c2pa_attribution_divergence":null'));
+            require(_has(output, '"attribution":{"state":"disputed"}'));
+        }
+        boundary.setConflicts(bytes.concat(good, bytes32(0)));
+        require(_has(router.tokenJSON(91), '"c2pa_conflict_read_unavailable":true'));
+        boundary.setConflicts(good);
+        require(_has(router.tokenJSON(91), '"c2pa_conflict_state":"none"'));
     }
 
     function _display() private pure returns (C2PAReport.Display memory) {

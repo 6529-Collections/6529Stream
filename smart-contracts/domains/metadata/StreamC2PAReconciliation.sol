@@ -41,13 +41,17 @@ import { IStreamCorePointers } from "../../interfaces/stream/core/IStreamCorePoi
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 import { StreamSchemaDocumentStore } from "./StreamSchemaDocumentStore.sol";
 import { StreamArtistC2PACredentials } from "../artist/StreamArtistC2PACredentials.sol";
+import {
+    IStreamC2PAConflicts as Conflicts
+} from "../../interfaces/stream/metadata/IStreamC2PAConflicts.sol";
+import { StreamC2PAConflicts as ConflictState } from "./StreamC2PAConflicts.sol";
 
 /// @notice Explicit selected-verifier C2PA reports and superseding-aware authorship display.
 /// @dev Admission authenticates an original Metadata receipt; it never authorizes a signer,
 /// parses an identity JSON document, executes a C2PA validator, or changes Artist authority.
 /// The selected verifier attests the report/identity-key-history reconciliation. The companion
 /// independently checks current source identity, credential enumeration, media and record pins.
-contract StreamC2PAReconciliation is C, StreamGasParameterHost {
+contract StreamC2PAReconciliation is C, Conflicts, StreamGasParameterHost {
     bytes32 public constant PROFILE = keccak256("6529STREAM_C2PA_RECONCILIATION_V1");
     bytes32 public constant RECORD_TYPE = keccak256("C2PA_VALIDATION");
     bytes32 public constant SCHEMA = keccak256("6529STREAM_C2PA_RECONCILIATION_REPORT_V1");
@@ -66,6 +70,7 @@ contract StreamC2PAReconciliation is C, StreamGasParameterHost {
     address[4] private _artistTargets; // Coordinator, Identity, Binding, Attribution
     bytes32[4] private _artistCodeHashes;
     mapping(bytes32 => Selection[]) private _history;
+    ConflictState.Store private _conflicts;
 
     constructor(
         address core_,
@@ -214,7 +219,54 @@ contract StreamC2PAReconciliation is C, StreamGasParameterHost {
                 collectionId, subjectId, recordHash, expectedSelection, selected.selectionHash
             );
         }
+        ConflictState.note(_conflicts, core, artist, selected);
         return selected.selectionHash;
+    }
+
+    /// @notice Current report staleness never erases an unresolved historical adverse finding.
+    /// @dev Direct local reads only, so this source remains suitable for transitive STATIC serving.
+    function standingConflict(uint256 collectionId, bytes32 subjectId)
+        external
+        view
+        returns (Conflicts.Standing memory v)
+    {
+        ConflictState.Head storage h = _conflicts.heads[_key(collectionId, subjectId)];
+        Conflicts.Conflict storage c = _conflicts.records[h.tail];
+        return
+            Conflicts.Standing(
+                h.tail, h.chain, c.recordHash, c.selectionHash, h.revision, h.openCount
+            );
+    }
+
+    function conflictRecord(bytes32 id) external view returns (Conflicts.Conflict memory) {
+        return _conflicts.records[id];
+    }
+
+    function conflictResolution(bytes32 id) external view returns (Conflicts.Resolution memory) {
+        return _conflicts.resolutions[id];
+    }
+
+    function conflictAt(uint256 collectionId, bytes32 subjectId, uint64 revision)
+        external
+        view
+        returns (bytes32)
+    {
+        return _conflicts.history[_key(collectionId, subjectId)][revision];
+    }
+
+    function resolutionNarrative(bytes32 id) external view returns (bytes memory) {
+        return ConflictState.narrative(_conflictEnvironment(), _conflicts.records[id]);
+    }
+
+    function clearStandingConflict(bytes32 id, bytes32 originalActionId) external {
+        _context();
+        ConflictState.clear(_conflicts, _conflictEnvironment(), id, originalActionId);
+    }
+
+    function _conflictEnvironment() private view returns (ConflictState.Environment memory) {
+        return ConflictState.Environment(
+            sourceChainId, core, artist, _artistTargets[3], chunkStore, _gasParameterValue(READ_GAS)
+        );
     }
 
     function currentSelection(uint256 collectionId, bytes32 subjectId)

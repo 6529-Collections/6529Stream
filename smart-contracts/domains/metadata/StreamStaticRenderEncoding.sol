@@ -14,6 +14,9 @@ import {
     IStreamC2PAReconciliation as C2PA
 } from "../../interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
 import { StreamStaticC2PAJSON } from "./StreamStaticC2PAJSON.sol";
+import {
+    IStreamC2PAConflicts as Conflicts
+} from "../../interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 /// @notice Fixed pure Metadata companion; consumes authenticated renderer input and makes no external read.
 /// @dev Its address/runtime/selector belong to the version's transitive declared read set.
@@ -37,6 +40,24 @@ library StreamStaticRenderEncoding {
         C2PA.Display c2pa;
         bytes32 c2paSubject;
         bool c2paUnavailable;
+        Conflicts.Standing c2paTokenConflict;
+        Conflicts.Standing c2paCollectionConflict;
+        bool c2paConflictsEnabled;
+        bool c2paConflictsUnavailable;
+    }
+
+    function _c2pa(Prepared memory p) private pure returns (bytes memory) {
+        if (!p.c2paConflictsEnabled) {
+            return StreamStaticC2PAJSON.fields(p.c2pa, p.c2paSubject, p.c2paUnavailable);
+        }
+        return StreamStaticC2PAJSON.withConflicts(
+            p.c2pa,
+            p.c2paSubject,
+            p.c2paUnavailable,
+            p.c2paTokenConflict,
+            p.c2paCollectionConflict,
+            p.c2paConflictsUnavailable
+        );
     }
 
     function render(
@@ -108,7 +129,7 @@ library StreamStaticRenderEncoding {
             context,
             ',"provenance":{"attribution":',
             p.artist,
-            StreamStaticC2PAJSON.fields(p.c2pa, p.c2paSubject, p.c2paUnavailable),
+            _c2pa(p),
             '},"render_mode":"',
             full ? "full" : "marketplace",
             '","config_record_hash":"',
@@ -201,7 +222,7 @@ library StreamStaticRenderEncoding {
             uint256(p.facts.dependencyHash).toHexString(32),
             '","provenance":{"attribution":',
             artist,
-            StreamStaticC2PAJSON.fields(p.c2pa, p.c2paSubject, p.c2paUnavailable),
+            _c2pa(p),
             '},"views":{"tokenJSON":"',
             root,
             "/tokenJSON/",

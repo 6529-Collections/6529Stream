@@ -10,6 +10,9 @@ import {
 import {
     IStreamC2PAReconciliation as C
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
+import {
+    IStreamC2PAConflicts as CF
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 contract StreamStaticC2PAEncodingTest {
     function testNoC2PAFieldsKeepFrozenAllModeExactBytes() public pure {
@@ -61,6 +64,72 @@ contract StreamStaticC2PAEncodingTest {
             before_ == keccak256(bytes(E.render(r, p, "run();", address(2), 3))),
             "report became executable content"
         );
+    }
+
+    function testStandingConflictSurvivesStaleOrConsistentReportWithoutChangingArtwork()
+        public
+        pure
+    {
+        (R.RenderRequest memory r, E.Prepared memory p) = _input();
+        bytes32 html = keccak256(bytes(E.render(r, p, "run();", address(2), 3)));
+        p.c2paConflictsEnabled = true;
+        p.c2paCollectionConflict = CF.Standing(
+            keccak256("conflict"),
+            keccak256("chain"),
+            keccak256("adverse record"),
+            keccak256("selection"),
+            1,
+            1
+        );
+        p.c2pa = C.Display(
+            keccak256("latest"),
+            keccak256("latest selection"),
+            C.ValidationStatus.UNEVALUATED,
+            C.AuthorshipStatus.UNEVALUATED,
+            false,
+            true
+        );
+        string memory stale = E.render(r, p, "run();", address(2), 2);
+        require(_contains(stale, '"c2pa_attribution_divergence":true'));
+        require(_contains(stale, '"c2pa_authorship_status":"unevaluated"'));
+        require(_contains(stale, '"c2pa_conflict_state":"standing"'));
+        p.c2pa.validation = C.ValidationStatus.VALID;
+        p.c2pa.authorship = C.AuthorshipStatus.CONSISTENT;
+        p.c2pa.current = true;
+        string memory current = E.render(r, p, "run();", address(2), 2);
+        require(_contains(current, '"c2pa_attribution_divergence":true'));
+        require(_contains(current, '"c2pa_authorship_status":"consistent"'));
+        require(
+            keccak256(bytes(stale)) != keccak256(bytes(current)),
+            "full JSON remains exact live bytes"
+        );
+        require(html == keccak256(bytes(E.render(r, p, "run();", address(2), 3))));
+    }
+
+    function testUnavailableConflictReadNeverClaimsClear() public pure {
+        (R.RenderRequest memory r, E.Prepared memory p) = _input();
+        p.c2paConflictsEnabled = true;
+        p.c2paConflictsUnavailable = true;
+        string memory output = E.render(r, p, "", address(2), 0);
+        require(_contains(output, '"c2pa_conflict_read_unavailable":true'));
+        require(_contains(output, '"c2pa_attribution_divergence":null'));
+        require(!_contains(output, '"c2pa_conflict_state":"none"'));
+    }
+
+    function _contains(string memory value, string memory needle) private pure returns (bool) {
+        bytes memory v = bytes(value);
+        bytes memory n = bytes(needle);
+        for (uint256 i; i + n.length <= v.length; ++i) {
+            bool ok = true;
+            for (uint256 j; j < n.length; ++j) {
+                if (v[i + j] != n[j]) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) return true;
+        }
+        return false;
     }
 
     function _input() private pure returns (R.RenderRequest memory r, E.Prepared memory p) {

@@ -2,6 +2,18 @@
 
 Owner: Artist lead. Current ART38 batch base: `8d1672ac`.
 
+- ART38 successor to `3f1a0680`: independent retained standing-conflict history,
+  exact current original op46/covered-narrative acknowledgement and typed STATIC
+  token-plus-collection disclosure. No Artist authority or Router/finality change.
+  Final 934-source ABI/type check and all six selected product sizes pass. The
+  frozen 38-source pure/typed-source run passes 13 tests including 256 fuzz cases.
+  Seven new actual Artist/Safe/Archive and two new actual Renderer recipes are
+  authored/typechecked, not executed. Full Artist runtime remains
+  subject to the separately held Attribution capacity repair below.
+- Acknowledgement is historical, not a perpetual appeal-currentness claim.
+  Existing full tokenJSON currentness can become stale when live disclosure
+  changes; full-output hashes are preserved. No blanket freeze-pin is proposed.
+
 - ART38 source built: original op24 credential enumeration and separate personhood
   heads; complete existing-profile import; selected-verifier Metadata evidence;
   offline key-history reconciliation; optional typed STATIC provenance. See

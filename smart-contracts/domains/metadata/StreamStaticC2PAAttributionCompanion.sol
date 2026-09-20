@@ -8,6 +8,10 @@ import {
 } from "../../interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 import "./StreamMetadataSubjects.sol";
+import {
+    IStreamC2PAConflicts as Conflicts,
+    IStreamStaticC2PAConflicts
+} from "../../interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 interface IStreamC2PAOriginalAttribution {
     function core() external view returns (address);
@@ -25,6 +29,7 @@ interface IStreamC2PARouterBinding {
 /// read roster. No delegatecall, timestamp, crypto verification or authority mutation serves reads.
 contract StreamStaticC2PAAttributionCompanion is
     IStreamStaticC2PAAttribution,
+    IStreamStaticC2PAConflicts,
     StreamGasParameterHost
 {
     bytes32 public constant ARTIST_GAS = keccak256("6529STREAM_GGP_C2PA_STATIC_ARTIST_GAS");
@@ -66,7 +71,54 @@ contract StreamStaticC2PAAttributionCompanion is
     }
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == type(IStreamStaticC2PAAttribution).interfaceId || id == 0x01ffc9a7;
+        return id == type(IStreamStaticC2PAAttribution).interfaceId
+            || id == type(IStreamStaticC2PAConflicts).interfaceId || id == 0x01ffc9a7;
+    }
+
+    function attributionC2PAConflicts(uint256 collection, uint256 token)
+        external
+        view
+        returns (
+            Conflicts.Standing memory tokenConflict,
+            Conflicts.Standing memory collectionConflict
+        )
+    {
+        _pins();
+        if (token != 0) {
+            tokenConflict = _conflict(
+                collection,
+                StreamMetadataSubjects.scopeSubject(
+                    sourceChainId,
+                    core,
+                    StreamFinalityScope(StreamFinalityScopeType.TOKEN, collection, token, 0)
+                )
+            );
+        }
+        collectionConflict = _conflict(
+            collection,
+            StreamMetadataSubjects.scopeSubject(
+                sourceChainId,
+                core,
+                StreamFinalityScope(StreamFinalityScopeType.COLLECTION, collection, 0, 0)
+            )
+        );
+    }
+
+    function _conflict(uint256 collection, bytes32 subject)
+        private
+        view
+        returns (Conflicts.Standing memory v)
+    {
+        bytes memory raw = _read(
+            reconciliation,
+            abi.encodeCall(Conflicts.standingConflict, (collection, subject)),
+            192,
+            REPORT_GAS
+        );
+        v = abi.decode(raw, (Conflicts.Standing));
+        if (raw.length != 192 || keccak256(raw) != keccak256(abi.encode(v))) {
+            revert C2PAStaticReadUnavailable();
+        }
     }
 
     function attribution(uint256 collection, uint256 token) external view returns (bytes memory) {
