@@ -45,12 +45,14 @@ import {
     StreamMetadataSubjects as ArchiveSubjects
 } from "../../smart-contracts/domains/metadata/StreamMetadataSubjects.sol";
 
-/// @notice Actual publication and recovered60 recipe exposing the original Archive selection gap.
-/// @dev These are characterization assertions, not a production repair or complete inventory run.
-/// Current authority and immutable historical records are deliberately exercised separately.
-contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtistMigrationFixture {
-    bytes32 private constant STATEMENT = keccak256("ARTIST_STATEMENT");
-    bytes32 private constant SCHEMA = keccak256("STREAM_ARTIST_STATEMENT_V1");
+/// @notice Actual publication and recovered60 recipe shared by preservation component tests.
+/// @dev Current authority and immutable historical records are exercised separately. This
+/// fixture alone does not establish complete inventory or selected Finality acceptance.
+abstract contract StreamCurrentPreservationSuccessionFixture is
+    StreamCurrentRecoveredArtistMigrationFixture
+{
+    bytes32 internal constant STATEMENT = keccak256("ARTIST_STATEMENT");
+    bytes32 internal constant SCHEMA = keccak256("STREAM_ARTIST_STATEMENT_V1");
 
     struct PublicationRecord {
         bytes32 metadataRecord;
@@ -62,7 +64,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
         bytes payload;
         bytes archiveBytes;
     }
-    PublicationRecord private original;
+    PublicationRecord internal original;
 
     function _additionalOperatingPolicies()
         internal
@@ -91,7 +93,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
             ArchiveRecords.CollectionWitness(1, new T.EconomicsConsent[](0), rows);
     }
 
-    function _seedOriginalPublication() private {
+    function _seedOriginalPublication() internal {
         _document(
             "RAW_BYTES",
             IStreamSchemaRegistry.DocumentKind.CANONICALIZATION,
@@ -135,7 +137,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
         string memory name,
         IStreamSchemaRegistry.DocumentKind kind,
         bytes memory payload
-    ) private {
+    ) internal {
         bytes32 id = keccak256(bytes(name));
         if (assemblySchemas.document(id).exists) {
             require(
@@ -176,7 +178,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
     }
 
     function _publish(T.SuiteConfiguration memory suite, address coordinator, string memory label)
-        private
+        internal
         returns (PublicationRecord memory result)
     {
         StreamArtistOnboardingRegistry facade =
@@ -282,7 +284,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
     }
 
     function _archiveId(address registry_, address coordinator, bytes32 record)
-        private
+        internal
         view
         returns (bytes32)
     {
@@ -300,7 +302,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
     }
 
     function _sources(T.SuiteConfiguration memory suite, address coordinator)
-        private
+        internal
         view
         returns (ArchiveSources.Dependencies memory d)
     {
@@ -346,7 +348,7 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
         return ArchiveBundle.admit(d, fixtureArtistId, item, proof);
     }
 
-    function _migrate() private {
+    function _migrate() internal {
         _cutover();
         (MigrationHydration.Request memory request, Commit.Prepared memory prepared) = _prepared();
         _safeCall(
@@ -370,7 +372,10 @@ contract StreamCurrentPreservationSuccessionTest is StreamCurrentRecoveredArtist
             "import retains original publication tuple"
         );
     }
+}
 
+/// @notice Original negative characterizations retain their existing assertions.
+contract StreamCurrentPreservationSuccessionTest is StreamCurrentPreservationSuccessionFixture {
     function testHistoricalPublicationRetainsOriginalArchiveAfterActualRecoveredSuccession()
         public
     {
