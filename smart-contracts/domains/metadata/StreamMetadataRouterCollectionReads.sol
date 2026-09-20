@@ -168,10 +168,16 @@ library StreamMetadataRouterCollectionReads {
         view
         returns (Bundles.Selection memory)
     {
+        return Bundle.selection(_selections(layout)[collectionId][2]);
+    }
+
+    function _selections(Content.Layout memory layout)
+        private
+        pure
+        returns (mapping(uint256 => mapping(uint8 => Manifests.Selection)) storage selections)
+    {
         uint256 slot = layout._selectedManifests;
-        mapping(uint256 => mapping(uint8 => Manifests.Selection)) storage selections;
         assembly ("memory-safe") { selections.slot := slot }
-        return Bundle.selection(selections[collectionId][2]);
     }
 
     /// @dev Fixed Router performs its existing authority/collection guards before delegating.
