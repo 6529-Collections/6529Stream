@@ -68,8 +68,8 @@ Solidity0.8.19, viaIR, optimizer200, Paris, no CBOR and no bytecode metadata has
 | AttributionRecoveredImport | 2,408 | 2,442 |
 
 The selected production capture is `size3`; ABI4 input is1,073 sources. Full
-production ABI/storage comparison retains10,319 original entries and identical
-recursive layouts. Final source proof binds later formatting to those production
+production ABI/storage comparison retains 10,315 original entries across 1,205 definitions and identical
+recursive layouts. Four entries in three new helper definitions are counted separately. Final source proof binds later formatting to those production
 tokens; the final ABI capture additionally includes the last two read oracles.
 The old34,560, intermediate26,341/25,578 and unsuccessful25,552 measurements remain
 retained. The unsuccessful private helper was removed; no limit was raised.
