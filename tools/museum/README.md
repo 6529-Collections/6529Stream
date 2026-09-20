@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Adopted VIEW policy output evidence](../../docs/museum-view-policy-output-v2.md)
+provides a separate read-only capture of original adoption, membership, policy,
+checkpoint and covered output records. It preserves the native refusal of VIEW
+finality and does not infer original rendered bytes or historical authority.
+
 [Scoped factory policy V2 finality and acquisition V9](../../docs/museum-scoped-policy-finality-v9.md)
 retains the original seven-child factory graph, TOKEN/RELEASE/SEASON membership,
 policy output rows and preservation records. It preserves title V5 inputs and

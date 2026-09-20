@@ -794,6 +794,11 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add separate adopted VIEW V2 output evidence capture with original tagged
+  adoption history, sealed membership, full entropy policies and complete
+  covered output parts/index. Exact offline replay retains historical evidence;
+  VIEW finality, original rendered bytes and authority remain separate work.
+
 - Add original scoped factory policy V2 capture and V9 acquisition exports for
   TOKEN, RELEASE and SEASON. Retain the immutable seven-child factory graph,
   complete membership, output rows and preservation records over unchanged title
