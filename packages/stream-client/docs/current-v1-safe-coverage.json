@@ -228,13 +228,13 @@
     "src/current-artist-operation.ts": "25e20f6589f0ffc81060bdff5407ec66ee10e6b7caa2529091924e300d4d6936",
     "src/current-artist-personhood-workflow.ts": "a93067dd623650bb690cbccf1ceca9415ab576c9f1caa3ccdd8d346aa59340fc",
     "src/current-artist-personhood.ts": "45004279884b645d5b3e71a99073e76a0d155d11b4f218be031d8ef090944574",
-    "src/current-artist-recovery-adjudication-workflow.ts": "5d36ffc393e5c67af6d6cfd777415dd64b27147c6bfa57284cb25e328747a8a7",
+    "src/current-artist-recovery-adjudication-workflow.ts": "db7af51778a1a8ba2bcc1787e08daea33171093eb0b96f4bd90fc9262d0593f5",
     "src/current-artist-recovery-adjudication.ts": "e56fa93f8921f6bf6949df9c1aea05b6b53cdd9ce857123b5bf92f8733e25849",
-    "src/current-artist-recovery-rewind-workflow.ts": "d838803aaecf79c7218faf5a8d2138e5998ec011846d646be6d9c4b53a2db031",
-    "src/current-artist-recovery-rewind.ts": "c40b8ab461b4fd4f0886b4d1adc1f597ae66d3350ae17c358a77ea11edc41165",
+    "src/current-artist-recovery-rewind-workflow.ts": "6a619bf1429aec4226e3e439eb87d9794471a06c80511399ea358212125bd126",
+    "src/current-artist-recovery-rewind.ts": "88d5c392694df421f7f5dd63d42f35c077bdb23e4faf9897b168faf97e741e79",
     "src/current-artist-workflow.ts": "078882f2e4f71cae89e239712da195fdc7aeb7ca772abfab59c3d7e1ce6a2a5a",
     "src/current-artist.ts": "8841b1f9f4b636df8d24c2ce3d4e0dee39a8e2a9f156c23b8cbdd62d5f21e652",
-    "src/current-burn-finality.ts": "f24569283a6a4d8d6f0266804cc2b7b1aa4209f7855958ef8bf2089d75ec628a",
+    "src/current-burn-finality.ts": "d3d9c7aa6aa8c133f0d5e17250c2b5006838a0706cf6d63c9419342656879d89",
     "src/current-burn-mint.ts": "1a4c2d7742cb1c0d947c97fd31f4b410797dc988e70c415238bc21c36ce4ea3a",
     "src/current-collection-inventory-workflow.ts": "938a275345ae2d24ca89a504d7bc8a43997dc6a64f9c14b4b1c1d7f0b3f2aa10",
     "src/current-collection-inventory.ts": "1ce54fbe5027f4da13d59d7cfba7eb54dd8f4529fc505b0353df2e3ce48b899c",
@@ -242,16 +242,16 @@
     "src/current-curated-fixed.ts": "8cebcf15b689a09185355706beef8bddc9b625489b6d40f78c21db1ebeb75cbf",
     "src/current-curated-private.ts": "4967275d9522bfc0d400e85efb08a4fafa3952a89a2d5f9900301e931992097f",
     "src/current-custody.ts": "ee0ea93da5631ef72051fd613e1985fffbb40355731103554c40bb1b4873cb30",
-    "src/current-direct-conservation-workflow.ts": "aed556bd993fe1f3b665fcf6b89606d1ee58c2b0585cf6e8a892fc9dfc5d9905",
+    "src/current-direct-conservation-workflow.ts": "72bff8b2d70805629ca81058fc5a0a39abeae6db9a3bd98538b7aae1b6f706fb",
     "src/current-direct-conservation.ts": "4640ece71a4b741e91753958ed9623f7a15ec1bdb90ee0919326d77b88d2dcdd",
     "src/current-distribution.ts": "c1cda004ceba3463c49b5a74f8dad0027ba0b7c5ef77fa6036caf2798f997aa2",
     "src/current-entropy-authority.ts": "f09f96daf381383efcbe59456d74ef953a22cf591e2021c66f326f8d0d7add7f",
-    "src/current-entropy-collection-policy-workflow.ts": "6ed5cf8381983f0a785c7ba244932e266c1c3943599abdf19d423bc10e1c5bde",
+    "src/current-entropy-collection-policy-workflow.ts": "cf81d7a9e6b0b0eb463819a7b39f42192a87e374e11f066a32a4b275b9838068",
     "src/current-entropy-collection-policy.ts": "90aed0a39445259d8fe8e6b26760a63bdce1432844395145faa67314926d7036",
-    "src/current-entropy-instant-workflow.ts": "3e43cd648d1d1872ef50756f4c33aed0fd73401b5a1679e4e70ee5fa737c65c2",
+    "src/current-entropy-instant-workflow.ts": "b8c073f6629f6d5f8027a835c5e36ec1379919eeb3ec54fd15f383a192858724",
     "src/current-entropy-instant.ts": "2f58332f7021030221f3f50830766f4718828b0eb946565404411a42a2711fe2",
-    "src/current-entropy-policy-succession-workflow.ts": "1d00bc19fdc8cf16fe5cdb5d241a6fee7097186548e7b415fc5173a421601291",
-    "src/current-entropy-policy-succession.ts": "5bc5ce4982580bda606cb0d650dc27abeb49e247153f245d83fb7fbdbc981465",
+    "src/current-entropy-policy-succession-workflow.ts": "5bead3347a336a245681af8afb2b8ca4cecda976178fb3bd3b2e1da933776cf8",
+    "src/current-entropy-policy-succession.ts": "ed8672f3239ce26953c3e9f4066ee2f1d937b509eda5eb84693682463af0cc58",
     "src/current-entropy.ts": "9d0ed2d2297453a735d761d53a833515da3385e8efdf340e9fbef6f608224266",
     "src/current-erc20-burn-mint-signing.ts": "b255d698e229b0fc5c51187c8a45f08db4fe1a983fbb5546c2589595a68deeb3",
     "src/current-erc20-burn-mint.ts": "d9ecbed171c1e007060002bcfb5040ecf483fdd048eb4a285406075a7c550403",
@@ -265,7 +265,7 @@
     "src/current-mint-continuity.ts": "d9ae5d938b7c40437ef8d1e66308407e640004d1ac9fa3edad35e268bb0f4faa",
     "src/current-mint-counter-reads-workflow.ts": "be53bf25348b07b013720bed55a38cdfe92ef3fdd84324ff59d0bceb389ede9a",
     "src/current-mint-counter-reads.ts": "e46ab9660c6aa661b4d58b2960a526b25a171992829c645ca76c4e348fd5ce43",
-    "src/current-mint-fallback-workflow.ts": "ec90d7dfc56a03605e0e20a02aa347dfc7f0cdff2225aac0d9cfb048110a43ac",
+    "src/current-mint-fallback-workflow.ts": "5602a1c33391219d178ef780727fa5d1331647a0da5ee5bb1a851a84402d447a",
     "src/current-mint-fallback.ts": "86ec4bdb3cb8a04218df69f41acc3e60286cafe28eb92f315e72cadc62f45420",
     "src/current-mint-gates.ts": "a6303fc1a2a5f5b0c9dc1013bdf408bc54d25e1e82026f12fc11dda007230eba",
     "src/current-mint-phase-freeze-workflow.ts": "e92adeab116606a237987c5133dcde117b86d95ab75503b9ea8005399f043f59",
@@ -306,7 +306,7 @@
     "src/signing.ts": "bd9b0ad255135a87296b539c91e210da10f812f0b97a2524764aacad84e66ebf",
     "src/snapshot.ts": "59d6f66d911533b9527854143126e85359c1f932151fe73ed6d2c0a627ae50d8",
     "docs/current-direct-conservation-coverage.json": "e7d88ca47658bb16305df2d536376f15ea33c2ff579a5d99903f972bd10ba777",
-    "docs/current-artist-operation-coverage.json": "139cbb16c1af700c64e619508acfdb1919abeaa600d4c96599f4f82455779e19",
+    "docs/current-artist-operation-coverage.json": "98bcf397f080d3b06c1f7fd55082d1d15dfe9af7d67cf665e11e706f69de8da9",
     "test/current-split-factory.test.mjs": "6f127db9a7b22741539ba354faa3ecf8d89debf333c28c352dd5f0029e39b707",
     "test/current-split-factory-workflow.test.mjs": "6939ab02de1cdff8947833df61289b735fe73d5aed65f3ebec7c83cf8ef4e9a4",
     "test/current-split-factory-oracle.test.mjs": "f5ff5b38271ae0eb915b3b3faaf9dfd89a455c365f7dde3c07bac1373ca1c748",
@@ -317,17 +317,17 @@
     "test/current-mint-phase-freeze-workflow.test.mjs": "dbbb60af29b5703441a3ec275092764798bb077e23392aab0224c3242e3cbcfa",
     "test/current-mint-phase-freeze-oracle.test.mjs": "fec341a1cf89fe50a9f82cce19bb8f5550e79d4b33a854df9366a340c3b5ea75",
     "test/current-entropy-collection-policy.test.mjs": "b586bfde1f1b04d6cd72b35886d74d373b415c485d1d01f90a699020c82b087a",
-    "test/current-entropy-collection-policy-workflow.test.mjs": "4740e199e15f5f3744987dc1790d6097df9378af1c283e9dae7cf9fab5ffc0b5",
+    "test/current-entropy-collection-policy-workflow.test.mjs": "57005f36d9efbebc9cda0be3b7089219ec38cf0a987f1bee84c84599ede4f566",
     "test/current-entropy-collection-policy-oracle.test.mjs": "9a7b78e802c5533876f192b56e0950dfd45d34860fced49f968ad1fe301ef33d",
     "test/current-entropy-instant.test.mjs": "3c949bc03f6c32b5b61cb245ad12df681b801b99c6ce37521a84e55756907e67",
-    "test/current-entropy-instant-workflow.test.mjs": "f9e0ec48fa8fe196e2880e3cc8e24c5611f444a75c11090fa1135afde01beea9",
+    "test/current-entropy-instant-workflow.test.mjs": "903f1cae9792b45f0aafa2dcaee0fef942a3a987642994ce86b8699a083622d0",
     "test/current-entropy-instant-oracle.test.mjs": "f1418e8125d95f8071b5a99f69e211b120459f4ab8d7dbd8c9954b1b883a3532",
     "test/current-entropy-policy-succession.test.mjs": "7657af0f48f7c7c725b6ddf50c7fe0f0a1779050e91b7559f5799f06adf6904d",
-    "test/current-entropy-policy-succession-workflow.test.mjs": "334e970728cfc7100f6376ad8b67dad6a3225513807404233534e6bf6fa74d6a",
+    "test/current-entropy-policy-succession-workflow.test.mjs": "6a7ac53faffd9acd26e09ecbe8718fedc6ef65a10b1e30625c38c0ee69d0e136",
     "test/current-entropy-policy-succession-oracle.test.mjs": "6f3fa5a8df3367b15f96571af35118996222928e7bbfae36378b8ae77f4d314e",
     "test/current-artist-operation.test.mjs": "22aaf3bcf88bf2cbc3c8be26a358bf35460750a2e799bc34f9dc23cea455d646",
-    "test/current-artist-workflow.test.mjs": "8e5b3c2989029fced01446f3506b0afe9cce99f9b52c764db111035887fab961",
-    "test/current-artist-attestation-oracle.test.mjs": "05b93b556cf34acf9e2c0403b30e5735c3e0110239780f1a2a2adee2a1aad9bc",
+    "test/current-artist-workflow.test.mjs": "7dd0626c85e3dcafd1e646a6e9c70fe443d8870b288f50571ce382b442ab89a3",
+    "test/current-artist-attestation-oracle.test.mjs": "ed45bd9650e9393262129167652818298c08dabb77b5b53ad71018a6e9f7cdd9",
     "test/current-artist-authority-hydration.test.mjs": "8b800dfe91dbcdaab91bbada2a69f4c8ad12a910b2146c81a7f5806bf15ee1a4",
     "test/current-artist-authority-hydration-workflow.test.mjs": "7536c3f11e4942ebfc81c1bec8f4712c7f4d8f193637671269c81e423bbe7c49",
     "test/current-artist-authority-hydration-oracle.test.mjs": "30ffc37e7df70048040012e8097c6fe50b993083863c7de93af1466f1823c39e",
@@ -341,7 +341,7 @@
     "docs/current-erc20-primary-offer.md": "46d5e7db7bd295269853af140441903a66570b645f87677076f4230a2f70b7db",
     "test/current-erc20-primary-offer.test.mjs": "113cb248b313fdce4e568c62f611f9860d958f5a01473ba3851060eb8a69f41b",
     "test/current-erc20-primary-offer-oracle.test.mjs": "f0c4ddcdff9880d985ba60a212370d29ebd8c10636166fe895967796949ce37d",
-    "docs/current-erc20-burn-mint.md": "937a39582bc5d17eb8db662e31cef111208e1c3c4f3819e24ed9fc2d65046bf0",
+    "docs/current-erc20-burn-mint.md": "f03df0e41fa254eedd41de23744aa2e220b47f0b43baf74f39e2c947e7e2201a",
     "test/current-erc20-burn-mint.test.mjs": "73ada9d658466aad32e8891a546624c8fc038cc26f5e41e3f6b688f81c2a938d",
     "test/current-erc20-burn-mint-oracle.test.mjs": "48d0ec5a57ee980c1585a0de9d763d743cde1a56e0f88caf887afe40840f7775",
     "docs/current-collection-inventory.md": "6fe4037c7b4389f74f4c61af7dd9c597ac1b4cf813326e53f8fc4c61d4bd0357",
@@ -374,21 +374,21 @@
     "test/current-metadata-citation-oracle.test.mjs": "686004ba31055bc342e90c3bbc3cddfb332477b6e2639d9bc54a64d0d7b90bfb",
     "docs/current-museum-anchor-master.md": "4dba87b92f2227a75c300ff9acdb4c9e51615b6d0a8c3b48b0e32d75f2939260",
     "test/current-museum-anchor-master.test.mjs": "3466ba8b2fa44b79ba0359556bb924d41781fc8f75855442975984542ca2574a",
-    "test/current-museum-anchor-master-workflow.test.mjs": "13ae626ccef784b4449fc856efb5ad7119a5a312e4c796b3dd2fa39de81d93e6",
+    "test/current-museum-anchor-master-workflow.test.mjs": "95f71ef76dd5baba813b9c00d82611e0e23c3e11a203338a25b22348d879108b",
     "test/current-museum-anchor-master-oracle.test.mjs": "e11c3ca1486e1ad51e4663860007c3eb402af7f21260eaee46fd729963ae3316",
     "docs/current-artist-recovery-adjudication.md": "abc6bcf9f84708e60bf43bc5b841ddc1b5a5de14c5cee6d6097df53571d8c599",
     "test/current-artist-recovery-adjudication.test.mjs": "abb3c4f868139cf32e512a4ecf99b79b0037632c05b8fd6a025bb0ce08bc5beb",
-    "test/current-artist-recovery-adjudication-workflow.test.mjs": "daf7c7d4c6f7f902f9c4a1312e1dca510fd250fd9f3a048dcecc158e550e6aa3",
+    "test/current-artist-recovery-adjudication-workflow.test.mjs": "b9c4c661228c6370ae8a652231bc4234175e07d0be0409657a6ad184862e506b",
     "test/current-artist-recovery-adjudication-oracle.test.mjs": "85846b744964863fdb3f18cb6162c5045b2a370346039a8b0501d8bde49b10fe",
     "docs/current-artist-recovery-rewind.md": "32d87ab3f08c45350f0c0b7ea2ffb652b26549214dca2326fb7e21dca35a62a3",
-    "test/current-artist-recovery-rewind.test.mjs": "50644f6493bf63e800393dbd06c7a7b8fb602b8e8f293905918e8422dd5cb964",
-    "test/current-artist-recovery-rewind-workflow.test.mjs": "ee81c5c58c58f1af4ca498db58655b36cefc8b97fd78aea4873864590e73410a",
+    "test/current-artist-recovery-rewind.test.mjs": "91f0a922d9f7d75a9183fac6a76cb55a78f844fbeeb3e2414fda938eb6f72108",
+    "test/current-artist-recovery-rewind-workflow.test.mjs": "8dcb49744b9389983e9b79cac2fcd5b5f6724f6c157d4627b5f4757051703cfd",
     "test/current-artist-recovery-rewind-oracle.test.mjs": "2f070d5c682ca3c2e8373019accc9dfc74bd0b5d58b0a93fc260995ddc88192f",
     "docs/current-artist-operation.md": "6183d22a9753b82a0287ad152916c69933870e0334f992e46e99d8cc7ff1e759",
     "test/current-artist-operation-oracle.test.mjs": "cae65d1d8193fec69bbd3b21545a7f317a98d47b5c0c57c726c4fda781207f65",
-    "docs/current-artist-ceremony.md": "74f6d739617ae2b2d0d52c888b92cee792ea14792568ea1f75cf031be37554f2",
+    "docs/current-artist-ceremony.md": "9ad9407f0e063f080031e8db5764fd17ed1176111b39c0badacafdba35f0b9b4",
     "test/current-artist-ceremony.test.mjs": "2c5b06b8b284c8674aaeef81d630f07b5576561798a071f12c75cd430f204a00",
-    "test/current-revenue.test.mjs": "98d5587f4d15162c214e9facc6573abfcf05a6f021b77e162cabffd8db333b97"
+    "test/current-revenue.test.mjs": "8b7132c45ad92a868c726bcb23c5dea770a8999af57c6f44d6306826d4ee5d5e"
   },
   "clientCandidatePaths": [
     "src/binding.ts",
@@ -4994,7 +4994,7 @@
         {"signature":"roleRegistry()","selector":"0x08c73259","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[8,10,26,28,30,31,48]},
         {"signature":"selectCollectionCoverage(bytes32)","selector":"0xc4832c26","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":203}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"setFamilyStatus(bytes32,uint8)","selector":"0x393871e6","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":374}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":162}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":162}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -5067,7 +5067,7 @@
         {"signature":"registerArtistStoredPayload(address,bytes32,bytes32)","selector":"0xdf6fd768","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":152}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"storedPayloadAt(uint256)","selector":"0xf42a50a3","mutability":"view","endpoint":{"category":"view","evidence":[{"line":170}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,8,10]},
         {"signature":"storedPayloadCount()","selector":"0xb06ecf30","mutability":"view","endpoint":{"category":"view","evidence":[{"line":166}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,8,10]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":52}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":52}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -6422,7 +6422,7 @@
         {"signature":"successorDesignation(bytes32)","selector":"0xf8affc59","mutability":"view","endpoint":{"category":"view","evidence":[{"line":525}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"successorDesignationDigest((bytes32,address,uint8,uint32,bytes32,bytes32),(uint256,uint64,bytes))","selector":"0x84ebc18d","mutability":"view","endpoint":{"category":"view","evidence":[{"line":561}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"successorDesignationRecord(bytes32)","selector":"0x6bc34f7d","mutability":"view","endpoint":{"category":"view","evidence":[{"line":541}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[10]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":422}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":422}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"unavailabilityFindingContext((bytes32,uint256,bytes32,bytes32),(address,bytes32,(uint8,uint256,uint256,bytes32),bytes32,bytes32))","selector":"0xb42f6029","mutability":"view","endpoint":{"category":"view","evidence":[{"line":221}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"unavailabilityFindingRecord(bytes32)","selector":"0xd13febae","mutability":"view","endpoint":{"category":"view","evidence":[{"line":213}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"verifyEntropyRecoveryUnavailability(address,(bytes32,string,bytes32),bytes32,bytes32)","selector":"0xf24decf4","mutability":"view","endpoint":{"category":"view","evidence":[{"line":197}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[25]},
@@ -6963,7 +6963,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":211}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":215}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":223}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":223}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"verifyArtworkScopeFinality((uint8,uint256,uint256,bytes32))","selector":"0x53b7eb26","mutability":"view","endpoint":{"category":"view","evidence":[{"line":991}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"verifyArtworkScopeFinalityRange((uint8,uint256,uint256,bytes32),uint256,uint256)","selector":"0x3cfddd1a","mutability":"view","endpoint":{"category":"view","evidence":[{"line":1001}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"verifyFinality(uint256)","selector":"0xf060d767","mutability":"view","endpoint":{"category":"view","evidence":[{"line":934}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -7001,7 +7001,7 @@
         {"signature":"quorum()","selector":"0x1703a018","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
         {"signature":"recordCheckpoint((bytes32,bytes,uint64,bytes32,uint256,bytes32,bytes32,uint64,uint256,uint256,uint64,bytes32),bytes,bytes,bytes,(address,bytes)[])","selector":"0x00e5e7af","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":115}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":74}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":74}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7034,7 +7034,7 @@
         {"signature":"quorum()","selector":"0x1703a018","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
         {"signature":"recordCheckpoint((bytes32,bytes,uint64,bytes32,uint256,bytes32,bytes32,uint64,uint256,uint256,uint64,bytes32),bytes,bytes,bytes,(address,bytes)[])","selector":"0x00e5e7af","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":116}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":75}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":75}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7169,7 +7169,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":136}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":140}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":148}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":148}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"sweepNativeSurplus(uint256,bytes32)","selector":"0xf36103bb","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":376}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]},
         {"signature":"validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)","selector":"0xa4285bba","mutability":"view","endpoint":{"category":"view","evidence":[{"line":475}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
@@ -7256,7 +7256,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":115}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":119}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":127}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":127}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7340,7 +7340,7 @@
         {"signature":"streamModuleSchemaHash()","selector":"0xdbff3398","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":89}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view","evidence":[{"line":93}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":85}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":305}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":305}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"updateAdminContract(address)","selector":"0x388d2c24","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":97}]},"nativeValue":"0","stages":"write-default"}
       ],
       "otherEntrypoints": [],
@@ -7443,7 +7443,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":239}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":243}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":251}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":251}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7499,7 +7499,7 @@
         {"signature":"snapshotManifestPointer(uint256,bytes32)","selector":"0x67631ffd","mutability":"view","endpoint":{"category":"view","evidence":[{"line":215}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"snapshotRecord(bytes32)","selector":"0xea87d8e6","mutability":"view","endpoint":{"category":"view","evidence":[{"line":184}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"snapshotRecordAt(uint256,uint256)","selector":"0x77a5babe","mutability":"view","endpoint":{"category":"view","evidence":[{"line":206}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":100}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":100}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7537,7 +7537,7 @@
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
         {"signature":"requireCompleteCollection(uint256)","selector":"0x876ecdb9","mutability":"view","endpoint":{"category":"view","evidence":[{"line":172}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[16]},
         {"signature":"scanCollectionTokens(uint256,uint256)","selector":"0xf76f67eb","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":97}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[16]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":56}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":56}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7588,7 +7588,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":126}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":130}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":138}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":138}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"viewChunk(bytes32,uint256)","selector":"0xbc5635a4","mutability":"view","endpoint":{"category":"view","evidence":[{"line":327}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"viewChunkCount(bytes32)","selector":"0xb22c626c","mutability":"view","endpoint":{"category":"view","evidence":[{"line":323}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"viewIdAt(uint256,uint256)","selector":"0x6389c85e","mutability":"view","endpoint":{"category":"view","evidence":[{"line":289}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -7631,7 +7631,7 @@
         {"signature":"schemaRegistryCodeHash()","selector":"0xaca6c7d7","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,7,40,41,52]},
         {"signature":"selectionCatalogAt(uint256,bytes32,uint8,uint64,uint256)","selector":"0x069e570f","mutability":"view","endpoint":{"category":"view","evidence":[{"line":303}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"selectionCatalogCount(uint256,bytes32,uint8,uint64)","selector":"0x70d55bed","mutability":"view","endpoint":{"category":"view","evidence":[{"line":313}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":54}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":54}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7669,7 +7669,7 @@
         {"signature":"manifestRecord(bytes32)","selector":"0xadeac513","mutability":"view","endpoint":{"category":"view","evidence":[{"line":188}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
         {"signature":"requireCurrentManifest(bytes32,bytes32)","selector":"0x5f508739","mutability":"view","endpoint":{"category":"view","evidence":[{"line":194}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":74}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":74}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"verifyNextLeaves(bytes32,uint256)","selector":"0x5144ad80","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":142}]},"nativeValue":"0","stages":"write-default"}
       ],
       "otherEntrypoints": [],
@@ -7737,7 +7737,7 @@
         {"signature":"setApprovalForAll(address,bool)","selector":"0xa22cb465","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34]},
         {"signature":"setCollectionMaxSupply(uint256,uint256)","selector":"0x9700e1db","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":537}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"setCollectionStatus(uint256,uint8)","selector":"0x68abd161","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":493}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":250}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":250}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"symbol()","selector":"0x95d89b41","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenCollectionIdentity(uint256)","selector":"0xa6b638c9","mutability":"view","endpoint":{"category":"view","evidence":[{"line":630}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[15,16,22,28,34,45,84]},
         {"signature":"tokenData(uint256)","selector":"0xb4b5b48f","mutability":"view","endpoint":{"category":"view","evidence":[{"line":660}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[15,18,23,24,33,36,45,47,54,55,56,57,60,62,63,84]},
@@ -7767,7 +7767,7 @@
         {"signature":"coreCollectionFinalityFacts(uint256)","selector":"0x4eb4b6dc","mutability":"view","endpoint":{"category":"view","evidence":[{"line":57}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"evidenceProvider()","selector":"0x9aa96088","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopedCoreFinalityFacts((uint8,uint256,uint256,bytes32))","selector":"0xde5e2530","mutability":"view","endpoint":{"category":"view","evidence":[{"line":85}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":143}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":143}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -7804,7 +7804,7 @@
         {"signature":"moduleManifest()","selector":"0x3499a2fd","mutability":"view","endpoint":{"category":"view","evidence":[{"line":77}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"moduleManifestHash()","selector":"0x89f700f5","mutability":"view","endpoint":{"category":"view","evidence":[{"line":90}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[30,45,46]},
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":58}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":58}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)","selector":"0xa4285bba","mutability":"view","endpoint":{"category":"view","evidence":[{"line":123}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
       "otherEntrypoints": [],
@@ -7848,9 +7848,9 @@
         {"signature":"gasParameterInfo(bytes32)","selector":"0xec2ef90a","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,12,26,28,40,45,50,52]},
         {"signature":"governanceAuthority()","selector":"0xc81dbbe8","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[40,42,45,48,50,52,74]},
         {"signature":"mintManager()","selector":"0x7e4edf70","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,8,9,10,12,14,15,19,20,26,28,30,34,37,45,46,50,55,56,57,62,63,84]},
-        {"signature":"mintManagerCodeHash()","selector":"0x137dcf04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[34]},
+        {"signature":"mintManagerCodeHash()","selector":"0x137dcf04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[14,34]},
         {"signature":"moduleRegistry()","selector":"0xb95459e4","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,14,15,19,22,26,28,30,31,34,45,46,48,49,50,51,63,75]},
-        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,34,45,75]},
+        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,14,34,45,75]},
         {"signature":"nextSaleNonce()","selector":"0x7ba1cb7f","mutability":"view","endpoint":{"category":"view","evidence":[{"line":337}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[19,20,22,34,37,54,55,56,57,63]},
         {"signature":"owner()","selector":"0x8da5cb5b","mutability":"view","endpoint":{"category":"view","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":44}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[3,8,9,10,15,19,20,22,23,25,26,28,30,34,37,40,42,45,48,50,52,54,55,56,57,63,73,74]},
         {"signature":"paused()","selector":"0x5c975abb","mutability":"view","endpoint":{"category":"view","evidence":[{"line":341}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,34,43,48,50,51,55,84]},
@@ -7873,7 +7873,7 @@
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
         {"signature":"streamModuleInterfaceId()","selector":"0x1e414a33","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":135}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,30]},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":131}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":96}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":96}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":213}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]}
       ],
       "otherEntrypoints": [],
@@ -7936,7 +7936,7 @@
         {"signature":"signatureGasLimit()","selector":"0xd4e6bd64","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23]},
         {"signature":"signerEpoch()","selector":"0x5b814063","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,84]},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":93}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":93}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"totalProceeds(address)","selector":"0x4afb66d5","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37],"historicalProfile":"direct-original-products","historicalRequest":{"productKind":"erc20-fixed","kind":"transferOwnership"},"historicalAuthority":"product owner","historicalNativeValue":"0"}
       ],
@@ -7982,9 +7982,9 @@
         {"signature":"gasParameterInfo(bytes32)","selector":"0xec2ef90a","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,12,26,28,40,45,50,52]},
         {"signature":"governanceAuthority()","selector":"0xc81dbbe8","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[40,42,45,48,50,52,74]},
         {"signature":"mintManager()","selector":"0x7e4edf70","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,8,9,10,12,14,15,19,20,26,28,30,34,37,45,46,50,55,56,57,62,63,84]},
-        {"signature":"mintManagerCodeHash()","selector":"0x137dcf04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[34]},
+        {"signature":"mintManagerCodeHash()","selector":"0x137dcf04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[14,34]},
         {"signature":"moduleRegistry()","selector":"0xb95459e4","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,14,15,19,22,26,28,30,31,34,45,46,48,49,50,51,63,75]},
-        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,34,45,75]},
+        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,14,34,45,75]},
         {"signature":"nextExecutionNonce(bytes32,address)","selector":"0xb5db53cc","mutability":"view","endpoint":{"category":"view","evidence":[{"line":220}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[37]},
         {"signature":"nextSaleNonce()","selector":"0x7ba1cb7f","mutability":"view","endpoint":{"category":"view","evidence":[{"line":208}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[19,20,22,34,37,54,55,56,57,63]},
         {"signature":"offerDelegationConfiguration()","selector":"0xeec3225d","mutability":"view","endpoint":{"category":"view","evidence":[{"line":199}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -8019,7 +8019,7 @@
         {"signature":"streamModuleInterfaceId()","selector":"0x1e414a33","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":178}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,30]},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":170}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":174}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":160}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":160}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"syncCollectionContest(uint256)","selector":"0x5012f020","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":454}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[19,37,63]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":470}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]}
       ],
@@ -8049,7 +8049,7 @@
         {"signature":"isPaymentIntentNonceUsed(address,bytes32)","selector":"0x667adbed","mutability":"view","endpoint":{"category":"view","evidence":[{"line":413}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,34,37]},
         {"signature":"isStreamERC20PrimarySettlementAdapter()","selector":"0x2e82bb82","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":98}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"moduleRegistry()","selector":"0xb95459e4","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,14,15,19,22,26,28,30,31,34,45,46,48,49,50,51,63,75]},
-        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,34,45,75]},
+        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,14,34,45,75]},
         {"signature":"paymentIntentDigest((address,address,uint256,bytes32,bytes32,bytes32,uint64))","selector":"0xa710aa25","mutability":"view","endpoint":{"category":"view","evidence":[{"line":422}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,34,37,83]},
         {"signature":"paymentIntentRevocationDigest((address,bytes32,uint64))","selector":"0x00a75eb3","mutability":"view","endpoint":{"category":"view","evidence":[{"line":431}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[23,37]},
         {"signature":"permit2()","selector":"0x12261ee7","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[34,37]},
@@ -8067,7 +8067,7 @@
         {"signature":"settleERC20PrimarySaleWithPermit2((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32),(uint256,uint256,bytes),bytes)","selector":"0x203e0995","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":155}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
         {"signature":"settlementCodeHash()","selector":"0x1aaa9d15","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[34]},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":102}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":102}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8123,7 +8123,7 @@
         {"signature":"settle(uint256)","selector":"0x8df82800","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":363}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[21,22,23],"historicalProfile":"direct-original-products","historicalRequest":{"productKind":"english-auction","kind":"settle"},"historicalAuthority":"permissionless original settlement","historicalNativeValue":"0"},
         {"signature":"signerEpoch()","selector":"0x5b814063","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,84]},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":108}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":108}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"surplus()","selector":"0x13888565","mutability":"view","endpoint":{"category":"view","evidence":[{"line":468}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"totalBidEscrow()","selector":"0xe97a2270","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[84]},
         {"signature":"totalNativeProceeds()","selector":"0x829cab49","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[84]},
@@ -8273,7 +8273,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":322}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":326}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":334}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":334}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"timeParameter(bytes32)","selector":"0x4e92a03f","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"timeParameterIds()","selector":"0x1c404390","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"timeParameterInfo(bytes32)","selector":"0x5f2463b8","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -8343,7 +8343,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":118}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":122}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":130}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":130}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"totalRefundsReceived()","selector":"0x5a89f648","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"totalWithdrawn()","selector":"0x4b319713","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"updateControllerOwnerPin(address)","selector":"0x88444a3a","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":368}]},"nativeValue":"0","stages":"write-default"},
@@ -8404,7 +8404,7 @@
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":139}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":143}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
         {"signature":"subscriptionId()","selector":"0x09c1ba2e","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":151}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":151}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"updateSubscription(uint256,bool)","selector":"0x68e2dddb","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":240}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"vrfCoordinatorAddress()","selector":"0x67f16bcf","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
@@ -8457,7 +8457,7 @@
         {"signature":"requireCoverage(bytes32,bytes32,bytes32)","selector":"0x3df78f89","mutability":"view","endpoint":{"category":"view","evidence":[{"line":450}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[52]},
         {"signature":"roleRegistry()","selector":"0x08c73259","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[8,10,26,28,30,31,48]},
         {"signature":"setFamilyStatus(bytes32,uint8)","selector":"0x393871e6","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":257}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":120}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":120}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8501,7 +8501,7 @@
         {"signature":"refreshNextChunk(bytes32,uint32,bytes32)","selector":"0xd65b6af7","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":334}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"requireArtifactCoverage(bytes32,bytes32,bytes32)","selector":"0x5940ccfd","mutability":"view","endpoint":{"category":"view","evidence":[{"line":461}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"schemaRegistry()","selector":"0x4441bbd9","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,40,41,52,53]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":89}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":89}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8530,7 +8530,7 @@
         {"signature":"requireCoordinator(bytes32,uint256)","selector":"0x6d6c859f","mutability":"view","endpoint":{"category":"view","evidence":[{"line":166}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopeMembershipCodeHash()","selector":"0x72bf4294","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopeMembershipHost()","selector":"0x6643bc25","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":72}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":72}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8559,7 +8559,7 @@
         {"signature":"nonSanctionDiscoveryFacts((uint8,uint256,uint256,bytes32))","selector":"0xe491733e","mutability":"view","endpoint":{"category":"view","evidence":[{"line":178}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"requireCurrentRoutes((uint8,uint256,uint256,bytes32),bool)","selector":"0xb415e609","mutability":"view","endpoint":{"category":"view","evidence":[{"line":198}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopeEvidenceProvider()","selector":"0x19a8102d","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":111}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":111}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8582,7 +8582,7 @@
         {"signature":"requireCurrentRoute((uint8,uint256,uint256,bytes32))","selector":"0x293a19f5","mutability":"view","endpoint":{"category":"view","evidence":[{"line":109}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopeMembershipHost()","selector":"0x6643bc25","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"sourceSetForPlan(bytes32)","selector":"0x06d6f106","mutability":"view","endpoint":{"category":"view","evidence":[{"line":73}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":34}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":34}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8617,7 +8617,7 @@
         {"signature":"sourceScope()","selector":"0x31378bac","mutability":"view","endpoint":{"category":"view","evidence":[{"line":127}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"sourceSetDataHash()","selector":"0x7b67bc97","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"sourceSetManifestHash()","selector":"0x570f5962","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":104}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":104}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"tokenInventory()","selector":"0xcca36996","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenInventoryCodeHash()","selector":"0xa0a5a678","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenSeedForFinality(uint256)","selector":"0xec719c9e","mutability":"view","endpoint":{"category":"view","evidence":[{"line":223}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
@@ -8669,7 +8669,7 @@
         {"signature":"scopeMembershipHostCodeHash()","selector":"0x52b56dd3","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"snapshotHost()","selector":"0x977d5a5e","mutability":"view","endpoint":{"category":"view","evidence":[{"line":83}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12]},
         {"signature":"sourceGas()","selector":"0xd76bd0f1","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":59}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":59}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"tokenContentRoot(uint256,bytes32)","selector":"0xe62db288","mutability":"view","endpoint":{"category":"view","evidence":[{"line":146}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
       "otherEntrypoints": [],
@@ -8708,7 +8708,7 @@
         {"signature":"scopeMembershipProgress((uint8,uint256,uint256,bytes32))","selector":"0xef930397","mutability":"view","endpoint":{"category":"view","evidence":[{"line":224}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopeMembershipPublication((uint8,uint256,uint256,bytes32))","selector":"0x7f2d9025","mutability":"view","endpoint":{"category":"view","evidence":[{"line":236}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopeTokenAt((uint8,uint256,uint256,bytes32),uint256)","selector":"0x50660e8d","mutability":"view","endpoint":{"category":"view","evidence":[{"line":264}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":100}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":100}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"tokenInventory()","selector":"0xcca36996","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenScopeAt(uint256,uint256)","selector":"0xaea95ae1","mutability":"view","endpoint":{"category":"view","evidence":[{"line":211}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenScopeCount(uint256)","selector":"0xe4cccd67","mutability":"view","endpoint":{"category":"view","evidence":[{"line":206}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
@@ -8738,7 +8738,7 @@
         {"signature":"metadataHost()","selector":"0x83933c7a","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[68,70]},
         {"signature":"metadataHostCodeHash()","selector":"0xc385e19d","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"requireCurrentSelection()","selector":"0x4f4c7065","mutability":"view","endpoint":{"category":"view","evidence":[{"line":76}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":51}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":51}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -8784,7 +8784,7 @@
         {"signature":"setPlatformSigner(address)","selector":"0x3b79c44f","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":107}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23],"historicalProfile":"direct-original-products","historicalRequest":{"productKind":"native-fixed","kind":"setPlatformSigner"},"historicalAuthority":"product owner","historicalNativeValue":"0"},
         {"signature":"signerEpoch()","selector":"0x5b814063","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,84]},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":96}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":96}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"totalNativeProceeds()","selector":"0x829cab49","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[84]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37],"historicalProfile":"direct-original-products","historicalRequest":{"productKind":"native-fixed","kind":"transferOwnership"},"historicalAuthority":"product owner","historicalNativeValue":"0"}
       ],
@@ -8860,7 +8860,7 @@
         {"signature":"stateExportCount()","selector":"0x30d4fa1c","mutability":"view","endpoint":{"category":"view","evidence":[{"line":173}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"stateExportHashAt(uint256)","selector":"0xcd95bac9","mutability":"view","endpoint":{"category":"view","evidence":[{"line":178}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"supersedeStateExport(bytes32,bytes32,bytes32,string)","selector":"0xc1aff4f1","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":152}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":106}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":106}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"systemManifestBatchTailRule(address,bytes4)","selector":"0xffd6babe","mutability":"view","endpoint":{"category":"view","evidence":[{"line":920}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"systemManifestBootstrapState()","selector":"0x8a2d979b","mutability":"view","endpoint":{"category":"view","evidence":[{"line":1087}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[8,10,26,28,30,40,48,52]},
         {"signature":"systemManifestTailTriggerAt(uint256)","selector":"0xd83d70b6","mutability":"view","endpoint":{"category":"view","evidence":[{"line":983}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -8982,7 +8982,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":310}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":314}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":322}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":322}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"tokenContentRoot(uint256,bytes32)","selector":"0xe62db288","mutability":"view","endpoint":{"category":"view","evidence":[{"line":907}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenHTML(uint256)","selector":"0xb79bebaf","mutability":"view","endpoint":{"category":"view","evidence":[{"line":1010}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"tokenJSON(uint256)","selector":"0x8f7bb179","mutability":"view","endpoint":{"category":"view","evidence":[{"line":1014}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -9048,7 +9048,7 @@
         {"signature":"renounceOwnership()","selector":"0x715018a6","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":62}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]},
         {"signature":"retireLedgerWriter(address)","selector":"0x59e90bf1","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":226}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[45,46]},
         {"signature":"setLedgerWriter(address,bool)","selector":"0x83e3452a","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":214}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":198}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":198}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]},
         {"signature":"voidAuthorization(address,bytes32)","selector":"0x1745af5c","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":550}]},"nativeValue":"0","stages":"write-default"}
       ],
@@ -9164,7 +9164,7 @@
         {"signature":"setPhaseExecutor(uint256,bytes32,address,bool)","selector":"0xc473ba18","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":326}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"setPhaseExecutorWithGrace(uint256,bytes32,address,bool,uint64)","selector":"0xdef72e30","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":336}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[51],"supportProfiles":["mint-policy-grace"]},
         {"signature":"setPhasePaused(uint256,bytes32,bool)","selector":"0x846bb3a1","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":404}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":211}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":211}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]},
         {"signature":"voidMintOffer((uint256,address,address,uint256,uint256,bytes32,address,address,uint256,bytes32,uint64,uint64),uint8,bytes)","selector":"0xc4652a5e","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":251}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[37,63]},
         {"signature":"voidMintSaleAuthorization((uint256,address,address,uint256,bytes32,bytes32,uint8,bytes32,bytes32,uint8,bytes32,bytes32,bytes32,bytes32,address,address,address,uint256,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes)","selector":"0x43297c4a","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":267}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[20]},
@@ -9198,7 +9198,7 @@
         {"signature":"gateConfigHash()","selector":"0xcd0bdcdd","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[18,19,35,48,50,51,61,63]},
         {"signature":"governanceAuthority()","selector":"0xc81dbbe8","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[40,42,45,48,50,52,74]},
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":63}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":63}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"ticketSigner()","selector":"0xb1b709cc","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"ticketSignerKind()","selector":"0xc05a7986","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)","selector":"0xa4285bba","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":101}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -9241,7 +9241,7 @@
         {"signature":"registrationChainHash()","selector":"0x7e669031","mutability":"view","endpoint":{"category":"view","evidence":[{"line":349}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"setModuleRegistryManifest(bytes32,string)","selector":"0x7ba46615","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":279}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"setModuleStatus(address,uint8,bytes32,string)","selector":"0x96a6e18b","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":225}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":358}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":358}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -9287,9 +9287,9 @@
         {"signature":"gasParameterInfo(bytes32)","selector":"0xec2ef90a","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,12,26,28,40,45,50,52]},
         {"signature":"governanceAuthority()","selector":"0xc81dbbe8","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[40,42,45,48,50,52,74]},
         {"signature":"mintManager()","selector":"0x7e4edf70","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[2,6,8,9,10,12,14,15,19,20,26,28,30,34,37,45,46,50,55,56,57,62,63,84]},
-        {"signature":"mintManagerCodeHash()","selector":"0x137dcf04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[34]},
+        {"signature":"mintManagerCodeHash()","selector":"0x137dcf04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[14,34]},
         {"signature":"moduleRegistry()","selector":"0xb95459e4","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,14,15,19,22,26,28,30,31,34,45,46,48,49,50,51,63,75]},
-        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,34,45,75]},
+        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,14,34,45,75]},
         {"signature":"nativeSaleCreditPage(uint256,uint256,uint256)","selector":"0xa45b0e1c","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[15,58]},
         {"signature":"nativeSaleCreditState()","selector":"0xabbbb5f7","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[15,58]},
         {"signature":"nativeSaleLifecycleBinding(bytes32)","selector":"0x608a66bf","mutability":"view","endpoint":{"category":"view","evidence":[{"line":187}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -9326,7 +9326,7 @@
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
         {"signature":"streamModuleInterfaceId()","selector":"0x1e414a33","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":177}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,30]},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":173}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":164}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":164}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"sweepNativeSurplus(uint256,bytes32)","selector":"0xf36103bb","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":557}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":549}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]},
         {"signature":"unpauseAdapter(bytes32)","selector":"0x9469f057","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":445}]},"nativeValue":"0","stages":"write-default"},
@@ -9371,7 +9371,7 @@
         {"signature":"raiseGasParameter(bytes32,uint256)","selector":"0x5c0df7da","mutability":"nonpayable","endpoint":{"category":"review-required"},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[34,37]},
         {"signature":"requireCurrentCheckpoint(bytes32)","selector":"0x62865f44","mutability":"view","endpoint":{"category":"view","evidence":[{"line":224}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"routerCodeHash()","selector":"0xa032b9c5","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":112}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":112}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"tokenInventory()","selector":"0xcca36996","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
       "otherEntrypoints": [],
@@ -9456,7 +9456,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":124}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":128}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":136}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":136}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"verifyRecoveryOwnerEvidence((uint8,uint256,uint256,bytes32),bytes32,bytes32)","selector":"0x20279cd8","mutability":"view","endpoint":{"category":"view","evidence":[{"line":505}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
       "otherEntrypoints": [],
@@ -9496,7 +9496,7 @@
         {"signature":"streamModuleSchemaHash()","selector":"0xdbff3398","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":83}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"view","endpoint":{"category":"view","evidence":[{"line":87}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":79}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":214}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":214}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"updateAdminContract(address)","selector":"0x388d2c24","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":91}]},"nativeValue":"0","stages":"write-default"}
       ],
       "otherEntrypoints": [],
@@ -9533,7 +9533,7 @@
         {"signature":"isStreamPlatformTokenCustodySettlement()","selector":"0x6adba907","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":592}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"isStreamPrimarySaleSettlement()","selector":"0xa2422a11","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":130}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"moduleRegistry()","selector":"0xb95459e4","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,14,15,19,22,26,28,30,31,34,45,46,48,49,50,51,63,75]},
-        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,34,45,75]},
+        {"signature":"moduleRegistryCodeHash()","selector":"0xe2f956c0","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[7,14,34,45,75]},
         {"signature":"nativeCustodyFactsHash(bytes32)","selector":"0x4dd52e0e","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"nativeSupplementalResult(bytes32)","selector":"0x36968248","mutability":"view","endpoint":{"category":"view","evidence":[{"line":626}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"officialSettled(bytes32,bytes32,address,address)","selector":"0xabf7c729","mutability":"view","endpoint":{"category":"view","evidence":[{"line":181}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -9570,7 +9570,7 @@
         {"signature":"supplementalFloorKey(bytes32)","selector":"0x704404f1","mutability":"view","endpoint":{"category":"view","evidence":[{"line":622}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"supplementalPurchaseConsumed(bytes32)","selector":"0x65d477ea","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"supplementalPurchaseKey(address,bytes32)","selector":"0x2ea4f228","mutability":"view","endpoint":{"category":"view","evidence":[{"line":257}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":142}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":142}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"totalOfficialSettled(address)","selector":"0x7fe3b24d","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"walletCodeHash()","selector":"0xeecff6cb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
@@ -9667,7 +9667,7 @@
         {"signature":"streamModuleInterfaceId()","selector":"0x1e414a33","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":180}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,30]},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":176}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":184}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":168}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":168}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"sweepNativeSurplus(uint256,bytes32)","selector":"0xf36103bb","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":883}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"totalLiabilities()","selector":"0xf73579a9","mutability":"view","endpoint":{"category":"view","evidence":[{"line":530}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[15]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":558}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]},
@@ -9734,7 +9734,7 @@
         {"signature":"streamModuleSupersedes()","selector":"0x28746186","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":452}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamModuleType()","selector":"0x3cc00767","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":436}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,12,30]},
         {"signature":"streamModuleVersion()","selector":"0x99d8b2df","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":440}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[6,30]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":113}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":113}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -9824,7 +9824,7 @@
         {"signature":"scriptBundleChunk(bytes32,uint256)","selector":"0x13f9db29","mutability":"view","endpoint":{"category":"view","evidence":[{"line":453}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scriptBundleFacts(bytes32)","selector":"0xa1f08183","mutability":"view","endpoint":{"category":"view","evidence":[{"line":503}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"sourceBindings()","selector":"0x50c4ca08","mutability":"view","endpoint":{"category":"view","evidence":[{"line":263}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":154}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":154}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"terminalEncodingBinding()","selector":"0x038dcc1a","mutability":"view","endpoint":{"category":"view","evidence":[{"line":163}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"terminalEntropyProfile()","selector":"0xc4bf6e67","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":159}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"terminalPolicyBinding()","selector":"0x074dcfce","mutability":"view","endpoint":{"category":"view","evidence":[{"line":167}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
@@ -9895,7 +9895,7 @@
         {"signature":"setCreditProducer(address,bool)","selector":"0x20b21f1a","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":495}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
         {"signature":"submitEscrowRecoveryConsent(address,bytes32,bytes32,uint64,bytes)","selector":"0x0240de79","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":392}]},"nativeValue":"0","stages":"write-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":135}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":135}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"surplus(address)","selector":"0x176d698e","mutability":"view","endpoint":{"category":"view","evidence":[{"line":568}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"totalOwed(address)","selector":"0xd7e9ec04","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[84]},
         {"signature":"walletCodeHash()","selector":"0xeecff6cb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"}
@@ -9983,7 +9983,7 @@
         {"signature":"setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)","selector":"0x829477ad","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"line":598}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[73]},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view","evidence":[{"line":542}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
         {"signature":"splitFactoryContract()","selector":"0x744d3fc5","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":184}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":184}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]}
       ],
       "otherEntrypoints": [],
@@ -10015,7 +10015,7 @@
         {"signature":"selectCurrentWithRecord(uint256,bytes32,bytes32,bytes32,uint64,((bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),(bytes32,bytes32,uint8,(uint8,bytes32,string,address,bytes32),((uint8,(uint8,string,(bool,string,bytes32)),string),(uint8,(uint8,string,(bool,string,bytes32)),string),(uint8,(uint8,string,(bool,string,bytes32)),string),(uint8,(uint8,string,(bool,string,bytes32)),string),(uint8,(uint8,string,(bool,string,bytes32)),string),(uint8,(uint8,string,(bool,string,bytes32)),string)),uint32,uint32,bool,(bool,string,bytes32),bool,uint8,bytes32)))","selector":"0x36162382","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":90}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"selectionLock(uint256,bytes32)","selector":"0x5a9c542c","mutability":"view","endpoint":{"category":"view","evidence":[{"line":248}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"selectionLockTransition(uint256,bytes32,bytes32,uint64)","selector":"0xc25dc8ff","mutability":"view","endpoint":{"category":"view","evidence":[{"line":220}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":67}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":67}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -10056,7 +10056,7 @@
         {"signature":"roleRedundancy(bytes32)","selector":"0xd5aa1650","mutability":"view","endpoint":{"category":"view","evidence":[{"line":319}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopedRole(bytes32,bytes32)","selector":"0x8a28138f","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":359}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"scopedRoleMutationState(bytes32,bytes32)","selector":"0x36333342","mutability":"view","endpoint":{"category":"view","evidence":[{"line":265}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":71}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":71}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"terminalFreezeVetoMembershipCount(address)","selector":"0xfce20261","mutability":"view","endpoint":{"category":"view","evidence":[{"line":232}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":62}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,23,34,37]}
       ],
@@ -10125,7 +10125,7 @@
         {"signature":"snapshotTokenRoyaltyAtMint(uint256,uint256,bytes32,bytes32,bytes32,bytes32)","selector":"0xc8323dfa","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":773}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"splitFactory()","selector":"0x5720babb","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[22,73,74,84]},
         {"signature":"supportsEconomicContinuity(address,bytes32,bytes32)","selector":"0xd6d78d9a","mutability":"view","endpoint":{"category":"view","evidence":[{"line":971}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[74]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":110}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"view","endpoint":{"category":"view","evidence":[{"line":110}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"tokenRoyalty(uint256)","selector":"0x1ff4a420","mutability":"view","endpoint":{"category":"view","evidence":[{"line":526}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"transferOwnership(address)","selector":"0xf2fde38b","mutability":"nonpayable","endpoint":{"category":"owner","allowedCaller":"current owner; additional body guards remain applicable","evidence":[{"path":"smart-contracts/vendor/openzeppelin/Ownable.sol","line":70}]},"nativeValue":"0","stages":"write-default","lexicalClientCandidates":[22,23,34,37]}
       ],
@@ -10180,7 +10180,7 @@
         {"signature":"registrationTransition((string,uint8,bytes32,bytes32,bytes32,string,uint32),bytes32[])","selector":"0x0194eb0c","mutability":"view","endpoint":{"category":"view","evidence":[{"line":171}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"setDocumentStatus(bytes32,uint8)","selector":"0x39eb4af4","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":93}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"statusTransition(bytes32,uint8)","selector":"0xb805702a","mutability":"view","endpoint":{"category":"view","evidence":[{"line":186}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":47}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":47}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -10236,7 +10236,7 @@
         {"signature":"splitWalletImplementationCodeHash()","selector":"0x1b858cf4","mutability":"view","endpoint":{"category":"view"},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[77]},
         {"signature":"splitWalletInitCodeHash()","selector":"0x57de32be","mutability":"view","endpoint":{"category":"view","evidence":[{"line":156}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[77]},
         {"signature":"splitWalletRuntimeCodeHash()","selector":"0x914575a9","mutability":"view","endpoint":{"category":"view","evidence":[{"line":161}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[73,77]},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":111}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":111}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"walletAt(uint256)","selector":"0x468a0d4b","mutability":"view","endpoint":{"category":"view","evidence":[{"line":246}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"walletFor(bytes32)","selector":"0x7730ab1a","mutability":"view","endpoint":{"category":"view","evidence":[{"line":283}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[77]}
       ],
@@ -10314,7 +10314,7 @@
         {"signature":"streamSystemManifestPointer()","selector":"0x7b3a36b1","mutability":"view","endpoint":{"category":"view","evidence":[{"line":233}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[30,45]},
         {"signature":"streamSystemManifestPointerAt(uint256)","selector":"0x893aae03","mutability":"view","endpoint":{"category":"view","evidence":[{"line":246}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"streamSystemManifestPointerCount()","selector":"0x5b1e1cba","mutability":"view","endpoint":{"category":"view","evidence":[{"line":241}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":174}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":174}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]}
       ],
       "otherEntrypoints": [],
       "fallbackRouting": null
@@ -10344,7 +10344,7 @@
         {"signature":"selectCurrent(uint256,bytes32,bytes32,bytes32,uint64,((bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),(bytes32,bytes32,bytes32,uint8,(string,(uint8,bytes32,uint64,bytes32,string),(uint8,uint32,uint32),string,(uint8,bytes32,string,(string,(bytes32,uint8,string,(string,bytes32))[],bytes32)),(uint8,bool,uint256,uint256,bool,(uint256,uint256),bool,(uint256,uint256)),(uint8,uint256,uint256,string),string,bool,string,string[],(uint8,uint8,string,string)[],(uint8,uint8,string)[]),(string,uint32))))","selector":"0x2e60825f","mutability":"nonpayable","endpoint":{"category":"review-required","evidence":[{"line":54}]},"nativeValue":"0","stages":"write-default"},
         {"signature":"selectionLock(uint256,bytes32)","selector":"0x5a9c542c","mutability":"view","endpoint":{"category":"view","evidence":[{"line":236}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
         {"signature":"selectionLockTransition(uint256,bytes32,bytes32,uint64)","selector":"0xc25dc8ff","mutability":"view","endpoint":{"category":"view","evidence":[{"line":208}]},"nativeValue":"eth_call; no transfer","stages":"read-default"},
-        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":49}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
+        {"signature":"supportsInterface(bytes4)","selector":"0x01ffc9a7","mutability":"pure","endpoint":{"category":"pure","evidence":[{"line":49}]},"nativeValue":"eth_call; no transfer","stages":"read-default","lexicalClientCandidates":[12,14,22,26,28,40,43,45,48,50,52,58,64,66,70,74,77]},
         {"signature":"workSelectionAt(uint256,bytes32,uint64)","selector":"0x8705b559","mutability":"view","endpoint":{"category":"view","evidence":[{"line":172}]},"nativeValue":"eth_call; no transfer","stages":"read-default"}
       ],
       "otherEntrypoints": [],

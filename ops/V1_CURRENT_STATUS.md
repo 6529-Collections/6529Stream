@@ -12,74 +12,77 @@ The supported RC1 is already deployed on Sepolia from
 `569bf87f1fa808787d324f6e1582924b5ccf1d40`. The expanded full-v1 candidate is not
 complete. No new funding is required. Automatic approval review has blocked
 local inherited/global primary-freeze implementation pending a more specific
-owner approval. The separate ERC-20 payable reveal-fee implementation is also
-blocked by automatic review even after the owner explicitly approved that local
-implementation. The exact unapplied patch is prepared and an artifact-specific approval is pending; other work continues.
+owner approval. The separate ERC-20 payable reveal-fee implementation now has renewed exact-artifact
+approval and is applied locally for runtime validation; it is not yet integrated
+or deployed. Other held proposals remain separate.
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `421104a6`. Whole-source ABI103 checks all 2,776
-Solidity sources at `5a68721b` with zero errors in 27.515 seconds. The subsequent
-change adds an opt-in four-case curated-purchase fixture, separately type-checked.
-These checks do not establish runtime acceptance. Original RC1 remains unchanged.
+Latest integrated source: `d56e13ff`. ABI104 checks all 2,796 Solidity sources,
+including compiler method identifiers, with zero errors in 28.250 seconds.
+Original supported RC1 remains unchanged. Source checks do not establish runtime
+acceptance for the combined graph.
 
-- Recovered delegation is source integrated (`ccbaf41f`): original grants,
-  revocations, uses, mixed consent history and repeated imports, with 43 authored
-  cases. The explicitly supported seven-owner feature graph is now 127. Recovered
-  op24/personhood/C2PA composition is the next active batch; corrected, multiple
-  and collaborator combinations remain explicit missing profiles.
-- Original personhood proof production (`8972da42`) and its conservation consumer
-  (`abbf0cb7`) are source integrated. The consumer authenticates the actual selected
-  Artist graph and preserves distinct original RESOLVED-summary and WAIVER-record
-  hash domains, registration versus operative identity and imported origins.
-  All 16 focused reader tests pass on `fbff83a3` after a test-only chain restoration
-  correction; provider19 and actual Artist/current paid acceptance remain pending.
-  Its additive getter exposes the original ten configuration pins and original
-  gas configurations without rewriting historical provider evidence.
-- Scoped inventory, archive coverage, metadata, STATIC, V2 policy provider and
-  profile Discovery are source integrated (`94a987a8`, including both dependency
-  commits). The 85 authored cases have not run as a full scoped ceremony. Five
-  final selected products fit; the combined provider has only two bytes of runtime
-  margin at 24,574. Required VIEW and prospective pre-sale reference remain open.
-- Snapshot/reference22 passes its recorded capture. V2 manifest17, provider-read7
-  and actual Reference component3 pass separate source-specific captures. The last
-  uses actual Metadata/Schema/Store/Membership with documented typed surrounding
-  components; large fixture gas is not transaction-capacity acceptance.
-- Joined Artist read factoring is integrated (`f9f46535`), preserving original
-  ABI/storage. Attribution remains 25,369 runtime bytes on its capture. A joined
-  eight-product size check at `70c0d9c3` also found Identity26,351 and Payout25,800
-  over the limit. Independent read-only factoring is active for both. Payout's
-  first new selected gate fits at24,311; this repair is not yet integrated.
-  An automatic-review denial stopped a separate replay-write relocation before
-  execution. That exact proposal remains unapplied; original host writes remain.
-- Router24,290 passes all100 focused cases, including nine 256-input properties,
-  on frozen `3e43c38a`. Conservation73 and original-auction11 retain their separate
-  passing evidence. Frozen universal6 is entering runtime verification with typed
-  Artist/metadata boundaries. Actual DIRECT7, Artist3 and complete current/Safe
-  acceptance require the fitting joined graph. Cold whole-purchase gas remains open.
-- Actual metric native16 remains seven passes/two failures from downstream
-  currentness/read capacity. Original publication costs15,664,908 gas including
-  intrinsic cost. The next fixed byte/context reader retains all original fresh
-  checks and limits; no new acceptance or successful retry is claimed.
-- All29 original DIRECT mutable product calls, including administrative variants,
-  are supported by direct, legacy-Safe and indexed-Safe clients (`45eb2bfa`). Root
-  package validation passes1,390 tests, including generation/build/strict types,
-  in123.314seconds. Original ABI98 evidence remains pinned. Whole37-role/Artist60
-  caller coverage and additional op24 workflows are being built; RPC tests do not
-  establish actual contract/Safe execution.
-- Museum original RIGHTS history now joins first-sale evidence (`9c181e2e`), with
-  73 root checks passing. Prior native packet60 and DIRECT76 captures remain
-  separate and overlap other suites. The new immutable-provider configuration
-  profile is being built; all19 requirements and unavailable documentary joins
-  remain explicit. Synthetic controls are not a captured acquisition packet.
-- Current Safe/delegated and contract-signer fixtures (`46c27181`, `05e06c29`)
-  now construct one actual graph per recipe and explicitly bind the paid-sale
-  conservation floor where required. The curated4 fixture (`421104a6`) retains
-  explicit typed surrounding components. Source-reviewed recipes await execution.
-  Mint is extending actual-stateful/fuzz tests while this frozen testing proceeds.
+- Recovered delegation, attestation, personhood and C2PA history are source
+  integrated (`ccbaf41f`, `603f93e2`), with explicit supported feature mask255.
+  The latest attestation batch adds50 authored cases. Original content consent,
+  royalty freeze and content freeze17/20/21 are the active next batch; broader
+  corrected/multiple/collaborator histories remain open.
+- Repeated Artist selection is source integrated (`cc19b90a`). Its exact native
+  capture passes13 of14 cases, including all eight original cases. The new cold
+  repeated-migration case fails the existing read reservation within400k. A
+  compact authenticated origin read and bounded completion-read fix are being
+  built; original caps and source/replay checks remain acceptance requirements.
+- Artist read/encoding repairs are integrated (`9574c5ce`, `f41d9af9`,
+  `c1a82790`), as is the fully validated decoder projection (`63817dfe`). A joined
+  31-contract gate at `d56e13ff` finds30 runtime/bare-creation products fitting:
+  Attribution23,989, Identity23,393 and Payout23,520. IdentityWriterExtension is
+  24,577, one byte over; a separately reached recovery library is24,822. Both
+  are assigned repairs. Linked closure, constructor arguments and complete
+  current execution remain separate. The denied replay-write relocation is inert.
+- Genuine conservation consumer evidence now includes reader16/provider19 at
+  `fbff83a3`, and provider22 at `25f4d7fe` after correcting original OFFCHAIN
+  empty-script facts (`beda5326`). Five actual Safe/op24/General join scenarios
+  are source integrated (`9cddfde7`); their runtime remains pending.
+- Fresh universal6 passes6/6 on `f9de5030` using an explicitly new WAIVED fixture
+  configuration: floor/genesis CALL2m, PRODUCER1m, READ300k, unchanged Manager4m.
+  All170 compiled production products are byte-identical to the retained older
+  6m capture, which remains5/6. The test configuration does not lower a live
+  governed row or prove documentary/500k collector capacity. Actual Artist and
+  surrounding typed boundaries remain documented in the capture.
+- Scoped inventory/coverage/metadata/STATIC/V2 provider/Discovery source remains
+  integrated (`94a987a8`), with85 authored cases and selected combined provider
+  24,574. Prospective COLLECTION reference is being built with explicit simulated
+  pre-mint inputs; actual-token finality evidence is separate. Required VIEW is
+  still open. Prior reference22, V2 manifest17/provider7/component3 and Router100
+  retain only their recorded source-specific acceptance.
+- Metric canonical input repair (`0afbab61`) passes44 scoped cases, including
+  five256-input fuzz cohorts. Its isolated write/read costs12.67m/8.44m gas.
+  The actual publisher's earlier native16 remains7PASS/2FAIL; neither a successful
+  full-path retry nor original transaction-envelope acceptance is claimed.
+- Personhood callers and a37-role Safe inventory are source integrated
+  (`d56e13ff`):90 concrete candidates,1,003 mutations and3,136 reads, with caller
+  classification and evidence status. Root's complete client package passes
+  1,448 tests plus generation/build/strict types in124.620seconds. These RPC/client
+  tests do not prove deployed Safe execution. Complete recovered-profile clients
+  are being built against ABI104 and original compiler library selectors.
+- Museum immutable provider configuration is integrated (`66291ab5`), with48
+  root checks passing; RIGHTS73 and earlier packet/DIRECT captures stay separate.
+  Actual native personhood capture/packet joining is being built. All19 adopted
+  requirements and missing actual documentary joins remain explicit.
+- Expanded actual-stateful/fuzz source is integrated (`6f6fc7bd`):20 mandatory
+  actions and14 authored fuzz/invariant/sensitivity cases. A separate genuine
+  documentary purchase/Safe/history/stateful fixture batch is ready for review;
+  neither campaign has runtime acceptance yet.
+- Automatic review accepted the refreshed local ERC20 reveal-allowance packet
+  `3e0072f0` after exact ABI/signing/storage-prefix evidence. It is applied in an
+  isolated branch on `68498f8d`; runtime/size checks and current-route cases are
+  next. It is not integrated or deployed. Original denial artifacts are retained;
+  unrelated primary-freeze/collaborator/replay proposals remain held.
 
-Complete current-stack/Safe, stateful/fuzz/gas/CI acceptance, source freeze and
-matching testnet demonstration remain required. Expanded v1 is incomplete.
+Complete current-stack/all-call Safe, stateful/fuzz/gas/CI acceptance, source
+freeze and matching testnet demonstration remain required. Expanded v1 is incomplete.
+
 
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling

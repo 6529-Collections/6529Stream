@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `421104a6`: recovery/delegation/personhood, full scoped provider and all29 DIRECT client calls source integrated. ABI103:2,776/zero errors; root clients1,390. Full runtime acceptance remains pending. |
+| Source checkpoint | `d56e13ff`: recovered feature255, Artist capacity/decoder repairs, metric input, personhood/Safe clients and conservation fixes source integrated. ABI104:2,796/zero errors; root clients1,448. Full runtime acceptance remains pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,53 +29,51 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest source is `421104a6`; ABI103 checks2,776 sources at `5a68721b` with zero
-errors. Root clients1,390 and Museum RIGHTS73 pass. Separate Router100,
-reference22, V2 manifest17/provider7/actualReference3 and personhood-reader16
-captures pass on their recorded sources. Metric native16 remains7PASS/2FAIL.
-Full current acceptance awaits fitting joined Artist and remaining features.
+Latest source `d56e13ff`; ABI1042,796/zero errors. Root clients1,448 and Museum
+provider48 pass. Genuine fresh WAIVED6 and OFFCHAIN-provider22 pass separate
+recorded captures. Thirty of31 joined Artist hosts fit; writer is one byte over,
+and a reached recovery library needs its assigned read extraction. Metadata
+repeated-selection13/14 and actual metric7/2 remain explicit runtime failures.
 
-- A: `D:/repos/6529Stream-artist-attribution-joined` delivered allowed-only13ab
-  (`f9f46535`) and count-only7153 (`30820c0a`). Attribution25,369 remains over.
-  Fit joined Identity through equivalent terminal read declarations; preserve
-  all original bodies, constructor pins, capability bits and writes. The exact
-  replay-write relocation proposal was auto-denied and remains inert/unapplied.
-- B: V2 provider/reference source and27 separate focused cases are complete.
-  Fit Payout via fixed typed read/ABI worker; first selected host24,311 fits.
-  Preserve Burn-owned feature returns and every mutation/checkpoint/import body.
-- C: full scoped dependency closure is integrated through `94a987a8`. Build the
-  measured metric-only canonical byte/context projection and isolated integrity
-  frame preserving fresh checks and limits. Required VIEW/prospective reference
-  remain separate next feature batches. No unchanged native16 retry.
-- Mint: build actual-current stateful/fuzz source with mandatory progress,
-  original Safe/nonces/receipt/liability and exact retry oracles. Keep the old
-  DIRECT7 diagnostic compile isolated; it cannot accept oversized actual Artist.
-- Burn: recovered delegatione56 is integrated as `ccbaf41f`, explicit127. Build
-  combined original op24/personhood/C2PA on that exact joined base; proposed128
-  capability/255 remains unadmitted until reviewed. Own codecs/capability lines;
-  A/B own disjoint read capacity. Complete broader profiles remain open.
-- Museum: historical RIGHTS is integrated `9c181e2e`, root73 checks pass. Build
-  an additive immutable originalConfiguration capture at36c without relabeling
-  old8bb or implying paid/current acceptance; preserve all19requirements.
-- Clients: all29 DIRECT controls are integrated `45eb2bfa`, root1,390 passes.
-  Build whole37-role/Artist60 selector/Safe inventory and typed personhood calls
-  against exact70c0/ABI102. Original older fixtures remain source-specific.
-- Conservation/native `01a0be37-2432-7a63-8820-fc42f159eb1d`: personhood/config
-  consumer36c+fbff integrated `abbf0cb7`/`5a68721b`; reader16 passes. Finish scoped
-  provider19 and authored actual op24 join. Frozen universal6 codegen completed;
-  genuine native/size/closure verification and execution are pending. Artist3
-  awaits fitting source. No duplicate broad compiler.
-- Testing: current fixtures are integrated through `421104a6`. Prepare42 focused
-  current/commerce cases plus22 unit companion; complete acceptance means every
-  test/current host and external Safe suites, with explicit gaps. Capture genuine
-  final-source closure only after fitting Artist; Mint owns stateful/fuzz.
-- Independent review `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: prepare a refreshed
-  inert ERC20 reveal-fee packet against current source, correcting callback/
-  constructor integration and pre-transfer fee-drift oracle. Original9b807 denial
-  remains unchanged; no implementation write or retry has been authorized by
-  automatic review. Root will inspect exact evidence before a renewed review.
+- A: finish repeated Metadata400k fix with authenticated immutable-origin
+  certificate and bounded completion reads; retain original caps/checks. Include
+  shared-Owner impact and IdentityWriter24,577 in the final selected size gate.
+  Previous pure-key2e32 is integrated; denied replay-write relocation stays inert.
+- B: finish fixed original-evidence read extraction for recovered Payout library
+  (selected24,822 to23,465), then focused frozen native acceptance. Original
+  Payout/decoder repairs are integrated; preserve all host writes/validation order.
+- C: metric050 is integrated with44 scoped passes; actual7/2 is not relabeled.
+  Build genuine prospective COLLECTION reference using explicit named simulation
+  vectors, actual source/renderer pins and archive proof; required VIEW follows.
+  Do not invent finalized tokens or substitute this for actual-token finality.
+- Mint: actual20-action stateful source is integrated. Finish reviewed genuine
+  documentary purchase/Safe/history and nine-action stateful batch; original
+  transaction envelope stays. New configuration SOURCE1m, floorPRODUCER4m/CALL6m,
+  masterMANIFEST500k/COVERAGE800k is explicit, runtime acceptance pending.
+- Burn: combined recovered attestation9a is integrated, feature255. Complete
+  original17/20/21 plus typed WithConsents royalty witnesses. Coordinate A's
+  additive read API and B's pure decoder/read worker; broader profiles stay open.
+- Museum: provider25d is integrated, root48 passes. Build native personhood
+  source/capture and acquisition joins preserving original/current origin,
+  supersession, distinct waiver/summary hashes and all19 requirements.
+- Clients: personhood/Safe inventory01e is integrated, root1,448 passes. Build
+  exact recovered feature255/op60 workflows using ABI104 method identifiers,
+  complete provenance and original Registry simulation. No future511 admission.
+- Conservation/native `01a0be37-2432-7a63-8820-fc42f159eb1d`: freshWAIVED6 and
+  OFFCHAIN22 are independently runtime accepted within their documented typed
+  boundaries. Prepare actual five personhood scenarios with Testing's closure;
+  review Mint documentary joins without duplicating its implementation.
+- Testing: retain exact Metadata13/1 capture and source/size/gas failure evidence.
+  Refresh current42 and whole-current/all-call Safe inventory on ABI104; launch
+  genuine final fitting closure after A/B repairs. Mint owns stateful campaigns.
+- Independent `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: renewed exact-artifact
+  automatic review accepted ERC20 patch3e0072f0; root applied it on isolated
+  `D:/repos/6529Stream-erc20-native-allowance-reviewed`, base68498f8d. Own its
+  coherent source commit, selected size and focused runtime/Safe/permit/refund
+  checks; add missing current entropy-mode cases. Original denials stay preserved,
+  but this refreshed packet is no longer implementation-held. No deployment.
 
-Root owns shared interfaces, architecture, integration and final closure.
+Root owns architecture, shared interfaces, integration and final closure.
 No funding or onchain action is needed. Other held artifacts remain unapplied.
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329
