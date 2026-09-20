@@ -228,7 +228,9 @@ contract StreamMetadataServingTest is CharacterizationTestBase, OfficialSafeFixt
             original == artist.finalityRegistry() && codeHash == original.codehash,
             "exact fixed facade binding"
         );
-        bytes32 json = keccak256(bytes(router.tokenMetadataJSON(address(core), 91)));
+        // Compare the same locked historical view before and after the original facade disappears.
+        // Ordinary rendering intentionally uses live attribution and this fixture lacks displayBinding.
+        bytes32 json = keccak256(bytes(router.historicalTokenMetadataJSON(address(core), 91)));
         bytes32 collection = keccak256(bytes(router.contractURIForCollection(address(core), 1)));
         StreamMetadataRecoveryRoutes.Pointer memory pointer;
         pointer.target = original;
@@ -599,9 +601,10 @@ contract StreamMetadataServingTest is CharacterizationTestBase, OfficialSafeFixt
     }
 
     function testHistoricalJSONAndDataURIUseIndependentExactGoldenBytes() public {
+        _requireLiteralGoldenContext();
         router.lockArtistIdentity(1);
         string memory expected =
-            '{"name":"Name #7","description":"Description","image":"ipfs://image","metadata_schema_version":"6529stream-v1","metadata_state":"final","token_id":91,"collection_id":1,"collection_serial":7,"hash":"0x66a80b61b29ec044d14c4c8c613e762ba1fb8eeb0c454d1ee00ed6dedaa5b5c5","token_data_base64":"AP9lKQ==","attributes":[],"artist":"0x00000000000000000000000000000000000a11ce","artist_identity_hash":"0x5e0eb9eddf3ac94ebc81731c09097e44d4202ba2ceec0a6936e8e88b2786aaa3","artist_acceptance_hash":"0x75d3033f7e9d1f0bd9d5c105f5569ce13edb3f1789a0856f8bbe82961ea1aac9","animation_url":"https://example.test/91"}';
+            '{"name":"Name #7","description":"Description","image":"ipfs://image","metadata_schema_version":"6529stream-v1","metadata_state":"final","token_id":91,"collection_id":1,"collection_serial":7,"hash":"0x66a80b61b29ec044d14c4c8c613e762ba1fb8eeb0c454d1ee00ed6dedaa5b5c5","token_data_base64":"AP9lKQ==","attributes":[],"artist":"0x00000000000000000000000000000000000a11ce","artist_identity_hash":"0x5e0eb9eddf3ac94ebc81731c09097e44d4202ba2ceec0a6936e8e88b2786aaa3","artist_acceptance_hash":"0x75d3033f7e9d1f0bd9d5c105f5569ce13edb3f1789a0856f8bbe82961ea1aac9","animation_url":"https://example.test/91","properties":{"stream":{"render_state":"final","citation":"eip155:31337/erc721:0x5615deb798bb3e4dfa0139dfa1b3d433cc23b72f/91"}}}';
         require(
             keccak256(bytes(router.historicalTokenMetadataJSON(address(core), 91)))
                 == keccak256(bytes(expected)),
@@ -617,7 +620,7 @@ contract StreamMetadataServingTest is CharacterizationTestBase, OfficialSafeFixt
             )
             == keccak256(
                 bytes(
-                    "data:application/json;base64,eyJuYW1lIjoiTmFtZSAjNyIsImRlc2NyaXB0aW9uIjoiRGVzY3JpcHRpb24iLCJpbWFnZSI6ImlwZnM6Ly9pbWFnZSIsIm1ldGFkYXRhX3NjaGVtYV92ZXJzaW9uIjoiNjUyOXN0cmVhbS12MSIsIm1ldGFkYXRhX3N0YXRlIjoiZmluYWwiLCJ0b2tlbl9pZCI6OTEsImNvbGxlY3Rpb25faWQiOjEsImNvbGxlY3Rpb25fc2VyaWFsIjo3LCJoYXNoIjoiMHg2NmE4MGI2MWIyOWVjMDQ0ZDE0YzRjOGM2MTNlNzYyYmExZmI4ZWViMGM0NTRkMWVlMDBlZDZkZWRhYTViNWM1IiwidG9rZW5fZGF0YV9iYXNlNjQiOiJBUDlsS1E9PSIsImF0dHJpYnV0ZXMiOltdLCJhcnRpc3QiOiIweDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwYTExY2UiLCJhcnRpc3RfaWRlbnRpdHlfaGFzaCI6IjB4NWUwZWI5ZWRkZjNhYzk0ZWJjODE3MzFjMDkwOTdlNDRkNDIwMmJhMmNlZWMwYTY5MzZlOGU4OGIyNzg2YWFhMyIsImFydGlzdF9hY2NlcHRhbmNlX2hhc2giOiIweDc1ZDMwMzNmN2U5ZDFmMGJkOWQ1YzEwNWY1NTY5Y2UxM2VkYjNmMTc4OWEwODU2ZjhiYmU4Mjk2MWVhMWFhYzkiLCJhbmltYXRpb25fdXJsIjoiaHR0cHM6Ly9leGFtcGxlLnRlc3QvOTEifQ=="
+                    "data:application/json;base64,eyJuYW1lIjoiTmFtZSAjNyIsImRlc2NyaXB0aW9uIjoiRGVzY3JpcHRpb24iLCJpbWFnZSI6ImlwZnM6Ly9pbWFnZSIsIm1ldGFkYXRhX3NjaGVtYV92ZXJzaW9uIjoiNjUyOXN0cmVhbS12MSIsIm1ldGFkYXRhX3N0YXRlIjoiZmluYWwiLCJ0b2tlbl9pZCI6OTEsImNvbGxlY3Rpb25faWQiOjEsImNvbGxlY3Rpb25fc2VyaWFsIjo3LCJoYXNoIjoiMHg2NmE4MGI2MWIyOWVjMDQ0ZDE0YzRjOGM2MTNlNzYyYmExZmI4ZWViMGM0NTRkMWVlMDBlZDZkZWRhYTViNWM1IiwidG9rZW5fZGF0YV9iYXNlNjQiOiJBUDlsS1E9PSIsImF0dHJpYnV0ZXMiOltdLCJhcnRpc3QiOiIweDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwYTExY2UiLCJhcnRpc3RfaWRlbnRpdHlfaGFzaCI6IjB4NWUwZWI5ZWRkZjNhYzk0ZWJjODE3MzFjMDkwOTdlNDRkNDIwMmJhMmNlZWMwYTY5MzZlOGU4OGIyNzg2YWFhMyIsImFydGlzdF9hY2NlcHRhbmNlX2hhc2giOiIweDc1ZDMwMzNmN2U5ZDFmMGJkOWQ1YzEwNWY1NTY5Y2UxM2VkYjNmMTc4OWEwODU2ZjhiYmU4Mjk2MWVhMWFhYzkiLCJhbmltYXRpb25fdXJsIjoiaHR0cHM6Ly9leGFtcGxlLnRlc3QvOTEiLCJwcm9wZXJ0aWVzIjp7InN0cmVhbSI6eyJyZW5kZXJfc3RhdGUiOiJmaW5hbCIsImNpdGF0aW9uIjoiZWlwMTU1OjMxMzM3L2VyYzcyMToweDU2MTVkZWI3OThiYjNlNGRmYTAxMzlkZmExYjNkNDMzY2MyM2I3MmYvOTEifX19"
                 )
             ),
             "independent base64 data URI golden"
@@ -625,16 +628,24 @@ contract StreamMetadataServingTest is CharacterizationTestBase, OfficialSafeFixt
     }
 
     function testOnchainHistoricalJSONMatchesIndependentEscapedHTMLGolden() public {
+        _requireLiteralGoldenContext();
         router.setCollectionScript(1, "document.body.textContent='</script>';");
         router.lockArtistIdentity(1);
         require(
             keccak256(bytes(router.historicalTokenMetadataJSON(address(core), 91)))
                 == keccak256(
                     bytes(
-                        '{"name":"Name #7","description":"Description","image":"ipfs://image","metadata_schema_version":"6529stream-v1","metadata_state":"final","token_id":91,"collection_id":1,"collection_serial":7,"hash":"0x66a80b61b29ec044d14c4c8c613e762ba1fb8eeb0c454d1ee00ed6dedaa5b5c5","token_data_location":"animation_url:tokenDataBase64","attributes":[],"artist":"0x00000000000000000000000000000000000a11ce","artist_identity_hash":"0x5e0eb9eddf3ac94ebc81731c09097e44d4202ba2ceec0a6936e8e88b2786aaa3","artist_acceptance_hash":"0x75d3033f7e9d1f0bd9d5c105f5569ce13edb3f1789a0856f8bbe82961ea1aac9","animation_url":"data:text/html;base64,PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5PjxzY3JpcHQ+Y29uc3QgdG9rZW5JZD05MTtjb25zdCB0b2tlbkhhc2g9JzB4NjZhODBiNjFiMjllYzA0NGQxNGM0YzhjNjEzZTc2MmJhMWZiOGVlYjBjNDU0ZDFlZTAwZWQ2ZGVkYWE1YjVjNSc7Y29uc3QgdG9rZW5EYXRhQmFzZTY0PSdBUDlsS1E9PSc7ZG9jdW1lbnQuYm9keS50ZXh0Q29udGVudD0nPFwvc2NyaXB0Pic7PC9zY3JpcHQ+PC9ib2R5PjwvaHRtbD4="}'
+                        '{"name":"Name #7","description":"Description","image":"ipfs://image","metadata_schema_version":"6529stream-v1","metadata_state":"final","token_id":91,"collection_id":1,"collection_serial":7,"hash":"0x66a80b61b29ec044d14c4c8c613e762ba1fb8eeb0c454d1ee00ed6dedaa5b5c5","token_data_location":"animation_url:tokenDataBase64","attributes":[],"artist":"0x00000000000000000000000000000000000a11ce","artist_identity_hash":"0x5e0eb9eddf3ac94ebc81731c09097e44d4202ba2ceec0a6936e8e88b2786aaa3","artist_acceptance_hash":"0x75d3033f7e9d1f0bd9d5c105f5569ce13edb3f1789a0856f8bbe82961ea1aac9","animation_url":"data:text/html;base64,PGh0bWw+PGhlYWQ+PC9oZWFkPjxib2R5PjxzY3JpcHQ+Y29uc3QgdG9rZW5JZD05MTtjb25zdCB0b2tlbkhhc2g9JzB4NjZhODBiNjFiMjllYzA0NGQxNGM0YzhjNjEzZTc2MmJhMWZiOGVlYjBjNDU0ZDFlZTAwZWQ2ZGVkYWE1YjVjNSc7Y29uc3QgdG9rZW5EYXRhQmFzZTY0PSdBUDlsS1E9PSc7ZG9jdW1lbnQuYm9keS50ZXh0Q29udGVudD0nPFwvc2NyaXB0Pic7PC9zY3JpcHQ+PC9ib2R5PjwvaHRtbD4=","properties":{"stream":{"render_state":"final","citation":"eip155:31337/erc721:0x5615deb798bb3e4dfa0139dfa1b3d433cc23b72f/91"}}}'
                     )
                 ),
             "independent exact HTML/base64/JSON golden"
+        );
+    }
+
+    function _requireLiteralGoldenContext() private view {
+        require(
+            block.chainid == 31337 && address(core) == 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f,
+            "literal citation golden fixture context"
         );
     }
 

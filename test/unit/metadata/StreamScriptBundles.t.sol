@@ -627,7 +627,27 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         bytes32 id = _publish(_one(bytes("render();")), false, 0, M.PayloadSourceType.INLINE_CHUNKS);
         _select(id);
         core.setLifecycle(3);
-        require(_contains(router.tokenJSON(91), '"stream":{"render_state":"burned"}'));
+        string memory json = router.tokenJSON(91);
+        string memory renderState =
+            abi.decode(vm.parseJson(json, ".properties.stream.render_state"), (string));
+        string memory citation =
+            abi.decode(vm.parseJson(json, ".properties.stream.citation"), (string));
+        require(keccak256(bytes(renderState)) == keccak256("burned"), "burned JSON state");
+        require(
+            keccak256(bytes(citation))
+                == keccak256(
+                    bytes(
+                        string.concat(
+                            "eip155:",
+                            block.chainid.toString(),
+                            "/erc721:",
+                            uint256(uint160(address(core))).toHexString(20),
+                            "/91"
+                        )
+                    )
+                ),
+            "burned JSON citation"
+        );
         require(_contains(router.tokenHTML(91), "data-stream-render-state=\"burned\""));
         vm.expectRevert(
             abi.encodeWithSelector(StreamMetadataFinalityServing.InvalidToken.selector, uint256(91))
