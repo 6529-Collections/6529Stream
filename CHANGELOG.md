@@ -75,6 +75,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add the complete 29-name Museum genesis source catalog, broad missing schema
+  definitions, worked examples and ordered registry chunk inputs. Preserve
+  existing definition bytes and distinguish profile/shape validation from
+  actual admission, complete exporter behavior and institutional acceptance.
+
 - Add ordered chunk retention and full-byte reads for general institutional,
   estate and curatorial payloads through 24,576 bytes, with an explicit V2 Museum
   reader and closed dossier dispatch preserving V1 replay. Typed notarization and

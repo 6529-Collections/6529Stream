@@ -82,6 +82,7 @@ needs package-index access; verification itself uses only retained local bytes.
 
 ```text
 python -m tools.museum.schemas --check
+python -m tools.museum.genesis_catalog --check --require-complete
 python -m tools.museum.fixtures --check
 python -m tools.museum.review --check
 python -m tools.museum export-fixture --schema schemas/museum/fixtures/source.schema.json --source schemas/museum/fixtures/photograph.json --output <empty-output-directory>

@@ -1,6 +1,13 @@
 # Candidate museum schemas and fixtures
 
-These three canonical JSON Schema documents implement the adopted name and
+The [genesis catalog](genesis/catalog.json) and
+[ordered admission plan](genesis/admission-plan.json) inventory the full
+29-name CMC set with exact schema/example commitments. See the
+[catalog guide](../../docs/museum-genesis-catalog.md) for validation scopes,
+registration prerequisites and remaining implementation gaps. These are
+prospective inputs; actual registration observations remain separate.
+
+The three root-level semantic JSON Schema documents implement the adopted name and
 typed-shape allocation. They are **unregistered candidates**. The profile's
 interpretation-document commitments are still being assembled; its annotation
 states that it is incomplete. Do not use this directory as a genesis registration
