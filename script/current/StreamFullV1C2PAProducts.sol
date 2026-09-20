@@ -19,6 +19,9 @@ import {
 import {
     StreamArtistOnboardingTypes as T
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
+import {
+    IStreamStaticC2PAConflicts
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 interface C2PAProductArtist {
     function operationCoordinator() external view returns (address);
@@ -198,7 +201,8 @@ library StreamFullV1C2PAProducts {
         );
         require(
             keccak256(abi.encode(rendererSources)) == keccak256(abi.encode(wanted))
-                && p.renderer.c2paAttributionEnabled()
+                && p.renderer.c2paAttributionEnabled() && p.renderer.c2paConflictsEnabled()
+                && p.wrapper.supportsInterface(type(IStreamStaticC2PAConflicts).interfaceId)
                 && p.renderer.governanceAuthority() == c.base.executor
                 && keccak256(abi.encode(p.renderer.rendererManifest()))
                     == keccak256(abi.encode(c.base.rendererManifest)),

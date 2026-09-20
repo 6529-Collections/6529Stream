@@ -41,6 +41,14 @@ import {
 import {
     IStreamArtistNativeReceipts
 } from "../../smart-contracts/interfaces/stream/artist/IStreamArtistHistory.sol";
+import {
+    IStreamC2PAConflicts as Conflict,
+    IStreamStaticC2PAConflicts
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamC2PAConflicts.sol";
+
+interface CurrentC2PACompositionVm {
+    function expectCall(address target, bytes calldata data, uint64 count) external;
+}
 
 /// @notice Original current graph, original op24 and actual threshold Artist/verifier Safes.
 /// @dev Only inherited upstream entropy is a service double. Construction, credential history
@@ -123,7 +131,9 @@ contract StreamCurrentC2PACompositionTest is StreamCurrentSafeGovernanceFixture 
             "fixed original Artist owners"
         );
         require(
-            products.renderer.c2paAttributionEnabled(), "new Renderer opted into genuine wrapper"
+            products.renderer.c2paAttributionEnabled() && products.renderer.c2paConflictsEnabled()
+                && products.wrapper.supportsInterface(type(IStreamStaticC2PAConflicts).interfaceId),
+            "new Renderer opted into report and standing-conflict wrapper"
         );
         (address encoding, bytes32 hash) = products.renderer.encodingBinding();
         require(
@@ -183,6 +193,88 @@ contract StreamCurrentC2PACompositionTest is StreamCurrentSafeGovernanceFixture 
                 && !display_.assertsAuthorship,
             "absence is explicit, not validator success"
         );
+    }
+
+    function testEmptyConflictReadsKeepExactTuplesAndReadBothOriginalScopes() public {
+        bytes32 collectionSubject = StreamMetadataSubjects.scopeSubject(
+            block.chainid,
+            address(core),
+            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0)
+        );
+        bytes32 tokenSubject = StreamMetadataSubjects.scopeSubject(
+            block.chainid,
+            address(core),
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 42, 0)
+        );
+        // This is an absent-evidence read, not an assertion that token 42 exists.
+        Conflict.Standing memory empty;
+        (bool ok, bytes memory raw) = address(products.reconciliation)
+            .staticcall(abi.encodeCall(Conflict.standingConflict, (uint256(1), collectionSubject)));
+        require(
+            ok && raw.length == 192 && keccak256(raw) == keccak256(abi.encode(empty)),
+            "original local zero Standing ABI"
+        );
+        (ok, raw) = address(products.reconciliation)
+            .staticcall(abi.encodeCall(Report.display, (uint256(1), collectionSubject)));
+        Report.Display memory emptyDisplay;
+        require(
+            ok && raw.length == 192 && keccak256(raw) == keccak256(abi.encode(emptyDisplay)),
+            "original Display ABI unchanged"
+        );
+        CurrentC2PACompositionVm calls = CurrentC2PACompositionVm(address(vm));
+        calls.expectCall(
+            address(products.reconciliation),
+            abi.encodeCall(Conflict.standingConflict, (uint256(1), collectionSubject)),
+            2
+        );
+        calls.expectCall(
+            address(products.reconciliation),
+            abi.encodeCall(Conflict.standingConflict, (uint256(1), tokenSubject)),
+            1
+        );
+        for (uint256 i; i < 2; ++i) {
+            (ok, raw) = address(products.wrapper)
+                .staticcall(
+                    abi.encodeCall(
+                        IStreamStaticC2PAConflicts.attributionC2PAConflicts,
+                        (uint256(1), i == 0 ? uint256(0) : uint256(42))
+                    )
+                );
+            require(
+                ok && raw.length == 384 && keccak256(raw) == keccak256(abi.encode(empty, empty)),
+                "canonical token then collection zero tuples"
+            );
+        }
+    }
+
+    function testStandingConflictEdgesCannotBeOmittedOrResealedWithWrongCaps() public {
+        address[2] memory targets = [address(products.wrapper), address(products.reconciliation)];
+        bytes4[2] memory selectors = [
+            IStreamStaticC2PAConflicts.attributionC2PAConflicts.selector,
+            Conflict.standingConflict.selector
+        ];
+        for (uint256 k; k < targets.length; ++k) {
+            StreamC2PAStaticReadPlan.Inventory memory inventory = _inventory();
+            uint256 index = _index(inventory.reads, targets[k], selectors[k]);
+            StreamC2PAStaticReadPlan.Read[] memory short =
+                new StreamC2PAStaticReadPlan.Read[](inventory.reads.length - 1);
+            uint256 n;
+            for (uint256 i; i < inventory.reads.length; ++i) {
+                if (i != index) short[n++] = inventory.reads[i];
+            }
+            inventory.reads = short;
+            bytes32 saved = StreamC2PAStaticReadPlan.inventoryHash(inventory);
+            vm.expectRevert(
+                abi.encodeWithSignature("Error(string)", "missing exact C2PA source edge")
+            );
+            this.checkInventory(inventory, saved);
+            inventory = _inventory();
+            index = _index(inventory.reads, targets[k], selectors[k]);
+            inventory.reads[index].maximumReturnBytes -= 32;
+            saved = StreamC2PAStaticReadPlan.inventoryHash(inventory);
+            vm.expectRevert(abi.encodeWithSignature("Error(string)", "original C2PA read bounds"));
+            this.checkInventory(inventory, saved);
+        }
     }
 
     function testActualSafeOp24RetainsDirectCredentialHeadHistoricalRecordAndPersonhood() public {
@@ -276,7 +368,18 @@ contract StreamCurrentC2PACompositionTest is StreamCurrentSafeGovernanceFixture 
     function testIncrementalRosterPinsDirectOwnerAuditAndNewEncodingEnvelope() public view {
         StreamC2PAStaticReadPlan.Read[] memory rows =
             StreamC2PAStaticReadPlan.delta(configuration, products);
-        require(rows.length == 15, "fourteen serving edges and one historical audit edge");
+        require(rows.length == 17, "sixteen serving edges and one historical audit edge");
+        _requireEdge(
+            rows,
+            address(products.wrapper),
+            IStreamStaticC2PAConflicts.attributionC2PAConflicts.selector,
+            384,
+            true,
+            1
+        );
+        _requireEdge(
+            rows, address(products.reconciliation), Conflict.standingConflict.selector, 192, true, 1
+        );
         _requireEdge(
             rows,
             artistSuite.owners[4],
@@ -323,7 +426,7 @@ contract StreamCurrentC2PACompositionTest is StreamCurrentSafeGovernanceFixture 
             configuration, products, base, keccak256(abi.encode(base))
         );
         require(
-            inventory.reads.length == 18
+            inventory.reads.length == 20
                 && inventory.originalAttributionInventoryHash == keccak256(abi.encode(base)),
             "deduplicated original root and all supplied AA owners"
         );

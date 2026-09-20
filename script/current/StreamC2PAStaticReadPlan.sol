@@ -28,6 +28,10 @@ import {
 import {
     IStreamCollectionMetadataV1
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
+import {
+    IStreamC2PAConflicts,
+    IStreamStaticC2PAConflicts
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamC2PAConflicts.sol";
 
 /// @notice Exact observed C2PA serving edges plus the fixed-owner historical head audit read.
 /// @dev This semantic inventory is deliberately not a RendererRegistry target-role cast.
@@ -61,7 +65,7 @@ library StreamC2PAStaticReadPlan {
         StreamFullV1C2PAProducts.Products memory p
     ) internal view returns (Read[] memory rows) {
         StreamFullV1C2PAProducts.validate(c, p);
-        rows = new Read[](15);
+        rows = new Read[](17);
         rows[0] = _row(
             address(p.wrapper),
             "STATIC_C2PA_ATTRIBUTION",
@@ -182,6 +186,24 @@ library StreamC2PAStaticReadPlan {
             StreamStaticRenderEncoding.render.selector,
             16777280,
             false,
+            SERVING
+        );
+        // Standing conflict reads are direct local reconciliation storage reads. The
+        // adoption/acknowledgement worker is a compiler-link dependency, not a serving target.
+        rows[15] = _row(
+            address(p.wrapper),
+            "STATIC_C2PA_ATTRIBUTION",
+            IStreamStaticC2PAConflicts.attributionC2PAConflicts.selector,
+            384,
+            true,
+            SERVING
+        );
+        rows[16] = _row(
+            address(p.reconciliation),
+            "C2PA_RECONCILIATION",
+            IStreamC2PAConflicts.standingConflict.selector,
+            192,
+            true,
             SERVING
         );
         _sort(rows);
