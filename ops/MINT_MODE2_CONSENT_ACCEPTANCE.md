@@ -83,3 +83,27 @@ Native test execution, gas/fuzz checks, broad native/CI validation and release
 evidence remain pending the coordinator's matched-source run. The preceding
 `f401600e` size capture remains immutable evidence for that exact source; this
 consumer change is not silently included in those measurements.
+
+### Exact-source follow-up
+
+Source `1491dc4878feb328609f5632ca3f10c86533e04c`, tree
+`94187827152f29a1e2000660411eb69a5567a53e`, now has separate selected native
+measurements and focused execution:
+
+- `mint-mode2-size-1491dc48-1` compiles 148 exact committed sources and seven
+  selected products. Manager is 24,331 runtime bytes; fallback is 24,452;
+  ArtistConsent is 3,104. All seven fit without compiler errors.
+  Input SHA-256 is
+  `0f1a59cf0243c4d2a09fe0ecfbe8c8f76a941e0cade2ae002bffd36a4fddcf3a`;
+  output SHA-256 is
+  `bfe015dec882fb6d2ab7b35574343622d9302a85fc55ea1e9eb5c831e5b58a7c`.
+- `mint-mode2-boundary-native-1491dc48-1` freezes the 154-source focused
+  Manager/Ledger/Registry closure. All 11 boundary tests pass in 256.292 seconds,
+  with no source mismatches or oversized captured production products.
+  Native result SHA-256 is
+  `391c0fc64817e199c7d7a6e3ed005094e234cc6495bbed2a992d968c41c5c966`.
+
+These 11 passes supersede the pending status only for that boundary suite.
+Its Artist/Core/governance dependencies remain explicitly typed test seams.
+The actual Artist/Safe workflows, other 52 authored cases, gas/fuzz checks and
+complete candidate acceptance remain pending. No prior capture was overwritten.
