@@ -25,8 +25,8 @@ Build and runtime integration remain separate facts in the rows below.
 The [current integrated batch](V1_CURRENT_STATUS.md#20-september-integrated-batch)
 records each source and test boundary. Clone wallets have 84 scoped passes;
 Core incident-gap recovery has 14, inventory has 18, and its finality/preservation
-consumers have 49 across recorded closures. Fallback and clone clients pass all 627 root
-package checks and exact retained ABI fixture checks. These counts describe
+consumers have 49 across recorded closures. Fallback, clone and environment clients pass all 655 root
+package checks and exact retained ABI/corpus fixture checks. These counts describe
 different scopes and must not be added into full-system acceptance.
 
 MetadataV1 now supports the required 24,576-byte records (`a7c984bf`), with 23
@@ -38,9 +38,10 @@ checks and 25 passes from its own frozen native cohort (host runtime 23,179
 bytes); complete current-graph acceptance remains pending. Native Artist statements
 retain a separate 8,192-byte bound.
 
-Current mint/Safe recipes (`262cc158`) and genuine record-product composition
+Current mint/Safe recipes (`262cc158`, seven curated cases in `5eeee268`)
+and genuine record-product composition
 (`6292287b`) are source-integrated; joined native execution is pending. All
-2,168 sources pass ABI/type/storage checks at `2e0c3443`. Original STATIC product
+2,172 sources pass ABI/type/storage checks at `18be311b`. Original STATIC product
 composition and its six authored current/Safe cases remain separate from full
 renderer analysis and runtime acceptance. The real publisher capacity run is
 in progress; earlier scoped inventory/environment probes do not close it.

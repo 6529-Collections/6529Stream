@@ -31,7 +31,11 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   rollback cases (`a575d215`), are authored and await joined execution.
   The current acceptance map (`262cc158`) adds six genuine Artist/ticket/Safe
   cases and an ordinary-profile settlement rollback/retry. Four remaining
-  mint-entrypoint families still use typed Artist boundaries and are assigned.
+  mint-entrypoint families were identified for further joins. Seven curated
+  auction/purchase cases are now integrated (`5eeee268`) with actual Artist,
+  governance and distinct Safes; the external entropy provider remains a service
+  double. Native runtime is pending. Actual-Artist native/ERC20 primary offers
+  remain the next coverage batch.
   A later source review corrects the PROFILE test call-count oracle to include
   its final escrow flush; production is unchanged and native remains pending.
 - Core incident abort preserves consumed token IDs and collection serials.
@@ -70,7 +74,9 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   tests, generation/build/strict types and both exact frozen ABI fixture checks.
   Clone-factory callers (`22913693`) then pass all 627 root package checks
   and their exact retained ABI fixture. These are client and simulated-RPC
-  results; joined Safe execution is pending.
+  results; joined Safe execution is pending. Environment-preparation callers
+  (`18be311b`) pass all 655 root package checks and both exact ABI/corpus
+  generators, retaining the complete 179,418-byte reference environment.
 - Publication header/single-decode transport (`23e45d78`) passes three focused
   parity cases, including 256 fuzz inputs; all three selected products fit.
   Independent source review is clear. Further payload/environment transport
@@ -127,8 +133,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   fixture analysis and partial direct read rosters are explicitly synthetic.
   Complete transitive analysis, goldens and joined runtime remain required.
 
-The latest complete-source ABI/type/storage pass at `2e0c3443` covers 2,168
-sources in 19.953 seconds with no errors. It does not generate bytecode or
+The latest complete-source ABI/type/storage pass at `18be311b` covers 2,172
+sources in 22.875 seconds with no errors. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different
