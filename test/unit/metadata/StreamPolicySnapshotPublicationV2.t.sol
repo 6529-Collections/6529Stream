@@ -135,7 +135,7 @@ contract StreamPolicySnapshotPublicationV2Test is PolicySnapshotFixtureV2 {
         _grant(1, StreamRecordFamilies.IDENTITY, 7, address(this), true);
         _grant(1, StreamRecordFamilies.SNAPSHOT, 7, address(this), false);
         vm.expectRevert();
-        _grant(1, StreamRecordFamilies.SNAPSHOT, 3, address(this), true);
+        metadata.familyWriterTransition(1, StreamRecordFamilies.SNAPSHOT, 3, address(this), true);
         vm.expectRevert();
         host.previewSnapshot(publication, address(this));
         _grant(1, StreamRecordFamilies.SNAPSHOT, 7, address(this), true);

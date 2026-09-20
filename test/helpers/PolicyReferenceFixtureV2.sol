@@ -97,7 +97,7 @@ abstract contract PolicyReferenceFixtureV2 is PolicySnapshotFixtureV2 {
         d.chainId = block.chainid;
         IStreamGasParameterHost.GasParameterConfig[4] memory configs;
         configs[0] = IStreamGasParameterHost.GasParameterConfig(
-            "POLICY_REFERENCE_READ_GAS", 500000, 50000, 1
+            "POLICY_REFERENCE_READ_GAS", 1000000, 50000, 1
         );
         configs[1] = IStreamGasParameterHost.GasParameterConfig(
             "POLICY_REFERENCE_SOURCE_GAS", 2000000, 50000, 1
@@ -108,7 +108,26 @@ abstract contract PolicyReferenceFixtureV2 is PolicySnapshotFixtureV2 {
         configs[3] = IStreamGasParameterHost.GasParameterConfig(
             "POLICY_REFERENCE_ARCHIVE_GAS", 500000, 50000, 1
         );
-        referenceHost = new StreamPolicyReferencePublicationV2(d, address(executor), configs);
+        // Fixture allowance covers Membership's own 500,000-gas forwarding admission.
+        // It is not a production minimum or whole-operation capacity acceptance.
+        referenceHost = StreamPolicyReferencePublicationV2(
+            _policyArtifactCreate(
+                "StreamPolicyReferencePublicationV2.sol:StreamPolicyReferencePublicationV2",
+                "out/StreamPolicyReferencePublicationV2.sol/StreamPolicyReferencePublicationV2.json",
+                abi.encode(d, address(executor), configs),
+                8
+            )
+        );
+        require(
+            referenceHost.core() == d.targets[0] && referenceHost.metadataHost() == d.targets[1]
+                && referenceHost.metadataRouter() == d.targets[4]
+                && referenceHost.snapshots() == d.targets[5]
+                && referenceHost.archiveCoverage() == d.targets[6]
+                && referenceHost.deploymentChainId() == d.chainId
+                && referenceHost.governanceAuthority() == address(executor)
+                && referenceHost.executorCodeHash() == address(executor).codehash,
+            "actual reference constructor immutables"
+        );
         _uploadSnapshot(
             bytes(
                 StreamReferenceEnvironmentJson.files(
@@ -436,8 +455,7 @@ abstract contract PolicyReferenceFixtureV2 is PolicySnapshotFixtureV2 {
     }
 
     function _reader() internal view returns (ReferenceReads.Dependencies memory d) {
-        d.targets =
-            [
+        d.targets = [
             address(core), address(metadata), address(route), address(host), address(referenceHost)
         ];
         for (uint256 i; i < 5; ++i) {

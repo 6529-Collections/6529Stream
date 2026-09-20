@@ -89,3 +89,19 @@ root, output/policy producers, renderer admission, archive and governance action
 facts are explicit typed boundaries. It does not prove browser execution, an
 actual selected-provider ceremony, full current-stack acceptance or transaction
 capacity. Earlier V2 output tests retain their separate scope and failures.
+
+The owned fixtures load the two publishers from Forge's exact linked production
+artifacts and execute ordinary zero-value CREATE at the fixture's original nonce.
+They check the predicted address, complete runtime template, every compiler
+immutable range and all constructor-bound getters. Captures must retain the
+source/compiler/artifact pins and allow read access to `out/`; this does not
+substitute mock code for either publisher. It avoids embedding their creation
+code in each test contract again.
+
+The reference fixture uses a 1,000,000-gas read allowance because the actual
+Membership contract's own 500,000-gas forwarding cap requires 607,936 parent gas.
+That allowance is a fixture parameter, not a production floor or whole-operation
+capacity result. The retained initial run stopped at one-chunk schema setup;
+the next run recorded 12 passes and 10 failures, diagnosed as a mis-scoped
+authority expectation and that nested read allowance. Corrected results must be
+reported against their own frozen capture; these earlier failures remain evidence.

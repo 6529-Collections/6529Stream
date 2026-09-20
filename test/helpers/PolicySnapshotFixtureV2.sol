@@ -20,6 +20,7 @@ import {
 } from "../../smart-contracts/domains/finality/StreamPolicyOutputSchemasV2.sol";
 import "./ScopeMembershipPublicationFixture.sol";
 import "./OfficialSafeFixture.sol";
+import "./PolicyArtifactCreateV2.sol";
 import "../../smart-contracts/domains/metadata/StreamPolicySnapshotPublicationV2.sol";
 import "../../smart-contracts/domains/finality/StreamFinalityCoordinatorInventory.sol";
 import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
@@ -72,7 +73,8 @@ contract PolicySnapshotReadBoundaryV2 {
 
 abstract contract PolicySnapshotFixtureV2 is
     ScopeMembershipPublicationFixture,
-    OfficialSafeFixture
+    OfficialSafeFixture,
+    PolicyArtifactCreateV2
 {
     PolicySnapshotVmV2 internal constant svm =
         PolicySnapshotVmV2(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -237,7 +239,7 @@ abstract contract PolicySnapshotFixtureV2 is
             "docs/schemas/preservation/policy-collection-snapshot-v2.abi.json"
         ];
         for (uint256 i; i < 3; ++i) {
-            _register(
+            _registerSnapshotDocument(
                 names[i],
                 i == 0
                     ? IStreamSchemaRegistry.DocumentKind.SCHEMA
@@ -247,12 +249,12 @@ abstract contract PolicySnapshotFixtureV2 is
                 bytes(vm.readFile(paths[i]))
             );
         }
-        _register(
+        _registerSnapshotDocument(
             "STREAM_POLICY_CONTENT_ROOT_RECORD_V2",
             IStreamSchemaRegistry.DocumentKind.SCHEMA,
             RootDocuments.document(RootDocuments.ROOT_SCHEMA)
         );
-        _register(
+        _registerSnapshotDocument(
             "STREAM_ABI_POLICY_CONTENT_ROOT_RECORD_V2",
             IStreamSchemaRegistry.DocumentKind.CANONICALIZATION,
             RootDocuments.document(RootDocuments.ROOT_CANON)
@@ -285,7 +287,20 @@ abstract contract PolicySnapshotFixtureV2 is
         gasConfigs[2] = IStreamGasParameterHost.GasParameterConfig(
             "POLICY_SNAPSHOT_INVENTORY_GAS", 3000000, 50000, 2
         );
-        host = new StreamPolicySnapshotPublicationV2(d, address(executor), gasConfigs);
+        host = StreamPolicySnapshotPublicationV2(
+            _policyArtifactCreate(
+                "StreamPolicySnapshotPublicationV2.sol:StreamPolicySnapshotPublicationV2",
+                "out/StreamPolicySnapshotPublicationV2.sol/StreamPolicySnapshotPublicationV2.json",
+                abi.encode(d, address(executor), gasConfigs),
+                4
+            )
+        );
+        require(
+            host.core() == d.targets[0] && host.metadataHost() == d.targets[1]
+                && host.governanceAuthority() == address(executor)
+                && host.authorityCodeHash() == address(executor).codehash,
+            "actual snapshot constructor immutables"
+        );
         publication = Scoped.Publication(
             scope,
             keccak256("snapshot"),
@@ -349,6 +364,35 @@ abstract contract PolicySnapshotFixtureV2 is
         route.set("collectionContentRootHead(uint256)", abi.encode(publication.contentRootRecord));
         route.set("contentRootRecord(bytes32)", abi.encode(canonicalRoot));
         route.set("policyContentRootBinding(bytes32)", abi.encode(rootBinding));
+    }
+
+    function _registerSnapshotDocument(
+        string memory name,
+        IStreamSchemaRegistry.DocumentKind kind,
+        bytes memory raw
+    ) internal {
+        bytes32[] memory chunks = new bytes32[]((raw.length + 8191) / 8192);
+        for (uint256 i; i < chunks.length; ++i) {
+            uint256 size = raw.length - i * 8192;
+            if (size > 8192) size = 8192;
+            bytes memory chunk = new bytes(size);
+            for (uint256 j; j < size; ++j) {
+                chunk[j] = raw[i * 8192 + j];
+            }
+            (chunks[i],) = store.publishChunk(chunk);
+        }
+        IStreamSchemaRegistry.DocumentSpec memory spec = IStreamSchemaRegistry.DocumentSpec(
+            name, kind, keccak256(raw), schemas.RAW_BYTES(), 0, "", uint32(raw.length)
+        );
+        (bytes32 actionScope, bytes32 oldState, bytes32 next) =
+            schemas.registrationTransition(spec, chunks);
+        executor.execute(
+            address(schemas),
+            abi.encodeCall(schemas.registerDocument, (spec, chunks)),
+            actionScope,
+            oldState,
+            next
+        );
     }
 
     function _refreshPlans() internal {
