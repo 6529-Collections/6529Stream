@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import {
     StreamNativeCommerceDeployment,
     StreamNativeEnglishAuction,
@@ -25,7 +25,7 @@ import {
 /// @notice Real Artist/Governor/Payer Safes join current Core prepared auctions and royalty snapshots.
 /// @dev Only the external entropy service is a double. These aggregate workflows do not
 /// establish individual cold transaction capacity or other royalty/primary rights profiles.
-contract StreamCurrentArtistRoyaltySnapshotTest is StreamCurrentSafeGovernanceFixture {
+contract StreamCurrentArtistRoyaltySnapshotTest is CurrentCommerceConservationFixture {
     bytes32 private constant SNAPSHOT_PHASE = keccak256("actual Artist royalty snapshot auction");
     bytes32 private constant ROYALTY_CLASS = keccak256("ROYALTY_ERC2981");
     bytes32 private constant APPLICATION = keccak256("actual snapshot application");
@@ -50,6 +50,7 @@ contract StreamCurrentArtistRoyaltySnapshotTest is StreamCurrentSafeGovernanceFi
             createOfficialSafe(components, safeOwnerAddresses(signingKeys), 2, 903);
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         this.installSnapshotGovernor(nextGovernor);
+        _enableWaivedCommerceFloor();
         vm.deal(address(payerSafe), 1 ether);
         require(
             core.collectionNextSerial(1) == 1 && core.collectionMintedEver(1) == 0,
@@ -130,6 +131,7 @@ contract StreamCurrentArtistRoyaltySnapshotTest is StreamCurrentSafeGovernanceFi
             address(manager), IStreamMintRoyaltyPolicy.registerPhaseRoyaltyPolicy.selector
         );
         require(n == rows.length, "exact two royalty selectors");
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _snapshotPolicy(address target, bytes4 selector)
@@ -564,6 +566,7 @@ contract StreamCurrentArtistRoyaltySnapshotTest is StreamCurrentSafeGovernanceFi
             "actual Safe executes paid prepared snapshot mint"
         );
         Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertWaivedCommerceReceipt(address(recorder), house.auction(id).settlementKey, 1);
         IStreamRoyaltySnapshot.Snapshot memory s =
             royalties.royaltySnapshot(house.auction(id).tokenId);
         uint256 count;

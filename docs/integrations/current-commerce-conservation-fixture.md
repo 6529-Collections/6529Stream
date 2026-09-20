@@ -5,6 +5,8 @@ commerce graphs. It does not change the common current stack's default
 conservation tier. Terminal, INSTANT, native fixed settlement, clearing, Dutch,
 paid burn/mint and dynamic royalty commerce fixtures explicitly opt in.
 Refund-window recipes opt in only when they finalize paid settlement.
+Universal ERC20, consented native commerce and Artist royalty-snapshot auction
+recipes also opt in through their genuine current graph.
 
 The helper deploys the actual `StreamConservationFloor`, schedules its original
 Core binding through class-1 delayed governance, and executes that binding with
@@ -40,6 +42,8 @@ recipe separately checks that the completed mint produced token one. The
 receipt assertion accepts an explicit expected token ID; its current native
 default is zero. A floor receipt must not be rewritten to claim a token that
 was allocated only later in the same transaction.
+Prepared native auctions instead assert their actual preallocated token ID one
+in the floor receipt and separately verify completed custody.
 
 Free operator distribution, configuration-only, zero-price-only native sale and
 free burn recipes do not install a waiver. Free burn surplus recovery installs
@@ -71,6 +75,14 @@ declaration, and a later idempotent finalization preserves the same receipt.
 Deposit/refund-only, delegated refund, credit export and surplus recipes retain
 the unbound default.
 
+Universal ERC20 setup runs after each recipe's final graph deployment and before
+its payment signatures. Consented native commerce schedules its original
+post-genesis governance requests through the newly installed threshold Safe;
+initial deployment admission retains its original governance actor. Artist
+royalty-snapshot auctions use their existing Safe governor. Original exact
+payment, escrow failure/retry, Artist consent and immutable royalty evidence
+assertions remain in these nine recipes.
+
 ## Evidence and limits
 
 The Terminal/INSTANT source passed a 1,315-source ABI/type check before
@@ -86,6 +98,9 @@ The refund-window extension and corrected payment-before-mint receipt oracle
 passed a 1,471-source ABI/type check including Terminal, INSTANT and Safe
 consumers. Refund-window retains its four original cases and adds the deferred
 refusal/retry case. Native execution of this extension also remains pending.
+The universal and prepared-auction extension passed a 1,476-source ABI/type
+check covering these nine additional recipes and the prior migrated consumers;
+its native execution remains pending.
 
 The helper uses explicitly named **fixture** gas configuration: 300,000 for
 reads, 1,000,000 for producers and 6,000,000 for the floor call. These are not

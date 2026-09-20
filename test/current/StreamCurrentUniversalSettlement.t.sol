@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentStackFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import "../helpers/StreamCurrentAssetPolicy.sol";
-import "../helpers/OfficialSafeFixture.sol";
 import { StreamArtistSaleTypes as SaleTerms } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
 import "../mocks/MockStreamPaymentToken.sol";
 import {
@@ -32,7 +31,7 @@ contract CurrentUniversalRecipient is IERC721Receiver {
 /// @notice Official Safe artists/payers use universal settlement with the actual current owners.
 /// @dev Only the test ERC-20 and external entropy service are controlled boundaries. Permit2 is
 ///      disabled in this fixture; its domain tests are separate from these current-stack flows.
-contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, OfficialSafeFixture {
+contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixture {
     bytes32 private constant UNIVERSAL_PHASE = keccak256("current universal ERC20 phase");
     StreamPrimarySaleSettlement private recorder;
     StreamERC20PrimarySettlementAdapter private payment;
@@ -59,6 +58,13 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
             manager.owner() == address(executor) && executor.genesisInitialized(),
             "actual final owners"
         );
+    }
+
+    function _enableUniversalCommerceFloor() private {
+        OfficialSafe governor =
+            createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 83);
+        _installGovernorSafe(governor, keys);
+        _enableWaivedCommerceFloor();
     }
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {
@@ -94,6 +100,7 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
         rows[0] = _policy(universalSale.registerSale.selector);
         rows[1] = _policy(universalSale.cancelSale.selector);
         rows[2] = _policy(universalSale.setPaused.selector);
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _policy(bytes4 selector) private view returns (GovernanceActionPolicyEntry memory) {
@@ -233,6 +240,7 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
     function testRequiredUniversalSaleReadRejectsBeforeConsentAndSafePaymentThenSucceeds() public {
         requireSaleConsent = true;
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        _enableUniversalCommerceFloor();
         require(artists.saleConsentScope(1) == 1, "actual immutable REQUIRED election");
         IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e =
             _signedExecution(61, address(payerSafe), address(payerSafe));
@@ -293,6 +301,7 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
     }
 
     function testActualSafeDirectPaymentMintsRevealsAndClaimsOfficialRevenue() public {
+        _enableUniversalCommerceFloor();
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
@@ -344,6 +353,7 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
     }
 
     function testActualSafeSignedIntentMintsAndRejectsExactReplay() public {
+        _enableUniversalCommerceFloor();
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
@@ -382,6 +392,7 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
     }
 
     function testLateRecipientRejectionRollsBackAndSameSafeIntentRetries() public {
+        _enableUniversalCommerceFloor();
         CurrentUniversalRecipient recipient = new CurrentUniversalRecipient();
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
@@ -426,6 +437,9 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
                 && token.rawBalance(address(recorder)) == 0
                 && recorder.totalOfficialSettled(address(token)) == 0,
             "all payment effects rollback"
+        );
+        _assertNoCommerceFloorReceipt(
+            recorder.settlementKey(address(universalSale), c.executionBinding.executionId)
         );
         recipient.setRejects(false);
         (ok,) = address(payment).call(callData);
@@ -493,6 +507,7 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
         bytes32 key = recorder.settlementKey(address(universalSale), c.executionBinding.executionId);
         StreamPrimarySettlementTypes.PrimarySettlementResult memory result =
             recorder.settlementResult(key);
+        _assertWaivedCommerceReceipt(address(recorder), key, 0);
         require(
             core.ownerOf(core.lastAllocatedTokenId()) == recipient && core.totalSupply() == 1
                 && core.collectionMintedEver(1) == 1,

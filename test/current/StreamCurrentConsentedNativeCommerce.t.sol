@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentStackFixture.sol";
-import "../helpers/OfficialSafeFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import {
     StreamNativeCommerceDeployment,
     StreamNativeEnglishAuction,
@@ -50,10 +49,7 @@ interface CurrentCommerceCallVm {
 /// @dev The external entropy service is a double. The PROFILE regression also explicitly
 /// injects a wallet deposit failure. These aggregate workflows do not establish individual
 /// cold transaction capacity or acceptance of other rights profiles.
-contract StreamCurrentConsentedNativeCommerceTest is
-    StreamCurrentStackFixture,
-    OfficialSafeFixture
-{
+contract StreamCurrentConsentedNativeCommerceTest is CurrentCommerceConservationFixture {
     bytes32 private constant COMMERCE_PHASE = keccak256("actual consented native commerce");
     uint96 private constant PRICE = 1_000_000;
     StreamNativeCommerceDeployment.Products private commerce;
@@ -77,6 +73,9 @@ contract StreamCurrentConsentedNativeCommerceTest is
         artistSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 301);
         payerSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 302);
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        OfficialSafe governor = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 303);
+        _installGovernorSafe(governor, keys);
+        _enableWaivedCommerceFloor();
         vm.deal(address(payerSafe), 1 ether);
     }
 
@@ -140,6 +139,7 @@ contract StreamCurrentConsentedNativeCommerceTest is
             }
         }
         require(n == rows.length, "only new Manager and house catalog rows");
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _configureAdditionalProducts() internal override {
@@ -405,6 +405,7 @@ contract StreamCurrentConsentedNativeCommerceTest is
         );
         fault.clearMockedCalls();
         IStreamNativeEnglishAuction.Auction memory settled = house.auction(id);
+        _assertWaivedCommerceReceipt(address(recorder), settled.settlementKey, 1);
         require(
             settled.status == 3 && settled.tokenId == 1
                 && settled.settlementKey == expected.result.settlementKey
@@ -797,6 +798,7 @@ contract StreamCurrentConsentedNativeCommerceTest is
 
     function _assertSettlementAndWithdraw(bytes32 id) private {
         IStreamNativeEnglishAuction.Auction memory a = house.auction(id);
+        _assertWaivedCommerceReceipt(address(recorder), a.settlementKey, 1);
         require(
             a.status == 3 && a.tokenId == core.lastAllocatedTokenId()
                 && core.ownerOf(a.tokenId) == address(payerSafe) && core.totalSupply() == 1
@@ -899,9 +901,6 @@ contract StreamCurrentConsentedNativeCommerceTest is
             "urn:6529stream:fixture:consented-commerce",
             DEPLOYMENT_HASH
         );
-        bytes memory scheduled = governanceRoot.execute(
-            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (request))
-        );
-        actionId = abi.decode(scheduled, (bytes32));
+        actionId = _scheduleAsGovernor(request);
     }
 }
