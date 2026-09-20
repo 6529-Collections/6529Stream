@@ -4,8 +4,10 @@ import {
     StreamArtistRecoveredCollectionHydration
 } from "./StreamArtistRecoveredCollectionHydration.sol";
 import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
+import { StreamArtistAttributionRecoveredImport } from "./StreamArtistAttributionRecoveredImport.sol";
 import "./StreamArtistC2PACredentials.sol";
 import { StreamArtistPersonhoodReads } from "./StreamArtistPersonhoodReads.sol";
+import { StreamArtistPersonhoodReadEncoding } from "./StreamArtistPersonhoodReadEncoding.sol";
 import { StreamArtistPersonhoodSummary } from "./StreamArtistPersonhoodSummary.sol";
 import { StreamArtistPersonhoodTypes as Personhood } from "../../interfaces/stream/artist/IStreamArtistPersonhoodEvidence.sol";
 import "./StreamArtistDisputeWithdrawalState.sol";
@@ -27,6 +29,8 @@ import {
     StreamArtistAttributionDisputeTypes as AD
 } from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import "./StreamArtistDisputeState.sol";
+import { StreamArtistAttributionDisputeTransport as DisputeTransport } from "./StreamArtistAttributionDisputeTransport.sol";
+import { StreamArtistAttributionSupplementalReads } from "./StreamArtistAttributionSupplementalReads.sol";
 
 import {
     StreamArtistAttributionBindingTransport
@@ -85,36 +89,46 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     mapping(bytes32 => Attest.Association) private _attestationAssociations;
 
     function personhoodEvidence(uint256 collectionId, bytes32 artistId)
-        external view returns (Personhood.Selection memory) {
-        return StreamArtistPersonhoodReads.read(_attestationStore(), collectionId, artistId);
+        external view returns (Personhood.Selection calldata) {
+        _returnAttribution(StreamArtistPersonhoodReadEncoding.readEncoded(
+            _attestationStore(), _environment(), operationCoordinator, msg.data
+        ));
     }
 
     function personhoodEvidenceStatus(uint256 collectionId, bytes32 artistId)
         external view returns (bytes32, Personhood.Status) {
-        Personhood.Selection memory selection = StreamArtistPersonhoodReads.read(_attestationStore(), collectionId, artistId);
-        return (selection.nativeRecord.recordHash, selection.status);
+        _returnAttribution(StreamArtistPersonhoodReadEncoding.readEncoded(
+            _attestationStore(), _environment(), operationCoordinator, msg.data
+        ));
     }
 
     function personhoodProofSummary(bytes32 nativeRecordHash)
-        external view returns (Personhood.Summary memory) {
-        return StreamArtistPersonhoodSummary.get(nativeRecordHash);
+        external view returns (Personhood.Summary calldata) {
+        _returnAttribution(StreamArtistPersonhoodReadEncoding.readEncoded(
+            _attestationStore(), _environment(), operationCoordinator, msg.data
+        ));
     }
 
     function personhoodProofSummaryHash(bytes32 nativeRecordHash) external view returns (bytes32) {
-        return StreamArtistPersonhoodSummary.hashOf(nativeRecordHash);
+        _returnAttribution(StreamArtistPersonhoodReadEncoding.readEncoded(
+            _attestationStore(), _environment(), operationCoordinator, msg.data
+        ));
     }
 
     function auditPersonhoodEvidence(bytes32 nativeRecordHash)
-        external view returns (bytes32, Personhood.NotarizationFacts memory) {
-        return StreamArtistPersonhoodSummary.audit(nativeRecordHash);
+        external view returns (bytes32, Personhood.NotarizationFacts calldata) {
+        _returnAttribution(StreamArtistPersonhoodReadEncoding.readEncoded(
+            _attestationStore(), _environment(), operationCoordinator, msg.data
+        ));
     }
 
     function personhoodResolution(uint256 collectionId, bytes32 artistId,
         T.AttestationRecord calldata record, bool checkEvidence)
-        external view returns (bool, Personhood.NotarizationFacts memory) {
+        external view returns (bool, Personhood.NotarizationFacts calldata) {
         if (msg.sender != address(this)) revert T.Unauthorized(msg.sender);
-        return StreamArtistPersonhoodReads.resolve(_environment(), operationCoordinator,
-            collectionId, artistId, record, checkEvidence);
+        _returnAttribution(StreamArtistPersonhoodReadEncoding.readEncoded(
+            _attestationStore(), _environment(), operationCoordinator, msg.data
+        ));
     }
 
     function c2paCredentialHead(bytes32 artistId) external view returns (C2PA.Head memory) {
@@ -212,16 +226,22 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         return SF.Attestation(r.recordHash, r.generation, r.subjectStateHash, class_, r.signedAt);
     }
 
-    function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
-        return StreamArtistPayloadStore.recordBytes(hash);
+    function recordPreimageBytes(bytes32 hash) external view returns (bytes calldata) {
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function storedPayloadCount() external view returns (uint256) {
-        return StreamArtistPayloadStore.count();
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function storedPayloadAt(uint256 index) external view returns (address, bytes32, bytes32) {
-        return StreamArtistPayloadStore.at(index);
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function attestationAssociation(bytes32 record)
@@ -381,13 +401,13 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         PlatformTransport.Result memory m =
             PlatformTransport.applyEncoded(_attestationStore(), _environment(), msg.data);
         bytes32 replay = _consume(
-            op == 10
+            c.operationId == 10
                 ? keccak256("attribution_lifecycle.replay.claim_record_hash_uniqueness")
                 : keccak256(abi.encode("PLATFORM_WORKS", c.operationId)),
             m.scope,
             m.record
         );
-        bytes32 state = op == 10
+        bytes32 state = c.operationId == 10
             ? StreamArtistAttributionCommitEncoding.claimState(_attributionClaims, m.record)
             : StreamArtistAttributionCommitEncoding.platformState(_platform, m.id);
         _commit(c, m.action, state, replay, m.primary);
@@ -695,37 +715,35 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         external
         view
         override
-        returns (bytes memory)
+        returns (bytes calldata)
     {
-        AttrState.Attribution memory a = _attributions[q.collectionId];
-        if (a.state != 2 || a.generation != 1) revert T.UnsupportedProfile();
-        return abi.encode(a);
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function authorityAttestationHydrationState(
         AH.Query calldata q,
         StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
-    ) external view returns (bytes memory) {
-        return StreamArtistAttestationHydration.exportEncoded(
+    ) external view returns (bytes calldata) {
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
             _attestationStore(), _environment(), msg.data
-        );
+        ));
     }
 
     function authorityPublicationHydrationState(
         AH.Query calldata q,
         StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
-    ) external view returns (bytes memory) {
-        return StreamArtistPublicationHydration.exportEncoded(
+    ) external view returns (bytes calldata) {
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
             _attestationStore(), _environment(), msg.data
-        );
+        ));
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 4)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
-            StreamArtistRecoveredCollectionHydration.importAttribution(
-                _attestationStore(), q, p.typedState
-            );
+            StreamArtistAttributionRecoveredImport.importEncoded(_attestationStore(), msg.data);
             return;
         }
         StreamArtistAttributionHydrationTransport.importEncoded(
@@ -740,8 +758,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function recoveredAuthorityHydrationState(
         AH.Query calldata q,
         StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata p
-    ) external view override returns (bytes memory) {
-        return StreamArtistRecoveredCollectionHydration.exportAttribution(_attestationStore(), q, p);
+    ) external view override returns (bytes calldata) {
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function attributionDispute(uint256 id, uint64 generation)
@@ -749,11 +769,15 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (AD.Head calldata)
     {
-        _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function attributionDisputeRecord(bytes32 hash) external view returns (AD.Record calldata) {
-        _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function attributionDisputeResolution(bytes32 action)
@@ -761,35 +785,22 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (AD.Resolution calldata)
     {
-        _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
-    }
-
-    function attributionDisputeWithdrawal(bytes32 opening)
-        external
-        view
-        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory)
-    {
-        return StreamArtistDisputeWithdrawalState.outcome(opening);
-    }
-
-    function applyDisputeWithdrawal(
-        T.ActionContext calldata c,
-        AD.Filing calldata p,
-        AD.Admission calldata a,
-        uint256 nonce
-    ) external returns (bytes32) {
-        _check(c, 61);
-        AD.Mutation memory m = StreamArtistDisputeWithdrawalState.applyEncoded(
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
             _attestationStore(), _environment(), msg.data
-        );
-        bytes32 consumed = _consume(
-            keccak256("attribution_lifecycle.replay.dispute_withdrawal_key"),
-            m.replayScope,
-            m.replayCommitment
-        );
-        _commit(c, m.action, m.state, consumed, m.record);
-        _native(61, m.record, a.binding_.artistId, p.collectionId);
-        return m.record;
+        ));
+    }
+
+    function attributionDisputeWithdrawal(bytes32 opening) external view
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome calldata) {
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
+    }
+
+    function applyDisputeWithdrawal(T.ActionContext calldata c, AD.Filing calldata p,
+        AD.Admission calldata a, uint256 nonce) external returns (bytes32) {
+        _check(c, 61);
+        return _disputeTransport(c);
     }
 
     function applyDispute(
@@ -801,35 +812,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     ) external returns (bytes32) {
         uint16 op = p.disputeAction == 1 ? 44 : 45;
         _check(c, op);
-        AD.Mutation memory m =
-            StreamArtistDisputeState.applyEncoded(_attestationStore(), _environment(), msg.data);
-        if (op == 44) {
-            bytes32 invalidated =
-                StreamArtistRepudiationState.invalidateByDispute(p.collectionId, m.record);
-            if (invalidated != 0) m.state = keccak256(abi.encode(m.state, invalidated));
-        }
-        bytes32 consumed = _consume(
-            (op == 44
-                    ? keccak256("attribution_lifecycle.replay.dispute_key")
-                    : keccak256("attribution_lifecycle.replay.counter_statement_key")),
-            m.replayScope,
-            m.replayCommitment
-        );
-        if (g.actionId != 0) {
-            consumed = keccak256(
-                abi.encode(
-                    consumed,
-                    _consume(
-                        keccak256("attribution_lifecycle.replay.governance_action"),
-                        g.actionId,
-                        m.record
-                    )
-                )
-            );
-        }
-        _commit(c, m.action, m.state, consumed, m.record);
-        _native(op, m.record, a.binding_.artistId, p.collectionId);
-        return m.record;
+        return _disputeTransport(c);
     }
 
     function applyDisputeResolution(
@@ -839,33 +822,19 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         Contest.GovernanceWitness calldata g
     ) external returns (bytes32) {
         _check(c, 46);
-        AD.Mutation memory m =
-            StreamArtistDisputeState.resolveEncoded(_attestationStore(), msg.data);
-        bytes32 consumed = _consume(
-            keccak256("attribution_lifecycle.replay.dispute_resolution_key"),
-            m.replayScope,
-            m.replayCommitment
-        );
-        consumed = keccak256(
-            abi.encode(
-                consumed,
-                _consume(
-                    keccak256("attribution_lifecycle.replay.governance_action"),
-                    g.actionId,
-                    p.disputeRecordHash
-                )
-            )
-        );
-        _commit(c, m.action, m.state, consumed, 0);
-        return g.actionId;
+        return _disputeTransport(c);
     }
 
     function rawPendingRepudiation(uint256 id) external view returns (bytes32) {
-        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function attributionRepudiationRecord(bytes32 hash) external view returns (RP.Record calldata) {
-        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function attributionRepudiationTerminal(bytes32 hash)
@@ -873,11 +842,15 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (RP.Terminal calldata)
     {
-        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function repudiationCount(bytes32 id, bytes32 cohort) external view returns (uint256) {
-        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+        _returnAttribution(StreamArtistAttributionSupplementalReads.readEncoded(
+            _attestationStore(), _environment(), msg.data
+        ));
     }
 
     function stageRepudiation(
@@ -887,12 +860,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 nonce
     ) external returns (bytes32) {
         _check(c, 47);
-        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
-            _attestationStore(), _environment(), msg.data
-        );
-        _repudiationCommit(c, m, keccak256("attribution_lifecycle.replay.repudiation_key"));
-        _native(47, m.record, admission.binding_.artistId, p.collectionId);
-        return m.record;
+        return _disputeTransport(c);
     }
 
     function vetoRepudiation(
@@ -901,37 +869,36 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         RP.GuardianProof calldata proof
     ) external {
         _check(c, 48);
-        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
-            _attestationStore(), _environment(), msg.data
-        );
-        _repudiationCommit(c, m, keccak256("attribution_lifecycle.replay.repudiation_veto_key"));
+        _disputeTransport(c);
     }
 
     function cancelRepudiation(T.ActionContext calldata c, RP.Record calldata record) external {
         _check(c, 49);
-        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
-            _attestationStore(), _environment(), msg.data
-        );
-        _repudiationCommit(
-            c, m, keccak256("attribution_lifecycle.replay.repudiation_cancellation_key")
-        );
+        _disputeTransport(c);
     }
 
     function executeRepudiation(T.ActionContext calldata c, RP.Record calldata record) external {
         _check(c, 50);
-        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
-            _attestationStore(), _environment(), msg.data
-        );
-        _repudiationCommit(
-            c, m, keccak256("attribution_lifecycle.replay.repudiation_execution_key")
-        );
+        _disputeTransport(c);
     }
 
-    function _repudiationCommit(T.ActionContext calldata c, RP.Mutation memory m, bytes32 surface)
-        private
-    {
-        bytes32 key = _consume(surface, m.replayScope, m.replayCommitment);
-        _commit(c, m.action, m.state, key, m.record);
+    function _disputeTransport(T.ActionContext calldata c) private returns (bytes32) {
+        DisputeTransport.Result memory m = DisputeTransport.applyEncoded(
+            _attestationStore(), _environment(), msg.data
+        );
+        bytes32 consumed;
+        if (m.replayKind != DisputeTransport.ReplayKind.None) {
+            consumed = _consume(m.replaySurface, m.replayScope, m.replayCommitment);
+            if (m.replayKind == DisputeTransport.ReplayKind.GovernancePair) {
+                consumed = keccak256(abi.encode(consumed, _consume(
+                    keccak256("attribution_lifecycle.replay.governance_action"),
+                    m.governanceScope, m.governanceCommitment
+                )));
+            }
+        }
+        _commit(c, m.action, m.state, consumed, m.record);
+        if (m.nativeReceipt) _native(c.operationId, m.record, m.artistId, m.collectionId);
+        return m.output;
     }
     function _recordAttestationEncoded(
         T.ActionContext calldata c,

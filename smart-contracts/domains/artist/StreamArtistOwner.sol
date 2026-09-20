@@ -161,7 +161,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     function recoveredAuthorityHydrationCapability()
         external
         view
-        returns (StreamArtistRecoveredHydrationTypes.Capability memory)
+        returns (StreamArtistRecoveredHydrationTypes.Capability calldata)
     {
         _forwardRecoveredRead();
     }
@@ -169,7 +169,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     function recoveredHydrationImportedPrefix()
         external
         view
-        returns (StreamArtistRecoveredHydrationTypes.OwnerProvenance memory, bytes32, uint64)
+        returns (StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata, bytes32, uint64)
     {
         _forwardRecoveredRead();
     }
@@ -185,7 +185,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     function recoveredHydrationOrigin(bytes32)
         external
         view
-        returns (StreamArtistRecoveredHydrationTypes.OriginEnvironment memory)
+        returns (StreamArtistRecoveredHydrationTypes.OriginEnvironment calldata)
     {
         _forwardRecoveredRead();
     }

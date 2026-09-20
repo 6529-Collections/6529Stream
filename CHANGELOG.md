@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Joined Artist Attribution capacity extraction
+
+- Share original dispute transport and ordinary personhood/recovered read encodings,
+  preserving guarded owner replay/commit order, original ABI and recursive storage.
+- Reduce the joined Attribution runtime from 34,560 to 25,369 bytes; deployment remains
+  blocked by 793 bytes. Author 13 owner-level regression cases; native/current-graph
+  acceptance remains pending. The separately rejected replay-write proposal is inert.
+
 ## Artist personhood documentary references
 
 - Link the original signed Artist personhood head to its exact General identity
