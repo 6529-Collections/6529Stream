@@ -51,9 +51,9 @@ The selected Renderer must have a fresh governed declaration, complete read rost
 runtime pins, analysis and golden evidence covering every supported suite and fixed
 worker. Catalogue membership alone is not admission. The Registry's existing target
 and read limits still apply; the source's maximum catalogue length does not promise
-that every possible catalogue fits a complete admitted roster. The new preservation
-Renderer and its explicit admission-profile extension are a separate follow-up; this
-batch does not permit old preservation consumers to reinterpret the new profile.
+that every possible catalogue fits a complete admitted roster. The distinct
+preservation Renderer below requires its own admitted profile; old preservation
+consumers cannot reinterpret it as the original profile.
 
 An original C2PA wrapper can point to the new live companion while retaining its
 own reconciliation pins. Reports pinned to A can truthfully become `current=false`
@@ -107,3 +107,54 @@ the complete reached linked graph and actual deployment remain separate checks.
 The first combined companion and earlier Identity encoders exceeded runtime limits;
 those captures are retained. The final explicit-widened read frame and separate
 fixed rendering worker fit without changing predicates or deployment limits.
+
+## Immutable catalogue successor
+
+The first genuine cold diagnostic passed A but exhausted the unchanged 250,000-gas
+source frame for B and C while reading the storage catalogue. Five shared code-only
+dependencies were still warm, so this was a lower-bound failure, not a fully cold
+transaction measurement. The failed run and original artifacts are retained.
+
+The successor source constructs a separate compiler-created data contract containing
+`STOP || abi.encode(completeEntries)`. Its constructor performs the same complete
+suite validation and original ordered catalogue-hash fold. Each read checks the
+immutable carrier runtime hash and length, then copies one complete 1,280-byte entry.
+The original getters retain their full values and array-bound panic. The carrier has
+no mutation or authority interface; the current Core, seal, completion and ancestry
+checks remain in their original order. The maximum eight-entry runtime is 10,305
+bytes, including its STOP byte and canonical array header. The admission roster must
+include the actual `STATIC_ARTIST_LINEAGE_CATALOGUE` target as well as the source and
+all supported suites.
+
+Five independent tests reconstruct the complete entries, runtime bytes and original
+catalogue fold; check all historical entries across A/B/C; reject carrier corruption
+including unused rows; retain both bounds errors; and fuzz valid indices. The cold
+successor cools every reached suite account and its storage, the five shared
+dependencies, Core, Router and carrier before the first source call. It measures
+only that 250,000-gas frame, not complete rendering or a transaction. Original
+fourteen body oracles are unchanged and split between two smaller test contracts.
+The fixture uses genuine compiler creation artifacts with the same CREATE caller,
+nonce and constructor arguments and retains normal runtime/initcode admission.
+
+## Distinct current-Artist preservation admission
+
+`StreamCurrentArtistPreservationAttributionV1` pins the actual lineage companion,
+source/catalogue and original coordinates. It also retains the original C2PA
+wrapper's reconciliation runtime and chain checks when that wrapper is selected.
+Its strict projection has no unavailable-source fallback.
+
+`StreamCurrentArtistPreservationRendererV1` retains the original complete token
+request, full artwork, original-at-mint entropy, current citation, terminal policy
+and C2PA output algorithms. Its explicit profile is
+`6529STREAM_CURRENT_ARTIST_PRESERVATION_RENDER_V1`; its attribution profile is
+`6529STREAM_CURRENT_ARTIST_NON_SANCTION_ATTRIBUTION_V1`. Neither is relabelled as
+the original preservation profile. Fresh governed Registry admission binds this
+exact producer/profile, actual row version, complete roster, analysis and golden
+execution. The old token and VIEW profile branches remain separate.
+
+The selected successor gate measured Source 6,683/13,686 runtime/bare creation,
+new Attribution 2,811/9,422, new Renderer 21,284/26,419, Admission 15,271/15,303 and
+Registry 21,927/26,040. These are bounded product sizes, not deployment or serving
+acceptance. Source/type/size evidence does not establish actual seven-owner
+migration, full admitted read closure, new consumer schema acceptance, C2PA
+continued use or cold whole-transaction limits. Focused runtime evidence is pending.

@@ -190,6 +190,16 @@
   provider joins. ABI-only checks pass; native, capacity and actual ceremony
   acceptance remain pending.
 
+## Current-Artist preservation and immutable catalogue reads
+
+- Add a distinct current-Artist preservation producer and closed governed
+  admission profile while retaining the original live and preservation paths.
+- Read complete authenticated lineage catalogue entries from compiler-created
+  immutable code, preserving the original catalogue commitment and authority
+  checks after the storage-based successor cold reads exceeded their budget.
+- Retain failed evidence, exact byte/field parity and cold-frame regressions in
+  the [current-authority guide](docs/guides/static-artist-current-authority.md).
+
 ## Explicit current-authority STATIC Artist reads
 
 - Add an immutable complete-suite catalogue and direct original namespace facts

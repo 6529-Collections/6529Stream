@@ -67,6 +67,7 @@ import {
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamStaticArtistLineageFacts.sol";
 
 interface LineageVm {
+    function getCode(string calldata) external view returns (bytes memory);
     function expectRevert(bytes4) external;
     function etch(address, bytes calldata) external;
     function chainId(uint256) external;
@@ -285,18 +286,18 @@ contract LineageReadOwner is MetadataRealReadOwner {
 
 /// @notice Actual new source/companion and original display algorithms with explicit typed suites.
 /// @dev Constructor hash comes from the independent original-literal Coordinator fixture.
-contract StreamStaticArtistLineageTest is CharacterizationTestBase {
-    LineageVm private constant lvm =
+abstract contract StaticArtistLineageFixture is CharacterizationTestBase {
+    LineageVm internal constant lvm =
         LineageVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    bytes32 private constant COMPLETE = keccak256("all seven current owners complete");
-    LineageCoreBoundary private core;
-    LineageRouterBoundary private router;
-    T.SuiteConfiguration[3] private suites;
-    MetadataImmutableReadCoordinator[3] private coordinators;
-    Source private source;
-    Companion private companion;
-    Original private original;
-    DisplaySnapshotBoundary private snapshot;
+    bytes32 internal constant COMPLETE = keccak256("all seven current owners complete");
+    LineageCoreBoundary internal core;
+    LineageRouterBoundary internal router;
+    T.SuiteConfiguration[3] internal suites;
+    MetadataImmutableReadCoordinator[3] internal coordinators;
+    Source internal source;
+    Companion internal companion;
+    Original internal original;
+    DisplaySnapshotBoundary internal snapshot;
 
     function setUp() public {
         core = new LineageCoreBoundary();
@@ -321,9 +322,21 @@ contract StreamStaticArtistLineageTest is CharacterizationTestBase {
                 )
             );
             for (uint8 i; i < 7; ++i) {
-                s.owners[i] = address(new LineageReadOwner(s, predicted, i));
+                s.owners[i] = address(
+                    LineageReadOwner(
+                        _artifact(
+                            "test/unit/metadata/StreamStaticArtistLineage.t.sol:LineageReadOwner",
+                            abi.encode(s, predicted, i)
+                        )
+                    )
+                );
             }
-            coordinators[j] = new MetadataImmutableReadCoordinator(s);
+            coordinators[j] = MetadataImmutableReadCoordinator(
+                _artifact(
+                    "test/helpers/MetadataRealOwnerReadFixture.sol:MetadataImmutableReadCoordinator",
+                    abi.encode(s)
+                )
+            );
             require(address(coordinators[j]) == predicted, "actual coordinator CREATE");
             LineageRegistryBoundary(s.registry).bind(predicted);
             suites[j] = s;
@@ -332,7 +345,12 @@ contract StreamStaticArtistLineageTest is CharacterizationTestBase {
         for (uint256 i; i < 3; ++i) {
             list[i] = address(coordinators[i]);
         }
-        source = new Source(address(core), address(router), list);
+        source = Source(
+            _artifact(
+                "smart-contracts/domains/metadata/StreamStaticArtistLineageSource.sol:StreamStaticArtistLineageSource",
+                abi.encode(address(core), address(router), list)
+            )
+        );
         core.pointer(keccak256("METADATA_ROUTER"), address(router), 1, 1);
         _select(0);
         DisplayScopeBoundary scopes = new DisplayScopeBoundary(address(core), address(router));
@@ -340,21 +358,52 @@ contract StreamStaticArtistLineageTest is CharacterizationTestBase {
             new DisplayOriginalBoundary(address(core), address(scopes));
         snapshot = new DisplaySnapshotBoundary(address(core), address(router), address(scopes));
         scopes.bindSources(address(snapshot), address(finality));
-        original = new Original(
-            address(core), address(router), suites[0].registry, address(finality), address(0)
+        original = Original(
+            _artifact(
+                "smart-contracts/domains/metadata/StreamStaticAttributionCompanion.sol:StreamStaticAttributionCompanion",
+                abi.encode(
+                    address(core),
+                    address(router),
+                    suites[0].registry,
+                    address(finality),
+                    address(0)
+                )
+            )
         );
-        companion = new Companion(address(original), address(source), address(0));
+        companion = Companion(
+            _artifact(
+                "smart-contracts/domains/metadata/StreamStaticArtistLineageCompanion.sol:StreamStaticArtistLineageCompanion",
+                abi.encode(address(original), address(source), address(0))
+            )
+        );
     }
 
-    function _owner(uint256 j, uint256 i) private view returns (LineageReadOwner) {
+    /// @dev Genuine frozen compiler artifact with the original CREATE context and exact arguments.
+    function _artifact(string memory name, bytes memory args) internal returns (address deployed) {
+        bytes memory init = bytes.concat(lvm.getCode(name), args);
+        require(init.length <= 49152, "actual initcode admission");
+        assembly ("memory-safe") {
+            deployed := create(0, add(init, 32), mload(init))
+            if iszero(deployed) {
+                let p := mload(0x40)
+                returndatacopy(p, 0, returndatasize())
+                revert(p, returndatasize())
+            }
+        }
+        require(
+            deployed.code.length != 0 && deployed.code.length <= 24576, "actual runtime admission"
+        );
+    }
+
+    function _owner(uint256 j, uint256 i) internal view returns (LineageReadOwner) {
         return LineageReadOwner(suites[j].owners[i]);
     }
 
-    function _select(uint256 j) private {
+    function _select(uint256 j) internal {
         core.pointer(keccak256("ARTIST_REGISTRY"), suites[j].registry, 1, 1);
     }
 
-    function _origin(uint256 j) private view returns (RH.OriginEnvironment memory o) {
+    function _origin(uint256 j) internal view returns (RH.OriginEnvironment memory o) {
         T.SuiteConfiguration memory s = suites[j];
         o.chainId = block.chainid;
         o.registry = s.registry;
@@ -369,13 +418,15 @@ contract StreamStaticArtistLineageTest is CharacterizationTestBase {
         o.suiteConfigurationHash = keccak256(abi.encode(s));
     }
 
-    function _prepare(uint256 j, uint8 omit, uint8 wrong) private {
+    function _prepare(uint256 j, uint8 omit, uint8 wrong) internal {
         coordinators[j].installFixturePrefix(_origin(0), COMPLETE, omit, wrong);
         _owner(j, 2).history(suites[j - 1].registry, 1, keccak256("root"), keccak256("manifest"), 1);
         _owner(j - 1, 2).seal(suites[j].registry, true, 2);
         _select(j);
     }
+}
 
+contract StreamStaticArtistLineageTest is StaticArtistLineageFixture {
     function testOriginalSuiteAndEveryFullAttributionByteMatch() public view {
         (bool coreOK, bytes memory actualCore) =
             suites[0].registry.staticcall(abi.encodeWithSignature("core()"));
@@ -505,7 +556,9 @@ contract StreamStaticArtistLineageTest is CharacterizationTestBase {
         _owner(1, 2).history(suites[0].registry, 1, keccak256("root"), keccak256("manifest"), 1);
         require(source.currentSuite().registry == suites[1].registry, "exact source restore");
     }
+}
 
+contract StreamStaticArtistLineageContinuityTest is StaticArtistLineageFixture {
     function testPinnedSuccessorRuntimeAndChainFailClosedThenRestore() public {
         _prepare(1, 255, 255);
         bytes memory saved = suites[1].owners[2].code;

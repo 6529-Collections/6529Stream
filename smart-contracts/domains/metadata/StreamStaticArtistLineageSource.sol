@@ -21,6 +21,9 @@ import {
 import { StreamMetadataRecoveryRoutes as Routes } from "./StreamMetadataRecoveryRoutes.sol";
 import { IStreamCorePointers } from "../../interfaces/stream/core/IStreamCorePointers.sol";
 import { StreamArtistStaticCalls as Calls } from "../artist/StreamArtistStaticCalls.sol";
+import {
+    StreamStaticArtistLineageCatalogue as Catalogue
+} from "./StreamStaticArtistLineageCatalogue.sol";
 
 /// @notice Current authority through an explicit, immutable catalogue of complete actual suites.
 /// @dev Catalogue membership is not Renderer admission. Every reached suite/selector must also
@@ -44,7 +47,9 @@ contract StreamStaticArtistLineageSource is I {
     uint256 public immutable sourceChainId;
     bytes32 public immutable catalogueHash;
     bytes32 public immutable originalOriginHash;
-    Entry[] private _entries;
+    address public immutable catalogueCarrier;
+    bytes32 public immutable catalogueCarrierCodeHash;
+    uint256 private immutable _catalogueCount;
     mapping(address => uint256) private _indexPlusOne;
     uint256 private constant CAP = 100000;
     error InvalidStaticArtistLineage();
@@ -65,20 +70,21 @@ contract StreamStaticArtistLineageSource is I {
                 router_
             )
         );
+        Entry[] memory entries = new Entry[](coordinators.length);
         for (uint256 i; i < coordinators.length; ++i) {
             Entry memory e = _capture(coordinators[i]);
             if (
                 e.suite.core != core_ || e.suite.metadata != router_
                     || _indexPlusOne[e.suite.registry] != 0
             ) _fail();
-            if (i != 0) _sameDependencies(_entries[0].suite, e.suite);
-            _entries.push(e);
+            if (i != 0) _sameDependencies(entries[0].suite, e.suite);
+            entries[i] = e;
             _indexPlusOne[e.suite.registry] = i + 1;
             folded = keccak256(abi.encode(folded, e));
         }
-        originalArtist = _entries[0].suite.registry;
-        originalArtistCodeHash = _entries[0].runtimes[7];
-        Entry memory first = _entries[0];
+        originalArtist = entries[0].suite.registry;
+        originalArtistCodeHash = entries[0].runtimes[7];
+        Entry memory first = entries[0];
         RH.OriginEnvironment memory origin;
         origin.chainId = block.chainid;
         origin.registry = first.suite.registry;
@@ -93,18 +99,27 @@ contract StreamStaticArtistLineageSource is I {
         origin.suiteConfigurationHash = keccak256(abi.encode(first.suite));
         originalOriginHash = RH.originHash(origin);
         catalogueHash = folded;
+        bytes memory encoded = abi.encode(entries);
+        address carrier = address(new Catalogue(encoded));
+        bytes32 carrierHash = keccak256(bytes.concat(hex"00", encoded));
+        if (carrier.codehash != carrierHash || carrier.code.length != 65 + 1280 * entries.length) {
+            _fail();
+        }
+        catalogueCarrier = carrier;
+        catalogueCarrierCodeHash = carrierHash;
+        _catalogueCount = entries.length;
     }
 
     function catalogueCount() external view returns (uint256) {
-        return _entries.length;
+        return _catalogueCount;
     }
 
     function catalogueSuite(uint256 index) external view returns (T.SuiteConfiguration memory) {
-        return _entries[index].suite;
+        return _entry(index).suite;
     }
 
     function catalogueEntry(uint256 index) external view returns (Entry memory) {
-        return _entries[index];
+        return _entry(index);
     }
 
     function currentSuite() external view returns (T.SuiteConfiguration memory suite) {
@@ -112,7 +127,7 @@ contract StreamStaticArtistLineageSource is I {
         Routes.Pointer memory p = _pointer(keccak256("ARTIST_REGISTRY"));
         uint256 plus = _indexPlusOne[p.target];
         if (plus == 0 || p.status != 1 || p.revision == 0) _fail();
-        Entry memory current = _entries[plus - 1];
+        Entry memory current = _entry(plus - 1);
         _pins(current);
         if (p.codeHash != current.runtimes[7]) _fail();
         suite = current.suite;
@@ -123,7 +138,7 @@ contract StreamStaticArtistLineageSource is I {
         ) _fail();
         if (_address(router, "core()") != core) _fail();
         if (plus == 1) return suite;
-        Entry memory original = _entries[0];
+        Entry memory original = _entry(0);
         _pins(original);
         // Immediate predecessor remains isSealed to this exact target even for repeated imports.
         F.Lineage memory b = abi.decode(
@@ -135,7 +150,7 @@ contract StreamStaticArtistLineageSource is I {
             b.bindingCount != 1 || b.predecessorCount != 1 || priorPlus == 0 || priorPlus == plus
                 || b.snapshotBlock == 0 || b.importRoot == 0 || b.manifestHash == 0
         ) _fail();
-        Entry memory prior = _entries[priorPlus - 1];
+        Entry memory prior = _entry(priorPlus - 1);
         _pins(prior);
         if (b.predecessorCodeHash != prior.runtimes[7]) _fail();
         F.Lineage memory seal = abi.decode(
@@ -170,6 +185,28 @@ contract StreamStaticArtistLineageSource is I {
                     || imported.originProfile != RH.PROFILE
             ) _fail();
         }
+    }
+
+    function _entry(uint256 index) private view returns (Entry memory e) {
+        // Preserve the original array getters' out-of-range panic.
+        if (index >= _catalogueCount) {
+            assembly ("memory-safe") {
+                mstore(0, 0x4e487b71)
+                mstore(32, 0x32)
+                revert(28, 36)
+            }
+        }
+        address carrier = catalogueCarrier;
+        if (
+            carrier.codehash != catalogueCarrierCodeHash
+                || carrier.code.length != 65 + 1280 * _catalogueCount
+        ) _fail();
+        // STOP + ABI array offset/length occupy 65 bytes. Every complete Entry is forty words.
+        bytes memory raw = new bytes(1280);
+        assembly ("memory-safe") {
+            extcodecopy(carrier, add(raw, 32), add(65, mul(index, 1280)), 1280)
+        }
+        return abi.decode(raw, (Entry));
     }
 
     function _capture(address coordinator) private view returns (Entry memory e) {

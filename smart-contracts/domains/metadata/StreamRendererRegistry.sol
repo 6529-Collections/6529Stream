@@ -686,7 +686,12 @@ contract StreamRendererRegistry is V, Current, Terminal, Preservation, StreamGas
             || role == keccak256("ARTIST_ATTRIBUTION_OWNER")
             || role == keccak256("ARTIST_COLLABORATOR_RECORDS_OWNER")
             || role == keccak256("ARTIST_ACCEPTANCE_OWNER")
-            || role == keccak256("ARTIST_SANCTION_OWNER");
+            || role == keccak256("ARTIST_SANCTION_OWNER")
+            || role == keccak256("ARTIST_PAYOUT_OWNER")
+            || role == keccak256("STATIC_ARTIST_LINEAGE_SOURCE")
+            || role == keccak256("STATIC_ARTIST_LINEAGE_CATALOGUE")
+            || role == keccak256("STATIC_ARTIST_LINEAGE_COMPANION")
+            || role == keccak256("STATIC_ARTIST_LINEAGE_RENDERING");
     }
 
     function _key(R.RendererManifest calldata m) private pure returns (bytes32) {

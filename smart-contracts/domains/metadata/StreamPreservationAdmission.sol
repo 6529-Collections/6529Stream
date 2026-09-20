@@ -36,9 +36,15 @@ interface IStreamPreservationRegistryCoordinates {
 /// @notice Fixed validator for the distinct preservation declaration. Original admission stays intact.
 library StreamPreservationAdmission {
     bytes32 internal constant TOKEN = keccak256("6529STREAM_PRESERVATION_RENDER_V1");
+    bytes32 internal constant CURRENT_ARTIST_TOKEN =
+        keccak256("6529STREAM_CURRENT_ARTIST_PRESERVATION_RENDER_V1");
     bytes32 internal constant VIEW = keccak256("6529STREAM_ADOPTED_POLICY_VIEW_PRESERVATION_V1");
     bytes32 internal constant ANALYSIS = keccak256("6529STREAM_PRESERVATION_ANALYSIS_ABI_V1");
     uint256 internal constant MAX_OUTPUT = 16777216;
+
+    function _tokenProfile(bytes32 profile) private pure returns (bool) {
+        return profile == TOKEN || profile == CURRENT_ARTIST_TOKEN;
+    }
 
     function key(bytes32 versionKey, address producer, bytes32 profile)
         internal
@@ -80,8 +86,7 @@ library StreamPreservationAdmission {
         ) {
             revert A.PreservationUnavailable(k);
         }
-        V.Version memory original =
-            abi.decode(
+        V.Version memory original = abi.decode(
             _read(registry, abi.encodeCall(V.version, (versionKey)), 288, cap), (V.Version)
         );
         if (!original.exists) revert V.UnknownRenderer(versionKey);
@@ -139,10 +144,11 @@ library StreamPreservationAdmission {
         view
     {
         if (
-            (b.profile != TOKEN && b.profile != VIEW) || b.producer.code.length == 0
-                || b.producer.codehash != b.producerCodeHash || b.attribution.code.length == 0
-                || b.attribution.codehash != b.attributionCodeHash || b.core.code.length == 0
-                || b.router.code.length == 0 || b.liveRenderer != original.renderer
+            (b.profile != TOKEN && b.profile != CURRENT_ARTIST_TOKEN && b.profile != VIEW)
+                || b.producer.code.length == 0 || b.producer.codehash != b.producerCodeHash
+                || b.attribution.code.length == 0 || b.attribution.codehash != b.attributionCodeHash
+                || b.core.code.length == 0 || b.router.code.length == 0
+                || b.liveRenderer != original.renderer
                 || b.liveRendererCodeHash != original.runtimeHash
                 || original.renderer.code.length == 0
                 || original.renderer.codehash != original.runtimeHash
@@ -153,10 +159,9 @@ library StreamPreservationAdmission {
         ) {
             revert A.InvalidPreservationAdmission();
         }
-        if (b.profile == TOKEN) {
-            bytes memory raw = _read(
-                b.producer, abi.encodeCall(P.preservationBinding, ()), 192, cap
-            );
+        if (_tokenProfile(b.profile)) {
+            bytes memory raw =
+                _read(b.producer, abi.encodeCall(P.preservationBinding, ()), 192, cap);
             if (
                 keccak256(raw)
                     != keccak256(
@@ -197,7 +202,10 @@ library StreamPreservationAdmission {
                             cap
                         ),
                         (bytes32)
-                    ) != keccak256("6529STREAM_NON_SANCTION_ATTRIBUTION_V1")
+                    )
+                    != (b.profile == CURRENT_ARTIST_TOKEN
+                            ? keccak256("6529STREAM_CURRENT_ARTIST_NON_SANCTION_ATTRIBUTION_V1")
+                            : keccak256("6529STREAM_NON_SANCTION_ATTRIBUTION_V1"))
         ) revert A.InvalidPreservationAdmission();
     }
 
@@ -242,7 +250,7 @@ library StreamPreservationAdmission {
                     item.selector == P.preservationProfile.selector && item.exact
                         && item.maxReturnBytes == 32
                 ) required |= 1;
-                if (b.profile == TOKEN) {
+                if (_tokenProfile(b.profile)) {
                     if (
                         item.selector == P.preservationBinding.selector && item.exact
                             && item.maxReturnBytes == 192
@@ -291,7 +299,7 @@ library StreamPreservationAdmission {
                 required |= 16;
             }
         }
-        if (oldIndex != oldReads.length || required != (b.profile == TOKEN ? 31 : 255)) {
+        if (oldIndex != oldReads.length || required != (_tokenProfile(b.profile) ? 31 : 255)) {
             revert A.InvalidPreservationAdmission();
         }
         A.PreservationAnalysis memory a = abi.decode(analysis, (A.PreservationAnalysis));
@@ -313,14 +321,14 @@ library StreamPreservationAdmission {
             A.PreservationGoldenVector memory v = vectors[i];
             if (
                 v.outputHash == 0 || v.tokenId == 0 || v.mode < 2
-                    || v.mode > (b.profile == TOKEN ? 3 : 5)
+                    || v.mode > (_tokenProfile(b.profile) ? 3 : 5)
             ) {
                 revert A.InvalidPreservationAdmission();
             }
             modes |= 1 << v.mode;
             _golden(registration, v, readGas, goldenGas);
         }
-        if (modes != (b.profile == TOKEN ? 12 : 60)) revert A.InvalidPreservationAdmission();
+        if (modes != (_tokenProfile(b.profile) ? 12 : 60)) revert A.InvalidPreservationAdmission();
     }
 
     function _golden(
@@ -337,7 +345,7 @@ library StreamPreservationAdmission {
         if (!exists || cid != v.scope.collectionId) revert A.InvalidPreservationAdmission();
         string memory output;
         bytes memory raw;
-        if (b.profile == TOKEN) {
+        if (_tokenProfile(b.profile)) {
             // Token methods select MARKETPLACE directly; COLLECTION is the canonical golden coordinate.
             if (
                 v.adoptionRecord != 0 || v.scope.scopeType != StreamFinalityScopeType.COLLECTION
