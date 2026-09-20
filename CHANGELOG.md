@@ -11,6 +11,14 @@ the release policy in `docs/release-policy.md`.
 - Preserve old profile encodings and original publication domains; retain global
   C2PA key-history order. Focused cases are authored; native acceptance is pending.
 
+## LOW_SECURITY instant entropy
+
+- Add a bounded synchronous entropy path with separate provider identity,
+  zero-fee pull credits and mint-commitment exclusion. Scope entropy and fresh
+  recovery remain ASYNC; runtime, consumer and deployment acceptance are separate.
+- Add a direct storage getter for full explicit policy and original token facts
+  so terminal STATIC consumers need no delegated entropy read.
+
 ## Artist combined multiplicity and delegation hydration
 
 - Extend the existing multiple-Artist operation-60 capability with complete

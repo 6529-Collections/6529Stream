@@ -9,9 +9,9 @@ legacy ASYNC / HIGH_ASSURANCE / REQUIRED profile.
 This implementation batch provides configuration and terminal token records.
 Nonrandom metadata rendering, distribution, finality and reference capture
 require their separate consumer profiles. The presence of a terminal status
-does not establish that those integrations are complete. INSTANT admission is
-explicitly unsupported pending the separate synchronous provider capability;
-that implementation remains required work.
+does not establish that those integrations are complete. The separate
+[instant provider capability](instant-entropy.md) admits INSTANT only for
+LOW_SECURITY collections with an authenticated synchronous provider.
 
 ## Setup order
 
@@ -47,7 +47,8 @@ continuity recipe; this batch does not backfill it.
 | DISABLED (0) | NOT_REQUIRED (1) | Provider, salt, request and reveal/recovery fields are zero | DISABLED (1) | Refused |
 | ASYNC (2) | REQUIRED (0) | Active pinned provider and declared reveal policy | REGISTERED (3) | Supported |
 | ASYNC (2) | NOT_REQUIRED (1) | Active pinned provider and declared reveal policy | NOT_REQUIRED (2) | Supported |
-| INSTANT (1) | Either | Typed unsupported-mode rejection in this batch | No registration | Refused |
+| INSTANT (1) | REQUIRED (0) | LOW_SECURITY, pinned instant provider, zero async reveal/recovery fields | REGISTERED (3), later synchronous request | Refused |
+| INSTANT (1) | NOT_REQUIRED (1) | Same explicit instant policy | NOT_REQUIRED (2) | Refused |
 
 The render requirement is an explicit content declaration. It is never inferred
 from STATIC, a renderer name, a metadata mode or a zero seed. All tokens in this
@@ -91,6 +92,22 @@ The read returns twelve ABI words, in order: configured, explicitPolicy, frozen,
 mode, securityClass, renderRequirement, revision (`uint64`), providerEpoch
 (`uint32`), policyHash, contentStateHash, lastActionId, artistConsentRecord.
 Both transitions return scope, oldHash, newHash, artistContentStateHash.
+
+For executable STATIC consumers, `IStreamEntropyTerminalFacts` adds
+`staticTerminalEntropyFacts(uint256)`, selector/interface ID `0x40016975`.
+The direct host getter returns exactly sixteen words (512 bytes): collection ID,
+the complete twelve-word policy record above, status (`uint8`), seed and request
+key. It reads the original subject, config, epoch and namespaced policy directly,
+without external or delegated calls. An absent explicit revision reverts with
+`ExplicitCollectionPolicyRequired`; it does not synthesize a legacy policy.
+
+This getter reports stored facts for any explicit token status. A terminal
+consumer must separately authenticate Core collection identity and original
+`coordinatorAtMint`, then admit the intended status. For DISABLED/NOT_REQUIRED,
+the direct subject seed and request key are zero, `tokenSeed` is unfinalized,
+and the original request ID and attempt are zero by the unchanged read equations.
+The getter preserves full H, security class, render requirement, freeze and
+Artist/action evidence. Its presence alone does not admit executable metadata.
 
 The content hash is Keccak-256 of Solidity `abi.encode` with these exact fields:
 
@@ -160,9 +177,11 @@ changed by this batch.
 Selected compilation retains all 202 original Coordinator ABI entries and all
 22 original storage entries, with no appended ordinary storage. The original
 Artist Registry and Coordinator ABI/storage are unchanged. The formatted
-twelve-product size capture places the entropy Coordinator at 24,555 runtime
-bytes and 28,936 creation bytes; only 21 runtime bytes remain below EIP-170.
+twelve-product collection-policy-only capture placed the entropy Coordinator at 24,555 runtime
+bytes and 28,936 creation bytes; 21 runtime bytes remained below EIP-170.
 All selected products fit, but this is not a complete deployment size proof.
+The later INSTANT/direct-facts batch has its own updated
+[selected size evidence](instant-entropy.md#read-budget-and-bytecode-checks).
 
 The source-inventory generator currently refuses to write because of 22 existing
 layout diagnostics. Each diagnostic was confirmed in the integration base

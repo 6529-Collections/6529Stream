@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamEntropyInstantProviderReads } from "./StreamEntropyInstantProviderReads.sol";
 import "./StreamEntropyCoordinator.sol";
 import { IStreamCore } from "../../interfaces/stream/core/IStreamCore.sol";
 import { IStreamEntropyEpochs } from "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
@@ -240,7 +241,6 @@ library StreamEntropyCollectionPolicy {
         P.PolicyInput memory input
     ) private view returns (Prepared memory p) {
         _mutable(core, id, prior);
-        if (input.mode == P.Mode.INSTANT) revert P.UnsupportedEntropyMode(input.mode);
         p.reveal = input.reveal;
         p.config = StreamEntropyCoordinator.CollectionConfig(
             input.provider,
@@ -261,6 +261,21 @@ library StreamEntropyCollectionPolicy {
                     || input.maxFreshRecoveryAttempts != 0 || input.recoveryPolicyId != 0
             ) revert P.InvalidCollectionPolicy(id);
             if (escrow != 0) revert P.CollectionPolicyEscrowOutstanding(id);
+        } else if (input.mode == P.Mode.INSTANT) {
+            if (input.securityClass != P.SecurityClass.LOW_SECURITY) {
+                revert P.UnsupportedEntropyMode(input.mode);
+            }
+            if (
+                input.timeoutBlocks != 0 || input.reveal.declared || input.reveal.requestMode != 0
+                    || input.reveal.revealOwnerRole != 0 || input.reveal.requestSLOBlocks != 0
+                    || input.reveal.revealFeePerTokenWei != 0 || input.maxFreshRecoveryAttempts != 0
+                    || input.recoveryPolicyId != 0
+            ) revert P.InvalidCollectionPolicy(id);
+            if (escrow != 0) revert P.CollectionPolicyEscrowOutstanding(id);
+            p.config.providerConfigHash =
+                StreamEntropyInstantProviderReads.configuration(input.provider);
+            p.config.providerCodeHash = input.provider.codehash;
+            StreamEntropyProviderLifecycle.requireActive(input.provider);
         } else {
             p.config.providerConfigHash = StreamEntropyCoordinatorReads.providerConfiguration(
                 input.provider, input.timeoutBlocks

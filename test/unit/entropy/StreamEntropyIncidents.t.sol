@@ -379,7 +379,11 @@ contract StreamEntropyIncidentsTest is
             entropy.gasParameterInfo(CAP);
         (uint256 cv, uint256 cf, uint8 cc, uint64 cr) = canonical.gasParameterInfo(CAP);
         require(value == cv && floor == cf && failureClass == cc && revision == cr);
-        require(entropy.gasParameterIds().length == 1 && entropy.gasParameterIds()[0] == CAP);
+        require(entropy.gasParameterIds().length == 2 && entropy.gasParameterIds()[0] == CAP);
+        require(
+            entropy.gasParameterIds()[1]
+                == keccak256("6529STREAM_GGP_ENTROPY_INSTANT_READ_GAS_LIMIT")
+        );
         require(
             entropy.supportsInterface(type(IStreamEntropyIncidents).interfaceId)
                 && entropy.supportsInterface(type(IStreamGasParameterHost).interfaceId)

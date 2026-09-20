@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import {
     IStreamEntropyRecoveryPolicies as R
 } from "../../interfaces/stream/entropy/IStreamEntropyRecoveryPolicies.sol";
@@ -219,6 +220,7 @@ library StreamEntropyRecoveryPolicies {
                 revert R.InvalidFreshRecoveryPolicy(id);
             }
             StreamEntropyProviderLifecycle.requireActive(step.provider);
+            StreamEntropyCoordinatorReads.providerConfiguration(step.provider, 1);
         }
         bytes32 hash = keccak256(
             abi.encode(

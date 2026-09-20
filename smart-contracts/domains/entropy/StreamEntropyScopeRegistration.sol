@@ -116,7 +116,10 @@ library StreamEntropyScopeRegistration {
         if (!disabled && config.provider == address(0)) {
             revert StreamEntropyCoordinator.InvalidCollection(collectionId);
         }
-        if (!disabled && !_revealPolicies[collectionId].declared) {
+        if (
+            PolicyState.mode(collectionId) == P.Mode.ASYNC
+                && !_revealPolicies[collectionId].declared
+        ) {
             revert StreamEntropyCoordinator.RevealPolicyUndeclared(collectionId);
         }
         config.locked = true;

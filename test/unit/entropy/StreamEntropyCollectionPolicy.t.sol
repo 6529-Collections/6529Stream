@@ -18,6 +18,9 @@ import {
 import {
     IStreamRevealFeeEscrow as F
 } from "../../../smart-contracts/interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
+import {
+    IStreamEntropyTerminalFacts as TerminalFacts
+} from "../../../smart-contracts/interfaces/stream/entropy/IStreamEntropyTerminalFacts.sol";
 
 /// @notice Actual Coordinator and workers with typed Core, Artist-evidence, role and provider seams.
 /// @dev The executing authority models exact target-side context; this is not an actual Governor/Safe
@@ -439,15 +442,17 @@ contract StreamEntropyCollectionPolicyTest is
         require(address(entropy).balance == 1 ether, "custody preserved");
     }
 
-    function testInstantModeReturnsTypedUnsupportedForBothSecurityClasses() public {
+    function testInstantRejectsHighAssuranceAndLowSecurityWithAsyncPolicyFields() public {
         P.PolicyInput memory input = _async();
         input.mode = P.Mode.INSTANT;
         vm.expectRevert(abi.encodeWithSelector(P.UnsupportedEntropyMode.selector, P.Mode.INSTANT));
         policy.configureCollectionEntropyPolicy(1, input);
         input.securityClass = P.SecurityClass.LOW_SECURITY;
-        vm.expectRevert(abi.encodeWithSelector(P.UnsupportedEntropyMode.selector, P.Mode.INSTANT));
+        vm.expectRevert(abi.encodeWithSelector(P.InvalidCollectionPolicy.selector, 1));
         policy.configureCollectionEntropyPolicy(1, input);
-        require(!policy.collectionEntropyPolicy(1).configured, "unsupported never configured");
+        require(
+            !policy.collectionEntropyPolicy(1).configured, "invalid instant policy never configured"
+        );
     }
 
     function testOperationalRevealFeeRetuneLeavesHArtistStateEpochAndFreezeUnchanged() public {
@@ -591,6 +596,12 @@ contract StreamEntropyCollectionPolicyTest is
         bytes memory query = abi.encodeCall(IStreamEntropyView.tokenEntropy, (1));
         (bool readOK, bytes memory originalToken) = address(entropy).staticcall(query);
         require(readOK && originalToken.length == 256, "original token tuple");
+        bytes memory terminalQuery = abi.encodeCall(TerminalFacts.staticTerminalEntropyFacts, (1));
+        (bool terminalOK, bytes memory originalTerminal) =
+            address(entropy).staticcall(terminalQuery);
+        require(
+            terminalOK && originalTerminal.length == 512, "original complete static terminal tuple"
+        );
         StreamEntropyCoordinator successor = new StreamEntropyCoordinator(
             StreamEntropyCoordinator.DeploymentConfig(
                 address(core),
@@ -656,6 +667,13 @@ contract StreamEntropyCollectionPolicyTest is
             entropy.registeredAtBlock(1) == block.number && successor.registeredAtBlock(1) == 0,
             "registration belongs only to original host"
         );
+        (terminalOK, terminalQuery) = address(entropy).staticcall(terminalQuery);
+        require(
+            terminalOK && keccak256(terminalQuery) == keccak256(originalTerminal),
+            "original host retains full terminal facts after selection changes"
+        );
+        vm.expectRevert(abi.encodeWithSelector(P.ExplicitCollectionPolicyRequired.selector, 0));
+        TerminalFacts(address(successor)).staticTerminalEntropyFacts(1);
     }
 
     function testArtistGasRevisionAboveUint64FailsClosedAndExactActionRetries() public {
@@ -684,6 +702,86 @@ contract StreamEntropyCollectionPolicyTest is
         require(
             r.revision == 1 && r.lastActionId == ACTION && r.artistConsentRecord == CONSENT,
             "malformed revision consumed no action or consent"
+        );
+    }
+
+    function testDirectStaticTerminalFactsReturnExactDisabledAndNotRequiredPoliciesWithoutDependencies()
+        public
+    {
+        require(
+            entropy.supportsInterface(type(TerminalFacts).interfaceId), "static facts capability"
+        );
+        P.PolicyInput memory disabled = _disabled();
+        _configure(1, disabled, ACTION, CONSENT);
+        P.PolicyInput memory optional = _async();
+        optional.renderRequirement = P.RenderRequirement.NOT_REQUIRED;
+        _configure(
+            2, optional, keccak256("static optional action"), keccak256("static optional receipt")
+        );
+        core.registerToken(1, 1, HASH);
+        core.registerToken(2, 2, HASH);
+        P.PolicyRecord memory disabledRecord = policy.collectionEntropyPolicy(1);
+        P.PolicyRecord memory optionalRecord = policy.collectionEntropyPolicy(2);
+        require(
+            disabledRecord.policyHash == _explicitHash(1, disabled, 0)
+                && optionalRecord.policyHash == _explicitHash(2, optional, 1),
+            "independent explicit H values"
+        );
+        bytes memory disabledExpected = abi.encode(
+            uint256(1), disabledRecord, uint8(StreamEntropyStatus.DISABLED), bytes32(0), bytes32(0)
+        );
+        bytes memory optionalExpected = abi.encode(
+            uint256(2),
+            optionalRecord,
+            uint8(StreamEntropyStatus.NOT_REQUIRED),
+            bytes32(0),
+            bytes32(0)
+        );
+        _assertStaticTerminalTuple(1, disabledExpected);
+        _assertStaticTerminalTuple(2, optionalExpected);
+        // Remove the read workers and external dependencies after capturing the independent oracle.
+        // A direct-storage getter must still return the complete fixed tuple from its original host.
+        vm.etch(address(StreamEntropyCollectionPolicy), hex"fe");
+        vm.etch(address(StreamEntropyAuxiliaryReads), hex"fe");
+        vm.etch(address(StreamEntropySubjectReads), hex"fe");
+        vm.etch(address(core), hex"fe");
+        vm.etch(address(artist), hex"fe");
+        vm.etch(address(provider), hex"fe");
+        _assertStaticTerminalTuple(1, disabledExpected);
+        _assertStaticTerminalTuple(2, optionalExpected);
+    }
+
+    function testStaticTerminalFactsRefuseLegacyAndUnknownSubjects() public {
+        _legacy(1);
+        core.registerToken(1, 1, HASH);
+        vm.expectRevert(abi.encodeWithSelector(P.ExplicitCollectionPolicyRequired.selector, 1));
+        TerminalFacts(address(entropy)).staticTerminalEntropyFacts(1);
+        vm.expectRevert(abi.encodeWithSelector(P.ExplicitCollectionPolicyRequired.selector, 0));
+        TerminalFacts(address(entropy)).staticTerminalEntropyFacts(2);
+    }
+
+    function _assertStaticTerminalTuple(uint256 tokenId, bytes memory expected) private view {
+        (bool ok, bytes memory data) = address(entropy)
+            .staticcall(abi.encodeCall(TerminalFacts.staticTerminalEntropyFacts, (tokenId)));
+        require(
+            ok && data.length == 512 && keccak256(data) == keccak256(expected),
+            "exact 16-word terminal facts tuple"
+        );
+        (uint256 collectionId, P.PolicyRecord memory p, uint8 status, bytes32 seed, bytes32 key) =
+            abi.decode(data, (uint256, P.PolicyRecord, uint8, bytes32, bytes32));
+        require(
+            collectionId == tokenId && p.configured && p.explicitPolicy && p.frozen
+                && p.revision == 1,
+            "complete policy and original collection"
+        );
+        require(
+            status
+                    == uint8(
+                        tokenId == 1
+                            ? StreamEntropyStatus.DISABLED
+                            : StreamEntropyStatus.NOT_REQUIRED
+                    ) && seed == 0 && key == 0,
+            "unfiltered terminal subject values"
         );
     }
 

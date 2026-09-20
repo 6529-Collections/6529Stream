@@ -8,6 +8,7 @@ import {
     IStreamGovernedParameterAuthority as A
 } from "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
+import { StreamEntropyInstantProviderReads } from "./StreamEntropyInstantProviderReads.sol";
 
 /// @notice Fixed library: state, enumeration and governance replay live in its calling coordinator.
 library StreamEntropyProviderLifecycle {
@@ -86,7 +87,11 @@ library StreamEntropyProviderLifecycle {
         if (r.revision == type(uint64).max) revert L.ProviderLifecycleRevisionOverflow(provider);
         bytes32 codeHash = r.runtimeCodeHash;
         if (next == S.ACTIVE) {
-            StreamEntropyCoordinatorReads.providerConfiguration(provider, 1);
+            if (StreamEntropyInstantProviderReads.supportsInstant(provider)) {
+                StreamEntropyInstantProviderReads.configuration(provider);
+            } else {
+                StreamEntropyCoordinatorReads.providerConfiguration(provider, 1);
+            }
             codeHash = provider.codehash;
         }
         bytes4 selector = legacy
@@ -98,8 +103,7 @@ library StreamEntropyProviderLifecycle {
                     : L.revokeEntropyProvider.selector;
         actionClass = legacy || next == S.ACTIVE ? 1 : 0;
         scope = keccak256(abi.encode(SCOPE, block.chainid, address(this), provider, selector));
-        oldHash =
-            keccak256(
+        oldHash = keccak256(
             abi.encode(STATE, scope, r.state, r.runtimeCodeHash, r.revision, r.reasonHash)
         );
         newHash = keccak256(

@@ -80,6 +80,7 @@ jobs:
           set -euo pipefail
           python -m tools.build.test_native_artifact_storage
           python -m tools.build.test_prepare_current_graph
+          python -m tools.build.test_instant_provider_runtime
 
       - name: Identify current compiler inputs
         id: current_compiler_inputs
@@ -120,6 +121,10 @@ jobs:
             python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate 2>&1 | tee -a ci-logs/current-stack-export.log
           fi
           python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate --check
+
+      - name: Verify call-free instant provider runtime
+        shell: bash
+        run: python -m tools.build.check_instant_provider_runtime --out out/current --cache-path cache/current
 
       - name: Save current compiler outputs
         if: ${{ fromJSON(steps.current_compiler_cache.outputs.cache-hit || 'false') == false }}
