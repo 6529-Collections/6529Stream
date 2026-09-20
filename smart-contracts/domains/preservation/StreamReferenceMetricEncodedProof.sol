@@ -26,6 +26,7 @@ import { StreamWorkRecordContext } from "../records/StreamWorkRecordContext.sol"
 import { IStreamSchemaRegistry } from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
 import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceMetricProof } from "./StreamReferenceMetricProof.sol";
+import { StreamReferenceMetricBytes as MetricBytes } from "./StreamReferenceMetricBytes.sol";
 
 /// @notice Fixed encoded supplement proof; no publication authority is granted by these codecs.
 library StreamReferenceMetricEncodedProof {
@@ -60,6 +61,18 @@ library StreamReferenceMetricEncodedProof {
         (runtimeHash, replayHash) = StreamReferenceMetricProof.requireCompact(input, s);
         canonical = abi.encode(s);
         if (canonical.length == 0 || canonical.length > 524288) revert T.InvalidMetricSupplement();
+    }
+
+    /// @dev Same host-owned manifest, read in this frame after the caller's original receipt
+    /// guard. Never accepts a caller-selected descriptor or an independently trusted hash.
+    function requireStored(
+        R.Dependencies memory d,
+        StreamReferenceMetricProof.CompactInput memory input,
+        Bytes.Manifest storage saved,
+        bytes32 expectedHash,
+        uint32 expectedLength
+    ) public view returns (bytes32 runtimeHash, bytes32 replayHash) {
+        return requireCanonical(d, input, MetricBytes.read(saved), expectedHash, expectedLength);
     }
 
     function requireCanonical(

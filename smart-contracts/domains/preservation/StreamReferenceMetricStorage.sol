@@ -178,9 +178,8 @@ library StreamReferenceMetricStorage {
                 || r.profileHash != D.PROFILE_HASH || r.canonicalizationHash != ModeD.CANON_HASH
                 || r.supplementHash != _hash(d, r)
         ) revert T.InvalidMetricSupplement();
-        bytes memory canonical = Bytes.read(state.payloads[key]);
         (bytes32 runtimeHash, bytes32 replayHash) =
-            Encoded.requireCanonical(d, input, canonical, r.payloadHash, r.payloadBytes);
+            Encoded.requireStored(d, input, state.payloads[key], r.payloadHash, r.payloadBytes);
         if (r.runtimeHash != runtimeHash || r.replayHash != replayHash) {
             revert T.InvalidMetricSupplement();
         }

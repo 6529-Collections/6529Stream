@@ -196,6 +196,11 @@ contract MetricExecutionHarness {
         Preparation.requireCurrent(d, bindings, publication, evidence, facts, payload, receipt);
     }
 
+    function setSupplementManifestHash(bool fresh, bytes32 value) external {
+        if (fresh) checked.payloads[receipt.recordHash].contentHash = value;
+        else legacy.payloads[receipt.recordHash].contentHash = value;
+    }
+
     function _retain(Bytes.Manifest storage target, bytes memory raw) private {
         for (uint256 i; i < (raw.length + 8191) / 8192; ++i) {
             store.publishChunk(_part(raw, i));
@@ -382,6 +387,39 @@ contract StreamReferenceMetricExecutionTest {
                 )
         );
         host.standaloneCurrent();
+    }
+
+    function testLinkedStoredProofUsesExactHostNamespaceUnderStaticCall() public {
+        host.publish(false, original);
+        host.publish(true, original);
+        (bytes memory raw, T.Receipt memory savedReceipt) =
+            abi.decode(host.stored(true), (bytes, T.Receipt));
+        bytes32 retained = keccak256(raw);
+        host.setSupplementManifestHash(false, bytes32(uint256(1)));
+        (bool oldBad,) = address(host).staticcall(abi.encodeCall(host.requireSupplement, (false)));
+        (bool freshGood, bytes memory result) =
+            address(host).staticcall(abi.encodeCall(host.requireSupplement, (true)));
+        require(!oldBad && freshGood);
+        (bytes memory encoded,) = abi.decode(result, (bytes, uint256));
+        // Currentness returns only the original Receipt; stored() also returns full bytes.
+        require(keccak256(encoded) == keccak256(abi.encode(savedReceipt)));
+        host.setSupplementManifestHash(false, retained);
+        host.setSupplementManifestHash(true, bytes32(uint256(1)));
+        (bool oldGood,) = address(host).staticcall(abi.encodeCall(host.requireSupplement, (false)));
+        (bool freshBad, bytes memory error) =
+            address(host).staticcall(abi.encodeCall(host.requireSupplement, (true)));
+        require(
+            oldGood && !freshBad
+                && keccak256(error)
+                    == keccak256(abi.encodeWithSelector(Bytes.InvalidSnapshotManifest.selector))
+        );
+        host.setSupplementManifestHash(true, retained);
+        (bytes memory restored,) = host.requireSupplement(true);
+        require(keccak256(restored) == keccak256(abi.encode(savedReceipt)));
+        (bytes memory oldRaw, T.Receipt memory oldReceipt) =
+            abi.decode(host.stored(false), (bytes, T.Receipt));
+        require(keccak256(oldRaw) == retained);
+        require(keccak256(abi.encode(oldReceipt)) == keccak256(abi.encode(savedReceipt)));
     }
 
     function testFreshFramesReportWholeOperationCost() public {

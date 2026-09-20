@@ -1,5 +1,9 @@
 # Compact same-call metric validation
 
+This page records the compact transport boundary. The later
+[metric-local byte reader](reference-metric-byte-reads.md) preserves these
+commitments while keeping immutable-byte transport in the fixed worker frame.
+
 The fixed metric workers now keep the complete authenticated Publication and
 Evidence in the currentness worker's memory frame. They pass the exact fields
 used by the metric proof through a fixed typed projection, then decode the

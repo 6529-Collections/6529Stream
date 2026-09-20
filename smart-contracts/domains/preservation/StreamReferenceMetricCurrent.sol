@@ -15,6 +15,10 @@ import {
 } from "../../interfaces/stream/preservation/StreamReferenceMetricTypes.sol";
 
 import { StreamReferenceMetricProof as Proof } from "./StreamReferenceMetricProof.sol";
+import { StreamReferenceMetricBytes as MetricBytes } from "./StreamReferenceMetricBytes.sol";
+import { StreamReferenceModeInput as Input } from "./StreamReferenceModeInput.sol";
+import { StreamReferenceModeProof as ModeProof } from "./StreamReferenceModeProof.sol";
+import { StreamReferenceRenderSourceReads as Source } from "./StreamReferenceRenderSourceReads.sol";
 
 /// @notice Fixed fresh-currentness frame. Only its complete checked inputs derive the projection.
 library StreamReferenceMetricCurrent {
@@ -27,10 +31,32 @@ library StreamReferenceMetricCurrent {
         Bytes.Manifest storage payload,
         R.Receipt storage receipt
     ) public view returns (Proof.CompactInput memory) {
-        Preparation.CurrentDecoded memory decoded =
-            Preparation.requireCurrentDecoded(
-                d, bindings, publication, evidence, facts, payload, receipt
-            );
+        // Literal original currentness sequence, with only the immutable-byte transport
+        // kept in this frame. The public full Preparation path remains the parity oracle.
+        Preparation.CurrentDecoded memory decoded;
+        decoded.publication = abi.decode(MetricBytes.read(publication), (R.Publication));
+        bytes memory raw = MetricBytes.read(evidence);
+        decoded.evidence = abi.decode(raw, (M.Evidence));
+        if (keccak256(raw) != keccak256(abi.encode(decoded.evidence))) {
+            revert M.InvalidModeEvidence();
+        }
+        R.SourceFacts memory source =
+            Source.requireModeSourceInputs(d, Source.project(decoded.publication), true);
+        decoded.context = Input.contextHash(d, decoded.publication);
+        M.Facts memory mode = ModeProof.requireEvidenceProjected(
+            d,
+            bindings,
+            Input.project(decoded.publication, decoded.context),
+            source,
+            decoded.evidence,
+            true
+        );
+        bytes32 sourcesHash = ModeProof.sourceHash(d, bindings, source, mode);
+        if (
+            sourcesHash != receipt.sourcesHash
+                || keccak256(abi.encode(mode)) != keccak256(abi.encode(facts))
+                || MetricBytes.requireIntact(payload) != receipt.payloadHash
+        ) revert M.InvalidModeEvidence();
         return Proof.compact(decoded.publication, decoded.evidence, decoded.context);
     }
 }
