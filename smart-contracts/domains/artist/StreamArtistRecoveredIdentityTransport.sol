@@ -19,33 +19,31 @@ import {
 import {
     StreamArtistAuthorityHydrationTypes as AH
 } from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
-import {
-    StreamArtistOnboardingTypes as T
-} from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import { StreamArtistIdentityState as Identity } from "./StreamArtistIdentityState.sol";
 import { StreamArtistOwnerHydration as Original } from "./StreamArtistOwnerHydration.sol";
 import { StreamArtistRecoveredOwnerReads as Reads } from "./StreamArtistRecoveredOwnerReads.sol";
 import {
-    StreamArtistRecoveredHydrationOwnerPayload as Payload
-} from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
-import {
     StreamArtistRecoveredIdentityHydrationExportRows as Export
 } from "./StreamArtistRecoveredIdentityHydrationExportRows.sol";
 import {
-    StreamArtistRecoveredIdentityHydrationSource as Codec
-} from "./StreamArtistRecoveredIdentityHydrationSource.sol";
+    StreamArtistRecoveredIdentitySourceValidation as Validation
+} from "./StreamArtistRecoveredIdentitySourceValidation.sol";
 import {
-    StreamArtistRecoveredIdentityHydrationImport as Import
-} from "./StreamArtistRecoveredIdentityHydrationImport.sol";
+    StreamArtistRecoveredIdentitySourceTuple as Tuple
+} from "./StreamArtistRecoveredIdentitySourceTuple.sol";
+import {
+    StreamArtistRecoveredIdentityTransportImport as Import
+} from "./StreamArtistRecoveredIdentityTransportImport.sol";
 import {
     StreamArtistRecoveredTimingInventory as Timing
 } from "./StreamArtistRecoveredTimingInventory.sol";
-import { StreamArtistHydrationGuards as Guards } from "./StreamArtistHydrationGuards.sol";
-import { StreamArtistHistoryState as History } from "./StreamArtistHistoryState.sol";
 
 /// @notice Fixed typed ABI transport over seventeen declared Identity storage roots.
 /// @dev The external host never accepts roots or arbitrary storage selectors from a caller.
 library StreamArtistRecoveredIdentityTransport {
+    // Preserve the original public error surface after moving the check to the fixed worker.
+    error InvalidRecoveredHydrationProvenance();
+
     function read(uint256[17] memory roots, Identity.OwnerContext memory owner, bytes calldata data)
         public
         view
@@ -79,30 +77,15 @@ library StreamArtistRecoveredIdentityTransport {
         }
         (AH.Query memory query, RH.OwnerProvenance memory local) =
             abi.decode(data[4:], (AH.Query, RH.OwnerProvenance));
-        IH.Bundle memory bundle = Export.exportBundle(roots, query, local);
-        if (selector == Raw.recoveredIdentityHydrationRaw.selector) return abi.encode(bundle);
-        return abi.encode(Codec.encode(bundle, local));
+        bytes memory bundle = Export.exportEncoded(roots, query, local);
+        if (selector == Raw.recoveredIdentityHydrationRaw.selector) return bundle;
+        Validation.validateEncoded(bundle, local);
+        // Export produced a complete canonical single-Bundle encoding. Only the outer
+        // envelope changes; every nested offset retains its original typed meaning.
+        return abi.encode(bytes.concat(abi.encode(IH.SCHEMA, uint256(64)), Tuple.body(bundle)));
     }
 
     function importEncoded(uint256[17] memory roots, bytes calldata encoded) public {
-        (, AH.Query memory query, AH.OwnerData memory data, bytes32 value) =
-            abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
-        (, Payload.Payload memory payload) = Payload.decode(data.typedState, 2);
-        IH.Bundle memory bundle = Codec.decode(payload.semanticState, payload.provenance);
-        // This profile carries one complete recovered subject. A different subject's nonce lane
-        // cannot disappear behind an otherwise valid per-subject semantic projection.
-        if (bundle.nonces.length != payload.nonces.length || Guards.commitment() != value) {
-            revert RH.InvalidRecoveredHydrationProvenance();
-        }
-        for (uint256 i; i < bundle.nonces.length; ++i) {
-            if (
-                bundle.nonces[i].kind != payload.nonces[i].index.kind
-                    || bundle.nonces[i].key != payload.nonces[i].index.key
-                    || keccak256(abi.encode(bundle.nonces[i].words))
-                        != keccak256(abi.encode(payload.nonces[i].words))
-            ) revert RH.InvalidRecoveredHydrationProvenance();
-        }
-        Import.importEncoded(roots, query.artistId, payload.semanticState, payload.provenance);
-        History.activate(query.artistId, query.collectionId, value);
+        Import.importEncoded(roots, encoded);
     }
 }
