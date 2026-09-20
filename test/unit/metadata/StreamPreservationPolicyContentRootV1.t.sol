@@ -13,6 +13,15 @@ import {
     IStreamPreservationPolicyPublicationFactoryV1 as GraphFactory
 } from "../../../smart-contracts/interfaces/stream/finality/IStreamPreservationPolicyPublicationFactoryV1.sol";
 import {
+    IStreamCurrentAuthorityPreservationPolicyPublicationFactoryV1 as CurrentGraphFactory
+} from "../../../smart-contracts/interfaces/stream/finality/IStreamCurrentAuthorityPreservationPolicyPublicationFactoryV1.sol";
+import {
+    StreamArtistArchiveOriginTypes as ArchiveOrigin
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamArtistArchiveOriginTypes.sol";
+import {
+    StreamCurrentAuthorityInventoryTypes as CurrentInventory
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
+import {
     StreamPreservationPolicyPublicationGraphTypesV1 as PublicationGraph
 } from "../../../smart-contracts/interfaces/stream/finality/StreamPreservationPolicyPublicationGraphTypesV1.sol";
 import {
@@ -867,5 +876,328 @@ contract StreamPreservationPolicyContentRootV1Test is PreservationRootWorkerFixt
             consent
         );
         return host.publishOld(abi.encodeCall(PV.publishVerifiedPolicyContentRoot, (p)));
+    }
+}
+
+/// @dev Factory responses are transport boundaries, as in the original graph-reader case above.
+/// These cases exercise the real metadata reader, not actual factory/resolver or succession flows.
+contract StreamCurrentAuthorityPreservationPolicyContentRootGraphTest is
+    PreservationRootWorkerFixture
+{
+    bytes32 private constant CURRENT_FACTORY_PROFILE =
+        keccak256("6529STREAM_CURRENT_AUTHORITY_PRESERVATION_POLICY_PUBLICATION_FACTORY_V1");
+    bytes32 private constant CURRENT_GRAPH_DOMAIN =
+        keccak256("6529STREAM_CURRENT_AUTHORITY_PRESERVATION_POLICY_PUBLICATION_GRAPH_V1");
+
+    struct GraphFixture {
+        address factory;
+        PublicationGraph.Recipe recipe;
+        ArchiveOrigin.Dependencies origin;
+        CurrentInventory.Dependencies authority;
+        PreservationGraph.CollectionFactoryBinding binding_;
+        PublicationGraph.Graph graph;
+    }
+
+    function testCurrentAuthorityGraphPublishesOriginalCollectionRootBinding() public {
+        GraphFixture memory f = _currentGraph();
+        Root.Publication memory p = _publication();
+        bytes32 consent = keccak256("current graph original op17 approval");
+        bytes32 expected = _approvePreservation(p, consent);
+        assertTrue(expected != 0);
+        bytes32 key = host.publishCollection(p);
+        Preservation.Binding memory b = host.binding(key);
+        assertEq(abi.encode(b).length, 608);
+        assertEq(b.profileId, keccak256("6529STREAM_PRESERVATION_POLICY_CONTENT_V1"));
+        assertEq(b.preservationOutputProfile, keccak256("6529STREAM_PRESERVATION_RENDER_V1"));
+        assertEq(b.outputManifest, f.graph.children[2]);
+        assertEq(b.outputManifestCodeHash, f.graph.codeHashes[2]);
+        assertEq(b.metadataRouter, address(host));
+        assertEq(host.family(1), expected);
+        assertEq(host.collectionContentRootHead(1), key);
+        assertTrue(host.consumedArtistContentConsent(consent));
+    }
+
+    function testCurrentAuthorityGraphRequiresEachBaseAndSupplementalInterface() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        bytes4[2] memory interfaces =
+            [type(GraphFactory).interfaceId, type(CurrentGraphFactory).interfaceId];
+        for (uint256 i; i < interfaces.length; ++i) {
+            bytes memory input = abi.encodeCall(IERC165.supportsInterface, (interfaces[i]));
+            for (uint256 j; j < 2; ++j) {
+                // Both a missing capability and a noncanonical boolean must refuse.
+                calls.mockCall(f.factory, input, abi.encode(j == 0 ? uint256(0) : uint256(2)));
+                _invalidCollection(_publication());
+                calls.mockCall(f.factory, input, abi.encode(true));
+                assertEq(host.previewCollection(_publication(), address(this)), good);
+            }
+        }
+    }
+
+    function testCurrentAuthorityGraphRejectsScopedAndWrongFactoryProfiles() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        bytes32[4] memory profiles = [
+            keccak256(
+                "6529STREAM_CURRENT_AUTHORITY_SCOPED_PRESERVATION_POLICY_PUBLICATION_FACTORY_V1"
+            ),
+            keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_PUBLICATION_FACTORY_V1"),
+            keccak256("6529STREAM_POLICY_PUBLICATION_FACTORY_V2"),
+            bytes32(0)
+        ];
+        bytes memory input =
+            abi.encodeCall(GraphFactory.preservationPolicyPublicationFactoryProfile, ());
+        for (uint256 i; i < profiles.length; ++i) {
+            // SCOPED shares the supplemental selectors; the base capability remains true here.
+            calls.mockCall(f.factory, input, abi.encode(profiles[i]));
+            _invalidCollection(_publication());
+            calls.mockCall(f.factory, input, abi.encode(CURRENT_FACTORY_PROFILE));
+            assertEq(host.previewCollection(_publication(), address(this)), good);
+        }
+    }
+
+    function testCurrentAuthorityGraphCommitsEveryOriginDependencyField() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        for (uint256 i; i < 4; ++i) {
+            ArchiveOrigin.Dependencies memory bad =
+                abi.decode(abi.encode(f.origin), (ArchiveOrigin.Dependencies));
+            if (i == 0) bad.worker = preservationArtifacts;
+            if (i == 1) bad.workerCodeHash = keccak256("substituted origin runtime");
+            if (i == 2) bad.originGas += 1;
+            if (i == 3) bad.profile = keccak256("substituted origin profile");
+            _rejectDependency(
+                f.factory,
+                abi.encodeCall(CurrentGraphFactory.originDependencies, ()),
+                abi.encode(bad),
+                abi.encode(f.origin),
+                good
+            );
+        }
+    }
+
+    function testCurrentAuthorityGraphCommitsEveryAuthorityDependencyField() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        for (uint256 i; i < 3; ++i) {
+            CurrentInventory.Dependencies memory bad =
+                abi.decode(abi.encode(f.authority), (CurrentInventory.Dependencies));
+            if (i == 0) bad.resolver = preservationCheckpoint;
+            if (i == 1) bad.resolverCodeHash = keccak256("substituted authority runtime");
+            if (i == 2) bad.resolverGas += 1;
+            _rejectDependency(
+                f.factory,
+                abi.encodeCall(CurrentGraphFactory.authorityDependencies, ()),
+                abi.encode(bad),
+                abi.encode(f.authority),
+                good
+            );
+        }
+    }
+
+    function testCurrentAuthorityGraphRequiresExactCanonicalDependencyTuples() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        assertEq(abi.encode(f.origin).length, 128);
+        assertEq(abi.encode(f.authority).length, 96);
+        for (uint256 i; i < 2; ++i) {
+            bytes memory input = i == 0
+                ? abi.encodeCall(CurrentGraphFactory.originDependencies, ())
+                : abi.encodeCall(CurrentGraphFactory.authorityDependencies, ());
+            bytes memory canonical = i == 0 ? abi.encode(f.origin) : abi.encode(f.authority);
+            bytes memory truncated = new bytes(canonical.length - 32);
+            for (uint256 j; j < truncated.length; ++j) {
+                truncated[j] = canonical[j];
+            }
+            _rejectDependency(f.factory, input, truncated, canonical, good);
+            _rejectDependency(
+                f.factory, input, abi.encodePacked(canonical, bytes32(0)), canonical, good
+            );
+            bytes memory noncanonical = abi.encodePacked(canonical);
+            noncanonical[0] = bytes1(uint8(1)); // High address bits are not canonical ABI.
+            _rejectDependency(f.factory, input, noncanonical, canonical, good);
+        }
+    }
+
+    function testCurrentAuthorityGraphRejectsOldRecipeUnderNewProfile() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        bytes32 currentRecipeHash = f.binding_.recipeHash;
+        f.binding_.recipeHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRESERVATION_POLICY_PUBLICATION_FACTORY_V1"),
+                block.chainid,
+                f.recipe
+            )
+        );
+        assertTrue(f.binding_.recipeHash != currentRecipeHash);
+        // Keep provider/getter/graph commitments mutually consistent, so the refusal
+        // tests the recipe domain and dependency preimage rather than a stale getter.
+        f.graph.graphId = _graphId(f, CURRENT_GRAPH_DOMAIN);
+        _mockIdentity(f);
+        _invalidCollection(_publication());
+        f.binding_.recipeHash = currentRecipeHash;
+        f.graph.graphId = _graphId(f, CURRENT_GRAPH_DOMAIN);
+        _mockIdentity(f);
+        assertEq(host.previewCollection(_publication(), address(this)), good);
+    }
+
+    function testCurrentAuthorityGraphRejectsOldGraphDomainUnderNewProfile() public {
+        GraphFixture memory f = _currentGraph();
+        bytes32 good = host.previewCollection(_publication(), address(this));
+        bytes32 currentGraphId = f.graph.graphId;
+        f.graph.graphId =
+            _graphId(f, keccak256("6529STREAM_PRESERVATION_POLICY_PUBLICATION_GRAPH_V1"));
+        assertTrue(f.graph.graphId != currentGraphId);
+        _mockIdentity(f);
+        _invalidCollection(_publication());
+        f.graph.graphId = currentGraphId;
+        _mockIdentity(f);
+        assertEq(host.previewCollection(_publication(), address(this)), good);
+    }
+
+    function _currentGraph() private returns (GraphFixture memory f) {
+        f.factory = address(new RootArtifactsBoundary(address(schemas)));
+        address sourceFactory = address(new RootArtifactsBoundary(address(schemas)));
+        f.recipe.inventory.chainId = block.chainid;
+        f.recipe.inventory.targets[0] = address(core);
+        f.recipe.inventory.targets[1] = address(metadata);
+        f.recipe.inventory.targets[2] = address(schemas);
+        f.recipe.inventory.targets[3] = address(store);
+        f.recipe.inventory.targets[4] = address(host);
+        for (uint256 i; i < 5; ++i) {
+            f.recipe.inventory.codeHashes[i] = f.recipe.inventory.targets[i].codehash;
+        }
+        f.recipe.targets[2] = sourceFactory;
+        f.recipe.codeHashes[2] = sourceFactory.codehash;
+        f.recipe.factorySourceGas = 5000000;
+        f.origin = ArchiveOrigin.Dependencies(
+            preservationCheckpoint,
+            preservationCheckpoint.codehash,
+            5000000,
+            keccak256("6529STREAM_ARTIST_ARCHIVE_ORIGIN_V1")
+        );
+        f.authority = CurrentInventory.Dependencies(
+            preservationArtifacts, preservationArtifacts.codehash, 5000000
+        );
+        // Literal domains and preimages are independent of the production hash helper.
+        f.binding_ = PreservationGraph.CollectionFactoryBinding(
+            f.factory,
+            f.factory.codehash,
+            keccak256(
+                abi.encode(CURRENT_FACTORY_PROFILE, block.chainid, f.recipe, f.origin, f.authority)
+            ),
+            keccak256("current graph original source dependencies"),
+            5000000,
+            keccak256("current graph original provider configuration")
+        );
+        f.graph.scope = StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0);
+        f.graph.inventoryPlan = keccak256("current authority inventory plan");
+        f.graph.sourceSet = preservationCheckpoint;
+        f.graph.sourceSetCodeHash = preservationCheckpoint.codehash;
+        f.graph.preparedChildren = 7;
+        for (uint256 i; i < 7; ++i) {
+            f.graph.children[i] = i == 2 ? address(preservationManifest) : preservationCheckpoint;
+            f.graph.codeHashes[i] = f.graph.children[i].codehash;
+        }
+        f.graph.graphId = _graphId(f, CURRENT_GRAPH_DOMAIN);
+        calls.mockCall(
+            provider,
+            abi.encodeCall(IERC165.supportsInterface, (type(PreservationGraph).interfaceId)),
+            abi.encode(true)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(IERC165.supportsInterface, (type(GraphFactory).interfaceId)),
+            abi.encode(true)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(IERC165.supportsInterface, (type(CurrentGraphFactory).interfaceId)),
+            abi.encode(true)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(GraphFactory.preservationPolicyPublicationFactoryProfile, ()),
+            abi.encode(CURRENT_FACTORY_PROFILE)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(GraphFactory.sourceFactoryDependenciesHash, ()),
+            abi.encode(f.binding_.sourceFactoryDependenciesHash)
+        );
+        calls.mockCall(f.factory, abi.encodeCall(GraphFactory.core, ()), abi.encode(address(core)));
+        calls.mockCall(
+            f.factory, abi.encodeCall(GraphFactory.metadataHost, ()), abi.encode(address(metadata))
+        );
+        calls.mockCall(f.factory, abi.encodeCall(GraphFactory.recipe, ()), abi.encode(f.recipe));
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(CurrentGraphFactory.originDependencies, ()),
+            abi.encode(f.origin)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(CurrentGraphFactory.authorityDependencies, ()),
+            abi.encode(f.authority)
+        );
+        _mockIdentity(f);
+        calls.mockCall(
+            sourceFactory,
+            abi.encodeCall(EntropyFactory.currentInventoryPlan, (f.graph.scope)),
+            abi.encode(f.graph.inventoryPlan)
+        );
+        calls.mockCall(
+            sourceFactory,
+            abi.encodeCall(EntropyFactory.sourceSetForPlan, (f.graph.inventoryPlan)),
+            abi.encode(f.graph.sourceSet, f.graph.sourceSetCodeHash)
+        );
+    }
+
+    function _mockIdentity(GraphFixture memory f) private {
+        calls.mockCall(
+            provider,
+            abi.encodeCall(PreservationGraph.collectionPreservationPolicyPublicationBinding, ()),
+            abi.encode(f.binding_)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(GraphFactory.recipeHash, ()),
+            abi.encode(f.binding_.recipeHash)
+        );
+        calls.mockCall(
+            f.factory,
+            abi.encodeCall(GraphFactory.requireCurrentGraph, (f.graph.scope)),
+            abi.encode(f.graph)
+        );
+    }
+
+    function _graphId(GraphFixture memory f, bytes32 domain) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                domain,
+                block.chainid,
+                f.factory,
+                f.binding_.recipeHash,
+                f.binding_.sourceFactoryDependenciesHash,
+                f.graph.scope,
+                f.graph.inventoryPlan,
+                f.graph.sourceSet,
+                f.graph.sourceSetCodeHash
+            )
+        );
+    }
+
+    function _rejectDependency(
+        address factory,
+        bytes memory input,
+        bytes memory malformed,
+        bytes memory canonical,
+        bytes32 good
+    ) private {
+        calls.mockCall(factory, input, malformed);
+        _invalidCollection(_publication());
+        calls.mockCall(factory, input, canonical);
+        assertEq(host.previewCollection(_publication(), address(this)), good);
     }
 }
