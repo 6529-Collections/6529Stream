@@ -18,56 +18,78 @@ Other held proposals remain separate.
 
 ## 20 September integrated batch
 
-Integrated source checkpoint: `8002ef1c`. ABI134 checks all 3,394 Solidity
-sources with zero errors in 37.641 seconds and complete committed-source
-readback. This proves source compatibility. Combined-system execution and the
-remaining feature work are still open; earlier failed runs retain their results.
+Integrated source checkpoint: `a6af993b`. ABI139 checks all 3,679 Solidity
+sources with zero errors in 41.109 seconds and complete committed-source
+readback. These are source compatibility results. The expanded candidate still
+has unfinished features and has not passed combined-system acceptance.
 
-- **Sales and Safe:** the strengthened Claim suite passes all 21 cases at
-  `5f262491`, whose test source is integrated as `3264bced`. It verifies final
-  ownership/status and callback rejection with an independently passing control.
-  The earlier Claim/Dutch41 remains separate. These use actual Core, Manager,
-  ledger, recorder and Safe with declared Artist/entropy/governance doubles.
-  Three actual retained-offer Safe callback recipes are integrated (`5a25c386`);
-  their combined 25-case current-contract runtime capture is running.
-- **Artist and succession:** consumed Platform correction lineage is integrated
-  (`08365ec5`), with 15 authored cases and selected production size checks.
-  Grant-bearing generation validation routing is repaired (`43987159`).
-  Original op52 ratification history import and complete corrected histories
-  remain in build. General current-authority A/B/late-C preservation and original
-  Finality continuity are source-integrated (`64861e26`), with 74 authored cases.
-  Their actual composed execution remains unaccepted. The separate frozen9bd
-  migration capacity inventory now has 155 measured fits and 66 unresolved
-  products; newly discovered dependencies explain the changing denominator.
-- **Publication and VIEW:** the actual 37-role full-policy ceremony is authored
-  and integrated (`8002ef1c`). It exposed a real circular dependency: recording
-  sanction changes live STATIC JSON and invalidates the outputs committed
-  before sanction. The real assertions remain intact. The [explicit preservation-output profile](../docs/adr/0054-explicit-non-sanction-preservation-rendering.md)
-  is now in build; full-current rechecks remain.
-  The high-capacity fixture also exceeds the original transaction envelope.
-  VIEW output checkpoints pass 12 cases; complete ordered output parts/index
-  (`7c669a2c`) pass 13 cases plus a 256-input fuzz property on their exact source.
-  The 16,384-member vocabulary does not prove a maximum-size transaction fits.
-- **Clients:** scoped graph preparation is integrated (`afe44128`). The builder
-  passes all 1,819 package tests. Root generation, build, strict types, exact
-  ABI129 fixture verification and all 47 new cases pass at `8002ef1c`.
-  These are client/RPC/Safe receipt fixtures, separate from actual Safe execution.
-  Checkpoint, output, root and downstream publication callers are next.
-- **Museum:** original scoped STATIC capture and V7 acquisition export are
-  integrated (`729bfa4c`), with 98 builder passes, 98 root passes at `8002ef1c`, and four offline
-  replay/export examples. Original V5/V6 and governance profiles retain their
-  bytes; complete authority remains false. Root schema checks pass and all affected source files remain unchanged.
-  Policy V2/VIEW, remaining source-family joins and institutional conformance
-  remain in build.
-- **Gas and runtime:** original metric publication native20 remains eight passes
-  and one gas failure after proof preparation. The preceding component46 passes,
-  including six 256-input properties. New prefixed-context hashing (`9d232173`)
-  preserves the full original preimage while avoiding its temporary copy; a
-  fresh 50-case component capture owns its measurement. Original publication21
-  has not been launched. Floor sparse-write optimization (`a7f55d5e`) passes
-  paired six-case runs, each with 256 fuzz inputs. The shared collector-receipt
-  experiment remains isolated: its first Dutch host is 848 bytes oversized.
-  Component savings do not satisfy the unchanged 500,000 cold paid-call target.
+- **Artist and succession:** original op52 ratification history import
+  (`d8873564`), pending corrected histories (`b8a258e1`) and accepted-generation
+  histories (`7e358470`) are source-integrated with independent review. The
+  latter includes eight actual-owner/Safe cases and 18 selected fitting products;
+  runtime remains pending. Persistent inactive-governance test mocks were
+  repaired with narrowly scoped real-context hooks. Signed dispute/repudiation
+  and remaining cross-era consent histories continue in build.
+- **Metadata and Safe:** authenticated scope-subject registration
+  (`0aee507b`) passes all 12 focused native cases, including real signed CALLs
+  through Safe 1.3.0 and 1.4.1. All 54 emitted production products fit. This
+  uses actual Metadata, Schema, Store, inventory and membership with named
+  Core/governance boundaries; it is not full all-call Safe acceptance.
+- **Preservation publication:** the separate non-sanction renderer/admission,
+  standard checkpoints, snapshots, references, complete inventories and graph
+  factories/providers are source-integrated (`4fb90a58`, `8884e28b`). The new
+  registry and six companion products fit their selected size capture; four
+  original golden-tail parity cases pass. The complete new ceremony is authored
+  in the builder and still needs runtime acceptance. The original live-output
+  sanction cycle and failing capacity assertions remain intact.
+- **Public root interfaces:** COLLECTION and TOKEN/RELEASE/SEASON publication
+  (`2a34273d`) and VIEW publication (`ae540f10`) now use the original Router,
+  CONTENT_ROOT consent, histories and aggregate. Common reads distinguish the
+  exact preservation leaf schema and authenticate VIEW bindings. Independent
+  review is clear. The standard 24-case and VIEW read/snapshot campaigns remain
+  pending; source checks are not execution evidence.
+- **VIEW:** the new producer, complete output checkpoint/manifest and root-free
+  snapshot/CONTENT_ROOT workers are source-integrated (`148a057c`, `e8a569b3`).
+  Selected products fit; their 46 output cases and 17 snapshot/state/read cases
+  are authored. Reference, inventory and finality continuation remain in build.
+  A real constructor cycle requires an explicit once-only governed VIEW source
+  binding on the single combined provider; it must refuse VIEW evidence while
+  pending. This new binding is being implemented without relaxing old hosts.
+- **Actual successor composition:** new Rights selection (`cd3451c7`) retains
+  original runtime pins while authenticating the current A/B/C authority.
+  Its eight unit and three actual migration cases are authored. The actual
+  scoped STATIC/export/archive recipe and streaming source-byte/package helpers
+  are source-integrated (`6b8d9e21`, `a6af993b`). Current-authority graph adoption
+  is in build. Original STATIC attribution still needs a distinct admitted
+  current-authority path with direct reads; truthful C2PA staleness remains.
+- **Archive compatibility:** the closed native ABI/schema correspondence fix
+  (`f8659b88`) preserves existing evidence and liveness checks. Its six matcher
+  cases pass, including 256 fuzz inputs. Four actual producer/archive cases
+  remain unexecuted. VIEW inventory tuples are not invented ahead of a producer.
+- **Clients and Museum:** scoped root/op17 clients (`8e8047ef`) have 54 new
+  cases and 1,928 builder package passes. Original scoped policy capture and
+  acquisition V9 (`3a6ccb31`) have 123 builder passes and four offline worked
+  exports. Root's integrated client run passes all 54 cases, generation, build,
+  strict types and the exact ABI fixture. The integrated Museum run passes 119
+  of 123 cases and both schemas; four provider-fixture initialization errors
+  are under repair. Streaming package tests did not run after that failure.
+  These retain their exact historical ABI/profile sources; synthetic exports
+  and mocked Safe receipts do not prove live contract acceptance.
+- **Testing throughput:** the selected-codegen repair (`3f39bb7b`) separates
+  full AST analysis from native bytecode generation. Root passes all 55 tooling
+  regressions. A six-source/four-output actual Forge proof preserves complete
+  output parity, native immutable IDs and original cache/artifact ownership.
+  Large-run speed gains remain unmeasured. Earlier migration4/retained25 compiler
+  timeouts and stopped scoped27 capture executed no EVM cases and remain
+  incomplete evidence, not behavioral test failures.
+- **Gas:** exact metric component50 passes with seven 256-input fuzz properties;
+  original publication native21 remains eight passes and one gas failure.
+  A compact proof/retention implementation is now in build. The isolated
+  collector experiment passes 27 cases and its Dutch host fits at 24,358 bytes,
+  but its recorded paid frame still costs 2,920,259 gross gas. An unchanged-artifact
+  opcode diagnostic identifies 51 durable fresh storage words: their write cost
+  alone exceeds the 500,000 target for this representation. A larger storage
+  design is being evaluated; the original gas target is unchanged.
 
 Complete current/Safe integration, fuzz/stateful campaigns, whole-graph size
 and gas, full CI, source freeze and matching testnet demonstration remain.
