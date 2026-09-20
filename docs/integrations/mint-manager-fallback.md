@@ -12,8 +12,8 @@ its fixed linked
 worker, and the stateless
 [`StreamMintFallbackPlan`](../../script/current/StreamMintFallbackPlan.sol)
 planning library. The ordinary Manager is unchanged. Full-genesis composition,
-the matched native test capture and release evidence are separate integration
-work; this document does not establish runtime or deployment acceptance.
+actual-current/Safe native acceptance and release evidence remain separate
+integration work; the focused acceptance below does not establish deployment readiness.
 The recovery interface is an explicit ABI for the pinned fallback runtime;
 inherited Manager ERC-165 interface advertisement is unchanged.
 
@@ -182,11 +182,25 @@ The authored acceptance files are:
   consent, replay/caps, exact Safe retry, and old auction custody/refund liability.
 - [`StreamCurrentMintFallbackIncident.t.sol`](../../test/current/StreamCurrentMintFallbackIncident.t.sol):
   the actual Safe incident composition, including an explicitly nonconforming
-  test predecessor and subsequent genuine ancestry import.
+  test predecessor and subsequent genuine ancestry import. Additional authored
+  cases burn a completed token during the ordinary delay, reject the stale
+  recovery commitments, and require a newly authorized proposal; a separate
+  late manifest-tail failure restores the already-aborted preparation, pointer,
+  manifest and Safe envelope before a new valid proposal succeeds. These cases
+  distinguish reverted execution-trace logs from committed recovery receipts.
 - [`StreamMintFallbackRecovery.t.sol`](../../test/unit/mint/StreamMintFallbackRecovery.t.sol):
   production Core/Ledger/fallback with typed governance and dependency fixtures;
   independent hash reconstruction, rejection contexts, runtime drift, event
   identity, callback reentry, rollback and retained completed/burned history.
+
+The 13 focused recovery cases passed native execution on exact source
+`d1a58e4403cfbb80d921e117e0a7ac9b90ff61c7`. The capture contains 180 sources,
+175 production source files, 192 artifact metadata records and 2,676 matching hash
+checks, with no oversized production product. Its ignored local path is
+`artifacts/native-assembly/counter-scopes/fallback-recovery-native-d1a58e44-1`;
+native JSON SHA-256 is
+`2d65bfe3b17d18cc265d72de791c43d14c6c4feeee79a2b8897772d2f56ae62d`.
+The nine authored actual-current/Safe cases remain native-execution pending.
 
 The current fixture uses the stated external entropy provider and a typed
 lifetime-entitlement gate. It does not establish a first-party migration-stable

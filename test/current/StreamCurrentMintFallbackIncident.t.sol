@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamMintFallbackFixture.sol";
+import {
+    StreamMintFallbackRecovery
+} from "../../smart-contracts/domains/mint/StreamMintFallbackRecovery.sol";
 
 /// @dev Deliberately nonconforming test-only Manager. Its governed owner can leave a real
 /// preparation outstanding; ordinary production Managers never expose this separate hook.
@@ -16,6 +19,10 @@ contract CurrentFallbackStrandingManager is StreamMintManager {
     }
 }
 
+interface CurrentFallbackIncidentCallVm {
+    function expectCall(address target, bytes calldata data, uint64 count) external;
+}
+
 /// @notice Real threshold-two Safe, executor, Registry, Manifest, Core, Artist and shared Ledger.
 /// @dev Only the stranding Manager, lifetime gate and external entropy provider are test seams.
 /// Native execution remains pending the coordinator's matched-source validation.
@@ -24,6 +31,14 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
     StreamMintManagerFallback private rescue;
     CurrentContinuityEntitlementGate private rescueGate;
     bytes32 private historicState;
+    bool private firstTokenBurned;
+
+    struct IncidentBatch {
+        GovernanceCall[] calls;
+        bytes[] data;
+        bytes32 action;
+        uint64 ready;
+    }
 
     function _deployReserveManager() internal override returns (StreamMintManager) {
         return StreamMintManager(
@@ -124,12 +139,30 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
     function testActualSafeIncidentRecoveryAfterTwoRealImportsPreservesBurnAndAllocationGap()
         public
     {
+        bytes32 firstRoot = _setupIncident();
+        _recoverThroughSafe();
+        require(
+            tree[0] != firstRoot && ledger.mintImportCommitment(firstRoot).complete
+                && ledger.mintImportCommitment(tree[0]).complete
+                && ledger.isCompletedMintDescendant(
+                    address(ledger), originalArtistManager, address(rescue)
+                ),
+            "two genuine roots retain the original Artist lineage"
+        );
+        _assertRecovered();
+        _assertHistoryAndCounters(false);
+        _configureSuccessorWithFreshConsent();
+        _mintAfterRecovery();
+        _assertHistoryAndCounters(true);
+    }
+
+    function _setupIncident() private returns (bytes32 firstRoot) {
         _setupFallback();
         require(continuitySafe.getThreshold() == 2, "actual threshold-two governor");
         uint64 rescueAdmitted = registry.moduleRecord(address(rescue)).registeredAt;
         require(rescueAdmitted < block.timestamp, "rescue admitted before operating exposure");
         _activateFallback();
-        bytes32 firstRoot = tree[0];
+        firstRoot = tree[0];
         require(ledger.mintImportCommitment(firstRoot).complete, "first real import completed");
         vm.prank(BUYER);
         core.burn(2);
@@ -149,20 +182,240 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
         gate = rescueGate;
         reserve = _reserveConfiguration();
         reserveActivatedAt = rescueAdmitted;
-        _recoverThroughSafe();
-        require(
-            tree[0] != firstRoot && ledger.mintImportCommitment(firstRoot).complete
-                && ledger.mintImportCommitment(tree[0]).complete
-                && ledger.isCompletedMintDescendant(
-                    address(ledger), originalArtistManager, address(rescue)
-                ),
-            "two genuine roots retain the original Artist lineage"
+    }
+
+    function testOwnerBurnDuringDelayMakesRecoveryStaleAndRequiresNewSafeProposal() public {
+        _setupIncident();
+        (IncidentBatch memory imports, IncidentBatch memory stale) = _scheduleIncident(false);
+        bytes32 oldCommitment = stale.calls[1].oldValueHash;
+        vm.warp(stale.ready - 1 days);
+        vm.prank(BUYER);
+        core.burn(1);
+        firstTokenBurned = true;
+        historicState = _historicState();
+        require(core.totalSupply() == 0, "independent owner burn changes committed live supply");
+        _assertStranded();
+        vm.warp(stale.ready);
+        _executeIncidentBatch(imports);
+        _assertImported();
+
+        bytes32 before_ = _rollbackState();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintFallbackRecovery.InvalidFallbackRecoveryContext.selector
+            )
         );
-        _assertRecovered();
+        executor.executeGovernanceBatch(stale.action, stale.calls, stale.data);
+        require(
+            _rollbackState() == before_,
+            "exact stale-context failure restores pointer and preparation"
+        );
+        _rejectIncidentBatchThroughSafe(stale);
+        _assertStranded();
+        _assertHistoryAndCounters(false);
+
+        IncidentBatch memory fresh;
+        (fresh.calls, fresh.data) = _activationPlan(3, INCIDENT_OPERATION);
+        _assertRecoveryIntent(fresh.calls[1]);
+        require(
+            fresh.calls[1].scopeHash == stale.calls[1].scopeHash
+                && fresh.calls[1].oldValueHash != oldCommitment
+                && fresh.calls[1].newValueHash != stale.calls[1].newValueHash,
+            "same incident requires freshly authorized current supply commitments"
+        );
+        _executeNewRecoveryProposal(fresh, stale.action);
         _assertHistoryAndCounters(false);
         _configureSuccessorWithFreshConsent();
         _mintAfterRecovery();
         _assertHistoryAndCounters(true);
+    }
+
+    function testManifestTailFailureRestoresAbortedPreparationAndSafeEnvelope() public {
+        _setupIncident();
+        (IncidentBatch memory imports, IncidentBatch memory badTail) = _scheduleIncident(true);
+        vm.warp(badTail.ready);
+        _executeIncidentBatch(imports);
+        _assertImported();
+        bytes32 before_ = _rollbackState();
+        // The exact third-call error proves pointer replacement and recovery both returned first.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamSystemManifest.GovernanceNewValueHashMismatch.selector,
+                badTail.calls[2].newValueHash ^ bytes32(uint256(1)),
+                badTail.calls[2].newValueHash
+            )
+        );
+        executor.executeGovernanceBatch(badTail.action, badTail.calls, badTail.data);
+        require(
+            _rollbackState() == before_,
+            "late manifest failure restores the actual aborted preparation"
+        );
+
+        // Observe the real Core hook once inside the failed Safe execution and once in the
+        // separately authorized successful batch below. The earlier diagnostic is excluded.
+        CurrentFallbackIncidentCallVm(address(vm))
+            .expectCall(
+                address(core),
+                abi.encodeCall(core.abortPreparedMintFromManager, (3, INCIDENT_OPERATION)),
+                2
+            );
+        _rejectIncidentBatchThroughSafe(badTail);
+        _assertStranded();
+        _assertHistoryAndCounters(false);
+        IncidentBatch memory fresh;
+        (fresh.calls, fresh.data) = _activationPlan(3, INCIDENT_OPERATION);
+        _assertRecoveryIntent(fresh.calls[1]);
+        require(
+            fresh.calls[1].oldValueHash == badTail.calls[1].oldValueHash
+                && fresh.calls[1].newValueHash == badTail.calls[1].newValueHash,
+            "failed abort leaves exactly the original recovery facts for a new proposal"
+        );
+        _executeNewRecoveryProposal(fresh, badTail.action);
+        _assertHistoryAndCounters(false);
+        _configureSuccessorWithFreshConsent();
+        _mintAfterRecovery();
+        _assertHistoryAndCounters(true);
+    }
+
+    function _scheduleIncident(bool badTail)
+        private
+        returns (IncidentBatch memory imports, IncidentBatch memory recovery)
+    {
+        StreamMintFallbackPlan.requireReserveReady(reserve);
+        _revokePrimary();
+        uint256 observed = block.timestamp;
+        _retireAndSnapshot();
+        (imports.calls, imports.data) = _importPlan();
+        (imports.action, imports.ready) = _scheduleBatchAsGovernor(1, imports.calls, imports.data);
+        (recovery.calls, recovery.data) = _activationPlan(3, INCIDENT_OPERATION);
+        _assertRecoveryIntent(recovery.calls[1]);
+        if (badTail) recovery.calls[2].newValueHash ^= bytes32(uint256(1));
+        (recovery.action, recovery.ready) =
+            _scheduleBatchAsGovernor(3, recovery.calls, recovery.data);
+        require(
+            reserveActivatedAt < observed && block.timestamp <= observed + 4 hours
+                && recovery.ready == observed + executor.minimumDelay(3)
+                && recovery.ready == imports.ready,
+            "genuine import and incident proposal retain original SLA and parallel delays"
+        );
+    }
+
+    function _executeIncidentBatch(IncidentBatch memory batch) private {
+        this.executeCurrentGovernorCall(
+            address(executor),
+            abi.encodeCall(executor.executeGovernanceBatch, (batch.action, batch.calls, batch.data))
+        );
+    }
+
+    function _rejectIncidentBatchThroughSafe(IncidentBatch memory batch) private {
+        bytes32 before_ = _rollbackState();
+        vm.recordLogs();
+        vm.expectRevert();
+        this.executeCurrentGovernorCall(
+            address(executor),
+            abi.encodeCall(executor.executeGovernanceBatch, (batch.action, batch.calls, batch.data))
+        );
+        // recordLogs is an execution trace, including LOGs inside reverted calls, not a
+        // transaction receipt. Full Safe-call reversion discards those inner recovery logs.
+        // No completion event is even reached; the valid proposal gets its own fresh capture.
+        Vm.Log[] memory trace = vm.getRecordedLogs();
+        bytes32 executed = keccak256(
+            "GovernanceActionExecuted(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,address,bytes32)"
+        );
+        for (uint256 i; i < trace.length; ++i) {
+            if (trace[i].topics.length == 0) continue;
+            require(
+                !(trace[i].emitter == address(executor) && trace[i].topics[0] == executed)
+                    && !(trace[i].emitter == address(continuitySafe)
+                        && trace[i].topics[0] == keccak256("ExecutionSuccess(bytes32,uint256)"))
+                    && !(trace[i].emitter == address(manifest)
+                        && trace[i].topics[0]
+                            == keccak256(
+                                "StreamSystemManifestPublished(uint16,bytes32,address,bytes32)"
+                            )),
+                "failed Safe transaction has no governance, Safe or manifest completion"
+            );
+        }
+        require(
+            _rollbackState() == before_
+                && executor.governanceAction(batch.action).status
+                    == GovernanceActionStatus.SCHEDULED,
+            "whole Safe envelope, pointers, manifest, preparation and imported accounting restored"
+        );
+    }
+
+    function _executeNewRecoveryProposal(IncidentBatch memory fresh, bytes32 rejectedAction)
+        private
+    {
+        uint256 scheduledAt = block.timestamp;
+        (fresh.action, fresh.ready) = _scheduleBatchAsGovernor(3, fresh.calls, fresh.data);
+        require(
+            fresh.action != rejectedAction && fresh.ready == scheduledAt + executor.minimumDelay(3),
+            "changed proposal has a new actual Safe authorization and full ordinary delay"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionNotExecutable.selector,
+                fresh.action,
+                fresh.ready
+            )
+        );
+        executor.executeGovernanceBatch(fresh.action, fresh.calls, fresh.data);
+        vm.warp(fresh.ready);
+        vm.recordLogs();
+        _executeIncidentBatch(fresh);
+        _assertRecoveryEvent(vm.getRecordedLogs(), fresh.action);
+        _assertRecovered();
+        _assertImported();
+        require(
+            executor.governanceAction(rejectedAction).status == GovernanceActionStatus.SCHEDULED
+                && executor.governanceAction(fresh.action).status == GovernanceActionStatus.EXECUTED
+                && StreamCurrentStackPlan.readPointer(core, MANAGER_POINTER).target
+                    == address(rescue),
+            "only newly authorized proposal executes the recovery"
+        );
+        StreamSystemManifest.AggregateState memory aggregate =
+            StreamGenesisManifestPlan.readAggregate(manifest);
+        require(
+            aggregate.modules.mintManager == address(rescue)
+                && aggregate.modules.mintLedger == address(ledger),
+            "successful fresh proposal publishes actual selected modules"
+        );
+    }
+
+    function _rollbackState() private view returns (bytes32) {
+        (bool exists, uint256 collection, uint256 serial, bool burned) =
+            core.tokenCollectionIdentity(3);
+        bytes32 preparation = keccak256(
+            abi.encode(
+                core.preparedMint(3),
+                core.pendingPreparedMintTokenId(),
+                exists,
+                collection,
+                serial,
+                burned,
+                core.tokenData(3),
+                core.coordinatorAtMint(3),
+                core.lastAllocatedTokenId(),
+                core.collectionNextSerial(1),
+                core.collectionMintedEver(1),
+                core.totalSupply()
+            )
+        );
+        return keccak256(
+            abi.encode(
+                preparation,
+                _historicState(),
+                continuitySafe.nonce(),
+                StreamCurrentStackPlan.readPointer(core, MANAGER_POINTER),
+                StreamCurrentStackPlan.readPointer(core, LEDGER_POINTER),
+                StreamGenesisManifestPlan.readAggregate(manifest),
+                manifest.streamSystemManifestPointer(),
+                manager.nextOperationNonce(),
+                successor.nextOperationNonce(),
+                ledger.mintImportCommitment(tree[0])
+            )
+        );
     }
 
     function _recoverThroughSafe() private {
@@ -258,7 +511,14 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
             )
         );
         bytes32 retained = keccak256(
-            abi.encode(uint256(1), uint256(3), uint256(3), uint256(4), uint256(2), uint256(1))
+            abi.encode(
+                uint256(1),
+                uint256(3),
+                uint256(3),
+                uint256(4),
+                uint256(2),
+                _liveSupplyBeforeRecovery()
+            )
         );
         bytes32 domain = keccak256("6529STREAM_MINT_FALLBACK_RECOVERY_STATE_V1");
         require(
@@ -310,11 +570,15 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
                 && core.pendingPreparedMintTokenId() == 3 && exists && collection == 1
                 && serial == 3 && !burned && core.lastAllocatedTokenId() == 3
                 && core.collectionNextSerial(1) == 4 && core.collectionMintedEver(1) == 2
-                && core.totalSupply() == 1
+                && core.totalSupply() == _liveSupplyBeforeRecovery()
                 && keccak256(core.tokenData(3)) == keccak256(bytes("original incident preparation"))
                 && _historicState() == historicState,
             "actual preparation persists without changing completed or burned history"
         );
+    }
+
+    function _liveSupplyBeforeRecovery() private view returns (uint256) {
+        return firstTokenBurned ? 0 : 1;
     }
 
     function _assertRecovered() private view {
@@ -327,7 +591,7 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
                 && serial == 0 && !burned && core.tokenData(3).length == 0
                 && core.coordinatorAtMint(3) == address(0) && core.lastAllocatedTokenId() == 3
                 && core.collectionNextSerial(1) == 4 && core.collectionMintedEver(1) == 2
-                && core.totalSupply() == 1,
+                && core.totalSupply() == _liveSupplyBeforeRecovery(),
             "recovery clears exact liability while permanently retaining token3 and serial3 gap"
         );
     }
@@ -339,9 +603,14 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
             exists && collection == 1 && serial == 2 && burned,
             "real previously completed burn retained"
         );
+        (exists, collection, serial, burned) = core.tokenCollectionIdentity(1);
+        require(
+            exists && collection == 1 && serial == 1 && burned == firstTokenBurned,
+            "original completed identity retains actual owner-burn history"
+        );
         return keccak256(
             abi.encode(
-                core.ownerOf(1),
+                firstTokenBurned ? address(0) : core.ownerOf(1),
                 core.tokenData(1),
                 core.coordinatorAtMint(1),
                 core.tokenData(2),
@@ -356,7 +625,7 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
 
     function _assertHistoryAndCounters(bool freshMinted) private view {
         require(
-            _historicState() == historicState && core.ownerOf(1) == BUYER
+            _historicState() == historicState && (firstTokenBurned || core.ownerOf(1) == BUYER)
                 && wallet.balance == 0.01 ether
                 && StreamMintManager(originalArtistManager).nextOperationNonce() == 2
                 && manager.nextOperationNonce() == 0
@@ -403,7 +672,8 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
         require(
             exists && collection == 1 && serial == 4 && !burned && core.ownerOf(4) == BUYER
                 && core.lastAllocatedTokenId() == 4 && core.collectionNextSerial(1) == 5
-                && core.collectionMintedEver(1) == 3 && core.totalSupply() == 2
+                && core.collectionMintedEver(1) == 3
+                && core.totalSupply() == _liveSupplyBeforeRecovery() + 1
                 && core.pendingPreparedMintTokenId() == 0 && !core.preparedMint(4).exists
                 && !core.preparedMint(3).exists
                 && core.tokenLifecycle(3) == uint8(StreamTokenLifecycle.UNKNOWN)
