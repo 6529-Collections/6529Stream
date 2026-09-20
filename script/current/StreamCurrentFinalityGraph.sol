@@ -14,6 +14,15 @@ import "./StreamCurrentGraphCreation.sol";
 import "./StreamCurrentFinalityArtifacts.sol";
 import "./StreamDeploymentSlot.sol";
 import "./StreamCurrentStackPlan.sol";
+import {
+    StreamArtistFinalityAdmission
+} from "../../smart-contracts/domains/artist/StreamArtistFinalityAdmission.sol";
+import {
+    IStreamArtistHistory
+} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistHistory.sol";
+import {
+    IStreamArtistAuthorityHydrationOwner
+} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol";
 import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
@@ -120,6 +129,24 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
     StreamBundleArchiveCoverage internal assemblyBundle;
     address[6] internal assemblyRouterAdapters;
     address internal assemblyMetadataAdapter;
+
+    // Separate successor construction evidence. The original V3 checkpoint is unchanged and
+    // remains the genesis graph format; these pins are never accepted from a resumed checkpoint.
+    struct SuccessorGraphSource {
+        address registry;
+        bytes32 registryCodeHash;
+        address coordinator;
+        bytes32 coordinatorCodeHash;
+        address finality;
+        bytes32 finalityCodeHash;
+        address provider;
+        bytes32 providerCodeHash;
+        bytes32 suiteHash;
+        bytes32 artistPointerHash;
+        bytes32 metadataPointerHash;
+        bytes32 routerPointerHash;
+    }
+    SuccessorGraphSource private _successorGraphSource;
     function _graphCreation(StreamCurrentGraphCreation.Kind kind)
         internal
         view
@@ -143,6 +170,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
     }
 
     function _currentGraphState() internal view returns (CurrentGraphStateV3 memory s) {
+        require(_successorGraphSource.registry == address(0), "genesis graph checkpoint only");
         require(address(assemblyCoordinator) == address(0), "phase one graph only");
         s.schemaVersion = 3;
         s.chainId = block.chainid;
@@ -373,23 +401,269 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         _deployCurrentGraphPrerequisites();
     }
 
+    /// @notice Reserves an authentic successor authority graph while Core still selects its source.
+    /// @dev Reuses only the original generic Metadata/schema/Store and the unchanged non-Artist
+    /// suite dependencies. All successor-specific source hosts and Finality products are new.
+    /// Generic Metadata still binds the predecessor Artist: this helper does not migrate it.
+    function _bindSuccessorArtistGraph(
+        T.SuiteConfiguration memory suite,
+        address predecessor,
+        bytes32 expectedPredecessorHash,
+        address modules_,
+        address executor_,
+        address manifest_,
+        address archive_,
+        address checkpoint_,
+        bytes32 deploymentHash
+    ) internal {
+        require(
+            address(assemblyCore) == address(0) && graphOperator != address(0)
+                && _successorGraphSource.registry == address(0),
+            "fresh successor graph binding"
+        );
+        require(
+            predecessor != address(0) && predecessor != suite.registry
+                && predecessor.code.length != 0 && expectedPredecessorHash != 0
+                && predecessor.codehash == expectedPredecessorHash
+                && suite.registry.code.length != 0 && suite.core.code.length != 0
+                && deploymentHash != 0,
+            "actual predecessor and successor"
+        );
+        require(
+            StreamArtistOnboardingRegistry(payable(suite.registry)).operationCoordinator()
+                    == assemblyCoordinatorAddress && assemblyCoordinatorAddress.code.length == 0,
+            "original reserved successor Coordinator"
+        );
+        address previousCoordinator =
+            StreamArtistOnboardingRegistry(payable(predecessor)).operationCoordinator();
+        require(previousCoordinator.code.length != 0, "actual predecessor Coordinator");
+        StreamArtistOnboardingCoordinator previous =
+            StreamArtistOnboardingCoordinator(previousCoordinator);
+        T.SuiteConfiguration memory original = previous.suiteConfiguration();
+        require(
+            original.registry == predecessor && previous.deploymentChainId() == block.chainid
+                && original.core == suite.core && original.mintManager == suite.mintManager
+                && original.roleRegistry == suite.roleRegistry
+                && original.metadata == suite.metadata
+                && original.primaryResolver == suite.primaryResolver
+                && original.royaltyResolver == suite.royaltyResolver
+                && original.primaryRevenueClass == suite.primaryRevenueClass
+                && original.validator == suite.validator,
+            "unchanged original non-Artist suite"
+        );
+        address originalFinality = previous.finalityRegistry();
+        (address originalProvider, bytes32 providerHash) =
+            StreamArtistFinalityAdmission.admit(original, originalFinality);
+        require(
+            originalFinality.codehash == previous.finalityRegistryCodeHash()
+                && originalProvider == previous.finalityEvidenceProvider()
+                && providerHash == previous.finalityEvidenceProviderCodeHash()
+                && IStreamGasParameterHost(predecessor).governanceAuthority() == executor_
+                && IStreamGasParameterHost(suite.registry).governanceAuthority() == executor_,
+            "actual predecessor Finality and governance"
+        );
+        StreamFinalityNativeProviderReads.Config memory source =
+            StreamFinalityNativeEvidenceProvider(originalProvider).nativeConfiguration();
+        require(
+            source.chainId == block.chainid && source.targets[0] == suite.core
+                && source.targets[2] == suite.metadata && source.targets[11] == predecessor
+                && source.targets[12] == originalFinality
+                && address(StreamArtworkFinalityRegistry(originalFinality).metadataReads())
+                    == source.targets[1],
+            "original native provider graph"
+        );
+        for (uint256 i; i < 22; ++i) {
+            require(
+                source.targets[i].code.length != 0
+                    && source.targets[i].codehash == source.codeHashes[i],
+                "complete actual predecessor provider pins"
+            );
+        }
+        assemblySuite = suite;
+        assemblyCore = StreamCore(payable(suite.core));
+        assemblyManager = StreamMintManager(payable(suite.mintManager));
+        assemblyRoles = StreamRoleRegistry(suite.roleRegistry);
+        assemblyModules = StreamModuleRegistry(modules_);
+        assemblyExecutor = StreamGovernanceExecutor(payable(executor_));
+        assemblyManifest = StreamSystemManifest(manifest_);
+        assemblyArtists = StreamArtistOnboardingRegistry(payable(suite.registry));
+        assemblyRouter = StreamMetadataRouter(suite.metadata);
+        assemblyPrimary = StreamRevenueResolver(suite.primaryResolver);
+        assemblyRoyalties = StreamRoyaltyResolver(suite.royaltyResolver);
+        assemblyArchive = StreamArchivalCoverage(archive_);
+        assemblyCheckpointVerifier = StreamArweaveCheckpointVerifier(checkpoint_);
+        assemblyMetadata = StreamCollectionMetadataV1(payable(source.targets[1]));
+        assemblySchemas = StreamSchemaRegistry(payable(source.targets[4]));
+        assemblyStore = StreamSchemaDocumentStore(source.targets[5]);
+        require(
+            assemblyMetadata.core() == suite.core
+                && assemblyMetadata.artistRegistry() == predecessor
+                && assemblyMetadata.artistRegistryCodeHash() == expectedPredecessorHash
+                && assemblyMetadata.schemaRegistry() == address(assemblySchemas)
+                && assemblyMetadata.chunkStore() == address(assemblyStore)
+                && assemblySchemas.chunkStore() == address(assemblyStore)
+                && assemblyMetadata.governanceAuthority() == executor_
+                && assemblySchemas.governanceAuthority() == executor_,
+            "retained original generic Metadata binding"
+        );
+        graphDeploymentHash = deploymentHash;
+        graphFinalityManifestHash = keccak256("current-stack native finality module v1");
+        graphFinalityManifestURI = "https://engineering.example.invalid/6529stream/current/finality";
+        graphRendererCatalogId = keccak256("STREAM_CURRENT_REFERENCE_RENDERER_CLASS_V1");
+        SuccessorGraphSource storage pinned = _successorGraphSource;
+        pinned.registry = predecessor;
+        pinned.registryCodeHash = expectedPredecessorHash;
+        pinned.coordinator = previousCoordinator;
+        pinned.coordinatorCodeHash = previousCoordinator.codehash;
+        pinned.finality = originalFinality;
+        pinned.finalityCodeHash = originalFinality.codehash;
+        pinned.provider = originalProvider;
+        pinned.providerCodeHash = providerHash;
+        pinned.suiteHash = keccak256(abi.encode(original));
+        pinned.artistPointerHash = keccak256(
+            abi.encode(
+                StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("ARTIST_REGISTRY"))
+            )
+        );
+        pinned.metadataPointerHash = keccak256(
+            abi.encode(
+                StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("COLLECTION_METADATA"))
+            )
+        );
+        pinned.routerPointerHash = keccak256(
+            abi.encode(
+                StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("METADATA_ROUTER"))
+            )
+        );
+        _requirePredecessorGraphSelections();
+        _deployCurrentGraphPrerequisites();
+    }
+
+    /// @notice Builds the real successor Finality/Coordinator prefix needed for governed operation55.
+    /// @dev Leaves WORK/RIGHTS/Conservation/inventory/bundle coordinates unconsumed. Their actual
+    /// constructors run only after selection and the complete owner import; no full graph is claimed.
+    function _completeSuccessorFinalityGraph(bytes memory rendererCatalog) internal {
+        require(
+            address(assemblyCoordinator) == address(0)
+                && assemblyCoordinatorAddress.code.length == 0,
+            "successor Coordinator not yet deployed"
+        );
+        _requirePredecessorGraphSelections();
+        _deployCurrentGraphSourceHosts(rendererCatalog);
+        _deployAssemblyFinalityCoordinator();
+        _requirePredecessorGraphSelections();
+    }
+
+    /// @notice Completes the remaining original constructors after selection and owner import.
+    /// @dev Metadata retains its original binding. The real selector constructors must authenticate
+    /// its completed successor through their current-identity read path; no selector is substituted.
+    function _completeSelectedSuccessorGraph() internal {
+        require(
+            _successorGraphSource.registry != address(0)
+                && address(assemblyCoordinator) == assemblyCoordinatorAddress
+                && assemblyCoordinatorAddress.code.length != 0
+                && address(assemblyWork) == address(0),
+            "pending successor selectors"
+        );
+        _requireSuccessorSourcePins();
+        _requireCurrentGraphSelections();
+        require(
+            assemblyModules.isModuleEligible(
+                address(assemblyArtists),
+                keccak256("ARTIST_REGISTRY"),
+                type(IStreamArtistMintConsent).interfaceId
+            ),
+            "actual admitted selected successor"
+        );
+        (bool imported, bytes32 code, uint256 count) = IStreamArtistHistory(
+                address(assemblyArtists)
+            ).artistHistoryPredecessorBinding(_successorGraphSource.registry);
+        require(
+            imported && code == _successorGraphSource.registryCodeHash && count != 0,
+            "actual governed predecessor import"
+        );
+        bytes32 completion;
+        for (uint256 i; i < 7; ++i) {
+            bytes32 actual = IStreamArtistAuthorityHydrationOwner(assemblySuite.owners[i])
+                .authorityHydrationCommitment();
+            require(
+                actual != 0 && (i == 0 || actual == completion),
+                "complete actual successor owner import"
+            );
+            completion = actual;
+        }
+        _deployAssemblyFinalitySelectors(assemblyProvider.nativeConfiguration());
+    }
+
+    function _requireSuccessorSourcePins() private view {
+        SuccessorGraphSource storage pinned = _successorGraphSource;
+        require(
+            pinned.registry != address(0) && pinned.registry.codehash == pinned.registryCodeHash
+                && pinned.coordinator.codehash == pinned.coordinatorCodeHash
+                && pinned.finality.codehash == pinned.finalityCodeHash
+                && pinned.provider.codehash == pinned.providerCodeHash
+                && keccak256(
+                    abi.encode(
+                        StreamArtistOnboardingCoordinator(pinned.coordinator).suiteConfiguration()
+                    )
+                ) == pinned.suiteHash,
+            "unchanged predecessor construction evidence"
+        );
+        require(
+            keccak256(
+                    abi.encode(
+                        StreamCurrentStackPlan.readPointer(
+                            assemblyCore, keccak256("COLLECTION_METADATA")
+                        )
+                    )
+                ) == pinned.metadataPointerHash
+                && keccak256(
+                    abi.encode(
+                        StreamCurrentStackPlan.readPointer(
+                            assemblyCore, keccak256("METADATA_ROUTER")
+                        )
+                    )
+                ) == pinned.routerPointerHash,
+            "unchanged selected original source hosts"
+        );
+    }
+
+    function _requirePredecessorGraphSelections() private view {
+        _requireSuccessorSourcePins();
+        _requireCurrentGraphFoundationSelections();
+        SuccessorGraphSource storage pinned = _successorGraphSource;
+        StreamCorePointerState memory selected =
+            StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("ARTIST_REGISTRY"));
+        require(
+            selected.target == pinned.registry && selected.codeHash == pinned.registryCodeHash
+                && selected.registryStatus == 1 && selected.registry == address(assemblyModules)
+                && selected.moduleType == keccak256("ARTIST_REGISTRY")
+                && selected.interfaceId == type(IStreamArtistMintConsent).interfaceId
+                && keccak256(abi.encode(selected)) == pinned.artistPointerHash
+                && assemblyModules.isModuleEligible(
+                    pinned.registry,
+                    keccak256("ARTIST_REGISTRY"),
+                    type(IStreamArtistMintConsent).interfaceId
+                ),
+            "actual admitted selected predecessor"
+        );
+        (bool cutover,,) = IStreamArtistHistory(pinned.registry).artistRegistryCutover();
+        require(!cutover, "predecessor not cut over during construction");
+        bytes32[2] memory keys = [keccak256("COLLECTION_METADATA"), keccak256("METADATA_ROUTER")];
+        address[2] memory targets = [address(assemblyMetadata), address(assemblyRouter)];
+        for (uint256 i; i < 2; ++i) {
+            StreamCorePointerState memory source =
+                StreamCurrentStackPlan.readPointer(assemblyCore, keys[i]);
+            require(
+                source.target == targets[i] && source.codeHash == targets[i].codehash
+                    && source.registryStatus == 1,
+                "actual selected original source host"
+            );
+        }
+    }
+
     function _requireCurrentGraphSelections() internal view {
-        StreamCorePointerState memory modules =
-            StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("MODULE_REGISTRY"));
-        require(
-            modules.target == address(assemblyModules)
-                && modules.codeHash == address(assemblyModules).codehash
-                && modules.registryStatus == 1,
-            "actual selected ModuleRegistry"
-        );
-        StreamCorePointerState memory manifestPointer =
-            StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("SYSTEM_MANIFEST"));
-        require(
-            manifestPointer.target == address(assemblyManifest)
-                && manifestPointer.codeHash == address(assemblyManifest).codehash
-                && manifestPointer.frozen && manifestPointer.registryStatus == 1,
-            "original frozen SystemManifest"
-        );
+        _requireCurrentGraphFoundationSelections();
         bytes32[3] memory keys = [
             keccak256("COLLECTION_METADATA"),
             keccak256("METADATA_ROUTER"),
@@ -406,6 +680,25 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
                 "executed original graph pointer selection"
             );
         }
+    }
+
+    function _requireCurrentGraphFoundationSelections() private view {
+        StreamCorePointerState memory modules =
+            StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("MODULE_REGISTRY"));
+        require(
+            modules.target == address(assemblyModules)
+                && modules.codeHash == address(assemblyModules).codehash
+                && modules.registryStatus == 1,
+            "actual selected ModuleRegistry"
+        );
+        StreamCorePointerState memory manifestPointer =
+            StreamCurrentStackPlan.readPointer(assemblyCore, keccak256("SYSTEM_MANIFEST"));
+        require(
+            manifestPointer.target == address(assemblyManifest)
+                && manifestPointer.codeHash == address(assemblyManifest).codehash
+                && manifestPointer.frozen && manifestPointer.registryStatus == 1,
+            "original frozen SystemManifest"
+        );
     }
 
     function _currentGraphRendererCatalog(uint256 collectionId)
@@ -1104,8 +1397,17 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
     }
 
     function _deployAssemblyFinalityGraph() internal {
+        StreamFinalityNativeProviderReads.Config memory c = _deployAssemblyFinalityCoordinator();
+        _requireCurrentGraphSelections();
+        _deployAssemblyFinalitySelectors(c);
+    }
+
+    function _deployAssemblyFinalityCoordinator()
+        private
+        returns (StreamFinalityNativeProviderReads.Config memory c)
+    {
         _predictAssemblyLateRuntimes();
-        StreamFinalityNativeProviderReads.Config memory c = _assemblyProviderConfiguration();
+        c = _assemblyProviderConfiguration();
         assemblyProvider = StreamFinalityNativeEvidenceProvider(
             _deployAssemblyLate(
                 Late.PROVIDER,
@@ -1224,7 +1526,11 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
                 == graphVm.computeCreateAddress(assemblyCoordinatorAddress, 1),
             "actual original reader address"
         );
-        _requireCurrentGraphSelections();
+    }
+
+    function _deployAssemblyFinalitySelectors(StreamFinalityNativeProviderReads.Config memory c)
+        private
+    {
         bytes memory selectorArgs =
             abi.encode(address(assemblyCore), address(assemblyMetadata), address(assemblySchemas));
         assemblyWork = StreamWorkRecordSelection(
