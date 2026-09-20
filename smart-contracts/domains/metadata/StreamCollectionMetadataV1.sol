@@ -22,6 +22,8 @@ import "../records/StreamRecordFamilies.sol";
 import "../records/StreamRecordDocumentReads.sol";
 import "./StreamSchemaDocumentStore.sol";
 import "./StreamMetadataSubjects.sol";
+import "../../interfaces/stream/metadata/IStreamMetadataPublishedScopeSubject.sol";
+import { StreamMetadataPublishedScopeSubject as PublishedScope } from "./StreamMetadataPublishedScopeSubject.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamMetadataGovernance.sol";
 import { StreamCollectionManifestExecution } from "./StreamCollectionManifestExecution.sol";
@@ -68,7 +70,8 @@ contract StreamCollectionMetadataV1 is
     IStreamCollectionManifestReads,
     IStreamCollectionManifestWriter,
     IStreamCollectionRecordPayloadChunks,
-    IStreamConservationTier
+    IStreamConservationTier,
+    IStreamMetadataPublishedScopeSubject
 {
     using StreamRecordFamilies for bytes32;
 
@@ -256,6 +259,7 @@ contract StreamCollectionMetadataV1 is
     {
         return id == type(IStreamCollectionRecordPayloadChunks).interfaceId
             || id == type(IStreamConservationTier).interfaceId
+            || id == type(IStreamMetadataPublishedScopeSubject).interfaceId
             || id == type(StaticSource).interfaceId
             || id == type(IStreamCollectionManifestReads).interfaceId || id == type(B).interfaceId
             || id == type(IStreamCollectionManifestWriter).interfaceId
@@ -542,6 +546,26 @@ contract StreamCollectionMetadataV1 is
             StreamFinalityScope(StreamFinalityScopeType.TOKEN, collectionId, tokenId, 0)
         );
         _subjects[subjectId] = Subject(collectionId, tokenId);
+    }
+
+    /// @notice Derive a canonical scope name from this host's authenticated original publication.
+    /// @dev Naming is permissionless and grants no record-writing or finality authority.
+    function registerScopeSubject(bytes32 membershipRecordHash)
+        external override returns (bytes32 subjectId)
+    {
+        _requireCode(core, coreCodeHash);
+        _requireCode(schemaRegistry, schemaRegistryCodeHash);
+        _requireCode(chunkStore, chunkStoreCodeHash);
+        StreamFinalityScope memory scope;
+        (subjectId, scope) = PublishedScope.derive(
+            core, schemaRegistry, chunkStore, _gasParameterValue(DEPENDENCY_READ_GAS),
+            membershipRecordHash
+        );
+        _requireCollection(scope.collectionId);
+        _subjects[subjectId] = Subject(scope.collectionId, 0);
+        emit MetadataScopeSubjectRegistered(
+            subjectId, scope.collectionId, membershipRecordHash, uint8(scope.scopeType), scope.scopeId
+        );
     }
 
     function deriveCollectionRecordHashFor(
