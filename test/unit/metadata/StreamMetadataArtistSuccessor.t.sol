@@ -624,6 +624,53 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         metadata.requireArtistRecordCandidate(p);
     }
 
+    function testRepeatedFixedWordShortLongAndZeroRefuseThenExactRetry() public {
+        P.Publication memory p = _repeatedCandidate();
+        metadata.requireArtistRecordCandidate(p);
+        MetadataCertificateVm cheat = MetadataCertificateVm(address(vm));
+        address[3] memory targets = [address(next), address(priorCoordinator), nextSuite.owners[6]];
+        bytes4[3] memory selectors = [
+            bytes4(keccak256("importedHistoryBindingCount()")),
+            bytes4(keccak256("configurationHash()")),
+            bytes4(keccak256("authorityHydrationCommitment()"))
+        ];
+        for (uint256 i; i < 3; ++i) {
+            bytes memory input = abi.encodePacked(selectors[i]);
+            (bool beforeOK, bytes memory original) = targets[i].staticcall(input);
+            require(beforeOK && original.length == 32, "actual original full word");
+            bytes[] memory refused = new bytes[](4);
+            refused[0] = bytes("");
+            refused[1] = new bytes(31);
+            refused[2] = abi.encode(bytes32(uint256(1)), bytes32(uint256(2)));
+            refused[3] = abi.encode(bytes32(0));
+            for (uint256 j; j < refused.length; ++j) {
+                cheat.mockCall(targets[i], input, refused[j]);
+                _candidateFailure(p);
+                cheat.clearMockedCalls();
+                (bytes32 candidate,) = metadata.requireArtistRecordCandidate(p);
+                require(candidate == p.candidateRecordHash, "exact original word retry");
+            }
+        }
+    }
+
+    function testRepeatedAddressCanonicalityAndMissingCodeRemainMandatory() public {
+        P.Publication memory p = _repeatedCandidate();
+        metadata.requireArtistRecordCandidate(p);
+        MetadataCertificateVm cheat = MetadataCertificateVm(address(vm));
+        // Address-returning getters retain their original full abi.decode path.
+        cheat.mockCall(address(priorCoordinator), abi.encodeWithSignature("finalityRegistry()"),
+            abi.encode((uint256(1) << 160) | uint160(priorCoordinator.finalityRegistry())));
+        _candidateFailure(p);
+        cheat.clearMockedCalls();
+        metadata.requireArtistRecordCandidate(p);
+        bytes memory runtime = nextSuite.owners[6].code;
+        vm.etch(nextSuite.owners[6], bytes(""));
+        _candidateFailure(p);
+        vm.etch(nextSuite.owners[6], runtime);
+        (bytes32 candidate,) = metadata.requireArtistRecordCandidate(p);
+        require(candidate == p.candidateRecordHash, "exact runtime retry");
+    }
+
     function testCandidateDocumentAndSelectionRefusalsAreIndependentlyMandatory() public {
         P.Publication memory p = _repeatedCandidate();
         P.Publication memory bad = abi.decode(abi.encode(p), (P.Publication));

@@ -62,6 +62,18 @@ library StreamMetadataArtistConfiguration {
         address finality,
         address provider
     ) internal view returns (bytes32) {
+        (bytes32 result,) = hashAndRuntime(coordinator, suite, finality, provider);
+        return result;
+    }
+
+    /// @dev Return the runtime facts authenticated by the original constructor hash so a
+    /// fixed caller can reuse them without a second set of code reads. Same encoding/checks.
+    function hashAndRuntime(
+        address coordinator,
+        T.SuiteConfiguration memory suite,
+        address finality,
+        address provider
+    ) internal view returns (bytes32 result, bytes32[16] memory runtimeHashes) {
         address[16] memory targets;
         for (uint256 i; i < 7; ++i) {
             targets[i] = suite.owners[i];
@@ -75,13 +87,12 @@ library StreamMetadataArtistConfiguration {
         targets[13] = suite.primaryResolver;
         targets[14] = suite.royaltyResolver;
         targets[15] = suite.validator;
-        bytes32[16] memory runtimeHashes;
         for (uint256 i; i < 16; ++i) {
             if (targets[i].code.length == 0) revert M.MetadataHostNotSelected();
             runtimeHashes[i] = targets[i].codehash;
         }
         bytes32 providerCodeHash = provider.codehash;
-        return keccak256(
+        result = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_ONBOARDING_CONFIGURATION_V1"),
                 block.chainid,

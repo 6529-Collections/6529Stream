@@ -96,3 +96,56 @@ runtimes are4,076 and8,430 bytes. Metadata's matched native runtime remains24,43
 Constructor arguments must still be counted for each actual deployment. No gas
 floor, dependency cap, callback cap, protocol size limit or import authority was
 relaxed. The proposed two-frame successor is separately held and unapplied.
+
+## Actual Owner read follow-up
+
+A separate named-cold recipe now uses real Owner constructor bindings, original
+Owner check/commit, actual hydration guard completion markers and the original
+immutable prefix producer/State/Reads. Its Coordinator is explicitly typed: it
+uses the original stored suite and immutable configuration/finality/provider
+getter shapes, exact constructor hash and reciprocal owner bindings, but does
+not execute the full operation55–60 source-admission lifecycle. Core, registry
+history/admission and Archive remain typed boundaries. This improves the measured
+read shape without claiming concrete Identity or full current-graph acceptance.
+
+The certificate read now inlines the unchanged State view body inside its fixed
+Reads library, retaining the original public State API, storage namespace and
+all provenance predicates. Metadata also reuses the sixteen code hashes already
+checked by the original configuration hash and the already-canonical suite hash
+when reconstructing the origin. No mutating call intervenes. The original hash
+API, literal constructor preimage and all code/return checks remain unchanged.
+
+The first171-source follow-up passed42 of44 scoped cases, including both256-input
+fuzz oracles, but still ran out of gas in the real Owner return. Its failures are
+retained. Hash reuse increased the certificate allowance from22,403 to24,592 gas;
+the fixed Reads body completed using20,294 gas but left too little for its wrapper.
+
+The final narrow word-reader successor replaces temporary byte arrays only for
+nine zero-argument full-word reads: the original binding count, source constructor
+hash and seven completion markers. It retains nonzero code, exact32-byte return,
+call success and all original value predicates. Address and structured decoders
+are unchanged. Its scratch-memory STATICCALL uses the same remaining gas as the
+old inner reader, within the identical single governed150,000 outer frame.
+
+The final171-source capture passes all seven focused cases, including256 hash
+fuzz inputs. The same cached retained cohort has45 passes and one preserved
+conservative-fixture cold failure, including both256-input fuzz oracles. The real
+Owner named-cold recipe succeeds: Metadata callback324,595/400,000 gas; single
+ancestry frame147,146/150,000; certificate24,698 with27,669 forwarded. This is a
+measured success for the explicitly described Owner/immutable-Coordinator recipe,
+not complete current-graph or arbitrary future implementation acceptance. Only
+2,854 gas remains in its dependency frame, so genuine full-suite composition
+must still be measured. Missing-prefix and mismatched seventh-marker controls
+fail for their intended predicates; short/long/zero-word, dirty-address and
+missing-code controls require exact successful retries.
+
+All82 concrete production products in that native closure fit the original
+runtime and unparameterized creation limits. ABI comparison retains1,759 prior
+entries and recursive storage layouts. The separate18-product Artist host gate
+remains tied to its original recorded source; no full Artist rebuild is claimed.
+
+The word-reader edit was initially rejected by automatic review on a per-read
+cap premise. Exact old/new evidence showed both inner calls use remaining gas
+inside the same outer cap; renewed review allowed the exact two-file patch.
+The original denial, packet, transport normalization and successful application
+record remain retained. The unrelated proposed two-frame partition stays inert.

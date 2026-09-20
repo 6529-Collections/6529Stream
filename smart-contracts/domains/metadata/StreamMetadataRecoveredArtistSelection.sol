@@ -109,7 +109,8 @@ library StreamMetadataRecoveredArtistSelection {
             ),
             (address)
         );
-        T.SuiteConfiguration memory source = _frameSuite(coordinator);
+        (T.SuiteConfiguration memory source, bytes32 suiteHash, bytes32[16] memory runtimeHashes) =
+            _frameSuite(coordinator);
         if (
             source.registry != original || source.core != core || next.registry != current
                 || source.mintManager != next.mintManager
@@ -126,11 +127,11 @@ library StreamMetadataRecoveredArtistSelection {
         origin.archive = source.archive;
         origin.owners = source.owners;
         for (uint256 i; i < 7; ++i) {
-            origin.ownerCodeHashes[i] = source.owners[i].codehash;
+            origin.ownerCodeHashes[i] = runtimeHashes[i];
         }
         origin.core = core;
         origin.manager = source.mintManager;
-        origin.suiteConfigurationHash = keccak256(abi.encode(source));
+        origin.suiteConfigurationHash = suiteHash;
         bytes32 hash = RH.originHash(origin);
         bytes32 completion = currentCompletion(core, next.metadata, next.owners);
         (bytes32 actual, bytes32 committed, uint64 revision, uint8 index) = abi.decode(
@@ -184,21 +185,31 @@ library StreamMetadataRecoveredArtistSelection {
             revert M.MetadataHostNotSelected();
         }
         for (uint256 i; i < 7; ++i) {
-            bytes32 actual = abi.decode(
-                _frameRead(
-                    owners[i],
-                    abi.encodeCall(
-                        IStreamArtistAuthorityHydrationOwner.authorityHydrationCommitment, ()
-                    ),
-                    32
-                ),
-                (bytes32)
+            bytes32 actual = _frameWord(
+                owners[i],
+                IStreamArtistAuthorityHydrationOwner.authorityHydrationCommitment.selector
             );
             if (actual == 0 || (i != 0 && actual != completion)) {
                 revert M.MetadataHostNotSelected();
             }
             completion = actual;
         }
+    }
+
+    /// @dev Closed zero-argument, full-word getters share the same finite outer frame.
+    /// A bytes32/uint256 return has no narrower ABI canonicality condition. Scratch memory
+    /// replaces only the previous temporary input/output byte arrays, not any validation.
+    function _frameWord(address target, bytes4 selector) private view returns (bytes32 value) {
+        if (target.code.length == 0) revert M.MetadataReadFailed(target);
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            mstore(0, selector)
+            ok := staticcall(gas(), target, 0, 4, 0, 32)
+            size := returndatasize()
+            value := mload(0)
+        }
+        if (!ok || size != 32) revert M.MetadataReadFailed(target);
     }
 
     function _frameRead(address target, bytes memory input, uint256 length)
@@ -220,7 +231,11 @@ library StreamMetadataRecoveredArtistSelection {
     function _frameSuite(address coordinator)
         private
         view
-        returns (T.SuiteConfiguration memory source)
+        returns (
+            T.SuiteConfiguration memory source,
+            bytes32 suiteHash,
+            bytes32[16] memory runtimeHashes
+        )
     {
         bytes memory raw = _frameRead(
             coordinator,
@@ -228,7 +243,8 @@ library StreamMetadataRecoveredArtistSelection {
             544
         );
         source = abi.decode(raw, (T.SuiteConfiguration));
-        if (keccak256(raw) != keccak256(abi.encode(source))) revert M.MetadataHostNotSelected();
+        suiteHash = keccak256(abi.encode(source));
+        if (keccak256(raw) != suiteHash) revert M.MetadataHostNotSelected();
         address finality = abi.decode(
             _frameRead(
                 coordinator,
@@ -245,35 +261,24 @@ library StreamMetadataRecoveredArtistSelection {
             ),
             (address)
         );
-        bytes32 actual = abi.decode(
-            _frameRead(
-                coordinator,
-                abi.encodeCall(IStreamMetadataArtistConfiguration.configurationHash, ()),
-                32
-            ),
-            (bytes32)
+        bytes32 actual = _frameWord(
+            coordinator, IStreamMetadataArtistConfiguration.configurationHash.selector
         );
-        if (
-            finality.code.length == 0 || provider.code.length == 0
-                || actual
-                    != StreamMetadataArtistConfiguration.hash(
-                        coordinator, source, finality, provider
-                    )
-        ) {
+        if (finality.code.length == 0 || provider.code.length == 0) {
             revert M.MetadataHostNotSelected();
         }
+        bytes32 expected;
+        (expected, runtimeHashes) = StreamMetadataArtistConfiguration.hashAndRuntime(
+            coordinator, source, finality, provider
+        );
+        if (actual != expected) revert M.MetadataHostNotSelected();
     }
 
     function _framePredecessor(address current, address original) private view {
         if (
-            abi.decode(
-                    _frameRead(
-                        current,
-                        abi.encodeCall(IStreamArtistHistory.importedHistoryBindingCount, ()),
-                        32
-                    ),
-                    (uint256)
-                ) != 1
+            uint256(_frameWord(
+                current, IStreamArtistHistory.importedHistoryBindingCount.selector
+            )) != 1
         ) {
             revert M.MetadataHostNotSelected();
         }

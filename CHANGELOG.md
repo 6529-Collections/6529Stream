@@ -16,6 +16,19 @@ the release policy in `docs/release-policy.md`.
   The new carrier is 22,005 runtime bytes with its original ABI/storage retained;
   runtime acceptance remains pending.
 
+## Single-frame Artist certificate read reuse
+
+- Inline the unchanged imported-origin certificate view body in its fixed read
+  worker and reuse authenticated constructor runtime/suite hashes. Replace nine
+  fixed full-word temporary byte arrays while preserving exact code/return checks.
+  Original APIs, storage,150k dependency frame and400k callback remain unchanged.
+- Add real Owner/Guards/State cold recipes with an explicit immutable Coordinator
+  boundary and independent original constructor-hash fuzz/refusal oracles.
+- Record seven focused passes and45 retained passes with one preserved conservative
+  fixture failure. The real Owner recipe succeeds at324,595 callback gas and
+  147,146 dependency-frame gas; complete current-graph acceptance remains separate.
+  All82 concrete native-closure products fit, with both256-input fuzz oracles passing.
+
 ## Bounded repeated Artist selection for original Metadata
 
 - Authenticate repeated Artist ancestry through one governed read frame and an

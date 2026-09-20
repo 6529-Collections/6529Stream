@@ -105,6 +105,14 @@ library StreamArtistRecoveredHydrationState {
     function originCertificate(bytes32 hash, uint8 ownerIndex, address currentRegistry)
         public view returns (bytes32, bytes32, uint64, uint8)
     {
+        return originCertificateInline(hash, ownerIndex, currentRegistry);
+    }
+
+    /// @dev Same immutable namespace/checks in a caller's existing fixed read frame.
+    /// Retains the public method above while avoiding a second cold delegatecall for Owner reads.
+    function originCertificateInline(bytes32 hash, uint8 ownerIndex, address currentRegistry)
+        internal view returns (bytes32, bytes32, uint64, uint8)
+    {
         State storage s = _state();
         uint256 plus = s.originIndexPlusOne[hash];
         if (
