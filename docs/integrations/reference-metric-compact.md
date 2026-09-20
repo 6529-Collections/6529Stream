@@ -1,8 +1,10 @@
 # Compact same-call metric validation
 
-This page records the compact transport boundary. The later
-[metric-local byte reader](reference-metric-byte-reads.md) preserves these
-commitments while keeping immutable-byte transport in the fixed worker frame.
+This page records the compact transport boundary and its later member-lookup
+optimization. The [metric-local byte reader](reference-metric-byte-reads.md) and
+[canonical publication parser](reference-metric-publication-input.md) retain
+these commitments inside fixed worker frames. Historical measurements below
+apply only to their recorded source.
 
 The fixed metric workers now keep the complete authenticated Publication and
 Evidence in the currentness worker's memory frame. They pass the exact fields
@@ -10,8 +12,9 @@ used by the metric proof through a fixed typed projection, then decode the
 original Supplement once in a separate fixed proof worker. This avoids repeated
 large ABI encodings without replacing any live source or publication checks.
 
-`StreamReferenceMetricCurrent.requireInput` first runs the original full
-`requireCurrentDecoded`. The publication worker then performs the original lock
+The original compact implementation ran the full `requireCurrentDecoded`
+sequence in `StreamReferenceMetricCurrent.requireInput`; the later canonical
+parser preserves that source-check sequence with exact encoded transport. The publication worker then performs the original lock
 and writer checks before the supplement's duplicate, authority, definition,
 proof, canonical-byte and Store checks. The read worker authenticates current
 source facts before checking the actual retained supplement and original
@@ -81,12 +84,38 @@ above its original 14m validation budget. An unchanged cached trace reproduced
 the diagnostic without code generation. It does not close either actual
 publisher capacity failure.
 
+## Compact member lookup and allocation
+
+The compact runtime proof now reuses one allocated four-word memory frame for
+its ordered prefix fold. Its 128-byte preimage is exactly the original
+`abi.encode(previous, pathHash, uint64Size, digest)`; the final count fold is
+unchanged. The frame belongs to allocated memory, not EVM free-pointer scratch.
+
+Only after the complete strict-order and count/hash checks pass, required
+members use a lower-bound search over that same sorted runtime. Each lookup
+still requires an exact path, nonzero size/digest, and the original expected
+size/digest when applicable. The six exact source/index/parameter lookups and
+both executable lookups retain their original order. The public full proof and
+its linear search remain unchanged as the independent oracle.
+
+Nine additional independent tests use both the original complete corpus and
+small, jointly rebuilt package/runtime fixtures. They cover paired field
+mutations that reach member lookup, missing members, zero executable fields,
+valid changed executable fields, ordering, path boundaries and a literal prefix
+fuzz oracle. Source review and ABI checks pass; the frozen original 25 plus nine
+new native cases are running. No measured savings or native acceptance is
+claimed for this optimization yet.
+
 ## Actual publisher remains a separate gate
 
-The retained native14 actual publisher result remains seven passes and two
-supplement-stage failures. Its original reference publication fits at 15,664,912
-gas including intrinsic cost, but required-supplement validation and supplement
-binding have not passed their unchanged envelopes. The earlier a73 isolated
-paths also remain recorded at 20,627,939 and 25,059,552 gas. This compact source
-change is not a claim that those actual-graph failures are resolved. A new
-actual-graph run requires its own exact source overlay and acceptance evidence.
+The native17 actual publisher capture, before this compact-proof change, passes
+eight of nine original cases. Full admission, consumer validation, original
+class-two lock and identical Safe retry pass. Final supplement binding still
+exhausts its original transaction budget in the encoded-proof frame. The only
+source delta from native16 is the accepted two-file publication parser; its
+original tests, fixture bytes, gas caps, cooling and intrinsic checks remain.
+
+That historical graph retains explicit typed Core/Artist/governance boundaries
+and an oversized older Router. It does not establish full-current deployability
+or release acceptance. The compact member optimization requires a fresh exact
+source overlay and the unchanged nine-case actual publisher campaign.

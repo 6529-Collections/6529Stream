@@ -171,22 +171,26 @@ library StreamReferenceMetricProof {
         ) revert T.InvalidMetricSupplement();
         // The fixed current worker derived this commitment from the complete fresh package.
         // Independently retain original runtime strict order, count and all three row fields.
-        bytes32 hash = keccak256("6529STREAM_METRIC_COMPLETE_PREFIX_V1");
+        // One allocated four-word frame retains the exact abi.encode preimage without
+        // growing memory for every member before the large runtime/replay encodings.
+        bytes32[4] memory frame;
+        frame[0] = keccak256("6529STREAM_METRIC_COMPLETE_PREFIX_V1");
         for (uint256 i; i < r.members.length; ++i) {
             R.PackageFile memory row = r.members[i];
             if (i != 0 && !pathLess(bytes(r.members[i - 1].path), bytes(row.path))) {
                 revert T.InvalidMetricSupplement();
             }
-            hash = keccak256(
-                abi.encode(hash, keccak256(bytes(row.path)), row.byteSize, row.sha256Digest)
-            );
+            frame[1] = keccak256(bytes(row.path));
+            frame[2] = bytes32(uint256(row.byteSize));
+            frame[3] = row.sha256Digest;
+            assembly ("memory-safe") { mstore(frame, keccak256(frame, 128)) }
         }
-        hash = keccak256(abi.encode(hash, r.members.length));
+        bytes32 hash = keccak256(abi.encode(frame[0], r.members.length));
         if (input.metricMemberCount != r.members.length || input.metricMemberHash != hash) {
             revert T.InvalidMetricSupplement();
         }
         for (uint256 i; i < 4; ++i) {
-            _member(
+            _sortedMember(
                 r.members,
                 string.concat("metric/source/", s.sources[i].path),
                 uint64(s.sources[i].content.length),
@@ -194,23 +198,50 @@ library StreamReferenceMetricProof {
                 true
             );
         }
-        _member(
+        _sortedMember(
             r.members,
             "metric/implementation.json",
             uint64(s.implementationIndex.length),
             sha256(s.implementationIndex),
             true
         );
-        _member(
+        _sortedMember(
             r.members,
             "metric/parameters.json",
             uint64(s.parameters.length),
             sha256(s.parameters),
             true
         );
-        _member(r.members, r.interpreter, 0, 0, false);
-        _member(r.members, r.launcher, 0, 0, false);
+        _sortedMember(r.members, r.interpreter, 0, 0, false);
+        _sortedMember(r.members, r.launcher, 0, 0, false);
         return keccak256(abi.encode(keccak256("6529STREAM_METRIC_RUNTIME_V1"), r));
+    }
+
+    /// @dev Compact runtime has already checked strict lexicographic order and the
+    /// complete prefix commitment. The original full proof keeps its linear lookup.
+    function _sortedMember(
+        R.PackageFile[] memory rows,
+        string memory path,
+        uint64 length,
+        bytes32 digest,
+        bool exact
+    ) private pure {
+        bytes memory target = bytes(path);
+        uint256 low;
+        uint256 high = rows.length;
+        while (low < high) {
+            uint256 middle = low + (high - low) / 2;
+            if (pathLess(bytes(rows[middle].path), target)) low = middle + 1;
+            else high = middle;
+        }
+        if (low == rows.length || keccak256(bytes(rows[low].path)) != keccak256(target)) {
+            revert T.InvalidMetricSupplement();
+        }
+        R.PackageFile memory row = rows[low];
+        if (
+            row.byteSize == 0 || row.sha256Digest == 0
+                || (exact && (row.byteSize != length || row.sha256Digest != digest))
+        ) revert T.InvalidMetricSupplement();
     }
 
     function project(R.Publication memory p, M.Evidence memory e, bytes32 context)

@@ -3,6 +3,15 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Compact metric runtime proof
+
+- Reuse the exact four-word runtime prefix preimage and search required members
+  only after strict ordering and complete commitment checks. Keep original
+  runtime/replay/canonical bytes, validation ordering and the full proof oracle.
+- Add independent differential cases for paired member mutations, executable
+  facts, ordering and path boundaries. Actual transaction acceptance remains a
+  separate unchanged-envelope campaign.
+
 ## Native Merkle charging ceilings
 
 - Make a verified Dutch or clearing Merkle price override replace the signed
