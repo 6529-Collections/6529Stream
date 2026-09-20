@@ -1455,7 +1455,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         for (uint8 i; i < 3; ++i) {
             children[i] = StreamArtistExtensionFactory(factory_).deployIdentity(i + 1, pins);
         }
-        RuntimeValue[] memory v = new RuntimeValue[](11);
+        RuntimeValue[] memory v = new RuntimeValue[](13);
         string memory name = "StreamArtistIdentityAuthority";
         v[0] = _runtimeValue("artist", "StreamArtistOwner", "artistRegistry", _addressWord(p[0]));
         v[1] = _runtimeValue(
@@ -1480,6 +1480,16 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         v[9] = _runtimeValue("artist", name, "identityEstateExtension", _addressWord(children[1]));
         v[10] =
             _runtimeValue("artist", name, "identityRecoveryExtension", _addressWord(children[2]));
+        // The real Identity constructor creates these children in order through fixed
+        // delegatecalled deployment libraries. Both CREATEs execute in the new host.
+        v[11] = _runtimeValue(
+            "artist", name, "identityAdjudicationExtension",
+            _addressWord(graphVm.computeCreateAddress(slot.product(), 1))
+        );
+        v[12] = _runtimeValue(
+            "artist", name, "identityRewindExtension",
+            _addressWord(graphVm.computeCreateAddress(slot.product(), 2))
+        );
         string[] memory parents = new string[](1);
         parents[0] = "StreamArtistOwner";
         bytes memory runtime = _productRuntime(name, parents, creation, v);
