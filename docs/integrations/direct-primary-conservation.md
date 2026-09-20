@@ -7,6 +7,32 @@ call the permanent Core-bound conservation floor in the same transaction.
 This source batch does not establish runtime acceptance or the 500,000-gas
 collector ceiling.
 
+## Original signing and payment
+
+The conservation hook preserves the original authorization digests and domains:
+
+| Product | EIP-712 domain name | Version |
+| --- | --- | --- |
+| Native fixed price | `6529StreamFixedPriceSale` | `2` |
+| ERC-20 fixed price, including commercial authorization and payer intent | `6529StreamPaymentIntentVerifier` | `1` |
+| English auction creation | `6529StreamEnglishAuction` | `2` |
+
+Each domain binds the current chain and actual product address. Use the product's
+original digest getter to check the signed message. In particular, the original
+ERC-20 commercial authorization inherits the payment-intent verifier's domain.
+
+The native payer must be the literal `buy` caller and send the signed price.
+The ERC-20 allowance spender is the original adapter. A relayer needs the payer's
+separate payment intent, whose sale reference is the registered sale ID; its
+asset and primary policy must match, and its maximum amount must cover the price.
+An empty payer signature takes the direct-caller exemption only when the payer
+is the literal caller, consuming no payment-intent nonce. The recipient may
+differ from the payer.
+
+Auction creation signatures authorize the custody mint. The later winning
+bidder and selected delivery recipient become the paid receipt's payer and
+beneficiary. Its authorization digest remains the original creation digest.
+
 ## Deployment and admission
 
 Register each product in the Core's canonical module registry with:
