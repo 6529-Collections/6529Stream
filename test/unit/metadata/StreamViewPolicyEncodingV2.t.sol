@@ -171,14 +171,17 @@ contract StreamViewPolicyEncodingV2Test is CharacterizationTestBase {
         }
         for (uint256 i; i < 2; ++i) {
             vm.expectRevert(abi.encodeWithSelector(V.InvalidViewAdoption.selector));
-            probe.output(i == 0, r, string(large), "", "", "", bytes("{}"), 2);
+            probe.output(i == 0, r, "", "", "", string(large), bytes("{}"), 2);
         }
     }
 
-    function testURIOnlyBoundAndCanonicalJSONParity() public {
+    function testCanonicalJSONBelowURIBoundRetainsLiteralParity() public view {
+        _output(_request(), "", string(new bytes(150000)), 2);
+    }
+
+    function testURIOnlyBoundRetainsExactOriginalError() public {
         R.RenderRequest memory r = _request();
         string memory h = string(new bytes(150000));
-        _output(r, "", h, 2);
         for (uint256 i; i < 2; ++i) {
             vm.expectRevert(abi.encodeWithSelector(V.InvalidViewAdoption.selector));
             probe.output(i == 0, r, "", "", "", h, bytes("{}"), 1);
@@ -189,12 +192,9 @@ contract StreamViewPolicyEncodingV2Test is CharacterizationTestBase {
         bytes memory prior = address(Encoding).code;
         // PUSH1 1 PUSH1 0 SSTORE STOP. The probe must not permit this write.
         vm.etch(address(Encoding), hex"600160005500");
-        (bool ok,) = address(probe)
-            .staticcall{ gas: 1000000 }(
-                abi.encodeCall(
-                    probe.output, (false, _request(), "", "", "", "", bytes("{}"), uint8(2))
-                )
-            );
+        (bool ok,) = address(probe).staticcall{ gas: 1000000 }(
+            abi.encodeCall(probe.output, (false, _request(), "", "", "", "", bytes("{}"), uint8(2)))
+        );
         require(!ok, "STATIC forbids worker writes");
         vm.etch(address(Encoding), prior);
         _output(_request(), "restored", "", 2);

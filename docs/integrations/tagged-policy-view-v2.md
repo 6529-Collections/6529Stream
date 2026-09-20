@@ -135,7 +135,7 @@ actual Artist authority evidence.
 
 ## Validation boundary
 
-The source batch has an ABI-only 329-source check and thirty-two authored
+The source batch has an ABI-only 329-source check and thirty-three focused
 regressions. Eight use actual Store and State to verify original V1 bytes,
 V1/V2/V1 lineage, independent tag domains, two scopes, substitution, late
 rollback and exact retry. Eleven use the actual V2 Renderer/Store/State with
@@ -143,7 +143,7 @@ explicit typed Core/factory/set/Coordinator/Artist replies to check full policy,
 terminal/finalized/legacy separation, all twelve policy-word mutations,
 prepared/burned identities, original coordinator, carrier corruption and
 constructor binding refusal, exact fixed historical dispatch, exact early
-burned-current refusal and formatter-runtime corruption/restore. Five formatter
+burned-current refusal and formatter-runtime corruption/restore. Six formatter
 oracles retain the former literal encoding bodies and check escaped bytes,
 full policy/legacy output, limits, fuzz and actual STATIC write denial. Four
 configuration-hash oracles cover the original complete context, distinct
@@ -165,9 +165,26 @@ The final affected gate fits the inherited VIEW provider at 23681 bytes and
 the policy VIEW provider at 24518. Together with the unchanged source products
 from the second gate, all sixteen selected products fit both original runtime
 and creation limits. This is selected bytecode evidence, not a native test or
-transaction-cap result. All thirty-two test bodies remain unexecuted for this
-batch; no new profile capacity or full current-stack/finality readiness is
-claimed.
+transaction-cap result.
+
+The first genuine native capture passed thirty cases and failed two pure
+formatter-bound fixtures. One exhausted the 100m aggregate test budget while
+the unchanged original encoder escaped an oversized NUL-filled name; the
+other combined JSON parity and both URI refusals in one aggregate frame.
+The test-only successor uses an oversized Base64 HTML carrier for the same
+JSON bound and separates URI parity from the dual exact-error checks.
+All thirty-three cases pass, including two 256-run fuzz oracles, with unchanged
+production and test gas limits.
+
+The cached successor recompiles only the changed test/probe closure. Every
+production artifact remains byte-identical to the original genuine 104-source
+capture. The smaller compiler context also emitted a different formatter
+candidate; that output is retained as unused, with no equivalence claim.
+Saved EVM deployment traces verify the original 7822-byte formatter creation,
+runtime and actual address, both new test/probe link references, and the
+embedded probe constructor. Test execution invokes no compiler and changes
+no artifacts. These component tests do not establish cold transaction
+capacity, governed admission or full current-stack/finality readiness.
 
 The provider codec uses the fixed compiler-linked
 `StreamFinalityProfileSourceReads` library with the actual compiler-owned
