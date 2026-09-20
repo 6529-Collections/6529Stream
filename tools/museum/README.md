@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Public mint/entropy capture](../../docs/museum-public-mint-entropy.md) joins
+source-derived token and request-control histories, preserving active attempts
+separately from observed request counts. A concrete
+[RC1 ownership recipe](../../docs/museum-rc1-public-capture.md) retains immutable
+deployment pins and makes historical ABI/provider limits explicit.
+
 [Public-chain RIGHTS and ownership capture](../../docs/museum-public-history-capture.md)
 uses bounded fixed-filter history queries at public block heights, exact native
 joins and offline reconstruction. Provider log completeness remains explicitly

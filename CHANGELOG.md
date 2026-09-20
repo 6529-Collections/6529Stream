@@ -257,6 +257,12 @@ the release policy in `docs/release-policy.md`.
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
 
+- Add public mint/entropy capture with two source-derived history stages,
+  cross-stage receipt/header reconciliation and exact offline leaf replay.
+  Preserve active versus observed request attempts and original profiles.
+  Add a pinned read-only RC1 ownership recipe with explicit historical ABI and
+  pruned-provider limitations; identify the public RPC client by User-Agent.
+
 - Add public-chain RIGHTS and ownership capture with bounded fixed-filter log
   queries, full returned-receipt/header checks, native state reconciliation and
   exact offline package replay. Preserve original strict history profiles and

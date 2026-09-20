@@ -33,7 +33,8 @@ acquisition item 10, prove legal title, or supply a full protocol event archive.
 The standalone capture retains the source, frozen definitions and derived output.
 It does not extend an existing examination or imply completion of the full
 acquisition packet. Existing strict-profile dossier composers continue to require
-their original input profiles. Public mint/entropy capture is a separate follow-on.
+their original input profiles. [Public mint/entropy capture](museum-public-mint-entropy.md)
+uses a separate source and capture profile with two source-derived history stages.
 
 ## Range coverage and checks
 
@@ -162,4 +163,6 @@ RPC provenance is caller-admitted; neither a transcript nor its local manifest
 authenticates the provider. Synthetic controls exercise the same native wire
 readers at public-size block heights. They do not establish actual Sepolia or
 mainnet execution. This batch includes no live RPC capture, native rebuild,
-registered source profile or deployment acceptance.
+registered source profile or deployment acceptance. The later
+[RC1 recipe](museum-rc1-public-capture.md) records a read-only public attempt and
+its explicit pruned-history failure.

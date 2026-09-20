@@ -93,7 +93,7 @@ class PublicRpcTransport:
         try:
             request = urllib.request.Request(self._endpoint, data=dumps({"jsonrpc": "2.0",
                 "id": self._sequence, "method": method, "params": params}),
-                headers={"Content-Type": "application/json"}, method="POST")
+                headers={"Content-Type": "application/json", "User-Agent": "6529Stream-readonly-capture/1"}, method="POST")
             with urllib.request.build_opener(_NoRedirect()).open(request, timeout=30) as response:
                 raw = response.read(MAX_RESPONSE + 1)
         except urllib.error.HTTPError as exc:

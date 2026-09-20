@@ -9,6 +9,11 @@ This implements another MUSEUM-17 producer/consumer join. It does not complete
 the full acquisition packet, object dossier, finality assessment or institutional
 acceptance.
 
+For public-chain heights, use the separate
+[public mint/entropy capture](museum-public-mint-entropy.md). It retains these
+native semantics with bounded filtered history and explicit provider trust.
+The original reader and examination profiles described here remain unchanged.
+
 ## What the retained token already proves
 
 `token_mint_evidence.extract` consumes originals only after the containing

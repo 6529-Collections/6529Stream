@@ -100,6 +100,8 @@ class PublicHistoryRpcTests(unittest.TestCase):
         with patch.object(rpc.urllib.request, "build_opener") as opener:
             opener.return_value.open.side_effect = [io.BytesIO(raw) for raw in responses]
             self.assertEqual(transport.request("eth_getLogs", LOG_PARAMS), [])
+            request = opener.return_value.open.call_args.args[0]
+            self.assertEqual(request.get_header("User-agent"), "6529Stream-readonly-capture/1")
             with self.assertRaisesRegex(rpc.PublicLimitError, "range_limit") as error: transport.request("eth_getLogs", LOG_PARAMS)
             self.assertNotIn("secret", str(error.exception))
             with self.assertRaisesRegex(MuseumError, "response failed") as error: transport.request("eth_getLogs", LOG_PARAMS)
