@@ -9,7 +9,7 @@ import "../mocks/MockStreamPaymentToken.sol";
 import {
     StreamPrimarySaleSettlement
 } from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
-import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
+import { StreamERC20PrimarySettlementAdapter } from "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
 
 contract CurrentUniversalRecipient is IERC721Receiver {

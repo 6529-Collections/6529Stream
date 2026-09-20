@@ -6,7 +6,7 @@ import "../helpers/UniversalSettlementTestMocks.sol";
 import "../../smart-contracts/domains/metadata/StreamConservationFloor.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
-import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
+import { StreamERC20PrimarySettlementAdapter } from "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
 import "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 
 /// @dev Selected Metadata writer boundary only. Actual facade class-7/8/Safe tests are separate.

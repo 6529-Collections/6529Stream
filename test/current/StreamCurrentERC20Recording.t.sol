@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 import "../helpers/CurrentERC20ConservationFixture.sol";
 import "../mocks/MockStreamPaymentToken.sol";
-import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
+import { StreamERC20PrimarySettlementAdapter } from "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
 
 interface RecordingFaultVM {
