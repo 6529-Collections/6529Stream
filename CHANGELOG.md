@@ -43,6 +43,12 @@ the release policy in `docs/release-policy.md`.
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
 
+- Add a separate general-attestation companion with mandatory signer verification,
+  exact curatorial grants, retained native Artist provenance and typed operative
+  identity notarizations. Add source-preserving Artist/general Museum adapters,
+  explicit SELF-review selection and closed offline dossier replay. Coordinated
+  contract execution, genesis registration and genuine capture remain pending.
+
 - Add a versioned local token-dossier recipe with registered native hosts,
   direct-owner and governed Metadata publications, deployment-scope independent
   records, same-block capture inputs and explicit compiler-source composition

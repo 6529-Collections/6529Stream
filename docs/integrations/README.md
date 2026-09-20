@@ -61,6 +61,8 @@ deployment evidence.
 | Adopt a verified root with artist consent and governed publisher authority | [Content-root publication](content-root-publication.md) |
 | Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
 | Append institutional records as the current NFT owner | [Owner records](owner-records.md) |
+| Publish signed general claims and exact identity notarizations | [General attestations](general-attestations.md) |
+| Preserve native Artist attribution and original general claims offline | [Museum native attribution](../museum-native-attribution.md) |
 | Encode complete steward designations and recovery responses | [Owner notice JSON](owner-notice-json.md) |
 | Authenticate the exact scheduled recovery action before notice | [Recovery action evidence](owner-recovery-action-reads.md) |
 | Prepare complete delivery claims and open the owner response window | [Owner recovery notices](owner-recovery-notices.md) |
