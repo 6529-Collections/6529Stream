@@ -9,6 +9,14 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+[Attribution and sanction capture](museum-attribution-sanction-capture.md)
+implements the pinned owner[4]/owner[6] reads, original native archive checks
+and generation-specific transition reconstruction. Its additive V5 join
+compares native fields and reconciles all seven source captures. Full original
+binding/attestation authority, missing historical baselines, generic record
+labels and historical execution remain qualified. Historical master, archive
+coverage and prospective reference joins are still required.
+
 [Packet V5](museum-acquisition-packet-v5.md) supplies the full-packet native
 authority/scope and DIRECT representation. All 19 field groups are required;
 the new assembler binds native personhood, DIRECT, conservation context,

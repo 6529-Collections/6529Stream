@@ -57,6 +57,11 @@ The [producer map](museum-packet-v5-producer-map.md) identifies the exact
 remaining attribution, sanction, master, archive and reference APIs. Their
 availability does not mean their evidence has been captured by this workflow.
 
+The additive [attribution/sanction join](museum-attribution-sanction-capture.md)
+adds its own native capture to this unchanged assembly. It compares the
+supported fields while retaining the original confirmed sanction separately
+from the latest association sanction and later dispute restoration.
+
 ## Complete supplied data and incomplete source coverage
 
 Schema validation checks all supplied field groups and their relationships.

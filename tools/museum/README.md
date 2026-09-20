@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Native attribution and sanction capture](../../docs/museum-attribution-sanction-capture.md)
+adds current native authority observations, original sanction archives and
+generation-specific state history. Its V5 join reconciles seven captures while
+preserving all original packet bytes. Original confirmation, latest sanction
+and dispute restoration remain separate; item 6 still has explicit source gaps.
+
 [Packet V5](../../docs/museum-acquisition-packet-v5.md) represents all 19
 requirements with native personhood, DIRECT and conservation fragments.
 Its assembler binds those fragments, current RIGHTS and supported attribution
