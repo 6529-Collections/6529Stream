@@ -188,7 +188,8 @@ def _reads(reads, targets, producer, attribution):
     attribution_selector = selector("preservationAttribution(uint256,uint256)")
     for row in decoded:
         order = (row[0] << 32) | int.from_bytes(hex_bytes(row[1], 4), "big")
-        require(row[0] < len(target_rows) and order > previous and 0 < row[2] <= 16777216
+        require(row[0] < len(target_rows) and any(hex_bytes(row[1], 4))
+            and order > previous and 0 < row[2] <= 16777216
             and (not row[3] or row[2] % 32 == 0), "VIEW preservation Registry read shape/order")
         previous = order; target = target_rows[row[0]]
         if target[0] == producer and row[1] in required_producer:

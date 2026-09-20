@@ -329,6 +329,24 @@ class ViewPreservationAdoptionWireTests(unittest.TestCase):
         value, context, graph = supplied(); value["preservation"]["registry"]["reads"][1][1] = "0x00000000"
         with self.assertRaises(MuseumError): w.validate(value, context, graph)
 
+    def test_fully_rehashed_zero_selector_registry_read_is_rejected(self):
+        value, context, graph = supplied()
+        p = value["preservation"]; registry = p["registry"]
+        reads = registry["reads"]
+        reads.append(["0", "0x00000000", "32", True])
+        reads.sort(key=lambda row: (int(row[0]), int(row[1], 16)))
+        decoded = w._v(t.READS, reads)
+        record = registry["record"]
+        record[2] = w.read_set_hash(registry["targetSetHash"], decoded)
+        record[1] = w.registration_hash(int(context["chainId"]), p["admission"][0],
+            registry["schemaRegistry"], registry["schemaRegistryCodeHash"],
+            registry["targetSetHash"], registry["version"][4],
+            w._v(t.PRESERVATION_REGISTRATION, record[0]), decoded)
+        p["admission"] = [graph["rendererRegistry"]["address"],
+            graph["rendererRegistry"]["runtimeHash"], record[0][0], *record[1:5]]
+        with self.assertRaisesRegex(MuseumError, "Registry read shape/order"):
+            w.validate(value, context, graph)
+
     def test_registration_readset_and_admission_hashes(self):
         for field in ("targetSetHash",):
             value, context, graph = supplied(); value["preservation"]["registry"][field] = H("changed")
