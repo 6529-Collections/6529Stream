@@ -194,7 +194,7 @@ contract ImmediateSalesEntropyBoundary {
         }
     }
 
-    function onTokenMinted(uint256 token, uint256, address, bytes32) external {
+    function onTokenMinted(uint256, uint256 token, address, bytes32) external {
         require(msg.sender == core);
         registered[token] = true;
         ++mintCalls;

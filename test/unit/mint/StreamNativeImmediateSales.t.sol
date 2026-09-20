@@ -312,6 +312,15 @@ contract StreamNativeImmediateSalesTest is NativeImmediateSalesFixture {
         vm.prank(payer);
         S.Receipt memory first = immediate.purchasePublic{ value: PRICE }(p);
         require(first.revealCredit == 0 && first.revealFee == 0, "no undeclared ETH line item");
+        p = _purchase(id, payer, 1600);
+        vm.prank(payer);
+        S.Receipt memory repeated = immediate.purchasePublic{ value: PRICE }(p);
+        require(
+            repeated.tokenId != first.tokenId
+                && core.ownerOf(repeated.tokenId) == p.initialRecipient
+                && immediateEntropy.tokenEntropyStatus(repeated.tokenId) == 1,
+            "disabled entropy follows each actual Core token, not the collection ID"
+        );
         immediateEntropy.configure(false, 17);
         require(
             immediate.saleRevealQuote(id).policy.revealFeePerTokenWei == 17,
