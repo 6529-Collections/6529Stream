@@ -44,7 +44,7 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   112 root affected/compatibility tests passing. It pins a verified V1 base and
   all six minimum native sources before RPC, captures supported registered
   scopes, and reconstructs the result offline. Actual new native capture and
-  global host completeness remain unproven; the populated recipe is being built.
+  global host completeness remain unproven; the populated recipe is integrated above.
 - Test-only `5ae32cdf` replaces eleven inline production constructors in the
   shared sale fixture with the existing ordinary-CREATE artifact helper.
   Constructor inputs/order, actual contracts and assertions are preserved.
@@ -65,11 +65,19 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   local approval remains pending after automatic review rejected application;
   no rejected code is applied.
 
-The latest publication/finality run passed code generation but failed setup
-when its fixture recorded the same immutable image object twice. A test-only
-correction verifies every identity field before reusing the object and adds
-fresh observation evidence. Independent source review is clear; the corrected
-run is pending. No valid combined metric export is claimed.
+The corrected publication/finality fixture passes four cases in its native5
+capture: original anchor agreement, mismatch rejection, exact combined export
+and repeated-image identity with fresh coverage. Eight measured production
+products fit deployment limits. This test-only source handoff is not yet
+integrated; independent restored replay and the final publication/Safe/lock/
+inventory cases are pending.
+
+The same capture exposes a real preparation-capacity defect: preparing the
+1,048-file combined package uses 38,710,093 gas before calldata intrinsic,
+above the 16,777,216 transaction limit. The 102-file platform list uses
+4,630,128. The high-gas fixture does not establish a usable package preparation
+transaction. The metadata lead owns diagnosis and a byte-preserving or bounded
+staged repair; the limit and original inventory identities remain unchanged.
 All original deployment-size, Artist-profile, economic-continuity, full Safe,
 museum and final candidate acceptance obligations remain in the feature table.
 
