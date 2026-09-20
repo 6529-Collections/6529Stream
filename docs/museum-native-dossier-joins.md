@@ -153,17 +153,15 @@ Use the owner record's empty optional URI or a valid content URI. The rights
 helper deploys a separate partial Artist graph with an unfulfilled Coordinator
 reservation: reuse its policy/grant/publication pattern against the token graph's
 existing Metadata/Artist bindings instead of running its graph builder. These
-composition changes and their native execution remain work for the coordinated
-graph owner; the read-only runner does not perform them.
+constraints are addressed by the versioned populated recipe below. Its native
+execution remains pending; the read-only runner does not perform the writes.
 
 The current token flow registers/selects Metadata but does not register its
-independent host or an OwnerRecords host. A registration-only helper should
-reuse `TokenGovernanceMixin._register_token_module`'s governance transition
-pattern with the hosts' self-described module fields; that existing helper
-requires standalone interface products and cannot be reused unchanged for this
-composition. Construction of the six anchor objects from the Coordinator's
-reviewed bindings is likewise an explicit preparatory step, not RPC discovery
-of trusted runtime hashes.
+independent host or an OwnerRecords host. The new recipe has a registration-only
+helper using `TokenGovernanceMixin._register_token_module`'s transition pattern
+and the hosts' self-described module fields, without requiring separate
+interface artifacts. Its plan builder derives the six anchors from the final
+original capture and its reviewed deployment bindings.
 
 For that graph, the Coordinator supplies these prerequisites:
 
@@ -233,6 +231,99 @@ is retained. Successful execution checks source consistency; acceptance of the
 actual deployed binaries and the positive publication recipe is a separate
 review. The runner does not silently convert an empty lane into a positive record
 case or assert global completeness.
+
+## Versioned populated-token recipe
+
+`tools.museum.current_token_dossier_capture` extends the original actual-token
+flow with a separate recipe version. It preserves the existing source classes,
+capture8 bytes, V1 retention format and V1/V2 assembly profiles. The new flow:
+
+1. Admits an explicit, fresh `http://127.0.0.1:<port>` chain at chain ID 31337,
+   its externally supplied genesis hash, empty genesis transaction list and an
+   unused fixture deployer. It creates or stops no node process.
+2. Runs the original actual paid-token, Safe media and typed-authority flow.
+3. Deploys the pinned OwnerRecords product and registers that host and the
+   existing independent host in the actual module registry through delayed
+   governance. Metadata keeps its existing registration and selected pointer.
+4. Registers three exact schema documents. The actual buyer submits a direct
+   Owner CONDITION_REPORT with embedded bytes and an empty optional URI. The
+   attestor Safe receives an actual CURATOR/class-3 Metadata family-writer grant
+   and publishes a distinct generic Metadata record. That Safe also publishes
+   one independent record in deployment scope `0` with a fresh nonce.
+5. Checks each original event, receipt, payload, hash and lane head. It retains
+   the direct-owner signature bundle and independent authorization bundle.
+   The original collection-scoped independent semantic lane remains unchanged.
+6. Freezes the original six Core views and all reader dependency runtimes at
+   one final block. The new deployment evidence records the additional
+   transactions, module registrations, records, source composition and genesis.
+7. Retains and reconstructs the original-format token package, builds a fresh
+   V1 base, constructs six anchors, then runs the read-only native capture and
+   V2 assembly. The joined report must contain each newly published hash at
+   its exact host/scope and all four registered catalog scopes. Missing positive
+   records cannot be replaced by an empty catalog or an outside-roster source.
+
+These are implemented execution steps, not a report of a completed native run.
+The schemas describe explicit local test statements; they establish no
+professional condition assessment, legal title or institutional endorsement.
+The original synthetic authority snapshot and controlled entropy remain explicit.
+
+### Source-bound compiler products
+
+`tools.museum.token_dossier_manifest` prepares a new composition from two
+externally SHA-256-pinned native manifests: the original token base and supplied
+native products. It inspects only the selected base products, the additional
+`StreamOwnerRecords` root, and their recursive creation/runtime library links.
+There is no compiler invocation or artifact-directory discovery.
+
+Every selected artifact must match its source/contract identity and its original
+compiler metadata source hashes at the exact supplied Git revision. Original
+base products are reused only when those checks match. A supplied replacement
+for an existing product requires an explicit `--replace <contract-name>`; a
+stale original is never silently replaced. New and replaced rows carry distinct
+provenance rather than inheriting the base's acceptance label. Optional
+`--lf-transport` permits only recorded line-ending conversions, without changing
+tracked source bytes or accepting other whitespace changes.
+
+```powershell
+python -m tools.museum.token_dossier_manifest audit --base work/original-native-inputs.json --base-sha256 <base-sha256> --products work/supplied-native-products.json --products-sha256 <products-sha256> --repository . --source-revision <full-source-sha> --lf-transport --output work/dossier-product-audit.json
+python -m tools.museum.token_dossier_manifest prepare --base work/original-native-inputs.json --base-sha256 <base-sha256> --products work/supplied-native-products.json --products-sha256 <products-sha256> --repository . --source-revision <full-source-sha> --lf-transport --output work/dossier-native-inputs.json
+```
+
+Add reviewed `--replace` arguments when the audit requires them. The audit names
+missing and stale products and graph-projection mismatches. A missing OwnerRecords
+artifact can conceal additional linked products; the tool reports that unresolved
+closure instead of guessing a minimum compilation set. Preparation refuses an
+incomplete or stale composition. It also checks the graph projection's exact
+executable templates and immutable offset groups before the recipe can reuse it.
+For a replaced graph product, supply a reviewed fresh projection with both
+`--projection-directory <directory>` and `--projection-manifest-sha256 <sha256>`.
+The selected projection must pass the same exact template/link/offset checks;
+the original projection remains retained as lineage. No projection is discovered
+or regenerated by this tool.
+Compiler metadata correspondence does not prove reproducible compilation or
+successful deployment. The original accepted base remains historical lineage.
+
+### Coordinator-owned execution
+
+After reviewing the exact artifact audit, constructors and receipt prerequisites,
+the Coordinator supplies the one fresh chain. Configure its credential-free
+loopback URL in `STREAM_MUSEUM_RPC`, then invoke the mutating recipe only on that
+owned chain:
+
+```powershell
+python -m tools.museum.current_token_dossier_capture --native-manifest work/dossier-native-inputs.json --native-manifest-sha256 <prepared-sha256> --source-revision <full-source-sha> --rpc-env STREAM_MUSEUM_RPC --genesis-hash <fresh-chain-genesis-hash> --disclosure public --output work/current-token-dossier
+python -m tools.museum.native_dossier_capture verify work/current-token-dossier/native-dossier --result-hash <nativeCaptureResultHash>
+```
+
+The output keeps the original capture, retained token, V1 base, native plan,
+native capture/assembly, recipe result and public local execution journal in
+separate directories/files. A failed execution also retains its journal. Save
+the printed hashes externally. This command sends fixture transactions but does
+not fund accounts, launch/stop Anvil, impersonate an owner, load saved chain state,
+replace code/storage or broadcast to a remote chain. The read-only verifier needs
+neither the RPC endpoint nor compiler products. Keep full original chain history
+available until capture finishes; a newer V1 base is never joined to capture8's
+old source block by token-ID coincidence.
 
 ## Remaining acceptance
 

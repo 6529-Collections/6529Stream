@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add a versioned local token-dossier recipe with registered native hosts,
+  direct-owner and governed Metadata publications, deployment-scope independent
+  records, same-block capture inputs and explicit compiler-source composition
+  checks; native execution remains pending coordinated artifact review.
+
 - Add a dedicated ERC20 paid burn-to-mint carrier and gate with independent NFT
   burn authority, original payer authorization and atomic burn/payment/mint
   rollback. The zero-native-reveal-fee profile has 21 passing focused gate tests;

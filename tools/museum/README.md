@@ -46,6 +46,9 @@ MetadataV1 enumeration, the current registered-host roster and a V2 partial
 assembly that checks common source reads and preserves the unchanged V1 output.
 The same guide includes a coordinated read-only capture runner with externally
 pinned same-block anchors, paired independent scopes and offline reconstruction.
+Its separate populated-token recipe adds real owner/Metadata/deployment records
+on a Coordinator-owned fresh local chain, after a pinned compiler-source audit;
+native execution and acceptance remain pending.
 
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
