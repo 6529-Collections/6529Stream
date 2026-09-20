@@ -173,24 +173,8 @@ contract StreamNativeConservationFloorProvider is
         returns (StreamConservationFloorTypes.ReleaseContext memory r)
     {
         r = _release(sale);
-        if (
-            r.scriptWork
-                && abi.decode(
-                        _read(
-                            core,
-                            abi.encodeCall(
-                                IStreamCoreConservationTier.declaredConservationTier,
-                                (sale.collectionId)
-                            ),
-                            32,
-                            _gasParameterValue(READ_GAS)
-                        ),
-                        (bytes32)
-                    ) == StreamConservationTiers.MUSEUM_GRADE
-        ) {
-            // Eligibility is checked before the ledger can reuse an earlier semantic release.
-            _reference(sale, r);
-        }
+        // Mapping is independent of evidence freshness. The permanent ledger asks for full
+        // current floor evidence only when this semantic release has no successful receipt.
     }
 
     function requireReleaseFloor(

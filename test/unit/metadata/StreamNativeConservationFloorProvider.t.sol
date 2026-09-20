@@ -531,13 +531,17 @@ contract StreamNativeConservationFloorProviderTest is ConservationSelectionFixtu
             abi.encodeCall(IStreamCoreConservationTier.declaredConservationTier, (uint256(1))),
             abi.encode(_FULL)
         );
+        require(
+            provider.saleRelease(sale).membershipHash == r.membershipHash,
+            "mapping remains available for a genuinely recorded identical semantic release"
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 StreamNativeConservationFloorProvider.NativePresaleReferenceUnavailable.selector,
                 uint256(1)
             )
         );
-        provider.saleRelease(sale); // Even an existing semantic receipt cannot excuse a now-FULL script gate.
+        provider.requireReleaseFloor(sale, r, _FULL);
     }
 
     function testProviderScriptReceiptLocatorExcludedAndActualContentChangesRelease()
