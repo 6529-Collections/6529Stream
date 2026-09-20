@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredRevokedAttribution as RecoveredRevoked } from "./StreamArtistRecoveredRevokedAttribution.sol";
 import {
     StreamArtistRecoveredCollectionHydration
 } from "./StreamArtistRecoveredCollectionHydration.sol";
@@ -22,6 +23,7 @@ library StreamArtistAttributionRecoveredImport {
         if (bytes4(data[:4]) != I.applyArtistAuthorityHydration.selector) revert T.InvalidRecord();
         (, AH.Query memory q, AH.OwnerData memory p,) =
             abi.decode(data[4:], (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (RecoveredRevoked.importIfSelected(s, q, p.typedState)) return;
         if (StreamArtistRecoveredAttestationHydration.selected(p.typedState)) {
             StreamArtistRecoveredAttestationHydration.importState(s, q, p.typedState);
             return;

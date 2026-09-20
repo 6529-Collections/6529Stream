@@ -528,6 +528,13 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         );
     }
 
+    /// @dev Scoped test extension for later real governance contexts; original default unchanged.
+    function _rhExecuteRecovery(Recovery.Request memory p, T.Authorization memory a)
+        internal virtual returns (bytes32)
+    {
+        return this.executeRegistered(p, a);
+    }
+
     function _rhBaseline() internal {
         _rhCandidate(
             0, "binding_lifecycle.replay.proposal_key", keccak256(abi.encode(uint256(1), uint64(1)))
@@ -589,7 +596,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         scheduled.status = GovernanceActionStatus.EXECUTED;
         _publish();
         Recovery.Context memory c = ingress.identityRecoveryContext(p, a);
-        rhRecovery = this.executeRegistered(p, a);
+        rhRecovery = _rhExecuteRecovery(p, a);
         Recovery.Record memory recovery = ingress.identityRecoveryRecord(rhRecovery);
         require(
             recovery.fields.vestedAuthorityClass == 1
@@ -1007,6 +1014,20 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
             "identity_authority.replay.import_binding",
             keccak256(abi.encode(uint256(0), uint8(2), bytes32(uint256(1))))
         );
+        _rhCommitHistory(next, c, root, manifest);
+        core.set(RH_POINTER, address(next.registry), false);
+        History(address(ingress)).observeRegistryCutover();
+        (, uint64 count) = History(address(ingress)).artistHistoryLane(1, artistId);
+        (, bytes32[] memory proof) = _rhProof(address(ingress), rows, count - 1);
+        History(address(next.registry)).verifyImportedLaneTip(0, rows[count - 1], proof);
+        (, proof) = _rhProof(address(ingress), rows, rows.length - 1);
+        History(address(next.registry)).verifyImportedLaneTip(0, rows[rows.length - 1], proof);
+    }
+
+    /// @dev The default preserves the historical mock recipe; successors can use scoped actions.
+    function _rhCommitHistory(Successor memory next, HT.Context memory c, bytes32 root, bytes32 manifest)
+        internal virtual
+    {
         ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
         authority.configureContestReads(
             suite.roleRegistry, address(artist), manifest, "urn:history"
@@ -1063,13 +1084,6 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
             !active && action == 0 && class_ == 0 && scope == 0 && oldHash == 0 && newHash == 0,
             "inactive after actual55"
         );
-        core.set(RH_POINTER, address(next.registry), false);
-        History(address(ingress)).observeRegistryCutover();
-        (, uint64 count) = History(address(ingress)).artistHistoryLane(1, artistId);
-        (, bytes32[] memory proof) = _rhProof(address(ingress), rows, count - 1);
-        History(address(next.registry)).verifyImportedLaneTip(0, rows[count - 1], proof);
-        (, proof) = _rhProof(address(ingress), rows, rows.length - 1);
-        History(address(next.registry)).verifyImportedLaneTip(0, rows[rows.length - 1], proof);
     }
 
     function _rhTwoImports() private returns (Successor memory last, bytes32 fresh) {

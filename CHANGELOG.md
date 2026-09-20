@@ -196,6 +196,16 @@
   linked-library size and gas validation remain pending.
 
 
+## Added: recovered accepted-generation correction histories
+
+- Retain complete governed revocation, fresh correction and acceptance records
+  across original and imported Artist owner eras through explicit operation-60 tags.
+- Preserve old profile bytes, original signatures/replay domains, seven-owner
+  storage and atomic Archive order; reject unsupported history before import.
+- Author eight actual-owner/Safe source recipes, including successor-origin
+  correction and late Archive rollback/retry. Runtime and full-current capacity
+  acceptance remain separate.
+
 ## Added: recovered original content ratification histories
 
 - Retain complete original operation-52 maps, current head, journal/replay eras and

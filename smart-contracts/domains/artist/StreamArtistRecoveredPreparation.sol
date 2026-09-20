@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredAcceptedGenerationStage as AcceptedStage } from "./StreamArtistRecoveredAcceptedGenerationStage.sol";
 import {
     StreamArtistRecoveredBindingCorrectionHydration as Corrections
 } from "./StreamArtistRecoveredBindingCorrectionHydration.sol";
@@ -105,7 +106,7 @@ library StreamArtistRecoveredPreparation {
                 context.identity, c.provenance, c.source.owners[2], payoutContinuations
             );
         uint8 consentMode;
-        (context.generations, consentMode, context.hasGenerations) = GenerationStage.collect(
+        (context.generations, consentMode, context.hasGenerations) = AcceptedStage.select(
             c.source,
             prepared.query,
             c.provenance,
@@ -115,6 +116,7 @@ library StreamArtistRecoveredPreparation {
             royaltyFreezes.length
         );
         if (context.hasGenerations) context.features |= RH.BINDING_GENERATIONS;
+        if (c.provenance.journals[3].length > 1) context.features |= RH.ACCEPTED_GENERATIONS;
         if (Corrections.selected(RH.ownerProvenance(c.provenance, 0))) {
             if (!context.hasGenerations) revert T.UnsupportedProfile();
             context.features |= RH.BINDING_CORRECTIONS;

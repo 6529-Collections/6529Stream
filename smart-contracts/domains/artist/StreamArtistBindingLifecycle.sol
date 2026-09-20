@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredAcceptedBindingHydration as RecoveredAccepted } from "./StreamArtistRecoveredAcceptedBindingHydration.sol";
 import {
     StreamArtistRecoveredBindingCorrectionHydration as RecoveredCorrections
 } from "./StreamArtistRecoveredBindingCorrectionHydration.sol";
@@ -440,7 +441,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return RecoveredRH.CORRECTION_GRAPH_FEATURES;
+        return RecoveredRH.ACCEPTED_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -453,9 +454,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (RecoveredCodec.isState(p.typedState, 0)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
-            if (RecoveredCorrections.importIfSelected(
-                    _bindings, _history, _terms, _terminals, _corrections, q, p.typedState
-                )) return;
+            if (RecoveredAccepted.importIfSelected(_bindings, _history, _terms, _terminals, _corrections, q, p.typedState)) return;
             if (RecoveredGenerations.selected(p.typedState)) {
                 RecoveredGenerations.importState(
                     _bindings, _history, _terms, _terminals, q, p.typedState
