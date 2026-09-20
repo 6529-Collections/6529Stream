@@ -58,6 +58,12 @@ library StreamArtistRecoveredOwnerReads {
             (bytes32 kind, bytes32 key) = abi.decode(data[4:], (bytes32, bytes32));
             return abi.encode(Imported.artifact(kind, key));
         }
+        if (selector == API.recoveredHydrationImportedOriginCertificate.selector) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            (bytes32 origin, bytes32 commitment, uint64 revision, uint8 importedIndex) =
+                Imported.originCertificate(hash, index, binding.registry);
+            return abi.encode(origin, commitment, revision, importedIndex);
+        }
         RH.OriginEnvironment memory current = environment(binding, index);
         bytes32 currentHash = RH.originHash(current);
         if (selector == API.recoveredHydrationOrigin.selector) {

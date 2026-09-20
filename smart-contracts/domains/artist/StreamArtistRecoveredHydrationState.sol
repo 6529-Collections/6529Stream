@@ -100,6 +100,23 @@ library StreamArtistRecoveredHydrationState {
         p.aliases = s.aliases;
     }
 
+    /// @notice Compact read of a key installed only by the unchanged validated op60 producer.
+    /// @dev Full original environment bytes remain available through environment(). No cache/write.
+    function originCertificate(bytes32 hash, uint8 ownerIndex, address currentRegistry)
+        public view returns (bytes32, bytes32, uint64, uint8)
+    {
+        State storage s = _state();
+        uint256 plus = s.originIndexPlusOne[hash];
+        if (
+            hash == 0 || s.commitment == 0 || s.profile != RH.PROFILE
+                || s.importedAtRevision == 0 || ownerIndex >= 7 || s.ownerIndex != ownerIndex
+                || plus == 0 || plus > s.origins.length || plus > s.eras.length
+                || s.eras[plus - 1].originHash != hash
+                || s.origins[plus - 1].registry == currentRegistry
+        ) revert RH.InvalidRecoveredHydrationProvenance();
+        return (hash, s.commitment, s.importedAtRevision, s.ownerIndex);
+    }
+
     function environment(bytes32 originHash) public view returns (RH.OriginEnvironment memory) {
         State storage s = _state();
         uint256 plus = s.originIndexPlusOne[originHash];

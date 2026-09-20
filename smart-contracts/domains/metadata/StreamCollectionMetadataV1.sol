@@ -619,9 +619,8 @@ contract StreamCollectionMetadataV1 is
     }
 
     function _candidate(P.Publication memory p) private view returns (bytes32 hash, uint8 kind) {
-        _requireArtistSelected();
         _requireSubject(p.collectionId, p.subjectId);
-        return StreamMetadataPublicationEncoding.candidatePrepared(
+        (hash, kind) = StreamMetadataPublicationEncoding.candidatePrepared(
             _recordPayloads,
             StreamMetadataPublicationEncoding.CandidateContext(
                 core,
@@ -635,6 +634,9 @@ contract StreamCollectionMetadataV1 is
             p,
             _policies[p.recordType]
         );
+        // All checks remain mandatory. Finish with ancestry so its fixed bounded frame
+        // does not strand a fresh full dependency reserve before document validation.
+        _requireArtistSelected();
     }
 
     function collectionRecord(bytes32 hash)

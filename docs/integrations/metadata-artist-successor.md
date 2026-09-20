@@ -55,9 +55,10 @@ emitting the original consumption event. The same host's
 already consumed authorization. Historical reads and record domains are unchanged.
 
 The original publication projection, candidate validation and subject preimage
-execute in a fixed linked worker. Host selection and collection/subject checks
-remain first; schema/code checks, chunk reads and candidate hashes retain their
-order. Existing receipt/payload reads use the existing manifest worker with the
+execute in a fixed linked worker. The mutation captures host selection first; collection/subject,
+schema/code, chunk and candidate checks retain their internal order. The candidate
+view finishes with selection after document validation; see the bounded repeated
+selection profile in [metadata-repeated-artist-selection.md](metadata-repeated-artist-selection.md). Existing receipt/payload reads use the existing manifest worker with the
 same storage references and original pointer-lookup-before-code-check order.
 The original host ABI and recursive storage layout are preserved.
 

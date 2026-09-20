@@ -20,7 +20,8 @@ import {
 
 import { StreamMetadataArtistConfiguration } from "./StreamMetadataArtistConfiguration.sol";
 import {
-    StreamMetadataRecoveredArtistSelection
+    StreamMetadataRecoveredArtistSelection,
+    IStreamMetadataCurrentCompletion
 } from "./StreamMetadataRecoveredArtistSelection.sol";
 
 /// @notice Same-Metadata publication through its original Artist or completely hydrated successor.
@@ -100,23 +101,36 @@ library StreamMetadataArtistSelection {
             ) revert M.MetadataHostNotSelected();
         }
         (address nextCoordinator, T.SuiteConfiguration memory next) = _suite(c, s.registry);
+        address priorCoordinator;
         if (successor != s.registry) {
-            StreamMetadataRecoveredArtistSelection.requireAncestor(
-                c.core, c.original, s.registry, next, c.gasCap
+            priorCoordinator = abi.decode(
+                _read(
+                    c,
+                    address(StreamMetadataRecoveredArtistSelection),
+                    abi.encodeCall(
+                        IStreamMetadataCurrentCompletion.repeatedAncestor,
+                        (c.core, c.original, s.registry, abi.encode(next))
+                    ),
+                    32
+                ),
+                (address)
+            );
+        } else {
+            priorCoordinator = abi.decode(
+                _read(
+                    c,
+                    c.original,
+                    abi.encodeCall(IStreamArtistIngressBinding.operationCoordinator, ()),
+                    32
+                ),
+                (address)
             );
         }
-        address priorCoordinator = abi.decode(
-            _read(
-                c,
-                c.original,
-                abi.encodeCall(IStreamArtistIngressBinding.operationCoordinator, ()),
-                32
-            ),
-            (address)
-        );
         if (priorCoordinator == address(0) || priorCoordinator == nextCoordinator) {
             revert M.MetadataHostNotSelected();
         }
+        // The repeated branch already authenticated this same fixed Router/owner proof.
+        if (successor != s.registry) return s;
         // All actual op60 profiles share Source._prepare/SourceGuards._suite and
         // Commit.execute: the exact sealed predecessor, all eight unchanged suite
         // dependencies, and each source owner's reciprocal binding/domain are

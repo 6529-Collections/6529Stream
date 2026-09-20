@@ -42,6 +42,12 @@ interface IStreamArtistRecoveredHydrationOwner {
         external
         view
         returns (RH.Point memory);
+    /// @notice Exact immutable imported-origin membership; never synthesizes a local origin.
+    /// @dev The fixed producer validated the full original environment before installing its key.
+    function recoveredHydrationImportedOriginCertificate(bytes32 environmentHash)
+        external
+        view
+        returns (bytes32 originHash, bytes32 importCommitment, uint64 importedAtRevision, uint8 ownerIndex);
     function recoveredHydrationOrigin(bytes32 environmentHash)
         external
         view

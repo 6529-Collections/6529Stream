@@ -177,7 +177,15 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     function recoveredHydrationReplayPoint(bytes32)
         external
         view
-        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+        returns (StreamArtistRecoveredHydrationTypes.Point calldata)
+    {
+        _forwardRecoveredRead();
+    }
+
+    function recoveredHydrationImportedOriginCertificate(bytes32)
+        external
+        view
+        returns (bytes32, bytes32, uint64, uint8)
     {
         _forwardRecoveredRead();
     }
@@ -194,7 +202,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         external
         view
         virtual
-        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+        returns (StreamArtistRecoveredHydrationTypes.Point calldata)
     {
         _forwardRecoveredRead();
     }

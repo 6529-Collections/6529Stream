@@ -18,6 +18,14 @@ import {
     StreamArtistRecordPublicationReads
 } from "../../../smart-contracts/domains/artist/StreamArtistRecordPublicationReads.sol";
 
+import { StreamArtistRecoveredHydrationState as ImportedState } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredHydrationState.sol";
+import { StreamArtistRecoveredOwnerReads as ImportedReads } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredOwnerReads.sol";
+import { StreamArtistOwnerHydration as ImportedBinding } from "../../../smart-contracts/domains/artist/StreamArtistOwnerHydration.sol";
+interface MetadataCertificateVm {
+    function mockCall(address, bytes calldata, bytes calldata) external;
+    function clearMockedCalls() external;
+}
+
 contract MetadataRouterForSuccessorBoundary {
     address public immutable core;
 
@@ -195,10 +203,37 @@ contract MetadataHydratedOwnerBoundary {
     bytes32 public domainId;
     bytes32 public authorityHydrationCommitment;
     mapping(bytes32 => RH.OriginEnvironment) private _origins;
+    mapping(bytes32 => bool) private _enabled;
+    mapping(bytes32 => T.ReplayCell) private _fixtureReplay;
+    uint8 private immutable _ownerIndex;
 
-    // Explicit immutable-prefix response boundary; actual op60 provenance execution is separate.
+    // Typed source/admission boundary; actual immutable storage producer and read workers.
+    // Corruption controls only disable the served certificate, never rewrite an installed prefix.
     function setOrigin(bytes32 hash, RH.OriginEnvironment memory value) external {
         _origins[hash] = value;
+        bool valid = value.registry != address(0) && RH.originHash(value) == hash;
+        _enabled[hash] = valid;
+        if (valid && ImportedState.commitment() == 0) {
+            RH.OwnerProvenance memory p;
+            p.origins = new RH.OriginEnvironment[](1);
+            p.origins[0] = value;
+            p.eras = new RH.OwnerEra[](1);
+            p.eras[0].originHash = hash;
+            p.eras[0].checkpoint.schema = RH.CHECKPOINT;
+            p.eras[0].checkpoint.ownerState = T.Snapshot(RH.ownerDomain(_ownerIndex), 12, bytes32(uint256(300)), bytes32(uint256(301)));
+            ImportedState.installOwnerPrefix(p, _ownerIndex, authorityHydrationCommitment, 1);
+        }
+    }
+
+    function recoveredHydrationImportedOriginCertificate(bytes32 hash)
+        external view returns (bytes32, bytes32, uint64, uint8)
+    {
+        require(_enabled[hash], "disabled certificate fixture");
+        // Same fixed reader and namespace as the real Owner. Stored fixture bindings and the
+        // extra refusal slot conservatively add reads; actual Owner bindings are immutable.
+        bytes memory raw = ImportedReads.read(_fixtureReplay,
+            ImportedBinding.Binding(artistRegistry, operationCoordinator, archiveV2, RH.ownerDomain(_ownerIndex)), 0, msg.data);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
     function recoveredHydrationOrigin(bytes32 hash)
@@ -216,6 +251,7 @@ contract MetadataHydratedOwnerBoundary {
         uint256 index,
         bytes32 commitment
     ) {
+        _ownerIndex = uint8(index);
         artistRegistry = s.registry;
         operationCoordinator = coordinator;
         archiveV2 = s.archive;
@@ -536,6 +572,8 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         safeVm.cool(address(store));
         safeVm.cool(address(StreamMetadataArtistSelection));
         safeVm.cool(address(StreamMetadataRecoveredArtistSelection));
+        safeVm.cool(address(ImportedReads));
+        safeVm.cool(address(ImportedState));
         safeVm.cool(address(StreamMetadataArtistConfiguration));
         safeVm.cool(address(StreamRecordDocumentReads));
         safeVm.cool(address(StreamMetadataPublicationEncoding));
@@ -543,6 +581,72 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         safeVm.cool(address(StreamArtistRecordPublicationReads));
         bytes32 hash = probe.candidate(nextSuite, p);
         require(hash == address(metadata).codehash, "actual publication worker original400k at C");
+    }
+
+    function testCompactCertificateRejectsMissingWrongAndNoncanonicalWordsThenExactRetry() public {
+        P.Publication memory p = _repeatedCandidate();
+        RH.OriginEnvironment memory original = _origin();
+        bytes32 h = RH.originHash(original);
+        address owner = nextSuite.owners[2];
+        bytes memory call_ = abi.encodeWithSignature("recoveredHydrationImportedOriginCertificate(bytes32)", h);
+        MetadataCertificateVm cheat = MetadataCertificateVm(address(vm));
+        bytes[] memory invalid = new bytes[](8);
+        invalid[0] = bytes(""); // Full old origin getter remains present; no fallback allowed.
+        invalid[1] = abi.encode(bytes32(uint256(1)), COMPLETION, uint64(1), uint8(2));
+        invalid[2] = abi.encode(h, bytes32(0), uint64(1), uint8(2));
+        invalid[3] = abi.encode(h, bytes32(uint256(1)), uint64(1), uint8(2));
+        invalid[4] = abi.encode(h, COMPLETION, uint64(0), uint8(2));
+        invalid[5] = abi.encode(h, COMPLETION, uint64(1), uint8(1));
+        invalid[6] = abi.encode(h, COMPLETION, uint256(1) << 64, uint8(2));
+        invalid[7] = abi.encode(h, COMPLETION, uint64(1), uint256(258));
+        for (uint256 i; i < invalid.length; ++i) {
+            cheat.mockCall(owner, call_, invalid[i]);
+            _candidateFailure(p);
+            cheat.clearMockedCalls();
+            (bytes32 result,) = metadata.requireArtistRecordCandidate(p);
+            require(result == p.candidateRecordHash, "exact certificate retry");
+        }
+        cheat.mockCall(owner, call_, abi.encode(h, COMPLETION, uint64(1), uint8(2), bytes32(0)));
+        _candidateFailure(p); cheat.clearMockedCalls();
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testRepeatedDependencyFrameRefusesMalformedSourceSuiteThenExactRetry() public {
+        P.Publication memory p = _repeatedCandidate();
+        MetadataCertificateVm cheat = MetadataCertificateVm(address(vm));
+        bytes memory selector = abi.encodeWithSignature("suiteConfiguration()");
+        cheat.mockCall(address(priorCoordinator), selector, abi.encode(originalSuite, bytes32(0)));
+        _candidateFailure(p); cheat.clearMockedCalls();
+        T.SuiteConfiguration memory changed = originalSuite;
+        changed.primaryRevenueClass = keccak256("wrong class");
+        cheat.mockCall(address(priorCoordinator), selector, abi.encode(changed));
+        _candidateFailure(p); cheat.clearMockedCalls();
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testCandidateDocumentAndSelectionRefusalsAreIndependentlyMandatory() public {
+        P.Publication memory p = _repeatedCandidate();
+        P.Publication memory bad = abi.decode(abi.encode(p), (P.Publication));
+        bad.subjectId = bytes32(uint256(77)); _candidateFailure(bad);
+        bad = abi.decode(abi.encode(p), (P.Publication));
+        bad.schemaId = keccak256("unregistered schema"); _candidateFailure(bad);
+        bad = abi.decode(abi.encode(p), (P.Publication));
+        bad.payloadHash = keccak256("missing bytes"); _candidateFailure(bad);
+        bad = abi.decode(abi.encode(p), (P.Publication));
+        bad.candidateRecordHash = bytes32(uint256(8)); _candidateFailure(bad);
+        MetadataHydratedOwnerBoundary(nextSuite.owners[6]).setCompletion(0);
+        _candidateFailure(p);
+        MetadataHydratedOwnerBoundary(nextSuite.owners[6]).setCompletion(COMPLETION);
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testRepeatedCandidateLowParentBudgetRefusesWithoutChangingConsumption() public {
+        P.Publication memory p = _repeatedCandidate();
+        bytes memory input = abi.encodeCall(metadata.requireArtistRecordCandidate, (p));
+        (bool ok,) = address(metadata).staticcall{gas: 150000}(input);
+        require(!ok, "full dependency reservation retained");
+        (bytes32 hash,) = metadata.requireArtistRecordCandidate(p);
+        require(hash == p.candidateRecordHash && metadata.payloadPointerCount(1) == 0, "read-only exact retry");
     }
 
     function _terms(address recorder, bytes memory payload)

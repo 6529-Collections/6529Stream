@@ -3,6 +3,21 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Bounded repeated Artist selection for original Metadata
+
+- Authenticate repeated Artist ancestry through one governed read frame and an
+  imported-only origin certificate, preserving complete source/current suite,
+  seven-owner, original record-domain and authorization-consumption checks.
+- Keep both gas caps and original prefix producers/storage unchanged; preserve
+  all prior owner ABIs and reduce two terminal read allocations. Candidate views
+  validate document facts before their final selection check; mutation ordering
+  and post-append revalidation remain unchanged.
+- Add exact-certificate, independent document/lineage refusal, low-budget and
+  reached rollback/retry tests, with actual read workers and explicit typed
+  source-admission boundaries. Full current operation60 acceptance is separate.
+- Record38 focused passes and one retained repeated-cold400k refusal. All18
+  selected products fit; this does not close cold repeated publication acceptance.
+
 ## Operator distribution supply scope
 
 - Require the distribution's supply counter to resolve to its original PHASE
