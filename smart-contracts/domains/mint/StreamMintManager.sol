@@ -26,6 +26,7 @@ import { StreamERC20OfferReceipt } from "./StreamERC20OfferReceipt.sol";
 import { IStreamERC20OfferMint } from "../../interfaces/stream/mint/IStreamERC20OfferMint.sol";
 import { StreamERC20OfferMintTypes } from "../../interfaces/stream/mint/StreamERC20OfferMintTypes.sol";
 import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol";
+import "../../interfaces/stream/mint/IStreamMintImmediateSaleAuthorizationRevocation.sol";
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
 import "./StreamMintManagerPolicy.sol";
@@ -50,6 +51,7 @@ contract StreamMintManager is
     IStreamPreparedNativeOfferMint,
     IStreamERC20OfferMint,
     IStreamMintSaleAuthorizationRevocation,
+    IStreamMintImmediateSaleAuthorizationRevocation,
     IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
     IStreamMintRoyaltyPolicy,
@@ -269,6 +271,17 @@ contract StreamMintManager is
         bytes calldata revocationSignature
     ) external override nonReentrant returns (bytes32) {
         return StreamMintRevocation.voidSaleAuthorization(_revocationContext(), authorization, revocationSignature);
+    }
+
+    function voidMintImmediateSaleAuthorization(
+        StreamPrivateSaleTypes.SaleAuthorization calldata authorization,
+        address claimedAuthorizer,
+        uint8 authorizerKind,
+        bytes calldata revocationSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamMintRevocation.voidImmediateSaleAuthorization(
+            _revocationContext(), authorization, claimedAuthorizer, authorizerKind, revocationSignature
+        );
     }
 
     function _revocationContext() private view returns (StreamMintRevocation.Context memory) {

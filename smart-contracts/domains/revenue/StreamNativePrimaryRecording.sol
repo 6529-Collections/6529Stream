@@ -38,6 +38,51 @@ library StreamNativePrimaryRecording {
     ) public returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result) {
         StreamNativeSettlementTypes.NativeSettlementCandidate memory n = candidate;
         _validateNative(x, n);
+        return _settleNative(
+            x, settlementConsumed, _results, _officialSettled, totalOfficialSettled, n, false, 0
+        );
+    }
+
+    function settlePublicNative(
+        Context memory x,
+        mapping(bytes32 => bool) storage settlementConsumed,
+        mapping(
+            bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult
+        ) storage _results,
+        mapping(bytes32 => uint256) storage _officialSettled,
+        mapping(address => uint256) storage totalOfficialSettled,
+        StreamNativeSettlementTypes.NativeSettlementCandidate calldata candidate
+    ) public returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result) {
+        StreamNativeSettlementTypes.NativeSettlementCandidate memory n = candidate;
+        StreamPrimarySettlementValidation.Bindings memory bindings = _bindings(x);
+        StreamPrimarySettlementValidation.nativePublicFields(bindings, n);
+        _requireNativeContext(x);
+        StreamNativeSettlementAdmission.requireAdmission(x.registry, n);
+        bytes32 recordHash = StreamPrimarySettlementValidation.nativePublicBindings(bindings, n);
+        return _settleNative(
+            x,
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            n,
+            true,
+            recordHash
+        );
+    }
+
+    function _settleNative(
+        Context memory x,
+        mapping(bytes32 => bool) storage settlementConsumed,
+        mapping(
+            bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult
+        ) storage _results,
+        mapping(bytes32 => uint256) storage _officialSettled,
+        mapping(address => uint256) storage totalOfficialSettled,
+        StreamNativeSettlementTypes.NativeSettlementCandidate memory n,
+        bool publicSale,
+        bytes32 publicRecordHash
+    ) private returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result) {
         bytes32 key = StreamPrimarySettlementHash.settlementKey(
             address(this), n.saleAdapter, n.executionBinding.executionId
         );
@@ -53,6 +98,11 @@ library StreamNativePrimaryRecording {
         );
         _requireNativeContext(x);
         StreamNativeSettlementAdmission.requireAdmission(x.registry, n);
+        if (
+            publicSale
+                && StreamPrimarySettlementValidation.nativePublicBindings(_bindings(x), n)
+                    != publicRecordHash
+        ) revert IStreamPrimarySaleSettlement.InvalidPrimarySale();
         _requireCurrent(x, c, selected);
         result = StreamPrimarySettlementTypes.PrimarySettlementResult(
             StreamNativeSettlementHash.candidateCommitment(address(this), n),
@@ -156,6 +206,16 @@ library StreamNativePrimaryRecording {
         _requireNativeContext(x);
         StreamNativeSettlementAdmission.requireAdmission(x.registry, c);
         StreamPrimarySettlementValidation.nativeBindings(bindings, c);
+    }
+
+    function _bindings(Context memory x)
+        private
+        pure
+        returns (StreamPrimarySettlementValidation.Bindings memory)
+    {
+        return StreamPrimarySettlementValidation.Bindings(
+            x.core, x.registry, address(x.funding.rights.resolver), address(x.funding.escrow)
+        );
     }
 
     function _requireNativeContext(Context memory x) private view {

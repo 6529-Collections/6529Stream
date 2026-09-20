@@ -31,6 +31,7 @@ import "./StreamPreparedNativeContentPurchaseRecording.sol";
 import "./StreamPreparedNativeOfferRecording.sol";
 import "../../interfaces/stream/revenue/IStreamDeferredNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
+import "../../interfaces/stream/revenue/IStreamNativePublicPrimarySaleSettlement.sol";
 import "../mint/StreamSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
@@ -42,6 +43,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 contract StreamPrimarySaleSettlement is
     IStreamPrimarySaleSettlement,
     IStreamNativePrimarySaleSettlement,
+    IStreamNativePublicPrimarySaleSettlement,
     IStreamDeferredNativePrimarySaleSettlement,
     IStreamPreparedNativePrimarySaleSettlement,
     IStreamPreparedNativeContentSettlement,
@@ -142,6 +144,7 @@ contract StreamPrimarySaleSettlement is
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamPrimarySaleSettlement).interfaceId
             || id == type(IStreamNativePrimarySaleSettlement).interfaceId
+            || id == type(IStreamNativePublicPrimarySaleSettlement).interfaceId
             || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativeContentSettlement).interfaceId
@@ -217,6 +220,25 @@ contract StreamPrimarySaleSettlement is
         returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
         return StreamNativePrimaryRecording.settleNative(
+            _nativeRecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            candidate
+        );
+    }
+
+    function settleNativePublicPrimarySaleFromAdapter(
+        StreamNativeSettlementTypes.NativeSettlementCandidate calldata candidate
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamNativePrimaryRecording.settlePublicNative(
             _nativeRecordingContext(),
             settlementConsumed,
             _results,

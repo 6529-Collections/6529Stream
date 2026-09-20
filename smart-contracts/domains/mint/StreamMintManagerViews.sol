@@ -14,6 +14,7 @@ import "../../interfaces/stream/mint/IStreamPreparedNativeOfferMint.sol";
 import "../../interfaces/stream/mint/IStreamPreparedNativeRightsMint.sol";
 import "../../interfaces/stream/mint/IStreamERC20OfferMint.sol";
 import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol";
+import "../../interfaces/stream/mint/IStreamMintImmediateSaleAuthorizationRevocation.sol";
 import "../../interfaces/stream/mint/IStreamMintAuthorizationRevocation.sol";
 import "../../interfaces/stream/mint/IStreamMintManagerImport.sol";
 import "../../interfaces/stream/mint/IStreamMintPolicyGrace.sol";
@@ -32,6 +33,7 @@ library StreamMintManagerViews {
             || interfaceId == type(IStreamPreparedNativeOfferMint).interfaceId
             || interfaceId == type(IStreamERC20OfferMint).interfaceId
             || interfaceId == type(IStreamMintSaleAuthorizationRevocation).interfaceId
+            || interfaceId == type(IStreamMintImmediateSaleAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId

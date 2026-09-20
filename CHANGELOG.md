@@ -40,6 +40,19 @@ the release policy in `docs/release-policy.md`.
   147,146 dependency-frame gas; complete current-graph acceptance remains separate.
   All82 concrete native-closure products fit, with both256-input fuzz oracles passing.
 
+## Canonical signed and public native immediate sales
+
+- Add a separate fixed/open adapter for the original 24-field Sales v1
+  authorization and public mode with zero seller digest. Preserve existing sale
+  domains and route payment through the official native recorder and floor.
+- Bind single-token caller-funded execution, configured signer membership,
+  Artist consent, strict primary rights and original Merkle price proofs to the
+  actual Manager/Ledger. Retain atomic callback checks and payer reveal credits.
+- Add a typed public recorder entry and historical full-payload Manager
+  revocation against the same Ledger ID. Author focused rollback, replay, Safe
+  and malformed-return regressions; current-stack and release acceptance remain
+  separate from source validation.
+
 ## Bounded repeated Artist selection for original Metadata
 
 - Authenticate repeated Artist ancestry through one governed read frame and an

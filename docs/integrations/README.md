@@ -32,6 +32,7 @@ deployment evidence.
 | Split primary revenue among the artist, sale poster and accepted collaborators | [Dynamic primary templates](../dynamic-primary-template-commerce.md) |
 | Elect and authorize royalties frozen at each prepared mint | [Artist snapshot consent](../artist-snapshot-royalty-consent.md) and [prepared snapshot decision](../adr/0044-prepared-royalty-snapshot-consent.md) |
 | Record artist approval of exact sale terms | [Sale-parameter consent](sale-parameter-consent.md) |
+| Execute canonical signed or public native fixed/open sales | [Canonical immediate sales](native-immediate-sales.md) |
 | Integrate the new native/ERC-20 funding boundary | [Sale funding](sale-funding.md) |
 | Prepare a token and settle its native payment atomically | [Prepared native settlement](prepared-native-settlement.md) |
 | Accept a signed native offer for a new token or selected work | [Native primary offers](native-primary-offers.md) |

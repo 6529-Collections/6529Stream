@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/mint/IStreamMintAuthorizationRevocation.sol";
 import "../../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../../interfaces/stream/mint/IStreamMintLedgerRevocation.sol";
+import "../../interfaces/stream/mint/IStreamImmediateSaleAuthorizationBinding.sol";
 import "./StreamMintTicketHash.sol";
 import "./StreamPrivateSaleHash.sol";
 
@@ -114,6 +115,64 @@ library StreamMintRevocation {
         _authorizer(c, signer, kind, id, StreamPrivateSaleHash.domain(block.chainid, adapter), signature);
         _void(c.ledger, id);
         emit MintAuthorizationVoided(1, collection, phase, id, signer, adapter, 2);
+    }
+
+    function voidImmediateSaleAuthorization(
+        Context memory c,
+        StreamPrivateSaleTypes.SaleAuthorization calldata authorization,
+        address claimedAuthorizer,
+        uint8 kind,
+        bytes calldata signature
+    ) public returns (bytes32 id) {
+        if (
+            authorization.chainId != block.chainid || authorization.mintManager != address(this)
+                || authorization.saleAdapter == address(0) || authorization.saleId == 0
+                || authorization.collectionId == 0 || authorization.phaseId == 0
+                || authorization.saleKind > 1
+                || authorization.revenueClass != keccak256("PRIMARY_SALE")
+                || claimedAuthorizer == address(0)
+        ) revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();
+        if (kind != 1 && kind != 2) {
+            revert IStreamMintAuthorizationRevocation.MintRevocationUnsupportedKind(kind);
+        }
+
+        // Copy only the fixed historical record. Decode words before narrowing so malformed
+        // addresses and uint8 values fail with the same explicit binding error.
+        address adapter = authorization.saleAdapter;
+        bytes memory data = abi.encodeCall(
+            IStreamImmediateSaleAuthorizationBinding.immediateSaleAuthorizationBinding,
+            (authorization.saleId)
+        );
+        bytes memory raw = new bytes(224);
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(gas(), adapter, add(data, 32), mload(data), add(raw, 32), 224)
+            size := returndatasize()
+        }
+        if (!ok || size != 224) {
+            revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();
+        }
+        uint256[7] memory binding = abi.decode(raw, (uint256[7]));
+        if (
+            binding[0] != authorization.collectionId || bytes32(binding[1]) != authorization.phaseId
+                || binding[2] != authorization.saleKind || binding[3] != 1 || binding[4] == 0
+                || binding[5] != uint256(uint160(claimedAuthorizer)) || binding[6] != kind
+        ) revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();
+
+        id = saleAuthorizationId(authorization);
+        _authorizer(
+            c,
+            claimedAuthorizer,
+            kind,
+            id,
+            StreamPrivateSaleHash.domain(block.chainid, adapter),
+            signature
+        );
+        _void(c.ledger, id);
+        emit MintAuthorizationVoided(
+            1, authorization.collectionId, authorization.phaseId, id, claimedAuthorizer, adapter, 2
+        );
     }
 
     function voidOffer(
