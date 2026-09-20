@@ -11,6 +11,19 @@ the release policy in `docs/release-policy.md`.
 - Preserve production behavior and existing typed-suite evidence. The new
   current-stack cases require combined native execution; ABI/source checks do
   not establish a runtime or complete finality acceptance result.
+
+## Recovered attestation fixed-worker capacity
+
+- Move complete original attestation validation and source collection/head checks
+  into fixed typed workers. Preserve original nominal bundles, six library entry
+  points, original errors, and all import maps/Credentials/Summary mutation order.
+- Measure the original worker at 23,421 runtime bytes, down from the retained
+  34,120-byte baseline; collection and validation workers also fit. Final source
+  differs from that size capture only by the retained error ABI declaration.
+- Verify 207-source ABI and exact original ABI/nominal selector compatibility.
+  Reuse the unchanged 19-case attestation suite; scoped native and complete
+  seven-owner/current-graph gas acceptance remain pending.
+
 ## Same-leaf ERC20 price carrier
 
 - Add a dedicated signed one-token price carrier using the original Manager's
