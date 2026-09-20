@@ -42,6 +42,129 @@ library StreamArtistRecoveryFamilyAncestry {
         bytes32 proof;
     }
 
+    /// @notice Complete original chain for explicit V2 adjudication, including earlier35s.
+    /// @dev The final zero tuple is an internal authority boundary, never a declared vesting.
+    /// The caller authenticates each non32 source and all cause/closure/staging history.
+    function readComplete(
+        RecoveryState.State storage recovery,
+        Rotations.State storage rotations,
+        Hashes.Environment memory e,
+        D.Cause memory current,
+        uint64 terminalBefore
+    ) public view returns (Facts memory f) {
+        bytes32 artistId = current.facts.artistId;
+        bytes32 head = rotations.latestExecution[artistId];
+        if (
+            e.chainId != block.chainid || e.registry == address(0) || artistId == 0
+                || (current.facts.authorityClass != 1 && current.facts.authorityClass != 3)
+                || current.facts.incumbent == address(0)
+                || current.facts.executedTransitionHash != head
+                || recovery.vestingHistory.latest[artistId] != head || terminalBefore == 0
+                || terminalBefore > current.facts.enteredAt
+                || current.facts.enteredAt > block.timestamp
+        ) revert I.UnsupportedIdentityRecoveryProfile(artistId);
+        uint256 count = 1;
+        bytes32 cursor = head;
+        uint64 revision;
+        while (cursor != 0) {
+            V.Snapshot memory v = recovery.vestingHistory.snapshots[cursor];
+            if (
+                v.transitionRecordHash != cursor || v.artistId != artistId || v.ownerRevision == 0
+                    || (revision != 0 && v.ownerRevision >= revision)
+            ) {
+                revert I.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+            revision = v.ownerRevision;
+            cursor = v.previousTransitionRecordHash;
+            ++count;
+        }
+        f.members = new Member[](count);
+        cursor = head;
+        address incumbent = current.facts.incumbent;
+        uint8 authorityClass = current.facts.authorityClass;
+        uint64 before_ = terminalBefore;
+        bytes32 proof;
+        for (uint256 i; i < count; ++i) {
+            Member memory m;
+            bytes32 source;
+            if (cursor == 0) {
+                V.Snapshot memory emptyV;
+                R.TransitionState memory emptyT;
+                if (
+                    authorityClass != 1 || (recovery.latest[artistId] != 0 && i == 0)
+                        || keccak256(abi.encode(recovery.vestingHistory.snapshots[bytes32(0)]))
+                            != keccak256(abi.encode(emptyV))
+                        || keccak256(
+                                abi.encode(
+                                    IStreamArtistRotationReads(address(this))
+                                        .artistTransitionState(0)
+                                )
+                            ) != keccak256(abi.encode(emptyT))
+                ) {
+                    revert I.UnsupportedIdentityRecoveryProfile(artistId);
+                }
+                m.incumbent = incumbent;
+            } else {
+                V.Snapshot memory v = recovery.vestingHistory.snapshots[cursor];
+                if (v.operationId == 32) {
+                    (m, source) = _rotation(recovery, rotations, e, artistId, cursor);
+                } else {
+                    R.TransitionState memory t =
+                        IStreamArtistRotationReads(address(this)).artistTransitionState(cursor);
+                    _anchor(recovery, e, v, t, artistId);
+                    m.vesting = v;
+                    m.transition = t;
+                    m.incumbent = v.newAddress;
+                    source = keccak256(abi.encode(v, t));
+                }
+                if (
+                    v.authorityClass != authorityClass || m.incumbent != incumbent
+                        || m.transition.executedAt > before_
+                        || (i == 0 && rotations.retirement[artistId][v.oldAddress] != head)
+                ) {
+                    revert I.UnsupportedIdentityRecoveryProfile(artistId);
+                }
+                if (v.operationId == 40 || v.operationId == 43) authorityClass = 1;
+                bytes32 parentHash = v.previousTransitionRecordHash;
+                if (parentHash != 0) {
+                    V.Snapshot memory parent = recovery.vestingHistory.snapshots[parentHash];
+                    _snapshot(recovery, e, parent, artistId);
+                    if (
+                        parent.transitionRecordHash != parentHash
+                            || parent.commitment != v.previousCommitment
+                            || parent.authorityClass != authorityClass
+                            || parent.newAddress != v.oldAddress
+                            || parent.ownerRevision >= v.ownerRevision
+                            || parent.executedAt > m.transition.stagedAt
+                            || parent.guardians.count > v.guardians.count
+                            || parent.guardians.ownerRevision > v.guardians.ownerRevision
+                    ) {
+                        revert I.UnsupportedIdentityRecoveryProfile(artistId);
+                    }
+                } else if (v.previousCommitment != 0 || authorityClass != 1) {
+                    revert I.UnsupportedIdentityRecoveryProfile(artistId);
+                }
+                cursor = parentHash;
+                incumbent = v.oldAddress;
+            }
+            m.before = before_;
+            f.members[i] = m;
+            proof = keccak256(abi.encode(proof, source, m));
+            before_ = m.vesting.operationId == 43 ? m.transition.executedAt : m.transition.stagedAt;
+        }
+        f.proof = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_RECOVERY_COMPLETE_ANCESTRY_V2"),
+                e.chainId,
+                e.registry,
+                address(this),
+                current,
+                terminalBefore,
+                proof
+            )
+        );
+    }
+
     function read(
         RecoveryState.State storage recovery,
         Rotations.State storage rotations,

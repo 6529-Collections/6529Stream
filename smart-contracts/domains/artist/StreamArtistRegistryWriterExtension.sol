@@ -64,6 +64,9 @@ import {
 import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
+import {
+    IStreamArtistIdentityRecoveryCoordinatorV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import {
@@ -221,6 +224,28 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistSaleCoordinator(operationCoordinator)
             .coordinateRecordSaleConsent(msg.sender, p, a);
+    }
+
+    function registerIdentityRecoveryActionV2(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistIdentityRecoveryCoordinatorV2(operationCoordinator)
+            .coordinateRegisterIdentityRecoveryActionV2(
+                msg.sender, actionId, calls, p, a, manifestHash
+            );
+    }
+
+    function recoverArtistIdentityV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistIdentityRecoveryCoordinatorV2(operationCoordinator)
+            .coordinateRecoverArtistIdentityV2(msg.sender, p, a, manifestHash);
     }
 
     function registerIdentityRecoveryAction(

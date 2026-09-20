@@ -232,6 +232,36 @@ library StreamArtistIdentityRecoveryState {
         bytes32 reason,
         bool scheduled
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _veto(s, replay, o, c, artistId, expectedAction, reason, scheduled, false, false);
+    }
+
+    /// @dev Fixed V2 child authenticates retained membership from its completed pinned scan.
+    function vetoWithRetainedMembership(
+        State storage s,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        bytes32 expectedAction,
+        bytes32 reason,
+        bool scheduled,
+        bool retained
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _veto(s, replay, o, c, artistId, expectedAction, reason, scheduled, true, retained);
+    }
+
+    function _veto(
+        State storage s,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        bytes32 expectedAction,
+        bytes32 reason,
+        bool scheduled,
+        bool adjudicated,
+        bool retained
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         A.Association storage a = s.actions[s.pendingAction[artistId]];
         if (
             c.operationId != 34 || a.associationHash == bytes32(0) || a.artistId != artistId
@@ -240,18 +270,20 @@ library StreamArtistIdentityRecoveryState {
                 || s.actionExecutions[expectedAction] != bytes32(0) || block.timestamp == 0
                 || block.timestamp > type(uint64).max
         ) revert A.InvalidRecoveryAction(expectedAction);
-        bool eligible = s.guardianSupersession.plans[expectedAction].associationHash == 0
-            ? GuardianHistory.member(
-                s.guardianHistory, expectedAction, a.associationHash, artistId, c.actor
-            )
-            : GuardianSupersession.member(
-                s.guardianSupersession,
-                s.guardianHistory,
-                artistId,
-                expectedAction,
-                a.associationHash,
-                c.actor
-            );
+        bool eligible = adjudicated
+            ? retained
+            : s.guardianSupersession.plans[expectedAction].associationHash == 0
+                ? GuardianHistory.member(
+                    s.guardianHistory, expectedAction, a.associationHash, artistId, c.actor
+                )
+                : GuardianSupersession.member(
+                    s.guardianSupersession,
+                    s.guardianHistory,
+                    artistId,
+                    expectedAction,
+                    a.associationHash,
+                    c.actor
+                );
         if (!eligible) {
             revert A.InvalidRecoveryGuardian(c.actor);
         }

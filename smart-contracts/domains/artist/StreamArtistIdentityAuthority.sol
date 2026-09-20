@@ -78,6 +78,19 @@ import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import "./StreamArtistIdentityExtensionDeployment.sol";
 import "./StreamArtistEstateExtensionDeployment.sol";
 import "./StreamArtistRecoveryExtensionDeployment.sol";
+import {
+    StreamArtistAdjudicationExtensionDeployment
+} from "./StreamArtistAdjudicationExtensionDeployment.sol";
+import {
+    StreamArtistIdentityAdjudicationExtension
+} from "./StreamArtistIdentityAdjudicationExtension.sol";
+import { StreamArtistRecoveryAdjudicationReads } from "./StreamArtistRecoveryAdjudicationReads.sol";
+import {
+    StreamArtistRecoveryEvidenceTypes as RecoveryEvidence
+} from "../../interfaces/stream/artist/StreamArtistRecoveryEvidenceTypes.sol";
+import {
+    StreamArtistRecoverySelectionTypesV2 as RecoverySelectionV2
+} from "../../interfaces/stream/artist/StreamArtistRecoverySelectionTypesV2.sol";
 import "./StreamArtistIdentityDismissalState.sol";
 import "./StreamArtistIdentityCauseState.sol";
 import "./StreamArtistIdentityResolutionReads.sol";
@@ -132,6 +145,7 @@ contract StreamArtistIdentityAuthority is
     address public immutable identityWriterExtension;
     address public immutable identityEstateExtension;
     address public immutable identityRecoveryExtension;
+    address public immutable identityAdjudicationExtension;
 
     function authorityNonceWordAt(uint8 kind, bytes32 key, uint256 index)
         external
@@ -492,6 +506,9 @@ contract StreamArtistIdentityAuthority is
         bytes32 reasonHash,
         bool scheduled
     ) external {
+        if (_recoveryAdjudication.actions[actionId].manifestHash != 0) {
+            _forwardAdjudicationWriter();
+        }
         _forwardRecoveryWriter();
     }
 
@@ -510,6 +527,98 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a
     ) external view returns (IdentityRecovery.Context memory) {
         _forwardIdentityRead();
+    }
+
+    function recoveryEvidenceBinding() external view returns (address, bytes32) {
+        return StreamArtistIdentityAdjudicationExtension(identityAdjudicationExtension)
+            .recoveryEvidenceBinding();
+    }
+
+    function recoverySelectionPreparationBinding() external view returns (address, bytes32) {
+        return StreamArtistIdentityAdjudicationExtension(identityAdjudicationExtension)
+            .recoverySelectionPreparationBinding();
+    }
+
+    function identityRecoveryContextV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardAdjudicationRead();
+    }
+
+    function guardianRecoveryAuthorityRoleV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view returns (bytes32) {
+        _forwardAdjudicationRead();
+    }
+
+    function identityRecoveryEvidenceState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RecoveryEvidence.EvidenceStateV2 memory)
+    {
+        _forwardAdjudicationRead();
+    }
+
+    function recoverySelectionBasisV2(bytes32 manifestHash)
+        external
+        view
+        returns (RecoverySelectionV2.Basis memory)
+    {
+        _forwardAdjudicationRead();
+    }
+
+    function prepareIdentityRecoveryActionV2(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        RecoveryAction.Witness calldata witness,
+        bytes32 previousAssociation,
+        bool previousTerminal,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardAdjudicationWriter();
+    }
+
+    function recoverIdentityV2(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        Contest.GovernanceWitness calldata governance,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardAdjudicationWriter();
+    }
+
+    function _forwardAdjudicationRead() private view {
+        _returnResolution(
+            StreamArtistRecoveryAdjudicationReads.read(
+                _identityRecovery,
+                _recoveryAdjudication,
+                _identity,
+                _rotations,
+                _resolutions,
+                _estate,
+                _ownerContext(),
+                msg.data
+            )
+        );
+    }
+
+    function _forwardAdjudicationWriter() private {
+        address target = identityAdjudicationExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := delegatecall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
     }
 
     function identityRecoveryRecord(bytes32 record)
@@ -875,6 +984,9 @@ contract StreamArtistIdentityAuthority is
         identityWriterExtension = extensions_[0];
         identityEstateExtension = extensions_[1];
         identityRecoveryExtension = extensions_[2];
+        identityAdjudicationExtension = StreamArtistAdjudicationExtensionDeployment.deploy(
+            address(this), registry_, coordinator_, archive_, core_, manager_
+        );
     }
 
     function setGuardians(

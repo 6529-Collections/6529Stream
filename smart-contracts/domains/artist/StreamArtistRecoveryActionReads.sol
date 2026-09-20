@@ -15,6 +15,9 @@ import {
     IStreamArtistIdentityRecovery
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import {
+    IStreamArtistIdentityRecoveryV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
+import {
     IStreamGovernanceActionFacts
 } from "../../interfaces/stream/governance/IStreamGovernanceActionFacts.sol";
 import {
@@ -40,7 +43,7 @@ library StreamArtistRecoveryActionReads {
         T.Authorization memory acceptance,
         R.Context memory context
     ) public view returns (A.Witness memory w) {
-        return _prepare(e, actionId, calls, request, acceptance, context, false);
+        return _prepare(e, actionId, calls, request, acceptance, context, false, bytes32(0));
     }
 
     function prepareAppeal(
@@ -51,7 +54,22 @@ library StreamArtistRecoveryActionReads {
         T.Authorization memory acceptance,
         R.Context memory context
     ) public view returns (A.Witness memory w) {
-        return _prepare(e, actionId, calls, request, acceptance, context, true);
+        return _prepare(e, actionId, calls, request, acceptance, context, true, bytes32(0));
+    }
+
+    /// @notice Exact additive selector/calldata authentication; zero never selects V1 implicitly.
+    function prepareV2(
+        A.Environment memory e,
+        bytes32 actionId,
+        GovernanceCall[] memory calls,
+        R.Request memory request,
+        T.Authorization memory acceptance,
+        R.Context memory context,
+        bool appeal,
+        bytes32 manifestHash
+    ) public view returns (A.Witness memory w) {
+        if (manifestHash == bytes32(0)) revert A.InvalidRecoveryAction(actionId);
+        return _prepare(e, actionId, calls, request, acceptance, context, appeal, manifestHash);
     }
 
     function _prepare(
@@ -61,7 +79,8 @@ library StreamArtistRecoveryActionReads {
         R.Request memory request,
         T.Authorization memory acceptance,
         R.Context memory context,
-        bool appeal
+        bool appeal,
+        bytes32 manifestHash
     ) private view returns (A.Witness memory w) {
         _pin(e.executor, e.executorCodeHash);
         if (e.registry.code.length == 0 || e.roles.code.length == 0) {
@@ -88,12 +107,23 @@ library StreamArtistRecoveryActionReads {
         w.actionId = actionId;
         w.callsHash = keccak256(abi.encode(CALLS, calls));
         if (w.callsHash != facts.callHash) revert A.InvalidRecoveryAction(actionId);
-        bytes4 selector = IStreamArtistIdentityRecovery.recoverArtistIdentity.selector;
-        w.callDataHash = keccak256(
-            abi.encodeCall(
-                IStreamArtistIdentityRecovery.recoverArtistIdentity, (request, acceptance)
-            )
-        );
+        bytes4 selector;
+        if (manifestHash == bytes32(0)) {
+            selector = IStreamArtistIdentityRecovery.recoverArtistIdentity.selector;
+            w.callDataHash = keccak256(
+                abi.encodeCall(
+                    IStreamArtistIdentityRecovery.recoverArtistIdentity, (request, acceptance)
+                )
+            );
+        } else {
+            selector = IStreamArtistIdentityRecoveryV2.recoverArtistIdentityV2.selector;
+            w.callDataHash = keccak256(
+                abi.encodeCall(
+                    IStreamArtistIdentityRecoveryV2.recoverArtistIdentityV2,
+                    (request, acceptance, manifestHash)
+                )
+            );
+        }
         uint256 matches;
         for (uint256 i; i < calls.length; ++i) {
             GovernanceCall memory call_ = calls[i];

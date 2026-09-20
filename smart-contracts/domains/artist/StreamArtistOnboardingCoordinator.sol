@@ -66,6 +66,9 @@ import { GovernanceCall } from "../../interfaces/stream/governance/StreamGoverna
 import "./StreamArtistIdentityDismissalOperations.sol";
 import "./StreamArtistIdentityRecoveryOperations.sol";
 import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
+import {
+    StreamArtistRecoveryAdjudicationOperations
+} from "./StreamArtistRecoveryAdjudicationOperations.sol";
 import "./StreamArtistUnavailabilityOperations.sol";
 import "./StreamArtistEntropyUnavailabilityOperations.sol";
 import "./StreamArtistRecoveryApprovalOperations.sol";
@@ -552,6 +555,28 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRegisterIdentityRecoveryActionV2(
+        address actor,
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external operation returns (bytes32) {
+        return StreamArtistRecoveryAdjudicationOperations.prepare(_economicContext(), msg.data);
+    }
+
+    function coordinateRecoverArtistIdentityV2(
+        address actor,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external operation returns (bytes32) {
+        return StreamArtistRecoveryAdjudicationOperations.recover(
+            _economicContext(), actor, p, a, manifestHash
+        );
     }
 
     function coordinateRegisterIdentityRecoveryAction(

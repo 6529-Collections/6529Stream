@@ -81,14 +81,47 @@ library StreamArtistLivingRecoveryReads {
         f.transition = IStreamArtistRotationReads(owner).artistTransitionState(recordHash);
         f.vesting = IStreamArtistGuardianVestingHistory(owner)
             .guardianVestingSnapshot(artistId, recordHash);
-        _record(e, artistId, recordHash, f);
-        f.proof = _admission(e, f);
+        _record(e, artistId, recordHash, f, false);
+        f.proof = _admission(e, f, false);
     }
 
-    function _record(Environment memory e, bytes32 artistId, bytes32 recordHash, Facts memory f)
-        private
-        pure
-    {
+    /// @notice Original admitted class1 or class3 operation35 for complete V2 ancestry.
+    /// @dev Current authority and cause/closure eligibility remain caller-owned.
+    function readFamily(
+        address owner,
+        address registry,
+        uint256 chainId,
+        bytes32 artistId,
+        bytes32 recordHash
+    ) public view returns (Facts memory f) {
+        if (
+            chainId != block.chainid || owner.code.length == 0 || registry == address(0)
+                || artistId == 0 || recordHash == 0
+                || IStreamArtistOwner(owner).deploymentChainId() != chainId
+                || IStreamArtistOwner(owner).artistRegistry() != registry
+        ) {
+            revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+        Environment memory e = Environment(owner, registry, chainId);
+        f.record = IStreamArtistIdentityRecoveryOwner(owner).identityRecoveryRecord(recordHash);
+        f.transition = IStreamArtistRotationReads(owner).artistTransitionState(recordHash);
+        f.vesting = IStreamArtistGuardianVestingHistory(owner)
+            .guardianVestingSnapshot(artistId, recordHash);
+        _record(e, artistId, recordHash, f, true);
+        f.proof = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ADMITTED_RECOVERY_FAMILY_V2"), _admission(e, f, true)
+            )
+        );
+    }
+
+    function _record(
+        Environment memory e,
+        bytes32 artistId,
+        bytes32 recordHash,
+        Facts memory f,
+        bool family
+    ) private pure {
         IdentityRecovery.Record memory r = f.record;
         R.TransitionState memory t = f.transition;
         V.Snapshot memory v = f.vesting;
@@ -97,10 +130,12 @@ library StreamArtistLivingRecoveryReads {
                 || Hashes.record(e.chainId, e.registry, r.fields) != recordHash
                 || r.fields.artistId != artistId || r.fields.oldAddress == address(0)
                 || r.fields.newAddress == address(0) || r.fields.oldAddress == r.fields.newAddress
-                || r.fields.vestedAuthorityClass != 1 || r.fields.recoveredAt == 0
+                || (r.fields.vestedAuthorityClass != 1
+                    && (!family || r.fields.vestedAuthorityClass != 3)) || r.fields.recoveredAt == 0
                 || r.fields.governanceActionId == 0 || r.fields.evidenceHash == 0
                 || r.fields.reasonHash == 0 || r.terms.artistId != artistId
-                || r.terms.newAddress != r.fields.newAddress || r.terms.vestedAuthorityClass != 1
+                || r.terms.newAddress != r.fields.newAddress
+                || r.terms.vestedAuthorityClass != r.fields.vestedAuthorityClass
                 || r.terms.expectedCauseHash == 0 || r.terms.evidenceHash != r.fields.evidenceHash
                 || r.terms.reasonHash != r.fields.reasonHash
                 || Hashes.supersession(r.terms.supersededRecordHashes)
@@ -115,14 +150,19 @@ library StreamArtistLivingRecoveryReads {
                 || uint256(t.postWindowEndsAt) != uint256(t.executedAt) + r.postContestSeconds
                 || (t.contestedAt != 0 && t.contestedAt < t.executedAt) || v.artistId != artistId
                 || v.transitionRecordHash != recordHash || v.operationId != 35
-                || v.authorityClass != 1 || v.oldAddress != r.fields.oldAddress
-                || v.newAddress != r.fields.newAddress || v.executedAt != t.executedAt
-                || v.ownerRevision == 0 || v.ownerRevision <= v.guardians.ownerRevision
-                || v.commitment == 0 || v.commitment != _vestingHash(e, v)
+                || v.authorityClass != r.fields.vestedAuthorityClass
+                || v.oldAddress != r.fields.oldAddress || v.newAddress != r.fields.newAddress
+                || v.executedAt != t.executedAt || v.ownerRevision == 0
+                || v.ownerRevision <= v.guardians.ownerRevision || v.commitment == 0
+                || v.commitment != _vestingHash(e, v)
         ) revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
     }
 
-    function _admission(Environment memory e, Facts memory f) private view returns (bytes32) {
+    function _admission(Environment memory e, Facts memory f, bool family)
+        private
+        view
+        returns (bytes32)
+    {
         bytes32 artistId = f.record.fields.artistId;
         bytes32 action = f.record.fields.governanceActionId;
         Admission memory admitted;
@@ -131,7 +171,7 @@ library StreamArtistLivingRecoveryReads {
         (admitted.association,, executed, actualCount) =
             IStreamArtistRecoveryActionOwner(e.owner).identityRecoveryActionState(artistId, action);
         admitted.frozen = _prefix(e, f.vesting, action, actualCount);
-        admitted.parent = _parent(e, f.vesting, actualCount);
+        admitted.parent = _parent(e, f.vesting, actualCount, family);
         address oldAddress;
         uint64 tail;
         (oldAddress, admitted.guardian, tail) = IStreamArtistIdentityRecoveryOwner(e.owner)
@@ -178,7 +218,7 @@ library StreamArtistLivingRecoveryReads {
         );
     }
 
-    function _parent(Environment memory e, V.Snapshot memory v, uint64 actualCount)
+    function _parent(Environment memory e, V.Snapshot memory v, uint64 actualCount, bool family)
         private
         view
         returns (V.Snapshot memory parent)
@@ -195,8 +235,11 @@ library StreamArtistLivingRecoveryReads {
             parent.artistId != v.artistId
                 || parent.transitionRecordHash != v.previousTransitionRecordHash
                 || parent.commitment == 0 || parent.commitment != v.previousCommitment
-                || parent.commitment != _vestingHash(e, parent) || parent.authorityClass != 1
-                || (parent.operationId != 32 && parent.operationId != 35)
+                || parent.commitment != _vestingHash(e, parent)
+                || parent.authorityClass != v.authorityClass
+                || (parent.operationId != 32
+                    && parent.operationId != 35
+                    && (!family || (parent.operationId != 40 && parent.operationId != 43)))
                 || parent.oldAddress == address(0) || parent.newAddress != v.oldAddress
                 || parent.oldAddress == parent.newAddress || parent.executedAt == 0
                 || parent.executedAt > v.executedAt || parent.ownerRevision == 0

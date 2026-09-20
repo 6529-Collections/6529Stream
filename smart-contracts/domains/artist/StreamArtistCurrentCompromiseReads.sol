@@ -104,6 +104,30 @@ library StreamArtistCurrentCompromiseReads {
         D.Cause memory current,
         R.TransitionState memory executed
     ) public view returns (Facts memory f) {
+        return _readFamily(owner, registry, chainId, current, executed, true);
+    }
+
+    /// @notice Original cause consumed by a caller-authenticated admitted operation35.
+    /// @dev The caller must prove that recovery's native consumption replay. No live head is
+    /// substituted for the original captured execution or pending transition.
+    function readConsumed(
+        address owner,
+        address registry,
+        uint256 chainId,
+        D.Cause memory current,
+        R.TransitionState memory executed
+    ) public view returns (Facts memory f) {
+        return _readFamily(owner, registry, chainId, current, executed, false);
+    }
+
+    function _readFamily(
+        address owner,
+        address registry,
+        uint256 chainId,
+        D.Cause memory current,
+        R.TransitionState memory executed,
+        bool live
+    ) private view returns (Facts memory f) {
         bytes32 artistId = current.facts.artistId;
         if (
             owner.code.length == 0 || registry == address(0) || chainId != block.chainid
@@ -111,7 +135,7 @@ library StreamArtistCurrentCompromiseReads {
                 || IStreamArtistOwner(owner).artistRegistry() != registry
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         Environment memory e = Environment(owner, registry, chainId);
-        _familyCause(e, current, executed);
+        _familyCause(e, current, executed, live);
         bytes32 subject;
         bytes32 standing;
         bytes32 estateProof;
@@ -128,9 +152,11 @@ library StreamArtistCurrentCompromiseReads {
                     .rotationRecord(current.facts.pendingTransitionHash)
                     .recordHash != 0
             ) {
-                f.pending = _pendingRecord(e, current, executed, f.contest, current.facts.kind == 1);
+                f.pending = _pendingRecord(
+                    e, current, executed, f.contest, current.facts.kind == 1, live
+                );
             } else {
-                estateProof = _pendingEstate(e, current, executed, f.contest);
+                estateProof = _pendingEstate(e, current, executed, f.contest, live);
             }
         }
         f.proof = keccak256(
@@ -164,7 +190,8 @@ library StreamArtistCurrentCompromiseReads {
         Environment memory e,
         D.Cause memory current,
         R.TransitionState memory executed,
-        C.Record memory contest
+        C.Record memory contest,
+        bool live
     ) private view returns (bytes32) {
         bytes32 artistId = current.facts.artistId;
         bytes32 hash = current.facts.pendingTransitionHash;
@@ -186,16 +213,23 @@ library StreamArtistCurrentCompromiseReads {
         R.RotationRecord memory emptyRotation;
         if (
             hash == executed.recordHash
-                || IStreamArtistRotationReads(e.owner).lastArtistTransition(artistId) != hash
+                || (live
+                    && IStreamArtistRotationReads(e.owner).lastArtistTransition(artistId) != hash)
                 || estate.request.incumbent != current.facts.incumbent
                 || estate.request.requestedAt < executed.executedAt
                 || estate.request.requestedAt > current.facts.enteredAt
                 || estate.transition.contestedAt != current.facts.enteredAt
                 || estate.cancellationReplay.touchedRevision != revision
                 || contest.capturedGuardianSetRecordHash != estate.request.guardianRecordHash
-                || successor != address(0) || noticeEndsAt != 0 || activation != 0
-                || old_ != address(0) || new_ != address(0) || ends != 0 || approvals != 0
-                || pending != 0
+                || (live
+                    && (successor != address(0)
+                        || noticeEndsAt != 0
+                        || activation != 0
+                        || old_ != address(0)
+                        || new_ != address(0)
+                        || ends != 0
+                        || approvals != 0
+                        || pending != 0))
                 || keccak256(abi.encode(closed)) != keccak256(abi.encode(emptyClosure))
                 || keccak256(abi.encode(IStreamArtistRotationReads(e.owner).rotationRecord(hash)))
                     != keccak256(abi.encode(emptyRotation))
@@ -206,7 +240,8 @@ library StreamArtistCurrentCompromiseReads {
     function _familyCause(
         Environment memory e,
         D.Cause memory current,
-        R.TransitionState memory executed
+        R.TransitionState memory executed,
+        bool live
     ) private view {
         D.CauseFacts memory c = current.facts;
         if (
@@ -229,13 +264,14 @@ library StreamArtistCurrentCompromiseReads {
                             c
                         )
                     )
-                || keccak256(abi.encode(current))
-                    != keccak256(
-                        abi.encode(
-                            IStreamArtistIdentityDismissalOwner(e.owner)
-                                .currentIdentityContestCause(c.artistId)
-                        )
-                    )
+                || (live
+                    && keccak256(abi.encode(current))
+                        != keccak256(
+                            abi.encode(
+                                IStreamArtistIdentityDismissalOwner(e.owner)
+                                    .currentIdentityContestCause(c.artistId)
+                            )
+                        ))
                 || keccak256(abi.encode(current))
                     != keccak256(
                         abi.encode(
@@ -452,7 +488,7 @@ library StreamArtistCurrentCompromiseReads {
         R.TransitionState memory executed,
         C.Record memory contest
     ) private view returns (R.RotationRecord memory r) {
-        return _pendingRecord(e, current, executed, contest, true);
+        return _pendingRecord(e, current, executed, contest, true, true);
     }
 
     function _pendingRecord(
@@ -460,7 +496,8 @@ library StreamArtistCurrentCompromiseReads {
         D.Cause memory current,
         R.TransitionState memory executed,
         C.Record memory contest,
-        bool hasContest
+        bool hasContest,
+        bool live
     ) private view returns (R.RotationRecord memory r) {
         bytes32 hash = current.facts.pendingTransitionHash;
         bytes32 artistId = current.facts.artistId;
@@ -475,9 +512,13 @@ library StreamArtistCurrentCompromiseReads {
         original.registry = e.registry;
         if (
             hash == executed.recordHash || r.recordHash != hash || r.terms.artistId != artistId
-                || IStreamArtistRotationReads(e.owner).lastArtistTransition(artistId) != hash
-                || old_ != address(0) || new_ != address(0) || ends != 0 || approvals != 0
-                || pending != 0 || r.terms.oldAddress != current.facts.incumbent
+                || (live
+                    && (IStreamArtistRotationReads(e.owner).lastArtistTransition(artistId) != hash
+                        || old_ != address(0)
+                        || new_ != address(0)
+                        || ends != 0
+                        || approvals != 0
+                        || pending != 0)) || r.terms.oldAddress != current.facts.incumbent
                 || r.terms.newAddress == address(0) || r.terms.oldAddress == r.terms.newAddress
                 || r.transition.artistId != artistId || r.transition.recordHash != hash
                 || r.transition.phase != 3 || r.transition.executedAt != 0

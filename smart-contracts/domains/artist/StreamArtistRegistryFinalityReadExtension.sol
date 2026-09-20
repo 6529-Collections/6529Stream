@@ -18,6 +18,12 @@ import {
 import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
+import {
+    IStreamArtistIdentityRecoveryOwnerV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
+import {
+    StreamArtistRecoveryEvidenceTypes as RecoveryEvidence
+} from "../../interfaces/stream/artist/StreamArtistRecoveryEvidenceTypes.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistSanctionReads.sol";
@@ -325,6 +331,25 @@ contract StreamArtistRegistryFinalityReadExtension {
         returns (bytes32)
     {
         return StreamArtistContentHashes.freezeDigest(_environment(), p, a);
+    }
+
+    function identityRecoveryContextV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view onlyHost returns (IdentityRecovery.Context memory) {
+        return IStreamArtistIdentityRecoveryOwnerV2(_contentSuite().owners[2])
+            .identityRecoveryContextV2(p, a, manifestHash);
+    }
+
+    function identityRecoveryEvidenceState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        onlyHost
+        returns (RecoveryEvidence.EvidenceStateV2 memory)
+    {
+        return IStreamArtistIdentityRecoveryOwnerV2(_contentSuite().owners[2])
+            .identityRecoveryEvidenceState(artistId, actionId);
     }
 
     function identityRecoveryContext(

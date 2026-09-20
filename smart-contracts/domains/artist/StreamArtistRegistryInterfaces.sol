@@ -160,6 +160,9 @@ import {
     IStreamArtistIdentityRecovery
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import {
+    IStreamArtistIdentityRecoveryV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
+import {
     IStreamArtistWindows
 } from "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import { IStreamArtistDormancy } from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
@@ -236,6 +239,7 @@ library StreamArtistRegistryInterfaces {
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistIdentityRecovery).interfaceId
+            || id == type(IStreamArtistIdentityRecoveryV2).interfaceId
             || id == type(IStreamArtistWindows).interfaceId
             || type(IStreamArtistDormancy).interfaceId == id
             || type(IStreamArtistDormancyEvidence).interfaceId == id || type(SG).interfaceId == id

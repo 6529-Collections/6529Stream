@@ -51,6 +51,11 @@ the release policy in `docs/release-policy.md`.
   DISABLED/NOT_REQUIRED token registration, preserving the legacy ASYNC profile.
   Nonrandom consumer integrations and INSTANT support remain separate work;
   current-stack runtime acceptance is pending.
+- Add explicit evidence-bound Artist recovery V2 for original class1/class3
+  C1/C2 histories, earliest declared vesting cutoffs, hostile-guardian APPEAL
+  evidence and complete guardian selection, including authenticated empty results.
+  Preserve original recovery records and V1 entry points; native execution,
+  capacity and full current-stack validation remain pending.
 
 - Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
   plans; current tests are authored and coordinated execution remains pending.

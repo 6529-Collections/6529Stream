@@ -18,6 +18,7 @@ import "./StreamArtistNonceAvailability.sol";
 import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
 import { StreamArtistIdentityRecoveryState } from "./StreamArtistIdentityRecoveryState.sol";
+import { StreamArtistRecoveryAdjudicationState } from "./StreamArtistRecoveryAdjudicationState.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorIdentityState.sol";
 import "./StreamArtistAuthorizationState.sol";
@@ -57,6 +58,8 @@ abstract contract StreamArtistIdentityData {
     StreamArtistStewardSanctionState.State internal _stewardGrants;
     // Explicit additive operation59; original appointment records and prior roots stay fixed.
     StreamArtistStewardCapabilityState.State internal _stewardCapabilityGrants;
+    // Explicit V2 evidence/action coordinates; every prior owner/child field retains its slot.
+    StreamArtistRecoveryAdjudicationState.State internal _recoveryAdjudication;
 
     function _noteLiving(
         StreamArtistIdentityState.OwnerContext memory o,

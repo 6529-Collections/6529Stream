@@ -217,6 +217,40 @@ library StreamArtistRecoveryStagingHistory {
         );
     }
 
+    /// @notice Exact last staging head before an admitted35, including an unresolved captured P.
+    /// @dev A successful35 has two original native receipts. The caller separately proves its
+    /// complete source record, consumed cause and the eligibility of each historical stage.
+    function beforeRecovery(
+        address owner,
+        address registry,
+        uint256 chainId,
+        bytes32 artistId,
+        bytes32 recoveryHash
+    ) public view returns (Head memory h) {
+        Environment memory e = _environment(owner, registry, chainId, artistId);
+        Recovery.Record memory r =
+            IStreamArtistIdentityRecoveryOwner(owner).identityRecoveryRecord(recoveryHash);
+        _recovery(e, artistId, recoveryHash, r);
+        V.Snapshot memory v = IStreamArtistGuardianVestingHistory(owner)
+            .guardianVestingSnapshot(artistId, recoveryHash);
+        if (
+            v.operationId != 35 || v.transitionRecordHash != recoveryHash || v.artistId != artistId
+                || v.ownerRevision == 0 || v.ownerRevision > e.revision
+                || v.commitment != _vestingHash(e, v)
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+        h = _head(e, artistId, _select(e, artistId, recoveryHash, 35));
+        return _boundary(
+            e,
+            artistId,
+            h,
+            v.ownerRevision,
+            keccak256("6529STREAM_ARTIST_RECOVERY_ADJUDICATED_STAGE_PREDECESSOR_V2"),
+            keccak256(abi.encode(r, v))
+        );
+    }
+
     /// @notice Original unexecuted request and the owner's permanent cancellation replay.
     /// @dev There is no stored estate cancellation timestamp. Cancellation may share the next
     /// rotation stage's revision because its living-action hook runs before the stage mutation.

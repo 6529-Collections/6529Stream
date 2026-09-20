@@ -5,6 +5,11 @@ or estate request was cancelled before execution. This extends first living
 recovery and class3 recovery after original estate activation40 or designated
 dormancy43, and composes those histories with repeated35 and ordinary32.
 
+This guide describes the original recovery selectors. The explicit
+[recovery adjudication V2 API](artist-recovery-adjudication-v2.md) additionally
+supports evidence-declared guardian cutoffs, NONE, standing-veto supersession
+and early current compromise recovery while preserving these original paths.
+
 ## Supported combinations
 
 `E` is the actual executed authority head. `P` is an original rotation staged by

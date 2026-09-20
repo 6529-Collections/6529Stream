@@ -77,16 +77,7 @@ library StreamArtistIdentityRecoveryMutation {
         RecoveryState.Input memory i,
         Recovery.Context memory c
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
-        if (
-            i.action.operationId != 35 || i.action.actor != i.executor || i.executor == address(0)
-                || i.governance.actionClass != 2 || i.governance.actionId == bytes32(0)
-                || i.governance.proposer == address(0) || i.governance.roleRevision == 0
-                || i.governance.roleMutationHash == bytes32(0)
-                || i.governance.scopeHash != c.scopeHash
-                || i.governance.oldValueHash != c.oldValueHash
-                || i.governance.newValueHash != c.newValueHash || block.timestamp == 0
-                || block.timestamp > type(uint64).max
-        ) revert Recovery.InvalidIdentityRecoveryGovernance();
+        _governance(i, c);
         _requireAppealWitness(
             s,
             rotations,
@@ -97,6 +88,49 @@ library StreamArtistIdentityRecoveryMutation {
             i.governance.roleRevision
         );
         bytes32 guardian = _requirePrepared(s, rotations, i, c);
+        return _recover(s, identity, rotations, estate, replay, i, c, guardian, false);
+    }
+
+    /// @dev The fixed V2 admission library has authenticated its manifest, role, exact prepared
+    /// action and complete election. Share only original operation35 writes and semantic hashes.
+    function recoverAdjudicated(
+        RecoveryState.State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistEstateState.State storage estate,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        RecoveryState.Input memory i,
+        Recovery.Context memory c,
+        bytes32 guardian
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        _governance(i, c);
+        return _recover(s, identity, rotations, estate, replay, i, c, guardian, true);
+    }
+
+    function _governance(RecoveryState.Input memory i, Recovery.Context memory c) private view {
+        if (
+            i.action.operationId != 35 || i.action.actor != i.executor || i.executor == address(0)
+                || i.governance.actionClass != 2 || i.governance.actionId == bytes32(0)
+                || i.governance.proposer == address(0) || i.governance.roleRevision == 0
+                || i.governance.roleMutationHash == bytes32(0)
+                || i.governance.scopeHash != c.scopeHash
+                || i.governance.oldValueHash != c.oldValueHash
+                || i.governance.newValueHash != c.newValueHash || block.timestamp == 0
+                || block.timestamp > type(uint64).max
+        ) revert Recovery.InvalidIdentityRecoveryGovernance();
+    }
+
+    function _recover(
+        RecoveryState.State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistEstateState.State storage estate,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        RecoveryState.Input memory i,
+        Recovery.Context memory c,
+        bytes32 guardian,
+        bool adjudicated
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         uint64 now_ = uint64(block.timestamp);
         uint64 postEnds = now_ + c.postContestSeconds;
         if (c.postContestSeconds < 72 hours || c.standingTailSeconds < 30 days) {
@@ -200,7 +234,7 @@ library StreamArtistIdentityRecoveryMutation {
             )
         );
         m.state = _stateHash(s, identity, rotations, item);
-        if (guardian != bytes32(0)) {
+        if (guardian != bytes32(0) || adjudicated) {
             s.actionExecutions[i.governance.actionId] = item.recordHash;
             s.recoveryGuardians[item.recordHash] = guardian;
             m.state = keccak256(
@@ -213,7 +247,7 @@ library StreamArtistIdentityRecoveryMutation {
                 )
             );
         }
-        if (i.request.supersededRecordHashes.length != 0) {
+        if (i.request.supersededRecordHashes.length != 0 || adjudicated) {
             m.state = keccak256(
                 abi.encode(
                     m.state,

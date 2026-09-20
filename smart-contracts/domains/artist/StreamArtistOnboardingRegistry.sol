@@ -69,6 +69,12 @@ import {
 import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
+import {
+    IStreamArtistIdentityRecoveryV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
+import {
+    StreamArtistRecoveryEvidenceTypes as RecoveryEvidence
+} from "../../interfaces/stream/artist/StreamArtistRecoveryEvidenceTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -134,6 +140,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistSuccessionRecords,
     IStreamArtistIdentityDismissal,
     IStreamArtistIdentityRecovery,
+    IStreamArtistIdentityRecoveryV2,
     IStreamArtistEstateActivation,
     IStreamArtistEstateBinding,
     IStreamArtistCommercialAuthority,
@@ -566,6 +573,40 @@ contract StreamArtistOnboardingRegistry is
         Succ.PublicDocument calldata document
     ) external view returns (bytes memory) {
         _forwardRegistryRead();
+    }
+
+    function registerIdentityRecoveryActionV2(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recoverArtistIdentityV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryContextV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function identityRecoveryEvidenceState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RecoveryEvidence.EvidenceStateV2 memory)
+    {
+        _forwardFinalityRead();
     }
 
     function registerIdentityRecoveryAction(
