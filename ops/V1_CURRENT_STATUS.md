@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `e558addd`. ABI94 checks all 2,557 sources with zero
-errors in 24.609 seconds. This proves source/type compatibility; runtime results
+Latest source checkpoint: `98fcd45f`. ABI96 checks all 2,574 sources with zero
+errors in 24.593 seconds. This proves source/type compatibility; runtime results
 below apply to their own recorded sources. Original RC1 is unchanged.
 
 - Actual governance-foundation entropy cutover passes 16/16 on `18c42131`,
@@ -31,7 +31,8 @@ below apply to their own recorded sources. Original RC1 is unchanged.
   typed-boundary measurements do not change the original default or release floor.
 - Artist creation carriers (`fffb5477`) fit both wrappers at 693 bytes and the
   Factory at 3,775 runtime/31,224 actual init, preserving exact child bytes and
-  CREATE semantics. Eight focused native cases are running on frozen `ee91a1e9`.
+  CREATE semantics. All eight focused native cases pass on frozen `ee91a1e9` (536 sources);
+  full Artist/Safe graph and Attribution capacity remain separate.
 - Router factoring (`9b016f1a`, guide `c0547385`) passes 70 focused regressions
   on `28f46de8`, including five 256-input fuzz properties. It removes 11,551
   runtime bytes but remains 2,178 bytes above the deployment limit in that
@@ -40,26 +41,32 @@ below apply to their own recorded sources. Original RC1 is unchanged.
   their 22-case native retry corrects an oversized test schema chunk only.
 - Metric transport (`ca95d161`) passes 17 focused tests with two 256-input
   properties, but isolated write/read costs remain 20.63m/25.06m. The actual
-  graph remains 7PASS/2FAIL. The compact transport repair fits eight selected
-  products and is in its focused native campaign; no raised-cap acceptance.
+  graph remains 7PASS/2FAIL. Compact transport (`50bf39d5`) passes 25 cases/three 256-input properties
+  with eight fitting products; measured write/read costs improve to 18.20m/17.22m
+  but remain over budget. A further immutable-byte transport repair is building.
 - Native conservation tier/catalog (`2758868f`, test correction `c093a9d6`)
   passes 51/51 on the original `f7a05e07` production capture; all 149 captured
   products fit. That evidence excludes later Core floor binding `ff372f80`.
   Core floor binding's 14 tests (`734775e8`) and master/waiver/SaleRights' 33
-  tests (`c1c169d5`) are in one separate native campaign. Their independent
-  source/oracle reviews are clear. Binding alone does not enforce sale floors.
+  tests (`c1c169d5`) initially pass 45/47; two test-harness
+  fixes (`7ce22d00`) are in a cached retry. No production fault was identified
+  in those failures. Their independent source/oracle reviews are clear. Binding alone does not enforce sale floors.
 - Offchain conservation/packetV3 (`a288d58a`) passes 100 root cases; canonical
   condition capture (`569be86d`) passes 36; durable native tier/default capture
   (`e558addd`) passes 38 in 10.460 seconds. These overlapping cohorts must not
   be summed. Positive fixtures are synthetic, and full packet assembly remains.
-- V3 recovery clients (`68fb843a`) pass 1,233 root checks including generation,
-  build and strict types. Their frozen profile remains separate from later
-  capacity changes and actual Safe runtime. Entropy-succession clients continue.
-- Native floor/settlement and genuine prospective reference producers continue.
-  Per-purchase preparation is an optional optimization: the original purchase
-  must remain possible in one transaction using the same freshly validated
-  evidence. This is a build requirement, not a waiver of whole-operation gas
-  targets. Held personhood and earlier denied artifacts remain unapplied.
+- Entropy-succession clients (`f5f24974`) bring the joined package to 1,286
+  passing root checks in 124.679 seconds, including generation/build/strict
+  types. Its frozen `7901f3b1` profile and earlier V3 recovery profile remain
+  separate from actual full-current Safe execution.
+- Native floor/settlement (`98fcd45f`) is source-integrated across 13 official
+  initial routes and supplemental receipts, with 40 authored focused cases.
+  Optional preparation preserves single-transaction buying; identical semantic
+  releases retain genuine prior evidence (`80a0f289`). Runtime and whole-operation
+  gas acceptance remain open. The original direct native/ERC20 fixed adapters
+  and English auction still need their own typed receipt joins; Mint owns those
+  three. Genuine prospective reference is also building. Held personhood and
+  earlier denied artifacts remain unapplied.
 
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling

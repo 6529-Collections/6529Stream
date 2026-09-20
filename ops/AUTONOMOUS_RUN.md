@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `e558addd`: Router/V2 reference, master/waiver/SaleRights, Core floor tests, production AUTH measurement and native-tier capture integrated. ABI94: 2,557 sources/zero errors. Scoped runtime evidence remains source-specific. |
+| Source checkpoint | `98fcd45f`: official settlement floor, prospective provider, compact metric and joined Router factoring integrated. ABI96: 2,574 sources/zero errors. Root clients1,286; carrier8 passes. Scoped runtime evidence remains source-specific. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,37 +29,43 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `e558addd`; ABI94 passes all 2,557 sources in 24.609 seconds.
-Root clients remain 1,233 passing checks. Native Museum tier/catalog passes 51
+Latest intake is `98fcd45f`; ABI96 passes all 2,574 sources in 24.593 seconds.
+Root clients pass 1,286 checks at `f5f24974` plus the test-only EOF correction. Native Museum tier/catalog passes 51
 on its original source; 47 master/Core-floor cases are running separately.
 Router 70 passes on its recorded capture but remains 2,178 bytes oversized.
 Native-tier offchain capture passes 38 root cases; positive fixtures are synthetic.
 
 Current ownership supersedes historical next-batch statements below:
 
-- A: finish the single frozen creation-carrier eight-case run and corrected
-  inert personhood proposal. Identity/Coordinator/Owner hosts remain Burn-owned.
+- A: creation-carrier8 passes. Corrected inert personhood v3 is in independent
+  review; prepare actual Artist/Safe preflight and an internal Attribution size
+  repair only outside held changes. Burn owns Identity/Coordinator/Owner.
 - B: finish the exact V2 snapshot/reference test-only chunk retry; continue the
   complete V2 COLLECTION inventory adapter. Source is integrated `4730cf01`.
 - C: finish compact metric native acceptance; build scoped finality and the
   genuine prospective reference host with the agreed acyclic Floor/source join.
-- Mint: production AUTH measurement is integrated `02d4fc0e`; independently
-  review optional preparation and actual conservation/commerce compatibility.
-  Actual Artist entropy seven-case source is integrated `cfcedb8e`, runtime pending.
+- Mint: implement the three original direct paid joins (native/ERC20 fixed and
+  English auction settlement) with genuine typed direct receipts, preserving
+  existing APIs/signatures/funding. Coordinate the additive floor capability
+  with its owner. Production AUTH and actual Artist entropy source are integrated.
 - Burn: finish coherent recovered-authority profile10, original chronology and
   seven-owner atomic import, with actual continuation/Safe test source.
 - Museum: native tier/default capture is integrated `e558addd`; continue one
   coherent additive native conservation packet shape when the real floor is
   frozen. Preserve all 19 acquisition requirements and source qualifications.
-- Clients: complete exact entropy-succession client/workflow profile from
-  joined `7901f3b1`/ABI89. Actual-foundation runtime `18c42131` stays separate.
+- Clients: entropy-succession source is integrated `f5f24974`, root1,286 passes.
+  Build native Museum anchor/master callers on separate `e558addd`/ABI94 profile;
+  pending direct/floor ledger APIs remain outside that frozen client scope.
 - Conservation/native task `01a0be37-2432-7a63-8820-fc42f159eb1d`: finish the
-  single 47-case run, optional-preparation floor and actual settlement joins.
+  47-case test-harness retry and source-integrated optional-preparation floor
+  acceptance. Implement typed direct floor consumer after Mint freezes its API.
   Master/waiver/SaleRights source is integrated `c1c169d5`; Core floor tests
   `734775e8`. C owns prospective reference; Museum owns offchain consumers.
 - Testing: continue joined Router internal read/copy factoring without changing
   external behavior or applying held artifacts. Then refreeze actual terminal10,
-  INSTANT8 and Safe9 on the fitting current graph. No duplicate native compiler.
+  INSTANT8 and Safe9 on the fitting current graph. Author genuine common
+  floor-binding and explicit WAIVED commerce fixture setup while frozen tests
+  run; complete Museum proof is a separate workflow. No duplicate compiler.
 
 Root owns shared interfaces, architecture, integration and final closure.
 Preparation must remain optional for a normal one-transaction purchase; gas
