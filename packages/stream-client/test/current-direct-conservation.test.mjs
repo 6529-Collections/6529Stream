@@ -408,3 +408,175 @@ test("reviewed requests snapshot nested inputs and reject calldata/value/product
   assert.throws(() => d.prepareDirectConservationCall(coordinates("native-fixed"), actor, { ...request, tokenData: "0xab" }));
   assert.throws(() => d.prepareDirectConservationCall(coordinates("native-fixed"), actor, { ...request, platformSignature: `0x${"00".repeat(d.DIRECT_CONSERVATION_MAX_SIGNATURE_BYTES + 1)}` }));
 });
+
+const controlState = productKind => ({
+  owner: actor,
+  paused: false,
+  platformSigner: addr(70),
+  signerEpoch: 5n,
+  signatureGasLimit: productKind === "erc20-fixed" ? 400000n : null
+});
+
+test("all 29 original state-changing selectors are exposed with exact compiled control calldata", () => {
+  const products = [
+    ["native-fixed", "nativeSale", d.DIRECT_CONSERVATION_NATIVE_ABI, 6],
+    ["erc20-fixed", "erc20Sale", d.DIRECT_CONSERVATION_ERC20_ABI, 11],
+    ["english-auction", "auction", d.DIRECT_CONSERVATION_AUCTION_ABI, 12]
+  ];
+  const mutating = iface => iface.fragments
+    .filter(fragment => fragment.type === "function" && !["view", "pure"].includes(fragment.stateMutability))
+    .map(fragment => fragment.format("sighash"))
+    .sort();
+  let controlCount = 0;
+  for (const [productKind, key, clientAbi, expectedCount] of products) {
+    const exposed = mutating(new Interface(clientAbi));
+    assert.equal(exposed.length, expectedCount);
+    assert.deepEqual(exposed, mutating(abi[key]));
+    const inputs = [
+      [{ kind: "setPaused", paused: true }, [true]],
+      [{ kind: "setPlatformSigner", signer: addr(71) }, [addr(71)]],
+      [{ kind: "transferOwnership", newOwner: addr(72) }, [addr(72)]],
+      [{ kind: "renounceOwnership" }, []]
+    ];
+    if (productKind === "erc20-fixed") {
+      inputs.push([{ kind: "raiseSignatureGasLimit", value: 1n << 63n }, [1n << 63n]]);
+    }
+    for (const [input, args] of inputs) {
+      const c = coordinates(productKind);
+      const plan = d.prepareDirectConservationCall(c, actor, { productKind, ...input });
+      assert.deepEqual(plan.call, {
+        to: c.product,
+        data: abi[key].encodeFunctionData(input.kind, args),
+        value: 0n
+      });
+      assert.equal(plan.caller, actor);
+      assert.equal(d.isDirectConservationControlRequest(plan.request), true);
+      assert.deepEqual(d.normalizeDirectConservationCall(plan), plan);
+      const transition = d.directConservationControlTransition(plan, controlState(productKind));
+      const log = abi[key].encodeEventLog(transition.expectedEvent.name, transition.expectedEvent.args);
+      const decoded = abi[key].parseLog(log);
+      assert.deepEqual(Array.from(decoded.args), Array.from(transition.expectedEvent.args));
+      assert.equal(transition.factsVerified, false);
+      controlCount++;
+    }
+  }
+  assert.equal(controlCount, 13);
+});
+
+test("same pause emits and same platform signer increments the epoch on every accepted call", () => {
+  for (const productKind of Object.keys(d.DIRECT_CONSERVATION_PRODUCT_KINDS)) {
+    const c = coordinates(productKind);
+    const state = controlState(productKind);
+    const pause = d.prepareDirectConservationCall(c, actor, { productKind, kind: "setPaused", paused: state.paused });
+    const paused = d.directConservationControlTransition(pause, state);
+    assert.deepEqual(paused.before, paused.after);
+    assert.equal(paused.expectedEvent.name, productKind === "english-auction" ? "AuctionsPauseChanged" : "SalesPauseChanged");
+    assert.deepEqual(paused.expectedEvent.args, [false]);
+    const signer = d.prepareDirectConservationCall(c, actor, { productKind, kind: "setPlatformSigner", signer: state.platformSigner });
+    const once = d.directConservationControlTransition(signer, state);
+    const twice = d.directConservationControlTransition(signer, once.after);
+    assert.equal(once.after.signerEpoch, 6n);
+    assert.equal(twice.after.signerEpoch, 7n);
+    assert.equal(once.after.platformSigner, state.platformSigner);
+    assert.equal(twice.after.owner, state.owner);
+    assert.notDeepEqual(twice.expectedEvent.args, once.expectedEvent.args);
+    const maximum = (1n << 64n) - 1n;
+    assert.equal(d.directConservationControlTransition(signer, { ...state, signerEpoch: maximum - 1n }).after.signerEpoch, maximum);
+    assert.throws(() => d.directConservationControlTransition(signer, { ...state, signerEpoch: maximum }), /signerEpoch/);
+  }
+});
+
+test("ownership is immediate, self-transfer emits, and old-owner or post-renunciation retries fail", () => {
+  for (const productKind of Object.keys(d.DIRECT_CONSERVATION_PRODUCT_KINDS)) {
+    const c = coordinates(productKind);
+    const state = controlState(productKind);
+    const self = d.prepareDirectConservationCall(c, actor, { productKind, kind: "transferOwnership", newOwner: actor });
+    const same = d.directConservationControlTransition(self, state);
+    assert.deepEqual(same.after, state);
+    assert.deepEqual(same.expectedEvent, { name: "OwnershipTransferred", args: [actor, actor] });
+    const transfer = d.prepareDirectConservationCall(c, actor, { productKind, kind: "transferOwnership", newOwner: addr(80) });
+    const changed = d.directConservationControlTransition(transfer, state);
+    assert.equal(changed.after.owner, addr(80));
+    assert.deepEqual(changed.expectedEvent.args, [actor, addr(80)]);
+    assert.throws(() => d.directConservationControlTransition(transfer, changed.after), /current owner/);
+    const newOwnerPause = d.prepareDirectConservationCall(c, addr(80), { productKind, kind: "setPaused", paused: true });
+    assert.equal(d.directConservationControlTransition(newOwnerPause, changed.after).after.paused, true);
+    const renounce = d.prepareDirectConservationCall(c, actor, { productKind, kind: "renounceOwnership" });
+    const renounced = d.directConservationControlTransition(renounce, state);
+    assert.equal(renounced.after.owner, ZeroAddress);
+    assert.deepEqual(renounced.expectedEvent.args, [actor, ZeroAddress]);
+    assert.throws(() => d.directConservationControlTransition(renounce, renounced.after), /current owner/);
+    assert.throws(() => d.prepareDirectConservationCall(c, actor, { productKind, kind: "acceptOwnership" }));
+  }
+});
+
+test("ERC20 signature gas limit keeps the original uint256 selector and uint64 monotonic ceiling", () => {
+  const productKind = "erc20-fixed";
+  const c = coordinates(productKind);
+  const state = controlState(productKind);
+  const prepare = value => d.prepareDirectConservationCall(c, actor, { productKind, kind: "raiseSignatureGasLimit", value });
+  assert.throws(() => d.directConservationControlTransition(prepare(400000n), state), /strictly increase/);
+  assert.throws(() => d.directConservationControlTransition(prepare(399999n), state), /strictly increase/);
+  const once = d.directConservationControlTransition(prepare(400001n), state);
+  assert.equal(once.after.signatureGasLimit, 400001n);
+  assert.deepEqual(once.expectedEvent, { name: "SignatureGasLimitRaised", args: [400000n, 400001n] });
+  assert.throws(() => d.directConservationControlTransition(prepare(400001n), once.after));
+  const maximum = (1n << 64n) - 1n;
+  assert.equal(d.directConservationControlTransition(prepare(maximum), state).after.signatureGasLimit, maximum);
+  assert.equal(prepare(maximum).call.data, abi.erc20Sale.encodeFunctionData("raiseSignatureGasLimit", [maximum]));
+  for (const value of [0n, -1n, 1n << 64n, 400001]) assert.throws(() => prepare(value));
+  for (const kind of ["native-fixed", "english-auction"]) {
+    assert.throws(() => d.prepareDirectConservationCall(coordinates(kind), actor, { productKind: kind, kind: "raiseSignatureGasLimit", value: 400001n }));
+  }
+});
+
+test("control observations and requests are exact immutable product-local facts", () => {
+  const productKind = "erc20-fixed";
+  const c = coordinates(productKind);
+  const input = { productKind, kind: "setPlatformSigner", signer: c.product };
+  const plan = d.prepareDirectConservationCall(c, actor, input);
+  const state = controlState(productKind);
+  const transition = d.directConservationControlTransition(plan, state);
+  input.signer = addr(99);
+  state.owner = addr(99);
+  state.signerEpoch = 99n;
+  assert.equal(transition.before.owner, actor);
+  assert.equal(transition.after.platformSigner, c.product);
+  assert.equal(transition.after.signerEpoch, 6n);
+  assert.equal(plan.request.signer, c.product);
+  assert.ok(Object.isFrozen(transition.before));
+  assert.ok(Object.isFrozen(transition.after));
+  assert.ok(Object.isFrozen(transition.expectedEvent.args));
+  assert.throws(() => d.directConservationControlTransition(plan, { ...state, owner: addr(77) }));
+  assert.throws(() => d.normalizeDirectConservationControlState(productKind, { ...state, pendingOwner: addr(99) }));
+  assert.throws(() => d.normalizeDirectConservationControlState(productKind, { ...state, signatureGasLimit: null }));
+  assert.throws(() => d.normalizeDirectConservationControlState("native-fixed", state));
+  assert.throws(() => d.normalizeDirectConservationControlState(productKind, { ...state, paused: 1 }));
+  for (const kind of Object.keys(d.DIRECT_CONSERVATION_PRODUCT_KINDS)) {
+    const target = coordinates(kind);
+    assert.throws(() => d.prepareDirectConservationCall(target, actor, { productKind: kind, kind: "setPaused", paused: 1 }));
+    assert.throws(() => d.prepareDirectConservationCall(target, actor, { productKind: kind, kind: "setPlatformSigner", signer: ZeroAddress }));
+    assert.throws(() => d.prepareDirectConservationCall(target, actor, { productKind: kind, kind: "transferOwnership", newOwner: ZeroAddress }));
+    assert.throws(() => d.prepareDirectConservationCall(target, actor, { productKind: kind, kind: "renounceOwnership", confirmation: true }));
+  }
+});
+
+test("control-state read builders match original product-local getters without pending-owner invention", () => {
+  for (const [productKind, key] of [["native-fixed", "nativeSale"], ["erc20-fixed", "erc20Sale"], ["english-auction", "auction"]]) {
+    const c = coordinates(productKind);
+    const kinds = ["owner", "paused", "platformSigner", "signerEpoch"];
+    if (productKind === "erc20-fixed") kinds.push("signatureGasLimit");
+    for (const kind of kinds) {
+      assert.deepEqual(d.prepareDirectConservationRead(c, { kind }), {
+        to: c.product,
+        data: abi[key].encodeFunctionData(kind, []),
+        value: 0n
+      });
+    }
+    assert.throws(() => d.prepareDirectConservationRead(c, { kind: "pendingOwner" }));
+    assert.throws(() => d.prepareDirectConservationRead(c, { kind: "owner", expectedOwner: actor }));
+    if (productKind !== "erc20-fixed") {
+      assert.throws(() => d.prepareDirectConservationRead(c, { kind: "signatureGasLimit" }));
+    }
+  }
+});

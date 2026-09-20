@@ -19,19 +19,104 @@ floor in the same transaction.
 | Product | Supported original calls | Caller and payment |
 | --- | --- | --- |
 | Native fixed price | `buy`, `cancelAuthorization` | Buy requires the literal caller to equal the signed payer, with exactly the signed price in native value. Cancellation uses the caller's commercial nonce lane. |
-| ERC20 fixed price | `registerSale`, `cancelSale`, `buy`, `cancelAuthorization`, `revokePaymentIntent`, `revokePaymentIntentBySignature` | Registration and sale cancellation require the product owner. Buy retains original Artist consent, carries zero native value and transfers tokens through the original adapter. Commercial and payer replay lanes are separate. |
+| ERC20 fixed price | `registerSale`, `cancelSale`, `buy`, `cancelAuthorization`, `revokePaymentIntent`, `revokePaymentIntentBySignature`, `raiseSignatureGasLimit` | Registration, sale cancellation and signature-gas increases require the product owner. Buy retains original Artist consent, carries zero native value and transfers tokens through the original adapter. Commercial and payer replay lanes are separate. |
 | English auction | `createAuction`, `bid`, `settle`, `cancel`, `setDeliveryRecipient`, `claimNoBidNFT`, `withdrawRefund`, `cancelAuthorization` | Only bid carries native value. Creation, bidder delivery changes, Artist cancellation, deferred NFT claims and refund withdrawal retain their original authority checks. |
+| All three products | `setPaused`, `setPlatformSigner`, `transferOwnership`, `renounceOwnership` | The actual product owner must call. All four controls carry zero native value. |
 
 `prepareDirectConservationCall` accepts the product coordinates, actual caller
 and a discriminated request using these exact method names. It returns an
 unsigned call and `factsVerified: false`. It preserves all supplied signatures,
-token bytes, payer and recipient identities. Unrelated pause controls, signer
-changes and ownership transfers are outside this operational profile.
+token bytes, payer and recipient identities. Every state-changing function in
+the three original product ABIs is covered, including their owner controls.
 
 The floor's `recordDirectPrimarySale` is authenticated transport for the product.
 It is not a wallet operation. The client exposes historical floor reads and hash
 helpers, with no public DIRECT preparation or synthetic universal-settlement
 candidate. The universal `settlementReceipt` at a DIRECT key remains all zero.
+
+## Owner controls and review context
+
+These controls use the product's actual `owner()`. An Artist, platform signer,
+Safe owner or outer transaction relayer does not gain that authority implicitly.
+For a Safe CALL, the Safe itself must be the product owner. The capture reads the
+pinned product's local owner, pause, signer, epoch and ERC20 signature-gas state;
+owner controls do not depend on live Core, Manager, registry or floor admission.
+
+Ownership transfer is immediate and takes a nonzero `newOwner`. There is no
+`pendingOwner` or `acceptOwnership` operation. Transferring to the current owner
+is valid and emits `OwnershipTransferred` with equal addresses. Renunciation
+sets the owner to zero and removes access to all `onlyOwner` controls, including
+unpausing or changing the signer. The client prepares these original calls;
+it does not execute them or invent an additional acceptance transaction.
+
+`setPaused` emits the original product event even when the value is unchanged.
+Native/ERC20 pause stops purchases; auction pause stops creation and bidding.
+The original settlement, refund, claim and nonce-revocation paths retain their
+own availability rules.
+
+`setPlatformSigner` requires a nonzero signer and increments the uint64 epoch,
+even when assigning the same address. Epoch overflow reverts. Existing
+commercial signatures become stale; the commercial and payer nonce mappings
+are not reset, and payer-intent signatures retain their separate domain.
+
+ERC20 `raiseSignatureGasLimit` strictly increases the local stipend from its
+current value, with a uint64 maximum. Its initial value is 400,000. It applies to
+platform, Artist and payer signature validation. This adapter-local setting has
+no governance delay or per-call ratio limit. Equal or lower values revert.
+Native and auction products expose no
+equivalent setter.
+
+Native and auction ownership writes inherit the original `Ownable` behavior.
+The ERC20 verifier adds its settlement reentrancy lock to ownership transfer and
+renunciation. The client preserves this source distinction without treating a
+successful standalone simulation as proof of every callback composition.
+
+The reviewed control prestate is retained in the capture. Simulation and receipt
+reconciliation reject changed control context and require a fresh capture.
+The original calls carry no expected-owner, epoch or previous-value argument;
+client preflight cannot make that state comparison atomic with execution.
+Successful reconciliation joins the exact original event with the complete
+expected local poststate. A rejected or failed call leaves product state
+unchanged; a failed Safe inner call may still consume the Safe nonce. Review the
+current owner and control state before preparing a fresh Safe authorization.
+Repeating a successful signer rotation is another epoch increment, not an
+idempotent retry.
+
+## Complete selector coverage
+
+The [machine-checked coverage register](current-direct-conservation-coverage.json)
+lists all 29 product-specific mutable selectors, their full signatures, authority,
+request kind and shared direct/Safe workflow. Counts are native 6, ERC20 11 and
+auction 12. There are no receive/fallback entries or two-step ownership calls.
+The ERC721 receiver callback is `view` and is outside this mutation inventory.
+
+Every row uses `prepareDirectConservationCall`, `captureDirectConservation`,
+`simulateDirectConservation` and `reconcileDirectConservationReceipt`. Safe
+preparation reuses `toSafeCall` / `createSafeCallPlan` and `verifySafeCallPlan`;
+execution readback reuses `requireSafeExecution`. No second control-specific
+transport is introduced.
+
+| Products | Selector | Request kind |
+| --- | --- | --- |
+| All three | `0x845ab94f` | `cancelAuthorization` |
+| All three | `0x715018a6` | `renounceOwnership` |
+| All three | `0x16c38b3c` | `setPaused` |
+| All three | `0x3b79c44f` | `setPlatformSigner` |
+| All three | `0xf2fde38b` | `transferOwnership` |
+| Native | `0x8a92b588` | `buy` |
+| ERC20 | `0xa763265a` | `buy` |
+| ERC20 | `0x0bea8985` | `cancelSale` |
+| ERC20 | `0xaaec2423` | `raiseSignatureGasLimit` |
+| ERC20 | `0x143b863c` | `registerSale` |
+| ERC20 | `0x3afb62b3` | `revokePaymentIntent` |
+| ERC20 | `0xc3bfed35` | `revokePaymentIntentBySignature` |
+| Auction | `0x9f04996d` | `bid` |
+| Auction | `0x40e58ee5` | `cancel` |
+| Auction | `0x49adc80b` | `claimNoBidNFT` |
+| Auction | `0x237e3730` | `createAuction` |
+| Auction | `0x754620a1` | `setDeliveryRecipient` |
+| Auction | `0x8df82800` | `settle` |
+| Auction | `0xa16c86f7` | `withdrawRefund` |
 
 ## Signing and payer consent
 
@@ -130,7 +215,7 @@ nested calls fit their governed gas limits.
 ## Safe and receipt workflow
 
 Use `toSafeCall(prepared.call)` or `createSafeCallPlan` with the exact prepared
-call. Each of the sixteen supported operational variants can use an ordinary
+call. Each of the 29 supported mutable product variants can use an ordinary
 Safe CALL. Native purchase and bid values are preserved; ERC20 and other calls
 carry zero inner native value.
 

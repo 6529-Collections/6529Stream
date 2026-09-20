@@ -192,3 +192,81 @@ void historicalRelease;
 void fullWidthAmount;
 void lane;
 void reads;
+
+declare const controlState: d.DirectConservationControlState;
+const controlCalls: d.DirectConservationCall[] = [];
+for (const productKind of ["native-fixed", "erc20-fixed", "english-auction"] as const) {
+  const controls: readonly d.DirectConservationCommonControlRequest[] = [
+    { kind: "setPaused", paused: false },
+    { kind: "setPlatformSigner", signer: caller },
+    { kind: "transferOwnership", newOwner: caller },
+    { kind: "renounceOwnership" }
+  ];
+  for (const request of controls) {
+    controlCalls.push(d.prepareDirectConservationCall(coordinates, caller, { productKind, ...request }));
+  }
+  d.normalizeDirectConservationControlState(productKind, controlState);
+  for (const kind of ["owner", "paused", "platformSigner", "signerEpoch"] as const) {
+    const controlRead: UnsignedCall = d.prepareDirectConservationRead(coordinates, { kind });
+    void controlRead;
+  }
+}
+controlCalls.push(d.prepareDirectConservationCall(coordinates, caller, {
+  productKind: "erc20-fixed",
+  kind: "raiseSignatureGasLimit",
+  value: (1n << 64n) - 1n
+}));
+d.prepareDirectConservationRead(coordinates, { kind: "signatureGasLimit" });
+for (const plan of controlCalls) {
+  const transition: d.DirectConservationControlTransition = d.directConservationControlTransition(plan, controlState);
+  const before: d.DirectConservationControlState = transition.before;
+  const after: d.DirectConservationControlState = transition.after;
+  const unverified: false = transition.factsVerified;
+  const gasLimit: bigint | null = after.signatureGasLimit;
+  const event: d.DirectConservationControlEvent = transition.expectedEvent;
+  if (event.name === "OwnershipTransferred") {
+    const oldOwner: Address = event.args[0];
+    const newOwner: Address = event.args[1];
+    void oldOwner;
+    void newOwner;
+  }
+  if (event.name === "SignatureGasLimitRaised") {
+    const previous: bigint = event.args[0];
+    const current: bigint = event.args[1];
+    void previous;
+    void current;
+  }
+  if (d.isDirectConservationControlRequest(plan.request)) {
+    const control: d.DirectConservationControlRequest = plan.request;
+    if (control.kind === "raiseSignatureGasLimit") {
+      const onlyERC20: "erc20-fixed" = control.productKind;
+      const preciseValue: bigint = control.value;
+      void onlyERC20;
+      void preciseValue;
+    }
+  }
+  // @ts-expect-error The supplied state is frozen before asynchronous observation.
+  transition.before.owner = caller;
+  // @ts-expect-error Expected event arguments are readonly tuples.
+  event.args[0] = caller;
+  // @ts-expect-error Control state is not a live authority assertion.
+  const verified: true = transition.factsVerified;
+  void before;
+  void after;
+  void unverified;
+  void gasLimit;
+  void verified;
+}
+
+// @ts-expect-error Pausing requires an actual boolean.
+d.prepareDirectConservationCall(coordinates, caller, { productKind: "native-fixed", kind: "setPaused", paused: 1n });
+// @ts-expect-error The original signer setter has no synthetic expected epoch guard.
+d.prepareDirectConservationCall(coordinates, caller, { productKind: "english-auction", kind: "setPlatformSigner", signer: caller, expectedSignerEpoch: 1n });
+// @ts-expect-error Only ERC20 has the original signature-gas setter.
+d.prepareDirectConservationCall(coordinates, caller, { productKind: "native-fixed", kind: "raiseSignatureGasLimit", value: 400001n });
+// @ts-expect-error Original uint256 arguments require bigint, not number.
+d.prepareDirectConservationCall(coordinates, caller, { productKind: "erc20-fixed", kind: "raiseSignatureGasLimit", value: 400001 });
+// @ts-expect-error Original ownership is one-step and has no acceptance method.
+d.prepareDirectConservationCall(coordinates, caller, { productKind: "erc20-fixed", kind: "acceptOwnership" });
+// @ts-expect-error Control observations do not have pending-owner state.
+d.normalizeDirectConservationControlState("native-fixed", { ...controlState, pendingOwner: caller });

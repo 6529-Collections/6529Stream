@@ -1,6 +1,10 @@
 import type { Provider } from 'ethers';
 import type { Address, Hex } from '../src/generated/contracts.js';
-import type { DirectConservationCall } from '../src/current-direct-conservation.js';
+import {
+  prepareDirectConservationCall,
+  type DirectConservationCall,
+  type DirectConservationCoordinates
+} from '../src/current-direct-conservation.js';
 import {
   captureDirectConservation,
   simulateDirectConservation,
@@ -20,6 +24,12 @@ declare const capture: DirectConservationCapture;
 declare const hash: Hex;
 declare const address: Address;
 declare const creation: DirectConservationAuctionCreation;
+declare const coordinates: DirectConservationCoordinates;
+
+const pause = prepareDirectConservationCall(coordinates, address, {
+  productKind: 'native-fixed', kind: 'setPaused', paused: true
+});
+void captureDirectConservation(provider, deployment, pause, { blockTag: 10 });
 
 void captureDirectConservation(provider, deployment, prepared, { blockTag: 10 });
 void simulateDirectConservation(provider, capture, { blockTag: 11, gasLimit: 5_000_000n });
@@ -40,7 +50,14 @@ async function outputs(): Promise<void> {
   const receipt: DirectConservationTransactionReceipt = await reconcileDirectConservationReceipt(provider, capture, hash, { execution: 'direct' });
   const amount: bigint | undefined = receipt.paidReceipt?.amount;
   const beneficiary: Address | undefined = receipt.floorHistory?.receipt.sale.beneficiary;
-  void [token, amount, beneficiary];
+  const owner: Address | undefined = receipt.control?.owner;
+  const signerEpoch: bigint | undefined = capture.control?.signerEpoch;
+  const signatureGasLimit: bigint | null | undefined = receipt.control?.signatureGasLimit;
+  void [token, amount, beneficiary, owner, signerEpoch, signatureGasLimit];
+  if (receipt.control) {
+    // @ts-expect-error Reconciled local control state is immutable.
+    receipt.control.owner = address;
+  }
   // @ts-expect-error Receipt outputs are immutable.
   receipt.outcome = 'paid';
   // @ts-expect-error Saved runtime pins are immutable.

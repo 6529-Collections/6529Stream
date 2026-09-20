@@ -8,7 +8,8 @@ import {
   concat, getAddress, id, keccak256, toUtf8Bytes
 } from "ethers";
 import * as client from "../dist/current-direct-conservation.js";
-import { requireSafeExecution } from "../dist/safe.js";
+import { requireSafeExecution, toSafeCall } from "../dist/safe.js";
+import { createSafeCallPlan, verifySafeCallPlan } from "../dist/safe-plan.js";
 
 const fixture = JSON.parse(readFileSync(
   new URL("./fixtures/current-direct-conservation-abi.json", import.meta.url), "utf8"
@@ -312,4 +313,92 @@ test("protocol fragments match compiled ABI; shared Safe transport retains its s
     assert.equal(requireSafeExecution({ status: 1, logs: [{ address: safe, ...encoded }] },
       safe, safeTxHash).safeTxHash, safeTxHash);
   }
+});
+
+test("coverage register exhausts all 29 original mutable selectors and preserves source qualification", () => {
+  const coverage = JSON.parse(readFileSync(
+    new URL("../docs/current-direct-conservation-coverage.json", import.meta.url), "utf8"
+  ));
+  assert.equal(coverage.sourceCommit, fixture.sourceCommit);
+  assert.equal(coverage.sourceTree, fixture.sourceTree);
+  assert.equal(coverage.compilerCapture, fixture.capture);
+  assert.deepEqual(coverage.counts, {
+    "native-fixed": 6, "erc20-fixed": 11, "english-auction": 12, total: 29
+  });
+  assert.equal(coverage.calls.length, 29);
+  assert.equal(coverage.calls.filter(row => row.workflow === "owner-control").length, 13);
+  assert.equal(new Set(coverage.calls.map(row => `${row.productKind}:${row.selector}`)).size, 29);
+  assert.match(coverage.evidence, /does not establish real Safe, native contract/);
+  assert.equal(coverage.sharedSafe.operation, 0);
+  assert.equal(coverage.sharedSafe.outerNativeValue, "0");
+  assert.deepEqual(coverage.sharedSafe.prepare, ["toSafeCall", "createSafeCallPlan"]);
+  assert.equal(coverage.sharedClient.prepare, "prepareDirectConservationCall");
+  assert.equal(coverage.sharedClient.receipt, coverage.sharedSafe.receipt);
+  for (const [path, sha256] of Object.entries(coverage.sourceWitnesses)) {
+    assert.equal(sha256, fixture.sourceHashes[path], path);
+  }
+  const products = {
+    "native-fixed": ["nativeSale", client.DIRECT_CONSERVATION_NATIVE_ABI],
+    "erc20-fixed": ["erc20Sale", client.DIRECT_CONSERVATION_ERC20_ABI],
+    "english-auction": ["auction", client.DIRECT_CONSERVATION_AUCTION_ABI]
+  };
+  for (const [kind, [key, clientAbi]] of Object.entries(products)) {
+    const originals = abi[key].fragments.filter(fragment => fragment.type === "function" && !fragment.constant);
+    const exposed = new Interface(clientAbi).fragments.filter(fragment => fragment.type === "function" && !fragment.constant);
+    const rows = coverage.calls.filter(row => row.productKind === kind);
+    assert.deepEqual(rows.map(row => row.signature).sort(), originals.map(fragment => fragment.format("sighash")).sort());
+    assert.deepEqual(exposed.map(fragment => fragment.format("sighash")).sort(), rows.map(row => row.signature).sort());
+    assert.ok(!fixture.abis[key].some(fragment => ["receive", "fallback"].includes(fragment.type)));
+    assert.equal(abi[key].getFunction("acceptOwnership"), null);
+    assert.equal(abi[key].getFunction("pendingOwner"), null);
+    for (const row of rows) {
+      const fragment = abi[key].getFunction(row.signature);
+      assert.equal(row.abiSegment, key);
+      assert.equal(row.selector, fragment.selector);
+      assert.equal(row.requestKind, fragment.name);
+      assert.equal(row.mutability, fragment.stateMutability);
+      assert.equal(row.client, "sharedClient");
+      assert.equal(row.safe, "sharedSafe");
+      if (row.workflow === "owner-control") {
+        assert.equal(row.authority, "product owner");
+        assert.equal(row.nativeValue, "0");
+      }
+    }
+  }
+});
+
+test("all thirteen original owner controls reuse exact generic Safe CALLs and compiled calldata", () => {
+  const rows = [
+    ["setPaused", { paused: true }, [true]],
+    ["setPlatformSigner", { signer: address(9) }, [address(9)]],
+    ["transferOwnership", { newOwner: address(10) }, [address(10)]],
+    ["renounceOwnership", {}, []]
+  ];
+  let count = 0;
+  for (const [kind, key] of [
+    ["native-fixed", "nativeSale"], ["erc20-fixed", "erc20Sale"], ["english-auction", "auction"]
+  ]) {
+    const c = coordinates(kind), owner = address(7);
+    const calls = kind === "erc20-fixed"
+      ? [...rows, ["raiseSignatureGasLimit", { value: (1n << 64n) - 1n }, [(1n << 64n) - 1n]]]
+      : rows;
+    for (const [method, fields, args] of calls) {
+      const prepared = client.prepareDirectConservationCall(c, owner, {
+        productKind: kind, kind: method, ...fields
+      });
+      const original = { to: c.product, value: 0n, data: abi[key].encodeFunctionData(method, args) };
+      assert.deepEqual(prepared.call, original);
+      assert.equal(prepared.caller, owner);
+      assert.equal(prepared.factsVerified, false);
+      assert.deepEqual(toSafeCall(prepared.call), { ...original, value: "0", operation: 0 });
+      const plan = createSafeCallPlan(c.chainId, `Original ${kind} ${method}`, [{
+        safe: owner, intent: `Execute reviewed original ${method}`, call: prepared.call, abi: fixture.abis[key]
+      }]);
+      assert.deepEqual(verifySafeCallPlan(plan, [fixture.abis[key]]), plan);
+      assert.equal(plan.steps[0].method, abi[key].getFunction(method).format("sighash"));
+      assert.equal(plan.steps[0].transaction.operation, 0);
+      count++;
+    }
+  }
+  assert.equal(count, 13);
 });

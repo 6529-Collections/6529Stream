@@ -896,8 +896,20 @@ const receiptReads = [
   "function cancelAuthorization(bytes32 nonce)"
 ] as const;
 
+const controlCallsAndReads = [
+  "function setPaused(bool paused_)",
+  "function setPlatformSigner(address signer)",
+  "function transferOwnership(address newOwner)",
+  "function renounceOwnership()",
+  "function owner() view returns (address)",
+  "function paused() view returns (bool)",
+  "function platformSigner() view returns (address)",
+  "function signerEpoch() view returns (uint64)"
+] as const;
+
 export const DIRECT_CONSERVATION_NATIVE_ABI = Object.freeze([
   ...receiptReads,
+  ...controlCallsAndReads,
   `function buy(${DIRECT_CONSERVATION_NATIVE_AUTHORIZATION_TUPLE} sale,bytes tokenData,bytes platformSignature,bytes artistSignature) payable returns (uint256 tokenId,bytes32 operationRoot)`,
   `function authorizationDigest(${DIRECT_CONSERVATION_NATIVE_AUTHORIZATION_TUPLE} sale) view returns (bytes32)`,
   "function primaryPolicy(uint256 collectionId) view returns (bytes32 policyHash,bytes32 profileId,address wallet)"
@@ -905,6 +917,9 @@ export const DIRECT_CONSERVATION_NATIVE_ABI = Object.freeze([
 
 export const DIRECT_CONSERVATION_ERC20_ABI = Object.freeze([
   ...receiptReads,
+  ...controlCallsAndReads,
+  "function raiseSignatureGasLimit(uint256 value)",
+  "function signatureGasLimit() view returns (uint256)",
   `function buy(${DIRECT_CONSERVATION_ERC20_AUTHORIZATION_TUPLE} authorization,bytes tokenData,bytes platformSignature,bytes artistSignature,${DIRECT_CONSERVATION_PAYMENT_INTENT_TUPLE} intent,bytes payerSignature) returns (uint256 tokenId,bytes32 operationRoot)`,
   `function registerSale(${DIRECT_CONSERVATION_ERC20_CONFIG_TUPLE} config) returns (bytes32 saleId)`,
   "function cancelSale(bytes32 saleId)",
@@ -921,6 +936,7 @@ export const DIRECT_CONSERVATION_ERC20_ABI = Object.freeze([
 
 export const DIRECT_CONSERVATION_AUCTION_ABI = Object.freeze([
   ...receiptReads,
+  ...controlCallsAndReads,
   `function createAuction(${DIRECT_CONSERVATION_AUCTION_AUTHORIZATION_TUPLE} authorization,bytes tokenData,bytes platformSignature,bytes artistSignature) returns (uint256 tokenId)`,
   "function bid(uint256 tokenId,address recipient) payable",
   "function settle(uint256 tokenId)",
@@ -979,7 +995,31 @@ interface DirectConservationSignedData {
   readonly artistSignature: Hex;
 }
 
+/** Original one-step Ownable and product controls; no new governance/signature transport. */
+export type DirectConservationCommonControlRequest =
+  | Readonly<{
+      kind: "setPaused";
+      paused: boolean;
+    }>
+  | Readonly<{
+      kind: "setPlatformSigner";
+      signer: Address;
+    }>
+  | Readonly<{
+      kind: "transferOwnership";
+      newOwner: Address;
+    }>
+  | Readonly<{
+      kind: "renounceOwnership";
+    }>;
+
+export type DirectConservationSignatureGasRequest = Readonly<{
+  kind: "raiseSignatureGasLimit";
+  value: bigint;
+}>;
+
 export type DirectConservationNativeRequest = Readonly<{ productKind: "native-fixed" }> & (
+  | DirectConservationCommonControlRequest
   | (Readonly<{
     kind: "buy";
     authorization: DirectConservationNativeAuthorization;
@@ -991,6 +1031,8 @@ export type DirectConservationNativeRequest = Readonly<{ productKind: "native-fi
 );
 
 export type DirectConservationERC20Request = Readonly<{ productKind: "erc20-fixed" }> & (
+  | DirectConservationCommonControlRequest
+  | DirectConservationSignatureGasRequest
   | (Readonly<{
       kind: "buy";
       authorization: DirectConservationERC20Authorization;
@@ -1019,6 +1061,7 @@ export type DirectConservationERC20Request = Readonly<{ productKind: "erc20-fixe
 );
 
 export type DirectConservationAuctionRequest = Readonly<{ productKind: "english-auction" }> & (
+  | DirectConservationCommonControlRequest
   | (Readonly<{
     kind: "createAuction";
     authorization: DirectConservationAuctionAuthorization;
@@ -1106,6 +1149,41 @@ export function normalizeDirectConservationRequest(
   const kind = value.kind;
   const base = { productKind: p, kind };
   const fields = (names: readonly string[]) => exact(value, ["productKind", "kind", ...names], "request");
+  if (kind === "setPaused") {
+    const input = fields(["paused"]);
+    if (typeof input.paused !== "boolean") {
+      throw new Error("paused must be boolean");
+    }
+    return Object.freeze({ productKind: p, kind, paused: input.paused });
+  }
+  if (kind === "setPlatformSigner") {
+    const input = fields(["signer"]);
+    return Object.freeze({
+      productKind: p,
+      kind,
+      signer: address(input.signer, "signer", true)
+    });
+  }
+  if (kind === "transferOwnership") {
+    const input = fields(["newOwner"]);
+    return Object.freeze({
+      productKind: p,
+      kind,
+      newOwner: address(input.newOwner, "newOwner", true)
+    });
+  }
+  if (kind === "renounceOwnership") {
+    fields([]);
+    return Object.freeze({ productKind: p, kind });
+  }
+  if (kind === "raiseSignatureGasLimit" && p === "erc20-fixed") {
+    const input = fields(["value"]);
+    return Object.freeze({
+      productKind: p,
+      kind,
+      value: positive(uint(input.value, 64, "signature gas limit"), "signature gas limit")
+    });
+  }
   if (kind === "cancelAuthorization") {
     const input = fields(["nonce"]);
     return Object.freeze({ ...base, nonce: hash(input.nonce, "nonce", p !== "erc20-fixed") }) as DirectConservationRequest;
@@ -1197,6 +1275,16 @@ export function normalizeDirectConservationRequest(
 
 function callArguments(request: DirectConservationRequest): readonly unknown[] {
   switch (request.kind) {
+    case "setPaused":
+      return [request.paused];
+    case "setPlatformSigner":
+      return [request.signer];
+    case "transferOwnership":
+      return [request.newOwner];
+    case "renounceOwnership":
+      return [];
+    case "raiseSignatureGasLimit":
+      return [request.value];
     case "buy":
       return request.productKind === "native-fixed"
         ? [request.authorization, request.tokenData, request.platformSignature, request.artistSignature]
@@ -1262,6 +1350,160 @@ export function normalizeDirectConservationCall(value: DirectConservationCall): 
     throw new Error("Prepared DIRECT call differs from its original request");
   }
   return result;
+}
+
+export type DirectConservationControlRequest =
+  | (DirectConservationCommonControlRequest & Readonly<{
+      productKind: DirectConservationProductKind;
+    }>)
+  | (DirectConservationSignatureGasRequest & Readonly<{
+      productKind: "erc20-fixed";
+    }>);
+
+/** Supplied product-local observations, including a zero owner after renunciation. */
+export interface DirectConservationControlState {
+  readonly owner: Address;
+  readonly paused: boolean;
+  readonly platformSigner: Address;
+  readonly signerEpoch: bigint;
+  /** Original ERC20 uint256 getter; null for native fixed price and auction products. */
+  readonly signatureGasLimit: bigint | null;
+}
+
+export type DirectConservationControlEvent =
+  | Readonly<{
+      name: "SalesPauseChanged" | "AuctionsPauseChanged";
+      args: readonly [boolean];
+    }>
+  | Readonly<{
+      name: "SalePlatformSignerChanged" | "PlatformSignerChanged" | "AuctionPlatformSignerChanged";
+      args: readonly [Address, bigint];
+    }>
+  | Readonly<{
+      name: "OwnershipTransferred";
+      args: readonly [Address, Address];
+    }>
+  | Readonly<{
+      name: "SignatureGasLimitRaised";
+      args: readonly [bigint, bigint];
+    }>;
+
+export interface DirectConservationControlTransition {
+  readonly before: DirectConservationControlState;
+  readonly after: DirectConservationControlState;
+  readonly expectedEvent: DirectConservationControlEvent;
+  readonly factsVerified: false;
+}
+
+export function isDirectConservationControlRequest(
+  request: DirectConservationRequest
+): request is DirectConservationControlRequest {
+  return request.kind === "setPaused"
+    || request.kind === "setPlatformSigner"
+    || request.kind === "transferOwnership"
+    || request.kind === "renounceOwnership"
+    || request.kind === "raiseSignatureGasLimit";
+}
+
+export function normalizeDirectConservationControlState(
+  kind: DirectConservationProductKind,
+  state: DirectConservationControlState
+): DirectConservationControlState {
+  const p = productKind(kind);
+  const input = exact(state, [
+    "owner",
+    "paused",
+    "platformSigner",
+    "signerEpoch",
+    "signatureGasLimit"
+  ], "control state");
+  if (typeof input.paused !== "boolean") {
+    throw new Error("control state paused must be boolean");
+  }
+  if (p !== "erc20-fixed" && input.signatureGasLimit !== null) {
+    throw new Error("Only the original ERC20 product has signatureGasLimit");
+  }
+  return Object.freeze({
+    owner: address(input.owner, "owner"),
+    paused: input.paused,
+    platformSigner: address(input.platformSigner, "platformSigner"),
+    signerEpoch: uint(input.signerEpoch, 64, "signerEpoch"),
+    signatureGasLimit: p === "erc20-fixed"
+      ? uint(input.signatureGasLimit, 256, "signatureGasLimit")
+      : null
+  });
+}
+
+/**
+ * Predicts one original control call from supplied state. These calls have no expected-state
+ * argument; recapture before execution rather than treating this snapshot as a concurrency guard.
+ * Every accepted call emits its event, including same-value pause and self-ownership transfer.
+ */
+export function directConservationControlTransition(
+  prepared: DirectConservationCall,
+  state: DirectConservationControlState
+): DirectConservationControlTransition {
+  const plan = normalizeDirectConservationCall(prepared);
+  const request = plan.request;
+  if (!isDirectConservationControlRequest(request)) {
+    throw new Error("Expected an original product control call");
+  }
+  const before = normalizeDirectConservationControlState(plan.coordinates.productKind, state);
+  if (before.owner !== plan.caller) {
+    throw new Error("Control call requires the supplied current owner as literal caller");
+  }
+  let after: DirectConservationControlState;
+  let expectedEvent: DirectConservationControlEvent;
+  switch (request.kind) {
+    case "setPaused":
+      after = Object.freeze({ ...before, paused: request.paused });
+      expectedEvent = Object.freeze({
+        name: request.productKind === "english-auction" ? "AuctionsPauseChanged" : "SalesPauseChanged",
+        args: Object.freeze([request.paused] as const)
+      });
+      break;
+    case "setPlatformSigner": {
+      const nextEpoch = uint(before.signerEpoch + 1n, 64, "next signerEpoch");
+      after = Object.freeze({ ...before, platformSigner: request.signer, signerEpoch: nextEpoch });
+      const name = request.productKind === "native-fixed"
+        ? "SalePlatformSignerChanged"
+        : request.productKind === "erc20-fixed"
+          ? "PlatformSignerChanged"
+          : "AuctionPlatformSignerChanged";
+      expectedEvent = Object.freeze({
+        name,
+        args: Object.freeze([request.signer, nextEpoch] as const)
+      });
+      break;
+    }
+    case "transferOwnership":
+      after = Object.freeze({ ...before, owner: request.newOwner });
+      expectedEvent = Object.freeze({
+        name: "OwnershipTransferred",
+        args: Object.freeze([before.owner, request.newOwner] as const)
+      });
+      break;
+    case "renounceOwnership":
+      after = Object.freeze({ ...before, owner: ZeroAddress as Address });
+      expectedEvent = Object.freeze({
+        name: "OwnershipTransferred",
+        args: Object.freeze([before.owner, ZeroAddress as Address] as const)
+      });
+      break;
+    case "raiseSignatureGasLimit": {
+      const previous = before.signatureGasLimit!;
+      if (request.value <= previous) {
+        throw new Error("Signature gas limit must strictly increase");
+      }
+      after = Object.freeze({ ...before, signatureGasLimit: request.value });
+      expectedEvent = Object.freeze({
+        name: "SignatureGasLimitRaised",
+        args: Object.freeze([previous, request.value] as const)
+      });
+      break;
+    }
+  }
+  return Object.freeze({ before, after, expectedEvent, factsVerified: false });
 }
 
 function checkedSaleRecord(
@@ -1494,6 +1736,9 @@ export function validateDirectConservationHistory(
 }
 
 export type DirectConservationReadRequest =
+  | Readonly<{
+    kind: "owner" | "paused" | "platformSigner" | "signerEpoch" | "signatureGasLimit";
+  }>
   | Readonly<{ kind: "directPrimaryBindings" }>
   | Readonly<{
     kind: "directPrimarySaleReceipt" | "directPrimarySaleReceiptHash";
@@ -1552,6 +1797,15 @@ export function prepareDirectConservationRead(
   const fields = (names: readonly string[]) => exact(request, ["kind", ...names], "read request");
   let args: readonly unknown[];
   switch (request.kind) {
+    case "signatureGasLimit":
+      requireKind(c, "erc20-fixed");
+      fields([]);
+      args = [];
+      break;
+    case "owner":
+    case "paused":
+    case "platformSigner":
+    case "signerEpoch":
     case "directPrimaryBindings":
       fields([]);
       args = [];

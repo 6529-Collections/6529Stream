@@ -72,6 +72,8 @@ export interface DirectConservationCapture {
   readonly refundCredit: bigint | null;
   readonly nextSaleNonce: bigint | null;
   readonly dependencies: readonly DirectConservationCodePin[];
+  /** Present only for original local owner controls; no commerce admission is inferred. */
+  readonly control?: direct.DirectConservationControlState;
   readonly captureHash: Hex;
   readonly admissionAuthority: "original-product-call-simulation";
 }
@@ -173,7 +175,15 @@ const abi = new Interface(
     "event ConservationFirstSaleRecorded(uint256 indexed collectionId, bytes32 indexed receiptHash, (bytes32 receiptHash, uint256 collectionId, bytes32 effectiveTier, address recorder, bytes32 settlementKey, uint64 recordedAt, uint64 sourceId, bytes32 sourceSetHash, (bytes32 artistId, bytes32 identityRecordHash, bytes32 intentRecordHash, bytes32 intentWaiverRecordHash, bytes32 interviewEvidenceHash, bytes32 rightsRecordHash, bytes32 personhoodEvidenceHash, bool platformWorks) facts) receipt, uint16 schemaVersion)",
     "event ConservationPrimarySalePrepared(bytes32 indexed preparationHash, address indexed recorder, bytes32 indexed settlementKey, bytes32 collectionEvidenceHash, bytes32 releaseEvidenceHash, uint16 schemaVersion)",
     "event ConservationReleaseFloorRecorded(bytes32 indexed releaseKey, bytes32 indexed receiptHash, (bytes32 receiptHash, bytes32 releaseKey, uint256 collectionId, bytes32 effectiveTier, address recorder, bytes32 settlementKey, uint64 recordedAt, uint64 sourceId, bytes32 sourceSetHash, (bytes32 scopeSubject, bytes32 membershipHash, bytes32 mediaInventoryHash, bytes32 scriptSourceHash, bytes32 sourceContextHash, bool scriptWork) context, (bytes32 sourceContextHash, bytes32 mediaEvidenceHash, bytes32 referenceEvidenceHash) facts) receipt, uint16 schemaVersion)",
-    "event ConservationSettlementRecorded(bytes32 indexed settlementKey, bytes32 indexed receiptHash, (bytes32 receiptHash, address recorder, bytes32 recorderCodeHash, bytes32 settlementKey, bytes32 candidatePayloadHash, bytes32 candidateCommitment, bytes32 resultHash, uint256 collectionId, uint256 tokenId, bytes32 effectiveTier, bytes32 firstSaleReceiptHash, bytes32 releaseReceiptHash, uint64 recordedAt) receipt, uint16 schemaVersion)"
+    "event ConservationSettlementRecorded(bytes32 indexed settlementKey, bytes32 indexed receiptHash, (bytes32 receiptHash, address recorder, bytes32 recorderCodeHash, bytes32 settlementKey, bytes32 candidatePayloadHash, bytes32 candidateCommitment, bytes32 resultHash, uint256 collectionId, uint256 tokenId, bytes32 effectiveTier, bytes32 firstSaleReceiptHash, bytes32 releaseReceiptHash, uint64 recordedAt) receipt, uint16 schemaVersion)",
+    "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+    "event SalePlatformSignerChanged(address indexed signer, uint64 epoch)",
+    "event SalesPauseChanged(bool paused)",
+    "event PlatformSignerChanged(address indexed signer, uint64 epoch)",
+    "event SignatureGasLimitRaised(uint256 previousValue, uint256 value)",
+    "event AuctionPlatformSignerChanged(address indexed signer, uint64 epoch)",
+    "event AuctionsPauseChanged(bool paused)",
+    "function signatureGasLimit() view returns (uint256)"
   ]
 );
 
@@ -320,7 +330,7 @@ function captured(value: DirectConservationCapture): DirectConservationCapture {
   keys(value, [
     'deployment', 'prepared', 'observed', 'bindings', 'admission', 'floor', 'mint', 'sale',
     'auction', 'paymentIntent', 'refundCredit', 'nextSaleNonce', 'dependencies', 'captureHash', 'admissionAuthority'
-  ]);
+  ], ['control']);
   const copy = {
     ...structuredClone(value),
     deployment: deployment(value.deployment),
@@ -480,7 +490,11 @@ const productAbis = {
     "function authorizationDigest((uint256 collectionId, bytes32 phaseId, address payer, address recipient, address artist, bytes32 profileId, bytes32 expectedPrimaryPolicyHash, bytes32 tokenDataHash, bytes32 mintCommitment, bytes32 mintPolicyHash, uint256 price, bytes32 nonce, uint64 deadline, uint64 signerEpoch) sale) view returns (bytes32)",
     "function buy((uint256 collectionId, bytes32 phaseId, address payer, address recipient, address artist, bytes32 profileId, bytes32 expectedPrimaryPolicyHash, bytes32 tokenDataHash, bytes32 mintCommitment, bytes32 mintPolicyHash, uint256 price, bytes32 nonce, uint64 deadline, uint64 signerEpoch) sale, bytes tokenData, bytes platformSignature, bytes artistSignature) payable returns (uint256 tokenId, bytes32 operationRoot)",
     "function cancelAuthorization(bytes32 nonce)",
-    "function primaryPolicy(uint256 collectionId) view returns (bytes32 policyHash, bytes32 profileId, address wallet)"
+    "function primaryPolicy(uint256 collectionId) view returns (bytes32 policyHash, bytes32 profileId, address wallet)",
+    "function setPaused(bool paused_)",
+    "function setPlatformSigner(address signer)",
+    "function transferOwnership(address newOwner)",
+    "function renounceOwnership()"
   ]),
   "erc20-fixed": new Interface([
     "function authorizationDigest((bytes32 saleId, bytes32 saleConfigHash, address payer, address recipient, address artist, bytes32 tokenDataHash, bytes32 mintCommitment, bytes32 nonce, uint64 deadline, uint64 signerEpoch) authorization) view returns (bytes32)",
@@ -490,7 +504,12 @@ const productAbis = {
     "function primaryPolicy(uint256 collectionId, bytes32 revenueClass) view returns (bytes32 policyHash, bytes32 profileId, address wallet)",
     "function registerSale((uint256 collectionId, bytes32 phaseId, address asset, bytes32 revenueClass, uint256 price, bytes32 mintPolicyHash, bytes32 expectedPrimaryPolicyHash, uint64 startsAt, uint64 endsAt) config) returns (bytes32 saleId)",
     "function revokePaymentIntent(bytes32 nonce)",
-    "function revokePaymentIntentBySignature(address payer, bytes32 nonce, uint64 deadline, bytes signature)"
+    "function revokePaymentIntentBySignature(address payer, bytes32 nonce, uint64 deadline, bytes signature)",
+    "function setPaused(bool value)",
+    "function setPlatformSigner(address signer)",
+    "function transferOwnership(address newOwner)",
+    "function renounceOwnership()",
+    "function raiseSignatureGasLimit(uint256 value)"
   ]),
   "english-auction": new Interface([
     "function authorizationDigest((uint256 collectionId, bytes32 phaseId, address artist, bytes32 profileId, bytes32 expectedPrimaryPolicyHash, bytes32 tokenDataHash, bytes32 mintCommitment, bytes32 mintPolicyHash, uint256 reservePrice, uint64 startTime, uint64 endTime, uint32 extensionWindow, uint16 minBidIncrementBps, bytes32 nonce, uint64 deadline, uint64 signerEpoch) authorization) view returns (bytes32)",
@@ -502,7 +521,11 @@ const productAbis = {
     "function primaryPolicy(uint256 collectionId) view returns (bytes32 policyHash, bytes32 profileId, address wallet)",
     "function setDeliveryRecipient(uint256 tokenId, address recipient)",
     "function settle(uint256 tokenId)",
-    "function withdrawRefund(address recipient)"
+    "function withdrawRefund(address recipient)",
+    "function setPaused(bool paused_)",
+    "function setPlatformSigner(address signer)",
+    "function transferOwnership(address newOwner)",
+    "function renounceOwnership()"
   ]),
 };
 
@@ -527,6 +550,37 @@ async function productRead(
   return decoded(contract, method, await provider.call({
     to: prepared.coordinates.product, data: contract.encodeFunctionData(method, args), blockTag: tag
   }));
+}
+
+function isControl(method: string): boolean {
+  return ['setPaused', 'setPlatformSigner', 'transferOwnership', 'renounceOwnership',
+    'raiseSignatureGasLimit'].includes(method);
+}
+
+async function controlState(
+  provider: Reader,
+  prepared: direct.DirectConservationCall,
+  tag: number
+): Promise<direct.DirectConservationControlState> {
+  const target = prepared.coordinates.product;
+  const [[owner], [paused], [platformSigner], [signerEpoch]] = await Promise.all([
+    read(provider, target, 'owner', [], tag),
+    read(provider, target, 'paused', [], tag),
+    read(provider, target, 'platformSigner', [], tag),
+    read(provider, target, 'signerEpoch', [], tag)
+  ]);
+  let signatureGasLimit: bigint | null = null;
+  if (prepared.coordinates.productKind === 'erc20-fixed') {
+    [signatureGasLimit] = await read(provider, target, 'signatureGasLimit', [], tag);
+  }
+  address(platformSigner);
+  if (signerEpoch === 0n || (signatureGasLimit !== null
+    && (signatureGasLimit < 400_000n || signatureGasLimit >= 1n << 64n))) {
+    throw Error('Impossible original control state');
+  }
+  return direct.normalizeDirectConservationControlState(prepared.coordinates.productKind, {
+    owner, paused, platformSigner, signerEpoch, signatureGasLimit
+  });
 }
 
 /** Read-only preflight. Signature, payment, callback and nested floor admission require simulation. */
@@ -556,9 +610,13 @@ export async function captureDirectConservation(
   let paymentIntent: DirectConservationCapture['paymentIntent'] = null;
   let refundCredit: bigint | null = null;
   let nextSaleNonce: bigint | null = null;
+  let control: direct.DirectConservationControlState | undefined;
   const dependencies: DirectConservationCodePin[] = [];
   const minting = method === 'buy' || method === 'createAuction';
-  if (minting) {
+  if (isControl(method)) {
+    control = await controlState(provider, prepared, tag);
+    direct.directConservationControlTransition(prepared, control);
+  } else if (minting) {
     await Promise.all([pinned(provider, d.core, tag), pinned(provider, d.manager, tag)]);
     const authorization = args[0];
     const [[paused], [epoch], [used], [onchainId], [onchainDigest], [signer]] = await Promise.all([
@@ -706,6 +764,7 @@ export async function captureDirectConservation(
   const body = {
     deployment: d, prepared, observed, bindings, admission: row, floor, mint, sale, auction,
     paymentIntent, refundCredit, nextSaleNonce, dependencies,
+    ...(control === undefined ? {} : { control }),
     admissionAuthority: 'original-product-call-simulation' as const
   };
   return freeze({ ...body, captureHash: fingerprint(body) });
@@ -724,6 +783,9 @@ export async function simulateDirectConservation(
   if (tag < saved.observed.blockNumber) throw Error('Simulation predates capture');
   equal(await captureDirectConservation(provider, saved.deployment, saved.prepared, { blockTag: saved.observed.blockNumber }), saved, 'Historical capture');
   const current = await captureDirectConservation(provider, saved.deployment, saved.prepared, { blockTag: tag });
+  if (saved.control !== undefined) {
+    equal(current.control, saved.control, 'Reviewed control prestate changed; recapture');
+  }
   const { method, contract } = argumentsOf(current.prepared);
   const returnData = bytes(await provider.call({ ...current.prepared.call, from: current.prepared.caller, blockTag: tag, gasLimit }));
   const values = decoded(contract, method, returnData);
@@ -763,20 +825,22 @@ export interface DirectConservationTransactionReceipt {
   readonly paidReceipt: direct.DirectConservationReceipt | null;
   readonly floorHistory: DirectConservationFloorHistory | null;
   readonly auction: direct.DirectConservationAuction | null;
+  readonly control?: direct.DirectConservationControlState;
   readonly outcome:
-  | 'paid'
-  | 'free-mint'
-  | 'auction-created'
-  | 'bid'
-  | 'pending-no-bid'
-  | 'delivered-no-bid'
-  | 'cancelled'
-  | 'recipient-updated'
-  | 'refund'
-  | 'authorization-cancelled'
-  | 'intent-revoked'
-  | 'sale-configured'
-  | 'sale-cancelled';
+    | 'paid'
+    | 'free-mint'
+    | 'auction-created'
+    | 'bid'
+    | 'pending-no-bid'
+    | 'delivered-no-bid'
+    | 'cancelled'
+    | 'recipient-updated'
+    | 'refund'
+    | 'authorization-cancelled'
+    | 'intent-revoked'
+    | 'sale-configured'
+    | 'sale-cancelled'
+    | 'control-updated';
   readonly requiredLogIndices: readonly number[];
 }
 
@@ -929,6 +993,9 @@ export async function reconcileDirectConservationReceipt(
   same(receipt.blockHash, observed.blockHash, 'Receipt block');
   equal(await captureDirectConservation(provider, d, saved.prepared, { blockTag: saved.observed.blockNumber }), saved, 'Historical capture');
   const before = await captureDirectConservation(provider, d, saved.prepared, { blockTag: tag - 1 });
+  if (saved.control !== undefined) {
+    equal(before.control, saved.control, 'Reviewed control prestate changed; recapture');
+  }
   await pinned(provider, d.product, tag);
   const call = saved.prepared.call;
   if (selectedTransport.execution === 'direct') {
@@ -954,6 +1021,7 @@ export async function reconcileDirectConservationReceipt(
   let paidReceipt: direct.DirectConservationReceipt | null = null;
   let floorHistory: DirectConservationFloorHistory | null = null;
   let auction: direct.DirectConservationAuction | null = null;
+  let control: direct.DirectConservationControlState | undefined;
   let outcome: DirectConservationTransactionReceipt['outcome'];
   let lastSettlement = -1;
   let settlementIndex = -1;
@@ -965,7 +1033,18 @@ export async function reconcileDirectConservationReceipt(
   let createdAt = observed.timestamp;
   let creationRevision = before.admission?.revision ?? 0n;
   const product = d.product.address;
-  if (method === 'buy') {
+  if (isControl(method)) {
+    if (before.control === undefined) throw Error('Missing reviewed control prestate');
+    const transition = direct.directConservationControlTransition(saved.prepared, before.control);
+    const event = abi.getEvent(transition.expectedEvent.name)!;
+    const expected = Object.fromEntries(event.inputs.map((input, index) => [
+      input.name, transition.expectedEvent.args[index]
+    ]));
+    m.one(product, transition.expectedEvent.name, expected);
+    control = await controlState(provider, saved.prepared, tag);
+    equal(control, transition.after, 'Original control poststate');
+    outcome = 'control-updated';
+  } else if (method === 'buy') {
     const authorization = args[0];
     direct.validateDirectConservationExecutionTerms(saved.prepared, { timestamp: observed.timestamp, signerEpoch: authorization.signerEpoch }, before.sale ?? undefined);
     const kind = saved.prepared.coordinates.productKind;
@@ -1242,6 +1321,7 @@ export async function reconcileDirectConservationReceipt(
   equal(await header(provider, tag, d.chainId), observed, 'Receipt block');
   return freeze({
     capture: before, transactionHash, observed, tokenId, mint, paidReceipt, floorHistory, auction,
+    ...(control === undefined ? {} : { control }),
     outcome, requiredLogIndices: [...new Set(refs)].sort((a, b) => a - b)
   });
 }

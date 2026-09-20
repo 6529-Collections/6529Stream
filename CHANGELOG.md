@@ -125,6 +125,9 @@ the release policy in `docs/release-policy.md`.
   unsupported newest records as unresolved. Keep examination joins and complete
   acquisition packet requirements explicit.
 
+- Complete original DIRECT product control callers and receipt checks, with
+  source-bound coverage of all 29 mutable selectors through direct and Safe calls.
+
 - Add original DIRECT sale and auction callers with separate payer consent,
   typed paid receipts, immutable conservation history and Safe verification.
 

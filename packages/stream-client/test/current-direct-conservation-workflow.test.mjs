@@ -66,6 +66,7 @@ function setup(kind = 'native-fixed', options = {}) {
   const prepared = p.prepareDirectConservationCall(coordinates, caller, request);
   const rootState = {
     used: false, rootUsed: false, intentUsed: false, paused: false, epoch: 1n,
+    owner: caller, platformSigner: addr(31), signatureGasLimit: 400000n,
     sale: structuredClone(sale), auction: null, nextSaleNonce: 1n, refund: 0n,
     admission: { status: 1n, registeredAt: 1n, statusUpdatedAt: 1n, revision: 1n },
     paid: emptyPaid(), floorReceipt: null, firstSale: null, release: null,
@@ -141,10 +142,13 @@ function setup(kind = 'native-fixed', options = {}) {
             result = [s.epoch];
             break;
           case 'platformSigner':
-            result = [addr(31)];
+            result = [s.platformSigner];
             break;
           case 'owner':
-            result = [caller];
+            result = [s.owner];
+            break;
+          case 'signatureGasLimit':
+            result = [s.signatureGasLimit];
             break;
           case 'authorizationUsed':
             result = [s.used];
@@ -803,5 +807,281 @@ test('generic Safe plans preserve every original call and its actual native valu
     assert.equal(verifySafeCallPlan(plan, [fixture.abis[kind === 'native-fixed' ? 'nativeSale' : kind === 'erc20-fixed' ? 'erc20Sale' : 'auction']]).hash, plan.hash);
     assert.equal(plan.steps[0].transaction.operation, 0);
     assert.equal(plan.steps[0].transaction.value, h.prepared.call.value.toString());
+  }
+});
+
+const controlOperations = [
+  ...['native-fixed', 'erc20-fixed', 'english-auction'].flatMap(kind =>
+    ['setPaused', 'setPlatformSigner', 'transferOwnership', 'renounceOwnership'].map(method => [kind, method])
+  ),
+  ['erc20-fixed', 'raiseSignatureGasLimit']
+];
+
+function controlRequest(kind, method, overrides = {}) {
+  const fields = method === 'setPaused' ? { paused: true }
+    : method === 'setPlatformSigner' ? { signer: B }
+      : method === 'transferOwnership' ? { newOwner: B }
+        : method === 'raiseSignatureGasLimit' ? { value: 800000n } : {};
+  return { productKind: kind, kind: method, ...fields, ...overrides };
+}
+
+async function prepareControl(kind, method, overrides = {}) {
+  const h = setup(kind);
+  h.prepared = p.prepareDirectConservationCall(
+    h.coordinates, h.caller, controlRequest(kind, method, overrides)
+  );
+  const c = await capture(h);
+  return { h, c };
+}
+
+function installControl(h, c, { tag = 11, safe = null } = {}) {
+  const request = c.prepared.request;
+  const next = structuredClone(h.state(tag - 1));
+  let name;
+  let args;
+  switch (request.kind) {
+    case 'setPaused':
+      next.paused = request.paused;
+      name = h.kind === 'english-auction' ? 'AuctionsPauseChanged' : 'SalesPauseChanged';
+      args = [request.paused];
+      break;
+    case 'setPlatformSigner':
+      next.platformSigner = request.signer;
+      next.epoch += 1n;
+      name = h.kind === 'native-fixed' ? 'SalePlatformSignerChanged'
+        : h.kind === 'erc20-fixed' ? 'PlatformSignerChanged' : 'AuctionPlatformSignerChanged';
+      args = [request.signer, next.epoch];
+      break;
+    case 'transferOwnership':
+      args = [next.owner, request.newOwner];
+      next.owner = request.newOwner;
+      name = 'OwnershipTransferred';
+      break;
+    case 'renounceOwnership':
+      args = [next.owner, ZeroAddress];
+      next.owner = ZeroAddress;
+      name = 'OwnershipTransferred';
+      break;
+    case 'raiseSignatureGasLimit':
+      args = [next.signatureGasLimit, request.value];
+      next.signatureGasLimit = request.value;
+      name = 'SignatureGasLimitRaised';
+      break;
+    default:
+      throw Error('Expected original control');
+  }
+  const fragment = contracts[h.kind].getEvent(name);
+  const log = {
+    address: h.product,
+    ...contracts[h.kind].encodeEventLog(fragment, args),
+    index: 0
+  };
+  h.states.set(tag, next);
+  return installTransaction(h, c.prepared, [log], tag, safe);
+}
+
+test('all thirteen local controls simulate and reconcile direct plus both Safe layouts without commerce dependencies', async () => {
+  for (const [kind, method] of controlOperations) {
+    for (const safe of [null, 'legacy', 'indexed']) {
+      const { h, c } = await prepareControl(kind, method);
+      h.codeAt = target => target === h.product ? code : '0x';
+      h.mutate = ({ name }) => {
+        if (!['directPrimaryBindings', 'owner', 'paused', 'platformSigner', 'signerEpoch',
+          'signatureGasLimit', method].includes(name)) {
+          throw Error(`Control unexpectedly read commerce prerequisite ${name}`);
+        }
+      };
+      const result = await w.simulateDirectConservation(h.provider, c, {
+        blockTag: 10, gasLimit: 5_000_000n
+      });
+      assert.equal(result.returnData, '0x');
+      assert.equal(result.tokenId, null);
+      const r = installControl(h, c, { safe });
+      const receipt = await reconcile(h, c, r);
+      assert.equal(receipt.outcome, 'control-updated');
+      assert.equal(receipt.tokenId, null);
+      assert.equal(receipt.paidReceipt, null);
+      assert.equal(receipt.floorHistory, null);
+      assert.equal(receipt.capture.admission, null);
+      assert.equal(receipt.control.signerEpoch, method === 'setPlatformSigner' ? 2n : 1n);
+      assert.equal(h.state(11).used, false);
+      assert.equal(h.state(11).intentUsed, false);
+    }
+  }
+});
+
+test('same pause, same signer and self-transfer retain exact mandatory event semantics', async () => {
+  for (const kind of ['native-fixed', 'erc20-fixed', 'english-auction']) {
+    for (const [method, fields] of [
+      ['setPaused', { paused: false }],
+      ['setPlatformSigner', { signer: addr(31) }],
+      ['transferOwnership', { newOwner: A }]
+    ]) {
+      const { h, c } = await prepareControl(kind, method, fields);
+      const r = installControl(h, c);
+      const result = await reconcile(h, c, r);
+      assert.equal(result.control.owner, A);
+      assert.equal(result.control.signerEpoch, method === 'setPlatformSigner' ? 2n : 1n);
+      r.receipt.logs = [];
+      await assert.rejects(reconcile(h, c, r), /Missing or duplicate/);
+    }
+  }
+});
+
+test('owner controls require the literal owner, reject unknown bindings and propagate original call reverts', async () => {
+  for (const [kind, method] of controlOperations) {
+    const { h, c } = await prepareControl(kind, method);
+    h.state(0).owner = B;
+    h.state(0).platformSigner = A;
+    await assert.rejects(capture(h), /current owner/);
+    h.state(0).owner = A;
+    h.state(0).platformSigner = addr(31);
+    h.mutate = ({ name, result }) => name === 'directPrimaryBindings'
+      ? [{ ...result[0], mintManager: B }] : undefined;
+    await assert.rejects(capture(h), /Bound Manager/);
+    h.mutate = ({ name }) => {
+      if (name === method) throw Error('original control call rejected');
+    };
+    await assert.rejects(w.simulateDirectConservation(h.provider, c, {
+      blockTag: 10, gasLimit: 5_000_000n
+    }), /original control call rejected/);
+  }
+});
+
+test('reviewed control context drift requires recapture for simulation and receipt attribution', async () => {
+  for (const field of ['paused', 'platformSigner', 'epoch', 'signatureGasLimit']) {
+    const { h, c } = await prepareControl('erc20-fixed', 'setPaused');
+    const next = structuredClone(h.state(10));
+    if (field === 'paused') next.paused = true;
+    if (field === 'platformSigner') next.platformSigner = B;
+    if (field === 'epoch') next.epoch = 2n;
+    if (field === 'signatureGasLimit') next.signatureGasLimit = 500000n;
+    h.states.set(11, next);
+    await assert.rejects(w.simulateDirectConservation(h.provider, c, {
+      blockTag: 11, gasLimit: 5_000_000n
+    }), /prestate changed/);
+    const refreshed = await w.captureDirectConservation(h.provider, h.deployment, h.prepared, { blockTag: 11 });
+    const r = installControl(h, refreshed, { tag: 12 });
+    await assert.rejects(reconcile(h, c, r), /prestate changed/);
+    assert.equal((await reconcile(h, refreshed, r)).outcome, 'control-updated');
+  }
+});
+
+test('signer changes invalidate old epochs and retry requires fresh reviewed context', async () => {
+  const { h, c } = await prepareControl('native-fixed', 'setPlatformSigner', { signer: addr(31) });
+  const r = installControl(h, c);
+  assert.equal((await reconcile(h, c, r)).control.signerEpoch, 2n);
+  await assert.rejects(w.simulateDirectConservation(h.provider, c, {
+    blockTag: 11, gasLimit: 5_000_000n
+  }), /prestate changed/);
+  const refreshed = await w.captureDirectConservation(h.provider, h.deployment, h.prepared, { blockTag: 11 });
+  const retry = installControl(h, refreshed, { tag: 12 });
+  assert.equal((await reconcile(h, refreshed, retry)).control.signerEpoch, 3n);
+  const oldAuthorization = p.prepareDirectConservationCall(h.coordinates, A, h.request);
+  await assert.rejects(w.captureDirectConservation(h.provider, h.deployment, oldAuthorization, {
+    blockTag: 12
+  }), /Mint authorization unavailable/);
+  h.states.get(12).epoch = (1n << 64n) - 1n;
+  await assert.rejects(w.captureDirectConservation(h.provider, h.deployment, h.prepared, {
+    blockTag: 12
+  }), /signerEpoch|uint64|bounded/i);
+});
+
+test('renunciation is immediate one-step and gas increases reject equal retries and impossible stored limits', async () => {
+  for (const kind of ['native-fixed', 'erc20-fixed', 'english-auction']) {
+    const { h, c } = await prepareControl(kind, 'renounceOwnership');
+    const r = installControl(h, c);
+    assert.equal((await reconcile(h, c, r)).control.owner, ZeroAddress);
+    await assert.rejects(w.captureDirectConservation(h.provider, h.deployment, h.prepared, {
+      blockTag: 11
+    }), /current owner/);
+  }
+  const { h, c } = await prepareControl('erc20-fixed', 'raiseSignatureGasLimit');
+  const r = installControl(h, c);
+  assert.equal((await reconcile(h, c, r)).control.signatureGasLimit, 800000n);
+  await assert.rejects(w.captureDirectConservation(h.provider, h.deployment, h.prepared, {
+    blockTag: 11
+  }), /strictly increase/);
+  const maximum = p.prepareDirectConservationCall(h.coordinates, A, controlRequest(
+    'erc20-fixed', 'raiseSignatureGasLimit', { value: (1n << 64n) - 1n }
+  ));
+  await w.captureDirectConservation(h.provider, h.deployment, maximum, { blockTag: 11 });
+  assert.throws(() => p.prepareDirectConservationCall(h.coordinates, A, controlRequest(
+    'erc20-fixed', 'raiseSignatureGasLimit', { value: 1n << 64n }
+  )));
+  for (const bad of [399999n, 1n << 64n]) {
+    h.state(11).signatureGasLimit = bad;
+    await assert.rejects(w.captureDirectConservation(h.provider, h.deployment, maximum, {
+      blockTag: 11
+    }), /Impossible original control state/);
+  }
+});
+
+test('every control rejects substituted Safe caller/value/hash, bad event fields and inconsistent poststate', async () => {
+  for (const [kind, method] of controlOperations) {
+    const { h, c } = await prepareControl(kind, method);
+    const r = installControl(h, c, { safe: 'indexed' });
+    await assert.rejects(w.reconcileDirectConservationReceipt(h.provider, c, r.txHash, {
+      ...r.options, expectedSafeTxHash: id('wrong-control-safe')
+    }), /matching Safe/);
+    const originalData = r.tx.data;
+    const parsed = Array.from(safeCall.decodeFunctionData('execTransaction', originalData));
+    parsed[1] = 1n;
+    r.tx.data = safeCall.encodeFunctionData('execTransaction', parsed);
+    await assert.rejects(reconcile(h, c, r), /exact CALL/);
+    parsed[1] = 0n;
+    parsed[3] = 1n;
+    r.tx.data = safeCall.encodeFunctionData('execTransaction', parsed);
+    await assert.rejects(reconcile(h, c, r), /exact CALL/);
+    r.tx.data = originalData;
+    r.tx.to = B;
+    await assert.rejects(reconcile(h, c, r), /Safe actual caller/);
+    r.tx.to = A;
+    const post = h.state(11);
+    const oldEpoch = post.epoch;
+    post.epoch += 1n;
+    await assert.rejects(reconcile(h, c, r), /control poststate/);
+    post.epoch = oldEpoch;
+    const savedLog = structuredClone(r.receipt.logs[0]);
+    const eventFragment = contracts[kind].getEvent(savedLog.topics[0]);
+    const values = Array.from(contracts[kind].decodeEventLog(
+      eventFragment, savedLog.data, savedLog.topics
+    ));
+    const last = values.length - 1;
+    values[last] = typeof values[last] === 'boolean' ? !values[last]
+      : typeof values[last] === 'bigint' ? values[last] + 1n : addr(90);
+    r.receipt.logs[0] = {
+      address: h.product,
+      ...contracts[kind].encodeEventLog(eventFragment, values),
+      index: 0
+    };
+    await assert.rejects(reconcile(h, c, r), /differs/);
+    r.receipt.logs[0] = structuredClone(savedLog);
+    r.receipt.logs[0].address = B;
+    await assert.rejects(reconcile(h, c, r), /Missing or duplicate/);
+    r.receipt.logs[0] = savedLog;
+    r.receipt.logs.unshift(r.receipt.logs.pop());
+    renumber(r.receipt.logs);
+    await assert.rejects(reconcile(h, c, r), /Safe success precedes/);
+  }
+});
+
+test('generic Safe inventory now includes every one of the twenty-nine actual mutable selectors', async () => {
+  for (const [kind, method] of controlOperations) {
+    const { h, c } = await prepareControl(kind, method);
+    const contractAbi = fixture.abis[kind === 'native-fixed' ? 'nativeSale'
+      : kind === 'erc20-fixed' ? 'erc20Sale' : 'auction'];
+    const plan = createSafeCallPlan(1n, `${kind} ${method}`, [{
+      safe: h.caller, intent: method, call: c.prepared.call, abi: contractAbi
+    }]);
+    assert.equal(verifySafeCallPlan(plan, [contractAbi]).hash, plan.hash);
+    assert.equal(plan.steps[0].transaction.value, '0');
+    assert.equal(plan.steps[0].transaction.operation, 0);
+  }
+  const listed = [...operations, ...controlOperations];
+  for (const kind of ['native-fixed', 'erc20-fixed', 'english-auction']) {
+    const original = contracts[kind].fragments.filter(fragment => fragment.type === 'function'
+      && !['view', 'pure'].includes(fragment.stateMutability)).map(fragment => fragment.name).sort();
+    assert.deepEqual(listed.filter(([product]) => product === kind).map(([, method]) => method).sort(), original);
   }
 });

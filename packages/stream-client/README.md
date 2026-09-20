@@ -339,7 +339,9 @@ contract profiles and outstanding larger-script work.
 
 - [Original DIRECT sales and conservation history](docs/current-direct-conservation.md)
   preserves native and ERC20 purchases, English auctions, original signing domains,
-  paid receipts and immutable floor evidence with exact Safe calls.
+  paid receipts and immutable floor evidence with exact Safe calls. Its
+  [complete selector register](docs/current-direct-conservation-coverage.json)
+  also covers original owner, pause, signer and ERC20 signature-gas controls.
 
 - [Native Museum anchors, tiers and media masters](docs/current-museum-anchor-master.md)
   adds permanent governance bindings, durable tier reads and original master or
