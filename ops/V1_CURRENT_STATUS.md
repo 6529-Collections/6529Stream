@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `6ad73f77`. All 2,421 sources pass the combined
-ABI/type/storage check in 23.391 seconds (ABI80). This is source compatibility,
+Latest Solidity source checkpoint: `e4ccdba4`. All 2,458 sources pass the combined
+ABI/type/storage check in 23.375 seconds (ABI81). This is source compatibility,
 not whole-system runtime acceptance. Original RC1 remains unchanged.
 
 - Core replacement now requires exact complete-policy import readiness in addition
@@ -45,6 +45,12 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   The capture uses actual components with documented typed boundaries; its
   original Router still exceeds deployment limits. Full V2 output checkpoints,
   snapshots, reference publication and locked-finality consumption remain to build.
+- Typed six-family recovery rewinds (`e4ccdba4`) are source-integrated with55
+  authored cases, independent producer review and an additional joined-host
+  review. Complete Identity/Payout selections, replay-preserving continuations,
+  original standing precedence and atomic original35 effects are included.
+  Runtime and new joined sizes are pending; the earlier6d size pass below
+  does not include this V3 addition. Recovered-authority hydration is the next build.
 - Complete original living-record hydration (`75ad082d`), adjudication V2
   (`5310fc7b`) and current living-notice recovery (`055f2396`) are source-integrated.
   Their respective 20, 44 and ten authored cases await runtime acceptance.
@@ -52,13 +58,19 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   original layouts; all 563 size-input sources match integration. Registry,
   Coordinator and Identity now fit at 24,018 / 24,333 / 24,179 runtime bytes;
   all eleven selected products fit. Other held Artist/Router/Estate size issues
-  remain. Complete non-guardian rewinds and advanced hydration are still building.
+  remain. Non-guardian V3 rewinds are now source-integrated above; advanced hydration is building.
 - Public-chain Museum RIGHTS/ownership capture (`b5ec1031`) passes 56 root cases;
   public mint/entropy capture and the pinned RC1 recipe (`7d20df15`) pass 39.
   These cohorts overlap and are not a distinct combined count. The additive
   bounded log/receipt profile states provider-log-completeness trust explicitly.
   An actual RC1 capture reached the public RPC but failed on pruned historical
   logs; no successful public-chain capture or complete acquisition packet is claimed.
+- Acquisition/accession evidence (`f541a56e`) passes38 root tests in5.930 seconds.
+  Original native OwnerRecords reconcile to the strictly preceding token
+  transfer, exact title-binding coordinates and retained instrument bytes.
+  Positive fixtures are synthetic. The older packet cannot encode native-owner
+  authority without inventing a numeric class; an additive typed V2 packet
+  profile is being built, preserving old schemas and explicit missing evidence.
 - Collection-policy clients (`aae07ba6`) and INSTANT/direct-read clients
   (`be336ace`) pass the joined 1,133-case root package in 38.908 seconds,
   including generation, build and strict types. Original source profiles remain
@@ -74,7 +86,7 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   Exact source/artifact attestation is pending; complete-flow acceptance remains open.
 
 Active builds cover exact legacy/explicit entropy-policy successor import and
-origin relay, complete recovery rewinds, V2 output/finality, scoped inventories,
+origin relay, recovered-authority hydration, V2 output/finality, scoped inventories,
 Museum evidence joins, recovery clients and actual-current Safe testing.
 Automatic approval review separately rejected application of the new personhood
 proof helper, citing its identity/security boundary. Those blocked paths remain
