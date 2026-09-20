@@ -37,6 +37,9 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+- Add reference environment preparation clients preserving complete typed inputs,
+  canonical bytes, original inventory prerequisites and exact uploader/preparer calls.
+
 - Add current split-factory clients with per-factory clone predictions, immutable
   profile readback, lazy deployment and original wallet-domain release payloads.
 

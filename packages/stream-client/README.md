@@ -336,6 +336,8 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Complete reference environment preparation](docs/current-reference-environment.md)
+  retains original typed identities and canonical bytes after both full file inventories.
 - [Current split profiles and clone wallets](docs/current-split-factory.md) bind
   each factory's implementation, preserve profile identity and verify lazy deployment.
 - [Reference file-inventory preparation](docs/current-reference-inventory.md)

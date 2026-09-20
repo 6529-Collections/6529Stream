@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "sourceEnvironmentSha256": "4177e70740caaed5cdbe727891ad485cd7e075f87c3cb3cd735a89ce6db6f452",
+  "sourceFixtureSha256": "dccfe2fc6ca80808b9ebcb9173df238598cccff3ffb9295ea8aa0497946d0564",
+  "canonicalByteLength": 179418,
+  "canonicalKeccak256": "0x79109bf6500bdae1c7dc6d098a536dbf655b79a87ccab2ac549058e31f227d7e",
+  "inventoriesFixture": "current-reference-inventory-corpus.json",
+  "qualification": "Exact scalar fields and canonical hashes from the retained 1048/102-row environment. Coverage is not part of these JSON bytes and is supplied separately in client tests; no live coverage, publication, execution or gas claim.",
+  "fields": {
+    "objectHash": "0xe6f9c1cd16430dd1a2128041ca02af0b30d1194ae7329e80dd84bf3eec3992a5",
+    "manifestHash": "0x79109bf6500bdae1c7dc6d098a536dbf655b79a87ccab2ac549058e31f227d7e",
+    "manifestBytes": "179418",
+    "engineName": "Google Chrome",
+    "engineVersion": "152.0.7977.83",
+    "engineExecutableSha256": "0xcaf423e184f0bcefe2ee5bef40539a3c005c63beb44e3321c0834929a13af733",
+    "toolchainName": "reference_capture.py; Python; websockets",
+    "toolchainVersion": "STREAM_REFERENCE_CANVAS_STILL_WINDOWS_V1; 3.12.10; 15.0.1",
+    "toolchainSha256": "0xce9592604bc018e62bfa6e7ebf7e52055dc2fbfcf692d53e9cfd377e747e6981",
+    "engineExecutablePath": "engine/chrome.exe",
+    "toolchainPath": "tool/reference_capture.py",
+    "operatingSystem": "Windows",
+    "operatingSystemVersion": "10.0.26100",
+    "architecture": "AMD64",
+    "viewportWidth": "64",
+    "viewportHeight": "64",
+    "devicePixelRatio": "1",
+    "colorSpace": "srgb",
+    "softwareRasterization": true,
+    "captureProfile": "0xbba0e8795f947e16fc03b2239dba7a7bd9d5df86206fb0c34dcaf1d1d427f054",
+    "licenseNote": "This package retains an observed installed proprietary Google Chrome build for local preservation experiments. Its licenseBasis is undetermined. This note is not a license or permission instrument. Windows and its named loader/system-module prerequisites are external platform requirements; this package does not contain a self-contained OS. No installed user profile, browsing history or credentials are included. The complete version directory includes unused components; their presence is not capture support.\n Additive metric subtree retains CPython 3.13.13 and its exact dependency distribution licenses. Fresh capture loaded the explicitly listed Windows Defender MpOAV platform module outside SystemRoot; it is an external OS/security prerequisite, not an archive member."
+  }
+}
