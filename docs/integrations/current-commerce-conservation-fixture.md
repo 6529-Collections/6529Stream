@@ -4,6 +4,7 @@
 commerce graphs. It does not change the common current stack's default
 conservation tier. Terminal, INSTANT, native fixed settlement, clearing, Dutch,
 paid burn/mint and dynamic royalty commerce fixtures explicitly opt in.
+Refund-window recipes opt in only when they finalize paid settlement.
 
 The helper deploys the actual `StreamConservationFloor`, schedules its original
 Core binding through class-1 delayed governance, and executes that binding with
@@ -33,6 +34,13 @@ recipient-callback failures also assert recorder and floor rollback. Successful
 paid paths require the actual ledger's first-sale and settlement receipt, with
 the original recorder/runtime, collection, token and explicit tier.
 
+Original fixed-price and deferred native settlement pay before minting. Their
+floor receipt therefore retains the candidate's token ID zero, while each
+recipe separately checks that the completed mint produced token one. The
+receipt assertion accepts an explicit expected token ID; its current native
+default is zero. A floor receipt must not be rewritten to claim a token that
+was allocated only later in the same transaction.
+
 Free operator distribution, configuration-only, zero-price-only native sale and
 free burn recipes do not install a waiver. Free burn surplus recovery installs
 its genuine Safe governor but leaves the floor unbound and the tier undeclared.
@@ -53,6 +61,16 @@ curated auction/purchase, custody rights, native/ERC20 offers and successor
 royalty continuity. Typed native English-auction and direct-sale acceptance
 remain separate migrations.
 
+The refund-window refusal recipe prepares real governance before taking the
+deposit. Unbound and bound-but-undeclared finalizations retain the original
+deposit record, consumed purchase authorization, buyer liabilities, Safe nonce
+and zero mint/revenue/entropy effects. It checks the adapter's original
+`DeferredSettlementFailed` wrapper; that wrapper deliberately hides the inner
+recorder error. The exact signed keeper payload succeeds after explicit
+declaration, and a later idempotent finalization preserves the same receipt.
+Deposit/refund-only, delegated refund, credit export and surplus recipes retain
+the unbound default.
+
 ## Evidence and limits
 
 The Terminal/INSTANT source passed a 1,315-source ABI/type check before
@@ -63,6 +81,11 @@ the five changed test files. These are compilation and source-review results;
 native execution of the combined current graph remains pending. The original
 Terminal ten and INSTANT eight cases become eleven and nine with the new
 refusal recipes.
+
+The refund-window extension and corrected payment-before-mint receipt oracle
+passed a 1,471-source ABI/type check including Terminal, INSTANT and Safe
+consumers. Refund-window retains its four original cases and adds the deferred
+refusal/retry case. Native execution of this extension also remains pending.
 
 The helper uses explicitly named **fixture** gas configuration: 300,000 for
 reads, 1,000,000 for producers and 6,000,000 for the floor call. These are not

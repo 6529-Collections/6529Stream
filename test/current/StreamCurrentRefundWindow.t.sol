@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeRefundWindowSale.sol";
 import {
     StreamPrimarySaleSettlement
@@ -50,7 +50,7 @@ contract CurrentRefundARRNGService {
 }
 
 /// @notice Actual Core/Manager/artist/settlement/entropy/Executor and threshold Safe composition.
-contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
+contract StreamCurrentRefundWindowTest is CurrentCommerceConservationFixture {
     bytes32 private constant REFUND_PHASE = keccak256("actual current refund phase");
     bytes32 private constant SALT = keccak256("actual current refund entropy salt");
     uint256 private constant PRICE = 1000;
@@ -198,6 +198,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
             0,
             0
         );
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _configureAdditionalProducts() internal override {
@@ -272,6 +273,11 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function testSafeDepositRefundAndPullClaimPreserveMonotonicPurchaseNonce() public {
+        (address floor,) = core.conservationFloor();
+        require(
+            floor == address(0) && core.declaredConservationTier(1) == 0,
+            "deposit and refund require no implicit conservation waiver"
+        );
         IStreamNativeRefundWindowSale.RefundPurchaseData memory data = _purchaseData(1);
         bytes32 id = _purchase(data);
         require(
@@ -326,6 +332,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function testPermissionlessSafeFinalizationPaysMintsAndRequestsActualEntropy() public {
+        _enableWaivedCommerceFloor();
         IStreamNativeRefundWindowSale.RefundPurchaseData memory data = _purchaseData(3);
         bytes32 id = _purchase(data);
         (uint64 deadline,,) = refundSale.purchaseDeadlines(id);
@@ -339,6 +346,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
         );
         IStreamNativeRefundWindowSale.RefundFinalizationResult memory result =
             refundSale.finalizeRefundWindow(id);
+        _assertWaivedCommerceReceipt(address(recorder), result.settlementKey, 0);
         require(
             result.tokenId == 1 && result.amount == PRICE && result.revealFeeForwarded == FEE
                 && result.revealFeeRefunded == 0,
@@ -371,6 +379,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function testCaughtExternalProviderFailurePreservesMintThenPublicSafeSLOReveals() public {
+        _enableWaivedCommerceFloor();
         _exec(operatorSafe, address(upstream), 0, abi.encodeCall(upstream.setRejecting, (true)));
         IStreamNativeRefundWindowSale.RefundPurchaseData memory data = _purchaseData(4);
         bytes32 id = _purchase(data);
@@ -381,6 +390,9 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
             address(refundSale),
             0,
             abi.encodeCall(refundSale.finalizeRefundWindow, (id))
+        );
+        _assertWaivedCommerceReceipt(
+            address(recorder), refundSale.finalizeRefundWindow(id).settlementKey, 0
         );
         require(
             refundSale.refundPurchaseRecord(id).status == 2 && core.ownerOf(1) == address(payerSafe)
@@ -469,6 +481,106 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
         require(
             address(payerSafe).balance == 1 ether && refundSale.totalBuyerLiabilities() == 0,
             "contested identity cannot trap payer exit"
+        );
+    }
+
+    function testDeferredFloorRefusalsPreserveDepositAndExactKeeperRetry() public {
+        _prepareCommerceFloor();
+        IStreamNativeRefundWindowSale.RefundPurchaseData memory data = _purchaseData(99);
+        bytes32 id = _purchase(data);
+        bytes32 purchaseState = keccak256(abi.encode(refundSale.refundPurchaseRecord(id)));
+        bytes32 purchaseKey = recorder.deferredPurchaseKey(address(refundSale), id);
+        (uint64 deadline,,) = refundSale.purchaseDeadlines(id);
+        vm.warp(deadline);
+        uint256 nonce = keeperSafe.nonce();
+        bytes memory callData = abi.encodeCall(refundSale.finalizeRefundWindow, (id));
+        bytes32 digest = keeperSafe.getTransactionHash(
+            address(refundSale), 0, callData, 0, 0, 0, 0, address(0), address(0), nonce
+        );
+        bytes memory payload = abi.encodeCall(
+            keeperSafe.execTransaction,
+            (
+                address(refundSale),
+                0,
+                callData,
+                0,
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(keys, digest)
+            )
+        );
+        for (uint256 i; i < 2; ++i) {
+            // The original deferred adapter deliberately wraps recorder failures.
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    StreamDeferredNativeSettlementCall.DeferredSettlementFailed.selector
+                )
+            );
+            refundSale.finalizeRefundWindow(id);
+            (bool ok, bytes memory reason) = address(keeperSafe).call(payload);
+            require(
+                !ok
+                    && keccak256(reason)
+                        == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                    && keeperSafe.nonce() == nonce,
+                "exact failed keeper payload retains original Safe nonce"
+            );
+            require(
+                keccak256(abi.encode(refundSale.refundPurchaseRecord(id))) == purchaseState
+                    && refundSale.refundPurchaseRecord(id).status == 1
+                    && refundSale.nextPurchaseNonce(refundId, address(payerSafe)) == 2
+                    && refundSale.purchaseAuthorizationUsed(
+                        address(artistSafe), data.authorization.nonce
+                    ) && address(payerSafe).balance == 1 ether - PRICE - FEE
+                    && address(refundSale).balance == PRICE + FEE
+                    && refundSale.totalPendingDeposits() == PRICE + FEE
+                    && refundSale.totalBuyerLiabilities() == PRICE + FEE && core.totalSupply() == 0
+                    && core.collectionMintedEver(1) == 0
+                    && !recorder.deferredPurchaseConsumed(purchaseKey)
+                    && recorder.totalOfficialSettled(address(0)) == 0 && wallet.balance == 0
+                    && upstream.arrngRequestId() == 0 && entropy.pendingRequestCount() == 0,
+                "refused finalization preserves original deposit and all settlement effects"
+            );
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamNativeRefundWindowSale.RefundPurchaseUnavailable.selector, id
+                )
+            );
+            refundSale.activeDeferredNativeSettlement(id);
+            _assertNoCommerceFloorReceipt(bytes32(0));
+            if (i == 0) _bindCommerceFloor();
+        }
+        _declareWaivedCommerce();
+        (bool success, bytes memory response) = address(keeperSafe).call(payload);
+        require(
+            success && response.length == 32 && abi.decode(response, (bool))
+                && keeperSafe.nonce() == nonce + 1,
+            "exact original keeper payload succeeds after explicit declaration"
+        );
+        IStreamNativeRefundWindowSale.RefundFinalizationResult memory result =
+            refundSale.finalizeRefundWindow(id);
+        _assertWaivedCommerceReceipt(address(recorder), result.settlementKey, 0);
+        require(
+            result.amount == PRICE && result.tokenId == 1 && result.revealFeeForwarded == FEE
+                && core.ownerOf(1) == address(payerSafe) && core.collectionMintedEver(1) == 1
+                && recorder.settlementConsumed(result.settlementKey)
+                && recorder.deferredPurchaseConsumed(purchaseKey)
+                && recorder.totalOfficialSettled(address(0)) == PRICE && wallet.balance == PRICE
+                && refundSale.totalBuyerLiabilities() == 0 && address(refundSale).balance == 0
+                && upstream.arrngRequestId() == 1,
+            "original deposit finalizes exactly once through the genuine floor"
+        );
+        bytes32 receipt =
+            keccak256(abi.encode(commerceFloor.settlementReceipt(result.settlementKey)));
+        this.finalizeAsKeeper(id);
+        require(
+            keccak256(abi.encode(commerceFloor.settlementReceipt(result.settlementKey))) == receipt
+                && core.collectionMintedEver(1) == 1 && wallet.balance == PRICE
+                && upstream.arrngRequestId() == 1,
+            "idempotent finalization preserves original floor receipt"
         );
     }
 

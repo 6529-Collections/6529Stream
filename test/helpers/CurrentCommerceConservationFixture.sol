@@ -202,6 +202,15 @@ abstract contract CurrentCommerceConservationFixture is StreamCurrentSafeGoverna
     }
 
     function _assertWaivedCommerceReceipt(address recorder, bytes32 settlementKey) internal view {
+        // Original native settlement pays before mint; the receipt retains candidate token zero.
+        _assertWaivedCommerceReceipt(recorder, settlementKey, 0);
+    }
+
+    function _assertWaivedCommerceReceipt(
+        address recorder,
+        bytes32 settlementKey,
+        uint256 expectedTokenId
+    ) internal view {
         StreamConservationFloorTypes.SettlementReceipt memory receipt =
             commerceFloor.settlementReceipt(settlementKey);
         StreamConservationFloorTypes.FirstSaleReceipt memory first = commerceFloor.firstSale(1);
@@ -209,7 +218,7 @@ abstract contract CurrentCommerceConservationFixture is StreamCurrentSafeGoverna
             receipt.receiptHash != 0 && receipt.recorder == recorder
                 && receipt.recorderCodeHash == recorder.codehash
                 && receipt.settlementKey == settlementKey && receipt.collectionId == 1
-                && receipt.tokenId == 1 && receipt.effectiveTier == COMMERCE_WAIVED
+                && receipt.tokenId == expectedTokenId && receipt.effectiveTier == COMMERCE_WAIVED
                 && receipt.firstSaleReceiptHash == first.receiptHash && first.receiptHash != 0
                 && first.collectionId == 1 && first.effectiveTier == COMMERCE_WAIVED,
             "genuine original paid WAIVED receipt"
