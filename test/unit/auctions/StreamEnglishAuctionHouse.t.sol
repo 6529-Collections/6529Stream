@@ -66,13 +66,21 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     AuctionContractArtist private _onboardingContractArtist;
 
     function setUp() public {
-        _setUpSaleFixture();
-        house = auction;
+        vm.deal(address(this), 100 ether);
+        platform = vm.addr(PLATFORM_KEY);
         vm.deal(FIRST_BIDDER, 100 ether);
         vm.deal(SECOND_BIDDER, 100 ether);
     }
 
+    /// @dev Contract-artist onboarding is selected before the only graph is constructed.
+    function deployAuctionScenario(address scenarioArtist) external {
+        require(msg.sender == address(this), "fixture caller");
+        _deployCurrentStack(scenarioArtist, platform);
+        house = auction;
+    }
+
     function testSignedCreationCustodiesActualCoreNFTAndConsumesReplay() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         vm.recordLogs();
         uint256 tokenId = _create(authorization);
@@ -112,6 +120,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testOutbidCreditsPullRefundAndExtendsNearDeadline() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         uint256 tokenId = _create(_authorization());
         _bid(FIRST_BIDDER, tokenId, FIRST_BIDDER, 1 ether);
         require(house.minimumBid(tokenId) == 1.05 ether, "five percent increment");
@@ -141,6 +150,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testSettlementPaysSplitBeforeReceiverAndCanWithdrawShares() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         uint256 tokenId = _create(_authorization());
         AuctionTestReceiver receiver = new AuctionTestReceiver();
         receiver.configure(house, wallet, false);
@@ -172,6 +182,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testRejectingRecipientRollsBackSettlementAndWinnerCanRetry() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         uint256 tokenId = _create(_authorization());
         AuctionTestReceiver receiver = new AuctionTestReceiver();
         receiver.configure(house, wallet, true);
@@ -200,6 +211,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testNoBidExpiryReturnsNFTAndPreBidArtistCanCancel() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         uint256 first = _create(authorization);
         vm.prank(artist);
@@ -217,6 +229,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testRejectingRefundPreservesCreditAndPauseLeavesExitsAvailable() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory terms = _authorization();
         terms.endTime = uint64(block.timestamp + 4 days);
         uint256 tokenId = _create(terms);
@@ -245,6 +258,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testSignatureTermsDeadlineAndPolicyCannotBeChanged() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         authorization.reservePrice = 2 ether;
@@ -280,6 +294,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testBidWindowCancellationAndRecipientAuthorization() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         authorization.startTime += 100;
         uint256 tokenId = _create(authorization);
@@ -302,6 +317,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testEntropyFailureRollsBackAuctionNonceAndMint() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         _failEntropyRegistrationCallback();
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
@@ -322,8 +338,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     function testContractArtistUnsoldNFTStaysEscrowedUntilAuthorizedPullClaim() public {
         AuctionContractArtist contractArtist = new AuctionContractArtist();
         _onboardingContractArtist = contractArtist;
-        _deployCurrentStack(address(contractArtist), platform);
-        house = auction;
+        this.deployAuctionScenario(address(contractArtist));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         authorization.artist = address(contractArtist);
         contractArtist.authorize(house.authorizationDigest(authorization));
@@ -364,6 +379,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testFullySignedAuctionCannotAttributeAnotherArtist() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         authorization.artist = vm.addr(999);
         bytes32 digest = house.authorizationDigest(authorization);
@@ -386,6 +402,7 @@ contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     }
 
     function testCanonicalStatusAndInterfacesExposeCustodyLifecycle() public {
+        this.deployAuctionScenario(vm.addr(ARTIST_KEY));
         require(
             house.supportsInterface(type(IStreamEnglishAuctionHouse).interfaceId),
             "auction interface"

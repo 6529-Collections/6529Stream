@@ -62,10 +62,18 @@ contract NativeSale1271Signer {
 /// @dev Actual current contracts and artist consents; one case explicitly injects a callback fault.
 contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     function setUp() public {
-        _setUpSaleFixture();
+        vm.deal(address(this), 100 ether);
+        platform = vm.addr(PLATFORM_KEY);
+    }
+
+    /// @dev Select the original artist before the scenario's single current graph deployment.
+    function deploySaleScenario(address scenarioArtist) external {
+        require(msg.sender == address(this), "fixture caller");
+        _deployCurrentStack(scenarioArtist, platform);
     }
 
     function testActualPaidMintFundsSplitAndAllowsRecipientWithdrawals() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (uint256 tokenId, bytes32 operationRoot) = _buy(authorization);
         require(core.ownerOf(tokenId) == authorization.recipient, "actual NFT minted");
@@ -81,6 +89,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testRecipientObservesPaidAccountedMintAndCannotReenterSale() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         NativeSaleReceiver receiver = new NativeSaleReceiver();
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         authorization.recipient = address(receiver);
@@ -95,6 +104,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testReceiverFailureRollsBackPaymentReplayLedgerAndCore() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         NativeSaleReceiver receiver = new NativeSaleReceiver();
         receiver.configure(sale, wallet, true, "");
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
@@ -106,6 +116,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testEntropyFailureRollsBackPaidMint() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         _failEntropyRegistrationCallback();
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
@@ -118,6 +129,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testReplayIsRejectedWithoutSecondPayment() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         _buy(authorization);
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
@@ -127,6 +139,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testArtistAndPlatformMustBothAuthorizeExactSale() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         authorization.recipient = address(0xBAD);
@@ -139,6 +152,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testPayerValueDeadlineAndPolicyAreEnforced() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         vm.expectRevert(
@@ -171,6 +185,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testArtistRevocationAndSignerRotationInvalidateOutstandingAuthorization() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         authorization.deadline = uint64(block.timestamp + 7 days);
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
@@ -189,8 +204,8 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testERC1271ArtistAndPlatformSignersCanBuy() public {
-        address contractArtist = address(new NativeSale1271Signer(artist));
-        _deployCurrentStack(contractArtist, platform);
+        address contractArtist = address(new NativeSale1271Signer(vm.addr(ARTIST_KEY)));
+        this.deploySaleScenario(contractArtist);
         _executeSaleGovernance(
             address(sale),
             abi.encodeCall(sale.setPlatformSigner, (address(new NativeSale1271Signer(platform))))
@@ -203,6 +218,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     }
 
     function testFullySignedSaleCannotAttributeAnotherArtist() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         authorization.artist = vm.addr(999);
         bytes32 digest = sale.authorizationDigest(authorization);
