@@ -501,6 +501,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified tagged full-policy VIEW adoption callers with original
+  Artist consent, shared V1/V2 history and current or historical rendering.
+
 - Add source-qualified canonical native and ERC20 Dutch purchase callers with
   inclusion-price quotes, separate reveal funding and original maximum permits.
 

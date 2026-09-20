@@ -80,6 +80,11 @@ The [canonical native/ERC20 Dutch clients](current-canonical-dutch.md) separatel
 retain ABI121 for original purchase/payment entry points, pull refunds and
 historical Manager revocation. Carrier callbacks remain protocol-only.
 
+The [tagged full-policy VIEW client](current-tagged-policy-view-v2.md) separately
+retains ABI125 for actual Router adoption and original current/historical
+serving. Nominal library methods remain separate from wallet call plans; this
+profile adds no VIEW publication or finality ceremony.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

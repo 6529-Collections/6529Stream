@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Tagged full-policy VIEW adoption](docs/current-tagged-policy-view-v2.md)
+  covers original Router adoption, stored Artist consent, closed V1/V2 history
+  and current or historical rendering under the exact ABI125 source profile.
+
 - [Canonical native and ERC20 Dutch purchases](docs/current-canonical-dutch.md)
   covers original Sales-v1 authorization, mined-price reconciliation, maximum
   token permits, native reveal allowances and local historical exits.

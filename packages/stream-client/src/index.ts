@@ -20,6 +20,8 @@ export * from "./current-canonical-native-dutch.js";
 export * from "./current-canonical-native-dutch-workflow.js";
 export * from "./current-erc20-dutch.js";
 export * from "./current-erc20-dutch-workflow.js";
+export * from "./current-tagged-policy-view-v2.js";
+export * from "./current-tagged-policy-view-v2-workflow.js";
 export * from "./current-manifests.js";
 export * from "./current-secondary.js";
 export * from "./current-native-sale-credits.js";
