@@ -68,6 +68,27 @@ canonical dynamic ABI, bounded to 32 ordered steps and 5,696 bytes. Existing
 recovery tuples, hashes and replacement targets are retained. An existing
 one-successor recovery permission is never retargeted for a later replacement.
 
+## Saved governance plans
+
+[`StreamEntropyPolicySuccessionPlan`](../../script/current/StreamEntropyPolicySuccessionPlan.sol)
+builds the exact begin, origin-admission and seal calls as separate class-1
+batches. Its catalog helper returns sorted additional rows for those calls and
+class-3 activation; it rejects duplicate origins and pins deployed runtimes.
+Retain the original admission inventory, remove already-admitted identical rows,
+and use the existing catalog-stage planner. Core pointer and SystemManifest
+publication admissions remain required. Finish catalog changes before saving
+subsequent action journals, because those journals bind the observed catalog.
+
+After import and sealing, `cutover` checks the complete live predecessor header,
+the selected Core pointer, candidate registration and current manifest. It
+returns one class-3 batch ordered as Core pointer replacement, candidate
+activation, then the original SystemManifest publication with the new entropy
+module. Retain the exact payload and returned calldata in the existing
+`StreamGovernanceStagePlan` journal. A later activation or manifest failure
+reverts the pointer change too; no partial cutover is an accepted result.
+The helper prepares calls only. Actual Core/Executor/manifest/Safe execution
+and cold-path gas acceptance are separate tests.
+
 ## Request and result flow
 
 The successor first writes the real request, original provider snapshot and

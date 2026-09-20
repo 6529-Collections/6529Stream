@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `e4ccdba4`: INSTANT, terminal commerce/metadata, current-notice recovery, joined Artist capacity, public Museum capture and clients integrated. ABI81 has2,458 sources/zero errors; root clients1,133 pass. Runtime acceptance remains scoped. |
+| Source checkpoint | `7901f3b1`: ABI89 has2,501 sources/zero errors. Entropy succession, V2 output, Artist capacity, Museum anchors and clients source-integrated; root clients1,177 pass. Runtime acceptance remains scoped. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,25 +29,33 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `e4ccdba4`: ABI81 checks 2,458 sources with zero errors.
+Latest intake is `7901f3b1`: ABI89 checks 2,501 sources with zero errors.
+Entropy policy succession is integrated44edac4e/dffb8daa with210 scoped native
+passes and38 fitting products. Exact cutover helper3fab88e1 is source-reviewed;
+Mint authors actual foundation/Core/Executor/manifest/Safe execution cases.
+Artist recovery clients3113e16c bring root clients to1,177 passes; MuseumV2
+4012efce passes53 root compatibility cases. These retain distinct source profiles.
 Root clients pass 1,133 cases; scoped commerce passes28 plus two256-input fuzz
 properties. INSTANT producer47 and terminal-consumer28 native passes retain
 separate documented typed boundaries. Joined Artist capacity repair fits all11
 selected products, including Registry24,018/Coordinator24,333/Identity24,179,
 before V3. Recovery rewindse4ccdba4 add55 authored cases and pass joinedABI81;
-their new size/runtime acceptance is pending. Acquisitionf541a56e passes38 root cases.
+exact V3 sizes find six over-limit products. Integratedafbf6726 fixes two new
+workers; Identity/Coordinator repairs continue, while the two deployment wrappers
+were already oversized before V3. Runtime acceptance remains pending.
+Acquisitionf541a56e passes38 root cases.
 Actual current terminal10, INSTANT8 and three-version Safe9 are source-integrated
 and reviewed, with native execution pending. Core policy-import admission
 (`4b6e05ea`) passes8 typed cases/two256-input properties; all16 products fit. RC1 and its evidence remain immutable.
 
 Current ownership supersedes older historical next-batch statements below:
 
-- A: joined V3 host review is clear. One selected-production capture now covers
-  eighteen affected hosts/deployers plus every new fixed V3 worker; repair new
-  transport overhead if needed without losing6d. Then resume complete corrected
+- A: V3 host repair7ee→7901 is integrated and selected products fit; fix the
+  two pre-existing deployment wrappers using exact compiler-derived initcode
+  carriers while preserving actual child CREATE semantics. Then complete corrected
   inert personhood proposal; blocked proof paths remain unapplied.
-- B: finite terminal consumer batch21a is integrated as86074453; build distinct
-  V2 current output/checkpoint/snapshot/reference/locked-finality flow, retaining
+- B: V2 checkpoint/manifest/root95f is integrateda5a7; correct two test fixtures
+  and build V2 snapshot/reference/locked-finality flow, retaining
   original op17 and separate SNAPSHOT/IDENTITY versus CURATOR authority.
 - C: actual-publisher native13 is complete5PASS/4FAIL. Publication now fits
   at15,664,912 including intrinsic; failure moved to the supplement path.
@@ -55,17 +63,22 @@ Current ownership supersedes older historical next-batch statements below:
   regenerated replay fixture, passes7/9; remaining supplement currentness/read
   paths exceed original budgets. Build same-call evidence reuse without a
   persistent cache or cap increase, alongside scoped inventory/archive/provider.
-- Mint: faithful legacy and explicit policy import, complete inventory and
-  ultimate-origin provider relay. Root owns Core admission and atomic activation.
+- Mint: entropy import/relay210 native passes integrated. Build actual foundation
+  Core/Executor/manifest/Safe cutover tests using root helper3fab88e1; avoid the
+  oversized full Router graph. Release gas floors remain to measure.
 - Burn: V3rewinds898669 are integratede4ccdba4 with55 authored cases andABI81.
   Build operation60 recovered-authority hydration, beginning with complete
   original class1 V2/V3 histories, then class3; class4 and broader profiles remain.
-- Museum: acquisition/title-binding/native ownership join is integratedf541
-  and passes38 root cases. Build additive packetV2/native_owner_receipt authority
-  variant limited to accession/title-binding slots; retain all missing items.
+- Museum: native-owner packetV2 is integrated4012efce and passes53 root cases.
+  Build selected intent/interview capture and zero-optional-capture additive schema;
+  root owns missing tier/floor and canonical condition-source producer decisions.
   Actual RC1 capture remains blocked by pruned configured RPC history.
-- Clients: current adjudication/current-notice op35 workflow pinned to3ac39b;
-  collection-policy and INSTANT callers are integrated and tested. No inferred V3.
+- Clients: V2/current-notice callers integrated3113e16c, joined1,177 root passes.
+  Build a separate V3 rewind caller profile pinned to898669e5; no op60 inference.
+- Conservation/native Museum: visible task01a0be37-2432-7a63-8820-fc42f159eb1d
+  owns Metadata tier facade, canonical condition catalog and actual primary-sale
+  conservation floor/master/reference producers. Root owns durable Core anchors;
+  Museum owns offchain consumers. Held personhood stays unapplied.
 - Testing: reviewed INSTANT8 plus bootstrap correction are integrated. The
   frozen18-case native plan is prepared but must not launch against the known
   Router44,008/49,781 size failure. Implement the approved mechanical Router factoring plan

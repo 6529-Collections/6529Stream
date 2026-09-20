@@ -18,17 +18,35 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `e4ccdba4`. All 2,458 sources pass the combined
-ABI/type/storage check in 23.375 seconds (ABI81). This is source compatibility,
+Latest Solidity source checkpoint: `7901f3b1`. All 2,501 sources pass the combined
+ABI/type/storage check in 23.953 seconds (ABI89). This is source compatibility,
 not whole-system runtime acceptance. Original RC1 remains unchanged.
 
+- Complete entropy policy succession (`44edac4e`, fixture correction `dffb8daa`)
+  is integrated. The recorded producer source passes210 native cases across15
+  suites, including actual Coordinator/provider and pinned Safe cases; all38
+  captured entropy products fit. Core/Artist/module/governance boundaries remain
+  typed in that210-case capture. The new exact catalog/import/cutover planner (`3fab88e1`) is source-reviewed;
+  actual Core/Executor/manifest/Safe cutover tests are being authored.
+- Artist host capacity repair (`7901f3b1`) fits Identity23,829, Coordinator24,516
+  and Registry24,223 in the exact producer capture, preserving715 prior ABI entries
+  and selected recursive layouts. The two old deployment-wrapper overruns remain;
+  runtime and cold-call acceptance are pending.
+- V2 output checkpoint/manifest/canonical-root source (`a5a7b4c4`) is integrated
+  after independent production review. Initial native evidence26/28 retains two
+  fixture failures; corrected fixtures run separately. Full V2 flow/capacity is open.
+- Core Museum anchors (`758572df`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md))
+  retain declarations across metadata replacement and bind one canonical append-only
+  condition catalog. Source review/type checks pass; actual producer and native
+  acceptance are assigned to the new conservation lane.
 - Core replacement now requires exact complete-policy import readiness in addition
   to pending-request coverage (`4b6e05ea`, [ADR0052](../docs/adr/0052-entropy-policy-succession.md)).
   Eight focused cases and two256-input fuzz properties pass; all16 captured
   production products fit, including Core19,630/23,068 runtime/init bytes.
   Exact source/runtime/pointer-revision/inventory binding, malformed responses
   and empty inventory are covered by typed boundaries. Real successor import,
-  activation and governed cutover remain to finish and execute.
+  activation and governed cutover are source-built. Their first actual-foundation
+  runtime has7 inherited passes and9 shared-setup failures; fixture repair is underway.
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling
   (`128c8378`) passes 28 focused cases and two 256-input fuzz properties; all
@@ -38,19 +56,23 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   independently source-reviewed and type-checked; their ten cases have not run. Actual INSTANT8 (`5af68676`/`6ad73f77`) is
   also independently reviewed and type-checked. Its full-current campaign is
   held at preflight because the actual Router exceeds deployment limits; a
-  behavior/storage-preserving factoring repair is being designed.
+  behavior/storage-preserving factoring repair is in progress.
 - Explicit terminal metadata/STATIC and V2 policy-source/readiness consumers
   (`86074453`) pass 28 focused native cases, with independent source/oracle
   review and exact source/artifact evidence. All eleven selected products fit.
   The capture uses actual components with documented typed boundaries; its
-  original Router still exceeds deployment limits. Full V2 output checkpoints,
+  original Router still exceeds deployment limits. V2 checkpoints and output manifests are source-integrated above;
   snapshots, reference publication and locked-finality consumption remain to build.
 - Typed six-family recovery rewinds (`e4ccdba4`) are source-integrated with55
   authored cases, independent producer review and an additional joined-host
   review. Complete Identity/Payout selections, replay-preserving continuations,
   original standing precedence and atomic original35 effects are included.
-  Runtime and new joined sizes are pending; the earlier6d size pass below
-  does not include this V3 addition. Recovered-authority hydration is the next build.
+  The exact V3 capture finds six oversized products: Identity28,156, Coordinator24,725,
+  EstateDeployment24,720, IdentityExtensionDeployment25,939, RewindOperations26,222
+  and RewindRecordReads25,098. The two deployment wrappers were already oversized
+  before V3. Worker factoring (`afbf6726`) brings the latter two to22,731/20,239;
+  all four affected workers fit in that exact capture. Host repair and joined
+  runtime acceptance remain pending. Recovered-authority hydration is building.
 - Complete original living-record hydration (`75ad082d`), adjudication V2
   (`5310fc7b`) and current living-notice recovery (`055f2396`) are source-integrated.
   Their respective 20, 44 and ten authored cases await runtime acceptance.
@@ -71,6 +93,13 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   Positive fixtures are synthetic. The older packet cannot encode native-owner
   authority without inventing a numeric class; an additive typed V2 packet
   profile is being built, preserving old schemas and explicit missing evidence.
+- Additive Museum packetV2 (`4012efce`) passes53 root cases in8.244 seconds.
+  Native Owner receipt authority is admitted only to accession/title-binding
+  slots; original V1 schemas remain unchanged. Complete-packet export still
+  reports missing conservation tier/floor, canonical condition and other evidence.
+- Artist recovery adjudication/current-notice clients (`3113e16c`) bring the joined
+  root package to1,177 passing cases in57.664 seconds, including build and strict
+  types. This separate3ac39b source profile does not infer V3 or actual Safe execution.
 - Collection-policy clients (`aae07ba6`) and INSTANT/direct-read clients
   (`be336ace`) pass the joined 1,133-case root package in 38.908 seconds,
   including generation, build and strict types. Original source profiles remain
@@ -90,8 +119,8 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   Complete-flow acceptance remains open.
 
 Active builds cover exact legacy/explicit entropy-policy successor import and
-origin relay, recovered-authority hydration, V2 output/finality, scoped inventories,
-Museum evidence joins, recovery clients and actual-current Safe testing.
+governed cutover, recovered-authority hydration, V2 output/finality, scoped inventories,
+Museum evidence/native producers, recovery clients and actual-current Safe testing.
 Automatic approval review separately rejected application of the new personhood
 proof helper, citing its identity/security boundary. Those blocked paths remain
 unapplied; a complete corrected inert proposal is being prepared for review.

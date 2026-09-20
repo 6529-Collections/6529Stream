@@ -16,42 +16,47 @@ different milestones.
 
 ## Latest integration checkpoint: 20 September
 
-The [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) records
-source-specific evidence. At `e4ccdba4`, all 2,458 Solidity sources pass
-ABI/type/storage checks. Root client generation/build/types and all1,133 tests
-pass. Museum public RIGHTS/ownership56 and public mint/RC1 recipe39 pass in
-separate overlapping cohorts. No combined-system total is inferred.
+At source `7901f3b1`, all 2,501 Solidity sources pass ABI/type/storage checks
+(ABI89, 23.953 seconds). This is source compatibility, not combined-system
+runtime acceptance. Root client generation/build/types and all1,177 tests pass.
+Museum packetV2 passes53 root compatibility cases; public RIGHTS/ownership56
+and public mint/RC1 recipe39 retain separate overlapping evidence.
 
-INSTANT/direct policy reads (`4010ec2a`) have47 scoped native passes. Immediate
-and deferred commerce (`128c8378`) has28 plus two256-input fuzz properties.
-Terminal metadata/STATIC and policy-source/readiness consumers (`86074453`)
-have28 scoped native passes. Each retains its recorded real/typed boundaries.
-The actual-current terminal10, INSTANT8 and three-version Safe9 recipes are source-built,
-independently reviewed and type-checked; native execution remains pending.
+Complete entropy policy import/original-provider relay (`44edac4e`, fixture
+`dffb8daa`) passes210 scoped native cases across15 suites; all38 captured entropy
+products fit. The original Core import gate passes8 typed cases. Actual
+Core/Executor/manifest/Safe cutover tests (`bc2bc792`) are integrated: their first
+run passes7 inherited cases but all9 new cases fail a shared registration-plan
+fixture, now being corrected. Full Artist/mint/render joins and gas floors remain.
+INSTANT/commerce/terminal-consumer47/28/28 cohorts retain their earlier boundaries.
 
-Joined Artist Registry/Coordinator/Identity size overruns are repaired by
-`6d3e55df`:24,018/24,333/24,179 runtime bytes, all11 selected products fit.
-Complete living records, adjudication and current-notice recovery remain
-runtime-pending. V3 recovery rewinds (`e4ccdba4`) add55 authored cases and
-independently reviewed host integration; their new sizes/runtime are pending,
-so the preceding6d fit does not carry forward automatically. Acquisition
-evidence (`f541a56e`) adds38 root passes; native-owner packetV2 joins are building. Other held Artist/Router/Estate capacity issues remain.
-Single-frame publication (`78fd429f`) saves1,175,817 gas in its fair isolated
-control and passes21 cases/three256-input properties; actual publisher native13
-completes5PASS/4FAIL, with publication now fitting15,664,912 including intrinsic
-and a later supplement failure. Source-unchanged native14 fixes only the stale
-replay fixture and passes7/9; remaining supplement currentness/read-budget
-failures require implementation work. Whole-flow acceptance remains open.
-Core exact-policy import gate (`4b6e05ea`) passes8 typed boundary cases/two256-input
-fuzz properties, with all16 production products fitting; actual successor work continues.
+V3 Artist rewinds (`e4ccdba4`) include55 authored cases. Worker and host factoring
+(`afbf6726`, `7901f3b1`) brings the recorded selected Identity/Coordinator/Registry
+to23,829/24,516/24,223 bytes with original ABI/layout preserved. Two old deployment
+wrappers remain oversized. Recovered-authority hydration is building; native and
+cold-call validation remain pending. The Router is still oversized; source
+factoring and canonical-input regressions continue independently.
 
-Remaining builds include complete entropy succession, recovered-authority and
-advanced hydration, V2 output/snapshot/reference/finality, scoped inventories,
-Museum packet joins and remaining clients. Personhood proof application was
-rejected by automatic review and remains unapplied; corrected inert preparation
-continues. Latest-stack Safe/fuzz/gas/CI, frozen source and matching testnet
-acceptance remain required. Historical captures below retain their own scope.
+V2 output checkpoints/manifests/canonical roots (`a5a7b4c4`) are independently
+reviewed and source-integrated. The producer's first28-case run has26 passes;
+fixture corrections are being rerun with explicit non-release gas limits.
+The full snapshot/reference/finality flow remains in progress. Reference
+publication now fits the original transaction cap, but complete supplement
+currentness/read flow still needs acceptance; its split workers now fit in a
+separate size capture and focused runtime tests are running.
 
+Durable Core conservation-tier and canonical condition-source anchors
+(`758572df`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md)) are source-built
+and reviewed. A sixth visible delivery task owns the missing native tier/floor,
+master/reference and canonical condition producers; Museum owns capture/replay.
+Anchor runtime/size acceptance and actual sale enforcement are still pending.
+The [current status](V1_CURRENT_STATUS.md) records detailed evidence boundaries.
+
+Remaining builds include recovered-authority/advanced hydration, V2 and scoped
+finality, Museum native producers/packet joins and V3 clients. The personhood
+proof and earlier held patches remain unapplied. Complete current-stack/Safe,
+stateful/fuzz/gas/CI acceptance, source freeze and matching testnet demonstration
+remain required. No combined completion percentage is inferred.
 
 ## How to read this document
 
