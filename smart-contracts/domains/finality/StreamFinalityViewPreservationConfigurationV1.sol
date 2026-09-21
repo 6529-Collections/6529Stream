@@ -36,6 +36,9 @@ import {
 import {
     StreamPreservationInventoryIO as IO
 } from "../preservation/StreamPreservationInventoryIO.sol";
+import {
+    StreamFinalityViewSameHostReadsV1 as SameHost
+} from "./StreamFinalityViewSameHostReadsV1.sol";
 import { StreamMetadataSubjects } from "../metadata/StreamMetadataSubjects.sol";
 
 /// @notice Closed, same-provider VIEW selection. This proves identities, never current evidence.
@@ -86,9 +89,7 @@ library StreamFinalityViewPreservationConfigurationV1 {
                 revert InvalidViewFinalityConfiguration();
             }
         }
-        raw = IO.fixedRead(
-            address(this), abi.encodeCall(Sources.viewFinalitySources, ()), 192, original.sourceGas
-        );
+        raw = SameHost.read(Sources.viewFinalitySources.selector, original.sourceGas);
         Sources.Selection memory selected = abi.decode(raw, (Sources.Selection));
         IO.canonical(address(this), raw, abi.encode(selected));
         raw = IO.fixedRead(
@@ -124,16 +125,31 @@ library StreamFinalityViewPreservationConfigurationV1 {
             revert InvalidViewFinalityConfiguration();
         }
         x.effective = abi.decode(abi.encode(original), (Native.Config));
-        x.effective.targets[8] = _address(
-            abi.encodeCall(SnapshotBinding.viewPreservationSnapshotHost, ()), original.sourceGas
+        uint256 snapshotWord = uint256(
+            abi.decode(
+                SameHost.read(
+                    SnapshotBinding.viewPreservationSnapshotHost.selector, original.sourceGas
+                ),
+                (bytes32)
+            )
         );
-        x.effective.codeHashes[8] = _word(
-            abi.encodeCall(SnapshotBinding.viewPreservationSnapshotCodeHash, ()), original.sourceGas
+        if (snapshotWord > type(uint160).max || snapshotWord == 0) {
+            revert InvalidViewFinalityConfiguration();
+        }
+        x.effective.targets[8] = address(uint160(snapshotWord));
+        x.effective.codeHashes[8] = abi.decode(
+            SameHost.read(
+                SnapshotBinding.viewPreservationSnapshotCodeHash.selector, original.sourceGas
+            ),
+            (bytes32)
         );
         uint256 validationGas = uint256(
-            _word(
-                abi.encodeCall(SnapshotBinding.viewPreservationSnapshotValidationGas, ()),
-                original.sourceGas
+            abi.decode(
+                SameHost.read(
+                    SnapshotBinding.viewPreservationSnapshotValidationGas.selector,
+                    original.sourceGas
+                ),
+                (bytes32)
             )
         );
         if (validationGas < original.readGas || validationGas > 16777216) {
@@ -145,8 +161,9 @@ library StreamFinalityViewPreservationConfigurationV1 {
         x.effective.codeHashes[18] = selected.renderCriticalInventoryCodeHash;
         x.effective.targets[19] = selected.bundleArchiveCoverage;
         x.effective.codeHashes[19] = selected.bundleArchiveCoverageCodeHash;
-        x.effective.targets[10] =
-            _address(abi.encodeCall(FactoryBinding.viewPolicySourceFactoryV2, ()), original.readGas);
+        x.effective.targets[10] = _address(
+            abi.encodeCall(FactoryBinding.viewPolicySourceFactoryV2, ()), original.readGas
+        );
         x.effective.codeHashes[10] = _word(
             abi.encodeCall(FactoryBinding.viewPolicySourceFactoryV2CodeHash, ()), original.readGas
         );

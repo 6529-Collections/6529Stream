@@ -14,6 +14,12 @@ import {
     StreamPreservationInventoryIO as IO
 } from "../../../smart-contracts/domains/preservation/StreamPreservationInventoryIO.sol";
 
+import {
+    StreamFinalityViewSameHostReadsV1 as SameHost
+} from "../../../smart-contracts/domains/finality/StreamFinalityViewSameHostReadsV1.sol";
+import {
+    StreamPreservationInventoryTypes as T
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import {
     StreamFinalityViewPreservationSourceSelectionV1 as Check
@@ -45,6 +51,11 @@ import {
 import {
     StreamViewPreservationReferenceDefinitionsV1 as Definitions
 } from "../../../smart-contracts/domains/records/StreamViewPreservationReferenceDefinitionsV1.sol";
+
+interface ViewConfigurationBudgetVm {
+    function mockCall(address target, bytes calldata input, bytes calldata output) external;
+    function clearMockedCalls() external;
+}
 
 /// @dev Explicit constructor/getter boundary; every unconfigured current-evidence selector refuses.
 contract ViewConfigurationBoundary {
@@ -337,6 +348,10 @@ contract ViewFinalityConfigurationHost {
         return Configuration.catalogue(original, scope);
     }
 
+    function closedAt(bytes4 selector, uint256 ceiling) external view returns (bytes memory) {
+        return SameHost.read(selector, ceiling);
+    }
+
     function snapshotAt(uint256 cap) external view returns (address) {
         return abi.decode(
             IO.fixedRead(
@@ -344,6 +359,17 @@ contract ViewFinalityConfigurationHost {
             ),
             (address)
         );
+    }
+}
+
+/// @dev One additional real call frame models a component adapter; dependency graph remains typed.
+contract ViewConfigurationOuterProbe {
+    function resolve(ViewFinalityConfigurationHost target)
+        external
+        view
+        returns (Configuration.Context memory, bytes32, bytes32)
+    {
+        return target.resolveAndInputHashes();
     }
 }
 
@@ -394,10 +420,9 @@ contract StreamFinalityViewPreservationConfigurationV1Test is ViewFinalityConfig
     }
 
     function _scope() private pure returns (StreamFinalityScope memory) {
-        return
-            StreamFinalityScope(
-                StreamFinalityScopeType.VIEW, 7, 0, keccak256("full sealed membership")
-            );
+        return StreamFinalityScope(
+            StreamFinalityScopeType.VIEW, 7, 0, keccak256("full sealed membership")
+        );
     }
 
     function testDeepProjectionAndCatalogueCommitOriginalConstructorConfig() public view {
@@ -483,5 +508,96 @@ contract StreamFinalityViewPreservationConfigurationV1Test is ViewFinalityConfig
         );
         host.catalogue(s);
         host.catalogue(_scope());
+    }
+
+    function testLowerComponentEnvelopeDirectAndComposedRetainsFullResult() public {
+        ViewConfigurationOuterProbe outer = new ViewConfigurationOuterProbe();
+        uint256[2] memory ceilings = [uint256(24000000), 48000000];
+        uint256[2] memory envelopes = [uint256(12000000), 44000000];
+        for (uint256 i; i < 2; ++i) {
+            config.readGas = 2000000;
+            config.componentSourceGas = 4000000;
+            config.sourceGas = ceilings[i];
+            host.configure(config, selected, expected.targets[5], factory);
+            (Configuration.Context memory expectedContext, bytes32 beforeHash, bytes32 afterHash) =
+                host.resolveAndInputHashes();
+            bytes32 expectedHash = keccak256(abi.encode(expectedContext, beforeHash, afterHash));
+            bytes memory request = abi.encodeCall(host.resolveAndInputHashes, ());
+            (bool ok, bytes memory raw) = address(host).staticcall{ gas: envelopes[i] }(request);
+            require(ok && keccak256(raw) == expectedHash, "direct full result below source ceiling");
+            (ok, raw) = address(outer).staticcall{ gas: envelopes[i] }(
+                abi.encodeCall(outer.resolve, (host))
+            );
+            require(
+                ok && keccak256(raw) == expectedHash,
+                "additional component frame retains full result"
+            );
+            require(beforeHash == keccak256(abi.encode(config)) && afterHash == beforeHash);
+        }
+    }
+
+    function testClosedSameHostCeilingAndNestedReadRemainStrict() public {
+        config.readGas = 2000000;
+        config.componentSourceGas = 4000000;
+        config.sourceGas = 24000000;
+        host.configure(config, selected, expected.targets[5], factory);
+        bytes4 selector = bytes4(keccak256("viewPreservationSnapshotHost()"));
+        bytes memory request = abi.encodeCall(host.closedAt, (selector, uint256(24000000)));
+        (bool ok, bytes memory raw) = address(host).staticcall{ gas: 4000000 }(request);
+        require(ok && abi.decode(abi.decode(raw, (bytes)), (address)) == expected.targets[5]);
+        (ok, raw) = address(host).staticcall{ gas: 2000000 }(request);
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(T.InventoryRead.selector, address(host))),
+            "inner full2m cap is never reduced"
+        );
+        (ok, raw) = address(host).staticcall{ gas: 4000000 }(
+            abi.encodeCall(host.closedAt, (selector, uint256(2000000)))
+        );
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(T.InventoryRead.selector, address(host))),
+            "upper ceiling remains binding"
+        );
+        (ok, raw) = address(host).staticcall{ gas: 140000 }(request);
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(T.InventoryRead.selector, address(host))),
+            "insufficient local reserve returns exact error"
+        );
+        (ok, raw) = address(host).staticcall{ gas: 4000000 }(request);
+        require(ok, "unchanged request restores at sufficient gas");
+    }
+
+    function testClosedSelectorAndExactReturnWidthAreMandatory() public {
+        bytes4 selector = bytes4(keccak256("viewPreservationSnapshotHost()"));
+        vm.expectRevert(abi.encodeWithSelector(T.InventoryRead.selector, address(host)));
+        host.closedAt(bytes4(keccak256("viewFinalitySourcesReceipt()")), 4000000);
+        for (uint256 i; i < 2; ++i) {
+            bytes memory wrong = new bytes(i == 0 ? 31 : 33);
+            ViewConfigurationBudgetVm(address(vm))
+                .mockCall(address(host), abi.encodeWithSelector(selector), wrong);
+            vm.expectRevert(abi.encodeWithSelector(T.InventoryRead.selector, address(host)));
+            host.closedAt(selector, 4000000);
+            ViewConfigurationBudgetVm(address(vm)).clearMockedCalls();
+            require(abi.decode(host.closedAt(selector, 4000000), (address)) == expected.targets[5]);
+        }
+    }
+
+    function testCanonicalSnapshotAddressStillRefusesThenRestores() public {
+        bytes4 selector = bytes4(keccak256("viewPreservationSnapshotHost()"));
+        ViewConfigurationBudgetVm(address(vm))
+            .mockCall(
+                address(host), abi.encodeWithSelector(selector), abi.encode(uint256(1) << 160)
+            );
+        vm.expectRevert(
+            abi.encodeWithSelector(Configuration.InvalidViewFinalityConfiguration.selector)
+        );
+        host.resolveAndInputHashes();
+        ViewConfigurationBudgetVm(address(vm)).clearMockedCalls();
+        host.resolveAndInputHashes();
     }
 }
