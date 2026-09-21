@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceRecordReadsV1 as RecordReads
+} from "./StreamPreservationPolicyReferenceRecordReadsV1.sol";
+import {
     StreamPreservationPolicyReferenceFamiliesV2 as F
 } from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
 import {
@@ -89,11 +92,7 @@ library StreamPreservationPolicyReferenceRecordsV1 {
         bytes32 family
     ) public view {
         definitions(d, family);
-        T.SourceFacts memory f = Sources.requireSource(d, publication(original), true, family);
-        if (
-            Sources.sourceHash(d, f, family) != receipt.observation.sourcesHash
-                || Bytes.requireIntact(payload) != receipt.observation.payloadHash
-        ) revert T.InvalidPolicyReference();
+        RecordReads.requireCurrent(original, payload, receipt, d, family);
     }
 
     function recordBytes(Bytes.Manifest storage original, T.Receipt storage receipt)
@@ -101,7 +100,7 @@ library StreamPreservationPolicyReferenceRecordsV1 {
         view
         returns (bytes memory)
     {
-        return abi.encode(publication(original), receipt);
+        return RecordReads.recordBytes(original, receipt);
     }
 
     function source(Bytes.Manifest storage payload) public view returns (bytes memory) {
@@ -113,24 +112,7 @@ library StreamPreservationPolicyReferenceRecordsV1 {
         view
         returns (bytes memory)
     {
-        bytes memory raw = Bytes.read(payload);
-        (
-            bytes32 domain,
-            uint256 chain,
-            address host,
-            T.Publication memory p,
-            T.Receipt memory r,
-            T.SourceFacts memory f,
-            bytes memory environment
-        ) = abi.decode(
-            raw, (bytes32, uint256, address, T.Publication, T.Receipt, T.SourceFacts, bytes)
-        );
-        if (
-            domain != F.payloadDomain(family, false)
-                || keccak256(raw)
-                    != keccak256(abi.encode(domain, chain, host, p, r, f, environment))
-        ) revert T.InvalidPolicyReference();
-        return abi.encode(f);
+        return RecordReads.source(payload, family);
     }
 
     function publication(Bytes.Manifest storage original)

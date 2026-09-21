@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceSnapshotPayloadReadsV1 as SnapshotPayloadReads
+} from "./StreamPreservationPolicyReferenceSnapshotPayloadReadsV1.sol";
+import {
     StreamPreservationPolicyReferenceFamiliesV2 as F
 } from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
 import {
@@ -283,80 +286,9 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         S.Receipt memory receipt,
         bytes32 family
     ) private view returns (S.Source memory f) {
-        bytes memory out = Reads.dynamicRead(
-            d.targets[5],
-            abi.encodeCall(Snap.snapshotPayload, (receipt.recordHash)),
-            receipt.manifestBytes + 96,
-            d.snapshotGas
-        );
-        bytes memory raw = abi.decode(out, (bytes));
-        _canonical(d.targets[5], out, abi.encode(raw));
-        if (raw.length != receipt.manifestBytes || keccak256(raw) != receipt.manifestHash) {
-            revert T.InvalidPolicyReference();
-        }
-        (
-            bytes32 domain,
-            uint256 chain,
-            address host,
-            address[11] memory targets,
-            bytes32[11] memory hashes,
-            S.Publication memory p,
-            S.Receipt memory fields,
-            S.Source memory value
-        ) = abi.decode(
-            raw,
-            (
-                bytes32,
-                uint256,
-                address,
-                address[11],
-                bytes32[11],
-                S.Publication,
-                S.Receipt,
-                S.Source
-            )
-        );
-        _canonical(
-            d.targets[5], raw, abi.encode(domain, chain, host, targets, hashes, p, fields, value)
-        );
-        // The caller retains the original receipt for the root/source join below.
-        receipt = abi.decode(abi.encode(receipt), (S.Receipt));
+        f = SnapshotPayloadReads.snapshot(d, source, original, receipt, family);
+        // A linked call copies memory. Retain the original internal caller-visible normalization.
         original.expectedSourceHash = 0;
-        receipt.recordHash = 0;
-        receipt.chainHash = 0;
-        receipt.manifestHash = 0;
-        receipt.manifestBytes = 0;
-        receipt.recordedAt = 0;
-        if (
-            domain
-                    != (F.isV2(family)
-                            ? keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V2")
-                            : keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1"))
-                || chain != d.chainId || host != d.targets[5]
-                || keccak256(abi.encode(targets, hashes))
-                    != keccak256(abi.encode(source.targets, source.codeHashes))
-                || keccak256(abi.encode(p)) != keccak256(abi.encode(original))
-                || keccak256(abi.encode(fields)) != keccak256(abi.encode(receipt))
-                || keccak256(abi.encode(value.scope)) != keccak256(abi.encode(p.scope))
-                || fields.sourceHash
-                    != keccak256(
-                        abi.encode(
-                            (F.isV2(family)
-                                    ? keccak256(
-                                        "6529STREAM_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V2"
-                                    )
-                                    : keccak256(
-                                            "6529STREAM_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"
-                                        )),
-                            chain,
-                            host,
-                            targets,
-                            hashes,
-                            value
-                        )
-                    )
-        ) revert T.InvalidPolicyReference();
-        f = value;
     }
 
     function _runtime(R.Dependencies memory d, E.Coverage memory e) private view {
