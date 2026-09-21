@@ -22,9 +22,10 @@ Retrieval producer/consumer source is integrated as `0c14acde`, with the
 independent fixture follow-up `523a8f27`. The reference-reader compiler repair
 is integrated as `51c3210b`: five native cases and 256 fuzz inputs pass on exact
 `5678cad2`, with root matching all 45 sources and 50 native artifacts.
-ABI156 checks 4,031 committed sources and finds two missed actual VIEW inventory
-constructor migrations. C is fixing those genuine-witness fixtures before the
-next combined check. ABI155's earlier 4,014-source pass remains historical.
+ABI157 now checks all 4,059 committed sources with zero errors in 48.110
+seconds on `a2973d36`. It includes genuine-witness constructors for both actual
+VIEW graphs and the reviewed Platform history batch `7b0f918e`. ABI156's two
+constructor failures remain preserved; affected native campaigns can resume.
 These are source and focused-test milestones; combined acceptance remains.
 
 - **Preservation and finality:** complete VIEW binding, both provider dispatch
@@ -54,8 +55,11 @@ These are source and focused-test milestones; combined acceptance remains.
   histories across accepted, disputed and sanctioned generations are integrated
   as `51d8ed8f`. Production and 13 new test oracles are independently reviewed;
   all 23 selected products fit measured runtime/full-initcode limits. Their
-  execution remains pending. Platform histories are now in build, followed by
-  operation-24 and complete mixed/multiple-Artist compositions.
+  execution remains pending. Complete original Platform histories are now
+  source integrated as `7b0f918e`, with independent production and fourteen
+  oracle reviews. Thirty-six selected products fit across qualified captures;
+  this is not one final-source runtime campaign. Operation-24 and complete
+  mixed/multiple-Artist/unbound compositions are the next implementation batch.
   The earlier current-Artist preservation campaign now executes 12 cases
   successfully, but three Registry setups fail on a zero collection ID in an
   original golden-vector fixture, leaving six intended cases unexecuted.
