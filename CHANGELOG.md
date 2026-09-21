@@ -1290,6 +1290,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add complete named owner-family interpretation to canonical semantic export,
+  retaining every catalogue lane, historical authority, exact field provenance,
+  unsupported encodings and unresolved notice/redemption state. Preserve the
+  original dossier and all 19 packet groups and 49 acceptance requirements.
+
 - Add offline collection script and dependency preservation with exact native
   manifest and bundle commitments, original registry versions and explicit
   unavailable outcomes, without execution or external URI retrieval claims.

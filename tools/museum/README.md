@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Complete owner-family semantic export](CANONICAL-SEMANTIC-EXPORT-V2.md)
+interprets all ten named owner families from the complete retained catalogue,
+with exact definition commitments, qualified relations and opaque alternatives.
+
 [Collection script and dependency preservation](COLLECTION-SCRIPT-DEPENDENCY-V1.md)
 replays exact current and original bundle observations, native commitments and
 available bytes while retaining unavailable outcomes and original registry pins.
