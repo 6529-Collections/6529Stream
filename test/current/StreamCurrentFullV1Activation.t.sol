@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../helpers/StreamFullV1ActivationFixture.sol";
+import { StreamMuseumGenesisSource } from "../helpers/StreamMuseumGenesisSource.sol";
+import {
+    StreamSchemaAdmissionPlan as MuseumAdmission
+} from "../../script/current/StreamSchemaAdmissionPlan.sol";
 import {
     StreamFullV1ActivationPolicies
 } from "../../script/current/StreamFullV1ActivationPolicies.sol";
@@ -15,7 +19,8 @@ import {
 } from "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyProviderLifecycle.sol";
 
 /// @notice Authored current-graph activation slices using actual 2-of-2 Safe delayed governance.
-/// @dev No canonical Museum catalog, complete STATIC admission, live services or full37 readiness.
+/// @dev Includes a combined canonical Museum admission/binding case. Complete STATIC
+/// admission, live services and full37 functional/release acceptance remain separate.
 contract StreamCurrentFullV1ActivationTest is StreamFullV1ActivationFixture {
     uint256 private stageNonce;
 
@@ -231,6 +236,168 @@ contract StreamCurrentFullV1ActivationTest is StreamFullV1ActivationFixture {
         this.planCollection(row);
     }
 
+    /// @notice One actual graph retains every original role across schema and module activation.
+    /// @dev This does not select reserve products as primary or invent STATIC analysis evidence.
+    function testAll37ConstructionSurvivesCombinedBindingsAndCanonicalMuseumAdmission() public {
+        StreamFullV1Candidate.Inventory memory original =
+            StreamFullV1Candidate.capture(foundation, configuration, products);
+        require(
+            original.roles.length == 37 && original.support.length == 25, "complete construction"
+        );
+        uint256 modulesBefore = registry.moduleCount();
+        _extend();
+        _register();
+        require(registry.moduleCount() == modulesBefore + 21, "all original pending modules");
+        StreamFullV1ActivationPlan.requireRegistered(_context(), _inputs());
+
+        // Admissions and the later bindings share the same Registry, Store, Safe and Executor.
+        (MuseumAdmission.Document[] memory rows, string[] memory paths, bytes32 sourceHash) =
+            StreamMuseumGenesisSource.load();
+        MuseumAdmission.Plan memory catalog =
+            MuseumAdmission.capture(assemblySchemas, sourceHash, rows);
+        bytes32 catalogHash = MuseumAdmission.planHash(catalog);
+        uint256 documentsBefore = assemblySchemas.documentCount();
+        uint256 pending = MuseumAdmission.pending(catalog, catalogHash);
+        for (uint256 i; i < rows.length; ++i) {
+            MuseumAdmission.publish(catalog, catalogHash, i, bytes(vm.readFile(paths[i])));
+            GenesisBatch memory intent = MuseumAdmission.next(catalog, catalogHash, i);
+            if (intent.calls.length != 0) {
+                _run(
+                    StreamFullV1ActivationPlan.withManifestTail(_context(), intent, _publication())
+                );
+            }
+        }
+        require(
+            assemblySchemas.documentCount() == documentsBefore + pending, "exact schema additions"
+        );
+        _requireCanonicalMuseum(catalog, catalogHash, paths);
+        require(
+            !ledger.ledgerWriter(address(products.continuity.manager)), "schemas grant no writer"
+        );
+
+        _run(StreamFullV1ActivationPlan.recorderCredit(_context()));
+        _run(StreamFullV1ActivationPlan.custodyBinding(_context()));
+        _run(StreamFullV1ActivationPlan.managerBinding(_context(), false));
+        _run(StreamFullV1ActivationPlan.managerBinding(_context(), true));
+        _run(StreamFullV1ActivationPlan.reserveWriter(_context()));
+        _run(StreamFullV1ActivationPlan.retirementClassifier(_context()));
+        StreamMintFallbackPlan.requireReserveReady(
+            StreamFullV1ContinuityProducts.mintConfiguration(
+                configuration.continuity, products.continuity
+            )
+        );
+        (address primaryRecorder,,,) = manager.preparedNativeRecorder();
+        (address reserveRecorder,,,) = products.continuity.manager.preparedNativeRecorder();
+        (bool enabled, bytes32 recorderHash,) = revenueEscrow.creditProducer(primaryRecorder);
+        require(
+            primaryRecorder == address(products.commerce.native.recorder)
+                && reserveRecorder == primaryRecorder && enabled
+                && recorderHash == primaryRecorder.codehash
+                && products.commerce.native.recorder.canonicalCustodyHouse().house
+                    == address(products.commerce.native.house),
+            "actual primary reserve recorder and escrow bindings"
+        );
+        _run(StreamFullV1ActivationPlan.providerClassifier(_context(), true, false));
+        _run(StreamFullV1ActivationPlan.providerClassifier(_context(), true, true));
+        for (uint8 i; i < 3; ++i) {
+            _run(
+                StreamFullV1ActivationPlan.providerActivation(
+                    _context(), i, "urn:fixture:combined-genesis"
+                )
+            );
+            (StreamEntropyCoordinator coordinator, address provider) =
+                StreamFullV1ActivationPlan.providerPair(_context(), i);
+            IStreamEntropyProviderLifecycle.ProviderRecord memory receipt =
+                coordinator.entropyProviderRecord(provider);
+            require(
+                receipt.state == EntropyProviderState.ACTIVE
+                    && receipt.runtimeCodeHash == provider.codehash && receipt.lastActionId != 0,
+                "three original provider activation receipts"
+            );
+        }
+        StreamEntropyFallbackPlan.Collection memory reserve = _collection();
+        _run(StreamFullV1ActivationPlan.collectionConfiguration(_context(), 2, reserve));
+        StreamGovernanceStagePlan.NextCall memory reveal =
+            StreamFullV1ActivationPlan.revealConfiguration(_context(), 2, reserve, address(this));
+        require(
+            reveal.caller == address(this) && reveal.target == address(products.continuity.entropy),
+            "explicit reserve administrator"
+        );
+        (bool ok,) = reveal.target.call(reveal.data);
+        require(ok, "actual reserve reveal policy");
+        StreamEntropyFallbackPlan.Collection[] memory collections =
+            new StreamEntropyFallbackPlan.Collection[](1);
+        collections[0] = reserve;
+        StreamEntropyFallbackPlan.checkpoint(
+            entropy,
+            products.continuity.entropy,
+            collections,
+            keccak256("combined fixture inventory")
+        );
+
+        StreamFullV1Candidate.requireUnchanged(
+            foundation, configuration, products, savedInventoryHash
+        );
+        StreamFullV1Candidate.Inventory memory retained =
+            StreamFullV1Candidate.capture(foundation, configuration, products);
+        require(
+            keccak256(abi.encode(retained)) == keccak256(abi.encode(original)),
+            "all37 and25support retain original identities"
+        );
+        StreamFullV1ActivationPlan.requireRegistered(_context(), _inputs());
+        require(
+            StreamFullV1ActivationPlan.pendingRegistrations(_context(), _inputs()).length == 0,
+            "no omitted admission"
+        );
+        _requireCanonicalMuseum(catalog, catalogHash, paths);
+        require(
+            StreamCurrentStackPlan.readPointer(core, keccak256("MINT_MANAGER")).target
+                    == address(manager)
+                && StreamCurrentStackPlan.readPointer(core, keccak256("ENTROPY_COORDINATOR")).target
+                == address(entropy) && ledger.ledgerWriterRetiredAt(address(manager)) == 0
+                && entropy.entropyProviderRecord(address(products.continuity.provider)).state
+                    == EntropyProviderState.UNKNOWN,
+            "reserve readiness neither promotes backup nor retires primary"
+        );
+    }
+
+    function _requireCanonicalMuseum(
+        MuseumAdmission.Plan memory catalog,
+        bytes32 hash,
+        string[] memory paths
+    ) private view {
+        MuseumAdmission.requireRegistered(catalog, hash);
+        require(
+            catalog.documents.length == 51 && paths.length == 51, "complete canonical source set"
+        );
+        uint256 bytesCount;
+        uint256 occurrences;
+        for (uint256 i; i < catalog.documents.length; ++i) {
+            MuseumAdmission.Document memory row = catalog.documents[i];
+            bytes32 id = keccak256(bytes(row.specification.name));
+            require(
+                MuseumAdmission.next(catalog, hash, i).calls.length == 0,
+                "original ACTIVE schema readback"
+            );
+            require(
+                keccak256(assemblySchemas.documentBytes(id))
+                    == keccak256(bytes(vm.readFile(paths[i]))),
+                "all original canonical bytes"
+            );
+            for (uint256 j; j < row.chunkHashes.length; ++j) {
+                require(
+                    assemblySchemas.documentChunkHashAt(id, j) == row.chunkHashes[j],
+                    "ordered original chunk occurrence"
+                );
+            }
+            bytesCount += row.specification.totalBytes;
+            occurrences += row.chunkHashes.length;
+        }
+        require(
+            bytesCount == 401717 && occurrences == 78, "complete Museum byte and occurrence closure"
+        );
+    }
+
     function testChangedRegistrationMetadataRejectedAfterActualAdmission() public {
         _extend();
         _register();
@@ -315,7 +482,15 @@ contract StreamCurrentFullV1ActivationTest is StreamFullV1ActivationFixture {
                 "",
                 uint32(raw.length)
             );
-            _run(StreamFullV1ActivationPlan.schemaDocument(_context(), bootstrap, bootstrapChunks));
+            _run(
+                StreamFullV1ActivationPlan.withManifestTail(
+                    _context(),
+                    StreamFullV1ActivationPlan.schemaDocument(
+                        _context(), bootstrap, bootstrapChunks
+                    ),
+                    _publication()
+                )
+            );
         }
         bytes memory first = new bytes(8192);
         bytes memory last = new bytes(808);

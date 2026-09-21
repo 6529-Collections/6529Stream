@@ -19,6 +19,29 @@ contract StreamCurrentMuseumGenesisAdmissionTest is StreamFullV1ActivationFixtur
     bytes private retainedSource;
     bytes32 private retainedHash;
 
+    struct ManifestSnapshot {
+        StreamSystemManifest.AggregateState aggregate;
+        address pointer;
+        uint256 count;
+        bytes32 historyHash;
+    }
+
+    struct SavedAdmission {
+        GenesisBatch batch;
+        Activation.Publication publication;
+        ManifestSnapshot manifestBefore;
+        bytes32 actionId;
+        bytes executorData;
+        bytes safeData;
+        bytes32 safeDataHash;
+        bytes32 safeTransactionHash;
+        uint256 safeNonce;
+        uint256 governanceNonce;
+        uint256 pending;
+        uint256 documents;
+        uint256 pointers;
+    }
+
     function setUp() public {
         _constructActivationCandidate();
         (Admission.Document[] memory rows, string[] memory paths, bytes32 sourceHash) =
@@ -272,6 +295,248 @@ contract StreamCurrentMuseumGenesisAdmissionTest is StreamFullV1ActivationFixtur
         );
     }
 
+    function testLateManifestFailureRollsBackAdmissionAndRetriesIdenticalSignedSafeCall() public {
+        (Admission.Plan memory p, string[] memory paths) = _source();
+        Admission.publish(p, retainedHash, 0, bytes(vm.readFile(paths[0])));
+        bytes32 documentId = keccak256(bytes(p.documents[0].specification.name));
+        require(!assemblySchemas.document(documentId).exists, "fresh admission");
+        SavedAdmission memory saved;
+        saved.publication = _publication();
+        saved.manifestBefore = _manifestSnapshot();
+        saved.batch = Activation.withManifestTail(
+            Activation.Context(foundation, configuration, products, savedInventoryHash),
+            Admission.next(p, retainedHash, 0),
+            saved.publication
+        );
+        require(
+            saved.batch.actionClass == 1 && saved.batch.calls.length == 2
+                && saved.batch.calls[0].target == address(assemblySchemas)
+                && saved.batch.calls[1].target == address(manifest),
+            "schema registration precedes the manifest failure"
+        );
+        uint64 ready;
+        (saved.actionId, ready) = _scheduleBatchAsGovernor(
+            saved.batch.actionClass, saved.batch.calls, saved.batch.callDatas
+        );
+        saved.safeNonce = governorSafe.nonce();
+        saved.governanceNonce = executor.governanceNonce();
+        saved.pending = executor.pendingScheduledActionCount();
+        saved.documents = assemblySchemas.documentCount();
+        saved.pointers = assemblySchemas.payloadPointerCount(0);
+        saved.executorData = abi.encodeCall(
+            executor.executeGovernanceBatch,
+            (saved.actionId, saved.batch.calls, saved.batch.callDatas)
+        );
+        saved.safeTransactionHash = governorSafe.getTransactionHash(
+            address(executor),
+            0,
+            saved.executorData,
+            0,
+            0,
+            0,
+            0,
+            address(0),
+            address(0),
+            saved.safeNonce
+        );
+        // Sign once. Failure, repair and replay reuse this complete Safe calldata.
+        bytes memory signatures = safeThresholdSignature(governorKeys, saved.safeTransactionHash);
+        saved.safeData = abi.encodeCall(
+            OfficialSafe.execTransaction,
+            (
+                address(executor),
+                0,
+                saved.executorData,
+                0,
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                signatures
+            )
+        );
+        saved.safeDataHash = keccak256(saved.safeData);
+        vm.warp(ready);
+        require(
+            executor.governanceAction(saved.actionId).status == GovernanceActionStatus.SCHEDULED,
+            "original action remains scheduled"
+        );
+        bytes32 beforeState = _admissionState(saved.actionId, documentId);
+        bytes memory descriptorCode = saved.publication.payload.code;
+        vm.etch(saved.publication.payload, hex"00");
+        // Only the final call reads the descriptor; schema registration succeeds first.
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.InvalidManifestTail.selector)
+        );
+        executor.executeGovernanceBatch(saved.actionId, saved.batch.calls, saved.batch.callDatas);
+        require(_admissionState(saved.actionId, documentId) == beforeState, "direct batch rollback");
+        _savedSafeFailure(saved, "GS013");
+        require(
+            _admissionState(saved.actionId, documentId) == beforeState,
+            "schema, manifest, executor and Safe nonce roll back together"
+        );
+        // Repair only the exact descriptor: no rescheduling, changed calldata or new signature.
+        vm.etch(saved.publication.payload, descriptorCode);
+        require(
+            saved.publication.payload.codehash == keccak256(descriptorCode), "exact payload repair"
+        );
+        require(
+            governorSafe.nonce() == saved.safeNonce
+                && governorSafe.getTransactionHash(
+                    address(executor),
+                    0,
+                    saved.executorData,
+                    0,
+                    0,
+                    0,
+                    0,
+                    address(0),
+                    address(0),
+                    governorSafe.nonce()
+                ) == saved.safeTransactionHash,
+            "retry retains the signed Safe nonce and digest"
+        );
+        vm.recordLogs();
+        (bool ok, bytes memory result) = _savedSafeCall(saved);
+        require(
+            ok && result.length == 32 && abi.decode(result, (bool)),
+            "identical signed retry succeeds"
+        );
+        _assertDocumentEvent(vm.getRecordedLogs(), p.documents[0], saved.actionId);
+        require(
+            Admission.next(p, retainedHash, 0).calls.length == 0
+                && assemblySchemas.documentCount() == saved.documents + 1
+                && assemblySchemas.payloadPointerCount(0) == saved.pointers + 1,
+            "one document and one accepted RAW_BYTES chunk"
+        );
+        require(
+            keccak256(assemblySchemas.documentBytes(documentId))
+                == p.documents[0].specification.contentHash,
+            "permissionless uploaded bytes survive the failed admission"
+        );
+        GovernanceAction memory action = executor.governanceAction(saved.actionId);
+        require(
+            action.status == GovernanceActionStatus.EXECUTED
+                && action.proposer == address(governorSafe)
+                && action.executor == address(governorSafe)
+                && governorSafe.nonce() == saved.safeNonce + 1
+                && executor.governanceNonce() == saved.governanceNonce
+                && executor.pendingScheduledActionCount() + 1 == saved.pending,
+            "one execution consumes only the saved Safe nonce and pending action"
+        );
+        _assertManifestAdvanced(saved.publication, saved.manifestBefore);
+        bytes32 afterState = _admissionState(saved.actionId, documentId);
+        _savedSafeFailure(saved, "GS026");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionNotScheduled.selector, saved.actionId
+            )
+        );
+        executor.executeGovernanceBatch(saved.actionId, saved.batch.calls, saved.batch.callDatas);
+        require(
+            _admissionState(saved.actionId, documentId) == afterState,
+            "both replay refusals are atomic"
+        );
+    }
+
+    function _savedSafeCall(SavedAdmission memory saved) private returns (bool, bytes memory) {
+        require(
+            keccak256(saved.safeData) == saved.safeDataHash,
+            "unchanged saved Safe calldata and signatures"
+        );
+        return address(governorSafe).call(saved.safeData);
+    }
+
+    function _savedSafeFailure(SavedAdmission memory saved, string memory reason) private {
+        (bool ok, bytes memory result) = _savedSafeCall(saved);
+        require(
+            !ok && keccak256(result) == keccak256(abi.encodeWithSignature("Error(string)", reason)),
+            "exact original Safe refusal"
+        );
+    }
+
+    function _admissionState(bytes32 actionId, bytes32 documentId) private view returns (bytes32) {
+        (
+            bool executing,
+            bytes32 activeId,
+            uint8 actionClass,
+            bytes32 scope,
+            bytes32 oldHash,
+            bytes32 newHash
+        ) = executor.currentAction();
+        require(
+            !executing && activeId == 0 && actionClass == 0 && scope == 0 && oldHash == 0
+                && newHash == 0,
+            "no residual execution context"
+        );
+        bytes32 schemaState = keccak256(
+            abi.encode(
+                assemblySchemas.documentCount(),
+                assemblySchemas.payloadPointerCount(0),
+                assemblySchemas.document(documentId)
+            )
+        );
+        bytes32 manifestState = keccak256(abi.encode(_manifestSnapshot()));
+        return keccak256(
+            abi.encode(
+                schemaState,
+                manifestState,
+                executor.governanceAction(actionId),
+                executor.governanceNonce(),
+                executor.pendingScheduledActionCount(),
+                governorSafe.nonce()
+            )
+        );
+    }
+
+    function _manifestSnapshot() private view returns (ManifestSnapshot memory saved) {
+        saved.aggregate = StreamGenesisManifestPlan.readAggregate(manifest);
+        saved.pointer = manifest.streamSystemManifestPointer();
+        saved.count = manifest.streamSystemManifestPointerCount();
+        saved.historyHash = _manifestHistoryHash(saved.count);
+    }
+
+    function _manifestHistoryHash(uint256 count) private view returns (bytes32 result) {
+        for (uint256 i; i < count; ++i) {
+            (address pointer, bytes32 hash, uint64 timestamp) =
+                manifest.streamSystemManifestPointerAt(i);
+            result = keccak256(abi.encode(result, i, pointer, hash, timestamp));
+        }
+    }
+
+    function _assertManifestAdvanced(
+        Activation.Publication memory publication,
+        ManifestSnapshot memory beforeState
+    ) private view {
+        StreamSystemManifest.AggregateState memory current =
+            StreamGenesisManifestPlan.readAggregate(manifest);
+        require(
+            current.revision == beforeState.aggregate.revision + 1
+                && current.manifestHash == publication.update.manifestHash
+                && keccak256(bytes(current.manifestURI))
+                    == keccak256(bytes(publication.update.manifestURI))
+                && keccak256(abi.encode(current.modules))
+                    == keccak256(abi.encode(beforeState.aggregate.modules))
+                && keccak256(abi.encode(current.discovery))
+                    == keccak256(abi.encode(beforeState.aggregate.discovery)),
+            "exact manifest head, revision, modules and discovery"
+        );
+        require(
+            manifest.streamSystemManifestPointer() == publication.payload
+                && manifest.streamSystemManifestPointerCount() == beforeState.count + 1
+                && _manifestHistoryHash(beforeState.count) == beforeState.historyHash,
+            "one manifest pointer appended to unchanged history"
+        );
+        (address pointer, bytes32 hash, uint64 timestamp) =
+            manifest.streamSystemManifestPointerAt(beforeState.count);
+        require(
+            pointer == publication.payload && hash == publication.update.manifestHash
+                && timestamp == block.timestamp,
+            "exact appended manifest publication"
+        );
+    }
+
     function _source() private view returns (Admission.Plan memory p, string[] memory paths) {
         return abi.decode(retainedSource, (Admission.Plan, string[]));
     }
@@ -281,7 +546,18 @@ contract StreamCurrentMuseumGenesisAdmissionTest is StreamFullV1ActivationFixtur
         GenesisBatch memory batch = Admission.next(p, retainedHash, index);
         if (batch.calls.length == 0) return;
         bytes32 actionId = _run(batch);
-        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertDocumentEvent(vm.getRecordedLogs(), p.documents[index], actionId);
+        require(
+            Admission.next(p, retainedHash, index).calls.length == 0,
+            "exact post-execution readback"
+        );
+    }
+
+    function _assertDocumentEvent(
+        Vm.Log[] memory logs,
+        Admission.Document memory row,
+        bytes32 actionId
+    ) private view {
         bytes32 topic = keccak256(
             "DocumentRegistered(uint16,bytes32,bytes32,bytes32,bytes32,(string,uint8,bytes32,bytes32,bytes32,string,uint32),bytes32[])"
         );
@@ -292,24 +568,34 @@ contract StreamCurrentMuseumGenesisAdmissionTest is StreamFullV1ActivationFixtur
                     || logs[i].topics[0] != topic
             ) continue;
             require(
-                logs[i].topics[1] == keccak256(bytes(p.documents[index].specification.name))
-                    && logs[i].topics[2] == p.documents[index].specification.contentHash
+                logs[i].topics[1] == keccak256(bytes(row.specification.name))
+                    && logs[i].topics[2] == row.specification.contentHash
                     && logs[i].topics[3] == actionId,
                 "original document and Safe action event"
+            );
+            require(
+                keccak256(logs[i].data)
+                    == keccak256(
+                        abi.encode(
+                            uint16(1),
+                            keccak256(abi.encode(row.specification, row.chunkHashes)),
+                            row.specification,
+                            row.chunkHashes
+                        )
+                    ),
+                "full document event version, declaration, specification and ordered chunks"
             );
             ++matched;
         }
         require(matched == 1, "one original admission event");
-        require(
-            Admission.next(p, retainedHash, index).calls.length == 0,
-            "exact post-execution readback"
-        );
     }
 
     function _run(GenesisBatch memory intent) private returns (bytes32 id) {
         Activation.Context memory x =
             Activation.Context(foundation, configuration, products, savedInventoryHash);
-        GenesisBatch memory batch = Activation.withManifestTail(x, intent, _publication());
+        Activation.Publication memory publication = _publication();
+        ManifestSnapshot memory beforeState = _manifestSnapshot();
+        GenesisBatch memory batch = Activation.withManifestTail(x, intent, publication);
         require(
             batch.actionClass == 1 && batch.calls.length == 2
                 && batch.calls[0].target == address(assemblySchemas)
@@ -331,6 +617,7 @@ contract StreamCurrentMuseumGenesisAdmissionTest is StreamFullV1ActivationFixtur
                 && action.proposer == address(governorSafe),
             "original threshold Safe action executed"
         );
+        _assertManifestAdvanced(publication, beforeState);
     }
 
     function _publication() private returns (Activation.Publication memory p) {

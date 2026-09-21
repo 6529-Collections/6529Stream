@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
+import {
+    StreamGenesisManifestTailFixture as TailFixture
+} from "../helpers/StreamGenesisManifestTailFixture.sol";
 import "../../script/current/StreamFullV1GenesisProducts.sol";
 import "../../script/current/StreamGovernanceStagePlan.sol";
 import {
@@ -50,6 +53,10 @@ contract StreamCurrentFullV1GenesisProductsTest is StreamCurrentStackFixture, Of
         vm.deal(address(this), 10 ether);
         _deployCurrentStack(vm.addr(ARTIST_KEY), vm.addr(PLATFORM_KEY));
         _installGovernor();
+        TailFixture.Plan memory tail =
+            TailFixture.plan(executor, address(registry), registry.registerModule.selector);
+        _executeStage(tail.batch, keccak256("original Registry admission tail fixture"));
+        TailFixture.assertInstalled(executor, tail, address(manifest));
         _executeStage(_registrationWithTail(), keccak256("genesis independent products"));
     }
 

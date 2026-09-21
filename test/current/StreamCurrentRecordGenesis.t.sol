@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
+import {
+    StreamGenesisManifestTailFixture as TailFixture
+} from "../helpers/StreamGenesisManifestTailFixture.sol";
 import "../../script/current/StreamFullV1RecordProducts.sol";
 import "../../script/current/StreamGovernanceCatalogStagePlan.sol";
 import {
@@ -60,11 +63,14 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         configuration.artistRegistry = address(artists);
         configuration.artistAttribution = artistSuite.owners[4];
         configuration.deploymentHash = DEPLOYMENT_HASH;
+        // Raw CIDs identify the exact fixture manifest strings; availability is not asserted.
         configuration.preservation = StreamFullV1RecordProducts.Manifest(
-            keccak256("fixture full-byte preservation manifest"), "urn:fixture:preservation-v1"
+            keccak256("fixture full-byte preservation manifest"),
+            "ipfs://bafkreig4cd54mehjls33ydm2ymakbmuud5b4ofta3ee72nlwi3xt3updve"
         );
         configuration.general = StreamFullV1RecordProducts.Manifest(
-            keccak256("fixture general attestation manifest"), "urn:fixture:general-attestations"
+            keccak256("fixture general attestation manifest"),
+            "ipfs://bafkreiaum6s2mqig4ap2nkcfkohrzi7yupsiwhfm4ir5kgy6rwcjkcuvr4"
         );
         configuration.signatureGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_ERC1271_VERIFY_GAS", 400000, 90000, 2
@@ -75,6 +81,10 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         // The Artist coordinator and original owners must already exist and be reciprocal.
         records = StreamFullV1RecordProducts.deploy(configuration);
         _extendCatalog();
+        TailFixture.Plan memory tail =
+            TailFixture.plan(executor, address(registry), registry.registerModule.selector);
+        _executeStage(tail.batch, keccak256("original Registry admission tail fixture"));
+        TailFixture.assertInstalled(executor, tail, address(manifest));
         _registerModules();
         if (!assemblySchemas.document(assemblySchemas.RAW_BYTES()).exists) {
             _document(
@@ -204,6 +214,7 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         for (uint256 i; i < r.payload.length; ++i) {
             r.payload[i] = bytes1(uint8(i * 37 + i / 8192));
         }
+        r.statementURI = _fixtureContentURI(r.payload);
         require(records.general.MAX_RECORD_PAYLOAD_BYTES() == 24576, "current full-byte General v2");
         bytes memory signature = _signature(governor, r);
         bytes32 hash = records.general.recordSignedAttestation(subject, r, signature);
@@ -356,6 +367,7 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         r.subjectId = fixtureArtistId;
         r.schemaId = nativeSchema;
         r.payload = bytes("original Artist statement through real Safe signatures");
+        r.statementURI = _fixtureContentURI(r.payload);
         bytes32 identity = IStreamArtistIdentityRevisionReads(artistSuite.owners[2])
             .operativeIdentityRecord(fixtureArtistId);
         T.Attestation memory original = T.Attestation(
@@ -428,8 +440,8 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         StreamOwnerNoticeTypes.Reference memory ref = StreamOwnerNoticeTypes.Reference(
             2,
             keccak256("RAW_BYTES"),
-            abi.encode(keccak256("fixture instrument")),
-            "urn:fixture:instrument"
+            abi.encode(sha256(bytes("fixture instrument"))),
+            _fixtureContentURI(bytes("fixture instrument"))
         );
         n.legalPersonRef = ref;
         n.instrumentRef = ref;
@@ -438,6 +450,7 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         r.schemaId = keccak256("STREAM_IDENTITY_NOTARIZATION_V1");
         r.canonicalizationId = keccak256("RFC8785_JCS");
         r.payload = records.general.notarizationPayload(n);
+        r.statementURI = _fixtureContentURI(r.payload);
         bytes memory signature = _signature(governor, r);
         vm.expectRevert();
         records.general.recordSignedAttestation(subject, r, signature);
@@ -445,6 +458,7 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         wrong.operativeIdentityRecordHash = keccak256("unrelated identity");
         General.Request memory changed = abi.decode(abi.encode(r), (General.Request));
         changed.payload = records.general.notarizationPayload(wrong);
+        changed.statementURI = _fixtureContentURI(changed.payload);
         bytes memory wrongSignature = _signature(governor, changed);
         vm.expectRevert();
         records.general.recordIdentityNotarization(subject, changed, wrong, wrongSignature);
@@ -505,8 +519,8 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         r.attesterDID = "did:example:fixture-claim";
         r.schemaId = schemaId;
         r.canonicalizationId = assemblySchemas.RAW_BYTES();
-        r.statementURI = "urn:fixture:original-statement";
         r.payload = bytes("{\"fixture\":true,\"claim\":\"general account assertion\"}");
+        r.statementURI = _fixtureContentURI(r.payload);
         r.effectiveAt = uint64(block.timestamp);
         r.nonce = nonce;
         r.deadline = uint64(block.timestamp + 30 days);
@@ -531,9 +545,32 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
             .deriveSubject(Independent.Subject(Independent.SubjectKind.COLLECTION, 1, 0, 0));
         r.contentHash =
             Original.HashRef(1, abi.encode(keccak256(payload)), assemblySchemas.RAW_BYTES());
-        r.uri = "urn:fixture:full-preservation-bytes";
+        r.uri = _fixtureContentURI(payload);
         r.schemaId = schemaId;
         r.effectiveAt = uint64(block.timestamp);
+    }
+
+    /// @dev CIDv1/raw/sha2-256 names exact supplied bytes; no publication or availability claim.
+    function _fixtureContentURI(bytes memory raw) private pure returns (string memory) {
+        bytes memory binary = abi.encodePacked(hex"01551220", sha256(raw));
+        bytes memory alphabet = "abcdefghijklmnopqrstuvwxyz234567";
+        bytes memory encoded = new bytes(59);
+        encoded[0] = "b";
+        uint256 cursor = 1;
+        uint256 word;
+        uint256 bits;
+        for (uint256 i; i < binary.length; ++i) {
+            word = (word << 8) | uint8(binary[i]);
+            bits += 8;
+            while (bits >= 5) {
+                bits -= 5;
+                encoded[cursor++] = alphabet[(word >> bits) & 31];
+            }
+            word &= (uint256(1) << bits) - 1;
+        }
+        if (bits != 0) encoded[cursor++] = alphabet[(word << (5 - bits)) & 31];
+        require(cursor == encoded.length, "complete raw fixture CID");
+        return string.concat("ipfs://", string(encoded));
     }
 
     function _grant(uint256 collection, bytes32 family, uint8 class_, address account, bool enabled)

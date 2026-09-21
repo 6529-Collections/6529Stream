@@ -317,14 +317,18 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.ticket = StreamFullV1GenesisProducts.Manifest(
             keccak256("ticket fixture"), "urn:fixture:full37:ticket"
         );
+        // Raw CIDs identify the exact fixture manifest strings; availability is not asserted.
         c.owner = StreamFullV1GenesisProducts.Manifest(
-            keccak256("owner fixture"), "urn:fixture:full37:owner"
+            keccak256("owner fixture"),
+            "ipfs://bafkreia5pk3hpooi3ez6hj3swrciqmuu7rjtfqlyrzpb5u7oircdfb6cs4"
         );
         c.attestation = StreamFullV1GenesisProducts.Manifest(
-            keccak256("independent fixture"), "urn:fixture:full37:independent"
+            keccak256("independent fixture"),
+            "ipfs://bafkreigynzqrd6gr6mudzcjouddws6ktpipeaiebfprpg7oy65thb4732q"
         );
         c.views = StreamFullV1GenesisProducts.Manifest(
-            keccak256("views fixture"), "urn:fixture:full37:views"
+            keccak256("views fixture"),
+            "ipfs://bafkreibhptvt3f6daic2eoaue5ll5yybx7qdaqmscprtnmbjxlctb2bdyq"
         );
         c.delegateManifestURI = "urn:fixture:full37:delegate";
         c.signatureGas = _gas("METADATA_ERC1271_VERIFY_GAS", 400000, 90000, 2);
@@ -342,11 +346,14 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.artistRegistry = address(artists);
         c.artistAttribution = artistSuite.owners[4];
         c.deploymentHash = DEPLOYMENT_HASH;
+        // Raw CIDs identify the exact fixture manifest strings; availability is not asserted.
         c.preservation = StreamFullV1RecordProducts.Manifest(
-            keccak256("preservation fixture"), "urn:fixture:full37:preservation"
+            keccak256("preservation fixture"),
+            "ipfs://bafkreihxue4twi4fl2qk633elezaie53r6zyhxxrv4padp5gufellkwj3q"
         );
         c.general = StreamFullV1RecordProducts.Manifest(
-            keccak256("general fixture"), "urn:fixture:full37:general"
+            keccak256("general fixture"),
+            "ipfs://bafkreifsiudnavzt2ubxgnrfs2aajcxxeqf3gqqhlzbvzwrbld3smjvki4"
         );
         c.signatureGas = configuration.independent.signatureGas;
         c.dependencyReadGas = configuration.independent.dependencyReadGas;
