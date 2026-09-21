@@ -1,4 +1,13 @@
 # Changelog
+## Current-authority complete VIEW source binding
+
+- Forward the shared complete VIEW admission API through the current-authority
+  preservation provider with the original constructor and source hash formula.
+- Share the original one-use guard and exact class2 action with the basic path;
+  preserve historical receipt reads and operative source validation separately.
+- Add focused host coverage. Native execution, linked size, gas and complete
+  VIEW ceremony acceptance remain pending.
+
 ## Scoped preservation sanction and Finality source
 
 - Add a distinct local export/resume recipe composing exact current-Artist

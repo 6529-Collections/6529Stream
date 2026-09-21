@@ -141,6 +141,18 @@ dependencies and preservation snapshot reciprocities; the route-read budget
 comes from that bound declaration. VIEW keeps its separate producer profile and
 does not enter the token-preservation V2 family.
 
+The provider also forwards the shared complete VIEW binding interface. Its
+complete proposal admits the reference, inventory and bundle source selection
+in the same original one-time class2 action. Basic and complete entrypoints
+consume the same guard; completing a basic-only binding later is not supported.
+The complete proposal, rather than its inner basic proposal, must be authorized.
+`viewFinalitySourcesReceipt()` retains historical admission after dependency
+drift; `viewFinalitySources()` revalidates the operative source bindings. Neither
+getter substitutes for current reference, inventory, archive or Finality
+evidence. This thin forwarding layer retains the four constructor arguments and
+source-configuration hash formula. Complete VIEW ceremony and media review
+integration remain separately tracked work.
+
 Preservation excludes only sanction-derived display. It does not freeze or
 ignore C2PA, claims, corrections or other provenance changes. Such changes can
 still make preservation observations stale. Sharing a retained reference or

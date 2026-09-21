@@ -5,7 +5,7 @@ import {
     StreamFinalityPreservationPolicyProviderComponentsV1 as PolicyComponents
 } from "./StreamFinalityPreservationPolicyProviderComponentsV1.sol";
 import {
-    StreamFinalityFactoryProfileSourceReadsV2 as Selection
+    StreamFinalityFactoryProfileSourceReadsV2 as ProfileSelection
 } from "./StreamFinalityFactoryProfileSourceReadsV2.sol";
 import {
     IStreamFinalityProfileSources as Profiles
@@ -84,6 +84,15 @@ import {
 import {
     IStreamViewRouteReadBudgetV1
 } from "../../interfaces/stream/finality/IStreamViewRouteReadBudgetV1.sol";
+import {
+    IStreamFinalityViewPreservationCompleteBindingV1
+} from "../../interfaces/stream/finality/IStreamFinalityViewPreservationCompleteBindingV1.sol";
+import {
+    IStreamViewPreservationFinalitySourcesV1
+} from "../../interfaces/stream/finality/IStreamViewPreservationFinalitySourcesV1.sol";
+import {
+    StreamFinalityViewPreservationCompleteBindingTypesV1 as CompleteViewBinding
+} from "../../interfaces/stream/finality/StreamFinalityViewPreservationCompleteBindingTypesV1.sol";
 
 /// @notice Current-authority provider for original static and genuine preservation graphs.
 /// @dev COLLECTION/scoped catalogues are constructor-only; VIEW is one-time class2 bound. Current canonical Router profile
@@ -99,9 +108,11 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
     IStreamViewSourceBinding,
     IStreamViewPolicySourceBindingV2,
     IStreamViewRouteReadBudgetV1,
-    IStreamFinalityViewPreservationBindingV1
+    IStreamFinalityViewPreservationBindingV1,
+    IStreamFinalityViewPreservationCompleteBindingV1,
+    IStreamViewPreservationFinalitySourcesV1
 {
-    Selection.Context private _sourceSelection;
+    ProfileSelection.Context private _sourceSelection;
     GraphSelection.Context private _graph;
     CollectionSelection.Context private _collectionGraph;
     // Constructor-only storage avoids reciprocal runtime hash cycles.
@@ -115,7 +126,7 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         GraphBinding.FactoryBinding memory publicationFactory
     ) StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2(original, scoped) {
         ViewBinding.initialize(_viewBinding, original);
-        Selection.Context memory c;
+        ProfileSelection.Context memory c;
         c.core = original.targets[0];
         c.router = original.targets[2];
         c.routerCodeHash = original.codeHashes[2];
@@ -123,7 +134,7 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         c.readGas = original.readGas;
         c.profiles[0] = _profile(original, 0, keccak256(abi.encode(original)));
         c.profiles[1] = Profiles.Profile(
-            Selection.profileHash(1),
+            ProfileSelection.profileHash(1),
             scoped.targets[9],
             scoped.codeHashes[9],
             scoped.targets[8],
@@ -132,7 +143,7 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
             scoped.codeHashes[10],
             keccak256(abi.encode(scoped))
         );
-        Selection.validate(c);
+        ProfileSelection.validate(c);
         _sourceSelection = c;
         _graph = GraphSelection.initialize(original, publicationFactory);
         _collectionGraph = CollectionSelection.initialize(original, collectionFactory);
@@ -166,6 +177,8 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
             || id == type(IStreamViewSourceBinding).interfaceId
             || id == type(IStreamViewPolicySourceBindingV2).interfaceId
             || id == type(IStreamViewRouteReadBudgetV1).interfaceId
+            || id == type(IStreamFinalityViewPreservationCompleteBindingV1).interfaceId
+            || id == type(IStreamViewPreservationFinalitySourcesV1).interfaceId
             || id == type(IStreamFinalityViewPreservationBindingV1).interfaceId;
     }
 
@@ -219,6 +232,62 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
             r.dependenciesHash
         );
         return r.recordHash;
+    }
+
+    function completeViewPreservationBindingProfile() external pure override returns (bytes32) {
+        return CompleteViewBinding.PROFILE;
+    }
+
+    function completeViewPreservationBindingTransition(
+        ViewBindingTypes.Configuration calldata configuration,
+        ViewDeclarationTypes.Binding calldata declaration,
+        IStreamViewPreservationFinalitySourcesV1.Selection calldata selected
+    ) external view override returns (ViewBindingTypes.Transition memory) {
+        _validateViewPolicyFactory();
+        return ViewBinding.completeTransition(
+            _viewBinding, _graph.original, configuration, declaration, selected
+        );
+    }
+
+    function bindCompleteViewPreservation(
+        ViewBindingTypes.Configuration calldata configuration,
+        ViewDeclarationTypes.Binding calldata declaration,
+        IStreamViewPreservationFinalitySourcesV1.Selection calldata selected
+    ) external override returns (bytes32 completeRecordHash) {
+        _validateViewPolicyFactory();
+        (
+            ViewBindingTypes.Receipt memory basic,
+            IStreamViewPreservationFinalitySourcesV1.Receipt memory complete
+        ) = ViewBinding.bindComplete(
+            _viewBinding, _graph.original, configuration, declaration, selected
+        );
+        emit ViewPreservationCompleteBound(
+            complete.recordHash,
+            basic.recordHash,
+            complete.actionId,
+            CompleteViewBinding.proposalHash(basic, complete)
+        );
+        return complete.recordHash;
+    }
+
+    /// @notice Authenticated immutable producer selection; consumers still require current evidence.
+    function viewFinalitySources()
+        external
+        view
+        override
+        returns (IStreamViewPreservationFinalitySourcesV1.Selection memory)
+    {
+        return ViewBinding.completeSelection(_viewBinding, _graph.original);
+    }
+
+    /// @notice Historical full admission; unavailable for pending and basic-only bindings.
+    function viewFinalitySourcesReceipt()
+        external
+        view
+        override
+        returns (IStreamViewPreservationFinalitySourcesV1.Receipt memory)
+    {
+        return ViewBinding.completeHistory(_viewBinding, _graph.original);
     }
 
     /// @notice Bootstrap scalar only; the route consumer pins this provider and checks profile,
@@ -307,7 +376,7 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (Profiles.Profile memory)
     {
-        Selection.profileHash(index);
+        ProfileSelection.profileHash(index);
         return _sourceSelection.profiles[index];
     }
 
@@ -327,7 +396,7 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         if (CollectionSelection.isPolicy(_collectionGraph, scope)) {
             return CollectionSelection.sources(_collectionGraph, scope);
         }
-        return Selection.current(_sourceSelection, scope);
+        return ProfileSelection.current(_sourceSelection, scope);
     }
 
     function collectionPreservationPolicyPublicationBinding()
@@ -637,7 +706,7 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         returns (Profiles.Profile memory)
     {
         return Profiles.Profile(
-            Selection.profileHash(index),
+            ProfileSelection.profileHash(index),
             c.targets[9],
             c.codeHashes[9],
             c.targets[8],
