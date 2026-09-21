@@ -20,6 +20,15 @@
   gas validation remain pending. See the
   [integration guide](docs/integrations/scoped-policy-read-capacity.md).
 
+## Policy inventory current code generation
+
+- Separate the full COLLECTION policy V2 current read and pure evidence projection
+  into a fixed linked worker, preserving original guards, storage, hash and write
+  order. Both selected products fit native production limits.
+- Add four typed-boundary regression cases and exact field/ABI preservation checks.
+  Cases are type-checked; full current execution and added-frame gas remain pending.
+  See the [frame note](docs/integrations/policy-inventory-current-frames.md).
+
 ## Complete recovered base multiplicity
 
 - Add a distinct typed operation60 profile for multiple recovered class1/class3
