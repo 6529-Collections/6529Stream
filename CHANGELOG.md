@@ -20,6 +20,17 @@
 - Add eight stored-state read cases and five further factory-pair cases;
   these are source and ABI checks pending native execution.
 
+## Complete current VIEW preservation binding
+
+- Add one original class-2 admission of the basic VIEW configuration and fixed
+  reference, inventory and bundle selection. Both entry points share the same
+  irreversible guard; historical receipt access remains separate from current
+  runtime and identity validation.
+- Add actual VIEW Work/Rights/Artist waiver and Safe construction cases, plus
+  an explicit supplied-observation complete inventory and archive recipe.
+  Diagnostic budgets are not transaction-capacity evidence; runtime, provider
+  finality dispatch and the executed ceremony remain pending.
+
 ## Actual current VIEW preservation ceremony
 
 - Add genuine declaration/adoption and complete output, snapshot and original

@@ -88,8 +88,10 @@ not execute a browser or establish the provenance of caller-supplied captures.
 Locally signed archival observations and producer-derived admission goldens are
 fixture evidence, not independent analysis or public archival retrieval.
 
-Complete VIEW inventory, archive-bundle closure, provider finality dispatch,
-sanction archival and original scope finalization remain separate required work.
+The [complete source recipe](current-view-complete-preservation.md) adds a single
+complete binding, VIEW documentary selections and source-authored inventory and
+archive coverage. Executed closure, provider finality dispatch, sanction archival
+and original scope finalization remain required.
 Artist `confirmSanctionFinalized(collectionId)` applies only to an executed
 COLLECTION finality record; independently finalized VIEW evidence does not
 change collection attribution. A VIEW-only fixture must check that boundary.
