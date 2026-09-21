@@ -18,8 +18,8 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-ABI164 checks all **4,119 Solidity sources** at `eda052c7` with
-zero errors in 49.937 seconds. This is a combined type, ABI and storage
+ABI166 checks all **4,121 Solidity sources** at `b1bd2bae` with
+zero errors in 49.969 seconds. This is a combined type, ABI and storage
 check. Full current-contract execution and the matching testnet candidate remain.
 
 - **Artist:** complete recovered operation-24 record history is source integrated
@@ -45,7 +45,11 @@ check. Full current-contract execution and the matching testnet candidate remain
   recorded producer source. A synthetic account export/import round trip also
   verifies six accounts, 18 slots and 13 getters through 63 real local RPC reads.
   This is transport evidence; the full production graph and actual Safe/client
-  campaign remain pending. VIEW Inventory/Bundle callers are in intake review.
+  campaign remain pending. VIEW Inventory/Bundle callers `791cb767` add all 22 writes, with an independent
+  combined 73-test pass and root fixture/generation/build/strict-type checks.
+  Test-only file entry `e3584dd7` and outer TEST adapter `b1bd2bae` are source
+  integrated; actual export requires a successful explicit run, not a skipped
+  default test or a completion marker alone.
 - **Museum:** canonical acquisition composition V10 and conservation dossier V3
   are integrated as `4784061d`, with 72 focused root passes. They join supplied
   preservation, work, recovery and attributed-observation sources and retain

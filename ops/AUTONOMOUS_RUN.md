@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI164 `eda052c7`: 4,119 sources, zero errors. Artist/finality capacity repairs and canonical Museum composition integrated; full runtime acceptance remains separate. |
+| Source checkpoint | ABI166 `b1bd2bae`: 4,121 sources, zero errors. Artist/finality capacity repairs and canonical Museum composition integrated; full runtime acceptance remains separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 21 September
 
-ABI164 checks all **4,119 Solidity sources** at `eda052c7` with
-zero errors in 49.937 seconds. This is a combined type, ABI and storage
+ABI166 checks all **4,121 Solidity sources** at `b1bd2bae` with
+zero errors in 49.969 seconds. This is a combined type, ABI and storage
 check. Full current-contract execution and the matching testnet candidate remain.
 
 Root owns architecture, shared interfaces, integration and delivery. Builders
@@ -43,7 +43,7 @@ Independent review covers coherent source handoffs and actual evidence.
 - Mint / independent review: Shared fixture extraction integrated ecfd88e6; retain original eight plus callback case. Changed callback-only trial also timed out900s/zeroEVM. Diagnose concrete remaining test-host construction; retain all three host timeouts and original acceptance cases.
 - Burn / preservation ceremony: Monitor integrated d8e42dc5 with25root passes. Browser package ready for genuine exports; independent owner-source compatibility reviewed. Complete actual preservation/browser acceptance.
 - Museum: Canonical V10/dossierV3 integrated4784061d with72root passes. Build preserved release-tool/source archives and offline regeneration; actual captures and institutional conformance remain separate.
-- Clients / Safe callers: Retrieval5928 passes42root tests. VIEW22-write consumer8caf52a3 awaits independent intake; finish complete Safe inventory and actual caller execution.
+- Clients / Safe callers: Retrieval5928 passes42root tests. VIEW22-write consumers integrated791cb767, independent73mock/oracle passes and root generation/build/types; finish complete Safe inventory and actual caller execution.
 - Testing / native tooling: Canonical owner tooling integrated9aaf with62root passes. Own shared physical execution view/dispatch and coordinated eda native product plan; then execute Genesis50/OwnerRecords with actual Safe.
 - Capacity / Rights: Actual3ec832 deliberately canceled for required size failures. Resume changed exacteda native plan with original cases/caps; held task handoff stays held.
 - Metric retention: Original Provider19owners/131products retained; scoped repair now integratededa. Coordinate fresh changed closure withTesting/C, then actualProvider12/OwnerRecords RPC.
