@@ -55,6 +55,9 @@ The policy binds the original dossier, source state and complete occurrence
 inventory. Review that exact policy before use. An explicit historical selection
 must retain each source's currentness and attribution; it cannot relabel an old
 statement as current or shrink the inventory denominator.
+WORK records outside the dossier's exact collection and token subject IDs remain
+in the inventory as `other_subject` and cannot be selected. An unfamiliar subject
+hash does not establish which token or other subject it names.
 
 ```powershell
 python -m tools.museum.canonical_semantic_export_v1 build `

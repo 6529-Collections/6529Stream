@@ -215,5 +215,88 @@ class SemanticSourcesTests(unittest.TestCase):
             s._work(files, self.state, self.source_hash)
 
 
+class SemanticWorkSubjectBoundaryTests(unittest.TestCase):
+    """Replay one collection catalogue with applicable and foreign WORK subjects."""
+    @classmethod
+    def setUpClass(cls):
+        from . import canonical_semantic_projection_v1 as projection
+        from .test_canonical_semantic_projection_v1 import inventory
+        evidence, inputs = supplied(condition=False)
+        state, graph = evidence['sourceState'], evidence['graph']
+        original = loads(inputs['metadata_files']['snapshot.json'], maximum=s.dossier.MAX_BYTES)['records'][0]
+        cls.applicable = {w._subject(state, lane) for lane in ('collection', 'token')}
+        cls.foreign = {w._subject(state | {'tokenId': str(int(state['tokenId']) + 1)}, 'token'),
+            keccak256(b'unknown subject without asserted preimage')}
+        native_rows, previous = [], w.ZERO
+        for index, subject in enumerate([*sorted(cls.foreign), w._subject(state, 'collection')]):
+            semantic = loads(hex_bytes(original['payloadHex']), maximum=32768, canonical=True)
+            semantic['subjectId'] = subject
+            raw = dumps(semantic)
+            record = list(w._typed(s.metadata.RECORD, original['record']))
+            receipt = list(w._typed(s.metadata.RECEIPT, original['receipt']))
+            record[1] = subject
+            record[2] = (1, hex_bytes(keccak256(raw)), schema_id('RFC8785_JCS'))
+            record[7] = int(state['timestamp']) - 10 + index
+            record = tuple(record)
+            digest = s.metadata.generic_hash(int(state['chainId']), graph['metadata']['address'], state['core'],
+                int(state['collectionId']), receipt[1], record)
+            previous = record_chain(state['chainId'], graph['metadata']['address'], state['collectionId'],
+                s.metadata.WORK, previous, digest, str(index))
+            receipt[3:8] = [int(state['timestamp']) - 9 + index, index, previous,
+                s.work_schema.WORK_SCHEMA_HASH, w.work_native.WORK_CANON_HASH]
+            native_rows.append((digest, record, tuple(receipt), raw))
+        evidence, inputs = supplied(condition=False, original_metadata_rows=native_rows)
+        append_work(evidence, inputs, tombstone=True)
+        with patch('socket.socket', side_effect=AssertionError('network used')):
+            checked = w.verify(dumps(evidence), **inputs)
+        files = {s.WORK_PATH: checked.files['work-condition/work.json'],
+            s.METADATA_PATH: inputs['metadata_files']['snapshot.json'], s.EVIDENCE_PATH: dumps(evidence)}
+        cls.rows, cls.denominator = s._work(files, state, keccak256(b'replayed subject-boundary source'))
+        cls.inventory = inventory()
+        cls.inventory.update(rows=cls.rows, leaves=s.field_inventory(cls.rows), sourceState=state,
+            sourceStateHash=keccak256(dumps(state)), denominators={'work': cls.denominator})
+        cls.projection = projection
+
+    def test_foreign_and_unknown_subjects_retained_but_not_applicable(self):
+        self.assertEqual(len(self.rows), 5)
+        self.assertEqual(self.denominator['recordCount'], '5')
+        for row in self.rows:
+            self.assertEqual(row['interpretation']['status'], 'interpreted')
+            self.assertEqual(dumps(row['semantic']), hex_bytes(row['original']['payloadHex']))
+            self.assertEqual(row['currentness']['eligibility'], 'not_reexecuted')
+            if row['selector']['subjectId'] in self.foreign:
+                self.assertEqual(row['currentness']['status'], 'other_subject')
+                self.assertFalse(row['currentness']['selected'])
+        self.assertEqual({row['currentness']['status'] for row in self.rows
+            if row['selector']['subjectId'] in self.applicable},
+            {'unselected_original', 'historical_native_selection', 'current_native_head'})
+
+    def test_historical_helper_keeps_collection_and_token_history_only(self):
+        ids = [row['occurrenceId'] for row in self.rows if row['selector']['subjectId'] in self.applicable]
+        raw = self.projection.historical_selection(self.inventory, ids)
+        selected, _ = self.projection._selection(self.inventory, self.rows, raw, keccak256(raw))
+        self.assertEqual(selected['selectedOccurrenceIds'], ids)
+        self.projection.render(self.inventory, raw, keccak256(raw))
+        for row in self.rows:
+            if row['selector']['subjectId'] in self.foreign:
+                with self.assertRaisesRegex(MuseumError, 'unsupported occurrence'):
+                    self.projection.historical_selection(self.inventory, [row['occurrenceId']])
+
+    def test_manually_rehashed_selection_cannot_cross_subject(self):
+        current = self.projection.default_selection(self.inventory)
+        self.assertEqual(len(loads(current, canonical=True)['selectedOccurrenceIds']), 1)
+        for row in self.rows:
+            if row['selector']['subjectId'] not in self.foreign:
+                continue
+            value = loads(current, canonical=True)
+            value.update(policy='explicit_historical', reason='retained_historical_occurrence_review',
+                selectedOccurrenceIds=[row['occurrenceId']])
+            raw = dumps(value)
+            with self.assertRaisesRegex(MuseumError, 'cannot cross subject'):
+                self.projection._selection(self.inventory, self.rows, raw, keccak256(raw))
+            with self.assertRaisesRegex(MuseumError, 'cannot cross subject'):
+                self.projection.render(self.inventory, raw, keccak256(raw))
+
+
 if __name__ == '__main__':
     unittest.main()

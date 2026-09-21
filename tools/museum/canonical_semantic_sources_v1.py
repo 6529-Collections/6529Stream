@@ -171,6 +171,7 @@ def _work(files, state, source_hash):
     originals = [r for r in snapshot['records'] if r['record'][0] == metadata.WORK]
     original_indices = {row['recordHash']: index for index, row in enumerate(snapshot['records'])}
     require(originals == value['allOriginalWorkRecords'], 'semantic WORK original denominator differs')
+    subjects = {work_consumer._subject(state, lane) for lane in ('collection', 'token')}
     histories = {}
     for lane in ('collection', 'token'):
         scope = value[lane]
@@ -185,10 +186,13 @@ def _work(files, state, source_hash):
         original_ref = _ref(files, METADATA_PATH, prefix)
         payload_ref = _ref(files, METADATA_PATH, prefix + '/payloadHex', 'hex')
         semantic, reason, projection_ref, current_ref = None, 'uninterpreted_original', None, None
-        current = _current('unselected_original', eligibility='not_reexecuted')
+        current = _current('unselected_original' if original['subjectId'] in subjects else 'other_subject',
+            eligibility='not_reexecuted')
         saved = histories.get(original['recordHash'])
         if saved is not None:
             lane, offset, projected, selected = saved
+            require(original['subjectId'] == work_consumer._subject(state, lane),
+                'semantic WORK selected original subject differs')
             require(projected['original'] == original, 'semantic WORK projection original differs')
             semantic = projected['semantic']
             require(dumps(semantic) == hex_bytes(original['payloadHex']), 'semantic WORK original payload differs')

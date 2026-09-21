@@ -1249,6 +1249,8 @@ the release policy in `docs/release-policy.md`.
 - Add native semantic selection and offline expansion for canonical dossiers,
   preserving all source occurrences, original authority, conflicting statements,
   exact model dependencies and unchanged dossier acceptance requirements.
+  Retain foreign-subject WORK records while rejecting their selection into a
+  dossier for a different token or collection subject.
 
 - Add read-only genesis Registry coverage for the fixed 29-schema and 22-support
   plan, with original definition/chunk reconstruction and explicit missing,
