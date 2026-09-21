@@ -8,6 +8,16 @@
 - Keep the original Artist field composition and strict checkpoint matchers;
   current live and explicitly projected preservation outputs retain citations.
 
+## Fresh VIEW constructor-budget measurement source
+
+- Add a separate unmeasured new-deployment budget profile, retaining all original
+  diagnostic defaults and strict full child-call forwarding.
+- Expose the complete checkpoint fixture boundary and add a bounded two-token
+  revalidation measurement plus an actual original-budget refusal control.
+  Every original row/root assertion and publication continuation remains.
+- Source configuration is a trial input only. Execution and gas acceptance remain
+  pending; no existing governed parameter or parent component ceiling changes.
+
 
 ## Current-authority VIEW publication and discovery composition
 

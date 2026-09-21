@@ -227,6 +227,24 @@ nested source/snapshot reservations. The authored composition retains those
 original values and cannot be treated as passing evidence until the production
 call path fits and executes under the supported limits.
 
+A separate [fresh constructor fixture](../../test/helpers/StreamCurrentAuthorityViewFreshBudgetFixture.sol)
+provides an explicitly unmeasured child-budget candidate. The base fixture retains
+every original diagnostic constructor value. Fresh deployments use the same
+products, full source bindings, records and outputs, with no reduction of an
+existing governed parameter and no increase to the 12-million discovery component
+ceiling. Lower nested reservations alone do not establish that the work fits.
+
+The [focused budget cases](../../test/current/StreamCurrentAuthorityViewFreshBudget.t.sol)
+measure complete two-token checkpoint revalidation under the candidate output
+host's seven-million child allowance, including every saved JSON and HTML row.
+The call follows construction in the same test, so reads may be warm and the
+observed gas includes caller/return-copy overhead. It does not establish cold
+transaction sizing. The cases preserve the full production revert when the trial fails. The separate
+control first obtains a real locked reference under the original configuration,
+then requires its sixteen-million reservation to fail inside a twelve-million
+call and checks the original state again. Full discovery, total transaction fit
+and browser acceptance remain separate from this checkpoint measurement.
+
 Preservation excludes only sanction-derived display. It does not freeze or
 ignore C2PA, claims, corrections or other provenance changes. Such changes can
 still make preservation observations stale. Sharing a retained reference or

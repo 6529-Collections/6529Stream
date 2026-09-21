@@ -117,6 +117,49 @@ import {
 abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
     StreamCurrentAuthorityPreservationPolicyAssemblyFixture
 {
+    /// @dev Constructor-only inputs for a new graph. The default preserves the original
+    /// diagnostic profile exactly; overriding this does not mutate governed deployed hosts.
+    struct AuthorityViewConstructionBudgets {
+        uint32 rendererGas;
+        uint32 attributionGas;
+        uint32 checkpointReadGas;
+        uint32 checkpointServingGas;
+        uint32 outputReadGas;
+        uint32 outputValidationGas;
+        uint32 snapshotReadGas;
+        uint32 snapshotSourceGas;
+        uint32 snapshotInventoryGas;
+        uint32 boundSnapshotValidationGas;
+        uint32 referenceReadGas;
+        uint32 referenceSourceGas;
+        uint32 referenceSnapshotGas;
+        uint32 referenceArchiveGas;
+    }
+
+    function _authorityViewConstructionBudgets()
+        internal
+        pure
+        virtual
+        returns (AuthorityViewConstructionBudgets memory)
+    {
+        return AuthorityViewConstructionBudgets({
+            rendererGas: 3000000,
+            attributionGas: 4000000,
+            checkpointReadGas: 2000000,
+            checkpointServingGas: 9000000,
+            outputReadGas: 2000000,
+            outputValidationGas: 12000000,
+            snapshotReadGas: 2000000,
+            snapshotSourceGas: 14000000,
+            snapshotInventoryGas: 4000000,
+            boundSnapshotValidationGas: 16000000,
+            referenceReadGas: 1000000,
+            referenceSourceGas: 16000000,
+            referenceSnapshotGas: 16000000,
+            referenceArchiveGas: 1000000
+        });
+    }
+
     AVStaticAttribution internal avOriginalAttribution;
     AVAttribution internal avAttribution;
     AVRenderer internal avRenderer;
@@ -150,7 +193,7 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
         avConfiguration = AVBasicTypes.Configuration(
             address(avSnapshot),
             address(avSnapshot).codehash,
-            16000000,
+            _authorityViewConstructionBudgets().boundSnapshotValidationGas,
             address(avCheckpoint),
             address(avCheckpoint).codehash,
             address(avOutput),
@@ -191,6 +234,7 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
     }
 
     function _avDeployOutputSources() private {
+        AuthorityViewConstructionBudgets memory budget = _authorityViewConstructionBudgets();
         _avInit(
             type(AVStaticAttribution).creationCode,
             abi.encode(
@@ -236,8 +280,8 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
             address(avAttribution),
             address(avAttribution).codehash,
             block.chainid,
-            3000000,
-            4000000
+            budget.rendererGas,
+            budget.attributionGas
         );
         _avInit(type(AVRenderer).creationCode, abi.encode(render));
         avRenderer = new AVRenderer(render);
@@ -257,8 +301,8 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
             address(avRenderer).codehash,
             avRenderer.configurationHash(),
             block.chainid,
-            2000000,
-            9000000
+            budget.checkpointReadGas,
+            budget.checkpointServingGas
         );
         _avInit(type(AVCheckpoint).creationCode, abi.encode(cp));
         avCheckpoint = new AVCheckpoint(cp);
@@ -278,8 +322,8 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
             address(assemblySchemas),
             address(assemblySchemas).codehash,
             block.chainid,
-            2000000,
-            12000000
+            budget.outputReadGas,
+            budget.outputValidationGas
         );
         _avInit(type(AVOutput).creationCode, abi.encode(output));
         avOutput = new AVOutput(output);
@@ -292,6 +336,7 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
     }
 
     function _avDeploySnapshot() private {
+        AuthorityViewConstructionBudgets memory budget = _authorityViewConstructionBudgets();
         AVSnapshotTypes.Dependencies memory d;
         d.targets = [
             address(assemblyCore),
@@ -309,9 +354,9 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        d.readGas = 2000000;
-        d.sourceGas = 14000000;
-        d.inventoryGas = 4000000;
+        d.readGas = budget.snapshotReadGas;
+        d.sourceGas = budget.snapshotSourceGas;
+        d.inventoryGas = budget.snapshotInventoryGas;
         AVGas.GasParameterConfig[3] memory caps = [
             AVGas.GasParameterConfig("VIEW_PRESERVATION_SNAPSHOT_READ_GAS", d.readGas, 100000, 2),
             AVGas.GasParameterConfig(
@@ -403,6 +448,7 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
     }
 
     function _avDeployReference() private {
+        AuthorityViewConstructionBudgets memory budget = _authorityViewConstructionBudgets();
         AVReferenceTypes.Dependencies memory d;
         d.targets = [
             address(assemblyCore),
@@ -417,10 +463,10 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        d.readGas = 1000000;
-        d.sourceGas = 16000000;
-        d.snapshotGas = 16000000;
-        d.archiveGas = 1000000;
+        d.readGas = budget.referenceReadGas;
+        d.sourceGas = budget.referenceSourceGas;
+        d.snapshotGas = budget.referenceSnapshotGas;
+        d.archiveGas = budget.referenceArchiveGas;
         AVGas.GasParameterConfig[4] memory caps = [
             AVGas.GasParameterConfig("VIEW_PRESERVATION_REFERENCE_READ_GAS", d.readGas, 50000, 1),
             AVGas.GasParameterConfig(

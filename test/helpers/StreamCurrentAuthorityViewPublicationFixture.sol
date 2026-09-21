@@ -185,7 +185,7 @@ abstract contract StreamCurrentAuthorityViewPublicationFixture is
         _authorityRequireViewPublication();
     }
 
-    function _authorityViewSelectRecords() private {
+    function _authorityViewSelectRecords() internal {
         require(authorityViewRecords.waiverPublication.recordHash == 0, "one VIEW record set");
         authorityViewRecords.collectionBefore = _authorityViewCollectionRecordsHash();
         require(
@@ -684,6 +684,17 @@ abstract contract StreamCurrentAuthorityViewPublicationFixture is
     }
 
     function _authorityViewCheckpointOutputs() internal {
+        (VPCheckpoint.Plan memory p, VPCheckpoint.Output[] memory rows) =
+            _authorityViewBuildCheckpoint();
+        _authorityViewCoverManifest(p, rows);
+    }
+
+    /// @dev Complete original checkpoint construction and all row/root assertions. Exposing this
+    /// boundary permits a bounded full-currentness measurement before output/snapshot publication.
+    function _authorityViewBuildCheckpoint()
+        internal
+        returns (VPCheckpoint.Plan memory p, VPCheckpoint.Output[] memory rows)
+    {
         authorityViewPublication.checkpoint = avCheckpoint.begin(
             authorityViewAdoption.scope, keccak256("actual current VIEW preservation ceremony")
         );
@@ -700,15 +711,14 @@ abstract contract StreamCurrentAuthorityViewPublicationFixture is
             avCheckpoint.append(authorityViewPublication.checkpoint, token, json, html);
         }
         avCheckpoint.seal(authorityViewPublication.checkpoint);
-        VPCheckpoint.Plan memory p =
-            avCheckpoint.requireCurrentCheckpoint(authorityViewPublication.checkpoint);
+        p = avCheckpoint.requireCurrentCheckpoint(authorityViewPublication.checkpoint);
         require(
             p.tokenCount == 2 && p.nextIndex == 2
                 && p.adoptionRecord == authorityViewAdoption.adoptionRecord && p.contentRoot != 0
                 && p.outputRoot != 0,
             "complete actual VIEW membership and outputs"
         );
-        VPCheckpoint.Output[] memory rows = new VPCheckpoint.Output[](2);
+        rows = new VPCheckpoint.Output[](2);
         bytes32[2] memory leaves;
         for (uint256 i; i < rows.length; ++i) {
             rows[i] = avCheckpoint.outputAt(authorityViewPublication.checkpoint, i);
@@ -755,7 +765,6 @@ abstract contract StreamCurrentAuthorityViewPublicationFixture is
                 ),
             "independent ordered two-leaf VIEW content root"
         );
-        _authorityViewCoverManifest(p, rows);
     }
 
     function _authorityViewCoverManifest(
