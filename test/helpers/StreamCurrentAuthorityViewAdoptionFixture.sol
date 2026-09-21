@@ -58,6 +58,9 @@ import {
     StreamCurrentAuthorityViewCompleteBindingFixture
 } from "./StreamCurrentAuthorityViewCompleteBindingFixture.sol";
 import {
+    StreamCurrentAuthorityNativeAssemblyFixture
+} from "./StreamCurrentAuthorityNativeAssemblyFixture.sol";
+import {
     StreamCurrentAuthorityPreservationStaticPrefixFixture
 } from "./StreamCurrentAuthorityPreservationStaticPrefixFixture.sol";
 import { StreamCurrentStackPlan } from "../../script/current/StreamCurrentStackPlan.sol";
@@ -127,6 +130,41 @@ abstract contract StreamCurrentAuthorityViewAdoptionFixture is
     bool internal authorityViewProbeMissingConsent;
     bool internal authorityViewMissingConsentObserved;
     bytes32 internal authorityViewAdoptionTransactionHash;
+
+    function _beforeAssemblyArtistOnboarding()
+        internal
+        virtual
+        override(
+            StreamCurrentAuthorityNativeAssemblyFixture,
+            StreamCurrentAuthorityPreservationStaticPrefixFixture
+        )
+    {
+        StreamCurrentAuthorityPreservationStaticPrefixFixture._beforeAssemblyArtistOnboarding();
+    }
+
+    function _afterAssemblyTokenFinalized(uint256 tokenId)
+        internal
+        virtual
+        override(
+            StreamCurrentAuthorityNativeAssemblyFixture,
+            StreamCurrentAuthorityPreservationStaticPrefixFixture
+        )
+    {
+        StreamCurrentAuthorityPreservationStaticPrefixFixture._afterAssemblyTokenFinalized(tokenId);
+    }
+
+    function _assemblyHTML(uint256 tokenId)
+        internal
+        view
+        virtual
+        override(
+            StreamCurrentAuthorityNativeAssemblyFixture,
+            StreamCurrentAuthorityPreservationStaticPrefixFixture
+        )
+        returns (bytes memory)
+    {
+        return StreamCurrentAuthorityPreservationStaticPrefixFixture._assemblyHTML(tokenId);
+    }
 
     function _authorityPrepareViewArtwork() internal {
         require(
