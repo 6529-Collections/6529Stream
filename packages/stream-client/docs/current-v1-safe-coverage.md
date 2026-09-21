@@ -143,6 +143,13 @@ recorder's class-3/class-8 CURATOR grant and retains both payload and submitted
 publication bytes. First/last samples verify the saved producer's current
 Registry admission; fresh coverage and current receipt-pair checks remain distinct.
 
+The [current-authority preservation inventory client](current-authority-preservation-inventory-v1.md)
+adds the nineteen original writes on each collection/scoped inventory host.
+Permissionless materialization preserves the resolver-selected Artist route,
+original receipt witnesses, ordered archive origins and their runtime rows.
+The nominal V1 hosts use the fixed token preservation V2 family. Sealed
+inventory evidence and current eligibility remain separate from archive coverage.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Current-authority preservation inventories](docs/current-authority-preservation-inventory-v1.md)
+  covers collection/scoped materialization, captured Artist authority,
+  original receipt witnesses and authenticated archive-origin history.
+
 - [Token preservation V2 references](docs/current-token-preservation-reference-v2.md)
   covers environment preparation, collection/scoped reference publication,
   admitted producer samples and original archive coverage semantics.

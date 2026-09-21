@@ -123,3 +123,5 @@ export * from "./current-token-preservation-snapshot-v2.js";
 export * from "./current-token-preservation-snapshot-v2-workflow.js";
 export * from "./current-token-preservation-reference-v2.js";
 export * from "./current-token-preservation-reference-v2-workflow.js";
+export * from "./current-authority-preservation-inventory-v1.js";
+export * from "./current-authority-preservation-inventory-v1-workflow.js";
