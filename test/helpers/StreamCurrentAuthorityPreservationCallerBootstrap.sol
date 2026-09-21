@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { FoundryAccountStateExport as Export } from "./FoundryAccountStateExport.sol";
+import {
+    FoundryAccountStateExport as Export,
+    FoundryAccountStateExportVm
+} from "./FoundryAccountStateExport.sol";
+import {
+    FoundryAccountStatePostRecording as PostRecording
+} from "./FoundryAccountStatePostRecording.sol";
 import { FoundryAccountStateDump as Dump } from "./FoundryAccountStateDump.sol";
 import {
     StreamCurrentAuthorityPreservationCallerBaseline
@@ -72,6 +78,21 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
     error PreparationChanged();
     error UnknownFinalAccount(address account);
 
+    // Preserve the existing host ABI for errors bubbled by the fixed post-recording library.
+    error UnsupportedForkOrChain(uint256 forkId, uint256 chainId);
+    error UnsupportedSelfDestruct(address account);
+    error MissingDumpAccount(address account);
+    error UnknownDumpAccount(address account);
+    error DuplicateAccount(address account);
+    error DuplicateSlot(address account, bytes32 slot);
+    error MissingDumpSlot(address account, bytes32 slot);
+    error UnknownDumpSlot(address account, bytes32 slot);
+    error DumpAccountMismatch(address account);
+    error DumpSlotMismatch(address account, bytes32 slot);
+    error InvalidDumpOmission(address account);
+    error CreatedAccountOmitted(address account);
+    error InvalidAbsentAccount(address account);
+
     /// @notice Read the admitted prestate from a fixed local artifact path without a large argv.
     /// @dev Invoke internally through the opt-in outer TEST adapter with an admitted native
     /// context supplying the linked Scenario artifact and its genuinely deployed libraries.
@@ -131,7 +152,7 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
         packet.cut.initialDumpHash = keccak256(bytes(initialRaw));
         (address[] memory accounts, Export.SlotSeed[] memory slots) =
             _seeds(prestate, Dump.parse(initialRaw), instance);
-        packet.snapshot = Export.finish(accounts, slots);
+        packet.snapshot = _finishSnapshot(accounts, slots);
         if (!_contains(packet.snapshot.createdAccounts, instance)) revert ScenarioNotRecorded();
         _requireClosure(packet.snapshot, prestate);
         _requireScenario(packet.snapshot, instance);
@@ -147,7 +168,7 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
         string memory finalRaw = vm.readFile(finalPath);
         Export.Account[] memory finalDump = Dump.parse(finalRaw);
         packet.cut.dumpOmissions = _omissions(packet.snapshot, finalDump);
-        Export.requireDumpParity(packet.snapshot, finalDump, packet.cut.dumpOmissions);
+        PostRecording.requireDumpParity(packet.snapshot, finalDump, packet.cut.dumpOmissions);
 
         packet.cut.profile = CUT_PROFILE;
         packet.cut.recorder = address(this);
@@ -180,6 +201,18 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
             abi.encode(CUT_PROFILE, keccak256(cutABI))
         );
         return packet.cut;
+    }
+
+    /// @dev Decode the typed diff and stop both recorders in the original Bootstrap frame before
+    /// the fixed post-recording DELEGATECALL. Its native library prestate must be admitted too.
+    function _finishSnapshot(address[] memory accounts, Export.SlotSeed[] memory slots)
+        private
+        returns (Export.Snapshot memory)
+    {
+        FoundryAccountStateExportVm.AccountAccess[] memory diff =
+            FoundryAccountStateExportVm(address(vm)).stopAndReturnStateDiff();
+        FoundryAccountStateExportVm(address(vm)).stopRecord();
+        return PostRecording.finishCaptured(diff, accounts, slots);
     }
 
     function _seeds(
