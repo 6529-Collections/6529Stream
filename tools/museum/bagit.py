@@ -250,6 +250,9 @@ def verify_bag_files(files, expected_manifest_hash):
     if value.get("mode") == "stream_museum_dossier_bagit_package":
         from .dossier_bagit import verify_files
         return verify_files(files, expected_manifest_hash)
+    if value.get("mode") == "stream_museum_view_preservation_bagit_package":
+        from .view_preservation_package_v1 import verify_files
+        return verify_files(files, expected_manifest_hash)
     rebuilt = build_bag(dumps(value["input"]), {name[5:]: content for name, content in files.items() if name.startswith("data/")})
     if dict(rebuilt.files) != files or rebuilt.manifest != raw:
         raise MuseumError("noncanonical, missing or altered bag content/tags")
@@ -301,6 +304,10 @@ def write_tree(files, directory):
 
 
 def _verify_semantics(d, payload_directory):
+    if d["mode"] == "stream_museum_view_preservation_bagit_input":
+        # This profile's verify_bag_files dispatch already replays all original
+        # inventory semantics, including when called by every OCFL version.
+        return
     if d["mode"] == "stream_museum_dossier_bagit_input":
         from .dossier import verify_payload_directory
         verify_payload_directory(d, Path(payload_directory))
@@ -314,6 +321,9 @@ def _verify_semantics(d, payload_directory):
 
 
 def bag_identity(description):
+    if description["mode"] == "stream_museum_view_preservation_bagit_input":
+        from .view_preservation_bagit_v1 import identity
+        return identity(description["scope"], description["externalIdentifier"])
     if description["mode"] == "stream_museum_dossier_bagit_input":
         from .dossier_bagit import identity
         return identity(description["scope"], description["externalIdentifier"])

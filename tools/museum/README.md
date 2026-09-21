@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Retained VIEW archival packages](../../docs/museum-view-preservation-package-v1.md)
+embed the complete inventory packet and every member file in BagIt and OCFL.
+Verification replays the original evidence in every version and preserves its
+provenance; the package profile remains unregistered.
+
 [VIEW source export correspondence](../../docs/museum-view-preservation-export-v1.md)
 joins the original local ceremony export and every member file to a separately
 pinned complete inventory packet. Local fixture and retained RPC provenance
