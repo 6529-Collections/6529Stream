@@ -95,6 +95,7 @@ export interface RecoveredHydrationWorkflowProtocol<I, C extends rh.ArtistRecove
   readonly commitment: typeof rh.artistRecoveredHydrationCommitment;
   readonly ownerAfter: typeof rh.artistRecoveredHydrationOwnerAfter;
   readonly profileEvidence: typeof rh.encodeArtistRecoveredHydrationProfileEvidence;
+  readonly freshIdentity?: (input: I) => Readonly<{ revision: bigint; replayCount: bigint }>;
   readonly validateInput?: (input: I, certificate: rh.ArtistRecoveredHydrationPrepared) => void;
   readonly validateSource?: (
     reader: ArtistRecoveredHydrationReader,
@@ -525,15 +526,16 @@ async function freshDestination(
   reader: ArtistRecoveredHydrationReader,
   destination: ArtistHydrationSuite,
   tag: number,
+  identity: Readonly<{ revision: bigint; replayCount: bigint }> = { revision: 3n, replayCount: 6n },
 ): Promise<readonly ArtistHydrationSnapshot[]> {
   const before: ArtistHydrationSnapshot[] = [];
   for (let i = 0; i < 7; i++) {
     const owner = destination.owners[i]!;
     const snapshot = (await read(reader, owner, "ownerStateSnapshotV2", [], tag))[0] as ArtistHydrationSnapshot;
     const checkpoint = (await read(reader, owner, "authorityCheckpoint", [], tag))[0] as ArtistHydrationCheckpoint;
-    if (snapshot.domainId !== DOMAINS[i] || snapshot.revision !== (i === 2 ? 3n : 0n)
+    if (snapshot.domainId !== DOMAINS[i] || snapshot.revision !== (i === 2 ? identity.revision : 0n)
       || checkpoint.schema !== id("6529STREAM_ARTIST_GUARD_CHECKPOINT_V1")
-      || checkpoint.replayCount !== (i === 2 ? 6n : 0n) || checkpoint.nonceIndexCount !== 0n
+      || checkpoint.replayCount !== (i === 2 ? identity.replayCount : 0n) || checkpoint.nonceIndexCount !== 0n
       || (await read(reader, owner, "artistNativeReceiptCount", [], tag))[0] !== 0n
       || (await read(reader, owner, "authorityHydrationCommitment", [], tag))[0] !== ZeroHash) {
       throw Error("Destination is not the original fresh seven-owner profile");
@@ -936,7 +938,7 @@ async function captureArtistRecoveredHydration<I, C extends rh.ArtistRecoveredHy
   const tag = blockNumber(options.blockTag);
   const gasLimit = gas(options.gasLimit);
   const ctx = await context(reader, pins, tag, true);
-  const before = await freshDestination(reader, ctx.destination, tag);
+  const before = await freshDestination(reader, ctx.destination, tag, protocol.freshIdentity?.(input));
   const certificate = await collectCertificate(protocol, reader, pins, ctx.destination, input, caller, tag, gasLimit);
   equal(certificate.admission.before_, before, "Prepared destination snapshots differ");
   equal(certificate.admission.source, ctx.source, "Prepared source suite differs");

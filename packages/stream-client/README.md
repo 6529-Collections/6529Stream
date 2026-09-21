@@ -440,6 +440,10 @@ contract profiles and outstanding larger-script work.
   adds the separately qualified ART36 caller, complete ordered royalty witnesses
   and historical content records with direct and Safe receipt checks.
 
+- [Multiple recovered Artists and collections](docs/current-artist-recovered-multiple-hydration.md)
+  adds the explicit MULTIPLE_BASE profile with complete owner partitions, original
+  global nonce order and one operation-60 import across all selected lanes.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain

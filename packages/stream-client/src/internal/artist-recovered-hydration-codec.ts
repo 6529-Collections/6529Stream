@@ -569,8 +569,9 @@ export interface ArtistRecoveredHydrationFeatureFacts {
 }
 
 /** Private closed profile engine. Public adapters permanently select their frozen feature ceiling. */
-export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) {
-  if (knownFeatures !== 255n && knownFeatures !== 511n) throw Error("Unsupported internal recovered profile");
+export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n) {
+  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n) throw Error("Unsupported internal recovered profile");
+  const multiple = knownFeatures === 262175n;
   const coder = AbiCoder.defaultAbiCoder();
 
   const ZERO = ZeroHash as Hex;
@@ -657,7 +658,37 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) 
   }
 
   function normalize<T>(tuple: string, value: T): T {
-    return normalizeValue(ParamType.from(tuple), value) as T;
+    const type = ParamType.from(tuple);
+    if (multiple) {
+      // Closed aggregate profile: budget the entire supplied tree before allocating copies.
+      let size = 0;
+      let nodes = 0;
+      const visit = (t: ParamType, v: unknown, depth: number): void => {
+        if (++nodes > 262_144 || depth > 64) throw Error("Recovered aggregate allocation capacity");
+        size += 32;
+        if (t.baseType === "array") {
+          list(v, 16_384, t.arrayLength === -1 ? undefined : t.arrayLength!);
+          for (let i = 0; i < v.length; i++) {
+            const d = Object.getOwnPropertyDescriptor(v, String(i));
+            if (!d || !("value" in d)) throw Error("Expected owned original data");
+            visit(t.arrayChildren!, d.value, depth + 1);
+          }
+        } else if (t.baseType === "tuple") {
+          exact(v, t.components!.map(c => c.name));
+          for (const c of t.components!) {
+            const d = Object.getOwnPropertyDescriptor(v, c.name);
+            if (!d || !("value" in d)) throw Error("Expected owned original data");
+            visit(c, d.value, depth + 1);
+          }
+        } else if (t.type === "bytes" || t.type === "string") {
+          if (typeof v !== "string") throw Error("Expected original text or bytes");
+          size += t.type === "bytes" ? Math.max(0, (v.length - 2) / 2) : v.length * 3;
+        }
+        if (size > ARTIST_RECOVERED_HYDRATION_MAX_PREPARED_BYTES) throw Error("Recovered aggregate allocation capacity");
+      };
+      visit(type, value, 0);
+    }
+    return normalizeValue(type, value) as T;
   }
 
   function plain(type: ParamType, value: any): unknown {
@@ -736,21 +767,50 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) 
   ): ArtistRecoveredHydrationRequest {
     const r = normalize(ARTIST_RECOVERED_HYDRATION_REQUEST_TUPLE, value);
     const a = r.records.authority;
-    if (a.bindingIndex !== 0n || a.artistIds.length !== 1 || a.collections.length !== 1) {
-      throw Error("Recovered profile requires one Artist, one collection, first binding");
+    if (multiple) {
+      list(a.artistIds, 128); list(a.collections, 128);
+      if (a.bindingIndex !== 0n || !a.artistIds.length || !a.collections.length
+        || a.artistIds.length === 1 && a.collections.length === 1 || r.records.witnesses.length) {
+        throw Error("MULTIPLE_BASE requires a complete plural graph without witness extensions");
+      }
+      for (let i = 0; i < a.artistIds.length; i++) {
+        const artist = a.artistIds[i]!;
+        if (artist === ZERO || i > 0 && BigInt(artist) <= BigInt(a.artistIds[i - 1]!)
+          || !a.collections.some(c => c.artistId === artist)) throw Error("Invalid multiple Artist selectors");
+      }
+      let total = 0;
+      for (let i = 0; i < a.collections.length; i++) {
+        const c = a.collections[i]!;
+        if (!c.collectionId || i > 0 && c.collectionId <= a.collections[i - 1]!.collectionId
+          || !a.artistIds.includes(c.artistId)) throw Error("Invalid multiple collection selectors");
+        list(c.policies, 128); total += c.policies.length;
+        const seen = new Set<string>();
+        for (const policy of c.policies) {
+          nonzero(policy.phaseId); nonzero(policy.policyHash);
+          const key = policy.phaseId + policy.policyHash;
+          if (seen.has(key)) throw Error("Duplicate policy selector");
+          seen.add(key);
+        }
+      }
+      if (total > 128) throw Error("Multiple policy inventory exceeds capacity");
+    } else {
+      if (a.bindingIndex !== 0n || a.artistIds.length !== 1 || a.collections.length !== 1) {
+        throw Error("Recovered profile requires one Artist, one collection, first binding");
+      }
+      nonzero(a.artistIds[0]!);
+      const collection = a.collections[0]!;
+      if (!collection.collectionId || collection.artistId !== a.artistIds[0]) throw Error("Invalid recovered collection");
+      list(collection.policies, 128);
+      const policies = new Set<string>();
+      for (const policy of collection.policies) {
+        nonzero(policy.phaseId);
+        nonzero(policy.policyHash);
+        const key = policy.phaseId + policy.policyHash;
+        if (policies.has(key)) throw Error("Duplicate policy selector");
+        policies.add(key);
+      }
     }
-    nonzero(a.artistIds[0]!);
     const collection = a.collections[0]!;
-    if (!collection.collectionId || collection.artistId !== a.artistIds[0]) throw Error("Invalid recovered collection");
-    list(collection.policies, 128);
-    const policies = new Set<string>();
-    for (const policy of collection.policies) {
-      nonzero(policy.phaseId);
-      nonzero(policy.policyHash);
-      const key = policy.phaseId + policy.policyHash;
-      if (policies.has(key)) throw Error("Duplicate policy selector");
-      policies.add(key);
-    }
     let replayTotal = 0;
     for (let i = 0; i < 7; i++) {
       const index = i as ArtistHydrationOwnerIndex;
@@ -1128,7 +1188,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) 
       || h.replayAliasesCommitment !== artistRecoveredHydrationAliasesHash(p.provenance.aliases, index)
       || h.semanticRecordCount !== BigInt(p.provenance.journal.length)
       || h.replayAliasCount !== BigInt(p.provenance.aliases.length) || h.eraCount !== BigInt(p.provenance.eras.length)
-      || (h.requiredFeatures & ~knownFeatures) !== 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
+      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & 262144n) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
       throw Error("Owner header differs from complete payload");
     }
   }
@@ -1222,38 +1282,91 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) 
       || hash([ARTIST_HYDRATION_SUITE_TUPLE], [c.source]) !== last.suiteConfigurationHash) {
       throw Error("Certificate source suite differs from original origin");
     }
-    list(c.artists, 1, 1);
-    list(c.collections, 1, 1);
     const artist = c.artists[0]!;
-    const collection = c.collections[0]!;
-    nonzero(artist.artistId);
-    if (artist.collectionId !== 0n || artist.bindingHash !== ZERO || artist.policies.length !== 0
-      || !collection.collectionId || collection.bindingHash === ZERO || collection.artistId !== artist.artistId
-      || p.query.artistId !== artist.artistId || p.query.collectionId !== collection.collectionId
-      || p.query.bindingHash !== collection.bindingHash
-      || !same(`${ARTIST_HYDRATION_QUERY_TUPLE}`, p.query, { ...collection, records: artist.records })) {
-      throw Error("Recovered query partition mismatch");
-    }
-    const artistRecords: Hex[] = [];
-    const collectionRecords: Hex[] = [];
-    let registrations = 0;
-    for (let i = 0; i < 7; i++) {
-      for (const entry of provenance.journals[i]!) {
-        const r = entry.receipt;
-        if (r.artistId !== artist.artistId || r.collectionId !== 0n && r.collectionId !== collection.collectionId) {
-          throw Error("Native occurrence outside selected recovered graph");
-        }
-        if (i === 2 && r.operation === 1n) {
-          if (r.recordHash !== artist.artistId || r.collectionId !== 0n) throw Error("Invalid original registration occurrence");
-          registrations++;
-        }
-        artistRecords.push(r.recordHash);
-        if (r.collectionId) collectionRecords.push(r.recordHash);
+    if (multiple) {
+      list(c.artists, 128); list(c.collections, 128);
+      if (!c.artists.length || !c.collections.length || c.artists.length === 1 && c.collections.length === 1) {
+        throw Error("Incomplete plural recovered graph");
       }
-    }
-    if (registrations !== 1 || !collectionRecords.length
-      || !same("bytes32[]", artistRecords, artist.records) || !same("bytes32[]", collectionRecords, collection.records)) {
-      throw Error("Incomplete original artist/collection occurrence partition");
+      const registrations = c.artists.map(() => 0);
+      const artistRecords: Hex[][] = c.artists.map(() => []);
+      const collectionRecords: Hex[][] = c.collections.map(() => []);
+      for (let i = 0; i < c.artists.length; i++) {
+        const q = c.artists[i]!;
+        if (q.artistId === ZERO || q.collectionId !== 0n || q.bindingHash !== ZERO || q.policies.length
+          || i > 0 && BigInt(q.artistId) <= BigInt(c.artists[i - 1]!.artistId)
+          || !c.collections.some(row => row.artistId === q.artistId)) throw Error("Invalid complete Artist partition");
+      }
+      let policies = 0;
+      for (let i = 0; i < c.collections.length; i++) {
+        const q = c.collections[i]!;
+        if (!q.collectionId || q.bindingHash === ZERO || i > 0 && q.collectionId <= c.collections[i - 1]!.collectionId
+          || !c.artists.some(row => row.artistId === q.artistId)) throw Error("Invalid complete collection partition");
+        list(q.policies, 128); policies += q.policies.length;
+        const seen = new Set<string>();
+        for (const policy of q.policies) {
+          nonzero(policy.phaseId); nonzero(policy.policyHash);
+          const key = policy.phaseId + policy.policyHash;
+          if (seen.has(key)) throw Error("Duplicate policy selector");
+          seen.add(key);
+        }
+      }
+      if (policies > 128) throw Error("Multiple policy inventory exceeds capacity");
+      const first = c.collections[0]!;
+      const anchorArtist = c.artists.find(row => row.artistId === first.artistId)!;
+      if (!same(ARTIST_HYDRATION_QUERY_TUPLE, p.query, { ...first, records: anchorArtist.records })) throw Error("Multiple anchor differs from original first collection");
+      for (let ownerIndex = 0; ownerIndex < 7; ownerIndex++) {
+        for (const entry of provenance.journals[ownerIndex]!) {
+          const r = entry.receipt;
+          const at = c.artists.findIndex(row => row.artistId === r.artistId);
+          const ci = r.collectionId ? c.collections.findIndex(row => row.collectionId === r.collectionId) : -1;
+          if (at < 0 || r.collectionId && (ci < 0 || c.collections[ci]!.artistId !== r.artistId)) throw Error("Native occurrence outside multiple graph");
+          if (ownerIndex === 2 && r.operation === 1n) {
+            if (r.recordHash !== r.artistId || r.collectionId) throw Error("Invalid original registration occurrence");
+            registrations[at] = registrations[at]! + 1;
+          }
+          artistRecords[at]!.push(r.recordHash);
+          if (ci >= 0) collectionRecords[ci]!.push(r.recordHash);
+        }
+      }
+      for (let i = 0; i < c.artists.length; i++) if (registrations[i] !== 1
+        || !same("bytes32[]", artistRecords[i], c.artists[i]!.records)) throw Error("Incomplete original Artist occurrences");
+      for (let i = 0; i < c.collections.length; i++) if (!collectionRecords[i]!.length
+        || !same("bytes32[]", collectionRecords[i], c.collections[i]!.records)) throw Error("Incomplete original collection occurrences");
+    } else {
+      list(c.artists, 1, 1);
+      list(c.collections, 1, 1);
+      const artist = c.artists[0]!;
+      const collection = c.collections[0]!;
+      nonzero(artist.artistId);
+      if (artist.collectionId !== 0n || artist.bindingHash !== ZERO || artist.policies.length !== 0
+        || !collection.collectionId || collection.bindingHash === ZERO || collection.artistId !== artist.artistId
+        || p.query.artistId !== artist.artistId || p.query.collectionId !== collection.collectionId
+        || p.query.bindingHash !== collection.bindingHash
+        || !same(`${ARTIST_HYDRATION_QUERY_TUPLE}`, p.query, { ...collection, records: artist.records })) {
+        throw Error("Recovered query partition mismatch");
+      }
+      const artistRecords: Hex[] = [];
+      const collectionRecords: Hex[] = [];
+      let registrations = 0;
+      for (let i = 0; i < 7; i++) {
+        for (const entry of provenance.journals[i]!) {
+          const r = entry.receipt;
+          if (r.artistId !== artist.artistId || r.collectionId !== 0n && r.collectionId !== collection.collectionId) {
+            throw Error("Native occurrence outside selected recovered graph");
+          }
+          if (i === 2 && r.operation === 1n) {
+            if (r.recordHash !== artist.artistId || r.collectionId !== 0n) throw Error("Invalid original registration occurrence");
+            registrations++;
+          }
+          artistRecords.push(r.recordHash);
+          if (r.collectionId) collectionRecords.push(r.recordHash);
+        }
+      }
+      if (registrations !== 1 || !collectionRecords.length
+        || !same("bytes32[]", artistRecords, artist.records) || !same("bytes32[]", collectionRecords, collection.records)) {
+        throw Error("Incomplete original artist/collection occurrence partition");
+      }
     }
     normalizeArtistRecoveredHydrationTimingCheckpoint(p.timing);
     normalizeArtistRecoveredHydrationExternalGuards(p.externalGuards);
@@ -1264,7 +1377,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) 
     for (let i = 0; i < 7; i++) {
       const index = i as ArtistHydrationOwnerIndex;
       if (c.before_[index].domainId !== artistRecoveredHydrationOwnerDomain(index)
-        || c.before_[index].revision !== (index === 2 ? 3n : 0n)) {
+        || c.before_[index].revision !== (index === 2 ? (multiple ? 1n + BigInt(c.artists.length + c.collections.length) : 3n) : 0n)) {
         throw Error("Destination before snapshot is not the original two-lane admission state");
       }
       const data = p.data[index];
@@ -1320,8 +1433,16 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n) 
   ): void {
     const a = request.records.authority;
     const c = p.admission;
-    if (a.artistIds[0] !== p.query.artistId || a.collections[0]!.collectionId !== p.query.collectionId
-      || !same(`${ARTIST_HYDRATION_POLICY_TUPLE}[]`, a.collections[0]!.policies, p.query.policies)
+    const selectorsMatch = multiple
+      ? same("bytes32[]", a.artistIds, c.artists.map(row => row.artistId))
+        && a.collections.length === c.collections.length && a.collections.every((row, i) => {
+          const q = c.collections[i]!;
+          return row.artistId === q.artistId && row.collectionId === q.collectionId
+            && same(`${ARTIST_HYDRATION_POLICY_TUPLE}[]`, row.policies, q.policies);
+        })
+      : a.artistIds[0] === p.query.artistId && a.collections[0]!.collectionId === p.query.collectionId
+        && same(`${ARTIST_HYDRATION_POLICY_TUPLE}[]`, a.collections[0]!.policies, p.query.policies);
+    if (!selectorsMatch
       || !same(`${ARTIST_HYDRATION_CHECKPOINT_TUPLE}[7]`, a.expectedSource, c.provenance.eras.at(-1)!.checkpoints)
       || request.expectedSourceImportCommitment !== c.provenance.eras.at(-1)!.priorImportCommitment
       || request.expectedSemanticInventory !== artistRecoveredHydrationSemanticInventory(p)) {

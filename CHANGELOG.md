@@ -102,6 +102,16 @@
   separate owners and rejection boundaries; compiler and runtime acceptance are
   separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
 
+## Multiple recovered Artist client profile
+
+- Add the explicit MULTIPLE_BASE client for class-1/class-3 recovered Artists
+  and generation-one PRIMARY_ONLY collections. Preserve complete provenance,
+  global nonce order and the original operation-60 Request, with source-pinned
+  preparation, simulation and direct/Safe historical receipt checks. Unsupported
+  aggregate histories reject; existing singleton clients retain their profiles.
+  Client checks do not establish contract execution or deployment acceptance.
+  See the [client guide](packages/stream-client/docs/current-artist-recovered-multiple-hydration.md).
+
 ## Offline preservation bootstrap packet decoding
 
 - Add a bounded decoder for the original eight-file Foundry caller-bootstrap
