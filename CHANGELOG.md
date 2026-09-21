@@ -1147,6 +1147,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add a separate repaired-source consent/root transport profile with reviewed
+  ABI164 correspondence, preserving the original version and its evidence.
+
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 

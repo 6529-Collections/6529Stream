@@ -337,6 +337,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Repaired-source consent/root transport](docs/current-preservation-root-interlude-v2.md)
+  adds a separate strict `eda052c7` profile with a reviewed ABI164 source join.
+
 - [Consent and root-publication Safe transport](docs/current-preservation-root-interlude.md)
   binds the original unsigned op17/root packets to exact signed Safe envelopes
   and keeps protocol-record verification separate from transport outcomes.
