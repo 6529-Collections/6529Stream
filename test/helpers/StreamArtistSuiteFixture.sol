@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentTestRuntime } from "./StreamCurrentTestRuntime.sol";
 import {
     StreamArtistIdentityCreationPart
 } from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
@@ -261,6 +262,26 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                 revert(ptr, returndatasize())
             }
         }
+    }
+
+    function _runtime(
+        string memory artifactPath,
+        string[] memory declarationArtifacts,
+        bytes memory linkedCreation,
+        RuntimeValue[] memory values
+    ) internal view override returns (bytes memory) {
+        return StreamCurrentTestRuntime.runtime(
+            artifactPath, declarationArtifacts, linkedCreation, values
+        );
+    }
+
+    function _linkRuntime(string memory artifact, bytes memory linkedCreation)
+        internal
+        view
+        override
+        returns (bytes memory, bytes memory)
+    {
+        return StreamCurrentTestRuntime.linkRuntime(artifact, linkedCreation);
     }
 
     function _fixtureModuleRegistry() internal view virtual returns (address);
