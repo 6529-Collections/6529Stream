@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[VIEW source export correspondence](../../docs/museum-view-preservation-export-v1.md)
+joins the original local ceremony export and every member file to a separately
+pinned complete inventory packet. Local fixture and retained RPC provenance
+remain separate; missing inventory evidence is never synthesized.
+
 [Full VIEW inventory and original bundle evidence](../../docs/museum-view-preservation-inventory-v1.md)
 joins twelve ordered source stages, complete member output bytes and optional
 original archive admissions. Recorded source reads retain explicit external

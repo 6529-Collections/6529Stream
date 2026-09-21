@@ -1023,6 +1023,10 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Join independently pinned local VIEW source exports to complete retained
+  inventory packets, preserving separate provenance and checking original
+  publication/binding commitments and every member's exact bytes.
+
 - Recompute the full native WORK selection commitment and its description and
   original receipt joins in the retained VIEW inventory consumer.
 
