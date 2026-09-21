@@ -18,6 +18,10 @@ import {
     StreamViewPreservationMediaCorrespondenceV1 as Media
 } from "./StreamViewPreservationMediaCorrespondenceV1.sol";
 
+import {
+    StreamViewRetrievalWitnessTypesV1 as W
+} from "../../interfaces/stream/preservation/StreamViewRetrievalWitnessTypesV1.sol";
+
 /// @notice VIEW-only exact locator-to-object observation under the original same-pair Archive.
 /// @dev A locator is never hashed as file content. The original reader still verifies complete
 /// object/coverage/receipt/fixity/native evidence and present liveness. No caller-selected profile.
@@ -30,6 +34,7 @@ library StreamViewPreservationArchiveReadsV1 {
         T.Item memory item,
         B.Proof memory proof
     ) public view returns (B.Admission memory result, bytes32 observation) {
+        if (item.role == W.ROLE) revert W.InvalidViewRetrieval();
         if (item.role != Media.LOCATOR_ROLE) {
             return Original.admit(d, artist, item, proof);
         }
@@ -62,6 +67,7 @@ library StreamViewPreservationArchiveReadsV1 {
         T.Item memory item,
         B.Admission memory saved
     ) public view returns (bytes32 observation) {
+        if (item.role == W.ROLE) revert W.InvalidViewRetrieval();
         if (item.role != Media.LOCATOR_ROLE) {
             return Original.current(d, artist, item, saved);
         }

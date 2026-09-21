@@ -64,7 +64,11 @@ does not mislabel those bytes as a VIEW publication.
 
 The original collection/scoped contracts and byte domains are unchanged.
 The new inventory profile is
-`keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1")`.
+`keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1")`.
+This pre-genesis successor requires an immutable retrieval-witness companion; older
+non-companion inventory profiles cannot be selected as this profile. The original
+Dependencies1344 tuple and its hash remain unchanged. See
+[attributed retrieval](view-attributed-retrieval-witness.md).
 The new bundle profile is
 `keccak256("6529STREAM_VIEW_PRESERVATION_BUNDLE_IMMUTABLE_STOP_AGGREGATE_V1")`.
 Inventory evidence is 736 bytes; bundle evidence is 288 bytes. Both include the
@@ -87,7 +91,7 @@ fresh admission. Earlier captures, including the raw-CID-only composed tests,
 remain evidence only for their recorded source.
 
 An exact `https://` locator must pass the original Archive institutional ASCII
-DNS/path grammar (10–2,048 bytes) and equal the complete retained identifier of
+DNS/path grammar (10â€“2,048 bytes) and equal the complete retained identifier of
 the same covered object's signed institutional receipt. A canonical `ar://`
 locator contains exactly 43 unpadded base64url characters encoding a nonzero
 32-byte transaction ID, with zero trailing bits and no path/query/fragment. It
@@ -111,12 +115,14 @@ review. Locator evidence requires external backend 1. Raw CID and absent rows
 retain their exact original bytes and generic correspondence behavior. No
 caller-selected profile or object digest can bypass these joins.
 
-Arbitrary origin HTTPS URLs that differ from the signed institution locator,
-redirects/mirrors, Arweave subpaths/manifests, DAG-PB CIDs and other unsupported
-URI forms still require a real retrieval-correspondence witness. Original VIEW
-payload admission does not admit inline data URIs. These remain visible required
-completeness work, not omitted media or inferred package-file correspondence.
-See [the bounded locator guide](view-locator-correspondence-v1.md).
+General origin HTTPS, redirect/mirror and Arweave-path rows require the new
+actual [attributed retrieval witness](view-attributed-retrieval-witness.md), derived
+from the inventory's immutable companion. The separate `coverRetrievalNext` path
+also accepts a fresh witness for an old locator-shaped HTTPS row while preserving
+that row's exact bytes. Generic cover retains the [bounded locator rules](view-locator-correspondence-v1.md).
+DAG-PB CIDs and other unsupported URI forms remain explicit refusals; original VIEW
+payload admission still excludes inline data URIs. No URI string becomes a digest
+and no package filename substitutes for full correspondence.
 
 ## Once-bound complete source selection
 
@@ -153,7 +159,7 @@ and these reciprocal identities, without requiring unpublished current roots:
 | Producer | Dependency tuple and required joins |
 | --- | --- |
 | VIEW reference | 608 bytes: Core/Metadata/Schema/Store/Router match the selected graph; snapshot equals the basic seven-word configuration; external coverage matches the selected original external producer; chain and governed gas relationships remain valid. Advertise the exact VIEW reference and scoped component interfaces, original `REFERENCE_RENDER` module type, VIEW implementation/schema/profile. |
-| VIEW inventory | 1,344 bytes: roles 0–4 match reference; role 5 is the bound VIEW snapshot; role 6 is the selected reference; roles 7–9 and Artist pins match the original selected WORK/RIGHTS/conservation/Artist graph; role 10 equals snapshot dependency 8; role 11 equals reference dependency 6. Require the exact VIEW inventory capability/profile and `dependencyHash == keccak256(abi.encode(dependencies))`. |
+| VIEW inventory | 1,344 bytes: roles 0â€“4 match reference; role 5 is the bound VIEW snapshot; role 6 is the selected reference; roles 7â€“9 and Artist pins match the original selected WORK/RIGHTS/conservation/Artist graph; role 10 equals snapshot dependency 8; role 11 equals reference dependency 6. Require the exact companion-enabled VIEW inventory capability/profile and `dependencyHash == keccak256(abi.encode(dependencies))`. Independently validate the 64-byte immutable witness binding, exact canonical Configuration13/profile/capability, and snapshot checkpoint/Core/Router/Archive/runtime reciprocity; no operative publication is needed at bind. |
 | VIEW bundle | 480 bytes: Core/Metadata match; role 2 is the selected inventory; roles 3/4 equal its coverage roles 10/11; role 5 equals its original Artist Archive. Require the exact VIEW bundle capability/profile and complete canonical dependency hash. |
 
 Reference gas parameters remain governed. The binding receipt retains the

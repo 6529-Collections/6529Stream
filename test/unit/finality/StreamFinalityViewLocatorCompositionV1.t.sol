@@ -249,7 +249,7 @@ contract StreamFinalityViewLocatorCompositionV1Test is ViewReviewCompositionFixt
     function testActualViewBundleCoverRefreshAndFullCurrentUseLocatorChecks() public {
         ViewBundleEnvironmentBoundary env = new ViewBundleEnvironmentBoundary();
         ViewBundleInventoryBoundary inv = new ViewBundleInventoryBoundary(
-            bundle.targets[0], bundle.targets[1], address(env), address(archive)
+            bundle.targets[0], bundle.targets[1], address(env), address(archive), bundle.targets[5]
         );
         B.Dependencies memory d = abi.decode(abi.encode(bundle), (B.Dependencies));
         d.targets[2] = address(inv);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../helpers/ViewRetrievalConfigurationFixture.sol";
 import "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import {
     StreamFinalityNativeProviderReads as Native
@@ -91,6 +92,7 @@ abstract contract ViewFinalityConfigurationFixture is CharacterizationTestBase {
     B.Dependencies internal bundle;
     ViewConfigurationSelectionProbe internal probe;
     uint256 internal originalChain;
+    address internal retrievalWitness;
 
     function _word(address a, string memory selector, bytes32 word) internal {
         ViewConfigurationBoundary(a).set(abi.encodeWithSignature(selector), abi.encode(word));
@@ -195,7 +197,9 @@ abstract contract ViewFinalityConfigurationFixture is CharacterizationTestBase {
         address inv = selected.renderCriticalInventory;
         _support(inv, type(Inventory).interfaceId, true);
         _word(
-            inv, "inventoryProfile()", keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1")
+            inv,
+            "inventoryProfile()",
+            keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1")
         );
         _address(inv, "core()", expected.targets[0]);
         _address(inv, "metadataHost()", expected.targets[1]);
@@ -240,6 +244,8 @@ abstract contract ViewFinalityConfigurationFixture is CharacterizationTestBase {
         _address(cov, "renderCriticalInventory()", inv);
         _address(cov, "artifactCoverage()", expected.targets[10]);
         _address(cov, "externalCoverage()", expected.targets[11]);
+        retrievalWitness = ViewRetrievalConfigurationFixture.configure(inventory, true);
+        ViewRetrievalConfigurationFixture.bind(selected.renderCriticalInventory, retrievalWitness);
         probe = new ViewConfigurationSelectionProbe();
     }
 }

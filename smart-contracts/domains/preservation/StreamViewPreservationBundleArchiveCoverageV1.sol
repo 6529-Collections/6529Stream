@@ -26,6 +26,11 @@ import {
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import { StreamMetadataSubjects } from "../metadata/StreamMetadataSubjects.sol";
 
+import { StreamViewRetrievalConsumerV1 as Retrieval } from "./StreamViewRetrievalConsumerV1.sol";
+import {
+    StreamViewRetrievalWitnessTypesV1 as W
+} from "../../interfaces/stream/preservation/StreamViewRetrievalWitnessTypesV1.sol";
+
 /// @notice Complete archival admission for one exact adopted VIEW preservation inventory.
 /// @dev This sibling never accepts a COLLECTION inventory or reuses its coverage domain.
 /// @dev Explicit immutable-STOP aggregate profile: every whole-byte part/state bundle is
@@ -46,6 +51,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
     mapping(bytes32 => Scoped.BundleEvidence) private _completed;
     mapping(bytes32 => B.Refresh) private _refreshes;
     mapping(bytes32 => bytes32) private _admissionObservation;
+    mapping(bytes32 => mapping(uint64 => bytes32)) private _retrievalWitnesses;
 
     event ViewPreservationBundleCoverageStarted(
         uint16 schemaVersion,
@@ -156,6 +162,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
                 || e.itemCount == 0 || e.artistId == 0 || e.collectionId == 0 || e.scopeSubject == 0
         ) revert T.InventoryIncomplete();
         _validateInventory(full);
+        environment = Retrieval.environment(_dependencies, full.scope, environment);
         _inventories[id] = full;
         _progress[id].environmentHash = environment;
         _progress[id].nextLink = _segment(id, 0).firstLink;
@@ -213,16 +220,52 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
     function coverNext(bytes32 id, T.Item calldata item, bytes32 nextLink, B.Proof calldata proof)
         external
     {
+        if (item.role == W.ROLE) revert W.InvalidViewRetrieval();
         B.Progress storage p = _progress[id];
         if (_inventories[id].inventory.planId == 0 || p.complete) revert T.InventoryIncomplete();
         T.Segment memory s = _segment(id, p.segmentIndex);
         if (Chains.link(s.key, s.itemCount, p.segmentItemIndex, item, nextLink) != p.nextLink) {
             revert T.InvalidInventorySegment();
         }
-        bytes32 environment = Reads.environment(_dependencies);
-        (B.Admission memory a, bytes32 observation) =
+        bytes32 environment = _environment(id);
+        (B.Admission memory admission, bytes32 observation) =
             ViewReads.admit(_dependencies, _inventories[id].inventory.artistId, item, proof);
-        if (Reads.environment(_dependencies) != environment) revert T.InventorySourceChanged();
+        if (_environment(id) != environment) revert T.InventorySourceChanged();
+        _append(id, item, nextLink, admission, observation, environment, s);
+    }
+
+    /// @notice A dedicated witness coordinate; original Archive proof fields are never overloaded.
+    function coverRetrievalNext(
+        bytes32 id,
+        T.Item calldata item,
+        bytes32 nextLink,
+        bytes32 witnessHash
+    ) external {
+        B.Progress storage p = _progress[id];
+        if (_inventories[id].inventory.planId == 0 || p.complete) revert T.InventoryIncomplete();
+        T.Segment memory s = _segment(id, p.segmentIndex);
+        if (Chains.link(s.key, s.itemCount, p.segmentItemIndex, item, nextLink) != p.nextLink) {
+            revert T.InvalidInventorySegment();
+        }
+        bytes32 environment = _environment(id);
+        Scoped.Context memory context = Retrieval.context(_dependencies, id, _inventories[id]);
+        (B.Admission memory admission, bytes32 observation) =
+            Retrieval.admit(_dependencies, context, item, witnessHash);
+        if (_environment(id) != environment) revert T.InventorySourceChanged();
+        _retrievalWitnesses[id][p.itemCount] = witnessHash;
+        _append(id, item, nextLink, admission, observation, environment, s);
+    }
+
+    function _append(
+        bytes32 id,
+        T.Item memory item,
+        bytes32 nextLink,
+        B.Admission memory a,
+        bytes32 observation,
+        bytes32 environment,
+        T.Segment memory s
+    ) private {
+        B.Progress storage p = _progress[id];
         if (environment != p.environmentHash) p.environmentHash = 0;
         bytes32 itemHash = Chains.itemHash(item);
         p.evidenceChainHash = keccak256(
@@ -254,7 +297,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
         if (s.itemCount != 0 || s.firstLink != 0 || p.segmentItemIndex != 0 || p.nextLink != 0) {
             revert T.InvalidInventorySegment();
         }
-        if (Reads.environment(_dependencies) != p.environmentHash) p.environmentHash = 0;
+        if (_environment(id) != p.environmentHash) p.environmentHash = 0;
         _finishSegment(id, s);
     }
 
@@ -305,27 +348,22 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
     /// @notice Canonical progress is keyed by environment; another caller cannot reset it.
     function beginRefresh(bytes32 id) external returns (bytes32 key) {
         if (!_progress[id].complete) revert T.InventoryIncomplete();
-        bytes32 environment = Reads.environment(_dependencies);
+        bytes32 environment = _environment(id);
         key = _refreshId(id, environment);
         if (_refreshes[key].environmentHash == 0) _refreshes[key].environmentHash = environment;
     }
 
     function refreshNext(bytes32 id, uint64 expectedIndex) external {
         if (!_progress[id].complete) revert T.InventoryIncomplete();
-        bytes32 environment = Reads.environment(_dependencies);
+        bytes32 environment = _environment(id);
         bytes32 key = _refreshId(id, environment);
         B.Refresh storage r = _refreshes[key];
         if (
             r.environmentHash != environment || r.complete || r.nextIndex != expectedIndex
                 || expectedIndex >= _items[id].length
         ) revert T.InventoryIncomplete();
-        bytes32 observation = ViewReads.current(
-            _dependencies,
-            _inventories[id].inventory.artistId,
-            _items[id][expectedIndex],
-            _admissions[id][expectedIndex]
-        );
-        if (Reads.environment(_dependencies) != environment) revert T.InventorySourceChanged();
+        bytes32 observation = _currentItem(id, expectedIndex);
+        if (_environment(id) != environment) revert T.InventorySourceChanged();
         r.currentObservationChain = _observation(
             r.currentObservationChain,
             expectedIndex,
@@ -363,7 +401,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
         ) {
             revert T.InventoryIncomplete();
         }
-        bytes32 environment = Reads.environment(_dependencies);
+        bytes32 environment = _environment(id);
         B.Refresh storage r = _refreshes[_refreshId(id, environment)];
         if (
             !r.complete || r.environmentHash != environment
@@ -383,16 +421,37 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
         if (!_progress[id].complete) {
             revert T.InventoryIncomplete();
         }
-        Reads.environment(_dependencies);
+        _environment(id);
         for (uint256 i; i < _items[id].length; ++i) {
-            ViewReads.current(
-                _dependencies,
-                _inventories[id].inventory.artistId,
-                _items[id][i],
-                _admissions[id][i]
-            );
+            _currentItem(id, uint64(i));
         }
         return _completed[id];
+    }
+
+    function retrievalWitnessForItem(bytes32 id, uint64 index) external view returns (bytes32) {
+        return _retrievalWitnesses[id][index];
+    }
+
+    function _environment(bytes32 id) private view returns (bytes32) {
+        return Retrieval.environment(
+            _dependencies, _inventories[id].scope, Reads.environment(_dependencies)
+        );
+    }
+
+    function _currentItem(bytes32 id, uint64 index) private view returns (bytes32) {
+        bytes32 witnessHash = _retrievalWitnesses[id][index];
+        if (witnessHash == 0) {
+            return ViewReads.current(
+                _dependencies,
+                _inventories[id].inventory.artistId,
+                _items[id][index],
+                _admissions[id][index]
+            );
+        }
+        Scoped.Context memory context = Retrieval.context(_dependencies, id, _inventories[id]);
+        return Retrieval.current(
+            _dependencies, context, _items[id][index], _admissions[id][index], witnessHash
+        );
     }
 
     function progress(bytes32 id) external view returns (B.Progress memory) {

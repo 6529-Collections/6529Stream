@@ -19,9 +19,14 @@ The exact profile is `6529STREAM_VIEW_ATTRIBUTED_RETRIEVAL_V1`.
 
 Every prepare/publish/current read obtains the actual checkpoint current source,
 complete adopted payload and exact image URI. Complete scope, Core, Router, adoption,
-source hash, original declaration and payload coordinates are committed. The
-satellite authenticates retrieval attribution; downstream inventory/media admission
-must separately join its actual Artist identity, full current scope and exact row.
+source hash, original declaration and payload coordinates are committed. Before an
+observation can be published, the pinned Router must return the complete canonical
+locked Artist presentation with the exact adopted Artist runtime and nonzero original
+identity, acceptance and snapshot fields. Its complete hash and Artist ID enter the
+signed Source. The admitted object must belong to that Artist. Downstream
+inventory/media admission independently repeats the Artist/full-scope/exact-row join.
+This prevents a writer for an unrelated Artist from creating a target-scope
+revocation epoch.
 
 ## Fresh signature and retained authority
 
@@ -74,24 +79,49 @@ exact witness/source/pair during cover, refresh, full-current and media review. 
 epoch covers revocation only; it is not an output, Artist, policy or source mutation
 epoch. Unrelated scopes do not invalidate one another.
 
-The companion-enabled inventory/Bundle integration is a separate source batch. It
-must derive the satellite solely from the selected inventory's immutable binding,
-use an explicit witness hash field/map, and preserve old raw-CID/absent/exact-locator
-row bytes. No generic Archive behavior is changed by this producer.
+The companion-enabled inventory uses the distinct draft profile
+`6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1`. Its constructor retains
+the original Dependencies tuple plus the satellite address/runtime. The original
+dependency hash is unchanged; the immutable companion is authenticated by the
+selected inventory runtime and explicit capability/configuration joins. Original
+inventory profiles cannot advertise this interpretation by inference.
+
+`coverRetrievalNext` records an explicit item-index-to-witness association and folds
+the retained witness identity into the original full admission commitment. Cover,
+refresh, full-current and media review share the same correspondence reader.
+Raw-CID, absent and exact-locator rows keep their bytes; an explicit fresh witness
+may also serve an ordinary HTTPS locator row when it really redirects or mirrors.
+Generic `coverNext` continues to require original exact-locator correspondence.
+Neither path changes generic Archive admission. A refresh interrupted by same-scope
+revocation cannot complete under its earlier epoch; another scope does not disturb it.
 
 ## Evidence and limits
 
-The producer source and seven codec plus fourteen actual Archive/Store test bodies
-were independently reviewed at ABI96 (79 sources, zero type errors). The actual
-suite composes original signed Archive receipts, fixity/native proofs, threshold
-Safes, actual Store carriers and the new satellite. It covers literal complete
-receipt/event domains, fresh signature/domain/nonce refusal, missing-carrier rollback,
-source/runtime/chain drift, family/fixity repair, historical deadline semantics,
-scoped revocation, direct-origin retrieval and complete separately archived 9KB
-Arweave manifest bytes across multiple retained chunks. Checkpoint/Router authority
-is explicitly typed, not an actual Artist/op17 ceremony. The codec closed-kind test
-uses a valid-width but unsupported kind value; it is not an upper-bit ABI-width test.
+The original producer source and seven codec plus fourteen actual Archive/Store test
+bodies were independently reviewed at ABI96. A later coupled-consumer review found
+the foreign-Artist scope-epoch issue described above. The complete successor at
+ABI103 has a separate independent source review covering all producer and consumer
+paths plus 34 authored bodies: seven codec, sixteen producer and eleven Bundle
+cases. The older capture remains qualified and does not cover the Artist repair.
 
-These are authored source oracles and a type check only. No producer runtime,
-bytecode-size, cold-gas, complete finality ceremony or transaction-cap acceptance is
-claimed. The original full current-source reobservation remains required.
+These cases use original signed Archive receipts, native/fixity proofs, threshold
+Safes, actual Store carriers, the actual satellite and Bundle state machine. They
+cover full literal receipt/event domains, fresh signature/nonce refusal, missing
+carrier rollback, Artist/runtime/chain drift, family/fixity restoration, historical
+deadline semantics, direct origin and complete separately archived 9KB Arweave
+manifest bytes, same-scope and cross-scope revocation, partial cover/refresh, and a
+true final-segment rollback followed by identical retry. Checkpoint/Router and
+inventory authority are explicitly typed, not an actual Artist/op17 ceremony. The
+codec closed-kind test uses a valid-width unsupported kind, not malformed ABI upper
+bits. Two additional SourceSelection cases and the existing typed fixtures check
+the new closed companion configuration without inventing operative evidence.
+
+A selected native size pass on the exact reviewed ABI103 source emitted fourteen
+products from 287 source files with zero compiler errors. All templates fit the
+24,576-byte runtime and 49,152-byte creation limits, including the static constructor
+arguments. Witness runtime is 12,346 bytes, inventory 16,963 and Bundle 21,843.
+The capture authenticates source/settings/metadata and compiler-declared links; it
+is not a deployed linked graph or test execution. No retrieval EVM tests, cold gas,
+full Artist/Router/finality ceremony or transaction-cap acceptance are claimed.
+Original complete source reobservation and the separate maximum-scope freshness
+and capacity work remain required.

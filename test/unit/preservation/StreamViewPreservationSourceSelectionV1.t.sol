@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../helpers/ViewRetrievalConfigurationFixture.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import {
     StreamFinalityViewPreservationSourceSelectionV1 as Check
@@ -66,6 +67,7 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
     B.Dependencies private bundle;
     ViewSelectionProbe private probe;
     uint256 private originalChain;
+    address private retrievalWitness;
 
     function _word(address a, string memory selector, bytes32 word) private {
         ViewSelectionBoundary(a).set(abi.encodeWithSignature(selector), abi.encode(word));
@@ -170,7 +172,9 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
         address inv = selected.renderCriticalInventory;
         _support(inv, type(Inventory).interfaceId, true);
         _word(
-            inv, "inventoryProfile()", keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1")
+            inv,
+            "inventoryProfile()",
+            keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1")
         );
         _address(inv, "core()", expected.targets[0]);
         _address(inv, "metadataHost()", expected.targets[1]);
@@ -215,6 +219,8 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
         _address(cov, "renderCriticalInventory()", inv);
         _address(cov, "artifactCoverage()", expected.targets[10]);
         _address(cov, "externalCoverage()", expected.targets[11]);
+        retrievalWitness = ViewRetrievalConfigurationFixture.configure(inventory, true);
+        ViewRetrievalConfigurationFixture.bind(selected.renderCriticalInventory, retrievalWitness);
         probe = new ViewSelectionProbe();
     }
 
@@ -298,7 +304,7 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
         _word(
             selected.renderCriticalInventory,
             "inventoryProfile()",
-            keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1")
+            keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1")
         );
         ViewSelectionBoundary(selected.referencePublication)
             .set(abi.encodeCall(Reference.dependencies, ()), hex"01");
@@ -339,5 +345,81 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
         _fails(selected, expected, 49999);
         _fails(selected, expected, 16777217);
         _positive();
+    }
+
+    function testRetrievalCompanionCannotBeAdvertisedByOldOrMalformedInventory() public {
+        _positive();
+        _word(
+            selected.renderCriticalInventory,
+            "inventoryProfile()",
+            keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1")
+        );
+        _fails(selected, expected, 500000);
+        _word(
+            selected.renderCriticalInventory,
+            "inventoryProfile()",
+            keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1")
+        );
+        _positive();
+        _support(
+            selected.renderCriticalInventory, type(RetrievalCompanionInterface).interfaceId, false
+        );
+        _fails(selected, expected, 500000);
+        _support(
+            selected.renderCriticalInventory, type(RetrievalCompanionInterface).interfaceId, true
+        );
+        bytes memory input = abi.encodeCall(RetrievalCompanionInterface.retrievalWitnessBinding, ());
+        ViewSelectionBoundary(selected.renderCriticalInventory)
+            .set(input, abi.encode(retrievalWitness, bytes32(uint256(1))));
+        _fails(selected, expected, 500000);
+        ViewRetrievalConfigurationFixture.bind(selected.renderCriticalInventory, retrievalWitness);
+        _positive();
+        ViewSelectionBoundary(selected.renderCriticalInventory).set(input, hex"01");
+        _fails(selected, expected, 500000);
+        ViewRetrievalConfigurationFixture.bind(selected.renderCriticalInventory, retrievalWitness);
+        _positive();
+    }
+
+    function testRetrievalConfigurationPinsAndSnapshotCheckpointNeedExactRestoredJoin() public {
+        RetrievalWitnessTypes.Configuration memory c =
+            RetrievalWitnessInterface(retrievalWitness).configuration();
+        bytes memory request = abi.encodeCall(RetrievalWitnessInterface.configuration, ());
+        for (uint256 i; i < 3; ++i) {
+            RetrievalWitnessTypes.Configuration memory changed =
+                abi.decode(abi.encode(c), (RetrievalWitnessTypes.Configuration));
+            if (i == 0) changed.archive = address(probe);
+            else if (i == 1) changed.routerCodeHash = keccak256("foreign Router runtime");
+            else changed.checkpoint = address(probe);
+            ViewRetrievalConfigurationFixture.set(retrievalWitness, request, abi.encode(changed));
+            _fails(selected, expected, 500000);
+            ViewRetrievalConfigurationFixture.set(retrievalWitness, request, abi.encode(c));
+            _positive();
+        }
+        RetrievalSnapshotTypes.Dependencies memory snap = abi.decode(
+            _get(expected.targets[5], abi.encodeWithSignature("dependencies()")),
+            (RetrievalSnapshotTypes.Dependencies)
+        );
+        RetrievalSnapshotTypes.Dependencies memory wrong =
+            abi.decode(abi.encode(snap), (RetrievalSnapshotTypes.Dependencies));
+        wrong.targets[6] = address(probe);
+        wrong.codeHashes[6] = address(probe).codehash;
+        ViewRetrievalConfigurationFixture.set(
+            expected.targets[5], abi.encodeWithSignature("dependencies()"), abi.encode(wrong)
+        );
+        _fails(selected, expected, 500000);
+        ViewRetrievalConfigurationFixture.set(
+            expected.targets[5], abi.encodeWithSignature("dependencies()"), abi.encode(snap)
+        );
+        _positive();
+        (bool ok,) = retrievalWitness.staticcall(
+            abi.encodeCall(RetrievalWitnessInterface.requireCurrent, (bytes32(uint256(1))))
+        );
+        require(!ok, "fixture has no operative retrieval evidence");
+    }
+
+    function _get(address target, bytes memory input) private view returns (bytes memory out) {
+        (bool ok, bytes memory raw) = target.staticcall(input);
+        require(ok);
+        return raw;
     }
 }

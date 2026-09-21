@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../helpers/ViewRetrievalConfigurationFixture.sol";
 import "../../helpers/ScopedBundleArchiveFixture.sol";
 import "../../../smart-contracts/domains/preservation/StreamViewPreservationBundleArchiveCoverageV1.sol";
 import {
@@ -13,19 +14,47 @@ contract ViewBundleInventoryBoundary {
     address public metadataHost;
     address public artifactCoverage;
     address public externalCoverage;
-    bytes32 public dependencyHash = keccak256("typed scoped source configuration");
+    bytes32 public dependencyHash;
+    RetrievalInventoryTypes.Dependencies private configured;
+    address private witness;
     Scoped.Evidence private evidence;
     T.Segment[] private segments;
 
-    constructor(address c, address m, address a, address x) {
+    constructor(address c, address m, address a, address x, address artistArchive) {
         core = c;
         metadataHost = m;
         artifactCoverage = a;
         externalCoverage = x;
+        configured.targets[0] = c;
+        configured.targets[1] = m;
+        configured.targets[4] = address(new ViewRetrievalConfigurationBoundary());
+        configured.targets[5] = address(new ViewRetrievalConfigurationBoundary());
+        configured.targets[10] = a;
+        configured.targets[11] = x;
+        for (uint256 i; i < 12; ++i) {
+            configured.codeHashes[i] = configured.targets[i].codehash;
+        }
+        configured.artistTargets[4] = artistArchive;
+        configured.artistCodeHashes[4] = artistArchive.codehash;
+        configured.chainId = block.chainid;
+        dependencyHash = keccak256(abi.encode(configured));
+        witness = ViewRetrievalConfigurationFixture.configure(configured, false);
+    }
+
+    function dependencies() external view returns (RetrievalInventoryTypes.Dependencies memory) {
+        return configured;
+    }
+
+    function retrievalWitnessBinding() external view returns (address, bytes32) {
+        return (witness, witness.codehash);
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(RetrievalCompanionInterface).interfaceId;
     }
 
     function inventoryProfile() external pure returns (bytes32) {
-        return keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1");
+        return keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1");
     }
 
     function configure(Scoped.Evidence memory e, T.Segment[] memory s) external {
@@ -79,7 +108,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1Test is ScopedBundleArchiv
         (firstReceipt, secondReceipt, originalCoverage) = _covered();
         onchain = new ViewBundleEnvironmentBoundary();
         inventory = new ViewBundleInventoryBoundary(
-            address(core), address(agentSafe), address(onchain), address(host)
+            address(core), address(agentSafe), address(onchain), address(host), address(fixitySafe)
         );
         B.Dependencies memory d;
         d.targets = [

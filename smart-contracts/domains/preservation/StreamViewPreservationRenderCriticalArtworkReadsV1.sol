@@ -36,6 +36,13 @@ import {
     StreamViewPreservationRenderCriticalRetainedReadsV1 as Retained
 } from "./StreamViewPreservationRenderCriticalRetainedReadsV1.sol";
 
+import {
+    StreamViewRetrievalWitnessTypesV1 as Retrieval
+} from "../../interfaces/stream/preservation/StreamViewRetrievalWitnessTypesV1.sol";
+import {
+    StreamViewRetrievalObligationV1 as RetrievalObligation
+} from "./StreamViewRetrievalObligationV1.sol";
+
 /// @notice The complete actually adopted declaration, immutable payload, script and image obligation.
 /// @dev Called after the host's current source proof; the retained source is independently rehashed.
 library StreamViewPreservationRenderCriticalArtworkReadsV1 {
@@ -112,7 +119,21 @@ library StreamViewPreservationRenderCriticalArtworkReadsV1 {
             0,
             bytes(p.imageURI)
         );
-        rows[5] = Media.item(host, key, p.imageURI);
+        Retrieval.Source memory retrieval = Retrieval.Source(
+            c.scope,
+            adopted.source.route.core,
+            adopted.source.route.router,
+            adopted.recordHash,
+            adopted.sourceHash,
+            host,
+            key,
+            adopted.source.payloadHash,
+            f.snapshotSource.adoption.contextHash,
+            p.imageURI,
+            f.snapshotSource.artist.artistId,
+            keccak256(abi.encode(f.snapshotSource.artist))
+        );
+        rows[5] = RetrievalObligation.item(retrieval);
         // The admitted V2 payload grammar has no library bundle or external animation field.
         rows[6] = Items.absent(keccak256("VIEW_EXTERNAL_LIBRARY_BUNDLE"), host, key, 0);
     }

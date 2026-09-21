@@ -19,7 +19,7 @@ import {
 /// @dev Actual VIEW receipts never inhabit the original COLLECTION or scoped-V1 receipt types.
 library StreamViewPreservationRenderCriticalTypesV1 {
     bytes32 internal constant PROFILE =
-        keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1");
+        keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_RETRIEVAL_V1");
 
     struct Plan {
         StreamFinalityScope scope;

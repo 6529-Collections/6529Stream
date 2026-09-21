@@ -59,6 +59,11 @@ import {
     StreamViewPreservationRenderCriticalOutputStagesV1 as Tokens
 } from "./StreamViewPreservationRenderCriticalOutputStagesV1.sol";
 
+import {
+    IStreamViewRetrievalInventoryBindingV1 as RetrievalBinding
+} from "../../interfaces/stream/preservation/IStreamViewRetrievalInventoryBindingV1.sol";
+import { StreamViewRetrievalBindingV1 as Retrieval } from "./StreamViewRetrievalBindingV1.sol";
+
 /// @notice Complete actual VIEW byte/source/declaration inventory under a distinct profile and domain.
 /// @dev Permissionless preparation confers no Artist, publication, archive or finality authority.
 /// Constructor-only storage avoids a runtime hash cycle with the eventual fixed provider.
@@ -66,8 +71,14 @@ contract StreamViewPreservationRenderCriticalInventoryV1 is
     IStreamViewPreservationRenderCriticalInventoryV1
 {
     State.State private _state;
+    address private immutable _retrievalWitness;
+    bytes32 private immutable _retrievalWitnessCodeHash;
 
-    constructor(S.Dependencies memory d) {
+    constructor(
+        S.Dependencies memory d,
+        address retrievalWitness,
+        bytes32 retrievalWitnessCodeHash
+    ) {
         if (
             d.chainId != block.chainid || d.readGas < 50000 || d.sourceGas < d.readGas
                 || d.selectionGas < d.readGas || d.snapshotGas < d.readGas
@@ -88,8 +99,15 @@ contract StreamViewPreservationRenderCriticalInventoryV1 is
         if (d.artistContentOwner == address(0) || d.artistContentOwnerCodeHash == 0) {
             revert T.InventorySourceChanged();
         }
+        Retrieval.requireConfiguration(d, retrievalWitness, retrievalWitnessCodeHash, d.readGas);
+        _retrievalWitness = retrievalWitness;
+        _retrievalWitnessCodeHash = retrievalWitnessCodeHash;
         _state.dependencies = d;
         _state.dependencyHash = keccak256(abi.encode(d));
+    }
+
+    function retrievalWitnessBinding() external view returns (address, bytes32) {
+        return (_retrievalWitness, _retrievalWitnessCodeHash);
     }
 
     function core() external view returns (address) {
@@ -205,7 +223,8 @@ contract StreamViewPreservationRenderCriticalInventoryV1 is
     }
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == type(IStreamViewPreservationRenderCriticalInventoryV1).interfaceId
+        return id == type(RetrievalBinding).interfaceId
+            || id == type(IStreamViewPreservationRenderCriticalInventoryV1).interfaceId
             || id == 0x01ffc9a7;
     }
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./ViewRetrievalConfigurationFixture.sol";
 import {
     ViewFinalityConfigurationFixture,
     ViewConfigurationBoundary
@@ -312,6 +313,8 @@ abstract contract ViewReviewCompositionFixture is ViewFinalityConfigurationFixtu
         inventory.targets = expected.targets;
         inventory.codeHashes = expected.codeHashes;
         _inventory();
+        retrievalWitness = ViewRetrievalConfigurationFixture.configure(inventory, false);
+        ViewRetrievalConfigurationFixture.bind(selected.renderCriticalInventory, retrievalWitness);
         _address(selected.renderCriticalInventory, "core()", actualCore);
         _address(selected.renderCriticalInventory, "externalCoverage()", actualArchive);
         bundle.targets[0] = actualCore;
@@ -660,6 +663,13 @@ abstract contract ViewReviewCompositionFixture is ViewFinalityConfigurationFixtu
     }
 
     function _admitted(T.Item memory item, B.Admission memory value) internal {
+        ViewConfigurationBoundary(selected.bundleArchiveCoverage)
+            .set(
+                abi.encodeWithSignature(
+                    "retrievalWitnessForItem(bytes32,uint64)", evidence.inventory.planId, uint64(7)
+                ),
+                abi.encode(bytes32(0))
+            );
         ViewConfigurationBoundary(selected.bundleArchiveCoverage)
             .set(
                 abi.encodeCall(Bundle.admittedItem, (evidence.inventory.planId, uint64(7))),

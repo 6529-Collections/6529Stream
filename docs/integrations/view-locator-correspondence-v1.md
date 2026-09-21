@@ -44,11 +44,16 @@ or browser-execution claim. All cases are source/type-check evidence only until
 an explicitly recorded native run. No shipping transaction or maximum-scope
 capacity conclusion follows.
 
-## Required general retrieval witness
+## General retrieval successor
+
+The bounded source-qualified implementation described above remains retained. The
+new [attributed retrieval satellite](view-attributed-retrieval-witness.md) and explicit
+companion-enabled consumer profile implement the following requirement in a separate
+source batch. Its runtime and transaction-capacity acceptance remain separate.
 
 The bounded implementation deliberately cannot resolve an arbitrary origin URL
 to a different preservation URL, nor an `ar://transaction/path` manifest route.
-That required successor needs an actual attributed producer with this retained
+That successor uses an actual attributed producer with this retained
 observation: exact requested URI, ordered redirects or manifest resolution,
 final retrieval URI, observation time, complete content Keccak/SHA-256/size,
 original Archive object and exact covered receipt pair, and the authenticated
@@ -57,12 +62,12 @@ nonce, expiry, revocation/currentness, canonical encoding and immutable full-byt
 retention must be explicit. A URI owner or arbitrary caller-supplied boolean
 cannot establish that evidence.
 
-The producer should receive the complete URI from the actual adopted source,
-join the full-byte retrieved object to the existing same-pair Archive proof,
-and retain the redirect/manifest witness. A consumer must verify the original
+The producer receives the complete URI from the actual adopted source,
+joins the full-byte retrieved object to the existing same-pair Archive proof,
+and retains the redirect/manifest witness. A consumer must verify the fresh
 writer authorization and observation domain plus current archive liveness,
 without equating an observation with permanent HTTP content immutability.
 Reference Environment currently has no such URI-resource table; an unrelated
-package member or matching filename is not a substitute. This surface remains
-unimplemented and required before those otherwise-valid media can pass VIEW
-completeness.
+package member or matching filename is not a substitute. Otherwise-valid media pass completeness only through that explicit successor
+and its actual signed correspondence checks; the old bounded locator reader alone
+still refuses them.

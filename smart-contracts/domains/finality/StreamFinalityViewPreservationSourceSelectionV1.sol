@@ -34,6 +34,10 @@ import {
     StreamPreservationInventoryIO as IO
 } from "../preservation/StreamPreservationInventoryIO.sol";
 
+import {
+    StreamViewRetrievalBindingV1 as Retrieval
+} from "../preservation/StreamViewRetrievalBindingV1.sol";
+
 /// @notice Fixed constructor/source reciprocity checks for the once-only complete VIEW binding.
 /// @dev The governing host constructs Expected exclusively from its original pinned configurations
 /// and authenticated basic snapshot binding. This helper confers no authority and reads no current
@@ -164,6 +168,7 @@ library StreamFinalityViewPreservationSourceSelectionV1 {
         _address(target, "referencePublisher()", e.targets[6], cap);
         _address(target, "artifactCoverage()", e.targets[10], cap);
         _address(target, "externalCoverage()", e.targets[11], cap);
+        Retrieval.requireInventory(target, d, cap);
     }
 
     function _bundle(Selection.Selection memory s, Expected memory e, uint256 cap)

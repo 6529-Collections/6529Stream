@@ -40,6 +40,10 @@ import {
     IStreamViewPreservationBundleArchiveCoverageV1 as Coverage
 } from "../../interfaces/stream/preservation/IStreamViewPreservationBundleArchiveCoverageV1.sol";
 
+import {
+    StreamViewRetrievalConsumerV1 as Retrieval
+} from "../preservation/StreamViewRetrievalConsumerV1.sol";
+
 /// @notice Exact media content from the already complete current VIEW artwork and archive.
 /// @dev No arbitrary item position is accepted. Find the original stage8 witness in the exact
 /// completed segment list and independently rebuild all seven artwork rows before its archive join.
@@ -163,7 +167,16 @@ library StreamFinalityViewMediaReviewV1 {
         B.Dependencies memory d = abi.decode(raw, (B.Dependencies));
         IO.canonical(c.targets[19], raw, abi.encode(d));
         // Re-run original full object correspondence, not only the cheap immutable pair projection.
-        (B.Admission memory current,) = Archive.admit(d, e.inventory.artistId, item, saved.proof);
+        bytes32 retrievalWitness = IO.word(
+            c.targets[19],
+            abi.encodeCall(Bundle.retrievalWitnessForItem, (e.inventory.planId, offset + 5)),
+            c.readGas
+        );
+        B.Admission memory current;
+        if (retrievalWitness == 0) (current,) = Archive.admit(
+            d, e.inventory.artistId, item, saved.proof
+        );
+        else (current,) = Retrieval.admit(d, context, item, retrievalWitness);
         if (keccak256(abi.encode(current)) != keccak256(abi.encode(saved))) {
             revert InvalidViewMediaReview();
         }
