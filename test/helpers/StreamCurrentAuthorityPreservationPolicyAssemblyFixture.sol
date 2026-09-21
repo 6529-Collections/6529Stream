@@ -13,9 +13,7 @@ import {
 import {
     StreamCurrentAuthorityPreservationPolicyGraph
 } from "../../script/current/StreamCurrentAuthorityPreservationPolicyGraph.sol";
-import {
-    StreamCurrentAuthorityPreservationPolicyGraphCreation
-} from "../../script/current/StreamCurrentAuthorityPreservationPolicyGraphCreation.sol";
+import { StreamNativeAssemblyCreation } from "./StreamNativeAssemblyCreation.sol";
 import {
     StreamFinalityNativeProviderReads as PreservationNativeConfig
 } from "../../smart-contracts/domains/finality/StreamFinalityNativeProviderReads.sol";
@@ -39,11 +37,11 @@ abstract contract StreamCurrentAuthorityPreservationPolicyAssemblyFixture is
 
     function _scopedPolicyCreation(string memory name)
         internal
-        pure
+        view
         override
         returns (bytes memory)
     {
-        return StreamCurrentAuthorityPreservationPolicyGraphCreation.code(name);
+        return StreamNativeAssemblyCreation.scopedPolicyCreation(name);
     }
 
     function _scopedPolicySourceGas() internal pure override returns (SourceGas memory) {

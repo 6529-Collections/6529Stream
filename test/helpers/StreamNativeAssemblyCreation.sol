@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StreamCurrentGraphCreation } from "../../script/current/StreamCurrentGraphCreation.sol";
+import {
+    StreamCurrentAuthorityGraphCreation
+} from "../../script/current/StreamCurrentAuthorityGraphCreation.sol";
+
 interface NativeAssemblyArtifactVm {
     function getCode(string calldata artifact) external view returns (bytes memory);
 }
@@ -393,10 +398,300 @@ library StreamNativeAssemblyCreation {
         revert("unknown original product artifact");
     }
 
+    /// @dev Exactly the original graph template subset; other original enum values still refuse.
+    function graphArtifact(StreamCurrentGraphCreation.Kind kind)
+        public
+        pure
+        returns (string memory)
+    {
+        if (kind == StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority) {
+            return artifact(Kind.StreamArtistIdentityAuthority);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamArtistOnboardingCoordinator) {
+            return artifact(Kind.StreamArtistOnboardingCoordinator);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry) {
+            return artifact(Kind.StreamArtistOnboardingRegistry);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamArtworkFinalityRegistry) {
+            return artifact(Kind.StreamArtworkFinalityRegistry);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamArweaveObjectCheckpointVerifier) {
+            return artifact(Kind.StreamArweaveObjectCheckpointVerifier);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamBundleArchiveCoverage) {
+            return artifact(Kind.StreamBundleArchiveCoverage);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamCollectionMetadataV1) {
+            return artifact(Kind.StreamCollectionMetadataV1);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamCollectionSnapshots) {
+            return artifact(Kind.StreamCollectionSnapshots);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamCollectionTokenInventory) {
+            return artifact(Kind.StreamCollectionTokenInventory);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamConservationRecordSelection) {
+            return artifact(Kind.StreamConservationRecordSelection);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamContentLeafManifest) {
+            return artifact(Kind.StreamContentLeafManifest);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamCoreFinalityAdapter) {
+            return artifact(Kind.StreamCoreFinalityAdapter);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamExternalArtifactCoverage) {
+            return artifact(Kind.StreamExternalArtifactCoverage);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityArtifactCoverage) {
+            return artifact(Kind.StreamFinalityArtifactCoverage);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityCoordinatorInventory) {
+            return artifact(Kind.StreamFinalityCoordinatorInventory);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityCurrentDiscovery) {
+            return artifact(Kind.StreamFinalityCurrentDiscovery);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityEntropySourceFactory) {
+            return artifact(Kind.StreamFinalityEntropySourceFactory);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityNativeEvidenceProvider) {
+            return artifact(Kind.StreamFinalityNativeEvidenceProvider);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityScopeMembership) {
+            return artifact(Kind.StreamFinalityScopeMembership);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityServingHostAdapter) {
+            return artifact(Kind.StreamFinalityServingHostAdapter);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamOnchainContentCheckpoint) {
+            return artifact(Kind.StreamOnchainContentCheckpoint);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamReferenceRenderPublication) {
+            return artifact(Kind.StreamReferenceRenderPublication);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamRenderCriticalInventory) {
+            return artifact(Kind.StreamRenderCriticalInventory);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamRightsRecordSelection) {
+            return artifact(Kind.StreamRightsRecordSelection);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamSchemaRegistry) {
+            return artifact(Kind.StreamSchemaRegistry);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamWorkRecordSelection) {
+            return artifact(Kind.StreamWorkRecordSelection);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamStaticSelectionCheckpoint) {
+            return artifact(Kind.StreamStaticSelectionCheckpoint);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamStaticContentCheckpoint) {
+            return artifact(Kind.StreamStaticContentCheckpoint);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamStaticOutputManifest) {
+            return artifact(Kind.StreamStaticOutputManifest);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamScopedSnapshotPublication) {
+            return artifact(Kind.StreamScopedSnapshotPublication);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamScopedReferencePublication) {
+            return artifact(Kind.StreamScopedReferencePublication);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamScopedRenderCriticalInventory) {
+            return artifact(Kind.StreamScopedRenderCriticalInventory);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamScopedBundleArchiveCoverage) {
+            return artifact(Kind.StreamScopedBundleArchiveCoverage);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityEntropyPolicySourceFactoryV2) {
+            return artifact(Kind.StreamFinalityEntropyPolicySourceFactoryV2);
+        }
+        if (
+            kind == StreamCurrentGraphCreation.Kind.StreamFinalityScopedEntropyPolicySourceFactoryV2
+        ) {
+            return artifact(Kind.StreamFinalityScopedEntropyPolicySourceFactoryV2);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamPolicyPublicationFactoryV2) {
+            return artifact(Kind.StreamPolicyPublicationFactoryV2);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamScopedPolicyPublicationFactoryV2) {
+            return artifact(Kind.StreamScopedPolicyPublicationFactoryV2);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityFullPolicyEvidenceProviderV2) {
+            return artifact(Kind.StreamFinalityFullPolicyEvidenceProviderV2);
+        }
+        if (kind == StreamCurrentGraphCreation.Kind.StreamFinalityFullPolicyDiscoveryV2) {
+            return artifact(Kind.StreamFinalityFullPolicyDiscoveryV2);
+        }
+        revert("unknown original product template");
+    }
+
+    function authorityArtifact(StreamCurrentAuthorityGraphCreation.Kind kind)
+        public
+        pure
+        returns (string memory)
+    {
+        if (
+            kind
+                == StreamCurrentAuthorityGraphCreation.Kind
+                .StreamCurrentAuthorityBundleArchiveCoverage
+        ) {
+            return "smart-contracts/domains/preservation/StreamCurrentAuthorityBundleArchiveCoverage.sol:StreamCurrentAuthorityBundleArchiveCoverage";
+        }
+        if (
+            kind
+                == StreamCurrentAuthorityGraphCreation.Kind
+                .StreamCurrentAuthorityNativeEvidenceProvider
+        ) {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityNativeEvidenceProvider.sol:StreamCurrentAuthorityNativeEvidenceProvider";
+        }
+        if (kind == StreamCurrentAuthorityGraphCreation.Kind.StreamArtistArchiveOriginReads) {
+            return "smart-contracts/domains/preservation/StreamArtistArchiveOriginReads.sol:StreamArtistArchiveOriginReads";
+        }
+        if (kind == StreamCurrentAuthorityGraphCreation.Kind.StreamArtistCurrentAuthorityResolver) {
+            return "smart-contracts/domains/preservation/StreamArtistCurrentAuthorityResolver.sol:StreamArtistCurrentAuthorityResolver";
+        }
+        if (kind == StreamCurrentAuthorityGraphCreation.Kind.StreamLineageArtworkFinalityRegistry) {
+            return "smart-contracts/domains/finality/StreamLineageArtworkFinalityRegistry.sol:StreamLineageArtworkFinalityRegistry";
+        }
+        if (kind == StreamCurrentAuthorityGraphCreation.Kind.StreamFinalityLineageCurrentDiscovery)
+        {
+            return "smart-contracts/domains/finality/StreamFinalityLineageCurrentDiscovery.sol:StreamFinalityLineageCurrentDiscovery";
+        }
+        if (
+            kind
+                == StreamCurrentAuthorityGraphCreation.Kind
+                .StreamCurrentAuthorityWorkRecordSelection
+        ) {
+            return "smart-contracts/domains/metadata/StreamCurrentAuthorityWorkRecordSelection.sol:StreamCurrentAuthorityWorkRecordSelection";
+        }
+        if (
+            kind
+                == StreamCurrentAuthorityGraphCreation.Kind
+                .StreamCurrentAuthorityConservationRecordSelection
+        ) {
+            return "smart-contracts/domains/metadata/StreamCurrentAuthorityConservationRecordSelection.sol:StreamCurrentAuthorityConservationRecordSelection";
+        }
+        if (
+            kind
+                == StreamCurrentAuthorityGraphCreation.Kind
+                .StreamCurrentAuthorityRenderCriticalInventory
+        ) {
+            return "smart-contracts/domains/preservation/StreamCurrentAuthorityRenderCriticalInventory.sol:StreamCurrentAuthorityRenderCriticalInventory";
+        }
+        if (
+            kind
+                == StreamCurrentAuthorityGraphCreation.Kind
+                .StreamCurrentAuthorityRightsRecordSelection
+        ) {
+            return "smart-contracts/domains/metadata/StreamCurrentAuthorityRightsRecordSelection.sol:StreamCurrentAuthorityRightsRecordSelection";
+        }
+        revert("unknown authority product template");
+    }
+
+    function scopedPolicyArtifact(string memory name_) public pure returns (string memory) {
+        bytes32 key = keccak256(bytes(name_));
+        if (key == keccak256("StreamCurrentAuthorityPreservationPolicyPublicationFactoryV1")) {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityPreservationPolicyPublicationFactoryV1.sol:StreamCurrentAuthorityPreservationPolicyPublicationFactoryV1";
+        }
+        if (key == keccak256("StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1"))
+        {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1.sol:StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1";
+        }
+        if (key == keccak256("StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1")) {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1.sol:StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1";
+        }
+        if (key == keccak256("StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1")) {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1.sol:StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1";
+        }
+        if (key == keccak256("StreamStaticSelectionCheckpoint")) {
+            return "smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol:StreamStaticSelectionCheckpoint";
+        }
+        if (key == keccak256("StreamStaticContentCheckpoint")) {
+            return "smart-contracts/domains/finality/StreamStaticContentCheckpoint.sol:StreamStaticContentCheckpoint";
+        }
+        if (key == keccak256("StreamStaticOutputManifest")) {
+            return "smart-contracts/domains/finality/StreamStaticOutputManifest.sol:StreamStaticOutputManifest";
+        }
+        if (key == keccak256("StreamScopedSnapshotPublication")) {
+            return "smart-contracts/domains/metadata/StreamScopedSnapshotPublication.sol:StreamScopedSnapshotPublication";
+        }
+        if (key == keccak256("StreamScopedReferencePublication")) {
+            return "smart-contracts/domains/preservation/StreamScopedReferencePublication.sol:StreamScopedReferencePublication";
+        }
+        if (key == keccak256("StreamFinalityEntropyPolicySourceFactoryV2")) {
+            return "smart-contracts/domains/finality/StreamFinalityEntropyPolicySourceFactoryV2.sol:StreamFinalityEntropyPolicySourceFactoryV2";
+        }
+        if (key == keccak256("StreamFinalityScopedEntropyPolicySourceFactoryV2")) {
+            return "smart-contracts/domains/finality/StreamFinalityScopedEntropyPolicySourceFactoryV2.sol:StreamFinalityScopedEntropyPolicySourceFactoryV2";
+        }
+        if (key == keccak256("StreamTerminalEntropyReadiness")) {
+            return "smart-contracts/domains/finality/StreamTerminalEntropyReadiness.sol:StreamTerminalEntropyReadiness";
+        }
+        if (key == keccak256("StreamPolicyContentCheckpointV2")) {
+            return "smart-contracts/domains/finality/StreamPolicyContentCheckpointV2.sol:StreamPolicyContentCheckpointV2";
+        }
+        if (key == keccak256("StreamPolicyOutputManifestV2")) {
+            return "smart-contracts/domains/finality/StreamPolicyOutputManifestV2.sol:StreamPolicyOutputManifestV2";
+        }
+        if (key == keccak256("StreamPolicySnapshotPublicationV2")) {
+            return "smart-contracts/domains/metadata/StreamPolicySnapshotPublicationV2.sol:StreamPolicySnapshotPublicationV2";
+        }
+        if (key == keccak256("StreamPolicyReferencePublicationV2")) {
+            return "smart-contracts/domains/preservation/StreamPolicyReferencePublicationV2.sol:StreamPolicyReferencePublicationV2";
+        }
+        if (key == keccak256("StreamCurrentAuthorityScopedRenderCriticalInventory")) {
+            return "smart-contracts/domains/preservation/StreamCurrentAuthorityScopedRenderCriticalInventory.sol:StreamCurrentAuthorityScopedRenderCriticalInventory";
+        }
+        if (key == keccak256("StreamCurrentAuthorityPolicyRenderCriticalInventoryV2")) {
+            return "smart-contracts/domains/preservation/StreamCurrentAuthorityPolicyRenderCriticalInventoryV2.sol:StreamCurrentAuthorityPolicyRenderCriticalInventoryV2";
+        }
+        if (key == keccak256("StreamCurrentAuthorityScopedBundleArchiveCoverage")) {
+            return "smart-contracts/domains/preservation/StreamCurrentAuthorityScopedBundleArchiveCoverage.sol:StreamCurrentAuthorityScopedBundleArchiveCoverage";
+        }
+        if (key == keccak256("StreamCurrentAuthorityBundleArchiveCoverage")) {
+            return "smart-contracts/domains/preservation/StreamCurrentAuthorityBundleArchiveCoverage.sol:StreamCurrentAuthorityBundleArchiveCoverage";
+        }
+        if (key == keccak256("StreamCurrentAuthorityScopedPolicyPublicationFactoryV2")) {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityScopedPolicyPublicationFactoryV2.sol:StreamCurrentAuthorityScopedPolicyPublicationFactoryV2";
+        }
+        if (key == keccak256("StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2")) {
+            return "smart-contracts/domains/finality/StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2.sol:StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2";
+        }
+        if (key == keccak256("StreamFinalityLineageDeferredScopedPolicyDiscoveryV2")) {
+            return "smart-contracts/domains/finality/StreamFinalityLineageDeferredScopedPolicyDiscoveryV2.sol:StreamFinalityLineageDeferredScopedPolicyDiscoveryV2";
+        }
+        revert("unknown original scoped-policy product");
+    }
+
+    function graphCreation(StreamCurrentGraphCreation.Kind kind)
+        public
+        view
+        returns (bytes memory code)
+    {
+        return _creation(graphArtifact(kind));
+    }
+
+    function authorityCreation(StreamCurrentAuthorityGraphCreation.Kind kind)
+        public
+        view
+        returns (bytes memory code)
+    {
+        return _creation(authorityArtifact(kind));
+    }
+
+    function scopedPolicyCreation(string memory name_) public view returns (bytes memory code) {
+        return _creation(scopedPolicyArtifact(name_));
+    }
+
     function creation(Kind kind) public view returns (bytes memory code) {
+        return _creation(artifact(kind));
+    }
+
+    function _creation(string memory artifact_) private view returns (bytes memory code) {
         NativeAssemblyArtifactVm artifactVm =
             NativeAssemblyArtifactVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-        code = artifactVm.getCode(artifact(kind));
+        code = artifactVm.getCode(artifact_);
         require(code.length != 0, "missing original production creation artifact");
     }
 }

@@ -4013,16 +4013,16 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         override
         returns (bytes memory)
     {
-        return StreamCurrentGraphCreation.creation(kind);
+        return StreamNativeAssemblyCreation.graphCreation(kind);
     }
 
     function _authorityCreation(StreamCurrentAuthorityGraphCreation.Kind kind)
         internal
-        pure
+        view
         override
         returns (bytes memory)
     {
-        return StreamCurrentAuthorityGraphCreation.code(kind);
+        return StreamNativeAssemblyCreation.authorityCreation(kind);
     }
 
     function _afterCurrentAuthorityCoordinatorDeployment() internal virtual override {
