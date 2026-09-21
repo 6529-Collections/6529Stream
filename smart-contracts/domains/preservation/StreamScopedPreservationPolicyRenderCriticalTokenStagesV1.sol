@@ -4,6 +4,9 @@ import {
     StreamScopedPreservationPolicyRenderCriticalStateV1 as State
 } from "./StreamScopedPreservationPolicyRenderCriticalStateV1.sol";
 import {
+    StreamScopedPreservationPolicyRenderCriticalStageGuardV1 as Guard
+} from "./StreamScopedPreservationPolicyRenderCriticalStageGuardV1.sol";
+import {
     StreamScopedPreservationPolicyRenderCriticalTypesV1 as Scoped
 } from "../../interfaces/stream/preservation/StreamScopedPreservationPolicyRenderCriticalTypesV1.sol";
 import {
@@ -69,7 +72,7 @@ library StreamScopedPreservationPolicyRenderCriticalTokenStagesV1 {
         view
         returns (uint64 ordinal)
     {
-        State.stage(s, id, 8);
+        Guard.stage(s, id, 8);
         ordinal = s.plans[id].progress.nextToken;
         if (ordinal >= s.plans[id].progress.tokenCount || s.tokenProgress[id].phase != phase) {
             revert T.InventoryIncomplete();

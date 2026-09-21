@@ -39,9 +39,16 @@ import "../../interfaces/stream/preservation/IStreamReferenceRenderPublication.s
 import {
     StreamScopedPreservationPolicyRenderCriticalStateV1 as State
 } from "./StreamScopedPreservationPolicyRenderCriticalStateV1.sol";
+import {
+    StreamScopedPreservationPolicyRenderCriticalStageGuardV1 as Guard
+} from "./StreamScopedPreservationPolicyRenderCriticalStageGuardV1.sol";
 
 /// @notice Typed stages using the actual host storage reference.
 library StreamScopedPreservationPolicyRenderCriticalRecordStagesV1 {
+    // Preserve the existing ABI entries for failures bubbled by the linked guard.
+    error InventoryIncomplete();
+    error InventorySourceChanged();
+
     function appendIntent(State.State storage state, bytes calldata input) public {
         (bytes32 id, StreamConservationRecordTypes.Intent memory witness, address originalActor) =
             abi.decode(input[4:], (bytes32, StreamConservationRecordTypes.Intent, address));
@@ -112,7 +119,7 @@ library StreamScopedPreservationPolicyRenderCriticalRecordStagesV1 {
     }
 
     function _stage(State.State storage state, bytes32 id, uint16 stage) private view {
-        State.stage(state, id, stage);
+        Guard.stage(state, id, stage);
     }
 
     function _append(
