@@ -40,8 +40,16 @@ import {
     StreamScopedPolicyRenderCriticalStateV2 as State
 } from "./StreamScopedPolicyRenderCriticalStateV2.sol";
 
+import {
+    StreamScopedPolicyRenderCriticalStageGuardV2 as StageGuard
+} from "./StreamScopedPolicyRenderCriticalStageGuardV2.sol";
+
 /// @notice Typed stages using the actual host storage reference.
 library StreamScopedPolicyRenderCriticalInterviewStageV2 {
+    // Retain the original error ABI after moving the fixed currentness guard.
+    error InventoryIncomplete();
+    error InventorySourceChanged();
+
     function appendInterview(State.State storage state, bytes calldata input) public {
         (
             bytes32 id,
@@ -81,7 +89,7 @@ library StreamScopedPolicyRenderCriticalInterviewStageV2 {
     }
 
     function _stage(State.State storage state, bytes32 id, uint16 stage) private view {
-        State.stage(state, id, stage);
+        StageGuard.stage(state, id, stage);
     }
 
     function _append(
