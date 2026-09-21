@@ -38,6 +38,16 @@
   Cases are type-checked; full current execution and added-frame gas remain pending.
   See the [frame note](docs/integrations/policy-inventory-current-frames.md).
 
+## Complete recovered consent multiplicity
+
+- Add a distinct typed operation60 profile for complete direct/delegated consent
+  and retained delegation histories across recovered Artists and collections.
+  Preserve original domains, full owner provenance, global grant/nonce accounting
+  and one atomic application per owner.
+- Add seven actual-owner/Safe scenarios and six focused nonce controls. Source
+  and type checks are retained; runtime, gas and joined capacity acceptance
+  remain pending. See the [integration guide](docs/integrations/artist-recovered-multiple-consents.md).
+
 ## Artist recovery history capacity
 
 - Move existing recovery/history validation into nine fixed typed workers,

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredMultipleConsentCollectionImport as Next } from "./StreamArtistRecoveredMultipleConsentCollectionImport.sol";
 import {
     StreamArtistRecoveredMultipleTypes as M
 } from "../../interfaces/stream/artist/StreamArtistRecoveredMultipleTypes.sol";
@@ -23,11 +22,11 @@ import {
     StreamArtistBindingLifecycleTypes as L
 } from "../../interfaces/stream/artist/StreamArtistBindingLifecycleTypes.sol";
 import {
-    StreamArtistRecoveredMultipleCodec as Codec
-} from "./StreamArtistRecoveredMultipleCodec.sol";
+    StreamArtistRecoveredMultipleConsentCodec as Codec
+} from "./StreamArtistRecoveredMultipleConsentCodec.sol";
 import {
-    StreamArtistRecoveredMultipleCollectionRows as Rows
-} from "./StreamArtistRecoveredMultipleCollectionRows.sol";
+    StreamArtistRecoveredMultipleConsentCollectionRows as Rows
+} from "./StreamArtistRecoveredMultipleConsentCollectionRows.sol";
 import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
@@ -37,7 +36,7 @@ import {
 import { StreamArtistAttributionStateTypes as AS } from "./StreamArtistAttributionStateTypes.sol";
 
 /// @notice Fixed typed empty-key installation inside one original whole-owner operation60 apply.
-library StreamArtistRecoveredMultipleCollectionImport {
+library StreamArtistRecoveredMultipleConsentCollectionImport {
     function bindings(
         mapping(uint256 => T.Binding) storage bindings_,
         mapping(uint256 => mapping(uint64 => T.Binding)) storage history,
@@ -46,7 +45,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
         AH.Query memory anchor,
         bytes memory raw
     ) public returns (bool) {
-        if (Next.bindings(bindings_, history, terms, terminals, anchor, raw)) return true;
         if (!Codec.selected(raw, 0)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(0, anchor, raw);
         Rows.validate(0, s, p.provenance);
@@ -80,7 +78,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
         AH.Query memory anchor,
         bytes memory raw
     ) public returns (bool) {
-        if (Next.acceptances(records, times, anchor, raw)) return true;
         if (!Codec.selected(raw, 3)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(3, anchor, raw);
         Rows.validate(3, s, p.provenance);
@@ -99,7 +96,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
     }
 
     function collaborator(AH.Query memory anchor, bytes memory raw) public pure returns (bool) {
-        if (Next.collaborator(anchor, raw)) return true;
         if (!Codec.selected(raw, 1)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(1, anchor, raw);
         Rows.validate(1, s, p.provenance);
@@ -110,7 +106,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
         public
         returns (bool)
     {
-        if (Next.attribution(state, anchor, raw)) return true;
         if (!Codec.selected(raw, 4)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(4, anchor, raw);
         Rows.validate(4, s, p.provenance);
@@ -123,37 +118,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
             state.attributions[s.collections[i].collectionId] = b.state.item;
         }
         return true;
-    }
-
-    function policies(
-        mapping(bytes32 => bytes32) storage policies_,
-        mapping(bytes32 => bytes32) storage delegations,
-        AH.Query memory anchor,
-        bytes memory raw
-    ) public returns (bool) {
-        if (!Codec.selected(raw, 6)) return false;
-        (M.State memory s, Payload.Payload memory p) = Codec.outer(6, anchor, raw);
-        Rows.validate(6, s, p.provenance);
-        for (uint256 i; i < s.rows.length; ++i) {
-            Original.PolicyBundle memory b = abi.decode(s.rows[i], (Original.PolicyBundle));
-            for (uint256 j; j < b.records.length; ++j) {
-                if (
-                    policies_[_scope(b.collectionId, b.policies[j])] != 0
-                        || delegations[b.records[j]] != 0
-                ) _invalid();
-            }
-        }
-        for (uint256 i; i < s.rows.length; ++i) {
-            Original.PolicyBundle memory b = abi.decode(s.rows[i], (Original.PolicyBundle));
-            for (uint256 j; j < b.records.length; ++j) {
-                policies_[_scope(b.collectionId, b.policies[j])] = b.records[j];
-            }
-        }
-        return true;
-    }
-
-    function _scope(uint256 id, AH.PolicyKey memory key) private pure returns (bytes32) {
-        return keccak256(abi.encode(id, key.phaseId, key.policyHash));
     }
 
     function _invalid() private pure {

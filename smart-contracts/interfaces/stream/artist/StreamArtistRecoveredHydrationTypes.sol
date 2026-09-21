@@ -34,7 +34,8 @@ library StreamArtistRecoveredHydrationTypes {
     uint256 internal constant HISTORY_PLATFORM = 65536;
     uint256 internal constant HISTORY_RECORDS = 131072;
     uint256 internal constant MULTIPLE_BASE = 262144;
-    uint256 internal constant KNOWN_FEATURES = 524287;
+    uint256 internal constant MULTIPLE_CONSENTS = 524288;
+    uint256 internal constant KNOWN_FEATURES = 1048575;
     // Reviewed recovered graph only; typed exporters still reject broader collection profiles.
     // Keep this explicit so adding a future known feature does not advertise it automatically.
     uint256 internal constant FIRST_GRAPH_FEATURES =
@@ -59,6 +60,8 @@ library StreamArtistRecoveredHydrationTypes {
         HISTORY_CONTENT_GRAPH_FEATURES | HISTORY_PLATFORM;
     uint256 internal constant RECORDS_GRAPH_FEATURES = PLATFORM_GRAPH_FEATURES | HISTORY_RECORDS;
     uint256 internal constant MULTIPLE_GRAPH_FEATURES = RECORDS_GRAPH_FEATURES | MULTIPLE_BASE;
+    uint256 internal constant MULTIPLE_CONSENTS_GRAPH_FEATURES =
+        MULTIPLE_GRAPH_FEATURES | MULTIPLE_CONSENTS;
     // Finite transport-profile limits, not limits on validity of original lifetime history.
     uint256 internal constant MAX_ERAS = 16;
     uint256 internal constant MAX_JOURNAL_ENTRIES = 4096;

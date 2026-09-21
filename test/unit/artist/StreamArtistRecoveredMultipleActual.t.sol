@@ -11,6 +11,10 @@ import {
     StreamArtistRecoveredMultipleIdentityNonceImport as NonceImport
 } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredMultipleIdentityNonceImport.sol";
 
+import {
+    StreamArtistRecoveredMultipleConsentCodec as ConsentAggregate
+} from "../../../smart-contracts/domains/artist/StreamArtistRecoveredMultipleConsentCodec.sol";
+
 contract StreamArtistRecoveredMultipleActualTest is ArtistRecoveredMultipleFixture {
     function testRecoveredMultipleOneArtistTwoCollectionsDirect() external {
         _multiSource(true, false);
@@ -233,15 +237,25 @@ contract StreamArtistRecoveredMultipleActualTest is ArtistRecoveredMultipleFixtu
         Successor memory next = _multiCutover();
         RH.Request memory r = _multiRequest();
         bytes32 before_ = _multiDestinationHash(next);
-        (bool ok, bytes memory reason) = address(this)
-            .staticcall(
-                abi.encodeCall(this.prepareMultiple, (next.coordinator.suiteConfiguration(), r))
+        Commit.Prepared memory p = Prepared.prepare(next.coordinator.suiteConfiguration(), r);
+        (, Payload.Payload memory payload) = Payload.decode(p.data[2].typedState, 2);
+        M.State memory state = ConsentAggregate.decode(2, payload.semanticState, payload.provenance);
+        bool checked;
+        for (uint256 i; i < state.rows.length; ++i) {
+            IH.Bundle memory b = abi.decode(state.rows[i], (IH.Bundle));
+            if (b.artistId != artistId) continue;
+            (bool ok, bytes memory reason) =
+                address(Union).staticcall(abi.encodeWithSelector(Union.validateLocal.selector, b));
+            require(
+                !ok && bytes4(reason) == RH.InvalidRecoveredHydrationProvenance.selector,
+                "old base local profile remains strict for authentic unused grant"
             );
+            checked = true;
+        }
         require(
-            !ok && bytes4(reason) == RH.InvalidRecoveredHydrationProvenance.selector,
-            "aggregate local validator rejects original unused grants, independent of inventory check"
+            checked && _multiDestinationHash(next) == before_,
+            "new profile preparation is read only; old base stays strict"
         );
-        require(_multiDestinationHash(next) == before_, "rejected family imports no scope");
     }
 
     function prepareMultiple(T.SuiteConfiguration memory target, RH.Request memory request)

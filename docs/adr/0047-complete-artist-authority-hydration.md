@@ -293,3 +293,21 @@ verified across principals and installed once. The
 [aggregate integration guide](../integrations/artist-recovered-multiple-base.md)
 defines exact rows, scope and authored direct/Safe regressions. Source/type checks
 do not establish native execution, gas, capacity or release acceptance.
+
+## Recovered consent multiplicity
+
+The additive `MULTIPLE_CONSENTS` bit 524288 and
+`6529STREAM_ARTIST_RECOVERED_MULTIPLE_CONSENTS_V1` tag compose complete original
+14/15/16/17/20/21 consent and 26/27 delegation histories across accepted
+generation-one PRIMARY_ONLY collections and recovered class-1/class-3 Artists.
+The allowed feature mask is 524671; combined owner advertisement is 1048575.
+The unchanged Request and operation60 retain the original singleton and base
+aggregate codecs. Every original grant version joins all collection/family uses
+before one equality check. Nonces form the complete original global union with
+unchanged domain, index order and tree words. No owner provenance is filtered.
+Shared timing/registration and each whole-owner import/commit occur once; all
+writes and final Archive composition remain atomic. The
+[consent multiplicity guide](../integrations/artist-recovered-multiple-consents.md)
+defines exact witnesses, original-source boundaries and excluded later families.
+Thirteen focused scenarios are authored/type-checked; runtime, gas, joined
+capacity and deployment acceptance remain separate.

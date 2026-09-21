@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredMultipleConsentPreparation as ConsentAggregate
+} from "./StreamArtistRecoveredMultipleConsentPreparation.sol";
+import {
     StreamArtistRecoveredMultipleOwners as Owners
 } from "./StreamArtistRecoveredMultipleOwners.sol";
 import {
@@ -67,6 +70,13 @@ import {
     StreamArtistRecoveredPreparationSeal as Seal
 } from "./StreamArtistRecoveredPreparationSeal.sol";
 
+import {
+    StreamArtistRecoveredMultipleObservations as Observations
+} from "./StreamArtistRecoveredMultipleObservations.sol";
+import {
+    StreamArtistRecoveredMultipleConsentSelection as Selection
+} from "./StreamArtistRecoveredMultipleConsentSelection.sol";
+
 /// @notice One complete source admission, per-subject semantics, and one complete payload per owner.
 library StreamArtistRecoveredMultiplePreparation {
     function encode(
@@ -75,12 +85,23 @@ library StreamArtistRecoveredMultiplePreparation {
         T.RoyaltyFreeze[] memory royalties,
         bool requireInventory
     ) public view returns (bytes memory) {
-        if (request.records.witnesses.length != 0 || royalties.length != 0) {
-            revert T.UnsupportedProfile();
-        }
         Commit.Prepared memory prepared;
         prepared.admission = Admission.collect(destination, request);
         Admission.Certificate memory c = prepared.admission;
+        if (
+            request.records.witnesses.length != 0 || royalties.length != 0
+                || Selection.required(
+                    c.source, c.collections, c.provenance.journals[2], c.provenance.journals[6]
+                )
+        ) {
+            ConsentAggregate.Context memory context;
+            context.destination = destination;
+            context.request = request;
+            context.royalties = royalties;
+            context.requireInventory = requireInventory;
+            context.admission = c;
+            return ConsentAggregate.encodeAdmitted(context);
+        }
         M.State memory scope;
         scope.artists = c.artists;
         scope.collections = c.collections;
@@ -122,7 +143,7 @@ library StreamArtistRecoveredMultiplePreparation {
         if ((features & ~(RH.FIRST_GRAPH_FEATURES | RH.MULTIPLE_BASE)) != 0) {
             revert T.UnsupportedProfile();
         }
-        prepared.externalGuards = _merge(observations);
+        prepared.externalGuards = Observations.collect(observations);
         Owners.Context memory context;
         context.prepared = prepared;
         context.destination = destination;
@@ -132,48 +153,5 @@ library StreamArtistRecoveredMultiplePreparation {
         context.payouts = payouts;
         context.features = features;
         return Owners.encode(context, requireInventory, request.expectedSemanticInventory);
-    }
-
-    function _merge(External.Snapshot[] memory all)
-        private
-        pure
-        returns (External.Snapshot memory result)
-    {
-        result.schema = all[0].schema;
-        result.provenanceCommitment = all[0].provenanceCommitment;
-        result.artistId = all[0].artistId;
-        uint256 a;
-        uint256 f;
-        uint256 e;
-        for (uint256 i; i < all.length; ++i) {
-            if (
-                all[i].schema != result.schema
-                    || all[i].provenanceCommitment != result.provenanceCommitment
-                    || all[i].artistId == 0
-            ) revert RH.InvalidRecoveredHydrationProfile();
-            a += all[i].actions.length;
-            f += all[i].finality.length;
-            e += all[i].entropy.length;
-        }
-        if (a > RH.MAX_REPLAY_ALIASES || f + e > RH.MAX_JOURNAL_ENTRIES) {
-            revert RH.InvalidRecoveredHydrationProfile();
-        }
-        result.actions = new External.ActionGuard[](a);
-        result.finality = new External.FinalityGuard[](f);
-        result.entropy = new External.EntropyGuard[](e);
-        a = 0;
-        f = 0;
-        e = 0;
-        for (uint256 i; i < all.length; ++i) {
-            for (uint256 j; j < all[i].actions.length; ++j) {
-                result.actions[a++] = all[i].actions[j];
-            }
-            for (uint256 j; j < all[i].finality.length; ++j) {
-                result.finality[f++] = all[i].finality[j];
-            }
-            for (uint256 j; j < all[i].entropy.length; ++j) {
-                result.entropy[e++] = all[i].entropy[j];
-            }
-        }
     }
 }

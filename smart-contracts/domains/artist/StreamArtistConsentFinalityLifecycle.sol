@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleConsentImport as ConsentAggregate } from "./StreamArtistRecoveredMultipleConsentImport.sol";
 import { StreamArtistRecoveredMultipleCollectionImport as MultipleImport } from "./StreamArtistRecoveredMultipleCollectionImport.sol";
 import {
     StreamArtistRecoveredHistoryContentOwnerImport as HistoryContentOwnerImport
@@ -589,7 +590,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.MULTIPLE_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.MULTIPLE_CONSENTS_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -604,6 +605,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 6)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (ConsentAggregate.applyState(_policies, _economics, _associatedEconomicsRecords, _economicsAssociations, _recordDelegation, _saleRecords, _latestSaleConsents, _contentConsents, _latestContentConsent, _royaltyFreezes, _contentFreezes, _latestContentFreeze, q, p.typedState)) return;
             if (MultipleImport.policies(_policies, _recordDelegation, q, p.typedState)) return;
             if (HistoryContentImport.selected(p.typedState)) {
                 HistoryContentOwnerImport.applyState(

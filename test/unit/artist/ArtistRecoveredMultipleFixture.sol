@@ -71,7 +71,7 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
         _newRotationSafe(991001);
         OfficialSafe second = shared ? firstSafe : rotationSafe;
         uint256[] memory secondKeys = shared ? firstKeys : rotationKeys;
-        T.BindingProposal memory proposal = _proposal(shared ? first : bytes32(0));
+        T.BindingProposal memory proposal = _multiProposal(shared ? first : bytes32(0));
         proposal.artistAddress = address(second);
         (bytes32 secondId,) = ingress.proposeArtistBinding(
             2, proposal, bytes("unit identity document"), "Artist Safe"
@@ -343,7 +343,7 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
         for (uint8 owner; owner < 7; ++owner) {
             (RH.ExportHeader memory h, Payload.Payload memory payload) =
                 Payload.decode(prepared.data[owner].typedState, owner);
-            require((h.requiredFeatures & RH.MULTIPLE_BASE) != 0, "explicit aggregate capability");
+            require((h.requiredFeatures & _multiFeature()) != 0, "explicit aggregate capability");
             (RH.OwnerProvenance memory prefix, bytes32 committed,) =
                 RecoveredOwner(target.owners[owner]).recoveredHydrationImportedPrefix();
             require(
@@ -434,8 +434,8 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
             );
         }
         (, Payload.Payload memory identity) = Payload.decode(prepared.data[2].typedState, 2);
-        M.State memory aggregate = Aggregate.decode(2, identity.semanticState, identity.provenance);
-        IH.NonceLane[] memory lanes = Union.ordered(aggregate, identity.nonces);
+        M.State memory aggregate = _multiDecode(identity);
+        IH.NonceLane[] memory lanes = _multiOrdered(aggregate, identity.nonces);
         for (uint256 i; i < lanes.length; ++i) {
             CP.NonceIndex memory actual = CP(next.identity).authorityNonceIndexAt(i);
             require(
@@ -444,6 +444,27 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
                 "original global nonce index order"
             );
         }
+    }
+
+    function _multiProposal(bytes32 id) internal view virtual returns (T.BindingProposal memory) {
+        return _proposal(id);
+    }
+
+    function _multiFeature() internal pure virtual returns (uint256) {
+        return RH.MULTIPLE_BASE;
+    }
+
+    function _multiDecode(Payload.Payload memory p) internal pure virtual returns (M.State memory) {
+        return Aggregate.decode(2, p.semanticState, p.provenance);
+    }
+
+    function _multiOrdered(M.State memory s, RH.NonceInventory[] memory n)
+        internal
+        pure
+        virtual
+        returns (IH.NonceLane[] memory)
+    {
+        return Union.ordered(s, n);
     }
 
     function _multiLivingRecovery() private {
