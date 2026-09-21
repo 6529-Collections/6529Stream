@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Solidity `9381dd99`, client batch `5776d191`. ABI146: 3,914 / zero errors; new client64 root cases pass. Runtime acceptance remains separate. |
+| Source checkpoint | Solidity `9db6df06`, client batch `4c2b62ed`. ABI149: 3,977 / zero errors; VIEW client41 and Museum83 root cases pass. Runtime acceptance remains separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,65 +30,54 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 21 September
 
 Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact evidence boundaries.
-Root owns shared interfaces, integration, architecture and delivery. Keep
-builders implementing while bounded frozen test batches run.
+Root owns shared interfaces, integration, architecture and delivery. Builders
+continue coherent features while frozen native campaigns run.
 
-- A: dispute history is integrated as `f526845f`; the existing `e1fa284c`
-  import pipeline is preserved with the required operation-48 point. Build
-  original sanction/confirmation history from authenticated Archive catalogues,
-  then remaining Platform/content/freeze combinations. Do not infer chronology.
-- B: preservation producer `432a61de` and one-case correction are integrated.
-  Execute the frozen 18-case producer/Registry campaign with genuine artifact
-  loading (`bba39285`). Retain the native 21/1 and corrected one-pass captures.
-- C: VIEW inventory and source selection are integrated as `bed02d87`; all
-  eleven repaired products fit. Finish explicit VIEW finality kernels and expose
-  exact APIs to Burn and Prepared. Host/stage/archive source review is clear.
-  C owns the shared Candidate, SanctionReviewReads and PreparedScopeReads changes
-  for explicit media review profile 3; preserve existing profile 1/2 behavior.
-  Diagnostic oversized configurations remain separate from acceptance.
-- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: root V2 read review is clear.
-  A's 23-oracle, C host/stage/archive and snapshot-reader repair reviews are
-  clear; actual Mint24 and archive4 runtime remain pending.
-- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: VIEW ceremony is integrated as
-  `40c714a9`; complete binding/records/archive are integrated as `dd619588`.
-  Own thin original-provider dispatch and the genuine scope-finality ceremony
-  against C's new kernels. Do not rerun old scoped27.
-- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: preservation capture and
-  actual native wire bridge and new VIEW reference45 pass root checks. Build
-  full render-critical inventory/bundle consumers against frozen `fd861f3f`.
-- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: inventory/archive22 CALLs
-  integrated as `e3bfd9b0`; historical finality callers are `5776d191`, producer
-  2,132 and root focused 64 pass. Build current preservation V2 and shared VIEW
-  binding callers from exact `9381dd99`/ABI146 with one shared fixture.
-- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 and corrected
-  metric13 are sealed. Publication22 is sealed failed before export/EVM on
-  captured MetadataRouter size. Map coherent current fixture/API migration while
-  Metric establishes current Router size; no historical retry or cap changes.
-- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: root16 and failed reader29
-  are sealed. Own the fresh reader campaign at `feb24a2e`, adding the repaired
-  worker and complete snapshot-family regression file under original controls.
-  The separate genuine successor3 source/constructor plan is sealed at `f8486206`;
-  refresh its selection after the remaining finality fixture batch stabilizes.
-- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: publication22 inputs are
-  frozen and Testing owns execution. The reader split is integrated as
-  `feb24a2e`, with source/ABI/selected-size review clear. Now establish current
-  MetadataRouter size and choose a coherent current publication repair/migration
-  with Testing; do not copy one current Router into the old dependency graph.
-- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: V2 family is integrated.
-  Actual scoped succession/export/resume is integrated as `f8486206`.
-  Explicit V2 dispatch and scoped finality fixtures are integrated as `679c489e`;
-  shared complete VIEW API forwarding is integrated as `9381dd99`. Build the
-  actual scoped-finality test drivers and current-authority VIEW finality dispatch
-  through C's exact kernels; original-provider dispatch remains Burn-owned.
-- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: the isolated shared receipt
-  optimized prototype passes 24 cases. Build a cold atomic full-sequence
-  benchmark using actual bounded refund/Ledger leaves; no production overlay
-  or changed 500,000 target.
+- A: sanction/confirmation history `8e15d977` and size repair `dfa48c48` are
+  integrated. Build explicit joined history/content profile, then remaining
+  Platform, operation-24 and multiplicity compositions; old profile tags remain.
+- B: correct same-native AST output selection for the 18-case preservation
+  campaign; all bytecode products compiled, but verification stopped before EVM.
+  Preserve that failure, use all-source AST with the same product selection,
+  and independently review Museum's ceremony-export adapter.
+- C: VIEW kernels and composed tests are integrated. Finish the four closed
+  same-host getter gas correction and bounded signed locator correspondence.
+  Keep original dependency caps, old profiles and archived captures explicit.
+- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: independently review Prepared's
+  Discovery/actual-VIEW join. Museum WORK and composed VIEW reviews are clear.
+  Actual Mint24 and archive4 execution remain pending.
+- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: one selected 18-product VIEW
+  native size baseline from root `9db6df06`/ABI149, then actual original-provider
+  ceremony/browser inputs. Preserve the declared browser/environment source.
+- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: full VIEW consumer integrated,
+  root83 passes. Export adapter `893972aa` is ready for independent intake;
+  consume new locator semantics only after their coherent source freeze.
+- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: complete VIEW and token V2
+  checkpoint/output callers integrated. Build snapshot, reference and current
+  inventory/archive callers with the existing shared fixture; final all-call
+  current-contract/Safe acceptance remains separate.
+- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: current publication11 compiles
+  exact `d667908b`; require sizes, six fresh exports, independent replay and
+  original gas/cooling. Three actual entropy/Safe cases are `14ece06b`.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: failed reader51 is sealed;
+  seven-product split integrated `9db6df06` fits. Complete focused11 execution,
+  then fresh joined reader51 and genuine successor3 under original controls.
+- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: current Router fits without
+  another repair. Source split and focused11 reviews are clear. Support exact
+  current publication exports/replay without rewriting source observations.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: both provider dispatches and
+  actual scoped drivers are integrated. Own both Discovery hosts/shared VIEW
+  selection/serving worker and actual current VIEW adoption/publication flow.
+  Coordinate C's bounded self-read correction; no legacy fallback.
+- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: isolated common path passes
+  34 native cases/28 RPC checks but exceeds 500,000 gross gas even at the minimal
+  boundary. Continue staged-alias/common-path optimization; no target waiver or
+  production overlay. Refund helper is a separate bounded experiment.
 
-Root ABI146 and its committed-source bridge pass; 23 documentation regressions,
-links and changelog checks pass. No root compiler remains. Check exact process
-ownership before starting or stopping any native campaign. Full current/Safe,
-stateful/fuzz, gas/size, CI, freeze and matching testnet remain.
+Root ABI149/source bridge passes. Latest documentation17, links, changelog and
+Windows whitespace checks pass on their recorded source. Inspect exact process
+ownership before native runs. Full current/Safe, stateful/fuzz, gas/size, CI,
+freeze and matching testnet remain; preserve supported RC1.
 
 ## Earlier source-specific assignments
 
