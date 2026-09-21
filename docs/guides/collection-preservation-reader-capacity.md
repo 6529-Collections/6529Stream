@@ -33,7 +33,8 @@ output, preservation admission, token identity, entropy, configuration and raw
 source reads. The original host still declares `Original`, including its dynamic
 entropy bytes, so both the ABI's nominal tuple and the literal source commitment
 remain unchanged. The helper's import of this type creates no runtime link back
-to the host. The three original facades retain their propagated error ABI declarations.
+to the host. The three original facades retain their propagated error ABI
+declarations.
 
 All calls use fixed linked-library delegation. Dependencies observe the same
 host, hashes retain `address(this)`, and caller identity is preserved. There is
@@ -43,7 +44,8 @@ execution gas and EIP-150 headroom; this extraction does not claim gas parity.
 
 ## Validation boundary
 
-The original ABIs and storage layouts are compared against the frozen source.
+All three original ABIs, storage layouts and method-identifier maps exactly
+match the frozen baseline in the final native outputs.
 Source inverse checks reconstruct the original functions and hosts and reject
 changes to the receipt copy, caller-memory normalization, dynamic entropy
 encoding, read bounds, read order, tuple declarations and unaccounted helper code.
@@ -57,11 +59,53 @@ five new workers. It retains actual native ASTs, metadata, ABI, storage layout,
 complete creation/runtime outputs, link references and method identifiers under
 the original Solidity 0.8.19, via-IR, optimizer-200, Paris, no-CBOR configuration.
 The complete initcode limit remains 49,152 bytes; these libraries have no
-constructor arguments. The first retained six-product capture correctly refused Records at 26,464
-bytes and SourceReads at 28,955 bytes, while the token reader and the first three
-workers fit. The further typed extraction retains that failed evidence; its
-final native measurement and Solidity regression execution remain pending until
-the associated evidence is recorded.
+constructor arguments. The first retained six-product capture correctly refused
+Records at 26,464 bytes and SourceReads at 28,955 bytes. That refused capture was
+preserved before the further typed extraction.
+
+The final eight-product capture uses source
+`7ba7f36da71d142919d0caa16af59c392dd20d67`, with 196 exact Git sources and one
+sequential compiler worker. Analysis and native code generation completed in
+104.125 seconds total. All selected products fit the original limits:
+
+| Product | Runtime bytes | Complete initcode bytes |
+| --- | ---: | ---: |
+| `StreamPreservationPolicyReferenceDependencyReadsV1` | 4,157 | 4,189 |
+| `StreamPreservationPolicyReferencePreparationV1` | 17,209 | 17,241 |
+| `StreamPreservationPolicyReferenceRecordReadsV1` | 15,094 | 15,126 |
+| `StreamPreservationPolicyReferenceRecordsV1` | 12,915 | 12,947 |
+| `StreamPreservationPolicyReferenceSnapshotPayloadReadsV1` | 11,574 | 11,606 |
+| `StreamPreservationPolicyReferenceSourceReadsV1` | 22,170 | 22,203 |
+| `StreamPreservationPolicyRenderCriticalTokenReadsV1` | 20,658 | 20,690 |
+| `StreamPreservationPolicyTokenOriginalReadsV1` | 20,768 | 20,800 |
+
+The actual native input SHA256 is
+`a8811979552b140ff7645a7668ce233d784dbef124a1f8c4c5130f2b89c8a1be`;
+the actual native output SHA256 is
+`2f9a1f4a94327ff29324439a9c6e5ad98dc6f7d4a405cc957e79e8e4598ce869`.
+The immutable local capture is under `out/preservation-reference-native-v2`.
+Its `HANDOFF.json` SHA256 is
+`5db6d834519c0a250afb381fc4ec9b2ac5963eee84ac6a2a548a19326e77dc92`.
+The earlier refused capture remains under `out/preservation-reference-native-v1`.
+
+Both source-inverse checks and all 49 Python regression tests pass. The final
+1,016-source ABI pass reports zero compiler errors and typechecks all eight new
+Solidity test cases. Those eight cases are authored and typechecked, not executed.
+Run the bounded source checks from the repository root with:
+
+```text
+python -B -m tools.development.check_preservation_record_capacity
+python -B -m tools.development.check_preservation_reference_capacity_inverse
+python -B -m unittest tools.development.test_preservation_record_capacity tools.development.test_preservation_reference_capacity_inverse
+```
+
+The pinned Forge serializer produced one authenticated physical owner context for
+all eight products, without another compiler invocation. Canonical owner loading
+and rechecking passed with the original native outputs unchanged. The owner
+evidence SHA256 is
+`7f59b58b766e08ea20ed7eb1eb8cf1a2c019ae479220f3d0105abe0085ee58cd`;
+`OWNER_ADDENDUM.json` retains the exact owner paths and hashes. Cross-context
+library-link admission and EVM execution remain separate acceptance.
 
 Selected library capacity and source checks do not establish linked deployment,
 complete collection publication, finality, cold transaction cost or full-graph
