@@ -545,7 +545,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         returns (bytes32, uint64, bytes32)
     {
         if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedContentRoot(scope);
-        return ScopedPolicyMetadata.root(_metadataConfigV2(scope), scope);
+        return ScopedPolicyMetadata.root(
+            _metadataConfigV2(scope), scope, keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
     }
 
     function scopedSnapshotHash(StreamFinalityScope calldata scope)
@@ -557,7 +559,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         if (!GraphSelection.isPolicy(_graph, scope)) {
             return super.scopedSnapshotHash(scope);
         }
-        return ScopedPolicyMetadata.snapshot(_metadataConfigV2(scope), scope);
+        return ScopedPolicyMetadata.snapshot(
+            _metadataConfigV2(scope), scope, keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
     }
 
     function scopedManifest(StreamFinalityScope calldata scope)
@@ -567,7 +571,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         returns (bool, bytes32)
     {
         if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedManifest(scope);
-        return ScopedPolicyMetadata.manifest(_metadataConfigV2(scope), scope);
+        return ScopedPolicyMetadata.manifest(
+            _metadataConfigV2(scope), scope, keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
+        );
     }
 
     function _scopedPolicyConfig(StreamFinalityScope memory scope)

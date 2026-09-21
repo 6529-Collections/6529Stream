@@ -112,6 +112,50 @@ identities. Package proofs can use the existing streaming file path API and
 Large non-package proofs remain explicit inputs. No missing row or sample can
 substitute for complete coverage.
 
-The local entrypoints stop at bundle evidence. Sanction publication, its separate
-archive evidence and terminal Finality acceptance are additional integration
-work. ABI validation and source review do not establish any of those outcomes.
+These original local entrypoints stop at bundle evidence. The separate recipe
+below adds sanction and Finality calls; neither recipe has executed acceptance
+evidence yet.
+
+## Scoped sanction, archive and Finality source
+
+The [Finality local recipe](../../test/helpers/StreamCurrentAuthorityScopedPreservationPolicyFinalityLocalRecipe.sol)
+extends the same export and exact-resume entrypoints. Export from that contract
+instance, capture its actual bytes, then resume that instance with the supplied
+observations and complete byte proofs described above. Its pre-inventory hook
+registers the manifest definitions and prepares the existing governed role and
+Artist callback budget. Its post-bundle hook calls the
+[scoped Finality fixture](../../test/helpers/StreamCurrentAuthorityScopedPreservationPolicyFinalityFixture.sol).
+The original bundle-only contract's hooks remain empty.
+
+The selected A, B or C era must be final before sanction. The current recovered
+owner codecs do not admit operation12 or operation13 history; this recipe does
+not establish sanction-before-migration support. Operation12 signs the exact
+scoped manifest and nine ordered non-sanction components with the current
+Artist's Safe and nonce. The archive retains the actual sanction record,
+canonical ceremony and signature bytes, and receives separate complete archive
+coverage. Missing archive evidence must fail before scoped execution.
+
+The original Finality Registry then executes `finalizeArtworkScopeWithArchive`
+under its real class2 governance action. Readback checks the exact scoped
+record, manifest, archive witness, action and EXACT freeze mode. Preservation
+producer bytes, current inventory and full bundle coverage, authority capture
+and independent component facts are compared before and after sanction and
+Finality. Live covered-token JSON must expose the actual current Artist
+sanction; RELEASE and SEASON use genuine complete reverse membership, and the
+TOKEN fixture preserves token2 as an uncovered control. The collection record
+stays absent. Operation13 remains the separate permissionless COLLECTION-only
+confirmation and is never called here; scoped Finality does not close or freeze
+the entire collection.
+
+`scopedFinalityEvidence()` returns evidence only after this local flow completes;
+it rejects an uncompleted instance. Combined ABI checks and source review pass,
+but this is authored source, not an executed ceremony. Native linked sizes,
+transaction gas, fresh browser capture and end-to-end acceptance remain pending.
+The inherited archive fixture uses synthetic checkpoint/observer evidence and
+does not prove retrieval from an external archive network. Existing governed
+callback budgets are preserved, not measured as deployment limits.
+
+One applicability gap remains explicit: the immutable native sanction profile
+catalogue text describes ONCHAIN COLLECTION, while these separately reviewed
+preservation readers compose scoped sanctions. This source work does not revise
+those immutable bytes or claim that catalogue wording covers the extension.

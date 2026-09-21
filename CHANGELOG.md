@@ -1,4 +1,16 @@
 # Changelog
+## Scoped preservation sanction and Finality source
+
+- Add a distinct local export/resume recipe composing exact current-Artist
+  operation12, its separate signature archive and original governed scoped
+  Finality for TOKEN, RELEASE and SEASON after the final selected migration.
+- Recheck complete preservation evidence and actual live sanction visibility;
+  retain the original bundle-only recipe and COLLECTION-only operation13.
+- Fix current-authority metadata and sanction reads to select the explicit V2
+  family. Add fifteen focused regression cases; original V1 defaults remain.
+- ABI and independent source checks pass. Native, gas, fresh browser and full
+  ceremony acceptance remain pending; see the [recipe boundaries](docs/integrations/current-authority-scoped-preservation-ceremony.md).
+
 ## Scoped current-Artist preservation ceremony source
 
 - Add separate V2 graph and fixture helpers for actual current-Artist producer

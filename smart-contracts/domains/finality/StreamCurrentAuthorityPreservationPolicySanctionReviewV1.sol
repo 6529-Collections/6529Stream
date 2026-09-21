@@ -6,6 +6,9 @@ import {
 import {
     StreamCurrentAuthorityPresentation as Presentation
 } from "./StreamCurrentAuthorityPresentation.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
 
 import "./StreamFinalityNativeProviderReads.sol";
 import "./StreamFinalityPreservationPolicyInputManifestReadsV1.sol";
@@ -113,7 +116,11 @@ library StreamCurrentAuthorityPreservationPolicySanctionReviewV1 {
         rd.readGas = c.readGas;
         rd.sourceGas = c.sourceGas;
         (R2.Publication memory declared, R2.Receipt memory receipt) = ReferenceReads.original(
-            rd, s.scope, current.observation.recordHash, current.observation.revision
+            rd,
+            s.scope,
+            current.observation.recordHash,
+            current.observation.revision,
+            Profiles.FAMILY_PROFILE
         );
         if (
             keccak256(abi.encode(receipt)) != keccak256(raw)

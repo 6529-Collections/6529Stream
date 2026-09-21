@@ -163,6 +163,7 @@ contract StreamCurrentAuthorityScopedPreservationPolicyLocalRecipe is
             records = _publishScopedRecords(publication.scope, heads);
         }
         _authoritySealScopedRecords(records, rightsResult);
+        _beforeScopedRecipeInventory(publication, referenceResult);
         AuthorityScopedInventory memory inventoryResult = _authorityMaterializeScopedInventory(
             publication, referenceResult, records, rightsResult.statement
         );
@@ -177,6 +178,7 @@ contract StreamCurrentAuthorityScopedPreservationPolicyLocalRecipe is
             files.packageProofs,
             largeByteProofs
         );
+        _afterScopedRecipeBundle(publication, referenceResult, inventoryResult, bundleResult);
         _authorityRequireOriginals();
         _authorityRequireRoute();
         require(authorityEra == era && bundleResult.evidence.coverage.bundleCoverageHash != 0);
@@ -200,6 +202,22 @@ contract StreamCurrentAuthorityScopedPreservationPolicyLocalRecipe is
         result.emptyPackageMembers = bundleResult.emptyPackageMembers;
         result.originStateBundles = bundleResult.stateBundles;
     }
+
+    /// @dev Optional derived ceremony setup occurs before source inventory and archive capture.
+    /// The original bundle-only recipe intentionally performs no additional work here.
+    function _beforeScopedRecipeInventory(
+        AuthorityScopedPublication memory,
+        AuthorityScopedReference memory
+    ) internal virtual { }
+
+    /// @dev A distinct derived recipe may consume the genuine completed bundle. The original
+    /// entrypoints stop at bundle evidence; no sanction or Finality is manufactured by this hook.
+    function _afterScopedRecipeBundle(
+        AuthorityScopedPublication memory,
+        AuthorityScopedReference memory,
+        AuthorityScopedInventory memory,
+        AuthorityScopedBundle memory
+    ) internal virtual { }
 
     function _setupScopedRecipe(StreamFinalityScopeType kind)
         private

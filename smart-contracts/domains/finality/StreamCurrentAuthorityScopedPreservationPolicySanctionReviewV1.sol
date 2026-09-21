@@ -7,6 +7,9 @@ import {
     StreamCurrentAuthorityPresentation as Presentation
 } from "./StreamCurrentAuthorityPresentation.sol";
 import {
+    StreamPreservationTokenProducerProfilesV1 as Profiles
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
     IStreamMetadataServingFacts
 } from "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 
@@ -99,7 +102,9 @@ library StreamCurrentAuthorityScopedPreservationPolicySanctionReviewV1 {
         d.chainId = c.chainId;
         d.readGas = c.readGas;
         d.sourceGas = c.sourceGas;
-        StreamFinalityScopedPreservationPolicyReferenceReadsV1.requireBindings(d);
+        StreamFinalityScopedPreservationPolicyReferenceReadsV1.requireBindings(
+            d, Profiles.FAMILY_PROFILE
+        );
         bytes memory raw = StreamFinalityBoundedReads.read(
             c.targets[9],
             abi.encodeCall(
@@ -124,7 +129,11 @@ library StreamCurrentAuthorityScopedPreservationPolicySanctionReviewV1 {
             StreamScopedPreservationPolicyReferenceTypesV1.Publication memory saved,
             StreamScopedPreservationPolicyReferenceTypesV1.Receipt memory receipt
         ) = StreamFinalityScopedPreservationPolicyReferenceReadsV1.original(
-            d, s.scope, s.inputs.referenceRenderRecordHash, head.observation.revision
+            d,
+            s.scope,
+            s.inputs.referenceRenderRecordHash,
+            head.observation.revision,
+            Profiles.FAMILY_PROFILE
         );
         if (keccak256(abi.encode(receipt)) != keccak256(raw)) revert NativeReviewSource();
         p = saved.observation;
