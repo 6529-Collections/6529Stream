@@ -52,7 +52,7 @@ def fixture():
                            {"id": 23, "nodeType": "ImportDirective", "absolutePath": "Child.sol"},
                            owner, contract(21, "Sibling")],
              "Unused.sol": [contract(40, "Unused")]}
-    analysis_input, native_input = scoped.split_request(request)
+    analysis_input, native_input = scoped.split_request(request, all_source_asts=False)
     analysis_output = {"sources": {
         name: {"id": ident, "ast": {"id": 100 + ident, "nodeType": "SourceUnit",
                                    "absolutePath": name, "nodes": copy.deepcopy(nodes[name])}}
@@ -83,7 +83,8 @@ class SelectorTests(unittest.TestCase):
         for result in (analysis, native):
             self.assertEqual(scoped.without_selection(result), scoped.without_selection(original))
         self.assertEqual(analysis["settings"]["outputSelection"], {"*": {"": ["ast"]}})
-        self.assertEqual(set(native["settings"]["outputSelection"]), {"Base.sol", "Owner.sol"})
+        self.assertEqual(set(native["settings"]["outputSelection"]), set(original["sources"]))
+        self.assertEqual(native["settings"]["outputSelection"]["Unused.sol"], {"": ["ast"]})
         self.assertEqual(native["settings"]["outputSelection"]["Owner.sol"][""], ["ast"])
         native["sources"]["Base.sol"]["content"] = "changed"
         analysis["settings"]["optimizer"]["runs"] = 1
@@ -94,7 +95,7 @@ class SelectorTests(unittest.TestCase):
         request = copy.deepcopy(self.request)
         request["settings"]["outputSelection"] = {"*": {"": ["ast"], "*": list(FIELDS)}}
         original = copy.deepcopy(request)
-        analysis, native = scoped.split_request(request, self.ni["settings"]["outputSelection"])
+        analysis, native = scoped.split_request(request, self.ni["settings"]["outputSelection"], all_source_asts=False)
         self.assertEqual(request, original)
         self.assertEqual(native, self.ni)
         self.assertEqual(analysis, self.ai)
@@ -108,11 +109,43 @@ class SelectorTests(unittest.TestCase):
             {"Owner.sol": {"Owner": []}},
             {"Owner.sol": {"Owner": ["abi"]}},
             {"Unknown.sol": {"Unknown": list(FIELDS)}},
-            {"Base.sol": {"": ["ast"]}, "Owner.sol": {"Owner": list(FIELDS)}},
+            {"Base.sol": {"": ["ast"]}},
+            {"Base.sol": {}, "Owner.sol": {"Owner": list(FIELDS)}},
         ]
         for selection in cases:
             with self.subTest(selection=selection), self.assertRaises(ValueError):
                 scoped.split_request(self.request, selection)
+
+    def test_default_native_ast_includes_unselected_base_without_extra_products(self):
+        selection = {"Owner.sol": {"Owner": list(FIELDS)}}
+        analysis, native = scoped.split_request(self.request, selection)
+        self.assertEqual({(s, n) for s, rows in native["settings"]["outputSelection"].items()
+                          for n in rows if n}, {("Owner.sol", "Owner")})
+        self.assertEqual(native["settings"]["outputSelection"]["Base.sol"], {"": ["ast"]})
+        output = copy.deepcopy(self.no)
+        output["sources"] = copy.deepcopy(self.ao["sources"])
+        del output["contracts"]["Base.sol"]
+        before = copy.deepcopy((analysis, native, output))
+        report = scoped.verify_pair(analysis, self.ao, native, output)
+        self.assertEqual(report["immutableJoins"][0]["declaration"], {"source": "Base.sol", "variable": "x"})
+        self.assertEqual((analysis, native, output), before)
+        del output["sources"]["Base.sol"]["ast"]
+        with self.assertRaisesRegex(ValueError, "native AST roster"):
+            scoped.verify_pair(analysis, self.ao, native, output)
+
+    def test_default_all_ast_selection_is_idempotent_and_keeps_fields_exact(self):
+        analysis, native = scoped.split_request(self.request)
+        self.assertEqual(scoped.split_request(native), (analysis, native))
+        for source, rows in self.ni["settings"]["outputSelection"].items():
+            self.assertEqual(native["settings"]["outputSelection"][source], rows)
+
+    def test_free_struct_source_accepts_ast_without_fictitious_contract(self):
+        self.request["sources"]["Struct.sol"] = {"content": "pragma solidity 0.8.19; struct Value { uint n; }"}
+        selected = {"Struct.sol": {"": ["ast"]}, "Owner.sol": {"Owner": list(FIELDS)}}
+        _, native = scoped.split_request(self.request, selected)
+        self.assertEqual(native["settings"]["outputSelection"]["Struct.sol"], {"": ["ast"]})
+        self.assertEqual({(s, n) for s, rows in native["settings"]["outputSelection"].items()
+                          for n in rows if n}, {("Owner.sol", "Owner")})
 
     def test_url_sources_refuse(self):
         self.request["sources"]["Base.sol"] = {"urls": ["Base.sol"]}
@@ -394,9 +427,11 @@ class CaptureTests(unittest.TestCase):
         self.compiler.write_bytes(b"unit-test-only-not-an-executable")
         self.compiler_sha = scoped.sha(self.compiler.read_bytes())
         self.request, self.ai, self.ao, self.ni, self.no = fixture()
+        self.ai, self.ni = scoped.split_request(self.request)
+        self.no["sources"] = copy.deepcopy(self.ao["sources"])
         self.processes = []
 
-    def capture(self, name="capture", *, fail_at=None, failure=None):
+    def capture(self, name="capture", *, fail_at=None, failure=None, all_source_asts=True):
         outputs = [self.ao, self.no]
         self.processes = []
 
@@ -413,7 +448,8 @@ class CaptureTests(unittest.TestCase):
         with mock.patch.object(scoped.subprocess, "run", return_value=version), \
                 mock.patch.object(scoped.subprocess, "Popen", side_effect=popen):
             return scoped.capture_pair(scoped.canonical(self.request), self.request["settings"]["outputSelection"],
-                                       self.compiler, self.compiler_sha, self.root / name, timeout=0.1)
+                                       self.compiler, self.compiler_sha, self.root / name, timeout=0.1,
+                                       all_source_asts=all_source_asts)
 
     def write_record(self, folder, record):
         (folder / "record.json").write_bytes(scoped.canonical(record))
@@ -431,11 +467,22 @@ class CaptureTests(unittest.TestCase):
         self.assertEqual(analysis["input"], self.ai)
         self.assertEqual(native["output"], self.no)
         self.assertIn("ast", analysis["output"]["sources"]["Child.sol"])
-        self.assertNotIn("ast", native["output"]["sources"]["Child.sol"])
+        self.assertIn("ast", native["output"]["sources"]["Child.sol"])
         for process in self.processes:
             self.assertEqual((process.wait_count, process.kill_count), (1, 0))
         for step in record["passes"].values():
             self.assertEqual((step["status"], step["exitCode"], step["pid"]), ("COMPLETE", 0, 12345))
+
+    def test_explicit_partial_ast_policy_is_retained_and_never_supplies_missing_base(self):
+        self.request, self.ai, self.ao, self.ni, self.no = fixture()
+        record = self.capture(all_source_asts=False)
+        self.assertIs(record["allSourceAsts"], False)
+        _, native, _ = scoped.read_capture(self.root / "capture")
+        self.assertNotIn("ast", native["output"]["sources"]["Child.sol"])
+        record["allSourceAsts"] = True
+        self.write_record(self.root / "capture", record)
+        with self.assertRaisesRegex(ValueError, "request transformation differs"):
+            scoped.read_capture(self.root / "capture")
 
     def test_changed_capture_bytes_or_hashes_refuse(self):
         for change in ("bytes", "hash", "extra"):
@@ -561,7 +608,7 @@ class CaptureTests(unittest.TestCase):
         self.assertEqual(evidence["forgeRequestedInputSha256"], scoped.sha(scoped.canonical(envelope)))
         self.assertEqual(evidence["nativeCompilerInputSha256"], scoped.sha(scoped.canonical(self.ni)))
         self.assertNotEqual(evidence["forgeRequestedInputSha256"], evidence["nativeCompilerInputSha256"])
-        self.assertNotIn("ast", native["output"]["sources"]["Child.sol"])
+        self.assertIn("ast", native["output"]["sources"]["Child.sol"])
 
     def test_build_binding_refuses_wrong_envelope_request_or_bytecode(self):
         self.capture(); folder = self.root / "capture"

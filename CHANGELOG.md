@@ -221,6 +221,11 @@
 
 ## Verify request-dependent Solidity import snapshots
 
+- Request all source ASTs in the same selected native compilation so inherited
+  immutable declarations are available without substituting analysis output.
+  Accept source-only AST entries, retain exact contract outputs and verification,
+  and document the additional internal compiler scheduling cost.
+
 - Reproduce exported-symbol tables using the pinned compiler's source-root DFS
   and import-snapshot rules when circular imports change those tables. Keep all
   other selected AST fields exact and preserve both raw native outputs.

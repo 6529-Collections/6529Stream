@@ -65,7 +65,7 @@ def pair_fixture():
             "viaIR": True, "optimizer": {"enabled": True, "runs": 200}, "evmVersion": "paris",
             "outputSelection": {"B.sol": {"B": ["abi", "evm.bytecode", "evm.deployedBytecode"]},
                                 "Host.sol": {"Host": ["abi", "evm.bytecode", "evm.deployedBytecode"]}}}}
-    ai, ni = scoped.split_request(request)
+    ai, ni = scoped.split_request(request, all_source_asts=False)
     ao = {"sources": {s: {"id": i, "ast": copy.deepcopy(ast)} for i, (s, ast) in enumerate(asts.items())}}
     no = {"sources": {s: {"id": row["id"]} for s, row in ao["sources"].items()}, "contracts": {}}
     for source, name in (("B.sol", "B"), ("Host.sol", "Host")):

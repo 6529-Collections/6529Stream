@@ -1,8 +1,9 @@
 """Split Solidity 0.8.19 analysis from selected code generation, without joining outputs.
 
 The full source universe and every setting except outputSelection stay identical.
-An AST selector also selects contract names for code generation in this compiler;
-the bytecode pass therefore requests AST only in explicitly selected source files.
+The bytecode pass requests native ASTs for every source, including abstract bases
+that declare inherited immutables. Contract output fields remain explicitly selected.
+This can schedule additional compiler work; it does not request extra bytecode outputs.
 """
 from __future__ import annotations
 
@@ -46,8 +47,10 @@ def without_selection(request: dict) -> dict:
     return result
 
 
-def split_request(request: dict, selection: dict | None = None) -> tuple[dict, dict]:
+def split_request(request: dict, selection: dict | None = None, *,
+                  all_source_asts: bool = True) -> tuple[dict, dict]:
     """Return analysis and codegen requests; reject implicit/wildcard contract roots."""
+    require(type(all_source_asts) is bool, "AST selection policy must be boolean")
     require(set(request) == {"language", "sources", "settings"} and request["language"] == "Solidity",
             "Expected literal Solidity standard JSON")
     require(bool(request["sources"]), "Empty source universe")
@@ -62,9 +65,10 @@ def split_request(request: dict, selection: dict | None = None) -> tuple[dict, d
     for source, outputs in selected.items():
         require(source in request["sources"], f"Unknown output source: {source}")
         require(isinstance(outputs, dict), f"Invalid contract selection: {source}")
-        if "" in outputs:
+        source_ast = "" in outputs
+        if source_ast:
             require(outputs.pop("") == ["ast"], "Only AST source output is supported")
-        require(bool(outputs), f"AST-only source must name an explicit output contract: {source}")
+        require(bool(outputs) or source_ast, f"Empty output source: {source}")
         for name, fields in outputs.items():
             require(bool(re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name)), "Exact contract names required")
             require(isinstance(fields, list) and bool(fields) and all(isinstance(f, str) and f for f in fields),
@@ -74,6 +78,9 @@ def split_request(request: dict, selection: dict | None = None) -> tuple[dict, d
                           or f.startswith(("evm.bytecode.", "evm.deployedBytecode.")) for f in fields)
         scoped[source] = {"": ["ast"], **outputs}
     require(bool(scoped) and binary, "Select at least one bytecode output")
+    if all_source_asts:
+        for source in request["sources"]:
+            scoped.setdefault(source, {"": ["ast"]})
     analysis, codegen = copy.deepcopy(request), copy.deepcopy(request)
     analysis["settings"]["outputSelection"] = copy.deepcopy(ANALYSIS_SELECTION)
     codegen["settings"]["outputSelection"] = scoped
@@ -194,7 +201,9 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
     """Validate identities and declarations, never import analysis AST into codegen."""
     require(same_json(without_selection(analysis_input), without_selection(codegen_input)),
             "Source universe or compiler settings differ")
-    expected_analysis, expected_codegen = split_request(codegen_input)
+    # Validate the retained native request as-is, including older partial-AST captures.
+    # Never add declarations from the separate analysis result during verification.
+    expected_analysis, expected_codegen = split_request(codegen_input, all_source_asts=False)
     require(same_json(analysis_input, expected_analysis) and same_json(codegen_input, expected_codegen),
             "Requests do not use the separated output selections")
     successful(analysis_output); successful(codegen_output)
@@ -319,19 +328,21 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
 
 
 def capture_pair(request_raw: bytes, selection: dict, compiler: Path, compiler_sha256: str,
-                 destination: Path, *, timeout: float, arguments: tuple[str, ...] = ("--standard-json",)) -> dict:
+                 destination: Path, *, timeout: float, arguments: tuple[str, ...] = ("--standard-json",),
+                 all_source_asts: bool = True) -> dict:
     """Run two bounded native requests, retaining exact stdin/stdout and process records."""
     require(math.isfinite(timeout) and timeout > 0, "Positive finite timeout required")
     require(arguments.count("--standard-json") == 1, "Expected standard JSON compiler arguments")
     compiler = compiler.resolve()
     require(sha(compiler.read_bytes()) == compiler_sha256, "Compiler executable hash differs")
     request = json.loads(request_raw)
-    analysis, codegen = split_request(request, selection)
+    analysis, codegen = split_request(request, selection, all_source_asts=all_source_asts)
     destination.mkdir(parents=True, exist_ok=False)
     (destination / "requested-input.json").write_bytes(request_raw)
     (destination / "selection.json").write_bytes(canonical(selection))
     record = {"schema": 1, "status": "RUNNING", "compiler": str(compiler), "compilerSha256": compiler_sha256,
               "arguments": list(arguments), "timeoutSecondsPerPass": timeout, "passes": {},
+              "allSourceAsts": all_source_asts,
               "toolSha256": sha(Path(__file__).read_bytes())}
 
     def save():
@@ -411,7 +422,8 @@ def _read_capture(folder: Path, *, allow_library_revalidation: bool = False) -> 
     contexts = [{"solcVersion": "0.8.19", "input": json.loads((folder / (n + "-input.json")).read_bytes()),
                  "output": json.loads((folder / (n + "-output.json")).read_bytes())} for n in ("analysis", "codegen")]
     expected = split_request(json.loads((folder / "requested-input.json").read_bytes()),
-                             json.loads((folder / "selection.json").read_bytes()))
+                             json.loads((folder / "selection.json").read_bytes()),
+                             all_source_asts=record.get("allSourceAsts", False))
     require(same_json(tuple(c["input"] for c in contexts), expected), "Captured request transformation differs")
     analysis, codegen = contexts
     report = verify_pair(analysis["input"], analysis["output"], codegen["input"], codegen["output"])
@@ -617,7 +629,8 @@ def forward(manifest_path: Path, arguments: list[str]) -> int:
     require(same_json(selection, manifest["expectedOutputSelection"]), "Requested output selection differs")
     destination = Path(manifest["captureDirectory"])
     capture_pair(raw, manifest["actualOutputSelection"], compiler, manifest["compilerSha256"],
-                 destination, timeout=manifest["timeoutSeconds"], arguments=tuple(arguments))
+                 destination, timeout=manifest["timeoutSeconds"], arguments=tuple(arguments),
+                 all_source_asts=manifest.get("allSourceAsts", True))
     sys.stdout.buffer.write((destination / "codegen-output.json").read_bytes())
     sys.stderr.buffer.write((destination / "codegen-stderr.log").read_bytes())
     return 0
@@ -633,6 +646,8 @@ def main() -> int:
     run.add_argument("--compiler-sha256", required=True)
     run.add_argument("--output", type=Path, required=True)
     run.add_argument("--timeout", type=float, required=True, help="Bound in seconds for each native pass")
+    run.add_argument("--selected-source-asts", action="store_true",
+                     help="Use the exact AST-source selection; caller must include inherited immutable sources")
     verify = commands.add_parser("verify")
     verify.add_argument("--capture", type=Path, required=True)
     verify.add_argument("--admission", type=Path)
@@ -650,7 +665,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "capture":
         record = capture_pair(args.input.read_bytes(), json.loads(args.selection.read_bytes()), args.solc,
-                              args.compiler_sha256, args.output, timeout=args.timeout)
+                              args.compiler_sha256, args.output, timeout=args.timeout,
+                              all_source_asts=not args.selected_source_asts)
     elif args.command == "verify":
         _, _, record = read_capture(args.capture, admission=args.admission)
     elif args.command == "admit":
