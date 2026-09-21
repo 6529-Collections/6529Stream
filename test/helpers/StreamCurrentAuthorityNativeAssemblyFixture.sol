@@ -4009,7 +4009,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
 
     function _graphCreation(StreamCurrentGraphCreation.Kind kind)
         internal
-        pure
+        view
         override
         returns (bytes memory)
     {

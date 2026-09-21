@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistIdentityCreationPart } from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
-import { StreamArtistEstateCreationPart } from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+import {
+    StreamArtistIdentityCreationPart
+} from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import {
+    StreamArtistEstateCreationPart
+} from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
 
 import {
     StreamArtistExtensionFactory
@@ -31,6 +35,7 @@ import "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifi
 import "../../smart-contracts/interfaces/stream/preservation/StreamArchivalTypes.sol";
 
 interface ArtistSuiteVm {
+    function getCode(string calldata artifact) external view returns (bytes memory);
     function getNonce(address account) external view returns (uint64);
     function computeCreateAddress(address deployer, uint256 nonce) external pure returns (address);
 }
@@ -64,16 +69,58 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
         s.core = core_;
         s.mintManager = manager_;
         s.roleRegistry = roles_;
-        s.validator = address(new StreamArtistRegistryValidatorBase());
+        s.validator = address(
+            StreamArtistRegistryValidatorBase(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol:StreamArtistRegistryValidatorBase",
+                        abi.encode()
+                    ))
+            )
+        );
         s.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
         _deployArtistArchival(core_, executor_, roles_);
         address nextCoordinator = _reserveCurrentCoordinator(address(this));
-        StreamArtistExtensionFactory artistExtensions = new StreamArtistExtensionFactory([
-            address(new StreamArtistIdentityCreationPart(0)),
-            address(new StreamArtistIdentityCreationPart(1)),
-            address(new StreamArtistEstateCreationPart(0)),
-            address(new StreamArtistEstateCreationPart(1))
-        ]);
+        StreamArtistExtensionFactory artistExtensions = StreamArtistExtensionFactory(
+            payable(_artistSuiteArtifactCreate(
+                    "smart-contracts/domains/artist/StreamArtistExtensionFactory.sol:StreamArtistExtensionFactory",
+                    abi.encode(
+                        [
+                            address(
+                                StreamArtistIdentityCreationPart(
+                                    payable(_artistSuiteArtifactCreate(
+                                            "smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart",
+                                            abi.encode(0)
+                                        ))
+                                )
+                            ),
+                            address(
+                                StreamArtistIdentityCreationPart(
+                                    payable(_artistSuiteArtifactCreate(
+                                            "smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart",
+                                            abi.encode(1)
+                                        ))
+                                )
+                            ),
+                            address(
+                                StreamArtistEstateCreationPart(
+                                    payable(_artistSuiteArtifactCreate(
+                                            "smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart",
+                                            abi.encode(0)
+                                        ))
+                                )
+                            ),
+                            address(
+                                StreamArtistEstateCreationPart(
+                                    payable(_artistSuiteArtifactCreate(
+                                            "smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart",
+                                            abi.encode(1)
+                                        ))
+                                )
+                            )
+                        ]
+                    )
+                ))
+        );
         artists = _deploySplitArtistFacade(
             _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
             address(this),
@@ -84,15 +131,28 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             keccak256("fixture artist module")
         );
         s.registry = address(artists);
-        s.archive = address(new StreamArtistArchiveV2(s.registry, nextCoordinator));
+        s.archive = address(
+            StreamArtistArchiveV2(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2",
+                        abi.encode(s.registry, nextCoordinator)
+                    ))
+            )
+        );
         s.owners[0] = address(
-            new StreamArtistBindingLifecycle(
-                s.registry, nextCoordinator, s.archive, core_, manager_
+            StreamArtistBindingLifecycle(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol:StreamArtistBindingLifecycle",
+                        abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
+                    ))
             )
         );
         s.owners[1] = address(
-            new StreamArtistCollaboratorLifecycle(
-                s.registry, nextCoordinator, s.archive, core_, manager_
+            StreamArtistCollaboratorLifecycle(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol:StreamArtistCollaboratorLifecycle",
+                        abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
+                    ))
             )
         );
         s.owners[2] = _deploySplitArtistIdentity(
@@ -102,42 +162,71 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             [s.registry, nextCoordinator, s.archive, core_, manager_]
         );
         s.owners[3] = address(
-            new StreamArtistAcceptanceLifecycle(
-                s.registry, nextCoordinator, s.archive, core_, manager_
+            StreamArtistAcceptanceLifecycle(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol:StreamArtistAcceptanceLifecycle",
+                        abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
+                    ))
             )
         );
         s.owners[4] = address(
-            new StreamArtistAttributionLifecycle(
-                s.registry, nextCoordinator, s.archive, core_, manager_
+            StreamArtistAttributionLifecycle(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol:StreamArtistAttributionLifecycle",
+                        abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
+                    ))
             )
         );
         s.owners[5] = address(
-            new StreamArtistPayoutLifecycle(s.registry, nextCoordinator, s.archive, core_, manager_)
+            StreamArtistPayoutLifecycle(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol:StreamArtistPayoutLifecycle",
+                        abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
+                    ))
+            )
         );
         s.owners[6] = address(
-            new StreamArtistConsentFinalityLifecycle(
-                s.registry, nextCoordinator, s.archive, core_, manager_
+            StreamArtistConsentFinalityLifecycle(
+                payable(_artistSuiteArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol:StreamArtistConsentFinalityLifecycle",
+                        abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
+                    ))
             )
         );
         IStreamArtistAttribution attribution = IStreamArtistAttribution(s.registry);
-        router = new StreamMetadataRouter(
-            core_,
-            executor_,
-            deploymentHash,
-            "https://engineering.example.invalid/6529stream/fixture/router",
-            keccak256("fixture metadata module"),
-            attribution
+        router = StreamMetadataRouter(
+            payable(_artistSuiteArtifactCreate(
+                    "smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter",
+                    abi.encode(
+                        core_,
+                        executor_,
+                        deploymentHash,
+                        "https://engineering.example.invalid/6529stream/fixture/router",
+                        keccak256("fixture metadata module"),
+                        attribution
+                    )
+                ))
         );
-        primaryResolver = new StreamRevenueResolver(
-            IStreamCore(core_),
-            factory_,
-            executor_,
-            attribution,
-            IStreamGasParameterHost.GasParameterConfig(
-                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
-            )
+        primaryResolver = StreamRevenueResolver(
+            payable(_artistSuiteArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver",
+                    abi.encode(
+                        IStreamCore(core_),
+                        factory_,
+                        executor_,
+                        attribution,
+                        IStreamGasParameterHost.GasParameterConfig(
+                            "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+                        )
+                    )
+                ))
         );
-        royalties = new StreamRoyaltyResolver(IStreamCore(core_), factory_, executor_, attribution);
+        royalties = StreamRoyaltyResolver(
+            payable(_artistSuiteArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver",
+                    abi.encode(IStreamCore(core_), factory_, executor_, attribution)
+                ))
+        );
         s.metadata = address(router);
         s.primaryResolver = address(primaryResolver);
         s.royaltyResolver = address(royalties);
@@ -151,6 +240,27 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             address(artistArchivalCheckpoint),
             deploymentHash
         );
+    }
+
+    /// @dev Real zero-value CREATE in this fixture, with original constructor bytes.
+    /// Forge resolves the genuine native artifact's libraries before returning its code.
+    function _artistSuiteArtifactCreate(string memory artifact, bytes memory arguments)
+        private
+        returns (address deployed)
+    {
+        ArtistSuiteVm artifactVm =
+            ArtistSuiteVm(address(uint160(uint256(keccak256("hevm cheat code")))));
+        bytes memory creation = artifactVm.getCode(artifact);
+        require(creation.length != 0, "missing original Artist production artifact");
+        bytes memory init = bytes.concat(creation, arguments);
+        assembly ("memory-safe") {
+            deployed := create(0, add(init, 32), mload(init))
+            if iszero(deployed) {
+                let ptr := mload(0x40)
+                returndatacopy(ptr, 0, returndatasize())
+                revert(ptr, returndatasize())
+            }
+        }
     }
 
     function _fixtureModuleRegistry() internal view virtual returns (address);
@@ -193,17 +303,26 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             IStreamGasParameterHost.GasParameterConfig(
                 "ARCHIVAL_ERC1271_VERIFY_GAS", 400_000, 90_000, 2
             );
-        artistArchivalCheckpoint =
-            new StreamArweaveCheckpointVerifier(executor_, observers, 2, signatureGas);
-        artistArchivalCoverage = new StreamArchivalCoverage(
-            core_,
-            executor_,
-            roles_,
-            address(artistArchivalCheckpoint),
-            signatureGas,
-            IStreamGasParameterHost.GasParameterConfig(
-                "ARCHIVAL_DEPENDENCY_READ_GAS", 150_000, 50_000, 2
-            )
+        artistArchivalCheckpoint = StreamArweaveCheckpointVerifier(
+            payable(_artistSuiteArtifactCreate(
+                    "smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol:StreamArweaveCheckpointVerifier",
+                    abi.encode(executor_, observers, 2, signatureGas)
+                ))
+        );
+        artistArchivalCoverage = StreamArchivalCoverage(
+            payable(_artistSuiteArtifactCreate(
+                    "smart-contracts/domains/preservation/StreamArchivalCoverage.sol:StreamArchivalCoverage",
+                    abi.encode(
+                        core_,
+                        executor_,
+                        roles_,
+                        address(artistArchivalCheckpoint),
+                        signatureGas,
+                        IStreamGasParameterHost.GasParameterConfig(
+                            "ARCHIVAL_DEPENDENCY_READ_GAS", 150_000, 50_000, 2
+                        )
+                    )
+                ))
         );
         require(address(artistArchivalCheckpoint).code.length <= 24_576, "checkpoint deployable");
         require(address(artistArchivalCoverage).code.length <= 24_576, "coverage deployable");
