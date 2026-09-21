@@ -164,12 +164,21 @@ abstract contract StreamCurrentFullPreservationPolicyViewCompleteFixture is
         );
     }
 
+    function _viewCompleteRetrievalSourceGas(uint256 snapshotSourceGas)
+        internal
+        pure
+        virtual
+        returns (uint256)
+    {
+        return snapshotSourceGas;
+    }
+
     function _viewDeployCompleteRetrieval(StreamRenderCriticalSourceTypes.Dependencies memory d)
         private
     {
         CompleteSnapshotTypes.Dependencies memory snapshot =
             assemblyViewPreservationSnapshot.dependencies();
-        uint256 sourceGas = snapshot.sourceGas;
+        uint256 sourceGas = _viewCompleteRetrievalSourceGas(snapshot.sourceGas);
         require(
             snapshot.targets[6] == address(assemblyViewPreservationCheckpoint)
                 && snapshot.codeHashes[6] == address(assemblyViewPreservationCheckpoint).codehash,
@@ -179,7 +188,7 @@ abstract contract StreamCurrentFullPreservationPolicyViewCompleteFixture is
             d.readGas <= type(uint32).max && sourceGas <= type(uint32).max,
             "retrieval constructor gas widths"
         );
-        // Preserve the graph's diagnostic budgets; operative capacity requires a later run.
+        // The default preserves diagnostic budgets; an explicit fresh fixture may choose its own.
         CompleteRetrievalTypes.Configuration memory c = CompleteRetrievalTypes.Configuration(
             d.targets[0],
             d.codeHashes[0],

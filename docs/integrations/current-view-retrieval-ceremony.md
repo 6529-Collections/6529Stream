@@ -71,10 +71,27 @@ of the old completed mapping.
 
 The source/type check includes both the original empty-image host and this new
 host. It is not native execution or a capacity result. In particular the actual
-fixture's witness source budget14m is nested under the existing bundle archive
-budget8m: that integration cannot be presumed executable. The fixture retains
+fixture's witness source budget 14m is nested under the existing bundle archive
+budget 8m: that integration cannot be presumed executable. The fixture retains
 those values so a measured gate reports the real incompatibility. The existing
 16,777,216 transaction envelope and maximum-scope requirements remain open.
+
+`StreamCurrentFullPreservationPolicyViewRetrievalFreshBudgetTest` inherits the
+same two cases and export/continuation entry points, but constructs a new
+checkpoint with serving budget 6m and a new witness with independent source
+budget 7m. Bundle archive budget 8m, snapshot source budget 14m and every other
+original constructor/leaf budget remain unchanged. The default host still uses
+checkpoint 9m and witness 14m. The witness authenticates the actual snapshot's
+checkpoint identity and runtime; its source budget need not equal the snapshot
+source budget. No existing deployed configuration or production code changes.
+
+The original strict forwarding thresholds for 6m and 7m are 6,105,238 and 7,121,111
+gas respectively. This removes the known impossible 14m reservation inside 8m;
+it does not prove that preceding reads, fixed worker frames, return copying,
+full current-source validation or complete output generation fit the remaining
+gas. The fresh host requires an independent genuine-artifact run, cold source
+and output measurements, and the same 16,777,216 transaction envelope before
+capacity can be claimed. Its exports belong to its own source/configuration.
 
 The separate frozen retrieval native campaign at source
 `a2973d360f6ab18881c04d58193f855704ec56d3` passed exactly42 cases:7 codec,

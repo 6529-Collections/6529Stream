@@ -1105,6 +1105,10 @@ abstract contract StreamCurrentFullPreservationPolicyPublicationBase is
         );
     }
 
+    function _fullPolicyViewCheckpointServingGas() internal pure virtual returns (uint32) {
+        return 9000000;
+    }
+
     /// @dev Construct only after original selected Metadata/Router and the real Finality graph
     /// are active. Constructor checks validate bindings, not a nonexistent VIEW adoption.
     /// Declared cap ladder: snapshot outer 16m > manifest source 14m > checkpoint 12m >
@@ -1148,7 +1152,7 @@ abstract contract StreamCurrentFullPreservationPolicyPublicationBase is
                 assemblyViewPreservationRenderer.configurationHash(),
                 block.chainid,
                 2000000,
-                9000000
+                _fullPolicyViewCheckpointServingGas()
             );
         _requirePreservationInitcode(
             type(StreamViewPreservationContentCheckpointV1).creationCode, abi.encode(checkpoint)
