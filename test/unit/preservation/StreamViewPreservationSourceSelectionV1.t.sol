@@ -384,6 +384,13 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
         RetrievalWitnessTypes.Configuration memory c =
             RetrievalWitnessInterface(retrievalWitness).configuration();
         bytes memory request = abi.encodeCall(RetrievalWitnessInterface.configuration, ());
+        bytes memory hashRequest = abi.encodeCall(RetrievalWitnessInterface.configurationHash, ());
+        bytes memory originalHash = _get(retrievalWitness, hashRequest);
+        // Reject an inconsistent hash separately from otherwise self-consistent foreign bindings.
+        ViewRetrievalConfigurationFixture.set(retrievalWitness, hashRequest, abi.encode(bytes32(0)));
+        _fails(selected, expected, 500000);
+        ViewRetrievalConfigurationFixture.set(retrievalWitness, hashRequest, originalHash);
+        _positive();
         for (uint256 i; i < 3; ++i) {
             RetrievalWitnessTypes.Configuration memory changed =
                 abi.decode(abi.encode(c), (RetrievalWitnessTypes.Configuration));
@@ -391,8 +398,14 @@ contract StreamViewPreservationSourceSelectionV1Test is CharacterizationTestBase
             else if (i == 1) changed.routerCodeHash = keccak256("foreign Router runtime");
             else changed.checkpoint = address(probe);
             ViewRetrievalConfigurationFixture.set(retrievalWitness, request, abi.encode(changed));
+            ViewRetrievalConfigurationFixture.set(
+                retrievalWitness,
+                hashRequest,
+                abi.encode(keccak256(abi.encode(RetrievalWitnessTypes.PROFILE, changed)))
+            );
             _fails(selected, expected, 500000);
             ViewRetrievalConfigurationFixture.set(retrievalWitness, request, abi.encode(c));
+            ViewRetrievalConfigurationFixture.set(retrievalWitness, hashRequest, originalHash);
             _positive();
         }
         RetrievalSnapshotTypes.Dependencies memory snap = abi.decode(

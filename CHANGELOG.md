@@ -1047,6 +1047,8 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add attributed VIEW retrieval records, exact inventory companion bindings and archive coverage for supported URL routes. Preserve original locator and archive record formats; retrieval runtime acceptance remains pending.
+
 - Add current-authority collection and scoped preservation inventory clients
   with captured Artist routes and ordered original archive-origin evidence.
 
