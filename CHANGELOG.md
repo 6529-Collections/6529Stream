@@ -1020,6 +1020,10 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add a distinct offline full VIEW render-critical inventory and original bundle
+  consumer, with ordered source stages, complete member output bytes and explicit
+  recorded-source/coverage trust. Native execution and full finality remain separate.
+
 - Add a bounded original VIEW reference consumer with exact native definitions,
   source proofs, first/last output samples and environment inventory parts.
   Supplied evidence checks do not establish browser execution or full finality.

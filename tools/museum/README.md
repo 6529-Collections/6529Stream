@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Full VIEW inventory and original bundle evidence](../../docs/museum-view-preservation-inventory-v1.md)
+joins twelve ordered source stages, complete member output bytes and optional
+original archive admissions. Recorded source reads retain explicit external
+trust; native execution, archive currentness and finality remain separate.
+
 [Retained VIEW reference evidence](../../docs/museum-view-preservation-reference-v1.md)
 checks exact original reference records, full preservation source proofs and
 environment file-inventory parts. Browser execution, historical authority and
