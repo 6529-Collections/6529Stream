@@ -35,6 +35,27 @@ library StreamArtistRecoveredPlatformNativeProof {
         uint256 era,
         H.Envelope memory e
     ) public pure returns (PW.State memory) {
+        return _advance(b, current, p, era, e, false);
+    }
+
+    function advanceWithRecords(
+        P.Platform memory b,
+        PW.State memory current,
+        RH.OwnerProvenance memory p,
+        uint256 era,
+        H.Envelope memory e
+    ) public pure returns (PW.State memory) {
+        return _advance(b, current, p, era, e, true);
+    }
+
+    function _advance(
+        P.Platform memory b,
+        PW.State memory current,
+        RH.OwnerProvenance memory p,
+        uint256 era,
+        H.Envelope memory e,
+        bool includeRecords
+    ) private pure returns (PW.State memory) {
         RH.OriginEnvironment memory o = p.origins[era];
         RH.Point memory point = RH.Point(p.eras[era].originHash, 4, e.after_[4].revision);
         bytes32 scope;
@@ -178,9 +199,29 @@ library StreamArtistRecoveredPlatformNativeProof {
         }
         if (e.operation != 10) state = keccak256(abi.encode(b.collectionId, current));
         _otherSnapshots(e);
-        Transition.validate(
-            o, p, era, e, action, state, Transition.replay(o, e.operation, scope, e.value), primary
-        );
+        if (includeRecords) {
+            Transition.validateWithRecords(
+                o,
+                p,
+                era,
+                e,
+                action,
+                state,
+                Transition.replay(o, e.operation, scope, e.value),
+                primary
+            );
+        } else {
+            Transition.validate(
+                o,
+                p,
+                era,
+                e,
+                action,
+                state,
+                Transition.replay(o, e.operation, scope, e.value),
+                primary
+            );
+        }
         return current;
     }
 

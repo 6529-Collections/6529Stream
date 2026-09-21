@@ -92,6 +92,24 @@ library StreamArtistRecoveredPlatformNativeRows {
         }
     }
 
+    function validateWithRecords(P.Platform memory b, RH.OwnerProvenance memory p)
+        public
+        pure
+        returns (D.Guard[] memory guards)
+    {
+        if (P.nativeCount(b) != 0) return validate(b, p);
+        P.Platform memory empty;
+        // Archive catalogues/operations are still required by the independent binding timeline.
+        empty.provenance = RH.ownerProvenanceHash(p, 4);
+        empty.collectionId = b.collectionId;
+        empty.catalogues = b.catalogues;
+        empty.operations = b.operations;
+        if (b.collectionId == 0 || keccak256(abi.encode(b)) != keccak256(abi.encode(empty))) {
+            _invalid();
+        }
+        return new D.Guard[](0);
+    }
+
     function _declare(
         P.Platform memory b,
         RH.JournalEntry memory j,

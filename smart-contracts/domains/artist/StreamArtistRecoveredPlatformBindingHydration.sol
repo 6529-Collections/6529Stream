@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHistoryRecordTypes as Records
+} from "./StreamArtistRecoveredHistoryRecordTypes.sol";
+
 import { StreamArtistRecoveredPlatformTypes as A } from "./StreamArtistRecoveredPlatformTypes.sol";
 import {
     StreamArtistRecoveredPlatformBindingValidation as V
@@ -89,6 +93,23 @@ library StreamArtistRecoveredPlatformBindingHydration {
         V.validate(b, q, p);
     }
 
+    function decodeWithRecords(AH.Query memory q, RH.OwnerProvenance memory p, bytes memory raw)
+        public
+        pure
+        returns (CB.Bundle memory b)
+    {
+        bytes32 tag;
+        uint16 version;
+        (tag, version, b) = abi.decode(raw, (bytes32, uint16, CB.Bundle));
+        if (
+            tag != Records.BINDING || version != RH.VERSION
+                || keccak256(raw) != keccak256(abi.encode(tag, version, b))
+        ) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
+        V.validate(b, q, p);
+    }
+
     function encodeCollected(
         address source,
         bytes memory original,
@@ -112,9 +133,12 @@ library StreamArtistRecoveredPlatformBindingHydration {
         bytes memory outer
     ) public returns (bool) {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 0);
-        if ((h.requiredFeatures & RH.HISTORY_PLATFORM) == 0) return false;
+        bool withRecords = (h.requiredFeatures & RH.HISTORY_RECORDS) != 0;
+        if (!withRecords && (h.requiredFeatures & RH.HISTORY_PLATFORM) == 0) return false;
         if (p.nonces.length != 0) revert RH.InvalidRecoveredHydrationProfile();
-        CB.Bundle memory b = decode(q, p.provenance, p.semanticState);
+        CB.Bundle memory b = withRecords
+            ? decodeWithRecords(q, p.provenance, p.semanticState)
+            : decode(q, p.provenance, p.semanticState);
         if (b.bindings.current.consentMode == 2 && (h.requiredFeatures & RH.DELEGATED_CONSENT) == 0)
         {
             revert RH.InvalidRecoveredHydrationProfile();

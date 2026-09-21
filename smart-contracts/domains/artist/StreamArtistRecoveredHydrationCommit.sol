@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredPlatformRouting as PlatformRouting } from "./StreamArtistRecoveredPlatformRouting.sol";
+import {
+    StreamArtistRecoveredHistoryRecordRouting as PlatformRouting
+} from "./StreamArtistRecoveredHistoryRecordRouting.sol";
 import {
     StreamArtistRecoveredSanctionRouting as SanctionRouting
 } from "./StreamArtistRecoveredSanctionRouting.sol";

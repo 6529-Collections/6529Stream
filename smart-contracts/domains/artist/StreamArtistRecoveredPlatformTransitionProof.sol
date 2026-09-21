@@ -23,6 +23,33 @@ library StreamArtistRecoveredPlatformTransitionProof {
         bytes32 replay,
         bytes32 record
     ) public pure returns (RH.Point memory point) {
+        return _validate(o, p, era, e, action, state, replay, record, false);
+    }
+
+    function validateWithRecords(
+        RH.OriginEnvironment memory o,
+        RH.OwnerProvenance memory p,
+        uint256 era,
+        H.Envelope memory e,
+        bytes32 action,
+        bytes32 state,
+        bytes32 replay,
+        bytes32 record
+    ) public pure returns (RH.Point memory point) {
+        return _validate(o, p, era, e, action, state, replay, record, true);
+    }
+
+    function _validate(
+        RH.OriginEnvironment memory o,
+        RH.OwnerProvenance memory p,
+        uint256 era,
+        H.Envelope memory e,
+        bytes32 action,
+        bytes32 state,
+        bytes32 replay,
+        bytes32 record,
+        bool includeRecords
+    ) private pure returns (RH.Point memory point) {
         T.Snapshot memory a = e.before_[4];
         T.Snapshot memory b = e.after_[4];
         if (
@@ -63,7 +90,10 @@ library StreamArtistRecoveredPlatformTransitionProof {
                 ) continue;
                 uint16 op = j.receipt.operation;
                 // Exact nonzero record arguments of the supported original owner4 writers.
-                if (op == 8 || op == 9 || op == 10 || op == 53 || op == 47 || op == 61) {
+                if (
+                    op == 8 || op == 9 || op == 10 || op == 53 || op == 47 || op == 61
+                        || (includeRecords && op == 24)
+                ) {
                     ++sequence;
                 }
             }

@@ -21,6 +21,17 @@
   acceptance remains separate. See the
   [bounded evidence](docs/guides/scoped-preservation-reference-read-frames.md).
 
+## Recovered op24 across complete Artist history
+
+- Add the explicit HISTORY_RECORDS operation-60 profile for original attestations,
+  publication evidence and independent personhood/C2PA heads alongside binding,
+  dispute, sanction, Platform and content/freeze history. Preserve original domains,
+  generation clocks and complete grant-use conservation.
+- Keep existing request interfaces, codecs, storage and seven-owner atomicity.
+  Sixteen actual-owner/Safe cases are authored; runtime and full mixed/multiple-
+  Artist or unbound composition remain separate. See the
+  [integration guide](docs/integrations/artist-recovered-history-records.md).
+
 ## Recovered Platform Works and correction lineage
 
 - Add the explicit HISTORY_PLATFORM operation-60 profile for complete original
@@ -2231,7 +2242,7 @@ the release policy in `docs/release-policy.md`.
   Safe direct/relayed paths. Its reviewed 22-case suite uses actual schemas,
   byte storage and governance, with explicit Core membership boundaries.
 - Added a permissionless collection inventory backed by actual Core serials,
-  including burns and excluding incomplete mints. Fourteen focused cases pass
+  including burns and excluding incomplete mints. Sixteen focused cases pass
   both compiler modes with 256 fuzz inputs and threshold Safe calls.
 - Added four actual artist-registry-to-metadata-host publication checks for
   Safe signatures, estate intent authority, rotation and atomic append rollback.
@@ -2257,7 +2268,7 @@ the release policy in `docs/release-policy.md`.
   and fuzzing pass independent review; actual full finality composition remains open.
 - Added canonical semantic review bodies and deterministic authority-policy
   selection, binding reviews to exact original records without circular hashes.
-  Fifteen new tests extend the reviewed museum suite to 80; actual recorded-state
+  Sixteen new tests extend the reviewed museum suite to 80; actual recorded-state
   authentication and complete projections remain in development.
 - Added a bounded, schema-derived source inventory for museum projections,
   retaining applicable branch evidence and exact field values. Thirteen new

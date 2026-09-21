@@ -26,6 +26,25 @@ library StreamArtistRecoveredPlatformGuards {
         RH.Point[] memory confirmations,
         D.Guard[] memory platform
     ) public pure {
+        return _validate(b, p, confirmations, platform, false);
+    }
+
+    function validateWithRecords(
+        D.Bundle memory b,
+        RH.OwnerProvenance memory p,
+        RH.Point[] memory confirmations,
+        D.Guard[] memory platform
+    ) public pure {
+        return _validate(b, p, confirmations, platform, true);
+    }
+
+    function _validate(
+        D.Bundle memory b,
+        RH.OwnerProvenance memory p,
+        RH.Point[] memory confirmations,
+        D.Guard[] memory platform,
+        bool includeRecords
+    ) private pure {
         D.Guard[] memory base = Original.guards(b);
         D.Guard[] memory expected = new D.Guard[](base.length + platform.length);
         for (uint256 i; i < base.length; ++i) {
@@ -37,6 +56,14 @@ library StreamArtistRecoveredPlatformGuards {
         uint256[] memory mutations = new uint256[](p.eras.length);
         uint256[] memory nativeCounts = new uint256[](p.eras.length);
         uint256[] memory claims = new uint256[](p.eras.length);
+        if (includeRecords) {
+            for (uint256 i; i < p.journal.length; ++i) {
+                if (p.journal[i].receipt.operation != 24) continue;
+                uint256 e = A.era(p, p.journal[i].position.point.environmentHash);
+                ++mutations[e];
+                ++nativeCounts[e];
+            }
+        }
         for (uint256 i; i < platform.length; ++i) {
             uint256 era_ = A.era(p, platform[i].point.environmentHash);
             ++mutations[era_];
