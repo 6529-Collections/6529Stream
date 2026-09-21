@@ -132,7 +132,9 @@ including unused rows; retain both bounds errors; and fuzz valid indices. The co
 successor cools every reached suite account and its storage, the five shared
 dependencies, Core, Router and carrier before the first source call. It measures
 only that 250,000-gas frame, not complete rendering or a transaction. Original
-fourteen body oracles are unchanged and split between two smaller test contracts.
+fourteen body oracles are split between two smaller test contracts. The chain
+restoration test later captures the original chain through the Source's immutable
+getter so compiler assumptions about `CHAINID` cannot mask its restore step.
 The fixture uses genuine compiler creation artifacts with the same CREATE caller,
 nonce and constructor arguments and retains normal runtime/initcode admission.
 
@@ -157,4 +159,38 @@ new Attribution 2,811/9,422, new Renderer 21,284/26,419, Admission 15,271/15,303
 Registry 21,927/26,040. These are bounded product sizes, not deployment or serving
 acceptance. Source/type/size evidence does not establish actual seven-owner
 migration, full admitted read closure, new consumer schema acceptance, C2PA
-continued use or cold whole-transaction limits. Focused runtime evidence is pending.
+continued use or cold whole-transaction limits. The new eighteen preservation
+Attribution/Renderer/Registry cases remain authored and typechecked, without runtime
+acceptance.
+
+## Bounded lineage runtime evidence
+
+Native capture 3 at source `432a61deb6d76ae388b9b2a335a7c34d118d76df`
+passed 21 cases and failed one chain-restoration fixture. Both 256-run fuzz cases
+passed. The actual trace showed the cheatcode restoration set the foreign chain
+again; the production Source correctly refused it. Test-only successor
+`5302ca42` reads the immutable original chain instead. Native capture 4 executed
+only that corrected case and passed. The original 21/1 capture remains retained;
+this is not a second complete 22-case run.
+
+Both captures use genuine solc 0.8.19 output with the original settings and normal
+deployment size limits. The successor freshly verifies the original 35 artifacts,
+checks all 25 selected native outputs, and retains only byte-identical fixed
+libraries with their independently verified original AST/source-map provenance.
+All production bytecode and raw metadata remain unchanged. No compiler ran and
+no source or artifact changed during either EVM invocation.
+
+The immutable catalogue's first cold source frames consumed:
+
+| Current suite | Source frame gas | Unchanged frame limit |
+| --- | ---: | ---: |
+| Original A | 107717 | 250000 |
+| Immediate B | 181568 | 250000 |
+| Repeated C | 219703 | 250000 |
+
+The recipe explicitly cools reached suite accounts and their storage, five shared
+dependencies, Core, Router, Source and the catalogue before the first read. These
+are callee-frame measurements: setup, complete attribution/rendering, transaction
+intrinsic gas and actual seven-owner migration are excluded. Earlier oversized
+test harnesses and storage-catalogue cold failures remain retained. The new
+preservation admission and actual Prepared migration recipes remain separate.

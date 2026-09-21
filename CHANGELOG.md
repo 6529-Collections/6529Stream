@@ -220,6 +220,13 @@
   provider joins. ABI-only checks pass; native, capacity and actual ceremony
   acceptance remain pending.
 
+## Bounded current-Artist lineage runtime evidence
+
+- Record cold A/B/C source reads within the unchanged 250,000-gas frame, with
+  complete-render and transaction limits explicitly separate.
+- Preserve the initial 21/1 run and the single corrected chain-restoration retry;
+  production source and artifacts remain unchanged.
+
 ## Current-Artist preservation and immutable catalogue reads
 
 - Add a distinct current-Artist preservation producer and closed governed
