@@ -18,57 +18,67 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-ABI170 checks all **4,205 Solidity sources** at `b546af9f` with zero errors
-in 49.984 seconds. Production source last changed at `3d634a3f`. The active
+ABI171 checks all **4,225 Solidity sources** at `0a4739ec` with zero errors
+in 50.594 seconds. Production source last changed at `be7cfe0e`. The broader
 runtime campaign remains on `ea4cf6b0`; it does not accept these later changes.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
-- **Artist recovery:** `51660e02` adds complete consent14/15/16/17/20/21 and
-  grant/nonce histories across multiple recovered class1/class3 Artists and
-  generation-one PRIMARY_ONLY collections. Original profiles remain strict.
-  Independent source and 13 authored-case reviews pass. All 36 selected native
-  products fit; Coordinator is exactly 24,576 bytes. The 13 cases have not run.
-  Aggregate op24/C2PA composition is being built separately, including original
-  Archive completion clocks and global per-Artist grant/credential histories.
-- **Preservation:** seven newly oversized V2 helpers have reviewed repairs
-  integrated (`95787baa`, `68bb471e`, `3d634a3f`). All affected products fit
-  selected native builds; public ABI, storage and original checks are retained.
-  Twenty new regressions are authored/typechecked; EVM and gas remain pending.
-- **Museum:** semantic selection/export (`a5d23fb8`, `ec5b9b8a`) passes 34 root
-  tests, including corrected cross-token subject boundaries. Script/dependency
-  capture and exact offline reconstruction (`f9123670`, `3b8bf3c0`) pass 58
-  focused root tests. Both retain original fields, alternatives and unknown
-  outcomes. Institutional acceptance and actual current-chain capture remain.
-- **Clients/Safe:** recovered MULTIPLE_BASE client `df8e84ca` retains its exact
-  source99e/ABI167 profile. Schema-only optimization `13a84574` preserves all
-  value and provider checks; root build, strict types and two mutation/cache
-  regressions pass. One measured synthetic workflow fell from 35.969 to 26.549
-  seconds. Remaining named workflows are running; actual all-call Safe acceptance
-  is still separate. Owner/Registry adapter `81f4daa9` has 26 independent passes.
-- **Tests that now execute:** all eleven product-activation boundary cases pass
-  at `c38c4c86` (integrated `b283d0ba`). All six shared caller-baseline cases pass
-  at `bcee6dac` (integrated `b546af9f`). Their original caller, creation and
-  rollback assertions are retained. These are focused component/boundary tests.
+- **Preservation:** repairs for **24 of 29** newly oversized components are
+  source integrated. The latest seventeen are six Record/Token stages
+  (`ec732321`), seven Description/Interview stages (`06a74e84`), three reference
+  readers (`049b7198`) and one root-authorization reader (`f3d6fb08`). Every
+  affected production product fits its recorded native build. Exact original
+  public ABI, storage and predicates are retained; the new linked frames still
+  need complete runtime/gas acceptance. Forty-four further regression cases are
+  source reviewed and typechecked. Four extra blank EOF lines were removed
+  separately (`be7cfe0e`); original measured source remains preserved.
+- **Final capacity batch:** five scoped V1 facades remain on their builder's
+  branch. The first changed build fits two but leaves three over the runtime
+  cap: Records 26,535, ReferenceSourceReads 31,068 and NativeReads 35,142 bytes.
+  All ten extracted workers fit. The owner is repairing those three before
+  handing over the coherent final batch; this is not a size-complete result.
+- **Artist recovery:** consent multiplicity `51660e02` retains all six consent
+  families and global grants/nonces across supported Artists/collections.
+  All 36 selected products fit; thirteen actual scenarios remain unexecuted.
+  Aggregate attestation fact/row workers are now integrated (`1d5dd75e`):
+  fourteen focused cases pass, including 256 fuzz runs, at producer `199b0c85`.
+  Independent native review passes; all 37 production libraries fit. These are pure-worker tests
+  with typed evidence. Complete op24 recovery, Archive clocks and cross-family
+  grant conservation are separate work. Independent review found a consumer
+  scope mismatch, and the composition also hit a compiler stack failure;
+  both are being repaired before source intake.
+- **Clients/Safe:** all twenty named MULTIPLE_BASE mocked workflows now pass
+  (`a2580872`), including explicit duplicate and failed Safe-event controls.
+  Source profile99e/ABI167, schema-only caching and full value/provider checks
+  remain unchanged. The complete MULTIPLE_CONSENTS client is being built from
+  the frozen c636/ABI11 contract profile. Actual all-call Safe execution remains.
+- **Museum:** semantic export retains its 34 root passes; script/dependency
+  capture and offline reconstruction retain 58. The next owner-family semantic
+  interpreter/export is in progress, preserving old profiles and explicit
+  unknown, historical and unresolved authority evidence. Actual current-chain
+  capture and institutional conformance are still required.
+- **Executable test boundaries:** eleven activation cases and six caller
+  baseline cases retain their recorded passes. The fixed post-recording test
+  worker (`12f9dc4d`, producer `905a5870`) passes four additional focused EVM
+  cases, including actual CREATE, reverted writes and SELFDESTRUCT refusal.
+  Source/oracle review is clear. Its full native exporter capture timed out at
+  the fixed 900-second bound. Compiler diagnosis continues; complete native
+  construction, prestate and export/bootstrap execution remain unproved.
 
-The completed fresh `ea4cf6b0` native campaigns qualify **983 library products**;
-243 earlier products pass source/context checks for reuse. These are build
-artifacts, not 1,226 executed tests. Eight complete contexts containing 104
-outputs were refused for **29 oversized preservation helpers**. Seven repairs
-are integrated above. Builders own all remaining size repairs in parallel;
-their later selected captures do not change the original refused evidence.
+The earlier `ea4cf6b0` native campaigns qualified 983 library products and
+authenticated 243 earlier products for reuse. Those are compilation outputs,
+not 1,226 executed tests. Eight contexts were refused for 29 oversized helpers;
+later repairs above do not rewrite those original results. Further original
+support/projection/construction groups are compiling independently. The first
+33-output Genesis host group timed out at its fixed 900-second codegen bound;
+zero dependent cases ran. Testing is splitting actual host contexts while
+preserving all original cases, constructor arguments and production limits.
 
-Actual3's changed 57-output host also timed out at its 1,800-second codegen
-bound; no dependent EVM case ran. Prepared's two earlier full-export captures
-timed out at 900 seconds. Smaller test boundaries are being implemented from
-measured compiler structure. No assertions or production limits were relaxed.
-The accepted earlier Provider12 run remains twelve original cases, including
-256 fuzz inputs, at `eda052c7`; no acceptance is transferred to the latest graph.
-
-Remaining delivery work is broader feature composition, actual current-stack
-and all-call Safe execution, stateful/fuzz, deployment and transaction gas,
-complete CI, source freeze and matching testnet demonstration. Collector cold
-paid-mint optimization remains isolated and unproved. Held proposals remain
-unapplied. RC1/main/Sepolia `569bf87f` are unchanged; no new funding is needed.
+Remaining delivery includes full feature composition, current-stack/all-call
+Safe execution, fuzz/stateful campaigns, deployment and transaction gas, full
+CI, source freeze and matching testnet. Collector cold paid-mint optimization
+remains an isolated prototype. Held proposals remain unapplied. Immutable
+RC1/main/release/Sepolia `569bf87f` are unchanged; no funding is needed now.
 
 ## Earlier source-specific evidence
 

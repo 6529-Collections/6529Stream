@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI170 `b546af9f`:4,205 sources/zero errors; production `3d634a3f`; runtime campaign retains `ea4cf6b0`. |
+| Source checkpoint | ABI171 `0a4739ec`:4,225 sources/zero errors; production `be7cfe0e`; runtime campaign retains `ea4cf6b0`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,42 +29,38 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 21 September
 
-ABI170 checks all **4,205 Solidity sources** at `b546af9f` with zero errors
-in 49.984 seconds. Production source last changed at `3d634a3f`. The active
+ABI171 checks all **4,225 Solidity sources** at `0a4739ec` with zero errors
+in 50.594 seconds. Production source last changed at `be7cfe0e`. The broader
 runtime campaign remains on `ea4cf6b0`; it does not accept these later changes.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
-Root owns shared architecture, source integration, cross-domain joins and final
-delivery. Builders complete coherent feature batches before broad acceptance.
-Preserve the fixed runtime source and immutable original inputs/results.
+Root owns architecture, integration and delivery. Reviewed feature batches are
+integrated while fixed-source tests run. Twenty-four of 29 newly observed
+preservation overages have integrated repairs; the final five-facade batch has
+three residual oversizes. Complete source and runtime claims remain distinct.
 
-- Artist lead: aggregate recovered op24/C2PA composition after integrated consent
-  multiplicity; complete original Archive completion clocks and grant totals.
-- Local fact-worker lead: canonical Identity projection compiler repair for
-  aggregate op24; preserve API and keep pure facts distinct from source admission.
-- Local stage lead: seven Description/Interview sibling capacity repairs.
-- Mint: activation11 passes; four-operation test slot/split boundary next.
-- Burn: six Record/Token siblings and sole ownership of four shared stage guards.
-- Metric: V2 three-read repair integrated; V1 RootAuthorization next.
-- Capacity: five scoped V1 repairs committed, selected native15 pending; Actual3
-  local57 timeout preserved, no unchanged retry or denied handoff relay.
-- Collector: three non-scoped V1 read repairs; final changed8-product capture.
-- Prepared: shared baseline6 passes; remaining full-export compiler extraction.
-- Museum: remaining named owner-family semantics after integrated semantic and
-  script/dependency exports.
-- Clients: remaining named mockRPC/Safe workflows after measured schema caching.
-- Testing: fresh983 library products plus243 reused; exact v4 routing now admits
-  all2678 selected source files. Continue named current-host execution and joins.
+- Build complete aggregate op24 profile; fix independently found full-scope versus attestation-only record projection and measured Yul stack failure; nine actual scenarios plus explicit new nonce-bit assertions. Keep final native/source separate.
+- Facts/Rows199b integrated1d5d;14actual+256fuzz producerPASS. Independently review full Artist composition consumers, Archive and grant conservation; no compiler.
+- Seven siblings76a integrated06a74, Collector/Metric/Prepared source reviews clear. Independently verify C native14 evidence then review Mint e618 fixedSlot8file/14case source.
 
-Global maximum is20 coordinated compiler processes; future Testing plans use
-at most13, with explicit external slots. Completed captures release their slots.
-Do not repeat inventories, compilers, test packets or review loops without a
-changed source, failed check or unresolved specific question. Publish coherent
-reviewed source while frozen tests run. No current funding/onchain action.
+- Activation11 passes; fixedSlot e618 eight-file boundary committed,14focused cases and one bounded native/EVM capture; independent B review pending.
+- Six stages+four guards integrated19da/ec732, all10prod fit and22oracles clear. Execute closed plainScoped6; remaining16 require changed dependency snapshot after final capacity repairs. Existing2mtest allowance, strict24576prod.
+- Build all10 owner-family semantic interpreter and additive exportV2, retain originalV1/19/49 and unresolved/historical evidence. Prior semantic34 and script58 integrated.
+- MULTIPLE_BASE20 named mocked workflows pass/a258 integrated. Build complete MULTIPLE_CONSENTS frozen c636/ABI11 client, value checks/Safe plans/17workflow groups; no newerop24profile.
+- ea4 983physical+243reuse preserved; support29 native verified; Genesis33TIMEOUT900. SetupPlans6 and original remaining73 captures continue; split genuine Genesis per-host contexts, keep original50/65/18/84 and all production/constructor caps.
+- fcda five facades+10workers/20oracles nativePASSbut3originalfacades stillover26535/31068/35142. Repair three as final coherent five-facade batch; original failures preserved. No denied Testing handoff relay.
+- V1RootAuth0af integratedf3d6,2products fit/7oracles clear. Independently review Capacity exactfcda20tests/source; no compiler/writer overlap.
+- 905post-recording boundary integrated12f9dc;4actualEVMpass with full nativeprestate qualifier. Fullcaller bounded900capture pending;90literal concrete owners mandatory; no duplicate inventory.
+- Three V1 repairs7ba7 integrated049b, all8products fit,49source tests/8oracles clear. Isolated e983 Collector lossless Floor evidence compression prototype; original bounds/callbacks/hashes/legacy/rawfallback retained, no500k claim/adoption.
 
-Seven of the29 newly observed preservation overages have integrated repairs;
-remaining batches are owned above. Actual all-call Safe, stateful/fuzz, full
-gas/size/CI, final freeze and testnet remain. Held proposals remain held.
+Global compiler maximum remains 20; Testing plans at most 13. Each other owner
+uses only its assigned bounded capture and releases finished slots. Preserve
+failed captures. Do not repeat inventories or compile unchanged failures.
+Existing current-profile large-test allowance applies only to fixtures; every
+production runtime/init and real constructor arguments retain their limits.
+
+Full actual-current/Safe, fuzz/stateful, gas/size/CI, freeze and testnet remain.
+Held proposals remain held. No new funding or on-chain action is needed now.
 
 ## Earlier source-specific assignments
 
