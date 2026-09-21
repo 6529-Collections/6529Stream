@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistSuiteFixture } from "../helpers/StreamArtistSuiteFixture.sol";
+import {
+    StreamCurrentFinalityArtifacts
+} from "../../script/current/StreamCurrentFinalityArtifacts.sol";
 
 import "./StreamCurrentFullV1Activation.t.sol";
 import {
@@ -39,6 +43,34 @@ contract StreamCurrentFullPolicyConstructionTest is
     StreamCurrentFullV1ActivationTest,
     StreamCurrentFullPolicyGraph
 {
+    // Select the test verifier explicitly where the test and script graph bases join.
+    function _runtime(
+        string memory artifactPath,
+        string[] memory declarationArtifacts,
+        bytes memory linkedCreation,
+        RuntimeValue[] memory values
+    )
+        internal
+        view
+        virtual
+        override(StreamCurrentFinalityArtifacts, StreamArtistSuiteFixture)
+        returns (bytes memory)
+    {
+        return StreamArtistSuiteFixture._runtime(
+            artifactPath, declarationArtifacts, linkedCreation, values
+        );
+    }
+
+    function _linkRuntime(string memory artifact, bytes memory linkedCreation)
+        internal
+        view
+        virtual
+        override(StreamCurrentFinalityArtifacts, StreamArtistSuiteFixture)
+        returns (bytes memory, bytes memory)
+    {
+        return StreamArtistSuiteFixture._linkRuntime(artifact, linkedCreation);
+    }
+
     function testActualFull37HasAcyclicFactoryProviderAndOriginalFinalityArtistPins() public view {
         FullPolicyCompanionState memory companions = _fullPolicyCompanionState();
         _requireFullPolicyCompanionsUnchanged(companions);

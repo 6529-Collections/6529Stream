@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistSuiteFixture } from "./StreamArtistSuiteFixture.sol";
+import {
+    StreamCurrentFinalityArtifacts
+} from "../../script/current/StreamCurrentFinalityArtifacts.sol";
 import "./StreamFullV1ActivationFixture.sol";
 import "../../script/current/StreamCurrentFullPreservationPolicyGraph.sol";
 import {
@@ -240,6 +244,34 @@ abstract contract StreamCurrentFullPreservationPolicyPublicationBase is
     StreamFullV1ActivationFixture,
     StreamCurrentFullPreservationPolicyGraph
 {
+    // Select the test verifier explicitly where the test and script graph bases join.
+    function _runtime(
+        string memory artifactPath,
+        string[] memory declarationArtifacts,
+        bytes memory linkedCreation,
+        RuntimeValue[] memory values
+    )
+        internal
+        view
+        virtual
+        override(StreamCurrentFinalityArtifacts, StreamArtistSuiteFixture)
+        returns (bytes memory)
+    {
+        return StreamArtistSuiteFixture._runtime(
+            artifactPath, declarationArtifacts, linkedCreation, values
+        );
+    }
+
+    function _linkRuntime(string memory artifact, bytes memory linkedCreation)
+        internal
+        view
+        virtual
+        override(StreamCurrentFinalityArtifacts, StreamArtistSuiteFixture)
+        returns (bytes memory, bytes memory)
+    {
+        return StreamArtistSuiteFixture._linkRuntime(artifact, linkedCreation);
+    }
+
     NativeAssemblyVm internal constant assemblyVm =
         NativeAssemblyVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 internal constant ASSEMBLY_DEPLOYMENT = DEPLOYMENT_HASH;

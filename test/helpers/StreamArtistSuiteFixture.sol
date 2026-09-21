@@ -269,7 +269,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
         string[] memory declarationArtifacts,
         bytes memory linkedCreation,
         RuntimeValue[] memory values
-    ) internal view override returns (bytes memory) {
+    ) internal view virtual override returns (bytes memory) {
         return StreamCurrentTestRuntime.runtime(
             artifactPath, declarationArtifacts, linkedCreation, values
         );
@@ -278,6 +278,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
     function _linkRuntime(string memory artifact, bytes memory linkedCreation)
         internal
         view
+        virtual
         override
         returns (bytes memory, bytes memory)
     {
