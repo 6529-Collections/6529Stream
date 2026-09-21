@@ -39,6 +39,9 @@ import "../../interfaces/stream/preservation/IStreamReferenceRenderPublication.s
 import {
     StreamScopedPolicyRenderCriticalStateV2 as State
 } from "./StreamScopedPolicyRenderCriticalStateV2.sol";
+import {
+    StreamScopedPolicyRenderCriticalStageGuardV2 as Guard
+} from "./StreamScopedPolicyRenderCriticalStageGuardV2.sol";
 
 /// @notice Typed stages using the actual host storage reference.
 library StreamScopedPolicyRenderCriticalRecordStagesV2 {
@@ -112,7 +115,7 @@ library StreamScopedPolicyRenderCriticalRecordStagesV2 {
     }
 
     function _stage(State.State storage state, bytes32 id, uint16 stage) private view {
-        State.stage(state, id, stage);
+        Guard.stage(state, id, stage);
     }
 
     function _append(
