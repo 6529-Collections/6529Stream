@@ -1147,6 +1147,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add preserved Museum source/runtime archives and explicit offline V10/V3
+  regeneration, with original native release-hash correspondence and complete
+  dossier requirement retention. Keep release and institutional limits explicit.
+
 - Add genuine VIEW inventory and Bundle clients with separate witness binding,
   ordered retrieval admissions and explicit history/cached/full-current checks.
 

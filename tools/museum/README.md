@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Preserved tool archives and offline replay](PRESERVED-TOOLS-V1.md) retain pinned
+source, runtime and complete vectors, then regenerate V10/V3 outputs without an
+operator service. Native release selection and original Archive evidence remain
+separate inputs; all 19/49 acceptance requirements survive.
+
 [Native acquisition V10 and object dossier V3](CANONICAL-COMPOSITION-V10.md)
 combine exact prior packets with current preservation, work/C2PA/condition and
 recovery/export sources. All 19 packet groups, 49 dossier requirements and
