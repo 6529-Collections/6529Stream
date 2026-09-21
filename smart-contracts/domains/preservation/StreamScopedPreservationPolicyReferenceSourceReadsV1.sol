@@ -69,9 +69,19 @@ import {
 } from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
 
+import {
+    StreamScopedPreservationReferenceSnapshotWorkerV1 as SnapshotWorker
+} from "./StreamScopedPreservationReferenceSnapshotWorkerV1.sol";
+import {
+    StreamScopedPreservationReferenceRootWorkerV1 as RootWorker
+} from "./StreamScopedPreservationReferenceRootWorkerV1.sol";
+
 /// @notice Current complete preservation snapshot and original Router authority, with bounded samples.
 /// @dev A first/last capture is never substituted for the complete snapshot membership or archive.
 library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
+    // Preserve the original error ABI after moving the final root-family check.
+    error InvalidPreservationRootFamily();
+
     function subject(T.Dependencies memory d, StreamFinalityScope memory scope)
         internal
         pure
@@ -296,80 +306,11 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         S.Receipt memory receipt,
         bytes32 family
     ) private view returns (S.Source memory f) {
-        bytes memory out = Reads.dynamicRead(
-            d.targets[5],
-            abi.encodeCall(Snap.snapshotPayload, (receipt.recordHash)),
-            receipt.manifestBytes + 96,
-            d.snapshotGas
-        );
-        bytes memory raw = abi.decode(out, (bytes));
-        _canonical(d.targets[5], out, abi.encode(raw));
-        if (raw.length != receipt.manifestBytes || keccak256(raw) != receipt.manifestHash) {
-            revert T.InvalidScopedPolicyReference();
-        }
-        (
-            bytes32 domain,
-            uint256 chain,
-            address host,
-            address[11] memory targets,
-            bytes32[11] memory hashes,
-            S.Publication memory p,
-            S.Receipt memory fields,
-            S.Source memory value
-        ) = abi.decode(
-            raw,
-            (
-                bytes32,
-                uint256,
-                address,
-                address[11],
-                bytes32[11],
-                S.Publication,
-                S.Receipt,
-                S.Source
-            )
-        );
-        _canonical(
-            d.targets[5], raw, abi.encode(domain, chain, host, targets, hashes, p, fields, value)
-        );
-        // The caller retains the original receipt for the root/source join below.
-        receipt = abi.decode(abi.encode(receipt), (S.Receipt));
+        S.Source memory value = SnapshotWorker.read(d, source, original, receipt, family);
+        // Public library arguments are copied. Preserve the prior internal publication mutation;
+        // the worker still normalizes a separate receipt copy, leaving the original receipt intact.
         original.expectedSourceHash = 0;
-        receipt.recordHash = 0;
-        receipt.chainHash = 0;
-        receipt.manifestHash = 0;
-        receipt.manifestBytes = 0;
-        receipt.recordedAt = 0;
-        if (
-            domain
-                    != (F.isV2(family)
-                            ? keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V2")
-                            : keccak256("6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_PAYLOAD_V1"))
-                || chain != d.chainId || host != d.targets[5]
-                || keccak256(abi.encode(targets, hashes))
-                    != keccak256(abi.encode(source.targets, source.codeHashes))
-                || keccak256(abi.encode(p)) != keccak256(abi.encode(original))
-                || keccak256(abi.encode(fields)) != keccak256(abi.encode(receipt))
-                || keccak256(abi.encode(value.scope)) != keccak256(abi.encode(p.scope))
-                || fields.sourceHash
-                    != keccak256(
-                        abi.encode(
-                            (F.isV2(family)
-                                    ? keccak256(
-                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V2"
-                                    )
-                                    : keccak256(
-                                        "6529STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_SOURCES_V1"
-                                    )),
-                            chain,
-                            host,
-                            targets,
-                            hashes,
-                            value
-                        )
-                    )
-        ) revert T.InvalidScopedPolicyReference();
-        f = value;
+        return value;
     }
 
     function _root(
@@ -380,122 +321,10 @@ library StreamScopedPreservationPolicyReferenceSourceReadsV1 {
         T.SourceFacts memory f,
         bytes32 family
     ) private view {
-        f.contentRootRecordHash = abi.decode(
-            Reads.read(
-                d.targets[4], abi.encodeCall(Root.scopedContentRootHead, (p.scope)), 32, d.readGas
-            ),
-            (bytes32)
-        );
-        bytes memory raw = Reads.dynamicRead(
-            d.targets[4],
-            abi.encodeCall(Root.scopedContentRootRecord, (f.contentRootRecordHash)),
-            4096,
-            d.sourceGas
-        );
-        f.contentRoot = abi.decode(raw, (Root.Record));
-        _canonical(d.targets[4], raw, abi.encode(f.contentRoot));
-        raw = Reads.read(
-            d.targets[4],
-            abi.encodeCall(
-                PreservationRoot.scopedPreservationPolicyContentRootBinding,
-                (f.contentRootRecordHash)
-            ),
-            800,
-            d.sourceGas
-        );
-        f.contentRootBinding = abi.decode(raw, (PreservationRoot.Binding));
-        _canonical(d.targets[4], raw, abi.encode(f.contentRootBinding));
-        PreservationRoot.Binding memory expected =
-            _binding(source, f.snapshotSource, f.snapshot, family);
-        if (keccak256(raw) != keccak256(abi.encode(expected))) {
-            revert T.InvalidScopedPolicyReference();
-        }
-        // The root-free snapshot declaration names the actual output receipt. Its payload
-        // hash is a different value and must never stand in for this original record key.
-        raw = Reads.read(
-            source.targets[8],
-            abi.encodeCall(Outputs.manifestRecord, (outputManifestRecord)),
-            608,
-            d.sourceGas
-        );
-        Outputs.Manifest memory manifest = abi.decode(raw, (Outputs.Manifest));
-        _canonical(source.targets[8], raw, abi.encode(manifest));
-        if (
-            outputManifestRecord == 0
-                || keccak256(raw) != keccak256(abi.encode(f.snapshotSource.outputs))
-        ) {
-            revert T.InvalidScopedPolicyReference();
-        }
-        Root.Record memory r = f.contentRoot;
-        if (
-            f.contentRootRecordHash == 0
-                || keccak256(abi.encode(r.publication.scope)) != keccak256(abi.encode(p.scope))
-                || r.publication.snapshotRecordHash != f.snapshot.recordHash
-                || r.publication.snapshotRevision != f.snapshot.revision
-                || r.snapshotHost != d.targets[5] || r.snapshotCodeHash != d.codeHashes[5]
-                || r.snapshotManifestHash != f.snapshot.manifestHash
-                || r.snapshotSourceHash != f.snapshot.sourceHash
-                || r.contentRoot != f.snapshotSource.outputs.contentRoot || r.contentRoot == 0
-                || r.leafCount != f.snapshotSource.membership.tokenCount || r.leafCount == 0
-                || r.outputManifestHash != f.snapshotSource.outputs.manifestHash
-                || r.artistId != f.snapshotSource.artist.artistId
-                || r.bindingGeneration != f.snapshotSource.artist.bindingGeneration
-                || r.bindingHash != f.snapshotSource.artist.bindingHash || r.publisher == address(0)
-                || (r.authorizationClass != 7 && r.authorizationClass != 8) || r.grantRevision == 0
-                || r.routeHash == 0 || r.stateHash == 0 || r.artistConsent == 0
-                || r.publishedAt == 0 || r.publishedAt > block.timestamp
-        ) revert T.InvalidScopedPolicyReference();
-        Root.Record memory fields = abi.decode(abi.encode(r), (Root.Record));
-        fields.stateHash = 0;
-        fields.artistConsent = 0;
-        fields.publishedAt = 0;
-        if (
-            r.stateHash
-                != keccak256(
-                    abi.encode(
-                        RootFamilies.stateDomain(family, true),
-                        d.chainId,
-                        d.targets[4],
-                        d.targets[0],
-                        fields,
-                        f.contentRootBinding
-                    )
-                )
-        ) revert T.InvalidScopedPolicyReference();
-    }
-
-    function _binding(
-        S.Dependencies memory d,
-        S.Source memory source,
-        S.Receipt memory receipt,
-        bytes32 family
-    ) private pure returns (PreservationRoot.Binding memory b) {
-        bytes32[5] memory ids = RootFamilies.ids(family, true);
-        b.profileId = RootFamilies.profile(family, true);
-        b.outputManifest = d.targets[8];
-        b.outputManifestCodeHash = d.codeHashes[8];
-        b.checkpoint = d.targets[7];
-        b.checkpointCodeHash = d.codeHashes[7];
-        b.checkpointHash = source.outputs.checkpointHash;
-        b.checkpointStateHash = source.outputs.checkpointStateHash;
-        b.entropySourceSet = d.targets[10];
-        b.entropySourceSetCodeHash = d.codeHashes[10];
-        b.inventoryHash = source.outputs.inventoryHash;
-        b.policyChainHash = source.outputs.policyChainHash;
-        b.outputRoot = source.outputs.outputRoot;
-        b.outputSchemaHash = RootFamilies.definitionHash(family, true, ids[0]);
-        b.outputCanonicalizationHash = RootFamilies.definitionHash(family, true, ids[1]);
-        b.leafSchemaHash = RootFamilies.definitionHash(family, true, ids[2]);
-        b.rootSchemaHash = RootFamilies.definitionHash(family, true, ids[3]);
-        b.rootCanonicalizationHash = RootFamilies.definitionHash(family, true, ids[4]);
-        b.sourceFactory = source.sourceFactory;
-        b.sourceFactoryCodeHash = source.sourceFactoryCodeHash;
-        b.factoryDependenciesHash = source.factoryDependenciesHash;
-        b.snapshotSchemaHash = receipt.schemaHash;
-        b.snapshotProfileHash = receipt.profileHash;
-        b.snapshotCanonicalizationHash = receipt.canonicalizationHash;
-        b.metadataRouter = source.outputs.metadataRouter;
-        b.preservationOutputProfile = source.outputs.preservationProfile;
+        (f.contentRootRecordHash, f.contentRoot, f.contentRootBinding) =
+            RootWorker.read(
+                d, source, p.scope, outputManifestRecord, f.snapshotSource, f.snapshot, family
+            );
     }
 
     function _runtime(R.Dependencies memory d, E.Coverage memory e) private view {

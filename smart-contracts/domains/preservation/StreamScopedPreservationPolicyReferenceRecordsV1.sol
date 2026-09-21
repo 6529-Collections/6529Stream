@@ -31,6 +31,10 @@ import {
     IStreamSchemaRegistry as Schema
 } from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
 
+import {
+    StreamScopedPreservationReferencePayloadWorkerV1 as PayloadWorker
+} from "./StreamScopedPreservationReferencePayloadWorkerV1.sol";
+
 /// @notice Fixed byte construction and typed historical/current reads for the scoped host.
 library StreamScopedPreservationPolicyReferenceRecordsV1 {
     function prepare(
@@ -115,24 +119,7 @@ library StreamScopedPreservationPolicyReferenceRecordsV1 {
         view
         returns (bytes memory)
     {
-        bytes memory raw = Bytes.read(payload);
-        (
-            bytes32 domain,
-            uint256 chain,
-            address host,
-            T.Publication memory p,
-            T.Receipt memory r,
-            T.SourceFacts memory f,
-            bytes memory environment
-        ) = abi.decode(
-            raw, (bytes32, uint256, address, T.Publication, T.Receipt, T.SourceFacts, bytes)
-        );
-        if (
-            domain != F.payloadDomain(family, true)
-                || keccak256(raw)
-                    != keccak256(abi.encode(domain, chain, host, p, r, f, environment))
-        ) revert T.InvalidScopedPolicyReference();
-        return abi.encode(f);
+        return PayloadWorker.source(payload, family);
     }
 
     function publication(Bytes.Manifest storage original)

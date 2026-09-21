@@ -51,9 +51,28 @@ import {
     StreamPreservationPolicyOutputSchemasV1 as OutputSchemas
 } from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
 
+import {
+    StreamScopedPreservationPolicyNativeSourceV1 as NativeSource
+} from "./StreamScopedPreservationPolicyNativeSourceV1.sol";
+import {
+    StreamScopedPreservationPolicyNativeReceiptRowsV1 as ReceiptRows
+} from "./StreamScopedPreservationPolicyNativeReceiptRowsV1.sol";
+import {
+    StreamScopedPreservationPolicyNativeFactRowsV1 as FactRows
+} from "./StreamScopedPreservationPolicyNativeFactRowsV1.sol";
+import {
+    StreamScopedPreservationPolicyNativePlanRowsV1 as PlanRows
+} from "./StreamScopedPreservationPolicyNativePlanRowsV1.sol";
+import {
+    StreamScopedPreservationPolicyNativeRuntimeRowsV1 as RuntimeRows
+} from "./StreamScopedPreservationPolicyNativeRuntimeRowsV1.sol";
+
 /// @notice Complete original scoped source/receipt/runtime inventory in bounded ordered segments.
 /// @dev Output manifest rows are hash inventory, explicitly separate from per-token full-byte rows.
 library StreamScopedPreservationPolicyRenderCriticalNativeReadsV1 {
+    // Preserve the original facade error ABI after moving the item builders.
+    error InvalidInventoryItem();
+
     function appendNative(State.State storage state, bytes32 id, uint64 maximum) public {
         State.stage(state, id, 0);
         Scoped.Plan storage p = state.plans[id];
@@ -88,7 +107,7 @@ library StreamScopedPreservationPolicyRenderCriticalNativeReadsV1 {
     ) public view returns (T.Item[] memory rows, uint64 total) {
         if (maximum == 0 || maximum > 64) revert T.InvalidInventorySegment();
         Snapshot.Dependencies memory sd = Sources.snapshotBindings(d, family);
-        R.SourceFacts memory f = Sources.sourceFacts(d, c, family);
+        NativeSource.Facts memory f = NativeSource.read(d, c, family);
         // Preserve the actual factory tuple and all four constructor targets, in addition
         // to the original inventory/snapshot/Artist roster and complete policy occurrences.
         Policies.Dependencies memory factory = _factory(d, f);
@@ -105,195 +124,46 @@ library StreamScopedPreservationPolicyRenderCriticalNativeReadsV1 {
         for (uint256 i; i < length; ++i) {
             uint256 at = start + i;
             if (at == 0) {
-                bytes memory raw = IO.read(
-                    d.targets[5],
-                    abi.encodeCall(Snap.snapshotRecord, (original)),
-                    16384,
-                    d.sourceGas
-                );
-                (Snapshot.Publication memory p, Snapshot.Receipt memory saved) =
-                    abi.decode(raw, (Snapshot.Publication, Snapshot.Receipt));
-                IO.canonical(d.targets[5], raw, abi.encode(p, saved));
-                if (
-                    keccak256(abi.encode(saved)) != keccak256(abi.encode(c.snapshot))
-                        || keccak256(abi.encode(p.scope)) != keccak256(abi.encode(c.scope))
-                ) revert T.InventorySourceChanged();
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("ORIGINAL_SCOPED_PRESERVATION_POLICY_SNAPSHOT_RECORD_V1"),
-                    d.targets[5],
-                    original,
-                    0,
-                    raw
-                );
+                rows[i] = ReceiptRows.record(d.targets[5], c.snapshot, c.scope, d.sourceGas);
             } else if (at == 1) {
-                bytes memory raw = IO.read(
-                    d.targets[5],
-                    abi.encodeCall(Snap.snapshotPayload, (original)),
-                    524352,
-                    d.sourceGas
-                );
-                bytes memory payload = abi.decode(raw, (bytes));
-                IO.canonical(d.targets[5], raw, abi.encode(payload));
-                if (
-                    payload.length != c.snapshot.manifestBytes
-                        || keccak256(payload) != c.snapshot.manifestHash
-                ) revert T.InventorySourceChanged();
-                rows[i] = Items.bytesItem(
-                    T.Kind.ORIGINAL_PAYLOAD,
-                    keccak256("SCOPED_POLICY_SNAPSHOT_MANIFEST_V2"),
-                    d.targets[5],
-                    original,
-                    0,
-                    payload
-                );
-                rows[i].schemaId =
-                (family == Family.FAMILY_PROFILE ? DefinitionsV2.SCHEMA_ID : Definitions.SCHEMA_ID);
-                rows[i].canonicalizationId =
-                (family == Family.FAMILY_PROFILE ? DefinitionsV2.CANON_ID : Definitions.CANON_ID);
+                rows[i] = ReceiptRows.payload(d.targets[5], c.snapshot, d.sourceGas, family);
             } else if (at == 2) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("SCOPED_POLICY_NATIVE_SOURCE_FACTS_V2"),
-                    d.targets[5],
-                    original,
-                    0,
-                    abi.encode(f.snapshotSource)
-                );
+                rows[i] = FactRows.source(d.targets[5], original, f.snapshotSource);
             } else if (at == 3) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("ORIGINAL_SCOPED_PRESERVATION_POLICY_CONTENT_ROOT_V1"),
-                    d.targets[4],
-                    c.rootRecordHash,
-                    0,
-                    abi.encode(f.contentRoot, f.contentRootBinding)
+                rows[i] = FactRows.root(
+                    d.targets[4], c.rootRecordHash, f.contentRoot, f.contentRootBinding
                 );
             } else if (at == 4) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("STATIC_SELECTION_PLAN"),
-                    sd.targets[6],
-                    c.selectionId,
-                    0,
-                    abi.encode(f.snapshotSource.selection)
-                );
+                rows[i] =
+                    PlanRows.selection(sd.targets[6], c.selectionId, f.snapshotSource.selection);
             } else if (at == 5) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("SCOPED_POLICY_CONTENT_PLAN_V2"),
-                    sd.targets[7],
-                    c.checkpointHash,
-                    0,
-                    abi.encode(f.snapshotSource.content)
-                );
+                rows[i] =
+                    PlanRows.content(sd.targets[7], c.checkpointHash, f.snapshotSource.content);
             } else if (at == 6) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("SCOPED_POLICY_OUTPUT_MANIFEST_V2"),
-                    sd.targets[8],
-                    c.outputManifestRecord,
-                    0,
-                    abi.encode(f.snapshotSource.outputs)
+                rows[i] = PlanRows.outputs(
+                    sd.targets[8], c.outputManifestRecord, f.snapshotSource.outputs
                 );
             } else if (at == 7) {
-                rows[i].kind = T.Kind.ONCHAIN_OBJECT;
-                rows[i].role = keccak256("COMPLETE_SCOPED_POLICY_OUTPUT_HASH_ROWS_V2");
-                rows[i].source = sd.targets[8];
-                rows[i].sourceRecord = c.outputManifestRecord;
-                rows[i].algorithm = 1;
-                rows[i].canonicalizationId =
-                (family == Family.FAMILY_PROFILE ? OutputV2.CANON : OutputSchemas.CANON);
-                rows[i].digest = abi.encodePacked(f.snapshotSource.outputs.manifestHash);
-                rows[i].byteSize = f.snapshotSource.outputs.byteLength;
-                rows[i].schemaId =
-                (family == Family.FAMILY_PROFILE ? OutputV2.SCHEMA : OutputSchemas.SCHEMA);
-                rows[i].objectHash = f.snapshotSource.outputs.artifactHash;
-                rows[i].originalCoverageHash = f.snapshotSource.outputs.coverageHash;
+                rows[i] = PlanRows.outputRows(
+                    sd.targets[8], c.outputManifestRecord, f.snapshotSource.outputs, family
+                );
             } else if (at == 8) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("ORIGINAL_COMPLETE_COORDINATOR_POLICIES_V2"),
-                    sd.targets[10],
-                    original,
-                    0,
-                    abi.encode(f.snapshotSource.entropy)
-                );
-            } else if (at < 21) {
-                rows[i] = Items.runtime(
-                    keccak256("SCOPED_INVENTORY_DEPENDENCY_RUNTIME"),
-                    d.targets[at - 9],
-                    original,
-                    at - 9
-                );
-            } else if (at < 32) {
-                IO.pin(sd.targets[at - 21], sd.codeHashes[at - 21]);
-                rows[i] = Items.runtime(
-                    keccak256("SCOPED_SNAPSHOT_DEPENDENCY_RUNTIME"),
-                    sd.targets[at - 21],
-                    original,
-                    at - 21
-                );
-            } else if (at < 37) {
-                rows[i] = Items.runtime(
-                    keccak256("ORIGINAL_ARTIST_DEPENDENCY_RUNTIME"),
-                    d.artistTargets[at - 32],
-                    original,
-                    at - 32
-                );
-            } else if (at == 37) {
-                rows[i] = Items.runtime(
-                    keccak256("ORIGINAL_ARTIST_CONTENT_OWNER_RUNTIME"),
-                    d.artistContentOwner,
-                    original,
-                    0
-                );
-            } else if (at == 38) {
-                rows[i] = Items.runtime(
-                    keccak256("SCOPED_POLICY_SOURCE_FACTORY_RUNTIME_V2"),
-                    f.snapshotSource.sourceFactory,
-                    original,
-                    0
-                );
-            } else if (at == 39) {
-                rows[i] = Items.bytesItem(
-                    T.Kind.NATIVE_BYTES,
-                    keccak256("SCOPED_POLICY_SOURCE_FACTORY_DEPENDENCIES_V2"),
-                    f.snapshotSource.sourceFactory,
-                    original,
-                    0,
-                    abi.encode(factory)
-                );
-            } else if (at < 44) {
-                rows[i] = Items.runtime(
-                    keccak256("SCOPED_POLICY_FACTORY_DEPENDENCY_RUNTIME_V2"),
-                    factory.targets[at - 40],
-                    original,
-                    at - 40
-                );
+                rows[i] = PlanRows.entropy(sd.targets[10], original, f.snapshotSource.entropy);
             } else {
-                uint256 index = (at - 44) / 2;
-                address coordinator = f.snapshotSource.entropy.policies[index].coordinator;
-                IO.pin(coordinator, f.snapshotSource.entropy.policies[index].indexedCodeHash);
-                if ((at - 44) % 2 == 0) {
-                    rows[i] = Items.runtime(
-                        keccak256("ORIGINAL_COORDINATOR_RUNTIME"), coordinator, original, index
-                    );
-                } else {
-                    rows[i] = Items.bytesItem(
-                        T.Kind.NATIVE_BYTES,
-                        keccak256("ORIGINAL_COORDINATOR_POLICY_V2"),
-                        coordinator,
-                        original,
-                        index,
-                        abi.encode(f.snapshotSource.entropy.policies[index])
-                    );
-                }
+                rows[i] = RuntimeRows.item(
+                    d,
+                    sd,
+                    f.snapshotSource.sourceFactory,
+                    factory,
+                    f.snapshotSource.entropy.policies,
+                    original,
+                    at
+                );
             }
         }
     }
 
-    function _factory(S.Dependencies memory d, R.SourceFacts memory f)
+    function _factory(S.Dependencies memory d, NativeSource.Facts memory f)
         private
         view
         returns (Policies.Dependencies memory saved)
