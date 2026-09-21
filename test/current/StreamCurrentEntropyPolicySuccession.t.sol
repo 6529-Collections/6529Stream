@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamCurrentGovernanceStagePlan.t.sol";
+import {
+    StreamEntropyStatus
+} from "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol";
 import "../../script/current/StreamEntropyFallbackPlan.sol";
 import "../../script/current/StreamEntropyPolicySuccessionPlan.sol";
 import "../../script/current/StreamGovernanceCatalogStagePlan.sol";
@@ -327,6 +330,354 @@ contract StreamCurrentEntropyPolicySuccessionTest is StreamCurrentGovernanceStag
         vm.etch(payload, originalCode);
         require(this.submitSigned(signed), "identical Safe packet and original payload retry");
         _assertActivated(sealedReceipt, id, before_);
+    }
+
+    function testOriginalRegisteredScopeRequestsAtOriginalHostAfterActualSafeCutover() public {
+        _start();
+        _twoPolicies();
+        _admitScopeRequester(address(governor));
+        bytes32 scopeRef = keccak256("registered before current cutover");
+        bytes32 oldScope = _scopeId(source, scopeRef);
+        _registerScopeAsGovernor(source, scopeRef);
+        bytes32 originalSubject = keccak256(abi.encode(source.scopeEntropy(oldScope)));
+        _completeImport();
+        (StreamGovernanceStagePlan.Plan memory plan,) = _cutover();
+        _run(plan);
+        require(
+            keccak256(abi.encode(source.scopeEntropy(oldScope))) == originalSubject
+                && successor.scopeEntropy(oldScope).status == StreamEntropyStatus.NONE,
+            "import leaves original subject at its original host"
+        );
+        uint256 nonce = governor.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.safeCall(
+            address(source),
+            abi.encodeCall(source.registerEntropyScope, (uint256(1), uint8(1), keccak256("late")))
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.safeCall(
+            address(successor), abi.encodeCall(successor.requestScopeEntropy, (oldScope, REASON))
+        );
+        require(governor.nonce() == nonce, "both refused Safe calls retain their nonce");
+        _registerScopeAsGovernor(successor, scopeRef);
+        bytes32 nextScope = _scopeId(successor, scopeRef);
+        require(nextScope != oldScope, "same reference has a distinct coordinator domain");
+        require(
+            this.safeCall(
+                address(source), abi.encodeCall(source.requestScopeEntropy, (oldScope, REASON))
+            ),
+            "first original-scope request remains valid after cutover"
+        );
+        StreamEntropyCoordinator.Subject memory requested = source.scopeEntropy(oldScope);
+        (bytes32 providerKey,,,,) = originalProvider.results(1);
+        bytes32 expectedKey = _expectedOriginalScopeRequestKey(oldScope);
+        require(
+            requested.status == StreamEntropyStatus.REQUESTED && requested.inputsHash == REASON
+                && requested.requestKey == expectedKey && providerKey == expectedKey
+                && source.providerRequestKeys(address(originalProvider), 1) == expectedKey
+                && source.pendingRequestCount() == 1 && successor.pendingRequestCount() == 0
+                && originalProvider.nextRequestId() == 2,
+            "one local original request; no phantom successor request"
+        );
+        require(originalProvider.fulfill(1, bytes32(0)) == 0, "zero raw output is valid");
+        (bytes32 seed, bool finalized) = source.scopeSeed(oldScope);
+        require(
+            finalized && seed == _expectedOriginalScopeSeed(oldScope, expectedKey)
+                && source.pendingRequestCount() == 0
+                && successor.scopeEntropy(nextScope).status == StreamEntropyStatus.REGISTERED
+                && successor.scopeEntropy(oldScope).status == StreamEntropyStatus.NONE,
+            "late original fulfillment preserves the separate successor subject"
+        );
+        require(originalProvider.fulfill(1, bytes32(0)) == 3, "duplicate delivery is terminal");
+        (bytes32 retained, bool stillFinalized) = source.scopeSeed(oldScope);
+        require(
+            retained == seed && stillFinalized && source.pendingRequestCount() == 0
+                && originalProvider.nextRequestId() == 2,
+            "repeat callback cannot redraw or consume another pending request"
+        );
+    }
+
+    function testLateFirstScopeRegistrationInvalidatesSealedCutoverWithoutPartialActivation()
+        public
+    {
+        _start();
+        _twoPolicies();
+        _admitScopeRequester(address(governor));
+        _completeImport();
+        (StreamGovernanceStagePlan.Plan memory plan,) = _cutover();
+        bytes32 id = _schedule(plan);
+        bytes32 scopeRef = keccak256("scope locks policy after seal");
+        bytes32 scope = _scopeId(source, scopeRef);
+        (uint256 count, uint64 serial, bytes32 digest) = C(address(source)).entropyPolicyInventory();
+        require(_ready(), "sealed import is ready before the first scope registration");
+        _assertSourceInventoryAndLock(count, serial, digest, false);
+        _registerScopeAsGovernor(source, scopeRef);
+        _assertSourceInventoryAndLock(count, serial + 1, digest, true);
+        require(!_ready(), "first scope locks source policy and invalidates the copied header");
+        bytes32 locked = keccak256(abi.encode(C(address(source)).exportEntropyPolicy(1)));
+        bytes32 subject = keccak256(abi.encode(source.scopeEntropy(scope)));
+        uint256 nonce = governor.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.safeCall(
+            address(source),
+            abi.encodeCall(source.registerEntropyScope, (uint256(1), uint8(1), scopeRef))
+        );
+        require(
+            governor.nonce() == nonce
+                && keccak256(abi.encode(C(address(source)).exportEntropyPolicy(1))) == locked
+                && keccak256(abi.encode(source.scopeEntropy(scope))) == subject,
+            "duplicate registration rolls back without another source mutation"
+        );
+        _assertSourceInventoryAndLock(count, serial + 1, digest, true);
+        BeforeCutover memory before_ = _before();
+        vm.warp(plan.notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCore.InvalidSatellitePointer.selector, ENTROPY, address(successor)
+            )
+        );
+        configuration.executor.executeGovernanceBatch(id, plan.batch.calls, plan.batch.callDatas);
+        _assertUnchanged(before_, id);
+        bytes memory signed = _signedExecution(plan, id);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.submitSigned(signed);
+        _assertUnchanged(before_, id);
+        require(
+            C(address(successor)).entropyPolicyImport().state == C.ImportState.SEALED
+                && keccak256(abi.encode(source.scopeEntropy(scope))) == subject
+                && source.pendingRequestCount() == 0 && successor.pendingRequestCount() == 0
+                && originalProvider.nextRequestId() == 1,
+            "stale import stays sealed while original unrequested scope remains intact"
+        );
+    }
+
+    function testIdenticalRequesterSafeScopeEnvelopeRetriesOnlyAfterActualImportActivation()
+        public
+    {
+        _start();
+        _twoPolicies();
+        OfficialSafe requester = createOfficialSafe(
+            deploySafeComponents("1.4.1"), safeOwnerAddresses(signers), 2, 0xF110
+        );
+        _admitScopeRequester(address(requester));
+        bytes32 scopeRef = keccak256("one signed scope across import states");
+        bytes32 scope = _scopeId(successor, scopeRef);
+        bytes memory signed = _signedScopeRegistration(requester, successor, scopeRef);
+        bytes32 signedHash = keccak256(signed);
+        _assertScopeEnvelopeRefused(requester, signed, scope);
+        _begin();
+        C(address(successor)).importNextEntropyPolicy(0);
+        C(address(successor)).importNextEntropyPolicy(1);
+        _route(1);
+        _route(3);
+        _seal();
+        _assertScopeEnvelopeRefused(requester, signed, scope);
+        (StreamGovernanceStagePlan.Plan memory plan,) = _cutover();
+        _run(plan);
+        vm.recordLogs();
+        (bool ok, bytes memory result) = address(requester).call(signed);
+        require(ok && abi.decode(result, (bool)), "identical signed scope envelope now succeeds");
+        _assertScopeEvent(vm.getRecordedLogs(), successor, scope, scopeRef);
+        require(
+            keccak256(signed) == signedHash && requester.nonce() == 1
+                && successor.scopeEntropy(scope).status == StreamEntropyStatus.REGISTERED
+                && source.scopeEntropy(scope).status == StreamEntropyStatus.NONE
+                && originalProvider.nextRequestId() == 1,
+            "one selected-host registration with no original subject or provider draw"
+        );
+        bytes32 subject = keccak256(abi.encode(successor.scopeEntropy(scope)));
+        (ok,) = address(requester).call(signed);
+        require(
+            !ok && requester.nonce() == 1
+                && keccak256(abi.encode(successor.scopeEntropy(scope))) == subject,
+            "successful Safe envelope cannot be replayed"
+        );
+    }
+
+    /// @dev Eleven literal ABI words; no coordinator hash helper or returned policy supplies inputs.
+    function _expectedOriginalScopeRequestKey(bytes32 scope) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_SCOPE_REQUEST_V1"),
+                block.chainid,
+                address(source),
+                address(configuration.core),
+                uint256(1),
+                scope,
+                address(originalProvider),
+                uint32(1),
+                keccak256(abi.encode("LOCAL_TEST_ONLY", address(source))),
+                REASON,
+                uint16(1)
+            )
+        );
+    }
+
+    /// @dev Fourteen literal ABI words independently retain the original host and zero raw output.
+    function _expectedOriginalScopeSeed(bytes32 scope, bytes32 requestKey)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_SCOPE_SEED_V1"),
+                block.chainid,
+                address(source),
+                address(configuration.core),
+                uint256(1),
+                scope,
+                address(originalProvider),
+                uint32(1),
+                keccak256(abi.encode("LOCAL_TEST_ONLY", address(source))),
+                requestKey,
+                uint256(1),
+                bytes32(0),
+                keccak256(abi.encode(uint256(1))),
+                REASON
+            )
+        );
+    }
+
+    function _assertSourceInventoryAndLock(
+        uint256 expectedCount,
+        uint64 expectedSerial,
+        bytes32 expectedDigest,
+        bool expectedLock
+    ) private view {
+        (uint256 count, uint64 serial, bytes32 digest) = C(address(source)).entropyPolicyInventory();
+        (,, bool locked,,,,) = source.collectionEntropyConfig(1);
+        require(
+            count == expectedCount && serial == expectedSerial && digest == expectedDigest
+                && locked == expectedLock,
+            "exact inventory header and first-scope lock"
+        );
+    }
+
+    function _admitScopeRequester(address requester) private {
+        GovernanceActionPolicyEntry[] memory rows = new GovernanceActionPolicyEntry[](2);
+        rows[0] = _row(1, address(source), source.setRequester.selector);
+        rows[1] = _row(1, address(successor), successor.setRequester.selector);
+        if (_key(rows[0]) > _key(rows[1])) (rows[0], rows[1]) = (rows[1], rows[0]);
+        StreamGovernanceCatalogStagePlan.Inventory memory inventory =
+            StreamGovernanceCatalogStagePlan.inventory(configuration.executor, rows);
+        (address payload, StreamSystemManifestUpdate memory update) = _publication();
+        (GenesisBatch memory batch, uint256 count) = StreamGovernanceCatalogStagePlan.nextBatch(
+            inventory,
+            StreamGovernanceCatalogStagePlan.inventoryHash(inventory),
+            0,
+            configuration.manifest,
+            payload,
+            update
+        );
+        require(count == 2, "only the two actual requester administration rows");
+        _run(_build(REASON, batch));
+        for (uint256 i; i < 2; ++i) {
+            StreamEntropyCoordinator host = i == 0 ? source : successor;
+            bytes memory data = abi.encodeCall(host.setRequester, (requester, true));
+            GovernanceCall memory call_ = StreamCurrentStackPlan.call(
+                address(host),
+                data,
+                keccak256(abi.encode(address(host), requester)),
+                0,
+                keccak256(data)
+            );
+            _run(_build(REASON, _one(1, call_, data)));
+            require(host.requesters(requester), "actual delayed governance authorizes requester");
+        }
+    }
+
+    function _scopeId(StreamEntropyCoordinator host, bytes32 scopeRef)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_SCOPE_SUBJECT_V1"),
+                block.chainid,
+                address(host),
+                address(configuration.core),
+                uint256(1),
+                uint8(1),
+                scopeRef
+            )
+        );
+    }
+
+    function _registerScopeAsGovernor(StreamEntropyCoordinator host, bytes32 scopeRef) private {
+        vm.recordLogs();
+        require(
+            this.safeCall(
+                address(host),
+                abi.encodeCall(host.registerEntropyScope, (uint256(1), uint8(1), scopeRef))
+            ),
+            "actual authorized Safe registers scope"
+        );
+        _assertScopeEvent(vm.getRecordedLogs(), host, _scopeId(host, scopeRef), scopeRef);
+    }
+
+    function _assertScopeEvent(
+        Vm.Log[] memory logs,
+        StreamEntropyCoordinator host,
+        bytes32 scope,
+        bytes32 scopeRef
+    ) private pure {
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == address(host) && logs[i].topics.length == 3
+                    && logs[i].topics[0]
+                        == keccak256("EntropyScopeRegistered(uint256,bytes32,uint8,bytes32)")
+            ) {
+                require(logs[i].topics[1] == bytes32(uint256(1)) && logs[i].topics[2] == scope);
+                (uint8 kind, bytes32 actualRef) = abi.decode(logs[i].data, (uint8, bytes32));
+                require(kind == 1 && actualRef == scopeRef);
+                ++count;
+            }
+        }
+        require(count == 1, "one independently derived original registration event");
+    }
+
+    function _signedScopeRegistration(
+        OfficialSafe requester,
+        StreamEntropyCoordinator host,
+        bytes32 scopeRef
+    ) private returns (bytes memory) {
+        bytes memory data = abi.encodeCall(
+            host.registerEntropyScope, (uint256(1), uint8(1), scopeRef)
+        );
+        bytes32 digest = requester.getTransactionHash(
+            address(host), 0, data, 0, 0, 0, 0, address(0), address(0), requester.nonce()
+        );
+        return abi.encodeCall(
+            requester.execTransaction,
+            (
+                address(host),
+                0,
+                data,
+                uint8(0),
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(signers, digest)
+            )
+        );
+    }
+
+    function _assertScopeEnvelopeRefused(OfficialSafe requester, bytes memory signed, bytes32 scope)
+        private
+    {
+        (bool ok, bytes memory result) = address(requester).call(signed);
+        require(
+            !ok && keccak256(result) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && requester.nonce() == 0
+                && successor.scopeEntropy(scope).status == StreamEntropyStatus.NONE
+                && originalProvider.nextRequestId() == 1,
+            "failed scope call rolls back subject, provider allocation and requester nonce"
+        );
     }
 
     function _start() private {
