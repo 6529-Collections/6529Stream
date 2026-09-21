@@ -94,9 +94,9 @@ python scripts/dev.py prepare-graph
 python scripts/dev.py test
 ```
 
-The command selects the actual cached literal creation library, whose compiler
-context owns the embedded creation bytes and immutable references for the 68
-required products. Each selected graph or campaign test host is authenticated
+For an embedded-creation fixture, the command selects the actual cached literal
+creation library, whose compiler context owns the embedded creation bytes and
+immutable references for the required products. Each selected graph or campaign test host is authenticated
 against its own cache-selected native compiler output. Unrelated test changes
 can therefore reuse an unchanged creation library without forcing a full build.
 The selected helpers and their transitive imports must still match current source
@@ -128,6 +128,63 @@ output directory. The current profile's large aggregate fixture limits cover
 many deployments and calls. Native product checks still enforce the 24,576-byte
 runtime limit, and the fixture checks constructor and deployed products; these
 local allowances do not establish a shipping transaction's gas capacity.
+
+### Explicit native product owners
+
+A fixture that obtains creation bytes through `vm.getCode` can keep the default
+command after a normal full build when every projection product and literal
+artifact target is physically cache-owned by the creation library's context.
+The command detects actual `getCode` calls in the native creation-library AST,
+requires exact physical/current executable equality, and authenticates the added
+source/import closures. Differently owned products require an explicit owner
+manifest. Use a completed, unchanged out/cache pair for each owner:
+
+```text
+python -m tools.build.prepare_current_graph --project PATH --products PRODUCTS.json --host test/current/Suite.t.sol:SuiteTest --owners OWNERS.json
+```
+
+The version-1 manifest has exactly `version`, `contexts`, and `owners` fields.
+`contexts` maps local labels to these required strings: `out`, `cache`, `buildId`,
+`compilerCapture`, `buildInfoSha256`, `nativeInputSha256`, and
+`nativeOutputSha256`. An optional `compilerAdmission` binds an existing explicit
+readmission receipt. Paths resolve relative to the manifest. The three digests
+are SHA-256 of the original raw full build-info file, `codegen-input.json`, and
+`codegen-output.json`; they are not hashes of reserialized JSON. `owners` maps
+exact `smart-contracts/path.sol:Name` or `test/path.sol:Name` coordinates to labels.
+Each selected host, creation helper, projection product, linked library, concrete
+embedded-construction dependency, and literal artifact coordinate in their
+transitive source closures needs an owner. All literal catalog entries are
+included conservatively, even if one selected test does not execute that entry.
+Abbreviated artifact paths and duplicate JSON keys are refused.
+
+Each context binds the genuine paired compiler capture, original Forge envelope,
+cache-selected physical artifacts, source/import closure, metadata, ABI, storage,
+bytecode, links, and native immutable declarations. Contexts require the current
+via-IR Paris optimizer-200 profile, metadata without CBOR/hash, no prelinked
+libraries, and identical remaining settings except `outputSelection`. Identities
+include absolute evidence paths and raw hashes: equal short Forge build IDs do
+not make two contexts interchangeable. The original capture, out and cache files
+are rechecked and remain unchanged; managed destinations cannot overlap them.
+
+Flat projections require every referenced immutable declaration and projected
+inheritance ancestor, including intermediate bases, to have the same owner as
+the product. Embedded concrete constructor dependencies also require that owner;
+`getCode` targets may have their own owners. Bound analysis ASTs may discover
+source paths and unprojected ancestors, but never supply runtime fields or
+immutable projections. Missing native declarations and conflicting shared parent
+owners fail before projection. Keep any additional declaration files passed to
+the runtime reader in the same context; its existing compilation-hash check
+still rejects unrelated mixed-context files.
+
+The resulting manifest records `artifactInputKind: current-native-export`, full
+owner identities, per-context reports and per-product projection bytes/hashes.
+It deliberately has no synthetic single compiler identity. Every emitted
+production runtime in each selected context still faces the original 24,576-byte
+limit, including outputs outside the projection list. This command does not
+construct a merged Forge cache or execution view, compile Solidity, deploy
+contracts, check constructor argument capacity, or establish runtime/release
+acceptance. A separate execution harness must preserve and bind the actual
+physical owner used by every `getCode` lookup. Python assertions must be enabled.
 
 ### Scoped acceptance captures
 

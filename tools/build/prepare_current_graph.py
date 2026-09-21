@@ -138,7 +138,12 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             cache_dir: Path | None = None, campaign: bool = False,
             selected_hosts: tuple[tuple[str, str], ...] | None = None,
             compiler_captures: dict[str, Path] | None = None,
-            compiler_admissions: dict[str, Path] | None = None) -> dict:
+            compiler_admissions: dict[str, Path] | None = None,
+            owners_path: Path | None = None) -> dict:
+    if owners_path is not None and (out is not None or cache_dir is not None or compiler_captures or compiler_admissions):
+        raise ValueError("Explicit owners cannot be combined with legacy out/cache/capture options")
+    if sys.flags.optimize or os.environ.get("PYTHONOPTIMIZE", "0") not in ("", "0"):
+        raise ValueError("Graph preparation requires enabled Python assertions")
     captures = compiler_captures or {}
     admissions = compiler_admissions or {}
     if set(admissions) - set(captures):
@@ -163,6 +168,9 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
     try:
         os.write(fd, str(os.getpid()).encode()); os.close(fd)
         check_campaign_owner(project, campaign)
+        if owners_path is not None:
+            from tools.build.current_graph_owners import prepare_owned
+            return prepare_owned(project, products_path, owners_path, hosts, artifact_root)
         cache_path = cache_dir / 'solidity-files-cache.json'
         cache_raw = cache_path.read_bytes(); cache = json.loads(cache_raw)
         if (campaign or selected_hosts is not None) and any(source not in cache['files'] for source, _ in hosts):
@@ -177,7 +185,7 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             raise ValueError('Graph product inventory must name production sources')
         if set(captures) - set(coordinates.values()):
             raise ValueError('Compiler capture does not match a selected native build')
-        contexts = {}; transports = set()
+        contexts = {}; transports = set(); dynamic_creation = False
         for ident in sorted(set(coordinates.values())):
             path = out / 'build-info' / (ident + '.json')
             if not path.is_file():
@@ -188,6 +196,9 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             analysis = None; capture_evidence = None
             if ident in captures:
                 build, analysis, capture_evidence = bind_build_capture(build, captures[ident], admission=admissions.get(ident))
+            if ident == build_id:
+                from tools.build.current_graph_owners import getcode_creation
+                dynamic_creation = getcode_creation(build, CREATION_SOURCE, CREATION_NAME)
             helpers = {name: source for name, source in helper.items() if coordinates[name] == ident}
             inventory = products if ident == build_id else {}
             roots = set(helpers.values()) | set(inventory.values())
@@ -196,6 +207,33 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
                                'products': inventory, 'roots': roots, 'analysis': analysis,
                                'compilerCapture': captures.get(ident), 'compilerAdmission': admissions.get(ident),
                                'captureEvidence': capture_evidence}
+        literal_artifacts = {}; dynamic_physical = {}
+        if dynamic_creation:
+            from tools.build.current_graph_owners import coordinate, literal_artifact_inventory
+            owner = contexts[build_id]
+            required = {source + ":" + name for name, source in products.items()}
+            while True:
+                discovered = literal_artifact_inventory(contexts)
+                additions = set(discovered) - set(literal_artifacts)
+                literal_artifacts.update(discovered)
+                required.update(additions)
+                for coord in sorted(required):
+                    source, name = coordinate(coord)
+                    if select_build(cache, ((source, name),)) != build_id:
+                        raise ValueError(f"Differently owned getCode product requires explicit --owners: {coord}")
+                    if name in owner['helpers'] and owner['helpers'][name] != source:
+                        raise ValueError(f"Ambiguous dynamic artifact basename: {name}")
+                    owner['build']['output']['contracts'][source][name]
+                    owner['helpers'][name] = source  # Require physical/current equality in the exporter.
+                    owner['roots'].add(source)
+                transports.update(validate_sources(project, owner['build'], source_roots=owner['roots'], analysis=owner['analysis']))
+                if not additions:
+                    break
+        if dynamic_creation:
+            for context in contexts.values():
+                for name, source in context['helpers'].items():
+                    physical = out / Path(source).name / (name + '.json')
+                    dynamic_physical[physical] = sha(physical.read_bytes())
         with tempfile.TemporaryDirectory(prefix='prepare-', dir=artifact_root) as temporary:
             temp = Path(temporary)
             for ident, context in contexts.items():
@@ -219,6 +257,9 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             owner = contexts[build_id]; projected = temp / 'compiled'
             report = module.project(owner['path'], owner['retained'], projected, products, True,
                                     compiler_capture=owner['compilerCapture'], compiler_admission=owner['compilerAdmission'])
+            for path, digest in dynamic_physical.items():
+                if sha(path.read_bytes()) != digest:
+                    raise ValueError(f'Dynamic physical artifact changed during preparation: {path}')
             if cache_path.read_bytes() != cache_raw:
                 raise ValueError('Compiler cache changed during graph preparation')
             for context in contexts.values():
@@ -247,7 +288,9 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
                       'sourceLineEndingTransports': sorted(transports), 'products': len(products),
                       'productionRuntimes': len(report['productionRuntimeSizes']),
                       'out': str(out), 'cache': str(cache_dir), 'hosts': helper,
-                      'helperBuildIds': coordinates,
+                      'helperBuildIds': coordinates, 'literalArtifactSources': literal_artifacts,
+                      'dynamicCreationSameOwner': dynamic_creation,
+                      'dynamicPhysicalArtifactHashes': {str(path): digest for path, digest in dynamic_physical.items()},
                       'compilerContexts': {ident: {'buildInfoSha256': sha(ctx['raw']),
                           'nativeExports': str(ctx['retained']), 'sourceRoots': sorted(ctx['roots']),
                           'compilerCapture': ctx['captureEvidence']}
@@ -265,6 +308,7 @@ def main() -> int:
     parser.add_argument("--products", type=Path, default=ROOT / "test/fixtures/current-graph/products.json")
     parser.add_argument("--out", type=Path, help="Completed Forge output directory, relative to project or absolute")
     parser.add_argument("--cache-path", type=Path, help="Matching Forge cache directory")
+    parser.add_argument("--owners", type=Path, help="Explicit native context/coordinate owner manifest; paths relative to this file")
     parser.add_argument("--campaign", action="store_true", help="Bind both executed fuzz/invariant hosts")
     parser.add_argument("--host", action="append", type=host_coordinate,
                         help="Exact test/path.t.sol:ContractName to authenticate (repeatable)")
@@ -284,7 +328,7 @@ def main() -> int:
         print(json.dumps(prepare(args.project, args.products, out=args.out,
                                  cache_dir=args.cache_path, campaign=args.campaign,
                                  selected_hosts=tuple(args.host) if args.host else None,
-                                 compiler_captures=captures, compiler_admissions=admissions), indent=2))
+                                 compiler_captures=captures, compiler_admissions=admissions, owners_path=args.owners), indent=2))
         return 0
     except (AssertionError, KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Graph preparation failed: {exc}", file=sys.stderr)

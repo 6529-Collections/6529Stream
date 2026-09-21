@@ -127,15 +127,42 @@ class TokenNativeGraphMixin:
         names = {"StreamModuleBase", "StreamGasParameterHost", "StreamArtistOwner", FACADE, "StreamArtistIdentityAuthority"}
         projected = {}
         declarations = {}
+        projected_contexts = {}
+        require("mode" not in manifest or manifest["mode"] == "explicit-native-owners",
+                "unsupported graph projection owner mode")
+        explicit_owners = manifest.get("mode") == "explicit-native-owners"
         for name in sorted(names):
             row = manifest["products"][name]
+            if explicit_owners:
+                owner = row["owner"]
+                context = manifest["contexts"][owner]
+                coordinate = row["source"] + ":" + name
+                require(manifest["owners"][coordinate] == owner
+                        and context["artifactInputKind"] == "current-native-export",
+                        "graph projection product owner differs: " + name)
+                original = context["products"][name]
+                require(all(row[key] == original[key] for key in
+                            ("source", "projectionBytes", "projectionSha256")),
+                        "graph projection owner row differs: " + name)
+                require(self.manifest["products"][name]["sha256"] == original["currentNativeExportSha256"],
+                        "graph native export owner differs: " + name)
+                compilation = context["compilerInputSha256"]
+            else:
+                compilation = manifest["compilerInputSha256"]
+                owner = compilation
+            projected_contexts[name] = owner
             raw = (directory / (name + ".json")).read_bytes()
             require(len(raw) == row["projectionBytes"] <= 1048576
                     and hashlib.sha256(raw).hexdigest() == row["projectionSha256"], "graph projection file differs: " + name)
             value = json.loads(raw)
             require(value["contractName"] == name and value["source"] == self.manifest["products"][name]["source"]
-                    and row["source"] == value["source"] and value["compilationHash"] == manifest["compilerInputSha256"],
+                    and row["source"] == value["source"] and value["compilationHash"] == compilation,
                     "graph projection compilation identity differs")
+            if explicit_owners:
+                require(value["currentNativeExportSha256"] == original["currentNativeExportSha256"]
+                        and value["deployedBytecode"].get("immutableReferences", {})
+                            == self.products[name]["deployedBytecode"].get("immutableReferences", {}),
+                        "graph same-owner immutable references differ: " + name)
             for field in ("bytecode", "deployedBytecode"):
                 native = self.products[name][field]
                 require(value[field]["object"] == native["object"]
@@ -146,7 +173,7 @@ class TokenNativeGraphMixin:
                         and declaration["source"] == value["source"] and declaration["compilationHash"] == value["compilationHash"]
                         and declaration["nodeType"] == "VariableDeclaration" and declaration["mutability"] == "immutable",
                         "graph projected immutable declaration differs")
-                key = (name, declaration["variable"])
+                key = (owner, (name, declaration["variable"]))
                 require(key not in declarations, "duplicate projected immutable declaration")
                 declarations[key] = identifier
             projected[name] = value
@@ -161,7 +188,13 @@ class TokenNativeGraphMixin:
             require(len(projected_offsets) == len(projection["deployedBytecode"].get("immutableReferences", {}))
                     and set(projected_offsets) == set(native_offsets), "graph projected immutable offset groups differ: " + name)
             translated = {identifier: native_offsets[positions] for positions, identifier in projected_offsets.items()}
-            self.token_declaration_ids[name] = {key: translated[identifier] for key, identifier in declarations.items() if identifier in translated}
+            self.token_declaration_ids[name] = {key: translated[identifier]
+                for (owner, key), identifier in declarations.items()
+                if owner == projected_contexts[name] and identifier in translated}
+            if explicit_owners:
+                resolved = self.token_declaration_ids[name]
+                require(len(resolved) == len(native) and set(resolved.values()) == set(native),
+                        "graph same-owner declaration closure differs: " + name)
         self.token_projection_sha256 = pin["manifestSha256"]
 
     def _graph_address(self, name):

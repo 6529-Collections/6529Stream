@@ -10,6 +10,17 @@
   current-stack and testnet rehearsals remain pending. See the
   [operator guide](docs/current-stack-monitoring.md).
 
+## Explicit current graph native owners
+
+- Bind each dynamic creation product, helper and test host to its original native
+  capture, physical cache and full build-info. Distinguish colliding short build
+  IDs, require coherent immutable parent and embedded-construction ownership, and
+  preserve all original production size gates without merging compiler outputs.
+- Retain embedded-creation and authenticated same-owner `getCode` preparation;
+  require the explicit owner manifest for separately owned dynamic products. Focused synthetic Python regressions cover valid
+  separate owners and rejection boundaries; compiler and runtime acceptance are
+  separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
+
 ## CI hygiene and workflow checks
 
 - Recognize preserved CRLF line endings in the existing raw Museum retrieval
