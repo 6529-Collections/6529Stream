@@ -16,6 +16,7 @@ from .current_owner_capture import (HOST, QUALIFICATION as OWNER_QUALIFICATION,
     publish_owner_records, make_owner_anchor, capture_owner_evidence, export_owner_dossier)
 from .current_rights_capture import CurrentRightsFixture
 from .current_owner_rpc_commerce import OwnerCommerceMixin
+from . import current_owner_registry_capture as registry_capture
 from .independent_wire import DOCUMENT_SPEC, RAW_BYTES, ZERO, require
 from .token_governance import TokenGovernanceMixin
 from .token_mint_flow import TOKEN_MODULE_ROWS, TOKEN_PRODUCT_ROOTS, TokenMintFlowMixin
@@ -222,16 +223,20 @@ def capture(fixture, output):
         plan_hash=pins["planHash"], transport=RpcTransport(fixture.endpoint), disclosure="public")
     result = export_owner_dossier(output / "package", account_hash, captured,
         output / "owner-dossier", disclosure="public")
+    if getattr(fixture, "registry_bridge", None) is not None:
+        registry_capture.capture_registry(fixture, output, account_hash, captured)
     return result["valuationManifestHash"]
 
 
 def main():
     run_main(fixture_type=CurrentOwnerRpcFixture, capture_function=capture,
-        configure_parser=configure_parser)
+        configure_parser=configure_parser, prepare_arguments=registry_capture.prepare_arguments,
+        configure_fixture=registry_capture.configure_fixture)
 
 
 def configure_parser(parser):
     parser.description = __doc__
+    registry_capture.configure_parser(parser)
 
 
 if __name__ == "__main__":

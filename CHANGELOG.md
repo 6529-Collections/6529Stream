@@ -1,5 +1,14 @@
 # Changelog
 
+## Owner and Genesis Registry capture composition
+
+- Add optional read-only coverage of all 51 Genesis Registry names at the existing
+  final Owner/Museum block, with original deployment runtime pins, retained
+  admission artifact bytes and concrete offline replay before the source join.
+- Preserve original account and owner packages and the Registry reader profile.
+  Pure/transport-double checks pass; actual joined RPC execution remains pending.
+  See the [capture recipe](docs/museum-current-owner-capture.md#optional-genesis-registry-coverage-at-the-same-anchor).
+
 ## Estate and dormancy recovery capacity
 
 - Split four existing recovery libraries into six fixed typed workers while

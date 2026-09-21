@@ -251,12 +251,41 @@ class OwnerCompositionTests(unittest.TestCase):
             self.assertEqual(pins["anchorHash"], keccak256(owner_anchor))
             self.assertEqual(pins["deploymentEvidenceHash"], keccak256(b"deployment-double"))
 
+    def test_opt_in_registry_runs_after_owner_export_and_preserves_return(self):
+        f = object.__new__(CurrentOwnerRpcFixture); f.endpoint = "http://127.0.0.1:1"
+        f.registry_bridge = (b"external-admission", schema_id("external"))
+        f.owner_publications = {"records": [], "loans": [], "valuations": [], "transactions": []}
+        order = []; account_hash = schema_id("account"); captured = object()
+        def media(fixture, output):
+            output.joinpath("anchor.json").write_bytes(b"account")
+            output.joinpath("deployment-evidence.json").write_bytes(b"evidence")
+            return account_hash
+        def export(*args, **kwargs):
+            order.append("owner-export")
+            return {"valuationManifestHash": schema_id("valuation-package")}
+        def registry(fixture, destination, digest, owner_capture):
+            self.assertIs(fixture, f); self.assertEqual(destination, output)
+            self.assertEqual(digest, account_hash); self.assertIs(owner_capture, captured)
+            order.append("registry-capture")
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            with patch("socket.socket", side_effect=AssertionError("no network")), \
+                    patch("tools.museum.current_owner_rpc_capture.capture_media", side_effect=media), \
+                    patch("tools.museum.current_owner_rpc_capture.make_owner_anchor", return_value=b"owner"), \
+                    patch("tools.museum.current_owner_rpc_capture.capture_owner_evidence", return_value=captured), \
+                    patch("tools.museum.current_owner_rpc_capture.export_owner_dossier", side_effect=export), \
+                    patch("tools.museum.current_owner_rpc_capture.registry_capture.capture_registry", side_effect=registry):
+                self.assertEqual(capture(f, output), schema_id("valuation-package"))
+            self.assertEqual(order, ["owner-export", "registry-capture"])
+
     def test_new_cli_reuses_one_existing_process_owner(self):
         from . import current_owner_rpc_capture as module
         with patch.object(module, "run_main") as run:
             module.main()
         run.assert_called_once_with(fixture_type=CurrentOwnerRpcFixture, capture_function=capture,
-            configure_parser=module.configure_parser)
+            configure_parser=module.configure_parser,
+            prepare_arguments=module.registry_capture.prepare_arguments,
+            configure_fixture=module.registry_capture.configure_fixture)
 
 
 class NativeInputTests(unittest.TestCase):

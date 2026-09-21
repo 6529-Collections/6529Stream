@@ -210,7 +210,7 @@ Original account source files remain byte-identical; canonical ancestor history
 retains its 256-block bound. A failed run leaves its evidence/journal for diagnosis
 and does not restart a partially completed ceremony.
 
-The 24 focused pure/transport-double tests cover composition order, original
+The focused pure/transport-double tests cover composition order, original
 receipt encoding, exact schema reuse, genuine-transaction requirements, explicit
 waiver setup, refusal cases, integer preservation and process ownership:
 
@@ -221,6 +221,62 @@ python -m unittest tools.museum.test_current_owner_rpc_capture tools.museum.test
 They do not execute a compiler, Anvil, paid mint or actual RPC capture. The
 integration/testing owner must authenticate native inputs, run the joined
 composition and replay both outputs before claiming positive capture acceptance.
+
+## Optional Genesis Registry coverage at the same anchor
+
+The same command can add the frozen [Genesis Registry coverage
+profile](../tools/museum/GENESIS-REGISTRY-COVERAGE-V1.md) after the original owner
+dossier export. Supply both optional arguments:
+
+```text
+--registry-runtime-bridge REVIEWED_RUNTIME_SOURCE_ARTIFACT --registry-runtime-bridge-hash EXTERNAL_KECCAK256
+```
+
+The exact nonempty artifact bytes and their external Keccak-256 commitment are
+checked before the existing process starts. The artifact must already have been
+reviewed for runtime/source admission. The adapter retains and byte-pins it;
+neither the adapter nor Registry reader verifies its admission semantics. The
+reader's fixed `SOURCE_REVISION` is a reader review checkpoint, separate from the
+actual deployment build and its `nativeInputManifestSha256`.
+
+After replaying the original account package and OwnerRecords source, the adapter
+uses their shared final block without selecting another block. It reads the
+selected CollectionMetadata pointer and preserves its original
+`admissionModuleRegistry`, even if Core's current registry differs. Exactly six
+role addresses receive their expected runtime hashes from the original deployment
+artifacts: Core, selected Metadata, admission ModuleRegistry, SchemaRegistry,
+chunk store and governance. The Registry source checks those pins against the
+recorded code and graph. Its closed twelve-field anchor carries the original
+eight common source fields; collection and token identity remain in the separate
+cross-source join.
+
+All 51 fixed-plan names are looked up. Absent, deprecated, archived and conflicting
+documents remain explicit outcomes; the adapter performs no registrations. It
+retains discovery calls, replays both discovery and complete Registry coverage,
+and checks common source state, shared getter results and runtime pins against
+the concrete account and owner sources before publishing:
+
+- `registry-coverage/`: independently pinned, network-free replay package.
+- `registry-discovery-transcript.json`: original same-block discovery calls.
+- `registry-runtime-bridge.bin`: exact supplied admission artifact bytes.
+- `registry-capture.json`: input pins, all coverage outcomes and cross-source join.
+
+The existing account and owner packages and returned valuation manifest hash are
+unchanged. Pin the coverage manifest hash independently and verify it with:
+
+```text
+python -m tools.museum.genesis_registry_coverage_v1 verify NEW_OUTPUT/registry-coverage --manifest-hash COVERAGE_HASH
+python -m unittest tools.museum.test_current_owner_registry_capture tools.museum.test_current_owner_rpc_capture -v
+```
+
+The coverage verifier proves the retained Registry package under its original
+qualifications. The outer join report alone does not verify the separate account,
+owner or admission artifacts; retain their original pins and verifiers. New
+checks use transport doubles, including all 51 lookup outcomes and refusal of
+changed source, native-manifest, role or block identities. Actual joined RPC
+execution remains with the integration/testing owner. This adapter does not
+establish full Registry history, a complete object dossier or the full VIEW
+workflow.
 
 ## Validation boundary
 
