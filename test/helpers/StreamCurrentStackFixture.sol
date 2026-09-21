@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistSuiteFixture.sol";
 import "./ArtistArtifactCreate.sol";
+import { StreamCurrentTestSetupPlans } from "./StreamCurrentTestSetupPlans.sol";
 import {
     IStreamCollectionMetadataV1
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
@@ -882,7 +883,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
             keccak256("fixture client")
         );
         (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches) =
-            StreamGovernanceGenesisPlan.build(c, payload, update);
+            StreamCurrentTestSetupPlans.foundationPlan(c, payload, update);
         for (uint256 i; i < binding.actionPolicies.length; ++i) {
             _foundationPolicies.push(binding.actionPolicies[i]);
         }
@@ -1089,151 +1090,24 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](76 + additional.length);
-        rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
-        rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
-        rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
-        rows[3] = _operatingPolicy(address(ledger), ledger.setLedgerWriter.selector);
-        rows[4] = _operatingPolicy(address(sale), sale.setPlatformSigner.selector);
-        rows[5] = _operatingPolicy(address(sale), sale.setPaused.selector);
-        rows[6] = _operatingPolicy(address(auction), auction.setPlatformSigner.selector);
-        rows[7] = _operatingPolicy(address(auction), auction.setPaused.selector);
-        rows[8] = _operatingPolicy(address(entropy), entropy.setRequester.selector);
-        rows[9] = _operatingPolicy(address(entropy), entropy.setProviderRevoked.selector);
-        rows[10] = _operatingPolicy(address(entropy), entropy.markRequestStale.selector);
-        rows[11] = _operatingPolicy(address(entropy), entropy.markRequestFailed.selector);
-        rows[12] = _operatingPolicy(address(router), router.setCollectionScript.selector);
-        rows[13] = _operatingPolicy(address(router), router.setContractMetadataURI.selector);
-        rows[14] = _operatingPolicy(address(assetPolicy), assetPolicy.setAssetStatus.selector);
-        rows[15] = _operatingPolicy(address(core), core.raiseGasParameter.selector);
-        rows[16] = _operatingPolicy(address(core), core.setCollectionMaxSupply.selector);
-        rows[17] = _operatingPolicy(address(royalties), royalties.configureDefaultRoyalty.selector);
-        rows[18] =
-            _operatingPolicy(address(royalties), royalties.configureCollectionRoyalty.selector);
-        rows[19] = _operatingPolicy(address(royalties), royalties.freezeDefaultRoyalty.selector);
-        rows[19].actionClass = 2;
-        rows[20] = _operatingPolicy(address(royalties), royalties.freezeCollectionRoyalty.selector);
-        rows[20].actionClass = 2;
-        uint256 i = 21;
-        rows[i++] = _operatingPolicy(3, address(executor), executor.rotateGovernanceRoot.selector);
-        rows[i++] = _operatingPolicy(
-            3, address(executor), executor.extendGovernanceActionPolicy.selector
-        );
-        rows[i++] = _operatingPolicy(0, address(executor), executor.registerProposer.selector);
-        rows[i++] = _operatingPolicy(1, address(executor), executor.registerProposer.selector);
-        rows[i++] = _operatingPolicy(0, address(executor), executor.registerCanceller.selector);
-        rows[i++] = _operatingPolicy(1, address(executor), executor.registerCanceller.selector);
-        rows[i++] =
-            _operatingPolicy(0, address(executor), executor.setApprovedNativeReceiver.selector);
-        rows[i++] =
-            _operatingPolicy(1, address(executor), executor.setApprovedNativeReceiver.selector);
-        rows[i++] = _operatingPolicy(0, address(executor), executor.setTighteningCall.selector);
-        rows[i++] = _operatingPolicy(1, address(executor), executor.setTighteningCall.selector);
-        rows[i++] = _operatingPolicy(0, address(executor), executor.registerFreezeSelector.selector);
-        rows[i++] = _operatingPolicy(1, address(executor), executor.registerFreezeSelector.selector);
-        rows[i++] = _operatingPolicy(
-            2, address(executor), executor.registerSystemManifestTailTrigger.selector
-        );
-        rows[i++] = _operatingPolicy(1, address(roles), roles.grantRole.selector);
-        rows[i++] = _operatingPolicy(1, address(roles), roles.revokeRole.selector);
-        rows[i++] = _operatingPolicy(1, address(roles), roles.grantScopedRole.selector);
-        rows[i++] = _operatingPolicy(1, address(roles), roles.revokeScopedRole.selector);
-        rows[i++] = _operatingPolicy(0, address(roles), roles.registerRoleManager.selector);
-        rows[i++] = _operatingPolicy(1, address(roles), roles.registerRoleManager.selector);
-        rows[i++] = _operatingPolicy(0, address(registry), registry.setModuleStatus.selector);
-        rows[i++] = _operatingPolicy(1, address(registry), registry.setModuleStatus.selector);
-        rows[i++] =
-            _operatingPolicy(1, address(registry), registry.setModuleRegistryManifest.selector);
-        rows[i++] = _operatingPolicy(0, address(core), core.setCollectionStatus.selector);
-        rows[i++] = _operatingPolicy(1, address(core), core.setCollectionStatus.selector);
-        rows[i++] = _operatingPolicy(2, address(core), core.setCollectionStatus.selector);
-        rows[i++] = _operatingPolicy(0, address(core), core.setCollectionMaxSupply.selector);
-        rows[i++] = _operatingPolicy(2, address(core), core.blockCollectionBurns.selector);
-        rows[i++] = _operatingPolicy(2, address(core), core.freezeCollection.selector);
-        rows[i++] =
-            _operatingPolicy(0, address(manifest), manifest.publishStreamSystemManifest.selector);
-        rows[i++] =
-            _operatingPolicy(1, address(manifest), manifest.publishStreamSystemManifest.selector);
-        rows[i++] =
-            _operatingPolicy(2, address(manifest), manifest.publishStreamSystemManifest.selector);
-        rows[i++] = _operatingPolicy(address(manager), manager.raiseGasParameter.selector);
-        rows[i++] = _operatingPolicy(address(factory), factory.raiseGasParameter.selector);
-        rows[i++] = _operatingPolicy(address(artists), artists.raiseGasParameter.selector);
-        rows[i++] =
-            _operatingPolicy(address(revenueEscrow), revenueEscrow.setCreditProducer.selector);
-        rows[i++] =
-            _operatingPolicy(address(revenueEscrow), revenueEscrow.raiseGasParameter.selector);
-        rows[i++] =
-            _operatingPolicy(address(primaryResolver), primaryResolver.raiseGasParameter.selector);
-        rows[i++] = _operatingPolicy(
-            address(primaryResolver), primaryResolver.createPrimaryTemplate.selector
-        );
-        rows[i++] = _operatingPolicy(
-            address(primaryResolver), primaryResolver.createDynamicPrimaryTemplate.selector
-        );
-        rows[i++] =
-            _operatingPolicy(address(assetPolicy), assetPolicy.setAssetPermitPolicy.selector);
-        rows[i++] = _operatingPolicy(
-            address(primaryResolver), primaryResolver.setPrimaryTemplateAssignment.selector
-        );
-        rows[i++] = _operatingPolicy(address(entropy), entropy.raiseTimeParameter.selector);
-        rows[i++] = _operatingPolicy(
-            1, address(artists), IStreamArtistIdentityContest.contestArtistIdentity.selector
-        );
-        rows[i++] = _operatingPolicy(
-            2, address(artists), IStreamArtistIdentityContest.contestArtistIdentity.selector
-        );
-        rows[i++] = _operatingPolicy(
-            1,
-            address(artists),
-            IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector
-        );
-        rows[i++] = _operatingPolicy(
-            2,
-            address(artists),
-            IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector
-        );
-        rows[i++] = _operatingPolicy(address(router), router.setCollectionScriptManifest.selector);
-        rows[i++] = _operatingPolicy(address(router), router.setCollectionMediaManifest.selector);
-        rows[i++] = _operatingPolicy(address(router), router.raiseGasParameter.selector);
-        rows[i++] = _operatingPolicy(address(entropy), entropy.activateEntropyProvider.selector);
-        rows[i++] = _operatingPolicy(0, address(entropy), entropy.deprecateEntropyProvider.selector);
-        rows[i++] = _operatingPolicy(0, address(entropy), entropy.revokeEntropyProvider.selector);
-        // Bounded predecessor grace remains an exact delayed-loosening CALL.
-        rows[i++] = _operatingPolicy(address(manager), manager.setPhaseExecutorWithGrace.selector);
-        rows[i++] = _operatingPolicy(2, address(manager), manager.freezePhase.selector);
-        rows[i++] = _operatingPolicy(1, address(ledger), ledger.importPhaseFreezes.selector);
-        // Metadata, economics and entropy configuration are also collected from genesis.
-        for (uint256 j; j < additional.length; ++j) {
-            rows[i++] = additional[j];
-        }
-        assert(i == rows.length);
-    }
-
-    function _operatingPolicy(uint8 actionClass, address target, bytes4 selector)
-        private
-        view
-        returns (GovernanceActionPolicyEntry memory row)
-    {
-        row = _operatingPolicy(target, selector);
-        row.actionClass = actionClass;
-    }
-
-    function _operatingPolicy(address target, bytes4 selector)
-        private
-        view
-        returns (GovernanceActionPolicyEntry memory)
-    {
-        return GovernanceActionPolicyEntry(
-            1,
-            target,
-            selector,
-            target.codehash,
-            keccak256(abi.encode(DEPLOYMENT_HASH, target)),
-            1,
-            0,
-            0,
-            bytes32(0)
-        );
+        StreamCurrentTestSetupPlans.Targets memory targets;
+        targets.manager = manager;
+        targets.ledger = ledger;
+        targets.sale = sale;
+        targets.auction = auction;
+        targets.entropy = entropy;
+        targets.router = router;
+        targets.assetPolicy = assetPolicy;
+        targets.core = core;
+        targets.royalties = royalties;
+        targets.executor = executor;
+        targets.roles = roles;
+        targets.registry = registry;
+        targets.manifest = manifest;
+        targets.factory = factory;
+        targets.artists = artists;
+        targets.revenueEscrow = revenueEscrow;
+        targets.primaryResolver = primaryResolver;
+        return StreamCurrentTestSetupPlans.operatingPolicies(targets, DEPLOYMENT_HASH, additional);
     }
 }
