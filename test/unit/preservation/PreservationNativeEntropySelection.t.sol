@@ -32,7 +32,9 @@ contract PreservationNativeEntropySelectionTest is PreservationNativeFixture {
         bytes32 scopeRef = keccak256("new scope after missing selection");
         bytes32 expected = _scopeId(coordinator, scopeRef);
         core.setPointer(keccak256("ENTROPY_COORDINATOR"), address(0));
-        vm.expectRevert(abi.encodeWithSelector(StreamEntropyCoordinator.InvalidCollection.selector, 1));
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamEntropyCoordinator.InvalidCollection.selector, 1)
+        );
         coordinator.registerEntropyScope(1, 1, scopeRef);
         require(coordinator.scopeEntropy(expected).status == StreamEntropyStatus.NONE);
 
