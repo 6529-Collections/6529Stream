@@ -76,6 +76,18 @@
   separate owners and rejection boundaries; compiler and runtime acceptance are
   separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
 
+## Current governance client lifecycle
+
+- Add a source-bound client for the sealed Executor's nine scheduling, execution,
+  cancellation, veto, expiry and calldata-publication methods. Preserve payable
+  execution values and authenticate historical schedule and terminal membership
+  evidence separately from current admission and target-specific effects.
+- Add direct RoleManager and RoleManager Safe grant/revoke workflows for the
+  seven operational roles, including ordered holder transitions, exact mutation
+  chains and historical receipt checks. These client and mock-provider checks
+  do not establish deployed runtime or current-stack acceptance. See the
+  [client guide](packages/stream-client/docs/current-governance-executor-v2.md).
+
 ## CI hygiene and workflow checks
 
 - Recognize preserved CRLF line endings in the existing raw Museum retrieval

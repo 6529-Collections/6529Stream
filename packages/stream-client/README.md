@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Governance lifecycle and operational roles](docs/current-governance-executor-v2.md)
+  covers nine sealed Executor lifecycle calls and seven operational roles through
+  the Registry's grant/revoke methods, with separate historical and current checks.
+
 - [Repaired-source consent/root transport](docs/current-preservation-root-interlude-v2.md)
   adds a separate strict `eda052c7` profile with a reviewed ABI164 source join.
 

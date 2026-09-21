@@ -133,3 +133,7 @@ export * from "./current-view-preservation-inventory-v1.js";
 export * from "./current-view-preservation-inventory-v1-workflow.js";
 export * from "./current-view-preservation-bundle-v1.js";
 export * from "./current-view-preservation-bundle-v1-workflow.js";
+export * from "./current-governance-executor-v2.js";
+export * from "./current-governance-executor-v2-workflow.js";
+export * from "./current-role-registry-operational.js";
+export * from "./current-role-registry-operational-workflow.js";
