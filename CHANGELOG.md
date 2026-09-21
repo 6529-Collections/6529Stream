@@ -1182,6 +1182,10 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add native acquisition V10 and object dossier V3 composition with exact prior
+  version replay, current source-family consumers, and unchanged 19/49 acceptance
+  denominators. Preserve source and institutional evidence limits.
+
 - Add an exact retained VIEW retrieval consumer with immutable witness and
   inventory bindings, original Archive routes and received media correspondence.
 

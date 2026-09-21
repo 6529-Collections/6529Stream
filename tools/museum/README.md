@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Native acquisition V10 and object dossier V3](CANONICAL-COMPOSITION-V10.md)
+combine exact prior packets with current preservation, work/C2PA/condition and
+recovery/export sources. All 19 packet groups, 49 dossier requirements and
+original source qualifications survive deterministic offline reconstruction.
+
 [Retained VIEW attributed retrieval evidence](../../docs/museum-view-attributed-retrieval-v1.md)
 joins the new inventory, immutable witness, original/current Archive evidence,
 ordered routes and complete received media. Source observations and route
