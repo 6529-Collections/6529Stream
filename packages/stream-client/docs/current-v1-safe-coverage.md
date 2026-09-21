@@ -124,6 +124,12 @@ the original Executor. The nested provider call consumes the same one-use guard
 as basic binding and records both receipts. Direct and Safe CALL preparation
 does not establish native execution or complete VIEW finality.
 
+The [token preservation V2 output client](current-token-preservation-output-v2.md)
+adds checkpoint begin/append and covered-manifest begin/verify callers under the
+same ABI146 source. Each selected Registry admission retains its actual
+original or current-Artist producer profile. Large append calldata has a local
+bounded transport path; the original historical transport limits remain fixed.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

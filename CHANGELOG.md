@@ -970,6 +970,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add token preservation V2 producer admission, checkpoint and covered-output
+  clients with exact row commitments and separate history/current evidence.
+
 - Add source-qualified complete VIEW preservation binding clients with original
   class-2 governance calls and distinct historical and operative source reads.
 

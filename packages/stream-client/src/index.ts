@@ -117,3 +117,5 @@ export * from "./current-artist-recovered-consent-hydration.js";
 export * from "./current-artist-recovered-consent-hydration-workflow.js";
 export * from "./current-view-complete-binding.js";
 export * from "./current-view-complete-binding-workflow.js";
+export * from "./current-token-preservation-output-v2.js";
+export * from "./current-token-preservation-output-v2-workflow.js";

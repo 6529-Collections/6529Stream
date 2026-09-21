@@ -85,6 +85,7 @@ const roots = [
   "IStreamScopedPreservationPolicyReferencePublicationV1",
   "IStreamScopedPreservationPolicyRenderCriticalInventoryV1",
   "IStreamScopedPreservationPolicySnapshotPublicationV1",
+  "IStreamStaticEntropySource",
   "IStreamStaticSelectionCheckpoint",
   "IStreamViewPolicySourceBindingV2",
   "IStreamViewPreservationBundleArchiveCoverageV1",

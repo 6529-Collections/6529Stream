@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Token preservation V2 output](docs/current-token-preservation-output-v2.md)
+  covers original/current-Artist producer admission, token-family checkpoints
+  and exact covered output manifests for COLLECTION, TOKEN, RELEASE and SEASON.
+
 - [Complete VIEW preservation binding](docs/current-view-complete-binding.md)
   covers the five shared ABI146 methods, one original class-2 governance action,
   and separate historical-receipt and operative-source reads on both providers.
