@@ -18,6 +18,15 @@
 - Source configuration is a trial input only. Execution and gas acceptance remain
   pending; no existing governed parameter or parent component ceiling changes.
 
+## Full-preservation provider capacity
+
+- Factor the two concrete full-preservation providers through fixed nominal read
+  and VIEW binding workers, retaining original constructors, ABI, storage,
+  Registry guards, profile branches and delegate caller identity.
+- Both provider runtimes and complete constructor payloads fit the original
+  limits. Add twelve focused guard and transport regressions; typechecking and
+  selected size evidence are complete, while execution and the full current
+  finality ceremony remain pending.
 
 ## Current-authority VIEW publication and discovery composition
 

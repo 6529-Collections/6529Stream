@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamFinalityFullPreservationDispatchV1 as GraphDispatch
+} from "./StreamFinalityFullPreservationDispatchV1.sol";
+import {
+    StreamFinalityViewProviderBindingTransportV1 as ViewBindingTransport
+} from "./StreamFinalityViewProviderBindingTransportV1.sol";
 import "./StreamFinalityFullPolicyBaseEvidenceProviderV2.sol";
 import {
     StreamFinalityPreservationPolicyProviderComponentsV1 as PolicyComponents
@@ -131,6 +137,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
     bytes32 private _sourceConfigurationHash;
     ViewBinding.State private _viewBinding;
 
+    // Retain original ABI error entries after their checks move into fixed workers.
+    error ScopedPolicyGraphConfiguration();
+    error ViewPreservationAlreadyBound();
+
     constructor(
         StreamFinalityNativeProviderReads.Config memory original,
         StreamFinalityScopedProviderReads.Config memory scoped,
@@ -204,9 +214,18 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         external
         view
         override
-        returns (ViewBindingTypes.Capability memory)
+        returns (ViewBindingTypes.Capability calldata)
     {
-        return _viewBinding.capability;
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     /// @notice Historical admission facts remain readable if a bound runtime later drifts.
@@ -214,34 +233,50 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         external
         view
         override
-        returns (ViewBindingTypes.Receipt memory)
+        returns (ViewBindingTypes.Receipt calldata)
     {
-        return _viewBinding.receipt;
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     function viewPreservationBindingTransition(
         ViewBindingTypes.Configuration calldata configuration,
         ViewDeclarationTypes.Binding calldata declaration
-    ) external view override returns (ViewBindingTypes.Transition memory) {
-        _validateViewPolicyFactory();
-        return ViewBinding.transition(_viewBinding, _graph.original, configuration, declaration);
+    ) external view override returns (ViewBindingTypes.Transition calldata) {
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     function bindViewPreservation(
         ViewBindingTypes.Configuration calldata configuration,
         ViewDeclarationTypes.Binding calldata declaration
     ) external override returns (bytes32 recordHash) {
-        _validateViewPolicyFactory();
-        ViewBindingTypes.Receipt memory r =
-            ViewBinding.bind(_viewBinding, _graph.original, configuration, declaration);
-        emit ViewPreservationBound(
-            r.recordHash,
-            r.actionId,
-            r.configuration.snapshotHost,
-            ViewBindingTypes.proposalHash(r),
-            r.dependenciesHash
+        _returnViewBinding(
+            ViewBindingTransport.write(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
         );
-        return r.recordHash;
     }
 
     function completeViewPreservationBindingProfile() external pure override returns (bytes32) {
@@ -252,10 +287,16 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         ViewBindingTypes.Configuration calldata configuration,
         ViewDeclarationTypes.Binding calldata declaration,
         IStreamViewPreservationFinalitySourcesV1.Selection calldata selected
-    ) external view override returns (ViewBindingTypes.Transition memory) {
-        _validateViewPolicyFactory();
-        return ViewBinding.completeTransition(
-            _viewBinding, _graph.original, configuration, declaration, selected
+    ) external view override returns (ViewBindingTypes.Transition calldata) {
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
         );
     }
 
@@ -264,20 +305,16 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         ViewDeclarationTypes.Binding calldata declaration,
         IStreamViewPreservationFinalitySourcesV1.Selection calldata selected
     ) external override returns (bytes32 completeRecordHash) {
-        _validateViewPolicyFactory();
-        (
-            ViewBindingTypes.Receipt memory basic,
-            IStreamViewPreservationFinalitySourcesV1.Receipt memory complete
-        ) = ViewBinding.bindComplete(
-            _viewBinding, _graph.original, configuration, declaration, selected
+        _returnViewBinding(
+            ViewBindingTransport.write(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
         );
-        emit ViewPreservationCompleteBound(
-            complete.recordHash,
-            basic.recordHash,
-            complete.actionId,
-            CompleteViewBinding.proposalHash(basic, complete)
-        );
-        return complete.recordHash;
     }
 
     /// @notice Authenticated immutable producer selection; consumers still require current evidence.
@@ -285,9 +322,18 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         external
         view
         override
-        returns (IStreamViewPreservationFinalitySourcesV1.Selection memory)
+        returns (IStreamViewPreservationFinalitySourcesV1.Selection calldata)
     {
-        return ViewBinding.completeSelection(_viewBinding, _graph.original);
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     /// @notice Historical full admission; unavailable for pending and basic-only bindings.
@@ -295,9 +341,18 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         external
         view
         override
-        returns (IStreamViewPreservationFinalitySourcesV1.Receipt memory)
+        returns (IStreamViewPreservationFinalitySourcesV1.Receipt calldata)
     {
-        return ViewBinding.completeHistory(_viewBinding, _graph.original);
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     /// @notice Bootstrap scalar only; the route consumer pins this provider and checks profile,
@@ -341,39 +396,63 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         }
     }
 
-    function _validateViewPolicyFactory() private view {
-        if (_viewBinding.receipt.recordHash != 0) {
-            revert ViewBindingTypes.ViewPreservationAlreadyBound();
-        }
-        ViewPolicyFactory.validate(
-            _graph.original,
-            _graph.recipe.targets[2],
-            _graph.recipe.codeHashes[2],
-            _graph.binding.sourceFactoryDependenciesHash
-        );
-    }
-
     function viewSourceBinding()
         external
         view
         override
-        returns (ViewDeclarationTypes.Binding memory)
+        returns (ViewDeclarationTypes.Binding calldata)
     {
-        return ViewBinding.declaration(_viewBinding, _graph.original);
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     /// @notice Authenticated bound capability, not a complete snapshot currentness verdict.
     /// The fixed consumer still validates current routes, eligibility and source reciprocities.
     function viewPreservationSnapshotHost() external view override returns (address) {
-        return ViewBinding.current(_viewBinding, _graph.original).snapshotHost;
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     function viewPreservationSnapshotCodeHash() external view override returns (bytes32) {
-        return ViewBinding.current(_viewBinding, _graph.original).snapshotCodeHash;
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     function viewPreservationSnapshotValidationGas() external view override returns (uint256) {
-        return ViewBinding.current(_viewBinding, _graph.original).validationGas;
+        _returnViewBinding(
+            ViewBindingTransport.read(
+                _viewBinding,
+                _graph.original,
+                _graph.recipe.targets[2],
+                _graph.recipe.codeHashes[2],
+                _graph.binding.sourceFactoryDependenciesHash,
+                msg.data
+            )
+        );
     }
 
     function preservationFactorySourceProfile() external pure override returns (bytes32) {
@@ -384,10 +463,12 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         external
         view
         override
-        returns (Profiles.Profile memory)
+        returns (Profiles.Profile calldata)
     {
-        ProfileSelection.profileHash(index);
-        return _sourceSelection.profiles[index];
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function finalitySourceConfigurationHash() external view override returns (bytes32) {
@@ -398,35 +479,30 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         external
         view
         override
-        returns (Profiles.Sources memory)
+        returns (Profiles.Sources calldata)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewConfiguration.catalogue(_graph.original, scope);
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return GraphSelection.sources(_graph, scope);
-        }
-        if (CollectionSelection.isPolicy(_collectionGraph, scope)) {
-            return CollectionSelection.sources(_collectionGraph, scope);
-        }
-        return ProfileSelection.current(_sourceSelection, scope);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function collectionPreservationPolicyPublicationBinding()
         external
         view
         override
-        returns (CollectionBinding.CollectionFactoryBinding memory)
+        returns (CollectionBinding.CollectionFactoryBinding calldata)
     {
-        return _collectionGraph.binding;
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function latestCollectionSnapshotHash(uint256 cid) public view override returns (bytes32) {
-        StreamFinalityScope memory scope =
-            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, cid, 0, 0);
-        if (!_policyScope(scope)) return super.latestCollectionSnapshotHash(cid);
-        _pins();
-        return PolicyComponents.snapshotHash(_collectionConfig(scope).source, cid);
+        (bool handled, bytes32 result) = GraphDispatch.latestSnapshot(_graph, _collectionGraph, cid);
+        if (!handled) return super.latestCollectionSnapshotHash(cid);
+        return result;
     }
 
     function finalityComponentFacts(bytes32 family, StreamFinalityScope calldata scope)
@@ -435,46 +511,15 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (StreamFinalityHostComponentFacts memory f)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            (f.frozen, f.dataHash) = ViewComponents.facts(_graph.original, scope, family);
-            if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
-                f.moduleVersion = metadataModuleVersion;
-                f.manifestHash = metadataModuleManifestHash;
-            } else {
-                componentHost(family);
-                f.moduleVersion = routerModuleVersion;
-                f.manifestHash = routerModuleManifestHash;
-            }
-            return f;
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            ScopedPolicyReads.Config memory configured = _scopedPolicyConfig(scope);
-            _pins();
-            _scope(scope);
-            if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
-                (f.frozen, f.dataHash) = ScopedPolicyFacts.facts(configured, scope);
-                f.moduleVersion = metadataModuleVersion;
-                f.manifestHash = metadataModuleManifestHash;
-            } else {
-                componentHost(family);
-                (f.frozen, f.dataHash) = ScopedPolicyStatic.facts(configured, scope, family);
-                f.moduleVersion = routerModuleVersion;
-                f.manifestHash = routerModuleManifestHash;
-            }
-            return f;
-        }
-        if (!_policyScope(scope)) return super.finalityComponentFacts(family, scope);
-        _pins();
-        _scope(scope);
-        if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
-            (f.frozen, f.dataHash) =
-                PolicyComponents.facts(_collectionConfig(scope).source, scope, family);
+        (bool handled, bool frozen, bytes32 dataHash, bool metadata) =
+            GraphDispatch.componentFacts(_graph, _collectionGraph, family, scope);
+        if (!handled) return super.finalityComponentFacts(family, scope);
+        f.frozen = frozen;
+        f.dataHash = dataHash;
+        if (metadata) {
             f.moduleVersion = metadataModuleVersion;
             f.manifestHash = metadataModuleManifestHash;
         } else {
-            componentHost(family);
-            (f.frozen, f.dataHash) =
-                PolicyComponents.facts(_collectionConfig(scope).source, scope, family);
             f.moduleVersion = routerModuleVersion;
             f.manifestHash = routerModuleManifestHash;
         }
@@ -486,14 +531,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes memory)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewOperations.manifest(_graph.original, scope);
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.manifest(_scopedPolicyConfig(scope), scope);
-        }
-        if (!_policyScope(scope)) return super.inputManifestBytes(scope);
-        return PolicyOperations.manifest(_collectionConfig(scope), scope);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.inputManifestBytes(scope);
     }
 
     function requireFinalityScopeInputs(StreamFinalityScope calldata scope, bytes32 manifestHash)
@@ -502,14 +543,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (StreamFinalityScopeInputs memory, bytes32, bytes32)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewOperations.inputs(_graph.original, scope, manifestHash);
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.inputs(_scopedPolicyConfig(scope), scope, manifestHash);
-        }
-        if (!_policyScope(scope)) return super.requireFinalityScopeInputs(scope, manifestHash);
-        return PolicyOperations.inputs(_collectionConfig(scope), scope, manifestHash);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.requireFinalityScopeInputs(scope, manifestHash);
     }
 
     function requireSanctionReviewFacts(StreamFinalityScope calldata scope, bytes32 manifestHash)
@@ -518,14 +555,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (IStreamFinalitySanctionReview.ReviewFacts memory)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewOperations.review(_graph.original, scope, manifestHash);
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.review(_scopedPolicyConfig(scope), scope, manifestHash);
-        }
-        if (!_policyScope(scope)) return super.requireSanctionReviewFacts(scope, manifestHash);
-        return PolicyOperations.review(_collectionConfig(scope), scope, manifestHash);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.requireSanctionReviewFacts(scope, manifestHash);
     }
 
     function requirePreparedFinalityScopeInputs(
@@ -534,24 +567,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         StreamFinalityComponentExpectation[] calldata components
     ) public view override returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
         _originalRegistry();
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            (StreamFinalityScopeInputs memory inputs_, bytes32 schema_, bytes32 canon_,) =
-                ViewOperations.prepared(_graph.original, scope, manifestHash, components, false);
-            return (inputs_, schema_, canon_);
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            (StreamFinalityScopeInputs memory inputs_, bytes32 schema_, bytes32 canon_,) = ScopedPolicyOperations.prepared(
-                _scopedPolicyConfig(scope), scope, manifestHash, components, false
-            );
-            return (inputs_, schema_, canon_);
-        }
-        if (!_policyScope(scope)) {
-            return super.requirePreparedFinalityScopeInputs(scope, manifestHash, components);
-        }
-        (StreamFinalityScopeInputs memory v, bytes32 schema, bytes32 canon,) = PolicyOperations.prepared(
-            _collectionConfig(scope), scope, manifestHash, components, false
-        );
-        return (v, schema, canon);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.requirePreparedFinalityScopeInputs(scope, manifestHash, components);
     }
 
     function requirePreparedFinalityScopeInputsAndReview(
@@ -570,30 +589,22 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         )
     {
         _originalRegistry();
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewOperations.prepared(_graph.original, scope, manifestHash, components, true);
-        }
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.prepared(
-                _scopedPolicyConfig(scope), scope, manifestHash, components, true
-            );
-        }
-        if (!_policyScope(scope)) {
-            return
-                super.requirePreparedFinalityScopeInputsAndReview(scope, manifestHash, components);
-        }
-        return PolicyOperations.prepared(
-            _collectionConfig(scope), scope, manifestHash, components, true
-        );
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.requirePreparedFinalityScopeInputsAndReview(scope, manifestHash, components);
     }
 
     function scopedPreservationPolicyPublicationBinding()
         external
         view
         override
-        returns (GraphBinding.FactoryBinding memory)
+        returns (GraphBinding.FactoryBinding calldata)
     {
-        return _graph.binding;
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function scopedPreservationPolicySnapshotProfile() external pure override returns (bytes32) {
@@ -606,7 +617,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (address)
     {
-        return _scopedPolicyConfig(scope).targets[8];
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function scopedPreservationPolicySnapshotCodeHash(StreamFinalityScope calldata scope)
@@ -615,7 +629,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes32)
     {
-        return _scopedPolicyConfig(scope).codeHashes[8];
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function scopedPreservationPolicySnapshotValidationGas(StreamFinalityScope calldata scope)
@@ -624,13 +641,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (uint256)
     {
-        if (
-            scope.scopeType != StreamFinalityScopeType.TOKEN
-                && scope.scopeType != StreamFinalityScopeType.RELEASE
-                && scope.scopeType != StreamFinalityScopeType.SEASON
-        ) revert GraphSelection.ScopedPolicyGraphConfiguration();
-        StreamMetadataSubjects.scopeSubject(deploymentChainId, core, scope);
-        return _graph.original.componentSourceGas;
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        revert();
     }
 
     function scopedContentRoot(StreamFinalityScope calldata scope)
@@ -639,11 +653,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes32, uint64, bytes32)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewMetadata.root(_graph.original, scope);
-        }
-        if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedContentRoot(scope);
-        return ScopedPolicyMetadata.root(_metadataConfigV2(scope), scope);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.scopedContentRoot(scope);
     }
 
     function scopedSnapshotHash(StreamFinalityScope calldata scope)
@@ -652,13 +665,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes32)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewMetadata.snapshot(_graph.original, scope);
-        }
-        if (!GraphSelection.isPolicy(_graph, scope)) {
-            return super.scopedSnapshotHash(scope);
-        }
-        return ScopedPolicyMetadata.snapshot(_metadataConfigV2(scope), scope);
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.scopedSnapshotHash(scope);
     }
 
     function scopedManifest(StreamFinalityScope calldata scope)
@@ -667,42 +677,10 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bool, bytes32)
     {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewMetadata.manifest(_graph.original, scope);
-        }
-        if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedManifest(scope);
-        return ScopedPolicyMetadata.manifest(_metadataConfigV2(scope), scope);
-    }
-
-    function _scopedPolicyConfig(StreamFinalityScope memory scope)
-        private
-        view
-        returns (ScopedPolicyReads.Config memory c)
-    {
-        (c,) = GraphSelection.current(_graph, scope);
-    }
-
-    function _metadataConfigV2(StreamFinalityScope memory scope)
-        private
-        view
-        returns (ScopedPolicyMetadata.Config memory c)
-    {
-        ScopedPolicyReads.Config memory s = _scopedPolicyConfig(scope);
-        c.snapshots = ScopedPolicySnapshots.Dependencies(
-            s.targets[0],
-            s.targets[1],
-            s.targets[2],
-            s.targets[8],
-            s.codeHashes[0],
-            s.codeHashes[1],
-            s.codeHashes[2],
-            s.codeHashes[8],
-            s.chainId,
-            s.readGas,
-            s.componentSourceGas
-        );
-        c.membership = s.targets[3];
-        c.membershipCodeHash = s.codeHashes[3];
+        (bool handled, bytes memory encoded) =
+            GraphDispatch.read(_graph, _collectionGraph, _sourceSelection, msg.data);
+        if (handled) _returnViewBinding(encoded);
+        return super.scopedManifest(scope);
     }
 
     function _originalRegistry() private view {
@@ -712,21 +690,6 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
         ) {
             revert NativeProviderOriginalRegistryOnly();
         }
-    }
-
-    function _collectionConfig(StreamFinalityScope memory scope)
-        private
-        view
-        returns (PolicyOperations.Config memory c)
-    {
-        CollectionGraph.Graph memory g;
-        (c.source, g) = CollectionSelection.current(_collectionGraph, scope);
-        c.outputManifest = g.children[2];
-        c.outputManifestCodeHash = g.codeHashes[2];
-    }
-
-    function _policyScope(StreamFinalityScope memory scope) private view returns (bool) {
-        return CollectionSelection.isPolicy(_collectionGraph, scope);
     }
 
     function _profile(StreamFinalityNativeProviderReads.Config memory c, uint8 index, bytes32 hash)
@@ -744,5 +707,9 @@ contract StreamFinalityFullPreservationPolicyEvidenceProviderV1 is
             c.codeHashes[10],
             hash
         );
+    }
+
+    function _returnViewBinding(bytes memory result) private pure {
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 }
