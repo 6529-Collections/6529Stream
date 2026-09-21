@@ -47,8 +47,15 @@ import {
     StreamCurrentAuthorityScopedRenderCriticalState as State
 } from "./StreamCurrentAuthorityScopedRenderCriticalState.sol";
 
+import {
+    StreamCurrentAuthorityScopedRenderCriticalStageGuard as StageGuard
+} from "./StreamCurrentAuthorityScopedRenderCriticalStageGuard.sol";
+
 /// @notice Typed stages using the actual host storage reference.
 library StreamCurrentAuthorityScopedRenderCriticalDescriptionStages {
+    // Retain the original error ABI after moving the fixed currentness guard.
+    error InventoryIncomplete();
+
     function appendWork(State.State storage state, bytes calldata input) public {
         (
             bytes32 id,
@@ -140,7 +147,7 @@ library StreamCurrentAuthorityScopedRenderCriticalDescriptionStages {
     }
 
     function _stage(State.State storage state, bytes32 id, uint16 stage) private view {
-        State.stage(state, id, stage);
+        StageGuard.stage(state, id, stage);
     }
 
     function _append(

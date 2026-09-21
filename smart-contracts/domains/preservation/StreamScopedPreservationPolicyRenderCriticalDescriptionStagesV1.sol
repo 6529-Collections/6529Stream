@@ -40,8 +40,15 @@ import {
     StreamScopedPreservationPolicyRenderCriticalStateV1 as State
 } from "./StreamScopedPreservationPolicyRenderCriticalStateV1.sol";
 
+import {
+    StreamScopedPreservationPolicyRenderCriticalStageGuardV1 as StageGuard
+} from "./StreamScopedPreservationPolicyRenderCriticalStageGuardV1.sol";
+
 /// @notice Typed stages using the actual host storage reference.
 library StreamScopedPreservationPolicyRenderCriticalDescriptionStagesV1 {
+    // Retain the original error ABI after moving the fixed currentness guard.
+    error InventoryIncomplete();
+
     function appendWork(State.State storage state, bytes calldata input) public {
         (bytes32 id, StreamWorkRecordTypes.Description memory witness, address originalActor) =
             abi.decode(input[4:], (bytes32, StreamWorkRecordTypes.Description, address));
@@ -122,7 +129,7 @@ library StreamScopedPreservationPolicyRenderCriticalDescriptionStagesV1 {
     }
 
     function _stage(State.State storage state, bytes32 id, uint16 stage) private view {
-        State.stage(state, id, stage);
+        StageGuard.stage(state, id, stage);
     }
 
     function _append(
