@@ -29,7 +29,7 @@ insufficient gas, closed selectors, wrong widths and noncanonical addresses.
 The surrounding constructor/getter graph is explicit and typed.
 
 The immutable `01f71ceb` capture now passes all eight Configuration cases.
-Native code generation completed in 74.485 seconds over 117 exact sources with
+The native build completed in 74.485 seconds (70.954 seconds in code generation) over 117 exact sources with
 all 164 ABI products selected up front. Complete native artifact, AST, metadata,
 link and source checks passed. The original size check incorrectly classified
 the 30,574-byte aggregate test root as a deployed protocol product; that failed
