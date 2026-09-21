@@ -31,7 +31,8 @@ library StreamArtistRecoveredHydrationTypes {
     uint256 internal constant DISPUTE_HISTORY = 8192;
     uint256 internal constant SANCTION_HISTORY = 16384;
     uint256 internal constant HISTORY_CONTENT = 32768;
-    uint256 internal constant KNOWN_FEATURES = 65535;
+    uint256 internal constant HISTORY_PLATFORM = 65536;
+    uint256 internal constant KNOWN_FEATURES = 131071;
     // Reviewed recovered graph only; typed exporters still reject broader collection profiles.
     // Keep this explicit so adding a future known feature does not advertise it automatically.
     uint256 internal constant FIRST_GRAPH_FEATURES =
@@ -50,6 +51,7 @@ library StreamArtistRecoveredHydrationTypes {
     uint256 internal constant DISPUTE_GRAPH_FEATURES = ACCEPTED_GRAPH_FEATURES | DISPUTE_HISTORY;
     uint256 internal constant SANCTION_GRAPH_FEATURES = DISPUTE_GRAPH_FEATURES | SANCTION_HISTORY;
     uint256 internal constant HISTORY_CONTENT_GRAPH_FEATURES = SANCTION_GRAPH_FEATURES | HISTORY_CONTENT;
+    uint256 internal constant PLATFORM_GRAPH_FEATURES = HISTORY_CONTENT_GRAPH_FEATURES | HISTORY_PLATFORM;
     // Finite transport-profile limits, not limits on validity of original lifetime history.
     uint256 internal constant MAX_ERAS = 16;
     uint256 internal constant MAX_JOURNAL_ENTRIES = 4096;

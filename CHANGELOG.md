@@ -1,5 +1,15 @@
 # Changelog
 
+## Recovered Platform Works and correction lineage
+
+- Add the explicit HISTORY_PLATFORM operation-60 profile for complete original
+  declaration, claim, contest, correction and later binding-continuation history.
+  Keep zero-Artist receipts collection-only and preserve original records/domains.
+- Authenticate original Archive clocks and all seven owner imports atomically;
+  retain existing request interfaces and earlier codecs. Authored actual-owner/Safe
+  regressions and capacity evidence remain distinct from native acceptance. See the
+  [integration guide](docs/integrations/artist-recovered-platform-history.md).
+
 ## Preservation reference reader compiler and capacity repair
 
 - Split the complete original-record read into a fixed library to remove the

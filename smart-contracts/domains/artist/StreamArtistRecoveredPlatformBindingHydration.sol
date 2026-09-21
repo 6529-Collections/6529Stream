@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredPlatformBindingHydration as Platform } from "./StreamArtistRecoveredPlatformBindingHydration.sol";
+import { StreamArtistRecoveredPlatformTypes as A } from "./StreamArtistRecoveredPlatformTypes.sol";
 import {
-    StreamArtistRecoveredDisputeHistoryTypes as A
-} from "./StreamArtistRecoveredDisputeHistoryTypes.sol";
-import {
-    StreamArtistRecoveredDisputeBindingValidation as V
-} from "./StreamArtistRecoveredDisputeBindingValidation.sol";
+    StreamArtistRecoveredPlatformBindingValidation as V
+} from "./StreamArtistRecoveredPlatformBindingValidation.sol";
 import {
     StreamArtistRecoveredBindingCorrectionTypes as CB
 } from "./StreamArtistRecoveredBindingCorrectionTypes.sol";
@@ -49,7 +46,7 @@ import {
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
 
 /// @notice Fixed-owner complete accepted generation export/import under original guarded op60.
-library StreamArtistRecoveredDisputeBindingHydration {
+library StreamArtistRecoveredPlatformBindingHydration {
     function collect(address source, AH.Query memory q, RH.OwnerProvenance memory p)
         public
         view
@@ -115,9 +112,7 @@ library StreamArtistRecoveredDisputeBindingHydration {
         bytes memory outer
     ) public returns (bool) {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 0);
-        if ((h.requiredFeatures & RH.HISTORY_PLATFORM) != 0)
-            return Platform.importIfSelected(bindings, history, terms, terminals, corrections, q, outer);
-        if ((h.requiredFeatures & RH.DISPUTE_HISTORY) == 0) return false;
+        if ((h.requiredFeatures & RH.HISTORY_PLATFORM) == 0) return false;
         if (p.nonces.length != 0) revert RH.InvalidRecoveredHydrationProfile();
         CB.Bundle memory b = decode(q, p.provenance, p.semanticState);
         if (b.bindings.current.consentMode == 2 && (h.requiredFeatures & RH.DELEGATED_CONSENT) == 0)

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredPlatformRouting as PlatformRouting } from "./StreamArtistRecoveredPlatformRouting.sol";
 import {
     StreamArtistRecoveredSanctionRouting as SanctionRouting
 } from "./StreamArtistRecoveredSanctionRouting.sol";
@@ -89,7 +90,10 @@ library StreamArtistRecoveredPreparationOwners {
             payload.provenance = RH.ownerProvenance(c.provenance, i);
             payload.publications = Publications.collect(c.source.owners[i], i);
             (data[i], payload.nonces) = Guards.collect(c.provenance, i, c.replayOrigins[i]);
-            if ((i == 0 || i == 3 || i == 4) && (c.features & RH.SANCTION_HISTORY) != 0) {
+            if ((i == 0 || i == 3 || i == 4) && (c.features & RH.HISTORY_PLATFORM) != 0) {
+                payload.semanticState =
+                    PlatformRouting.ownerState(c.source, c.query, c.provenance, c.generations, i);
+            } else if ((i == 0 || i == 3 || i == 4) && (c.features & RH.SANCTION_HISTORY) != 0) {
                 payload.semanticState =
                     SanctionRouting.ownerState(c.source, c.query, c.provenance, c.generations, i);
             } else if ((i == 0 || i == 3 || i == 4) && (c.features & RH.DISPUTE_HISTORY) != 0) {

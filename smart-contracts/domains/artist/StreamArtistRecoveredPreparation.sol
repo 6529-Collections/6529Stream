@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredPlatformStage as PlatformStage } from "./StreamArtistRecoveredPlatformStage.sol";
+import { StreamArtistRecoveredPlatformCollection as PlatformCollection } from "./StreamArtistRecoveredPlatformCollection.sol";
 import {
     StreamArtistRecoveredHistoryContentSelection as HistoryContentSelection
 } from "./StreamArtistRecoveredHistoryContentSelection.sol";
@@ -117,9 +119,16 @@ library StreamArtistRecoveredPreparation {
                 context.identity, c.provenance, c.source.owners[2], payoutContinuations
             );
         uint8 consentMode;
-        (uint8 historyRoute, bool sanctioned) =
-            HistoryContentSelection.select(c.source, prepared.query, c.provenance);
-        if (historyRoute == 3) {
+        (uint8 historyRoute, bool sanctioned, bool platformHistory) =
+            PlatformStage.select(c.source, prepared.query, c.provenance);
+        if (platformHistory) {
+            if (context.hasAttestations) revert T.UnsupportedProfile();
+            uint256 platformFeatures;
+            (context.generations, context.consent, consentMode, context.hasGenerations, platformFeatures) =
+                PlatformStage.collect(c.source, prepared.query, c.provenance, context.identity,
+                    context.economics, royaltyFreezes, sanctioned);
+            context.features |= platformFeatures;
+        } else if (historyRoute == 3) {
             if (context.hasAttestations) revert T.UnsupportedProfile();
             context.features |= RH.DISPUTE_HISTORY | RH.HISTORY_CONTENT;
             if (sanctioned) context.features |= RH.SANCTION_HISTORY;

@@ -145,6 +145,13 @@ library StreamArtistRecoveredHydrationAdmission {
         for (uint8 owner; owner < 7; ++owner) {
             for (uint256 j; j < c.provenance.journals[owner].length; ++j) {
                 H.Receipt memory row = c.provenance.journals[owner][j].receipt;
+                if (_platformCollectionOnly(owner, row)) {
+                    uint256 collection = StreamArtistMultipleHydrationOperations._collection(
+                        selected.collections, row.collectionId
+                    );
+                    ++collectionCounts[collection];
+                    continue;
+                }
                 uint256 artist = StreamArtistMultipleHydrationOperations._artist(
                     selected.artistIds, row.artistId
                 );
@@ -179,6 +186,13 @@ library StreamArtistRecoveredHydrationAdmission {
         for (uint8 owner; owner < 7; ++owner) {
             for (uint256 j; j < c.provenance.journals[owner].length; ++j) {
                 H.Receipt memory row = c.provenance.journals[owner][j].receipt;
+                if (_platformCollectionOnly(owner, row)) {
+                    uint256 collection = StreamArtistMultipleHydrationOperations._collection(
+                        selected.collections, row.collectionId
+                    );
+                    c.collections[collection].records[collectionCounts[collection]++] = row.recordHash;
+                    continue;
+                }
                 uint256 artist = StreamArtistMultipleHydrationOperations._artist(
                     selected.artistIds, row.artistId
                 );
@@ -193,4 +207,10 @@ library StreamArtistRecoveredHydrationAdmission {
             }
         }
     }
+    function _platformCollectionOnly(uint8 owner, H.Receipt memory row) private pure returns (bool) {
+        return owner == 4 && row.artistId == 0 && row.collectionId != 0
+            && (row.operation == 8 || row.operation == 9 || row.operation == 10
+                || row.operation == 11 || row.operation == 53);
+    }
+
 }

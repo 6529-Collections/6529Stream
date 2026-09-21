@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredPlatformImport as PlatformHistory } from "./StreamArtistRecoveredPlatformImport.sol";
 import {
     StreamArtistRecoveredSanctionAttributionImport as SanctionHistory
 } from "./StreamArtistRecoveredSanctionAttributionImport.sol";
@@ -126,6 +127,8 @@ library StreamArtistRecoveredRevokedAttribution {
         returns (bool)
     {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 4);
+        if ((h.requiredFeatures & RH.HISTORY_PLATFORM) != 0)
+            return PlatformHistory.importIfSelected(s, q, outer);
         if ((h.requiredFeatures & RH.SANCTION_HISTORY) != 0) {
             return SanctionHistory.importIfSelected(s, q, outer);
         }
