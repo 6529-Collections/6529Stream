@@ -36,6 +36,13 @@ import { StreamRenderCriticalSourceReads as Sources } from "./StreamRenderCritic
 
 /// @notice Typed stages using the actual host storage reference.
 library StreamMultiOriginRecordStages {
+    struct ParentFrame {
+        bytes32 id;
+        T.Item[] refs;
+        address actor;
+        O.ReceiptWitness receipt;
+    }
+
     event InventorySegmentRecorded(
         bytes32 indexed planId, uint64 indexed index, T.Segment segment, T.Item[] items
     );
@@ -61,15 +68,17 @@ library StreamMultiOriginRecordStages {
         _parent(
             state,
             origins,
-            id,
-            References.intent(
-                state.dependencies.targets[1],
-                c.conservation.record.recordHash,
-                c.conservation.record.payloadHash,
-                witness
-            ),
-            originalActor,
-            receipt
+            ParentFrame(
+                id,
+                References.intent(
+                    state.dependencies.targets[1],
+                    c.conservation.record.recordHash,
+                    c.conservation.record.payloadHash,
+                    witness
+                ),
+                originalActor,
+                receipt
+            )
         );
     }
 
@@ -96,27 +105,26 @@ library StreamMultiOriginRecordStages {
         _parent(
             state,
             origins,
-            id,
-            References.waiver(
-                state.dependencies.targets[1],
-                c.conservation.record.recordHash,
-                c.conservation.record.payloadHash,
-                witness
-            ),
-            originalActor,
-            receipt
+            ParentFrame(
+                id,
+                References.waiver(
+                    state.dependencies.targets[1],
+                    c.conservation.record.recordHash,
+                    c.conservation.record.payloadHash,
+                    witness
+                ),
+                originalActor,
+                receipt
+            )
         );
     }
 
     function _parent(
         State.State storage state,
         Origins.State storage origins,
-        bytes32 id,
-        T.Item[] memory refs,
-        address actor,
-        O.ReceiptWitness memory receipt
+        ParentFrame memory frame
     ) private {
-        S.Context memory c = state.contexts[id];
+        S.Context memory c = state.contexts[frame.id];
         T.Item[] memory originals = Originals.items(
             state.dependencies,
             c,
@@ -128,16 +136,16 @@ library StreamMultiOriginRecordStages {
             _publication(
                 state,
                 origins,
-                id,
-                receipt,
+                frame.id,
+                frame.receipt,
                 state.dependencies,
                 c.conservation.record.publication,
                 c.conservation.record.recordHash,
-                actor
+                frame.actor
             )
         );
-        _append(state, id, _join(originals, refs), c.conservation.selectionHash);
-        state.plans[id].completedStages = 5;
+        _append(state, frame.id, _join(originals, frame.refs), c.conservation.selectionHash);
+        state.plans[frame.id].completedStages = 5;
     }
 
     function _stage(State.State storage state, bytes32 id, uint16 stage) private view {
