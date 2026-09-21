@@ -1,4 +1,16 @@
 # Changelog
+## Scoped current-Artist preservation ceremony source
+
+- Add separate V2 graph and fixture helpers for actual current-Artist producer
+  admission, scoped publication and A-to-B-to-C record succession.
+- Add distinct preservation export packets and exact local resume entrypoints
+  for fresh observations, inventory and complete byte coverage. Keep the
+  original full-output recipes unchanged.
+- Combined ABI-only validation passes. The three scoped tests remain authored;
+  native execution, gas, sizes, browser capture and Finality remain pending.
+  See the [ceremony recipe](docs/integrations/current-authority-scoped-preservation-ceremony.md)
+  for synthetic fixture evidence and finite catalogue limits.
+
 ## V2 preservation stored-root reads
 
 - Recognize exact V2 collection and scoped root/family pairs through the

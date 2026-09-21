@@ -60,6 +60,11 @@ rejoins the complete original Registry admission, producer binding and saved
 output. Actual current-Artist producer admission and the complete succession
 ceremony require separate composed runtime validation.
 
+The separate [scoped ceremony recipe](current-authority-scoped-preservation-ceremony.md)
+constructs actual current-Artist admission, V2 publication, fresh source export
+and exact local resume entrypoints. Its three succession cases are authored;
+runtime and complete capture/coverage acceptance remain pending.
+
 ## V2 interpretation and compatibility
 
 Collection and scoped checkpoint capabilities are respectively
