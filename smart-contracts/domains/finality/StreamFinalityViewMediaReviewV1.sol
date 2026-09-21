@@ -24,7 +24,9 @@ import {
 import {
     StreamBundleArchiveTypes as B
 } from "../../interfaces/stream/preservation/StreamBundleArchiveTypes.sol";
-import { StreamBundleArchiveReads as Archive } from "../preservation/StreamBundleArchiveReads.sol";
+import {
+    StreamViewPreservationArchiveReadsV1 as Archive
+} from "../preservation/StreamViewPreservationArchiveReadsV1.sol";
 import {
     StreamPreservationInventoryChains as Chains
 } from "../preservation/StreamPreservationInventoryChains.sol";

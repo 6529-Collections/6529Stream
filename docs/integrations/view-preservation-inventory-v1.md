@@ -79,14 +79,44 @@ SHA-256 multihash authenticates the file digest; the CID alone does not establis
 size or availability. The original bundle proof must establish a nonzero full
 byte length and actual current archive coverage for that digest.
 
-The current media check rejects HTTPS URLs, Arweave transaction identifiers,
-DAG-PB CIDs, query/path variants and other unsupported URI forms. Their strings
-do not cryptographically imply file bytes. Original VIEW payload admission does
-not admit inline data URIs. An authorized external observation profile that
-binds the exact URI to digest/size/provenance is still required for those media;
-it must not be inferred from an arbitrary reference package member or from the
-hash of the URI string. This is a visible completeness limitation, not an
-optional omission from the VIEW inventory.
+The pre-genesis draft now also admits two closed locator obligations under the
+same explicit VIEW inventory and sanction-review profiles. This changes the new
+draft source and exact sanction catalogue bytes; it does not update a registered
+document in place. A deployment must register the exact new bytes and obtain
+fresh admission. Earlier captures, including the raw-CID-only composed tests,
+remain evidence only for their recorded source.
+
+An exact `https://` locator must pass the original Archive institutional ASCII
+DNS/path grammar (10–2,048 bytes) and equal the complete retained identifier of
+the same covered object's signed institutional receipt. A canonical `ar://`
+locator contains exactly 43 unpadded base64url characters encoding a nonzero
+32-byte transaction ID, with zero trailing bits and no path/query/fragment. It
+must equal that same pair's endowed receipt identifier; the original native
+checkpoint binds the transaction, data root and full byte size. Neither URI is
+interpreted as a file digest.
+
+These rows use `EXTERNAL_REFERENCE`, role `VIEW_ARCHIVE_LOCATOR_IMAGE`,
+`RAW_BYTES`, algorithm zero, empty digest and unknown size zero. Their provenance
+is `keccak256(abi.encode(keccak256("6529STREAM_VIEW_ARCHIVE_LOCATOR_OBLIGATION_V1"),
+source, sourceRecord, exactURI))`. All other optional coordinates remain zero.
+The complete inventory source, ordered row and its original archive Admission
+are still committed separately. The fixed VIEW reader reconstructs the entire
+canonical row, reads the actual object, validates original complete receipt,
+fixity, native evidence and current pair, then checks exact locator equality.
+A separate temporary row supplies that authenticated object's digest to the
+unchanged generic Archive reader; retained locator rows remain unchanged.
+
+The same fixed reader serves cover, refresh, full-current diagnosis and media
+review. Locator evidence requires external backend 1. Raw CID and absent rows
+retain their exact original bytes and generic correspondence behavior. No
+caller-selected profile or object digest can bypass these joins.
+
+Arbitrary origin HTTPS URLs that differ from the signed institution locator,
+redirects/mirrors, Arweave subpaths/manifests, DAG-PB CIDs and other unsupported
+URI forms still require a real retrieval-correspondence witness. Original VIEW
+payload admission does not admit inline data URIs. These remain visible required
+completeness work, not omitted media or inferred package-file correspondence.
+See [the bounded locator guide](view-locator-correspondence-v1.md).
 
 ## Once-bound complete source selection
 

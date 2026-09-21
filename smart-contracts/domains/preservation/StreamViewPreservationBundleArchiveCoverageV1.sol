@@ -12,6 +12,9 @@ import {
     StreamPreservationInventoryChains as Chains
 } from "./StreamPreservationInventoryChains.sol";
 import { StreamBundleArchiveReads as Reads } from "./StreamBundleArchiveReads.sol";
+import {
+    StreamViewPreservationArchiveReadsV1 as ViewReads
+} from "./StreamViewPreservationArchiveReadsV1.sol";
 import "../../interfaces/stream/preservation/IStreamViewPreservationRenderCriticalInventoryV1.sol";
 import "../../interfaces/stream/preservation/IStreamViewPreservationBundleArchiveCoverageV1.sol";
 import {
@@ -218,7 +221,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
         }
         bytes32 environment = Reads.environment(_dependencies);
         (B.Admission memory a, bytes32 observation) =
-            Reads.admit(_dependencies, _inventories[id].inventory.artistId, item, proof);
+            ViewReads.admit(_dependencies, _inventories[id].inventory.artistId, item, proof);
         if (Reads.environment(_dependencies) != environment) revert T.InventorySourceChanged();
         if (environment != p.environmentHash) p.environmentHash = 0;
         bytes32 itemHash = Chains.itemHash(item);
@@ -316,7 +319,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
             r.environmentHash != environment || r.complete || r.nextIndex != expectedIndex
                 || expectedIndex >= _items[id].length
         ) revert T.InventoryIncomplete();
-        bytes32 observation = Reads.current(
+        bytes32 observation = ViewReads.current(
             _dependencies,
             _inventories[id].inventory.artistId,
             _items[id][expectedIndex],
@@ -382,7 +385,7 @@ contract StreamViewPreservationBundleArchiveCoverageV1 is
         }
         Reads.environment(_dependencies);
         for (uint256 i; i < _items[id].length; ++i) {
-            Reads.current(
+            ViewReads.current(
                 _dependencies,
                 _inventories[id].inventory.artistId,
                 _items[id][i],
