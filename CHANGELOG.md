@@ -10,6 +10,16 @@
   and full current recovery/gas acceptance remain pending. See the
   [capacity guide](docs/integrations/artist-recovery-estate-dormancy-capacity.md).
 
+## Scoped full-policy provider read capacity
+
+- Move the original V2 payload, selected-root and configuration-pin bodies into
+  fixed linked workers while retaining all 21 original ABI entries, complete
+  policy payloads, root bindings and currentness checks.
+- All five selected libraries fit the original runtime and complete-init caps.
+  Seven focused regression cases are typechecked; runtime execution and composed
+  gas validation remain pending. See the
+  [integration guide](docs/integrations/scoped-policy-read-capacity.md).
+
 ## Complete recovered base multiplicity
 
 - Add a distinct typed operation60 profile for multiple recovered class1/class3
