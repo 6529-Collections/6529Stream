@@ -160,9 +160,14 @@ refresh transitions can be reconstructed from their captured prior state.
 The [attributed VIEW retrieval witness client](current-view-retrieval-v1.md)
 adds the separate ABI157 producer's two ordinary publish/revoke calls. It
 preserves the original raw observation digest, institutional writer, scope-shared
-nonce and mined-time receipt commitment. The companion retrieval-enabled VIEW
-inventory and Bundle consumer are separate pending workflows. Source and client
-checks do not establish actual Safe execution or linked runtime provenance.
+nonce and mined-time receipt commitment.
+
+The [VIEW inventory and Bundle consumer clients](current-view-preservation-consumers-v1.md)
+add all sixteen inventory and six Bundle writes under the same ABI157 source.
+The companion binding remains outside the inventory dependency hash. Ordered
+item-to-witness associations, immutable history, cached coverage and full
+per-item currentness retain their separate checks. Source and client checks
+do not establish actual Safe execution or linked runtime provenance.
 
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader

@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [VIEW inventory and Bundle consumers](docs/current-view-preservation-consumers-v1.md)
+  cover all 22 original writes, the separate retrieval companion binding,
+  ordered witness admissions and distinct cached/full currentness checks.
+
 - [Attributed VIEW retrieval witnesses](docs/current-view-retrieval-v1.md)
   covers the original witness's publish/revoke calls, raw observation signing,
   exact retained bytes and separate history/current admission.

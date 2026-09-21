@@ -129,3 +129,7 @@ export * from "./current-authority-preservation-archive-v1.js";
 export * from "./current-authority-preservation-archive-v1-workflow.js";
 export * from "./current-view-retrieval-v1.js";
 export * from "./current-view-retrieval-v1-workflow.js";
+export * from "./current-view-preservation-inventory-v1.js";
+export * from "./current-view-preservation-inventory-v1-workflow.js";
+export * from "./current-view-preservation-bundle-v1.js";
+export * from "./current-view-preservation-bundle-v1-workflow.js";

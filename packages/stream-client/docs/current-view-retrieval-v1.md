@@ -166,11 +166,13 @@ Safe mode additionally takes an independently verified `expectedSafeTxHash`.
 Unrelated same-block nonce or epoch changes are refused; these block observations
 do not prove an intra-block execution trace or fresh end-block source admission.
 
-## Remaining consumer and runtime work
+## Consumer workflows and remaining runtime work
 
 The retrieval-enabled VIEW inventory has a distinct profile and immutable
-witness binding. Its Bundle's `coverRetrievalNext`, stored item-to-witness join,
-revocation-aware refresh and media review are a separate consumer workflow.
+witness binding. The [inventory and Bundle clients](current-view-preservation-consumers-v1.md)
+cover `coverRetrievalNext`, the stored item-to-witness join and revocation-aware
+refresh through their separate consumer workflow. Finality media review remains
+its own original consumer path.
 The original dependency hash alone does not authenticate that companion, and
 the token current-authority archive client does not supply this VIEW workflow.
 

@@ -1147,6 +1147,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add genuine VIEW inventory and Bundle clients with separate witness binding,
+  ordered retrieval admissions and explicit history/cached/full-current checks.
+
 - Add attributed VIEW retrieval witness clients with original raw signing,
   canonical retained bytes and separate historical/current admission checks.
 
