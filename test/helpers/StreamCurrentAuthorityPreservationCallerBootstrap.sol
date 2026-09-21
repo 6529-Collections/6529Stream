@@ -99,6 +99,9 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
     error InvalidArtifactPrefix();
     error ExistingArtifact(string path);
     error InvalidPrestateEncoding();
+    error InvalidBaselineReadAccountsEncoding();
+    error InvalidBaselineReadAccount(address account);
+    error BaselineReadAccountMismatch(address account);
     error DuplicatePrestateAccount(address account);
     error DuplicatePrestateSlot(address account, bytes32 slot);
     error PrestateAccountMismatch(address account);
@@ -117,11 +120,18 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
     /// successful outer execution require independent admission before these bytes may become an
     /// admitted input. This never writes admitted-prestate.abi or the export's complete.abi marker.
     /// Baseline files survive a later revert; their distinct completion marker is not export proof.
+    /// An optional <prefix>.baseline-read-accounts.abi contains canonical abi.encode(address[]) of
+    /// strictly increasing nonzero accounts observed in independently authenticated prior CREATE or
+    /// configuration evidence. The runner pins that input separately. Full ordinary code reads
+    /// expose these existing accounts to the journal before dumping; no account or slot is installed
+    /// or appended. This grants neither admission nor storage closure. Without it, capture remains
+    /// unadmitted discovery and can omit untouched predeployed libraries.
     function capturePrestateFile(string memory artifactPrefix)
         public
         returns (BaselineCut memory cut)
     {
         _freshBaselinePaths(artifactPrefix);
+        _observeBaselineAccounts(artifactPrefix);
         string memory path = string.concat(artifactPrefix, ".baseline-dump.json");
         vm.dumpState(path);
         string memory raw = vm.readFile(path);
@@ -153,6 +163,31 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
             string.concat(artifactPrefix, ".baseline-complete.abi"),
             abi.encode(BASELINE_PROFILE, keccak256(contextABI))
         );
+    }
+
+    function _observeBaselineAccounts(string memory prefix) private view {
+        string memory path = string.concat(prefix, ".baseline-read-accounts.abi");
+        if (!vm.exists(path)) return;
+        bytes memory encoded = vm.readFileBinary(path);
+        address[] memory accounts = abi.decode(encoded, (address[]));
+        if (keccak256(abi.encode(accounts)) != keccak256(encoded)) {
+            revert InvalidBaselineReadAccountsEncoding();
+        }
+        address previous;
+        for (uint256 i; i < accounts.length; ++i) {
+            address account = accounts[i];
+            if (uint160(account) <= uint160(previous)) {
+                revert InvalidBaselineReadAccount(account);
+            }
+            previous = account;
+            bytes memory code = account.code;
+            bytes32 codeHash = account.codehash;
+            // Existing funded or nonce-bearing code-less accounts retain keccak256(empty).
+            // Absent accounts and Foundry's non-EVM VM-codehash exception cannot be admitted here.
+            if (codeHash == bytes32(0) || keccak256(code) != codeHash) {
+                revert BaselineReadAccountMismatch(account);
+            }
+        }
     }
 
     /// @notice Read the admitted prestate from a fixed local artifact path without a large argv.
