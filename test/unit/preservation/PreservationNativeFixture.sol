@@ -244,6 +244,8 @@ abstract contract PreservationNativeFixture is
         this.setCurrentAction(false, 0, 0, 0, 0, 0);
         c.configureCollection(1, nativeProvider, keccak256("salt"), true, 10);
         c.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
+        // New scopes require the selected coordinator; the typed Core returns its actual codehash.
+        core.setPointer(keccak256("ENTROPY_COORDINATOR"), address(c));
         c.registerEntropyScope(1, 1, keccak256("scope"));
     }
 
