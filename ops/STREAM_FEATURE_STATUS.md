@@ -16,96 +16,22 @@ different milestones.
 
 ## Latest integration checkpoint: 21 September
 
-Retrieval producer/consumer source is integrated as `0c14acde`, with the
-independent fixture follow-up `523a8f27`. The reference-reader compiler repair
-is integrated as `51c3210b`: five native cases and 256 fuzz inputs pass on exact
-`5678cad2`, with root matching all 45 sources and 50 native artifacts.
-ABI157 now checks all 4,059 committed sources with zero errors in 48.110
-seconds on `a2973d36`. It includes genuine-witness constructors for both actual
-VIEW graphs and the reviewed Platform history batch `7b0f918e`. ABI156's two
-constructor failures remain preserved; affected native campaigns can resume.
-These are source and focused-test milestones; combined acceptance remains.
+The current client package passes **2,408 tests** on `26051498`, including
+current-authority Archive workflows and the retained Burn/Safe fixes. Museum
+documentary/semantic V2 dossier `e278ddcf` passes all 33 focused tests at root.
+Publication11 passes on exact `9d4af023`, including independent archive replay;
+Registry6 passes on `6d9729c6`. Each campaign retains its declared typed boundaries.
 
-- **Preservation and finality:** complete VIEW binding, both provider dispatch
-  paths and Discovery are integrated. Same-host gas tests pass eight cases on
-  their recorded source. Exact HTTPS/Arweave locator support is integrated;
-  general attributed origin/mirror/redirect witnesses and their immutable
-  inventory/bundle bindings are now source integrated. Thirty-six authored
-  retrieval tests await execution; fourteen selected products fit size limits.
-  A separate fresh constructor-budget fixture (`dcf9a037`) preserves the old
-  diagnostic controls and measures complete two-token checkpoint revalidation.
-  Its execution is now authorized on the joined provider repairs below.
-- **Deployment size:** the repaired snapshot readers (`9db6df06`) now pass all
-  51 joined cases, including 256 fuzz inputs, on exact `9db6df06`. Independent
-  artifact/trace review and the sealed packet pass. The selected VIEW
-  size capture at that same source exposed two oversized provider facades
-  (38,563 and 38,947 runtime bytes) and a 26,213-byte metadata worker.
-  The metadata worker repair is integrated as `1dbc0c66`: its two products
-  measure 19,001 and 21,299 bytes. Seven independently reviewed differential
-  cases now pass on exact `7053ab06`, including 256 fuzz inputs, with
-  independently reviewed artifacts and traces. Both provider repairs are
-  integrated as `9d4af023`: 24,206 and 24,190 runtime bytes; complete initcode
-  is 40,303 and 40,665 bytes. The provider12 campaign then exposed a
-  reachable reference-reader Yul compiler stack failure before execution. The
-  repair now fits at 19,833/12,901 runtime bytes and passes its focused five
-  cases; complete provider and fresh-checkpoint execution remain pending.
-- **Artist history:** joined original content, royalty/freeze and ratification
-  histories across accepted, disputed and sanctioned generations are integrated
-  as `51d8ed8f`. Production and 13 new test oracles are independently reviewed;
-  all 23 selected products fit measured runtime/full-initcode limits. Their
-  execution remains pending. Complete original Platform histories are now
-  source integrated as `7b0f918e`, with independent production and fourteen
-  oracle reviews. Thirty-six selected products fit across qualified captures;
-  this is not one final-source runtime campaign. Operation-24 and complete
-  mixed/multiple-Artist/unbound compositions are the next implementation batch.
-  The earlier current-Artist preservation campaign now executes 12 cases
-  successfully, but three Registry setups fail on a zero collection ID in an
-  original golden-vector fixture, leaving six intended cases unexecuted.
-  Fixture correction `7a9fd077` clears that failure. The next run compiled
-  and passed size checks but exposed a wrong renderer context document name
-  during setup. Its one-literal correction is integrated as `bb38c4de`; the
-  six test bodies remain unexecuted, with both failed captures retained.
-- **Museum:** complete VIEW inventory and bundle verification has 83 root passes;
-  the ceremony-export adapter has 23. Retained VIEW BagIt/OCFL packaging is now
-  integrated as `a8562dc5`, with all 31 new/shared offline cases passing at root.
-  Exact locator consumers (`1576e5f2`) now pass all 34 new/shared offline
-  cases at root. Conservation/interview dossier `fcf5af68` now passes
-  25 new/shared original-capture tests, retaining complete declared fields and
-  separate Artist/estate histories. Actual contract capture, browser replay,
-  complete dossier scope and institutional conformance remain separate.
-- **Clients and Safe:** token V2 snapshots (`b454c032`) and all five reference
-  publication writes (`28c145eb`) are integrated. Root verifies exact source,
-  independent reviews and producer logs: 58 and 65 focused passes respectively.
-  Current-authority inventories (`38308a93`) now cover all nineteen
-  writes per collection/scoped host; the exact reviewed source and 70 passing
-  producer tests are verified at root. Archive workflows are next. Full
-  combined package and actual current-contract Safe execution remain.
-- **Current-stack testing:** publication11 at exact `d667908b` passes native
-  compilation and all 191 production size/artifact gates, but export setup
-  fails with `CheckpointPayloadMismatch(1)`. No export, replay or test body is
-  accepted from that capture. Root traced this to historical JSON using the
-  newer citation serializer. Repair `ecb6c29e` restores only the original
-  historical dispatch; current output and strict matchers remain unchanged.
-  The repair is independently source-reviewed, with eight endpoint regressions
-  integrated as `7053ab06`; all eight now pass on that source, with
-  independent artifact/trace review and a sealed packet. The full publication
-  successor at `9d4af023` now compiles, passes production gates and exports
-  its actual Safe/publication state. Fresh independent replay and all eleven
-  cases remain pending. Mint/terminal/Safe44 reached its 5,400-second compiler
-  deadline without EVM execution. Mint owns a bounded parallel compilation
-  successor; the timed-out capture is preserved.
-- **Collector gas:** isolated experiment `2e43e6b6` passes 44 native cases,
-  including 256 fuzz inputs, and 28 matched RPC checks. The cheapest exact
-  payment is now 516,891 gross gas, down 87,245 from the prior experiment,
-  but still above 500,000 and missing actual Core/Floor/guard work. The next
-  task measures and reduces that complete path; no production overlay or
-  whole-purchase acceptance is claimed.
+ABI157 checks all 4,059 Solidity sources at `a2973d36` with zero errors.
+The subsequent Provider12 native build found a scoped-reader compiler failure;
+its repair is underway. Artist operation24/history composition, actual retrieval
+ceremony, combined genesis/Museum cases and current Safe scenario/driver work
+continue in parallel. The actual Collector receipt prototype is not adopted.
 
-Complete current-stack/all-call Safe integration, stateful campaigns, full gas
-and size acceptance, full CI, candidate freeze and matching testnet deployment
-remain. Held proposals remain unapplied. Supported RC1 and its Sepolia evidence
-at `569bf87f1fa808787d324f6e1582924b5ccf1d40` are unchanged; no new funding or
-onchain action is required for current coding.
+[Current delivery status](V1_CURRENT_STATUS.md) records each active campaign,
+its source and remaining acceptance. Full current-stack/Safe, stateful/fuzz,
+whole-system gas/size, CI, freeze and matching testnet demonstration remain.
+RC1 `569bf87f` and its existing Sepolia evidence are preserved.
 
 ## How to read this document
 
@@ -148,7 +74,7 @@ document records delivery status without narrowing those requirements.
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
 | Latest broad cheap compilation evidence | ABI155: 4,014 sources at `e93cb091`, zero errors in 47.781 seconds; complete committed-source bridge. This is not whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Full publication runs at `9d4af023`; provider12 stopped before EVM on a reachable Yul failure, repair assigned. |
+| Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 at `a2973d36` stopped before EVM on the scoped-reader Yul failure; repair assigned. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.
@@ -333,7 +259,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-07](#museum-07-evidence) Independent collection views host | Built | Tested* | Partial | Immutable full manifest/revision history, complete65,536-byte payload with bounded reads, schema binding and current DISPLAY authority/selection are integrated.9/9 tests pass with actual MetadataV1, SchemaRegistry/store and threshold Safe. **Remaining:** Actual current Core/Executor/module composition, renderer adoption and full genesis activation; those focused boundaries are typed. Canonical adopted VIEW/STATIC source `b256a3c1` passes21 scoped cases and two256-input fuzz properties; tagged VIEWV2 is source-integrated (`9939ef3c`) with16 selected fitting products and a30-pass/two-test-fixture-failure predecessor; successor and complete finality remain pending. |
 | [MUSEUM-08](#museum-08-evidence) Artist, general and notarized attestation museum authority mapping | In progress | Partly tested | Partial | General/native Artist/notarized producers and explicit recorded-source/dossier adapters are integrated9677f5bf. Root passes 86 affected checks and 15 focused native cases pass with exact compiler/artifact evidence. Institutional and estate claims do not become verified identity; historical Artist evidence retains original authority. General 24,576-byte successor2e0c3443 and explicit V2 replay pass64 affected root checks; its own frozen native cohort passes25 with23,179-byte host runtime. Full graph/gas acceptance remains pending. **Remaining:** Separate native statement capacity, genuine current-graph captures, complete reviewer/source mappings and whole dossier conformance. |
 | [MUSEUM-09](#museum-09-evidence) Typed work description and format catalog | Built | Partly tested | Partial | Closed bounded WORK_DESCRIPTION JSON interpretation, original shared Artist/curator authority, registered format catalog and fixed selection. Pure work-to-LIDO profile exists; full general actual-record semantic composition remains partial. **Remaining:** Broader faithful work/physical/interactive source coverage and actual current joined exporter acceptance; raw schema presence is not complete semantic mapping. |
-| [MUSEUM-10](#museum-10-evidence) Typed Artist intent, waiver and interview | Built | Partly tested | Partial | Full typed intent/waiver/interview and format interpretation, selected original authority/binding/record and interview checks exist in fixed consumers; estate statements remain distinct. Original intent/waiver/interview dossier `fcf5af68` retains all semantic fields, instruments, participants, transcripts, references and four Artist/estate history lanes; 25 new/shared offline tests pass. **Remaining:** Complete canonical dossier composition and all admissible actual source/archival variants; offline projections do not establish participant identity, consent or media delivery. |
+| [MUSEUM-10](#museum-10-evidence) Typed Artist intent, waiver and interview | Built | Partly tested | Partial | Full typed intent/waiver/interview and format interpretation, selected original authority/binding/record and interview checks exist in fixed consumers; estate statements remain distinct. Original intent/waiver/interview dossier `fcf5af68` retains all semantic fields, instruments, participants, transcripts, references and four Artist/estate history lanes; 25 new/shared offline tests pass. V2 dossier `e278ddcf` adds original byte/Archive correspondence, typed semantic resources and complete retained-package reconstruction; 33 focused cases pass at root. **Remaining:** Actual RPC capture, complete canonical dossier composition and opaque unsupported encodings; supplied-evidence consistency does not establish participant identity, consent, institutional acceptance or media delivery. |
 | [MUSEUM-11](#museum-11-evidence) Typed RIGHTS interpretation, selection and museum source | Built | Tested* | Integrated* | Exact full RIGHTS JSON, class/family/subject/registered-definition selection and immutable historical receipt capture; separate six-use-class PREMIS/semantic rights output keeps independent links distinct from grants. **Remaining:** Full initialized Artist/Metadata-to-museum positive capture and all later-current selection cases remain separate. Test-fixture legal statements never prove real legal ownership/permission. |
 | [MUSEUM-12](#museum-12-evidence) Steward designation and recovery response/notice records | Built | Partly tested | Partial | Typed steward/response schemas and original owner notice/action consumers exist, including bounded incremental endpoint publication and original 72-hour clock. Publisher delivery claims remain claims. Source-preserving semantic/notice evidence and closed offline dossier adapters62dc2990 pass93 affected root tests with independent source review. **Remaining:** Positive actual capture, full dossier composition and complete operational delivery evidence; do not conflate protocol publication with receipt by an institution. |
 | [MUSEUM-13](#museum-13-evidence) Remaining named owner/institutional record semantic adapters | In progress | Partly tested | Not integrated | Source-bound ACCESSION/TITLE_BINDING, DEACCESSION and first-claim REDEMPTION_CLAIM adapters, retained institutional instruments and bounded exact Transfer receipt capture/replay are integrated. Root22 institutional/Transfer cases pass. Accession/title V5 export `e031ce6f` adds11-source packet derivation, with39 builder cases and five offline CLI cases passing; legal/institutional authority is not inferred. **Remaining:** Actual current token records, authenticated institutional/title evidence and full conformance. Synthetic Transfer controls do not establish legal title, physical custody or a receipt-trie proof. |
