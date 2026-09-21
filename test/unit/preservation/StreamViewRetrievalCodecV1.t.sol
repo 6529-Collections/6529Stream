@@ -43,9 +43,8 @@ contract StreamViewRetrievalCodecV1Test is CharacterizationTestBase {
     }
 
     function _observation() private pure returns (T.Observation memory o) {
-        o.source.scope = StreamFinalityScope(
-            StreamFinalityScopeType.VIEW, 7, 0, bytes32(uint256(4))
-        );
+        o.source.scope =
+            StreamFinalityScope(StreamFinalityScopeType.VIEW, 7, 0, bytes32(uint256(4)));
         o.source.core = address(1);
         o.source.router = address(2);
         o.source.declaration = address(3);
@@ -55,6 +54,9 @@ contract StreamViewRetrievalCodecV1Test is CharacterizationTestBase {
         o.source.payloadHash = bytes32(uint256(7));
         o.source.checkpointContextHash = bytes32(uint256(8));
         o.source.requestedURI = "https://origin.invalid/image?exact=%2F";
+        o.source.artistId = keccak256("original Artist");
+        o.source.artistPresentationHash = keccak256("complete presentation");
+        o.object.artistId = o.source.artistId;
         o.object.contentHash = keccak256("whole bytes");
         o.object.sha256Digest = sha256("whole bytes");
         o.object.byteSize = 11;

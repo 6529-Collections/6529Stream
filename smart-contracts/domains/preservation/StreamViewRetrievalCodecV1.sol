@@ -25,7 +25,9 @@ library StreamViewRetrievalCodecV1 {
                 s.declaration,
                 s.declarationRecord,
                 s.payloadHash,
-                s.requestedURI
+                s.requestedURI,
+                s.artistId,
+                s.artistPresentationHash
             )
         );
     }
@@ -60,7 +62,8 @@ library StreamViewRetrievalCodecV1 {
                 || s.scope.tokenId != 0 || s.scope.scopeId == 0 || s.core == address(0)
                 || s.router == address(0) || s.adoptionRecord == 0 || s.adoptionSourceHash == 0
                 || s.declaration == address(0) || s.declarationRecord == 0 || s.payloadHash == 0
-                || s.checkpointContextHash == 0 || o.writer == address(0) || o.observedAt == 0
+                || s.checkpointContextHash == 0 || s.artistId == 0 || s.artistPresentationHash == 0
+                || o.object.artistId != s.artistId || o.writer == address(0) || o.observedAt == 0
                 || o.deadline < o.observedAt || o.coverage.objectHash == 0
                 || o.coverage.coverageHash == 0 || o.object.contentHash == 0
                 || o.object.sha256Digest == 0 || o.object.byteSize == 0

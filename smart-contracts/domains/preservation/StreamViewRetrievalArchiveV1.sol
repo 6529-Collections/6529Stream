@@ -35,8 +35,7 @@ library StreamViewRetrievalArchiveV1 {
         )
     {
         IO.pin(c.archive, c.archiveCodeHash);
-        bytes memory raw =
-            IO.fixedRead(
+        bytes memory raw = IO.fixedRead(
             c.archive, abi.encodeCall(Archive.coverage, (coverageHash)), 480, c.readGas
         );
         E.Coverage memory coverage = abi.decode(raw, (E.Coverage));
@@ -46,6 +45,9 @@ library StreamViewRetrievalArchiveV1 {
         );
         object = abi.decode(raw, (E.ObjectIdentity));
         IO.canonical(c.archive, raw, abi.encode(object));
+        if (source.artistId == 0 || object.artistId != source.artistId) {
+            revert T.InvalidViewRetrieval();
+        }
         I.Item memory item;
         item.kind = I.Kind.EXTERNAL_REFERENCE;
         item.role = T.ROLE;

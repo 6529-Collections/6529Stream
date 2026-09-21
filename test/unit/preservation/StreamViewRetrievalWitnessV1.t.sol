@@ -24,6 +24,11 @@ contract StreamViewRetrievalWitnessV1Test is ViewRetrievalWitnessFixture {
                 o
             )
         );
+        require(
+            o.source.artistId == object.artistId
+                && o.source.artistPresentationHash
+                    == keccak256(abi.encode(router.artistPresentation(scope.collectionId)))
+        );
         bytes memory payload = abi.encode(o, sig);
         T.Receipt memory expected;
         expected.sourceKey = keccak256(
@@ -37,7 +42,9 @@ contract StreamViewRetrievalWitnessV1Test is ViewRetrievalWitnessFixture {
                 o.source.declaration,
                 o.source.declarationRecord,
                 o.source.payloadHash,
-                ORIGIN
+                ORIGIN,
+                o.source.artistId,
+                o.source.artistPresentationHash
             )
         );
         expected.observationHash = digest;
@@ -384,5 +391,61 @@ contract StreamViewRetrievalWitnessV1Test is ViewRetrievalWitnessFixture {
         rv.expectRevert();
         new Witness(changed);
         new Witness(configuration);
+    }
+
+    function testForeignArtistObservationCannotPublishOrCreateRevocationEpoch() public {
+        T.Request memory q = _request(51);
+        (, bytes memory signedForRealArtist) = _prepared(q);
+        Artist.ArtistPresentation memory original = router.artistPresentation(scope.collectionId);
+        Artist.ArtistPresentation memory other =
+            abi.decode(abi.encode(original), (Artist.ArtistPresentation));
+        other.artistId = keccak256("different actual collection Artist");
+        other.snapshotHash = keccak256("different locked snapshot");
+        router.setPresentation(scope.collectionId, other);
+        rv.expectRevert(abi.encodeWithSelector(T.InvalidViewRetrieval.selector));
+        witness.prepare(q);
+        rv.expectRevert(abi.encodeWithSelector(T.InvalidViewRetrieval.selector));
+        witness.publish(q, signedForRealArtist);
+        require(!witness.nonceUsed(_key(51)) && witness.revocationEpoch(scope) == 0);
+        rv.expectRevert(
+            abi.encodeWithSelector(T.ViewRetrievalUnknown.selector, bytes32(uint256(99)))
+        );
+        vm.prank(safeVm.addr(SECOND_AGENT));
+        witness.revoke(bytes32(uint256(99)), keccak256("no foreign authority"));
+        require(witness.revocationEpoch(scope) == 0);
+        router.setPresentation(scope.collectionId, original);
+        bytes32 h = witness.publish(q, signedForRealArtist);
+        witness.requireCurrent(h);
+    }
+
+    function testDifferentCollectionArtistAndFullPresentationAreNotSubstitutable() public {
+        T.Request memory q = _request(53);
+        bytes32 h = _publish(q);
+        bytes32 originalCurrent = _currentHash(h);
+        C.Source memory originalSource = selected;
+        StreamFinalityScope memory originalScope = scope;
+        Artist.ArtistPresentation memory presentation =
+            router.artistPresentation(scope.collectionId);
+        scope.collectionId = 8;
+        selected.adoption.input.scope = scope;
+        selected.adoption.recordHash = keccak256("second collection adoption");
+        checkpoint.set(selected);
+        Artist.ArtistPresentation memory other =
+            abi.decode(abi.encode(presentation), (Artist.ArtistPresentation));
+        other.artistId = keccak256("second collection Artist");
+        router.setPresentation(8, other);
+        q = _request(54);
+        rv.expectRevert(abi.encodeWithSelector(T.InvalidViewRetrieval.selector));
+        witness.prepare(q);
+        require(witness.revocationEpoch(scope) == 0 && witness.revocationEpoch(originalScope) == 0);
+        scope = originalScope;
+        selected = originalSource;
+        checkpoint.set(selected);
+        presentation.snapshotHash = keccak256("changed full locked presentation");
+        router.setPresentation(scope.collectionId, presentation);
+        _refusesCurrent(h);
+        presentation.snapshotHash = keccak256("locked complete Artist snapshot");
+        router.setPresentation(scope.collectionId, presentation);
+        require(_currentHash(h) == originalCurrent);
     }
 }

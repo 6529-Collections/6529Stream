@@ -37,6 +37,10 @@ import {
     StreamArchivalTypes as A
 } from "../../smart-contracts/interfaces/stream/preservation/StreamArchivalTypes.sol";
 
+import {
+    IStreamMetadataServingFacts as Artist
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
+
 interface RetrievalVm {
     struct Log {
         bytes32[] topics;
@@ -53,6 +57,19 @@ interface RetrievalVm {
 /// @dev Explicit selected Router and full-current checkpoint boundary. No Artist/op17 claim.
 contract RetrievalRouterBoundary {
     address public immutable core;
+    mapping(uint256 => Artist.ArtistPresentation) private _presentation;
+
+    function setPresentation(uint256 cid, Artist.ArtistPresentation memory p) external {
+        _presentation[cid] = p;
+    }
+
+    function artistPresentation(uint256 cid)
+        external
+        view
+        returns (Artist.ArtistPresentation memory)
+    {
+        return _presentation[cid];
+    }
 
     constructor(address c) {
         core = c;
@@ -136,6 +153,25 @@ abstract contract ViewRetrievalWitnessFixture is ScopedBundleArchiveFixture {
         selected.adoption.recordHash = keccak256("actual adopted record boundary");
         selected.adoption.sourceHash = keccak256("complete current source boundary");
         selected.adoption.adoptedAt = uint64(block.timestamp);
+        selected.adoption.source.route.artist = address(governance);
+        selected.adoption.source.route.artistCodeHash = address(governance).codehash;
+        router.setPresentation(
+            scope.collectionId,
+            Artist.ArtistPresentation(
+                true,
+                address(governance),
+                address(governance).codehash,
+                object.artistId,
+                1,
+                keccak256("locked original Artist binding"),
+                address(agentSafe),
+                keccak256("accepted identity"),
+                keccak256("original acceptance"),
+                uint64(block.timestamp),
+                uint64(block.timestamp),
+                keccak256("locked complete Artist snapshot")
+            )
+        );
         selected.adoption.source.route.core = address(core);
         selected.adoption.source.route.coreCodeHash = address(core).codehash;
         selected.adoption.source.route.router = address(router);

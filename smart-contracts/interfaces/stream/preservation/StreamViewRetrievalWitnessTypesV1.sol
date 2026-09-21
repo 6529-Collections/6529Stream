@@ -40,6 +40,8 @@ library StreamViewRetrievalWitnessTypesV1 {
         bytes32 payloadHash;
         bytes32 checkpointContextHash;
         string requestedURI;
+        bytes32 artistId;
+        bytes32 artistPresentationHash;
     }
 
     /// @dev kind1 is observed HTTP redirect; kind2 attributed byte-identical mirror;
