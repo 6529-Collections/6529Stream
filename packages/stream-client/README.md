@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Preservation RPC and Safe driver](docs/current-preservation-caller-harness.md)
+  connects five original client families to an explicit provider and send
+  transport, retaining exact signed Safe envelopes through receipt inspection.
+
 - [Current-authority preservation archive coverage](docs/current-authority-preservation-archive-v1.md)
   covers five collection/scoped archive operations, exact original proofs,
   resolver-selected archive origins and current coverage refresh.

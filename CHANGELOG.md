@@ -1088,6 +1088,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add an explicit preservation RPC/Safe driver with immutable signed envelopes,
+  original family receipt checks and distinct revert/nonce retry outcomes.
+
 - Add current-authority preservation archive callers with ordered original
   proofs, exact V2 byte correspondence and separate current coverage refresh.
 
