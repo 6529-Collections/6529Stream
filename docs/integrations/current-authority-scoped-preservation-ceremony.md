@@ -159,3 +159,30 @@ One applicability gap remains explicit: the immutable native sanction profile
 catalogue text describes ONCHAIN COLLECTION, while these separately reviewed
 preservation readers compose scoped sanctions. This source work does not revise
 those immutable bytes or claim that catalogue wording covers the extension.
+
+## Executable contract-composition cases
+
+The distinct [scoped Finality tests](../../test/current/StreamCurrentAuthorityScopedPreservationFinality.t.sol)
+drive the [test fixture](../../test/helpers/StreamCurrentAuthorityScopedPreservationPolicyFinalityTestFixture.sol)
+through actual A-to-B-to-C migration, current-Artist producer reads, Reference
+publication, complete inventory and bundle coverage, operation12, its separate
+archive and governed scoped finalization. TOKEN, RELEASE and SEASON have
+separate positive cases. The earlier publication tests remain unchanged.
+
+These cases deliberately supply deterministic PNG, runtime-package and
+environment fixture objects with actual preserved HTML/JSON. Their archive
+checkpoint and observer attestations are synthetic inputs to genuine contract
+verification, receipts and fixity checks. They test contract composition without
+browser execution or a claim of external archive retrieval. Fresh observation
+acceptance still uses the supplied-file local recipe above. Missing external
+capture files cannot make a default test silently pass or skip.
+
+Negative cases exercise a rejected scheduled finalization with missing archive
+coverage and a mismatched sanction subject followed by the exact intended
+authorization retry. They check retained protocol state and distinguish a
+rejected scheduled action from the separate successful action. A narrow empty
+hook in the shared Finality fixture permits these late failure checks before
+the canonical positive finalization; the supplied-observation recipe leaves it
+empty. The current Foundry profile has read access to
+`docs/schemas/preservation` for the exact V2 definition documents. These cases
+are authored source until their native campaign is recorded.

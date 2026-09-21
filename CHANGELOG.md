@@ -1,4 +1,14 @@
 # Changelog
+## Scoped preservation terminal composition tests
+
+- Add distinct executable TOKEN, RELEASE and SEASON contract-composition cases
+  reaching current-Artist sanction, signature archive and scoped Finality after
+  actual A-to-B-to-C migration, plus rejection and exact-retry coverage.
+- Label deterministic observation and archive-attestation fixtures explicitly;
+  retain the supplied-observation local recipe for fresh browser acceptance.
+- Add only the current profile's preservation-schema read permission. Native
+  execution and transaction-cap acceptance remain pending.
+
 ## Current-authority complete VIEW source binding
 
 - Forward the shared complete VIEW admission API through the current-authority

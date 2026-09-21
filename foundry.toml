@@ -59,6 +59,7 @@ fs_permissions = [
     { access = "read", path = "./deployments" },
     { access = "read", path = "./schemas" },
     { access = "read", path = "./docs/schemas/finality" },
+    { access = "read", path = "./docs/schemas/preservation" },
     { access = "read", path = "./out/current" },
     { access = "read", path = "./artifacts/current-graph" },
     { access = "read-write", path = "./artifacts/native-assembly" },

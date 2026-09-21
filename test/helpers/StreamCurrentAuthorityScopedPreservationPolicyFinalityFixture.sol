@@ -171,6 +171,9 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyFinalityFixture 
         _scopedCeremonyRejectMissingArchive(
             publication.scope, components, finalityRecord, f.manifest
         );
+        _beforeScopedCeremonyFinalize(
+            publication.scope, components, finalityRecord, f.manifest, proof, execution
+        );
         bytes32 action = _assemblyGovernanceCall(
             2,
             address(assemblyFinality),
@@ -199,6 +202,18 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyFinalityFixture 
             action
         );
     }
+
+    /// @dev Test-only derived fixtures may exercise failed governed calls against these genuine
+    /// prepared inputs before the exact successful action. The supplied-observation recipe
+    /// performs no additional work here. A derived fixture must retain all original inputs.
+    function _beforeScopedCeremonyFinalize(
+        StreamFinalityScope memory,
+        StreamFinalityComponentExpectation[] memory,
+        bytes32,
+        StreamFinalityManifestRef memory,
+        StreamFinalitySanctionArchiveProof memory,
+        StreamFinalityExecutionContext memory
+    ) internal virtual { }
 
     function _scopedCeremonySanction(StreamFinalityScope memory scope, ScopedCeremonyFrame memory f)
         private
