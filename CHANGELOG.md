@@ -11,6 +11,16 @@
   and rejection of omitted checks. Slither baseline refresh remains a separate
   source-freeze task.
 
+## Scoped preservation reference reader compiler repair
+
+- Move complete original scoped reference reads into a fixed linked worker and
+  bound the dynamic decoder's temporary lifetime, resolving the observed via-IR
+  stack-depth failure. Preserve original/V2 bytes, caller, scopes, ABI and checks.
+- Both affected libraries fit the original deployment limits. Six scoped
+  transport/refusal regressions pass with 256 fuzz runs; complete Provider12
+  acceptance remains separate. See the
+  [bounded evidence](docs/guides/scoped-preservation-reference-read-frames.md).
+
 ## Recovered Platform Works and correction lineage
 
 - Add the explicit HISTORY_PLATFORM operation-60 profile for complete original
