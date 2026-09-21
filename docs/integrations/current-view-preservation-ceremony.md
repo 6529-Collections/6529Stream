@@ -88,6 +88,11 @@ not execute a browser or establish the provenance of caller-supplied captures.
 Locally signed archival observations and producer-derived admission goldens are
 fixture evidence, not independent analysis or public archival retrieval.
 
+The [local input guide](current-view-ceremony-inputs.md) describes the same host's
+actual VIEW source export, complete member files, fresh native runtime inputs
+and exact supplied-file loader. Freeze matching native sources and artifacts
+before exporting or observing that source.
+
 The [complete source recipe](current-view-complete-preservation.md) adds a single
 complete binding, VIEW documentary selections, inventory, archive coverage and
 the original provider's VIEW finality dispatch. Its explicit observation entry

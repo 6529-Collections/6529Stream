@@ -72,6 +72,9 @@ import {
     StreamExternalArtifactTypes as VIExternal
 } from "../../smart-contracts/interfaces/stream/preservation/StreamExternalArtifactTypes.sol";
 import { Strings } from "../../smart-contracts/vendor/openzeppelin/Strings.sol";
+import {
+    StreamViewCeremonyInputEncoding as ViewInputWire
+} from "./StreamViewCeremonyInputEncoding.sol";
 
 /// @notice Materializes every genuine VIEW source occurrence and covers its complete bytes.
 /// @dev Hosts must be deployed and bound by the complete construction fixture. This helper
@@ -684,18 +687,27 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
                 && bytes(viewPackageMembersDirectory).length != 0,
             "supplied package member observations only"
         );
+        require(
+            item.sourceIndex < viewReferencePublication.observation.environment.packageFiles.length,
+            "actual ordered package index"
+        );
         VIObservation.PackageFile memory member =
             viewReferencePublication.observation.environment.packageFiles[item.sourceIndex];
         string memory json = assemblyVm.readFile(
             string.concat(
-                viewPackageMembersDirectory, "/", Strings.toString(item.sourceIndex), ".json"
+                viewPackageMembersDirectory, "/", ViewInputWire.memberName(item.sourceIndex)
             )
         );
+        require(
+            assemblyVm.parseJsonUint(json, ".packageIndex") == item.sourceIndex,
+            "supplied packageIndex matches original occurrence"
+        );
         VIExternal.ObjectIdentity memory object;
-        object.contentHash = bytes32(safeVm.parseJsonBytes(json, ".contentHash"));
-        object.sha256Digest = bytes32(safeVm.parseJsonBytes(json, ".sha256Digest"));
-        object.arweaveDataRoot = bytes32(safeVm.parseJsonBytes(json, ".arweaveDataRoot"));
-        object.byteSize = uint64(assemblyVm.parseJsonUint(json, ".byteSize"));
+        object.contentHash = ViewInputWire.digest(safeVm.parseJsonBytes(json, ".contentHash"));
+        object.sha256Digest = ViewInputWire.digest(safeVm.parseJsonBytes(json, ".sha256Digest"));
+        object.arweaveDataRoot =
+            ViewInputWire.digest(safeVm.parseJsonBytes(json, ".arweaveDataRoot"));
+        object.byteSize = ViewInputWire.byteSize(assemblyVm.parseJsonUint(json, ".byteSize"));
         string memory path = assemblyVm.parseJsonString(json, ".path");
         require(
             object.byteSize != 0 && object.byteSize == item.byteSize
@@ -712,13 +724,23 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
         object.formatCatalogId = keccak256("PRESERVATION_BYTE_OBJECT_DECLARATION");
         object.formatCatalogHash =
             keccak256("declared object metadata; interpretation comes from actual original source");
-        VIExternal.Coverage memory coverage = _assemblyCoverExternal(
-            object,
-            safeVm.parseJsonBytes(json, ".firstDataPath"),
-            safeVm.parseJsonBytes(json, ".lastDataPath"),
-            safeVm.parseJsonBytes(json, ".firstChunkRaw"),
-            safeVm.parseJsonBytes(json, ".lastChunkRaw")
-        );
+        bytes memory firstPath = safeVm.parseJsonBytes(json, ".firstDataPath");
+        bytes memory lastPath = safeVm.parseJsonBytes(json, ".lastDataPath");
+        bytes memory firstChunk = safeVm.parseJsonBytes(json, ".firstChunkRaw");
+        bytes memory lastChunk = safeVm.parseJsonBytes(json, ".lastChunkRaw");
+        // Even an already-covered repeated object must supply its exact endpoint intervals
+        // and bytes. Native archive verification authenticates the paths/root on admission.
+        _axEndpointBytes(firstPath, firstChunk, object.byteSize, 0);
+        _axEndpointBytes(lastPath, lastChunk, object.byteSize, object.byteSize - 1);
+        if (firstChunk.length == object.byteSize) {
+            require(
+                keccak256(firstChunk) == object.contentHash
+                    && sha256(firstChunk) == object.sha256Digest,
+                "complete single-chunk package member digests"
+            );
+        }
+        VIExternal.Coverage memory coverage =
+            _assemblyCoverExternal(object, firstPath, lastPath, firstChunk, lastChunk);
         return VIBundle.Proof(1, coverage.coverageHash, coverage.objectHash);
     }
 }

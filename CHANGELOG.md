@@ -41,6 +41,17 @@
 - ABI and independent source checks pass. Native, gas, fresh browser and full
   ceremony acceptance remain pending; see the [recipe boundaries](docs/integrations/current-authority-scoped-preservation-ceremony.md).
 
+## Actual VIEW ceremony source export and supplied-file transport
+
+- Export the prepared current VIEW graph, publication ABI and every original
+  member's full output, token data, JSON and HTML with exact file commitments.
+  Add a pinned supplied-file entry over the existing ceremony and align package
+  endpoint filenames and indices with the retained object producer.
+- Add offline environment ABI, complete-object endpoint and repeated-capture
+  input tooling with refusal coverage. These local transport checks do not
+  establish browser execution, native ceremony execution or transaction capacity.
+  See the [input guide](docs/integrations/current-view-ceremony-inputs.md).
+
 ## Original VIEW finality dispatch and ceremony source
 
 - Connect the original combined provider to the fixed VIEW catalogue, component,
