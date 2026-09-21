@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Retained VIEW locator correspondence](../../docs/museum-view-locator-correspondence-v1.md)
+joins exact adopted HTTPS or Arweave locators to the original same-pair Archive
+admission and complete supplied media bytes under a separate source profile.
+Current availability and general retrieval remain separate.
+
 [Retained VIEW archival packages](../../docs/museum-view-preservation-package-v1.md)
 embed the complete inventory packet and every member file in BagIt and OCFL.
 Verification replays the original evidence in every version and preserves its

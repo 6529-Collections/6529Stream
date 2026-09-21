@@ -1088,6 +1088,11 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add a separate retained VIEW locator consumer that joins the actual adopted
+  URI, original same-pair Archive evidence and complete supplied media bytes.
+  Existing inventory profiles remain unchanged; current availability and
+  general retrieval witnesses require separate evidence.
+
 - Package complete retained VIEW inventories and all member bytes in BagIt and
   immutable OCFL versions, with full offline evidence replay in every version.
   The archival transport retains explicit provenance and conformance limits.
