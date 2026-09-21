@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistSuiteFixture.sol";
 import "./ArtistArtifactCreate.sol";
+import { StreamCurrentTestProductActivation } from "./StreamCurrentTestProductActivation.sol";
 import { StreamCurrentTestSetupPlans } from "./StreamCurrentTestSetupPlans.sol";
 import {
     IStreamCollectionMetadataV1
@@ -635,85 +636,46 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         );
     }
 
+    /// @dev Closed snapshot of existing fixture identities for linked activation operations.
+    function _productActivationContext()
+        private
+        view
+        returns (StreamCurrentTestProductActivation.Context memory c)
+    {
+        c.executor = executor;
+        c.governanceRoot = governanceRoot;
+        c.core = core;
+        c.registry = registry;
+        c.manifest = manifest;
+        c.manager = manager;
+        c.ledger = ledger;
+        c.entropy = entropy;
+        c.provider = address(provider);
+        c.router = router;
+        c.royalties = royalties;
+        c.artists = artists;
+        c.finality = address(assemblyFinality);
+        c.primaryResolver = primaryResolver;
+        c.revenueEscrow = revenueEscrow;
+        c.sale = sale;
+        c.auction = auction;
+        c.profile = profile;
+        c.deploymentHash = DEPLOYMENT_HASH;
+        c.registryHash = REGISTRY_HASH;
+        c.finalityManifestHash = graphFinalityManifestHash;
+        c.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
+    }
+
     /// @dev New products use ordinary delayed governance after the foundation seal.
     function _activateInitialProducts() private {
-        StreamModuleRegistration[] memory allRecords = _moduleRecords();
-        // Foundation, Router and Artist were already admitted and selected in the first phase.
-        StreamModuleRegistration[] memory records =
-            new StreamModuleRegistration[](allRecords.length - 4);
-        uint256 nextRecord;
-        for (uint256 i = 2; i < allRecords.length; ++i) {
-            if (i == 5 || i == 7) continue;
-            records[nextRecord++] = allRecords[i];
-        }
-        require(nextRecord == records.length, "complete remaining product registration");
         GenesisBatch[] memory batches = new GenesisBatch[](3);
-        batches[0].actionClass = 1;
-        (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
-            StreamCurrentStackPlan.registrationCalls(registry, records);
-        batches[0].calls = new GovernanceCall[](records.length + 2);
-        batches[0].callDatas = new bytes[](records.length + 2);
-        for (uint256 i; i < records.length; ++i) {
-            batches[0].calls[i] = registrations[i];
-            batches[0].callDatas[i] = registrationData[i];
-        }
-        (batches[0].calls[records.length], batches[0].callDatas[records.length]) =
-            StreamEntropyLifecyclePlan.activate(
-                entropy, address(provider), "urn:stream:genesis:entropy-provider"
-            );
-        bytes memory data = abi.encodeCall(
-            entropy.configureCollection,
-            (1, address(provider), keccak256("collection salt"), true, uint64(100))
-        );
-        batches[0].callDatas[records.length + 1] = data;
-        batches[0].calls[records.length + 1] = _configurationCall(address(entropy), data);
-        batches[2].actionClass = 1;
+        StreamModuleRegistration[] memory records;
+        (records, batches[0]) =
+            StreamCurrentTestProductActivation.registrations(_productActivationContext());
         address[] memory extraProducers = _additionalEscrowProducers();
-        batches[2].calls = new GovernanceCall[](7 + extraProducers.length);
-        batches[2].callDatas = new bytes[](7 + extraProducers.length);
-        data = abi.encodeCall(
-            router.setCollectionMetadata,
-            (
-                1,
-                "Stream Genesis",
-                "Current stack integration",
-                "ipfs://image",
-                "https://example.invalid/art/"
-            )
+        (batches[1], batches[2]) = StreamCurrentTestProductActivation.pointersAndConfiguration(
+            _productActivationContext(), records, extraProducers
         );
-        batches[2].callDatas[0] = data;
-        batches[2].calls[0] = _configurationCall(address(router), data);
-        data =
-            abi.encodeCall(router.setCollectionScript, (1, "document.body.textContent=tokenHash;"));
-        batches[2].callDatas[1] = data;
-        batches[2].calls[1] = _configurationCall(address(router), data);
-        data = abi.encodeCall(royalties.configureCollectionRoyalty, (1, profile, uint16(690)));
-        batches[2].callDatas[2] = data;
-        batches[2].calls[2] = _configurationCall(address(royalties), data);
-        data = abi.encodeCall(
-            primaryResolver.setPrimaryProfileAssignment,
-            (PRIMARY_REVENUE_CLASS, uint8(1), 1, profile, bytes32(0))
-        );
-        batches[2].callDatas[3] = data;
-        batches[2].calls[3] = _configurationCall(address(primaryResolver), data);
-        (batches[2].calls[4], batches[2].callDatas[4]) = _escrowProducerCall(address(sale));
-        (batches[2].calls[5], batches[2].callDatas[5]) = _escrowProducerCall(address(auction));
-        for (uint256 i; i < extraProducers.length; ++i) {
-            (batches[2].calls[6 + i], batches[2].callDatas[6 + i]) =
-                _escrowProducerCall(extraProducers[i]);
-        }
-
-        data = abi.encodeCall(router.initializeOriginalFinalityAnchor, ());
-        batches[2].callDatas[6 + extraProducers.length] = data;
-        batches[2].calls[6 + extraProducers.length] = _configurationCall(address(router), data);
-
-        bytes32[] memory installTypes = new bytes32[](records.length);
-        for (uint256 i; i < records.length; ++i) {
-            installTypes[i] = _pointerType(records[i].moduleType);
-        }
-        batches[1].actionClass = 3;
-        (batches[1].calls, batches[1].callDatas) =
-            StreamCurrentStackPlan.pointerCalls(core, registry, installTypes, records);
         _admitInitialProductPolicies(batches);
         _executeInitialBatch(batches[0]);
         GovernanceCall[] memory pointerCalls = new GovernanceCall[](records.length + 1);
@@ -723,7 +685,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
             pointerData[i] = batches[1].callDatas[i];
         }
         (pointerCalls[records.length], pointerData[records.length]) =
-            _initialPublication(_initialProductModules(), keccak256("initial product selection"));
+            StreamCurrentTestProductActivation.initialProductPublication(
+                _productActivationContext(), keccak256("initial product selection")
+            );
         batches[1].calls = pointerCalls;
         batches[1].callDatas = pointerData;
         _executeInitialBatch(batches[1]);
@@ -738,93 +702,6 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
                 executor, address(entropy), entropy.revokeEntropyProvider.selector
             )
         );
-    }
-
-    function _escrowProducerCall(address producer)
-        private
-        view
-        returns (GovernanceCall memory call_, bytes memory data)
-    {
-        (bytes32 scope, bytes32 oldState, bytes32 nextState) =
-            revenueEscrow.creditProducerTransitionHashes(producer, true);
-        data = abi.encodeCall(revenueEscrow.setCreditProducer, (producer, true));
-        call_ =
-            StreamCurrentStackPlan.call(address(revenueEscrow), data, scope, oldState, nextState);
-    }
-
-    function _moduleRecords() private view returns (StreamModuleRegistration[] memory records) {
-        records = new StreamModuleRegistration[](10);
-        records[0] = _record(
-            address(registry),
-            keccak256("MODULE_REGISTRY"),
-            type(IStreamModuleRegistry).interfaceId,
-            REGISTRY_HASH
-        );
-        records[1] = _record(
-            address(manifest),
-            0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6,
-            type(IStreamSystemManifest).interfaceId,
-            keccak256("fixture system manifest")
-        );
-        records[2] = _record(
-            address(manager),
-            keccak256("MINT_MANAGER"),
-            type(IStreamMintManager).interfaceId,
-            keccak256("fixture mint manager")
-        );
-        records[3] = _record(
-            address(ledger),
-            keccak256("MINT_LEDGER"),
-            type(IStreamMintLedger).interfaceId,
-            keccak256("fixture mint ledger")
-        );
-        records[4] = _record(
-            address(entropy),
-            keccak256("ENTROPY_COORDINATOR"),
-            type(IStreamEntropyCoordinator).interfaceId,
-            keccak256("fixture entropy module")
-        );
-        records[5] = _record(
-            address(router),
-            keccak256("METADATA_ROUTER"),
-            type(IStreamMetadataRouter).interfaceId,
-            keccak256("fixture metadata module")
-        );
-        records[6] = _record(
-            address(royalties),
-            keccak256("REVENUE_RESOLVER"),
-            type(IStreamRoyaltyResolver).interfaceId,
-            keccak256("fixture royalty module")
-        );
-        records[7] = _record(
-            address(artists),
-            keccak256("ARTIST_REGISTRY"),
-            type(IStreamArtistMintConsent).interfaceId,
-            keccak256("fixture artist module")
-        );
-        records[8] = _record(
-            address(executor),
-            keccak256("GOVERNANCE_LAYER"),
-            type(IStreamStateExportPublisher).interfaceId,
-            keccak256("fixture state export publisher")
-        );
-        records[9] = _record(
-            address(assemblyFinality),
-            keccak256("ARTWORK_FINALITY_REGISTRY"),
-            type(IStreamArtworkFinalityRegistry).interfaceId,
-            graphFinalityManifestHash
-        );
-    }
-
-    function _pointerType(bytes32 moduleType) private pure returns (bytes32) {
-        if (moduleType == 0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6) {
-            return keccak256("SYSTEM_MANIFEST");
-        }
-        if (moduleType == keccak256("REVENUE_RESOLVER")) return keccak256("ROYALTY_RESOLVER");
-        if (moduleType == keccak256("GOVERNANCE_LAYER")) {
-            return keccak256("STATE_EXPORT_PUBLISHER");
-        }
-        return moduleType;
     }
 
     function _record(address module, bytes32 moduleType, bytes4 interfaceId, bytes32 moduleHash)
@@ -842,16 +719,6 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
             DEPLOYMENT_HASH,
             moduleHash,
             "urn:6529stream:fixture:module"
-        );
-    }
-
-    function _configurationCall(address target, bytes memory data)
-        private
-        pure
-        returns (GovernanceCall memory)
-    {
-        return StreamCurrentStackPlan.call(
-            target, data, keccak256(abi.encode(target, data)), bytes32(0), keccak256(data)
         );
     }
 
@@ -893,199 +760,29 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     }
 
     function _admitInitialProductPolicies(GenesisBatch[] memory batches) private {
-        GovernanceActionPolicyEntry[] memory candidates = _actionPolicies(batches);
-        uint256 count;
-        for (uint256 i; i < candidates.length; ++i) {
-            bool exists;
-            for (uint256 j; j < _foundationPolicies.length; ++j) {
-                if (_policyKey(candidates[i]) != _policyKey(_foundationPolicies[j])) continue;
-                require(
-                    keccak256(abi.encode(candidates[i]))
-                        == keccak256(abi.encode(_foundationPolicies[j])),
-                    "foundation policy cannot be rewritten"
-                );
-                exists = true;
-                break;
-            }
-            if (!exists) candidates[count++] = candidates[i];
-        }
-        GovernanceActionPolicyEntry[] memory additions = new GovernanceActionPolicyEntry[](count);
-        for (uint256 i; i < count; ++i) {
-            additions[i] = candidates[i];
-        }
-        (bytes32 candidate, bytes32 catalog, uint256 existingCount, uint64 revision) =
-            executor.governanceActionPolicyState();
-        require(
-            revision == _fixtureCatalogRevision && existingCount == _foundationPolicies.length,
-            "exact original foundation catalog"
-        );
-        if (count == 0) return;
-        (bytes32 next, bytes32 scope, bytes32 oldHash, bytes32 newHash) = StreamGovernanceActionPolicy.extensionTransition(
-            address(executor), candidate, catalog, existingCount, revision, additions
-        );
-        GenesisBatch memory batch;
-        batch.actionClass = 3;
-        batch.calls = new GovernanceCall[](2);
-        batch.callDatas = new bytes[](2);
-        batch.callDatas[0] = abi.encodeCall(
-            executor.extendGovernanceActionPolicy, (revision, catalog, next, additions)
-        );
-        batch.calls[0] = StreamCurrentStackPlan.call(
-            address(executor), batch.callDatas[0], scope, oldHash, newHash
-        );
-        (batch.calls[1], batch.callDatas[1]) =
-            _initialPublication(StreamGenesisManifestPlan.readAggregate(manifest).modules, next);
-        _executeInitialBatch(batch);
-        (, bytes32 appliedCatalog, uint256 appliedCount, uint64 appliedRevision) =
-            executor.governanceActionPolicyState();
-        require(
-            appliedCatalog == next && appliedRevision == revision + 1
-                && appliedCount == existingCount + count,
-            "exact applied catalog extension"
-        );
+        // Preserve the original hook before observing retained policy state.
+        GovernanceActionPolicyEntry[] memory operating = _operatingPolicies();
+        GovernanceActionPolicyEntry[] memory retained = _foundationPolicies;
+        (GovernanceActionPolicyEntry[] memory additions, uint64 appliedRevision) =
+            StreamCurrentTestProductActivation.admitPolicies(
+                _productActivationContext(), retained, _fixtureCatalogRevision, operating, batches
+            );
+        if (additions.length == 0) return;
         _fixtureCatalogRevision = appliedRevision;
-        for (uint256 i; i < count; ++i) {
+        for (uint256 i; i < additions.length; ++i) {
             _foundationPolicies.push(additions[i]);
         }
-    }
-
-    function _initialProductModules()
-        private
-        view
-        returns (StreamSystemManifest.ModuleAddresses memory modules)
-    {
-        modules = StreamGenesisManifestPlan.readAggregate(manifest).modules;
-        modules.artistRegistry = address(artists);
-        modules.artworkFinalityRegistry = address(assemblyFinality);
-        modules.revenueResolver = address(royalties);
-        modules.metadataRouter = address(router);
-        modules.entropyCoordinator = address(entropy);
-        modules.mintManager = address(manager);
-        modules.mintLedger = address(ledger);
-        modules.streamAdminsOrGovernance = address(executor);
-        modules.moduleRegistry = address(registry);
-        modules.stateExportPublisher = address(executor);
     }
 
     function _initialPublication(
         StreamSystemManifest.ModuleAddresses memory modules,
         bytes32 reason
     ) private returns (GovernanceCall memory call_, bytes memory data) {
-        StreamSystemManifest.AggregateState memory current =
-            StreamGenesisManifestPlan.readAggregate(manifest);
-        (address payload, bytes32 hash) = StreamGenesisManifestPlan.writePayload(
-            abi.encodePacked(
-                "{\"purpose\":\"current product activation\",\"commitment\":\"",
-                Strings.toHexString(uint256(reason), 32),
-                "\"}"
-            )
-        );
-        StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate(
-            hash,
-            "urn:6529stream:current-stack:products",
-            current.discovery.eventCatalogHash,
-            current.discovery.compatibilityMatrixHash,
-            current.discovery.numericIdCatalogHash,
-            current.discovery.schemaCatalogHash,
-            current.discovery.canonicalizationCatalogHash,
-            current.discovery.specBundleHash,
-            current.discovery.reconstructionClientHash
-        );
-        return StreamGenesisManifestPlan.publicationCall(manifest, payload, update, modules);
+        return StreamCurrentTestProductActivation.publication(_productActivationContext(), modules, reason);
     }
 
     function _executeInitialBatch(GenesisBatch memory batch) private {
-        executor.publishGovernanceCallData(batch.callDatas);
-        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = StreamGovernanceBootstrap.deriveBatchTransitionHashes(
-            batch.calls, StreamGovernanceBootstrap.governanceCallsHash(batch.calls)
-        );
-        uint64 ready = uint64(block.timestamp + executor.minimumDelay(batch.actionClass));
-        bytes memory result = governanceRoot.execute(
-            address(executor),
-            0,
-            abi.encodeCall(
-                executor.scheduleGovernanceBatch,
-                (
-                    batch.actionClass,
-                    batch.calls,
-                    scope,
-                    oldHash,
-                    newHash,
-                    ready,
-                    ready + 7 days,
-                    keccak256("initial product activation"),
-                    "urn:6529stream:fixture:product-activation",
-                    DEPLOYMENT_HASH
-                )
-            )
-        );
-        vm.warp(ready);
-        executor.executeGovernanceBatch(abi.decode(result, (bytes32)), batch.calls, batch.callDatas);
-    }
-
-    function _actionPolicies(GenesisBatch[] memory batches)
-        private
-        view
-        returns (GovernanceActionPolicyEntry[] memory policies)
-    {
-        GovernanceActionPolicyEntry[] memory operating = _operatingPolicies();
-        uint256 capacity = operating.length;
-        for (uint256 i; i < batches.length; ++i) {
-            capacity += batches[i].calls.length;
-        }
-        GovernanceActionPolicyEntry[] memory candidates =
-            new GovernanceActionPolicyEntry[](capacity);
-        uint256 count = operating.length;
-        for (uint256 i; i < count; ++i) {
-            candidates[i] = operating[i];
-        }
-        for (uint256 i; i < batches.length; ++i) {
-            for (uint256 j; j < batches[i].calls.length; ++j) {
-                GovernanceCall memory operation = batches[i].calls[j];
-                bytes32 key = keccak256(
-                    abi.encode(batches[i].actionClass, operation.target, operation.selector)
-                );
-                bool duplicate;
-                for (uint256 k; k < count; ++k) {
-                    if (
-                        keccak256(
-                                abi.encode(
-                                    candidates[k].actionClass,
-                                    candidates[k].target,
-                                    candidates[k].selector
-                                )
-                            ) == key
-                    ) duplicate = true;
-                }
-                if (!duplicate) {
-                    candidates[count++] = GovernanceActionPolicyEntry(
-                        batches[i].actionClass,
-                        operation.target,
-                        operation.selector,
-                        operation.target.codehash,
-                        keccak256(abi.encode(DEPLOYMENT_HASH, operation.target)),
-                        1,
-                        0,
-                        0,
-                        bytes32(0)
-                    );
-                }
-            }
-        }
-        policies = new GovernanceActionPolicyEntry[](count);
-        for (uint256 i; i < count; ++i) {
-            policies[i] = candidates[i];
-        }
-        for (uint256 i = 1; i < count; ++i) {
-            for (
-                uint256 j = i; j > 0 && _policyKey(policies[j - 1]) > _policyKey(policies[j]); --j) {
-                (policies[j - 1], policies[j]) = (policies[j], policies[j - 1]);
-            }
-        }
-    }
-
-    function _policyKey(GovernanceActionPolicyEntry memory policy) private pure returns (bytes32) {
-        return keccak256(abi.encode(policy.actionClass, policy.target, policy.selector));
+        StreamCurrentTestProductActivation.executeBatch(_productActivationContext(), batch);
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
