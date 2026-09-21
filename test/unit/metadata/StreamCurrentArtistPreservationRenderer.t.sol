@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StaticMetadataRoutingFixture } from "../../helpers/StaticMetadataRoutingFixture.sol";
+import {
+    CurrentArtistPreservationFixture
+} from "../../helpers/CurrentArtistPreservationFixture.sol";
 import {
     StreamCurrentArtistPreservationRendererV1 as Producer
 } from "../../../smart-contracts/domains/metadata/StreamCurrentArtistPreservationRendererV1.sol";
@@ -70,7 +72,7 @@ contract CurrentArtistPreservationArtistBoundary {
     }
 }
 
-contract StreamCurrentArtistPreservationRendererTest is StaticMetadataRoutingFixture {
+contract StreamCurrentArtistPreservationRendererTest is CurrentArtistPreservationFixture {
     CurrentArtistPreservationRendererVm private constant pvm = CurrentArtistPreservationRendererVm(
         address(uint160(uint256(keccak256("hevm cheat code"))))
     );
@@ -85,12 +87,17 @@ contract StreamCurrentArtistPreservationRendererTest is StaticMetadataRoutingFix
         projection = new CurrentArtistPreservationArtistBoundary(
             address(core), address(router), address(attribution)
         );
-        producer = new Producer(
-            address(renderer),
-            address(projection),
-            address(executor),
-            G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2),
-            G.GasParameterConfig("STATIC_ATTRIBUTION_GAS", 8000000, 8000000, 1)
+        producer = Producer(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamCurrentArtistPreservationRendererV1.sol:StreamCurrentArtistPreservationRendererV1",
+                abi.encode(
+                    address(renderer),
+                    address(projection),
+                    address(executor),
+                    G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2),
+                    G.GasParameterConfig("STATIC_ATTRIBUTION_GAS", 8000000, 8000000, 1)
+                )
+            )
         );
     }
 
@@ -188,18 +195,25 @@ contract StreamCurrentArtistPreservationRendererTest is StaticMetadataRoutingFix
             G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2);
         G.GasParameterConfig memory artistGas =
             G.GasParameterConfig("STATIC_ATTRIBUTION_GAS", 8000000, 8000000, 1);
-        vm.expectRevert(abi.encodeWithSelector(OriginalProducer.InvalidStaticRender.selector));
-        new OriginalProducer(
-            address(renderer), address(projection), address(executor), read, artistGas
+        bytes memory rejectedOriginal = _preservationInit(
+            "smart-contracts/domains/metadata/StreamPreservationRendererV1.sol:StreamPreservationRendererV1",
+            abi.encode(address(renderer), address(projection), address(executor), read, artistGas)
         );
-        OriginalArtist old = new OriginalArtist(
-            address(core), address(router), address(attribution)
+        vm.expectRevert(abi.encodeWithSelector(OriginalProducer.InvalidStaticRender.selector));
+        this.deployPreservationForRefusal(rejectedOriginal);
+        OriginalArtist old =
+            new OriginalArtist(address(core), address(router), address(attribution));
+        bytes memory rejectedCurrent = _preservationInit(
+            "smart-contracts/domains/metadata/StreamCurrentArtistPreservationRendererV1.sol:StreamCurrentArtistPreservationRendererV1",
+            abi.encode(address(renderer), address(old), address(executor), read, artistGas)
         );
         vm.expectRevert(abi.encodeWithSelector(Producer.InvalidStaticRender.selector));
-        new Producer(address(renderer), address(old), address(executor), read, artistGas);
-        OriginalProducer oldProducer =
-            new OriginalProducer(
-            address(renderer), address(old), address(executor), read, artistGas
+        this.deployPreservationForRefusal(rejectedCurrent);
+        OriginalProducer oldProducer = OriginalProducer(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamPreservationRendererV1.sol:StreamPreservationRendererV1",
+                abi.encode(address(renderer), address(old), address(executor), read, artistGas)
+            )
         );
         CurrentArtistPreservationBindingProbe probe = new CurrentArtistPreservationBindingProbe();
         V.Version memory v;

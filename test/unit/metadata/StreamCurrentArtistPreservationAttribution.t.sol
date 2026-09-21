@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    CurrentArtistPreservationCreate
+} from "../../helpers/CurrentArtistPreservationFixture.sol";
 import { StaticArtistLineageFixture } from "./StreamStaticArtistLineage.t.sol";
 import {
     StreamCurrentArtistPreservationAttributionV1 as P
@@ -72,9 +75,17 @@ contract StreamStaticArtistLineageColdTest is StaticArtistLineageFixture {
 }
 
 /// @notice Actual current-suite companion and fixed preservation wrapper; typed fact/authority graph.
-contract StreamCurrentArtistPreservationAttributionTest is StaticArtistLineageFixture {
+contract StreamCurrentArtistPreservationAttributionTest is
+    StaticArtistLineageFixture,
+    CurrentArtistPreservationCreate
+{
     function testCurrentPreservationMatchesFreshLineageAcrossAThenBAndC() public {
-        P value = new P(address(companion), address(companion), address(0));
+        P value = P(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamCurrentArtistPreservationAttributionV1.sol:StreamCurrentArtistPreservationAttributionV1",
+                abi.encode(address(companion), address(companion), address(0))
+            )
+        );
         require(
             value.preservationAttributionProfile()
                 == keccak256("6529STREAM_CURRENT_ARTIST_NON_SANCTION_ATTRIBUTION_V1"),
@@ -100,14 +111,24 @@ contract StreamCurrentArtistPreservationAttributionTest is StaticArtistLineageFi
         PreservationReconciliationBoundary report = new PreservationReconciliationBoundary(
             address(core), address(router), suites[0].registry
         );
-        C2PA live = new C2PA(
-            address(companion),
-            address(report),
-            address(0),
-            G.GasParameterConfig("C2PA_STATIC_ARTIST_GAS", 8000000, 100000, 2),
-            G.GasParameterConfig("C2PA_STATIC_REPORT_GAS", 100000, 100000, 2)
+        C2PA live = C2PA(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamStaticC2PAAttributionCompanion.sol:StreamStaticC2PAAttributionCompanion",
+                abi.encode(
+                    address(companion),
+                    address(report),
+                    address(0),
+                    G.GasParameterConfig("C2PA_STATIC_ARTIST_GAS", 8000000, 100000, 2),
+                    G.GasParameterConfig("C2PA_STATIC_REPORT_GAS", 100000, 100000, 2)
+                )
+            )
         );
-        P value = new P(address(companion), address(live), address(0));
+        P value = P(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamCurrentArtistPreservationAttributionV1.sol:StreamCurrentArtistPreservationAttributionV1",
+                abi.encode(address(companion), address(live), address(0))
+            )
+        );
         _prepare(1, 255, 255);
         _prepare(2, 255, 255);
         bytes32 expected = keccak256(value.preservationAttribution(1, 0));
@@ -126,6 +147,10 @@ contract StreamCurrentArtistPreservationAttributionTest is StaticArtistLineageFi
     }
 
     function testCurrentPreservationCannotAcceptLegacyCompanionProfile() public {
+        bytes memory init = _preservationInit(
+            "smart-contracts/domains/metadata/StreamCurrentArtistPreservationAttributionV1.sol:StreamCurrentArtistPreservationAttributionV1",
+            abi.encode(address(original), address(original), address(0))
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 bytes4(keccak256("RendererReadFailed(address,bytes4)")),
@@ -133,6 +158,6 @@ contract StreamCurrentArtistPreservationAttributionTest is StaticArtistLineageFi
                 bytes4(keccak256("attributionProfile()"))
             )
         );
-        new P(address(original), address(original), address(0));
+        this.deployPreservationForRefusal(init);
     }
 }

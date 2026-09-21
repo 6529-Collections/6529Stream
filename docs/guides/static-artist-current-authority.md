@@ -163,6 +163,19 @@ continued use or cold whole-transaction limits. The new eighteen preservation
 Attribution/Renderer/Registry cases remain authored and typechecked, without runtime
 acceptance.
 
+Their dedicated fixtures load genuine linked compiler creation artifacts instead
+of embedding heavy child creation code. The original shared STATIC fixture is
+unchanged; the new fixture repeats its constructor order, arguments and subsequent
+calls. Successful CREATE calls assert the original caller-derived address, nonce
+and normal 49,152/24,576-byte limits. Constructor refusal cases fetch the artifact
+before the expectation and use a self-only outer call to check the exact bubbled
+error; that failed outer frame also rolls back the attempted CREATE nonce, which
+the original assertions do not observe. Six Registry cases retain their complete
+bodies in three smaller harnesses. Their document helper uses the exact original
+body in a fixed test library, preserving the caller through delegation. All six
+test harnesses fit in the selected size gate; native artifact and execution gates
+remain separate.
+
 ## Bounded lineage runtime evidence
 
 Native capture 3 at source `432a61deb6d76ae388b9b2a335a7c34d118d76df`

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StaticMetadataRoutingFixture,
+    CurrentArtistPreservationFixture,
+    CurrentArtistPreservationDocuments,
     StaticRouteModules
-} from "../../helpers/StaticMetadataRoutingFixture.sol";
+} from "../../helpers/CurrentArtistPreservationFixture.sol";
 import {
     CurrentArtistPreservationArtistBoundary
 } from "./StreamCurrentArtistPreservationRenderer.t.sol";
@@ -58,29 +59,37 @@ interface CurrentArtistPreservationGateVm {
 /// @notice Actual current-Artist profile Registry/Schema/Store/Router/live+preservation renderer.
 /// Artist and analysis are
 /// explicit typed test assertions. This proves gate mechanics and genuine execution, not opcode review.
-contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFixture {
-    CurrentArtistPreservationGateVm private constant gvm =
+abstract contract CurrentArtistPreservationRegistryFixture is CurrentArtistPreservationFixture {
+    CurrentArtistPreservationGateVm internal constant gvm =
         CurrentArtistPreservationGateVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    Registry private gate;
-    Producer private producer;
-    CurrentArtistPreservationArtistBoundary private projection;
-    bytes32 private versionKey;
-    uint256 private serial;
-    uint16 private producerIndex;
-    uint16 private attributionIndex;
-    bytes32 private newSchema;
+    Registry internal gate;
+    Producer internal producer;
+    CurrentArtistPreservationArtistBoundary internal projection;
+    bytes32 internal versionKey;
+    uint256 internal serial;
+    uint16 internal producerIndex;
+    uint16 internal attributionIndex;
+    bytes32 internal newSchema;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
-        projection = new CurrentArtistPreservationArtistBoundary(
-            address(core), address(router), address(attribution)
+        projection = CurrentArtistPreservationArtistBoundary(
+            _preservationDeploy(
+                "test/unit/metadata/StreamCurrentArtistPreservationRenderer.t.sol:CurrentArtistPreservationArtistBoundary",
+                abi.encode(address(core), address(router), address(attribution))
+            )
         );
-        producer = new Producer(
-            address(renderer),
-            address(projection),
-            address(executor),
-            G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2),
-            G.GasParameterConfig("STATIC_ATTRIBUTION_GAS", 8000000, 8000000, 1)
+        producer = Producer(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamCurrentArtistPreservationRendererV1.sol:StreamCurrentArtistPreservationRendererV1",
+                abi.encode(
+                    address(renderer),
+                    address(projection),
+                    address(executor),
+                    G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2),
+                    G.GasParameterConfig("STATIC_ATTRIBUTION_GAS", 8000000, 8000000, 1)
+                )
+            )
         );
         V.Target[] memory targets = new V.Target[](2);
         targets[0] = V.Target(
@@ -96,12 +105,17 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
         }
         producerIndex = targets[0].target == address(producer) ? 0 : 1;
         attributionIndex = 1 - producerIndex;
-        gate = new Registry(
-            address(executor),
-            address(schemas),
-            targets,
-            G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2),
-            G.GasParameterConfig("RENDERER_GOLDEN_VECTOR_GAS", 12000000, 100000, 2)
+        gate = Registry(
+            _preservationDeploy(
+                "smart-contracts/domains/metadata/StreamRendererRegistry.sol:StreamRendererRegistry",
+                abi.encode(
+                    address(executor),
+                    address(schemas),
+                    targets,
+                    G.GasParameterConfig("METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2),
+                    G.GasParameterConfig("RENDERER_GOLDEN_VECTOR_GAS", 12000000, 100000, 2)
+                )
+            )
         );
         _doc("RAW_BYTES", Docs.DocumentKind.CANONICALIZATION, bytes(schemas.RAW_BYTES_DEFINITION()));
         V.Registration memory original;
@@ -146,7 +160,12 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
             ),
             (bytes32)
         );
-        modules = new StaticRouteModules(address(metadata), address(gate));
+        modules = StaticRouteModules(
+            _preservationDeploy(
+                "test/helpers/StaticMetadataRoutingFixture.sol:StaticRouteModules",
+                abi.encode(address(metadata), address(gate))
+            )
+        );
         core.setPointer(keccak256("MODULE_REGISTRY"), address(modules));
         S.ConfigInput memory input;
         input.registry = address(gate);
@@ -165,7 +184,7 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
     }
 
     function _recipe()
-        private
+        internal
         returns (P.PreservationRegistration memory r, V.Read[] memory reads_)
     {
         reads_ = new V.Read[](5);
@@ -229,6 +248,59 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
         r.goldenDocument = _catalog(abi.encode(vectors));
     }
 
+    function registerAgain(P.PreservationRegistration calldata r, V.Read[] calldata reads_)
+        external
+    {
+        _register(r, reads_);
+    }
+
+    function _register(P.PreservationRegistration memory r, V.Read[] memory reads_) internal {
+        (bytes32 s, bytes32 p, bytes32 n) = gate.preservationTransition(r, reads_);
+        executor.execute(
+            address(gate), abi.encodeCall(gate.registerPreservation, (r, reads_)), s, p, n
+        );
+    }
+
+    function _readHash(V.Read[] memory reads_) internal view returns (bytes32) {
+        return keccak256(
+            abi.encode(keccak256("6529STREAM_RENDERER_READ_SET_V1"), gate.targetSetHash(), reads_)
+        );
+    }
+
+    function _sort(V.Read[] memory rows) internal pure {
+        for (uint256 i = 1; i < rows.length; ++i) {
+            V.Read memory value = rows[i];
+            uint256 j = i;
+            while (
+                j > 0
+                    && (rows[j - 1].targetIndex > value.targetIndex
+                        || (rows[j - 1].targetIndex == value.targetIndex
+                            && rows[j - 1].selector > value.selector))
+            ) {
+                rows[j] = rows[j - 1];
+                --j;
+            }
+            rows[j] = value;
+        }
+    }
+
+    function _catalog(bytes memory payload) internal returns (bytes32) {
+        return _doc(
+            string.concat("PRESERVATION_CATALOG_", Strings.toString(++serial)),
+            Docs.DocumentKind.CATALOG,
+            payload
+        );
+    }
+
+    function _doc(string memory name, Docs.DocumentKind kind, bytes memory payload)
+        internal
+        returns (bytes32)
+    {
+        return CurrentArtistPreservationDocuments.publish(schemas, executor, name, kind, payload);
+    }
+}
+
+contract StreamCurrentArtistPreservationRegistryTest is CurrentArtistPreservationRegistryFixture {
     function testGovernedSeparateGoldenMatchesActualOldOutputAndRetainsOriginalVersion() public {
         bytes32 oldHash = keccak256(abi.encode(gate.version(versionKey)));
         (P.PreservationRegistration memory r, V.Read[] memory reads_) = _recipe();
@@ -309,7 +381,11 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
             "empty static record"
         );
     }
+}
 
+contract StreamCurrentArtistPreservationRegistryRefusalTest is
+    CurrentArtistPreservationRegistryFixture
+{
     function testOriginalAdmissionDoesNotAuthorizeNewProfileAndForeignCallerCannotRegister()
         public
     {
@@ -339,7 +415,11 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
             "no partial record"
         );
     }
+}
 
+contract StreamCurrentArtistPreservationRegistryRetentionTest is
+    CurrentArtistPreservationRegistryFixture
+{
     function testLateActualGoldenFailureRollsBackThenSameRegistrationRetries() public {
         (P.PreservationRegistration memory r, V.Read[] memory reads_) = _recipe();
         projection.setFail(true);
@@ -367,73 +447,6 @@ contract StreamCurrentArtistPreservationRegistryTest is StaticMetadataRoutingFix
         (, P.Admission memory a) =
             gate.requirePreservation(versionKey, address(producer), r.binding.profile);
         require(a.registrationHash != 0, "retained exact restoration");
-    }
-
-    function registerAgain(P.PreservationRegistration calldata r, V.Read[] calldata reads_)
-        external
-    {
-        _register(r, reads_);
-    }
-
-    function _register(P.PreservationRegistration memory r, V.Read[] memory reads_) private {
-        (bytes32 s, bytes32 p, bytes32 n) = gate.preservationTransition(r, reads_);
-        executor.execute(
-            address(gate), abi.encodeCall(gate.registerPreservation, (r, reads_)), s, p, n
-        );
-    }
-
-    function _readHash(V.Read[] memory reads_) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(keccak256("6529STREAM_RENDERER_READ_SET_V1"), gate.targetSetHash(), reads_)
-        );
-    }
-
-    function _sort(V.Read[] memory rows) private pure {
-        for (uint256 i = 1; i < rows.length; ++i) {
-            V.Read memory value = rows[i];
-            uint256 j = i;
-            while (
-                j > 0
-                    && (rows[j - 1].targetIndex > value.targetIndex
-                        || (rows[j - 1].targetIndex == value.targetIndex
-                            && rows[j - 1].selector > value.selector))
-            ) {
-                rows[j] = rows[j - 1];
-                --j;
-            }
-            rows[j] = value;
-        }
-    }
-
-    function _catalog(bytes memory payload) private returns (bytes32) {
-        return _doc(
-            string.concat("PRESERVATION_CATALOG_", Strings.toString(++serial)),
-            Docs.DocumentKind.CATALOG,
-            payload
-        );
-    }
-
-    function _doc(string memory name, Docs.DocumentKind kind, bytes memory payload)
-        private
-        returns (bytes32)
-    {
-        Store store = Store(schemas.chunkStore());
-        (bytes32 hash,) = store.publishChunk(payload);
-        bytes32[] memory chunks = new bytes32[](1);
-        chunks[0] = hash;
-        Docs.DocumentSpec memory spec =
-            Docs.DocumentSpec(name, kind, hash, schemas.RAW_BYTES(), 0, "", uint32(payload.length));
-        (bytes32 s, bytes32 before_, bytes32 after_) = schemas.registrationTransition(spec, chunks);
-        return abi.decode(
-            executor.execute(
-                address(schemas),
-                abi.encodeCall(schemas.registerDocument, (spec, chunks)),
-                s,
-                before_,
-                after_
-            ),
-            (bytes32)
-        );
     }
 }
 
