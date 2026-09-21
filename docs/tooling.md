@@ -241,7 +241,13 @@ By default cache profiles and source layouts must match. An explicit
 `--routing-context LABEL --routing-profile PROFILE` uses that original context's
 cache profiles and test/script paths. Every selected artifact's original profile
 and actual native input must match the target Solidity settings apart from
-`outputSelection`; source/library paths and cache format must still agree. This
+`outputSelection`; source paths and cache format must still agree. Library search
+roots may differ only with a recorded proof that no original native input source
+lies beneath a changed root and every import in every authenticated source is
+literal relative syntax resolving to the same pinned source path and SourceUnit
+ID. Missing ASTs, external/package imports, unresolved imports and used changed
+roots refuse the transport. The proof is recorded outside the derived cache;
+original sources, native outputs and caches remain untouched. This
 is execution routing only, not replacement compiler output or proof of cache use.
 A cached listing with the compiler disabled must succeed before runtime use.
 

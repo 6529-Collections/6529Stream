@@ -11,6 +11,7 @@ import copy
 import hashlib
 import json
 import os
+import posixpath
 from pathlib import Path, PurePosixPath
 import sys
 
@@ -188,11 +189,61 @@ def authenticate(project: Path, products_path: Path, config: Path, preparation: 
             'productionSizes': caps, 'literalArtifactSources': literals}
 
 
+def prove_unused_library_roots(contexts: dict, original: list, target: list) -> dict:
+    """Prove a search-root-only routing change has no library lookup dependency.
+
+    Every original source must be represented in the authenticated analysis, and
+    every import must be literal relative syntax resolving to that same source
+    universe/SourceUnit ID. Analysis is discovery evidence only, never bytecode.
+    """
+    for roots in (original, target):
+        require(isinstance(roots, list) and all(isinstance(root, str) for root in roots), 'Invalid library search roots')
+        require(len(roots) == len({root.casefold() for root in roots}), 'Duplicate library search roots')
+        for root in roots:
+            safe_relative(root)
+            require(root != '.', 'Project root cannot be transported as an unused library root')
+    changed = set(original) ^ set(target)
+    if not changed and original != target:
+        changed = set(original)  # A reordered search path must also be demonstrably unused.
+    source_counts = {}; import_counts = {}
+    for label, context in contexts.items():
+        sources = context['build']['input']['sources']
+        asts = (context['analysis'] or context['build'])['output']['sources']
+        imports = 0
+        for source in sources:
+            safe_relative(source)
+            require(not any(source.casefold() == root.casefold() or source.casefold().startswith(root.casefold() + '/')
+                            for root in changed), f'Changed library root contains a native source: {source}')
+            ast = asts.get(source, {}).get('ast')
+            require(isinstance(ast, dict) and ast.get('absolutePath') == source,
+                    f'Library-root transport lacks authenticated source AST: {source}')
+            for node in ast['nodes']:
+                if node.get('nodeType') != 'ImportDirective':
+                    continue
+                literal = node.get('file')
+                require(isinstance(literal, str) and literal.startswith(('./', '../'))
+                        and '\\' not in literal and ':' not in literal,
+                        f'Library-root transport requires literal relative imports: {source}')
+                resolved = posixpath.normpath(posixpath.join(posixpath.dirname(source), literal))
+                safe_relative(resolved)
+                require(resolved == node.get('absolutePath') and resolved in sources,
+                        f'Library-root import resolution differs: {source}: {literal}')
+                imported = asts.get(resolved, {}).get('ast')
+                require(isinstance(imported, dict) and imported.get('absolutePath') == resolved
+                        and type(node.get('sourceUnit')) is int and node['sourceUnit'] == imported.get('id'),
+                        f'Library-root import SourceUnit differs: {source}: {literal}')
+                imports += 1
+        source_counts[label] = len(sources); import_counts[label] = imports
+    return {'original': original, 'target': target, 'unusedChangedRoots': sorted(changed),
+            'sourceCounts': source_counts, 'relativeImportCounts': import_counts}
+
+
 def cache_transport(contexts: dict, assignments: dict, destination: Path, *,
-                    routing: dict | None = None, project: Path | None = None) -> tuple[dict, dict, dict]:
+                    routing: dict | None = None, project: Path | None = None,
+                    transport_report: dict | None = None) -> tuple[dict, dict, dict]:
     """Only cache paths/build routing changes; compiler data is never combined."""
     cache = None; files = {}; origins = {}; copies = {}; paths_seen = set(); source_hashes = {}
-    target = None
+    target = None; library_transports = {}
     if routing is not None:
         require(set(routing) == {'context', 'profile'} and routing['context'] in contexts, 'Invalid explicit cache routing')
         target = owned.strict_json(contexts[routing['context']]['cacheRaw'])
@@ -206,9 +257,11 @@ def cache_transport(contexts: dict, assignments: dict, destination: Path, *,
         if target is not None:
             require({k:v for k,v in header.items() if k != 'profiles'}
                     == {k:v for k,v in cache.items() if k not in ('paths', 'profiles')}, 'Cache format transport differs')
-            require({k:v for k,v in original['paths'].items() if k not in ('artifacts', 'build_infos', 'tests', 'scripts')}
-                    == {k:v for k,v in target['paths'].items() if k not in ('artifacts', 'build_infos', 'tests', 'scripts')},
-                    'Cache source/library layout differs')
+            require({k:v for k,v in original['paths'].items() if k not in ('artifacts', 'build_infos', 'tests', 'scripts', 'libraries')}
+                    == {k:v for k,v in target['paths'].items() if k not in ('artifacts', 'build_infos', 'tests', 'scripts', 'libraries')},
+                    'Cache source layout differs')
+            if original['paths']['libraries'] != target['paths']['libraries']:
+                library_transports[label] = prove_unused_library_roots(contexts, original['paths']['libraries'], target['paths']['libraries'])
             native_semantics = {k:v for k,v in context['build']['input']['settings'].items() if k != 'outputSelection'}
             require(native_semantics == target_semantics, 'Target routing profile differs from native compiler settings')
         elif cache is None:
@@ -288,6 +341,9 @@ def cache_transport(contexts: dict, assignments: dict, destination: Path, *,
     cache['files'] = files; cache['builds'] = sorted(c['identity'] for c in contexts.values())
     cache['paths']['artifacts'] = str((destination / 'out').resolve())
     cache['paths']['build_infos'] = str((destination / 'out/build-info').resolve())
+    # Report the proof outside the Forge cache; do not add compiler/cache fields.
+    if transport_report is not None:
+        transport_report.update(library_transports)
     return cache, copies, source_hashes
 
 
@@ -336,7 +392,9 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
     originals = [Path(p) for p in evidence['protectedDirectories']]
     require_disjoint(destination, originals + [owners, products, preparation, project / 'foundry.toml'])
     require(not project.is_relative_to(destination), 'Execution view cannot contain the project')
-    cache, copies, routing_sources = cache_transport(evidence['contexts'], evidence['owners'], destination, routing=routing, project=project)
+    library_transports = {}
+    cache, copies, routing_sources = cache_transport(evidence['contexts'], evidence['owners'], destination,
+        routing=routing, project=project, transport_report=library_transports)
     input_files = {str((project / s).resolve()): h for s, h in evidence['sources'].items()}
     input_files.update({str((project / s).resolve()): h for s, h in routing_sources.items()})
     for context in evidence['contexts'].values():
@@ -373,7 +431,8 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
     (destination / 'cache').mkdir()
     (destination / 'cache/solidity-files-cache.json').write_bytes(canonical(cache))
     result = {'version': 1, 'status': 'PREPARED_EXECUTION_VIEW', 'project': str(project), 'view': str(destination),
-              'routingTransport': routing, 'routingSourceHashes': routing_sources, 'entrypoints': entrypoints, 'expectedCases': evidence['cases'], 'artifacts': evidence['artifacts'],
+              'routingTransport': routing, 'routingSourceHashes': routing_sources,
+              'librarySearchRootTransports': library_transports, 'entrypoints': entrypoints, 'expectedCases': evidence['cases'], 'artifacts': evidence['artifacts'],
               'productionSizes': evidence['productionSizes'], 'literalArtifactSources': evidence['literalArtifactSources'],
               'preparationSha256': preparation_sha256, 'inputFiles': input_files,
               'inputDirectories': input_directories, 'routingCacheSha256': routing_cache_hash(cache),

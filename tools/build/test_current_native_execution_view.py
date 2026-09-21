@@ -122,6 +122,43 @@ class CacheTransportTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'native compiler settings'):
             view.cache_transport(self.contexts,self.assignments,self.root/'view',routing={'context':'one','profile':'default'})
 
+    def test_explicit_unused_library_search_roots_can_be_routed(self):
+        settings={'viaIR':True,'optimizer':{'enabled':True,'runs':200},'evmVersion':'paris'}
+        for label in self.contexts:
+            self.contexts[label]['build']['input']['settings']=copy.deepcopy(settings)
+            self.mutate_cache(label,lambda c:c.update(profiles={'default':{'solc':dict(settings,outputSelection={'*':{}})}}))
+        self.mutate_cache('two',lambda c:c['paths'].update(libraries=[]))
+        with self.assertRaisesRegex(ValueError,'Cache source layout'):self.transport()
+        before=copy.deepcopy(self.contexts); report={}
+        cache,_,_=view.cache_transport(self.contexts,self.assignments,self.root/'view',
+                                       routing={'context':'one','profile':'default'},transport_report=report)
+        self.assertEqual(cache['paths']['libraries'],['lib'])
+        self.assertEqual(report['two']['unusedChangedRoots'],['lib'])
+        self.assertEqual(report['two']['sourceCounts'],{'one':1,'two':1})
+        self.assertEqual(self.contexts,before)
+
+    def test_library_search_root_proof_requires_complete_literal_relative_imports(self):
+        ctx=self.contexts['one']; ast=ctx['build']['output']['sources'][self.source]['ast'];ast['id']=1
+        target='smart-contracts/Imported.sol'
+        ctx['build']['input']['sources'][target]={'content':'// imported'}
+        ctx['build']['output']['sources'][target]={'id':2,'ast':{'id':2,'absolutePath':target,'nodes':[]}}
+        node={'nodeType':'ImportDirective','file':'../../smart-contracts/Imported.sol','absolutePath':target,'sourceUnit':2}
+        ast['nodes']=[node]
+        self.assertEqual(view.prove_unused_library_roots(self.contexts,[],['lib'])['relativeImportCounts']['one'],1)
+        for key,value in [('file','package/Imported.sol'),('file','../../../outside.sol'),
+                          ('absolutePath',self.source),('sourceUnit',99)]:
+            old=node[key];node[key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):view.prove_unused_library_roots(self.contexts,[],['lib'])
+            node[key]=old
+        del ctx['build']['output']['sources'][target]['ast']
+        with self.assertRaises(ValueError):view.prove_unused_library_roots(self.contexts,[],['lib'])
+
+    def test_library_search_root_proof_rejects_actual_native_source_below_changed_root(self):
+        ctx=self.contexts['two'];ctx['build']['input']['sources']['lib/External.sol']={'content':'// external'}
+        with self.assertRaisesRegex(ValueError,'contains a native source'):view.prove_unused_library_roots(self.contexts,[],['lib'])
+        for roots in (['../lib'],['C:/lib'],['lib','LIB'],['.']):
+            with self.assertRaises(ValueError):view.prove_unused_library_roots(self.contexts,[],roots)
+
     def test_view_copy_original_and_input_rechecks(self):
         cache,copies,_=self.transport(); destination=self.root/'view';(destination/'out').mkdir(parents=True);(destination/'cache').mkdir()
         for rel,path in copies.items():

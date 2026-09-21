@@ -13,6 +13,10 @@
 
 ## Native execution cache views
 
+- Permit explicit routing between unused library search-root lists only after
+  proving complete literal relative imports and absence of native sources under
+  every changed root. Preserve the original cache and refuse external, unresolved
+  or actually used changed library paths.
 - Build a separate Forge execution view from explicit original native owners and
   pinned canonical preparation, preserving every original artifact and build-info
   file. Namespace routing by full owner identity and recheck sources, cache,
