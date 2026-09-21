@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredDisputeConsentHistory as DisputeHistory } from "./StreamArtistRecoveredDisputeConsentHistory.sol";
 
 import {
     StreamArtistRecoveredHydrationTypes as RH
@@ -86,7 +87,8 @@ library StreamArtistRecoveredContentConsentHydration {
 
     function selected(bytes memory outer) public pure returns (bool) {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 6);
-        return (h.requiredFeatures & RH.RATIFICATIONS) != 0
+        return (h.requiredFeatures & RH.DISPUTE_HISTORY) != 0
+            || (h.requiredFeatures & RH.RATIFICATIONS) != 0
             || (h.requiredFeatures & RH.CONTENT_CONSENTS) != 0
             || ((h.requiredFeatures & RH.BINDING_GENERATIONS) != 0
                 && (GenerationBase.tagged(p.semanticState)
@@ -142,6 +144,13 @@ library StreamArtistRecoveredContentConsentHydration {
         bytes memory outer
     ) public returns (Bundle memory result) {
         (RH.ExportHeader memory header, Payload.Payload memory payload) = Payload.decode(outer, 6);
+        if ((header.requiredFeatures & RH.DISPUTE_HISTORY) != 0) {
+            result.original = DisputeHistory.importState(policies,economics,associated,associations,delegations,sales,latest,q,outer);
+            result.consents = new ContentOwner.ConsentRecord[](0);
+            result.royalties = new Royalty[](0);
+            result.freezes = new Content.FreezeRecord[](0);
+            return result;
+        }
         bool ratified = Ratified.tagged(payload.semanticState);
         if (ratified != ((header.requiredFeatures & RH.RATIFICATIONS) != 0)) _invalid();
         bool delegatedGeneration = GenerationDelegated.tagged(payload.semanticState);

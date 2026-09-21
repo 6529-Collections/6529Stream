@@ -55,7 +55,7 @@ library StreamArtistDisputeWithdrawalState {
         string reasonURI
     );
 
-    function store() private pure returns (Store storage s) {
+    function store() internal pure returns (Store storage s) {
         bytes32 slot = SLOT;
         assembly ("memory-safe") { s.slot := slot }
     }

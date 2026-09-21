@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredDisputeStage as DisputeStage } from "./StreamArtistRecoveredDisputeStage.sol";
 import { StreamArtistRecoveredAcceptedBindingHydration as AcceptedBinding } from "./StreamArtistRecoveredAcceptedBindingHydration.sol";
 import { StreamArtistRecoveredAcceptedGenerationStage as AcceptedStage } from "./StreamArtistRecoveredAcceptedGenerationStage.sol";
 import {
@@ -85,7 +86,11 @@ library StreamArtistRecoveredPreparationOwners {
             payload.provenance = RH.ownerProvenance(c.provenance, i);
             payload.publications = Publications.collect(c.source.owners[i], i);
             (data[i], payload.nonces) = Guards.collect(c.provenance, i, c.replayOrigins[i]);
-            if (i == 0 && (c.features & RH.ACCEPTED_GENERATIONS) != 0) {
+            if ((i == 0 || i == 3 || i == 4) && (c.features & RH.DISPUTE_HISTORY) != 0) {
+                payload.semanticState = DisputeStage.ownerState(c.source,c.query,c.provenance,c.generations,i);
+            } else if (i == 6 && (c.features & RH.DISPUTE_HISTORY) != 0) {
+                payload.semanticState = c.consent;
+            } else if (i == 0 && (c.features & RH.ACCEPTED_GENERATIONS) != 0) {
                 payload.semanticState = AcceptedBinding.encodeCollected(c.source.owners[0], c.generations, c.query, payload.provenance);
             } else if ((i == 3 || i == 4) && (c.features & RH.ACCEPTED_GENERATIONS) != 0) {
                 payload.semanticState = AcceptedStage.ownerState(c.source, c.query, c.provenance, c.generations, i);

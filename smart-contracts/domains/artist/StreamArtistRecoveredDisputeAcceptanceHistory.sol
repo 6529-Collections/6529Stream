@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredDisputeAcceptanceHistory as DisputeHistory } from "./StreamArtistRecoveredDisputeAcceptanceHistory.sol";
+import {
+    StreamArtistRecoveredDisputeHistoryTypes as D
+} from "./StreamArtistRecoveredDisputeHistoryTypes.sol";
 import {
     StreamArtistRecoveredAcceptedGenerationTypes as A
 } from "./StreamArtistRecoveredAcceptedGenerationTypes.sol";
@@ -27,7 +29,7 @@ import {
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
 
 /// @notice Every actual accepted binding's original record/time; no guessed signer preimage.
-library StreamArtistRecoveredAcceptanceHistory {
+library StreamArtistRecoveredDisputeAcceptanceHistory {
     bytes32 private constant KEY = keccak256("acceptance_lifecycle.replay.record_uniqueness");
 
     function collect(
@@ -67,8 +69,8 @@ library StreamArtistRecoveredAcceptanceHistory {
         if (
             P.validateOwner(p, 3) != b.provenance || b.artistId != q.artistId
                 || b.collectionId != q.collectionId || b.bindingHash != q.bindingHash
-                || q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0 || b.rows.length < 2
-                || b.rows.length > 128 || b.rows.length != p.journal.length
+                || q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0
+                || b.rows.length == 0 || b.rows.length > 128 || b.rows.length != p.journal.length
                 || b.rows[b.rows.length - 1].bindingHash != q.bindingHash
         ) _invalid();
         uint256[] memory counts = new uint256[](p.eras.length);
@@ -106,7 +108,9 @@ library StreamArtistRecoveredAcceptanceHistory {
         }
         for (uint256 i; i < p.aliases.length; ++i) {
             RH.ReplayAlias memory a = p.aliases[i];
-            if (a.surface != KEY || a.scope == 0 || a.cell.kind != 1 || a.cell.status != 2) _invalid();
+            if (a.surface != KEY || a.scope == 0 || a.cell.kind != 1 || a.cell.status != 2) {
+                _invalid();
+            }
             bool found;
             for (uint256 j; j < b.rows.length; ++j) {
                 if (a.cell.commitment == b.rows[j].recordHash) {
@@ -149,7 +153,7 @@ library StreamArtistRecoveredAcceptanceHistory {
         returns (bytes memory)
     {
         validate(b, q, p);
-        return abi.encode(A.ACCEPTANCE, RH.VERSION, b);
+        return abi.encode(D.ACCEPTANCE, RH.VERSION, b);
     }
 
     function decode(AH.Query memory q, RH.OwnerProvenance memory p, bytes memory raw)
@@ -161,7 +165,7 @@ library StreamArtistRecoveredAcceptanceHistory {
         uint16 version;
         (tag, version, b) = abi.decode(raw, (bytes32, uint16, A.AcceptanceBundle));
         if (
-            tag != A.ACCEPTANCE || version != RH.VERSION
+            tag != D.ACCEPTANCE || version != RH.VERSION
                 || keccak256(raw) != keccak256(abi.encode(tag, version, b))
         ) _invalid();
         validate(b, q, p);
@@ -174,8 +178,7 @@ library StreamArtistRecoveredAcceptanceHistory {
         bytes memory outer
     ) public returns (bool) {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 3);
-        if ((h.requiredFeatures & RH.DISPUTE_HISTORY) != 0) return DisputeHistory.importIfSelected(records, times, q, outer);
-        if ((h.requiredFeatures & RH.ACCEPTED_GENERATIONS) == 0) return false;
+        if ((h.requiredFeatures & RH.DISPUTE_HISTORY) == 0) return false;
         if (p.nonces.length != 0) _invalid();
         A.AcceptanceBundle memory b = decode(q, p.provenance, p.semanticState);
         for (uint256 i; i < b.rows.length; ++i) {

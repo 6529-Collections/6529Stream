@@ -576,7 +576,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.ACCEPTED_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.DISPUTE_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(

@@ -31,7 +31,7 @@ library StreamArtistRecoveredIdentitySourceCauses {
                     || r.cause.facts.previousCauseHash != previous
             ) revert IH.InvalidRecoveredIdentity(r.cause.causeHash);
             RH.Point memory point = _occurrence(
-                p, b.artistId, r.cause.facts.kind == 1 ? uint16(33) : uint16(31), r.cause.causeHash
+                p, b.artistId, r.cause.facts.kind == 1 ? uint16(0) : uint16(31), r.cause.causeHash
             );
             if (!_samePoint(point, r.point)) revert IH.InvalidRecoveredIdentity(r.cause.causeHash);
             if (i != 0) _ordered(p, b.causes[i - 1].point, r.point);
@@ -51,7 +51,7 @@ library StreamArtistRecoveredIdentitySourceCauses {
         for (uint256 i; i < p.journal.length; ++i) {
             RH.JournalEntry memory j = p.journal[i];
             if (
-                j.receipt.operation != op || j.receipt.artistId != artist
+                (op == 0 ? (j.receipt.operation != 33 && j.receipt.operation != 48) : j.receipt.operation != op) || j.receipt.artistId != artist
                     || j.receipt.recordHash != key
             ) continue;
             if (found || key == 0) revert IH.InvalidRecoveredIdentity(key);

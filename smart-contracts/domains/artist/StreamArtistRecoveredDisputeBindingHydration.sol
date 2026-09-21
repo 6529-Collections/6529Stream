@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredDisputeBindingHydration as DisputeHistory } from "./StreamArtistRecoveredDisputeBindingHydration.sol";
 import {
-    StreamArtistRecoveredAcceptedGenerationTypes as A
-} from "./StreamArtistRecoveredAcceptedGenerationTypes.sol";
+    StreamArtistRecoveredDisputeHistoryTypes as A
+} from "./StreamArtistRecoveredDisputeHistoryTypes.sol";
 import {
-    StreamArtistRecoveredAcceptedBindingValidation as V
-} from "./StreamArtistRecoveredAcceptedBindingValidation.sol";
+    StreamArtistRecoveredDisputeBindingValidation as V
+} from "./StreamArtistRecoveredDisputeBindingValidation.sol";
 import {
     StreamArtistRecoveredBindingCorrectionTypes as CB
 } from "./StreamArtistRecoveredBindingCorrectionTypes.sol";
@@ -48,17 +47,8 @@ import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
 
-import {
-    StreamArtistRecoveredBindingCorrectionHydration as OriginalCorrections
-} from "./StreamArtistRecoveredBindingCorrectionHydration.sol";
-
 /// @notice Fixed-owner complete accepted generation export/import under original guarded op60.
-library StreamArtistRecoveredAcceptedBindingHydration {
-    function selected(RH.Provenance memory p) public pure returns (bool) {
-        // Every accepted former generation contributes its original Acceptance occurrence.
-        return p.journals[3].length > 1;
-    }
-
+library StreamArtistRecoveredDisputeBindingHydration {
     function collect(address source, AH.Query memory q, RH.OwnerProvenance memory p)
         public
         view
@@ -71,7 +61,7 @@ library StreamArtistRecoveredAcceptedBindingHydration {
         b.bindings.provenanceCommitment = RH.ownerProvenanceHash(p, 0);
         b.bindings.current = Binding(source).binding(q.collectionId);
         uint256 n = b.bindings.current.generation;
-        if (n < 2 || n > 128) revert T.UnsupportedProfile();
+        if (n == 0 || n > 128) revert T.UnsupportedProfile();
         b.bindings.rows = new G.Row[](n);
         b.corrections = new CS.Correction[](n);
         for (uint256 i; i < n; ++i) {
@@ -124,16 +114,8 @@ library StreamArtistRecoveredAcceptedBindingHydration {
         bytes memory outer
     ) public returns (bool) {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 0);
-        if ((h.requiredFeatures & RH.DISPUTE_HISTORY) != 0) return DisputeHistory.importIfSelected(bindings, history, terms, terminals, corrections, q, outer);
-        if ((h.requiredFeatures & RH.ACCEPTED_GENERATIONS) == 0) {
-            return OriginalCorrections.importIfSelected(
-                bindings, history, terms, terminals, corrections, q, outer
-            );
-        }
-        if (
-            (h.requiredFeatures & (RH.BINDING_GENERATIONS | RH.BINDING_CORRECTIONS))
-                    != (RH.BINDING_GENERATIONS | RH.BINDING_CORRECTIONS) || p.nonces.length != 0
-        ) revert RH.InvalidRecoveredHydrationProfile();
+        if ((h.requiredFeatures & RH.DISPUTE_HISTORY) == 0) return false;
+        if (p.nonces.length != 0) revert RH.InvalidRecoveredHydrationProfile();
         CB.Bundle memory b = decode(q, p.provenance, p.semanticState);
         if (b.bindings.current.consentMode == 2 && (h.requiredFeatures & RH.DELEGATED_CONSENT) == 0)
         {

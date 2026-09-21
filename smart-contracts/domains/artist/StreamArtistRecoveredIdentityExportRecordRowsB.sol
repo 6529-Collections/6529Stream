@@ -34,7 +34,7 @@ library StreamArtistRecoveredIdentityExportRecordRowsB {
                     )
                 )
             );
-        } else if (op == 33) {
+        } else if (op == 33 || op == 48) {
             return (false, abi.encode(IH.ContestRow(j.position, X.contests(r).records[key])));
         } else {
             revert IH.InvalidRecoveredIdentity(key);

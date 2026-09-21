@@ -344,6 +344,16 @@
   linked-library size and gas validation remain pending.
 
 
+## Added: recovered signed attribution history
+
+- Preserve complete original signed disputes, resolutions, withdrawals and
+  repudiation terminals through seven-owner operation-60 migration.
+- Retain paired Identity veto causes, prior-generation consent associations,
+  original replay domains and atomic Archive rollback under explicit new tags.
+- Add twenty-three actual-owner/Safe source oracles, including fresh successor
+  authorization refusals and retries. Runtime, full-current gas and
+  maximum carrier acceptance remain separate from source validation.
+
 ## Added: recovered accepted-generation correction histories
 
 - Retain complete governed revocation, fresh correction and acceptance records

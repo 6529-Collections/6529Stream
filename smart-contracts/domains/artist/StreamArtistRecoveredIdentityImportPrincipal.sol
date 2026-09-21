@@ -148,7 +148,7 @@ library StreamArtistRecoveredIdentityImportPrincipal {
             uint16 op = j.receipt.operation;
             bool primary = op == 1 || op == 19 || op == 23 || op == 25 || op == 26 || op == 28
                 || op == 29 || op == 31 || op == 33 || op == 36 || op == 37 || op == 38 || op == 41
-                || op == 42 || op == 43 || op == 51 || op == 58;
+                || op == 42 || op == 43 || op == 48 || op == 51 || op == 58;
             if (op == 35) {
                 primary = X.recovery(roots).records[j.receipt.recordHash].recordHash
                     == j.receipt.recordHash;

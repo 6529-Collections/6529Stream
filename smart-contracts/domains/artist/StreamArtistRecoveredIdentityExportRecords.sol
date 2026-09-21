@@ -39,8 +39,8 @@ library StreamArtistRecoveredIdentityExportRecords {
         rows[26] = new bytes[](n[26]);
         rows[28] = new bytes[](n[28]);
         rows[29] = new bytes[](n[29]);
-        rows[33] = new bytes[](n[33] / 2);
-        rows[31] = new bytes[](n[33] / 2 + n[31]);
+        rows[33] = new bytes[]((n[33] + n[48]) / 2);
+        rows[31] = new bytes[]((n[33] + n[48]) / 2 + n[31]);
         rows[58] = new bytes[](n[58]);
         rows[51] = new bytes[](n[51]);
         rows[35] = new bytes[](n[35] / 2);
@@ -68,10 +68,10 @@ library StreamArtistRecoveredIdentityExportRecords {
             } else if (op == 29) {
                 bytes memory row = RowsA.row29(r, artistId, j);
                 rows[op][at[op]++] = row;
-            } else if (op == 31 || op == 33) {
+            } else if (op == 31 || op == 33 || op == 48) {
                 (bool cause, bytes memory row) = RowsB.row31(r, artistId, j, op);
                 if (cause) rows[31][causeAt++] = row;
-                else rows[33][at[op]++] = row;
+                else rows[33][at[33]++] = row;
             } else if (op == 35) {
                 bytes memory row = RowsB.row35(r, artistId, j);
                 if (row.length == 0) continue;

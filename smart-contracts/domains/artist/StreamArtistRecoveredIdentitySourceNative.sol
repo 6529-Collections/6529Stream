@@ -22,7 +22,7 @@ library StreamArtistRecoveredIdentitySourceNative {
             uint16 op = j.receipt.operation;
             // Collaborator/class4 hydration is a separate profile; it cannot be silently dropped.
             if (
-                op == 44 || op == 45 || op == 46 || op == 47 || op == 48 || op == 49 || op == 50
+                op == 44 || op == 45 || op == 46 || op == 47 || op == 49 || op == 50
                     || op == 59
             ) revert IH.InvalidRecoveredIdentity(j.receipt.recordHash);
             ++counts[op];
@@ -31,7 +31,8 @@ library StreamArtistRecoveredIdentitySourceNative {
             counts[1] != 1 || counts[19] != b.sanctionGrants.length
                 || counts[23] != b.findings.length || counts[25] != b.revisions.length
                 || counts[26] != b.delegations.length || counts[28] != b.guardians.length
-                || counts[29] != b.rotations.length || counts[33] != b.contests.length * 2
+                || counts[29] != b.rotations.length || counts[33] + counts[48] != b.contests.length * 2
+                || counts[33] % 2 != 0 || counts[48] % 2 != 0
                 || counts[35] != b.recoveries.length * 2 || counts[36] != b.designations.length
                 || counts[37] != b.directives.length || counts[38] != b.estates.length
                 || counts[41] != b.notices.length || counts[51] != b.standingRecords.length
@@ -66,13 +67,14 @@ library StreamArtistRecoveredIdentitySourceNative {
             }
         }
         for (uint256 i; i < b.contests.length; ++i) {
+            uint16 operation = _contestOperation(p, b.contests[i].record.recordHash);
             uint256 at =
-                _native(p, b.artistId, b.contests[i].position, 33, b.contests[i].record.recordHash);
+                _native(p, b.artistId, b.contests[i].position, operation, b.contests[i].record.recordHash);
             if (i != 0) {
                 _ordered(p, b.contests[i - 1].position.point, b.contests[i].position.point);
             }
             if (
-                at + 1 >= p.journal.length || p.journal[at + 1].receipt.operation != 33
+                at + 1 >= p.journal.length || p.journal[at + 1].receipt.operation != operation
                     || p.journal[at + 1].receipt.artistId != b.artistId
                     || !_samePoint(p.journal[at + 1].position.point, b.contests[i].position.point)
                     || !_causeReference(
@@ -170,6 +172,19 @@ library StreamArtistRecoveredIdentitySourceNative {
                 _ordered(p, b.findings[i - 1].position.point, b.findings[i].position.point);
             }
         }
+    }
+
+    /// @dev Original48 appends the same canonical Contest then Cause pair under its own ID.
+    function _contestOperation(RH.OwnerProvenance calldata p, bytes32 record)
+        private pure returns (uint16 operation)
+    {
+        for (uint256 i; i < p.journal.length; ++i) {
+            if (p.journal[i].receipt.recordHash != record) continue;
+            uint16 op = p.journal[i].receipt.operation;
+            if (operation != 0 || (op != 33 && op != 48)) revert IH.InvalidRecoveredIdentity(record);
+            operation = op;
+        }
+        if (operation == 0) revert IH.InvalidRecoveredIdentity(record);
     }
 
     function _native(
