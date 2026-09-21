@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamFinalityScopedPreservationPolicySnapshotReadsV1 as SnapRead
+} from "../finality/StreamFinalityScopedPreservationPolicySnapshotReadsV1.sol";
+import {
+    StreamFinalityScope
+} from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
 import {
     StreamPreservationPolicyReferenceFamiliesV2 as F
@@ -19,6 +25,47 @@ import {
 
 /// @notice Fixed original scoped snapshot payload validation for reference sources.
 library StreamScopedPreservationReferenceSnapshotWorkerV1 {
+    /// @notice Retains the original requireCurrent -> original -> payload read order.
+    /// @dev Returns the untouched receipt, complete source and actual output receipt key.
+    /// The normalized publication remains local and the receipt normalization stays a deep copy.
+    function capture(
+        T.Dependencies memory d,
+        S.Dependencies memory source,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision,
+        bytes32 family
+    )
+        public
+        view
+        returns (
+            S.Receipt memory receipt,
+            S.Source memory snapshotSource,
+            bytes32 outputManifestRecord
+        )
+    {
+        SnapRead.Dependencies memory reader =
+            SnapRead.Dependencies(
+                d.targets[0],
+                d.targets[1],
+                d.targets[4],
+                d.targets[5],
+                d.codeHashes[0],
+                d.codeHashes[1],
+                d.codeHashes[4],
+                d.codeHashes[5],
+                d.chainId,
+                d.readGas,
+                d.snapshotGas
+            );
+        SnapRead.requireCurrent(reader, scope, recordHash, revision, family);
+        (S.Publication memory original, S.Receipt memory originalReceipt) =
+            SnapRead.original(reader, scope, recordHash, revision, family);
+        receipt = originalReceipt;
+        snapshotSource = read(d, source, original, receipt, family);
+        outputManifestRecord = original.outputManifestRecord;
+    }
+
     function read(
         T.Dependencies memory d,
         S.Dependencies memory source,

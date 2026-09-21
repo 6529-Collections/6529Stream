@@ -44,6 +44,13 @@ import {
     StreamSnapshotManifestBytes as WorkerBytes
 } from "../../../smart-contracts/domains/records/StreamSnapshotManifestBytes.sol";
 
+import {
+    IStreamSchemaDocumentFacts as WorkerSchemaFacts
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamSchemaDocumentFacts.sol";
+import {
+    IStreamWorkRecordSelection as WorkerWorkErrors
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamWorkRecordSelection.sol";
+
 interface ScopedReferenceWorkerVm {
     function expectRevert(bytes calldata data) external;
     function expectCall(address callee, bytes calldata data, uint64 count) external;
@@ -55,6 +62,7 @@ interface ScopedReferenceWorkerVm {
 contract ScopedReferencePayloadWorkerHarness {
     address private _store;
     mapping(bytes32 => WorkerBytes.Manifest) private _payloads;
+    mapping(bytes32 => WorkerT.Receipt) private _recordReceipts;
 
     constructor(address store) {
         _store = store;
@@ -71,6 +79,23 @@ contract ScopedReferencePayloadWorkerHarness {
 
     function originalSource(bytes32 hash) external view returns (bytes memory) {
         return WorkerRecords.source(_payloads[hash]);
+    }
+
+    function retainRecord(bytes memory raw, WorkerT.Receipt memory receipt)
+        external
+        returns (bytes32 hash)
+    {
+        hash = keccak256(raw);
+        WorkerBytes.retain(_payloads[hash], _store, raw);
+        _recordReceipts[hash] = receipt;
+    }
+
+    function recordBytes(bytes32 hash) external view returns (bytes memory) {
+        return WorkerRecords.recordBytes(_payloads[hash], _recordReceipts[hash]);
+    }
+
+    function publication(bytes32 hash) external view returns (WorkerT.Publication memory) {
+        return WorkerRecords.publication(_payloads[hash]);
     }
 }
 
@@ -291,5 +316,71 @@ contract StreamScopedPreservationReferenceWorkersV1Test is ScopedPreservationRef
         );
         harness.source(key, keccak256("unsupported reference family"));
         require(keccak256(harness.originalSource(key)) == keccak256(healthy));
+    }
+
+    function testHistoryWorkerKeepsOriginalTupleAndRejectsPaddedPublication() public {
+        _reference(1, 2);
+        bytes32 record = _publishReference();
+        // The direct head getter reads the stored receipt without the moved record codec.
+        WorkerT.Receipt memory receipt = referenceHost.currentReference(referenceInput.scope);
+        require(receipt.observation.recordHash == record);
+        bytes memory original = abi.encode(referenceInput);
+        bytes memory expected = abi.encode(referenceInput, receipt);
+        ScopedReferencePayloadWorkerHarness harness =
+            new ScopedReferencePayloadWorkerHarness(address(snapshotStore));
+        bytes32 key = harness.retainRecord(original, receipt);
+        require(keccak256(harness.recordBytes(key)) == keccak256(expected));
+        require(keccak256(abi.encode(harness.publication(key))) == keccak256(original));
+        (WorkerT.Publication memory stored, WorkerT.Receipt memory storedReceipt) =
+            referenceHost.referenceRecord(record);
+        require(keccak256(abi.encode(stored, storedReceipt)) == keccak256(expected));
+
+        // Valid retained Store bytes with noncanonical trailing data must fail in both routes.
+        bytes memory padded = bytes.concat(original, bytes32(0));
+        _upload(padded, false);
+        bytes32 badKey = harness.retainRecord(padded, receipt);
+        workerVm.expectRevert(abi.encodeWithSelector(WorkerT.InvalidScopedPolicyReference.selector));
+        harness.publication(badKey);
+        workerVm.expectRevert(abi.encodeWithSelector(WorkerT.InvalidScopedPolicyReference.selector));
+        harness.recordBytes(badKey);
+        require(keccak256(harness.recordBytes(key)) == keccak256(expected));
+        require(keccak256(abi.encode(harness.publication(key))) == keccak256(original));
+    }
+
+    function testDefinitionsWorkerKeepsFamilyAndDocumentFailureOrderThenRestores() public {
+        _reference(1, 2);
+        WorkerT.Dependencies memory d = referenceHost.dependencies();
+        bytes32 originalDependencies = keccak256(abi.encode(d));
+        bytes32 first = keccak256("STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_ABI_V1");
+        bytes32 last = keccak256("STREAM_REFERENCE_NATIVE_FORMATS_V1");
+        WorkerSchemaFacts registry = WorkerSchemaFacts(d.targets[2]);
+        WorkerSchemaFacts.DocumentFacts memory firstFacts = registry.documentFacts(first);
+        WorkerSchemaFacts.DocumentFacts memory lastFacts = registry.documentFacts(last);
+        require(firstFacts.exists && lastFacts.exists);
+        bytes memory firstCall = abi.encodeCall(WorkerSchemaFacts.documentFacts, (first));
+        bytes memory lastCall = abi.encodeCall(WorkerSchemaFacts.documentFacts, (last));
+        WorkerRecords.definitions(d);
+        WorkerSchemaFacts.DocumentFacts memory unavailable;
+        workerVm.mockCall(d.targets[2], firstCall, abi.encode(unavailable));
+        workerVm.mockCall(d.targets[2], lastCall, abi.encode(unavailable));
+
+        // An unsupported family must fail before either unavailable document is read.
+        workerVm.expectRevert(
+            abi.encodeWithSelector(WorkerFamilies.InvalidPreservationReferenceFamily.selector)
+        );
+        WorkerRecords.definitions(d, keccak256("unknown scoped reference family"));
+        workerVm.expectRevert(
+            abi.encodeWithSelector(WorkerWorkErrors.WorkDefinitionUnavailable.selector, first)
+        );
+        WorkerRecords.definitions(d, WorkerProfiles.ORIGINAL_PROFILE);
+        workerVm.mockCall(d.targets[2], firstCall, abi.encode(firstFacts));
+        workerVm.expectRevert(
+            abi.encodeWithSelector(WorkerWorkErrors.WorkDefinitionUnavailable.selector, last)
+        );
+        WorkerRecords.definitions(d);
+        workerVm.mockCall(d.targets[2], lastCall, abi.encode(lastFacts));
+        WorkerRecords.definitions(d);
+        WorkerRecords.definitions(d, WorkerProfiles.ORIGINAL_PROFILE);
+        require(keccak256(abi.encode(d)) == originalDependencies);
     }
 }

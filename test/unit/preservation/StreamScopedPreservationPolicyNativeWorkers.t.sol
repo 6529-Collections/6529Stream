@@ -70,6 +70,10 @@ import {
 } from "../../../smart-contracts/interfaces/stream/finality/StreamFinalityCoordinatorPolicyTypesV2.sol";
 import { IERC165 } from "../../../smart-contracts/vendor/openzeppelin/IERC165.sol";
 
+import {
+    StreamScopedPreservationPolicyNativeSegmentV1 as SegmentWorker
+} from "../../../smart-contracts/domains/preservation/StreamScopedPreservationPolicyNativeSegmentV1.sol";
+
 /// @dev Exact-calldata synthetic boundary. Every read requires the same consuming host.
 /// No claim of original publication, Artist authority, real source admission or finality.
 contract ScopedNativeWorkerReadTable {
@@ -105,6 +109,94 @@ contract ScopedNativeWorkerReadTable {
 }
 
 contract ScopedNativeWorkerSameHost {
+    // Separated compiler-owned State roots and nonzero sentinels catch a misrouted append boundary.
+    uint256 private beforeState = 0x1234;
+    State.State private actualState;
+    uint256 private betweenStates = 0x5678;
+    State.State private originalState;
+    uint256 private afterState = 0x9abc;
+
+    function segment(
+        S.Dependencies memory d,
+        Scoped.Context memory c,
+        uint64 start,
+        uint64 maximum,
+        bytes32 family
+    ) external view returns (T.Item[] memory, uint64) {
+        return SegmentWorker.items(d, c, start, maximum, family);
+    }
+
+    function seedAppend(S.Dependencies memory d, Scoped.Context memory c, bytes32 id, uint8 fault)
+        external
+    {
+        Scoped.Plan memory p;
+        p.scope = c.scope;
+        p.nativeCursor = 5;
+        p.nativeCount = 48;
+        p.referenceCursor = 7;
+        p.referenceCount = 9;
+        p.progress = T.Plan({
+            collectionId: fault == 0 ? 0 : c.scope.collectionId,
+            subject: c.subject,
+            artistId: c.artistId,
+            sourceContextHash: keccak256("untouched source context"),
+            tokenCount: 11,
+            nextToken: 3,
+            segmentCount: 1,
+            itemCount: 17,
+            segmentChainHash: keccak256("untouched segment chain"),
+            completedStages: fault == 1 ? 1 : 0,
+            renderCriticalEvidenceHash: fault == 2 ? keccak256("already completed") : bytes32(0)
+        });
+        T.Segment memory prior = T.Segment(
+            keccak256("prior key"), 17, keccak256("prior first link"), keccak256("prior witness")
+        );
+        actualState.dependencies = d;
+        originalState.dependencies = d;
+        actualState.dependencyHash = keccak256("untouched dependencies");
+        originalState.dependencyHash = actualState.dependencyHash;
+        actualState.contexts[id] = c;
+        originalState.contexts[id] = c;
+        actualState.plans[id] = p;
+        originalState.plans[id] = p;
+        actualState.segments[id][0] = prior;
+        originalState.segments[id][0] = prior;
+    }
+
+    function appendActual(bytes32 id, uint64 maximum) external {
+        Candidate.appendNative(actualState, id, maximum);
+    }
+
+    function appendOriginal(bytes32 id, uint64 maximum) external {
+        FrozenScopedNativeEa4.appendNative(originalState, id, maximum);
+    }
+
+    function appendStateHashes(bytes32 id) external view returns (bytes32, bytes32) {
+        bytes32 canaries = keccak256(abi.encode(beforeState, betweenStates, afterState));
+        return (
+            _appendStateHash(actualState, id, canaries),
+            _appendStateHash(originalState, id, canaries)
+        );
+    }
+
+    function _appendStateHash(State.State storage state, bytes32 id, bytes32 canaries)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                canaries,
+                state.dependencies,
+                state.dependencyHash,
+                state.contexts[id],
+                state.plans[id],
+                state.segments[id][0],
+                state.segments[id][1]
+            )
+        );
+    }
+
     function actual(
         S.Dependencies memory d,
         Scoped.Context memory c,
@@ -777,10 +869,111 @@ contract StreamScopedPreservationPolicyNativeWorkersTest {
         _set(x.d.targets[5], abi.encodeCall(Snap.dependencies, ()), abi.encode(x.sd));
         _good(x, 0, 64, Family.ORIGINAL_PROFILE);
     }
+
+    function testSegmentBoundaryKeepsFullFacadeAndFrozenBytesAcrossFamilies() public {
+        for (uint8 mode; mode < 2; ++mode) {
+            bytes32 family = mode == 0 ? Family.ORIGINAL_PROFILE : Family.FAMILY_PROFILE;
+            for (uint8 scope = 1; scope <= 3; ++scope) {
+                Fixture memory x = _setup(family, scope, 2);
+                (bool ok, bytes memory original) = _pair(x, 0, 64, family);
+                (bool segmentOk, bytes memory segment) = address(x.host)
+                    .staticcall(
+                        abi.encodeCall(x.host.segment, (x.d, x.c, uint64(0), uint64(64), family))
+                    );
+                require(
+                    ok && segmentOk && keccak256(segment) == keccak256(original),
+                    "full segment boundary"
+                );
+                (T.Item[] memory rows, uint64 total) = abi.decode(segment, (T.Item[], uint64));
+                require(total == 48 && rows.length == total);
+                _digest(rows[2], abi.encode(x.f.snapshotSource));
+                _digest(rows[3], abi.encode(x.f.contentRoot, x.f.contentRootBinding));
+                // A late consumed-source pin still fails after the full source has been authenticated.
+                bytes32 saved = x.f.snapshotSource.factoryDependenciesHash;
+                x.f.snapshotSource.factoryDependenciesHash ^= bytes32(uint256(1));
+                _sync(x, family);
+                (ok, original) = _pair(x, 2, 1, family);
+                (segmentOk, segment) = address(x.host)
+                    .staticcall(
+                        abi.encodeCall(x.host.segment, (x.d, x.c, uint64(2), uint64(1), family))
+                    );
+                require(
+                    !ok && !segmentOk && keccak256(segment) == keccak256(original),
+                    "segment refusal parity"
+                );
+                require(
+                    keccak256(segment)
+                        == keccak256(abi.encodeWithSelector(T.InventorySourceChanged.selector))
+                );
+                x.f.snapshotSource.factoryDependenciesHash = saved;
+                _sync(x, family);
+                _good(x, 0, 64, family);
+                (rows, total) = x.host.segment(x.d, x.c, 0, 64, family);
+                require(total == 48 && rows.length == total);
+            }
+        }
+    }
+
+    function testAppendBoundaryKeepsStageBeforeItemsAndRefusalsLeaveBothRootsUntouched() public {
+        // These are early-stage refusals only. They do not admit a synthetic current context
+        // or claim a full successful append ceremony; all original current reads remain real.
+        for (uint8 fault; fault < 4; ++fault) {
+            Fixture memory x = _setup(Family.ORIGINAL_PROFILE, 2, 2);
+            if (fault == 3) {
+                // Valid stage reaches Sources.current, whose original scope guard must precede
+                // dependency reads and the requested invalid maximum in the later segment.
+                x.c.scope.scopeType = StreamFinalityScopeType.COLLECTION;
+                x.d.codeHashes[0] = bytes32(0);
+            }
+            bytes32 id = keccak256(abi.encode("append original stage", fault));
+            x.host.seedAppend(x.d, x.c, id, fault);
+            (bytes32 beforeActual, bytes32 beforeOriginal) = x.host.appendStateHashes(id);
+            require(beforeActual == beforeOriginal);
+            (bool ok, bytes memory actual) =
+                address(x.host).call(abi.encodeCall(x.host.appendActual, (id, uint64(0))));
+            (bool originalOk, bytes memory original) =
+                address(x.host).call(abi.encodeCall(x.host.appendOriginal, (id, uint64(0))));
+            bytes memory expected = fault == 3
+                ? abi.encodeWithSelector(T.InventorySourceChanged.selector)
+                : abi.encodeWithSelector(T.InventoryIncomplete.selector);
+            require(!ok && !originalOk && keccak256(actual) == keccak256(original));
+            require(keccak256(actual) == keccak256(expected), "stage before segment and pins");
+            (bytes32 afterActual, bytes32 afterOriginal) = x.host.appendStateHashes(id);
+            require(
+                afterActual == beforeActual && afterOriginal == beforeOriginal,
+                "both storage roots unchanged"
+            );
+        }
+    }
 }
 
 /// @dev Literal ea4 five-argument items/_factory bodies, same host; only public becomes internal.
 library FrozenScopedNativeEa4 {
+    function appendNative(State.State storage state, bytes32 id, uint64 maximum) internal {
+        State.stage(state, id, 0);
+        Scoped.Plan storage p = state.plans[id];
+        (T.Item[] memory rows, uint64 total) =
+            items(state.dependencies, state.contexts[id], p.nativeCursor, maximum);
+        if (p.nativeCursor != 0 && p.nativeCount != total) revert T.InventorySourceChanged();
+        p.nativeCount = total;
+        State.append(
+            state,
+            id,
+            rows,
+            keccak256(abi.encode(p.progress.sourceContextHash, p.nativeCursor, total))
+        );
+        p.nativeCursor += uint64(rows.length);
+        if (p.nativeCursor == total) p.progress.completedStages = 1;
+    }
+
+    function items(S.Dependencies memory d, Scoped.Context memory c, uint64 start, uint64 maximum)
+        internal
+        view
+        returns (T.Item[] memory rows, uint64 total)
+    {
+        return items(d, c, start, maximum, Family.ORIGINAL_PROFILE);
+    }
+
     function items(
         S.Dependencies memory d,
         Scoped.Context memory c,
