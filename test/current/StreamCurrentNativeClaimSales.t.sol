@@ -117,17 +117,17 @@ contract CurrentClaimReceiver {
 /// Core, Metadata, Manager, Ledger, recorder and permanent WAIVED Floor retain actual code.
 /// WAIVED is explicit and supplies no documentary evidence. These aggregate scenarios do not
 /// establish cold transaction gas capacity, other rights profiles or public randomness security.
-contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture {
+abstract contract StreamCurrentNativeClaimSalesFixture is CurrentCommerceConservationFixture {
     bytes32 internal constant CLAIM_PHASE = keccak256("current native claims phase");
-    uint256 private constant PRICE = 1000;
+    uint256 internal constant PRICE = 1000;
     uint256 internal constant REVEAL_FEE = 100;
-    bytes32 private constant MERKLE_PHASE = keccak256("current claim beneficiary allowlist");
-    bytes32 private constant PRICE_COUNTER = keccak256("current claim price counter");
-    uint256 private constant SURPLUS = 77;
+    bytes32 internal constant MERKLE_PHASE = keccak256("current claim beneficiary allowlist");
+    bytes32 internal constant PRICE_COUNTER = keccak256("current claim price counter");
+    uint256 internal constant SURPLUS = 77;
     StreamNativeClaimSales internal claims;
     StreamPrimarySaleSettlement internal recorder;
-    OfficialSafe private artistSafe;
-    OfficialSafe private payerSafe;
+    OfficialSafe internal artistSafe;
+    OfficialSafe internal payerSafe;
     uint256[] private artistKeys;
     uint256[] private payerKeys;
 
@@ -341,6 +341,807 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
         _govern(_governanceRequest(1, address(claims), data, 0, 0, 0));
     }
 
+    function _register(uint8 mode, uint8 kind, uint64 cap, bytes32 phase)
+        internal
+        returns (bytes32 id)
+    {
+        Claim.Configuration memory c;
+        c.sale.collectionId = 1;
+        c.sale.phaseId = phase;
+        c.sale.saleKind = kind;
+        c.sale.authorityMode = mode;
+        c.sale.endsAt = this.claimsScenarioTime() + 30 days;
+        c.sale.saleSupplyLimit = cap;
+        c.sale.mintPolicyHash = manager.phasePolicyHash(1, phase);
+        if (kind == 13) {
+            c.maxUnitPrice = 2000;
+            c.sale.expectedPrimaryPolicyHash = _nativePrimaryPolicyHash();
+        }
+        if (phase == MERKLE_PHASE) c.sale.priceCounterId = PRICE_COUNTER;
+        if (mode == 1) {
+            this.governClaims(
+                abi.encodeCall(
+                    claims.configureCollectionSigner,
+                    (
+                        uint256(1),
+                        address(artistSafe),
+                        uint8(2),
+                        keccak256("current immutable claim signer"),
+                        true
+                    )
+                )
+            );
+            bool enabled;
+            (c.sale.signer, enabled) = claims.collectionSigner(1, address(artistSafe), 2);
+            require(
+                enabled && c.sale.signer.installingAuthority == address(executor),
+                "actual governed signer installation"
+            );
+        }
+        id = claims.saleIdFor(1, phase, claims.nextSaleNonce());
+        this.governClaims(abi.encodeCall(claims.registerSale, (c)));
+        Claim.Record memory record = claims.saleRecord(id);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_CLAIM_SALES_CONFIG_V1"),
+                block.chainid,
+                address(claims),
+                c
+            )
+        );
+        require(
+            keccak256(abi.encode(record.sale.config)) == keccak256(abi.encode(c.sale))
+                && record.maxUnitPrice == c.maxUnitPrice && record.sale.configHash == expected,
+            "actual immutable configuration with independent hash"
+        );
+        _recordConsent(id, expected);
+    }
+
+    function _recordConsent(bytes32 id, bytes32 configHash) private {
+        require(artists.saleConsentScope(1) == 1, "actual REQUIRED sale-consent election");
+        SaleConsent.Consent memory terms = SaleConsent.Consent(1, address(claims), id, configHash);
+        T.Authorization memory authorization = T.Authorization(
+            IStreamArtistAuthorizationRevocation(address(artists))
+            .artistAuthorizationState(fixtureArtistId, 0, 0)
+            .nextUnusedNonce,
+            this.claimsScenarioTime() + 1 days,
+            ""
+        );
+        require(
+            executeSafe(
+                artistSafe,
+                artistKeys,
+                address(artists),
+                0,
+                abi.encodeCall(
+                    IStreamArtistSaleAuthority.recordSaleConsent, (terms, authorization)
+                ),
+                0
+            ),
+            "actual Artist Safe consents to exact claim sale"
+        );
+        (bool consented, bytes32 receipt) = artists.isSaleConsented(1, id, configHash);
+        SaleConsent.Record memory consent = artists.saleConsentRecord(receipt);
+        require(
+            consented && consent.signer == address(artistSafe)
+                && consent.artistId == fixtureArtistId
+                && keccak256(abi.encode(consent.terms)) == keccak256(abi.encode(terms)),
+            "actual permanent Artist sale record"
+        );
+    }
+
+    function _configureClaimAllowlist() private {
+        // Independent canonical double-hashed leaf: the counter subject is the beneficiary.
+        bytes32 leaf = keccak256(
+            bytes.concat(
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_MINT_ALLOWLIST_LEAF_V1"),
+                        block.chainid,
+                        address(manager),
+                        uint256(1),
+                        MERKLE_PHASE,
+                        PRICE_COUNTER,
+                        SECOND_OWNER,
+                        uint64(1),
+                        true,
+                        uint256(0)
+                    )
+                )
+            )
+        );
+        bytes32 definition = IStreamMintCounterPolicy(address(ledger))
+            .registerCounterDefinition(
+                IStreamMintCounterPolicy.Definition(
+                    IStreamMintCounterPolicy.CounterScope.PHASE,
+                    IStreamMintManager.CounterKeyMode.RECIPIENT,
+                    leaf,
+                    DEPLOYMENT_HASH
+                )
+            );
+        bytes32[] memory counters = new bytes32[](1);
+        counters[0] = PRICE_COUNTER;
+        IStreamMintManager.MintCounterConfig[] memory configs =
+            new IStreamMintManager.MintCounterConfig[](1);
+        configs[0] = IStreamMintManager.MintCounterConfig(
+            true,
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            IStreamMintLedger.CounterCapMode.MERKLE_STATIC,
+            IStreamMintLedger.CounterDeltaMode.STATIC,
+            1,
+            1,
+            definition
+        );
+        IStreamMintManager.MintGateConfig memory gate;
+        IStreamMintManager.MintPhaseConfig memory config =
+            IStreamMintManager.MintPhaseConfig(false, 0, 0, 1, DEPLOYMENT_HASH, DEPLOYMENT_HASH);
+        address[] memory phaseExecutors = new address[](0);
+        _recordFixturePolicy(
+            MERKLE_PHASE,
+            manager.previewPhasePolicyHash(
+                1, MERKLE_PHASE, config, gate, counters, configs, phaseExecutors
+            )
+        );
+        manager.configurePhase(1, MERKLE_PHASE, config, gate, counters, configs);
+        phaseExecutors = new address[](1);
+        phaseExecutors[0] = address(claims);
+        _recordFixturePolicy(
+            MERKLE_PHASE,
+            manager.previewPhasePolicyHash(
+                1, MERKLE_PHASE, config, gate, counters, configs, phaseExecutors
+            )
+        );
+        manager.setPhaseExecutor(1, MERKLE_PHASE, address(claims), true);
+    }
+
+    function _allowlistData() internal pure returns (bytes memory) {
+        IStreamMintCounterPolicy.AllowlistProof[][] memory proofs =
+            new IStreamMintCounterPolicy.AllowlistProof[][](1);
+        proofs[0] = new IStreamMintCounterPolicy.AllowlistProof[](1);
+        proofs[0][0] = IStreamMintCounterPolicy.AllowlistProof(1, true, 0, new bytes32[](0));
+        return abi.encode(proofs);
+    }
+
+    function _purchase(bytes32 id, uint256 tag, uint256 chosen)
+        internal
+        view
+        returns (Claim.Purchase memory p)
+    {
+        p.mint.saleId = id;
+        p.mint.payer = address(payerSafe);
+        p.mint.executor = address(payerSafe);
+        p.mint.initialRecipient = address(payerSafe);
+        p.mint.beneficiary = SECOND_OWNER;
+        p.mint.tokenData = abi.encode(TOKEN_DATA, tag);
+        p.mint.mintCommitment = keccak256(abi.encode("current claims commitment", tag));
+        p.mint.executionNonce = claims.nextExecutionNonce(id, p.mint.payer);
+        p.chosenUnitPrice = chosen;
+    }
+
+    function _authorization(Claim.Purchase memory p, uint256 nonce, uint256 minimum)
+        internal
+        view
+        returns (Sales.SaleAuthorization memory a)
+    {
+        Immediate.Configuration memory c = claims.saleRecord(p.mint.saleId).sale.config;
+        a.chainId = block.chainid;
+        a.saleAdapter = address(claims);
+        a.mintManager = address(manager);
+        a.collectionId = 1;
+        a.phaseId = c.phaseId;
+        a.saleId = p.mint.saleId;
+        a.saleKind = c.saleKind;
+        a.revenueClass = PRIMARY_REVENUE_CLASS;
+        a.expectedPrimaryPolicyHash = c.expectedPrimaryPolicyHash;
+        address[] memory recipients = new address[](1);
+        recipients[0] = p.mint.initialRecipient;
+        address[] memory beneficiaries = new address[](1);
+        beneficiaries[0] = p.mint.beneficiary;
+        bytes[] memory data = new bytes[](1);
+        data[0] = p.mint.tokenData;
+        bytes32[] memory commitments = new bytes32[](1);
+        commitments[0] = p.mint.mintCommitment;
+        a.initialRecipientsHash =
+            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_RECIPIENTS_V1"), recipients));
+        a.beneficiariesHash = keccak256(
+            abi.encode(keccak256("6529STREAM_MINT_BATCH_BENEFICIARIES_V1"), beneficiaries)
+        );
+        a.tokenDataArrayHash =
+            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_TOKEN_DATA_V1"), data));
+        a.mintCommitmentsHash =
+            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_COMMITMENTS_V1"), commitments));
+        a.payer = p.mint.payer;
+        a.executor = p.mint.executor;
+        a.unitPrice = minimum;
+        a.quantity = 1;
+        a.policyHash = c.mintPolicyHash;
+        a.nonce = bytes32(nonce);
+        a.deadline = this.claimsScenarioTime() + 30 days;
+    }
+
+    function _literalDigest(Sales.SaleAuthorization memory a) internal view returns (bytes32) {
+        bytes32 domain = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256("6529Stream Sales"),
+                keccak256("1"),
+                block.chainid,
+                address(claims)
+            )
+        );
+        bytes32 body = keccak256(
+            abi.encode(
+                keccak256(
+                    "SaleAuthorization(uint256 chainId,address saleAdapter,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 saleId,uint8 saleKind,bytes32 revenueClass,bytes32 expectedPrimaryPolicyHash,uint8 primaryPolicyMode,bytes32 initialRecipientsHash,bytes32 beneficiariesHash,bytes32 tokenDataArrayHash,bytes32 mintCommitmentsHash,address payer,address executor,address asset,uint256 unitPrice,uint256 quantity,bytes32 contentSelectionHash,bytes32 policyHash,bytes32 nonce,uint64 deadline,uint64 finalizeBy)"
+                ),
+                a
+            )
+        );
+        return keccak256(abi.encodePacked(hex"1901", domain, body));
+    }
+
+    function _authorizationId(bytes32 digest) internal pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest));
+    }
+
+    function _publicAuthorizationId(Claim.Purchase memory p) internal view returns (bytes32) {
+        bytes32 configHash = claims.saleRecord(p.mint.saleId).sale.configHash;
+        bytes32 request = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_CLAIM_SALES_REQUEST_V1"),
+                block.chainid,
+                address(claims),
+                configHash,
+                p
+            )
+        );
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_PUBLIC_CLAIM_MINT_AUTHORIZATION_V1"),
+                block.chainid,
+                address(claims),
+                address(manager),
+                configHash,
+                request
+            )
+        );
+    }
+
+    function _saleProof(Sales.SaleAuthorization memory a)
+        internal
+        returns (IStreamPrivateSaleAdapter.Signature memory)
+    {
+        return IStreamPrivateSaleAdapter.Signature(
+            address(artistSafe),
+            2,
+            safeThresholdSignature(
+                artistKeys, safeMessageDigest(artistSafe, abi.encode(_literalDigest(a)))
+            )
+        );
+    }
+
+    function _signedSafeCall(uint256 value, bytes memory data) internal returns (bytes memory) {
+        bytes memory signatures = safeThresholdSignature(
+            payerKeys,
+            payerSafe.getTransactionHash(
+                address(claims), value, data, 0, 0, 0, 0, address(0), address(0), payerSafe.nonce()
+            )
+        );
+        return abi.encodeCall(
+            payerSafe.execTransaction,
+            (
+                address(claims),
+                value,
+                data,
+                uint8(0),
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                signatures
+            )
+        );
+    }
+
+    function _executeSaved(bytes memory callData) internal {
+        (bool ok, bytes memory result) = address(payerSafe).call(callData);
+        require(
+            ok && result.length == 32 && abi.decode(result, (bool)), "actual threshold Safe CALL"
+        );
+    }
+
+    function _requestAndFulfill(uint256 tokenId) internal {
+        require(
+            executeSafe(
+                payerSafe,
+                payerKeys,
+                address(entropy),
+                0,
+                abi.encodeCall(entropy.requestEntropy, (tokenId)),
+                0
+            ),
+            "actual reveal-owner Safe request"
+        );
+        (,,,,, bytes32 requestKey, uint256 requestId,) = entropy.tokenEntropy(tokenId);
+        require(
+            requestKey != 0 && requestId == 1 && entropy.revealFeeEscrow(1) == 0
+                && address(provider).balance == REVEAL_FEE,
+            "actual Coordinator consumes escrow for upstream fee"
+        );
+        provider.fulfill(requestId, bytes32(0));
+        (, bool finalized) = entropy.tokenSeed(tokenId);
+        require(
+            finalized && bytes(core.tokenURI(tokenId)).length != 0,
+            "actual Coordinator and Metadata finish with upstream raw zero"
+        );
+    }
+
+    function _assertReceipt(
+        Claim.Purchase memory p,
+        Native.NativeSettlementCandidate memory c,
+        Immediate.Receipt memory r,
+        bytes32 auth,
+        bytes32 digest,
+        uint256 credit
+    ) internal view {
+        require(
+            r.saleId == p.mint.saleId && r.executionId == c.executionBinding.executionId
+                && r.authorizationId == auth && r.saleAuthorizationDigest == digest
+                && r.operationRoot == c.operationIdentityCommitment
+                && r.operationId == c.operationId,
+            "exact original authority and operation receipt"
+        );
+        require(
+            r.tokenId != 0 && r.chargedAmount == p.chosenUnitPrice && r.revealFee == REVEAL_FEE
+                && r.revealCredit == credit,
+            "chosen amount and actual reveal accounting"
+        );
+        require(
+            claims.executionStatus(r.executionId) == 2
+                && core.ownerOf(r.tokenId) == p.mint.initialRecipient
+                && core.coordinatorAtMint(r.tokenId) == address(entropy)
+                && c.sale.beneficiary == p.mint.beneficiary,
+            "actual recipient distinct from bound beneficiary, coordinator retained"
+        );
+        require(
+            ledger.isManagerAuthorizationUsed(address(manager), auth)
+                && ledger.isManagerOperationRootUsed(address(manager), r.operationRoot),
+            "actual Ledger replay consumed"
+        );
+        require(
+            claims.activePublicNativeCandidate(r.executionId) == 0,
+            "no lingering public paid witness"
+        );
+        if (p.chosenUnitPrice == 0) _assertFreeReceipt(r);
+        else _assertPaidReceipt(p, c, r);
+    }
+
+    function _assertFreeReceipt(Immediate.Receipt memory r) private view {
+        bytes32 key = recorder.settlementKey(address(claims), r.executionId);
+        require(
+            r.settlementKey == 0 && !recorder.settlementConsumed(key)
+                && recorder.settlementResult(key).candidateCommitment == 0
+                && commerceFloor.directPrimarySaleFloorReceipt(key).receiptHash == 0,
+            "zero price creates no official or DIRECT payment receipt"
+        );
+        _assertNoCommerceFloorReceipt(key);
+        require(
+            wallet.balance == 0 && recorder.totalOfficialSettled(address(0)) == 0
+                && revenueEscrow.totalOwed(address(0)) == 0 && address(revenueEscrow).balance == 0,
+            "reveal payment is never official sale revenue"
+        );
+    }
+
+    function _assertPaidReceipt(
+        Claim.Purchase memory p,
+        Native.NativeSettlementCandidate memory c,
+        Immediate.Receipt memory r
+    ) private view {
+        bytes32 key = recorder.settlementKey(address(claims), r.executionId);
+        Settlement.PrimarySettlementResult memory result = recorder.settlementResult(key);
+        require(
+            r.settlementKey == key && recorder.settlementConsumed(key)
+                && result.settlementKey == key
+                && result.candidateCommitment == _candidateCommitment(c),
+            "independently bound original native settlement"
+        );
+        require(
+            result.profileId == profile && result.wallet == wallet && result.asset == address(0)
+                && result.amount == p.chosenUnitPrice && result.executor == address(payerSafe)
+                && !result.escrowed,
+            "whole chosen amount reaches original official PROFILE wallet"
+        );
+        require(
+            result.executionId == r.executionId
+                && result.operationIdentityCommitment == r.operationRoot
+                && result.currentPolicyHash == c.currentPolicyHash
+                && result.boundPolicyHash == c.boundPolicyHash,
+            "official result retains actual mint operation and policy"
+        );
+        _assertWaivedCommerceReceipt(address(recorder), key);
+        StreamConservationFloorTypes.SettlementReceipt memory floorReceipt =
+            commerceFloor.settlementReceipt(key);
+        require(
+            floorReceipt.candidateCommitment == result.candidateCommitment
+                && floorReceipt.resultHash == keccak256(abi.encode(result))
+                && floorReceipt.releaseReceiptHash == 0 && commerceFloor.sourceCount() == 0
+                && commerceFloor.firstSale(1).sourceId == 0,
+            "actual WAIVED Floor binds original result with no documentary evidence"
+        );
+        require(
+            commerceFloor.firstSale(1).sourceSetHash == commerceFloor.sourceSetHashAt(0)
+                && commerceFloor.sourceSetHashAt(0) != 0
+                && commerceFloor.directPrimarySaleFloorReceipt(key).receiptHash == 0,
+            "permanent first sale has exact empty source head and no duplicate DIRECT receipt"
+        );
+    }
+
+    /// @dev The permissionless preparation boundary diagnoses genuine missing evidence before
+    /// payment. This prospective result creates neither an official payment nor a Floor receipt.
+    function _assertMissingDocumentaryFloor(Native.NativeSettlementCandidate memory n) internal {
+        Settlement.ERC20SettlementCandidate memory c;
+        c.saleAdapter = n.saleAdapter;
+        c.executor = n.executor;
+        c.sale = n.sale;
+        c.executionBinding = n.executionBinding;
+        c.orchestrationOrder = n.orchestrationOrder;
+        c.mintManager = n.mintManager;
+        c.operationIdentityCommitment = n.operationIdentityCommitment;
+        c.operationId = n.operationId;
+        c.currentPolicyHash = n.currentPolicyHash;
+        c.boundPolicyHash = n.boundPolicyHash;
+        c.rights = n.rights;
+        c.saleExecutionHash = n.saleExecutionHash;
+        Settlement.PrimarySettlementResult memory r;
+        r.candidateCommitment = _candidateCommitment(n);
+        r.settlementKey = recorder.settlementKey(address(claims), n.executionBinding.executionId);
+        r.profileId = n.rights.profileId;
+        r.wallet = n.rights.wallet;
+        r.amount = n.sale.amount;
+        r.executor = n.executor;
+        r.executionId = n.executionBinding.executionId;
+        r.operationIdentityCommitment = n.operationIdentityCommitment;
+        r.currentPolicyHash = n.currentPolicyHash;
+        r.boundPolicyHash = n.boundPolicyHash;
+        require(commerceFloor.sourceCount() == 0, "no documentary source installed");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamConservationFloor.ConservationFloorSourceUnavailable.selector
+            )
+        );
+        commerceFloor.preparePrimarySale(address(recorder), c, r);
+    }
+
+    function _candidateCommitment(Native.NativeSettlementCandidate memory c)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_SETTLEMENT_CANDIDATE_V1"),
+                block.chainid,
+                address(recorder),
+                c
+            )
+        );
+    }
+
+    function _assertFreeEvents(Vm.Log[] memory logs, Immediate.Receipt memory r) internal view {
+        uint256 seen;
+        for (uint256 i; i < logs.length; ++i) {
+            require(
+                logs[i].emitter != address(recorder) && logs[i].emitter != address(commerceFloor),
+                "zero path emits no recorder or conservation events"
+            );
+            if (
+                logs[i].emitter == address(claims) && logs[i].topics.length != 0
+                    && logs[i].topics[0]
+                        == keccak256("FreeClaimExecuted(bytes32,bytes32,uint256,bytes32)")
+            ) {
+                require(
+                    logs[i].topics.length == 4 && logs[i].topics[1] == r.saleId
+                        && logs[i].topics[2] == r.executionId
+                        && uint256(logs[i].topics[3]) == r.tokenId
+                        && keccak256(logs[i].data) == keccak256(abi.encode(r.authorizationId)),
+                    "exact free event identity"
+                );
+                ++seen;
+            }
+        }
+        require(seen == 1, "one explicit free event");
+    }
+
+    function _assertMoney(uint256 payerBefore, uint256 revenue, uint256 count, uint256 credit)
+        internal
+        view
+    {
+        require(
+            address(payerSafe).balance == payerBefore - revenue - count * REVEAL_FEE - credit
+                && wallet.balance == revenue && recorder.totalOfficialSettled(address(0)) == revenue
+                && recorder.officialSettled(PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
+                    == revenue,
+            "actual native revenue and payer conservation"
+        );
+        require(
+            revenueEscrow.totalOwed(address(0)) == 0 && address(revenueEscrow).balance == 0
+                && address(recorder).balance == 0,
+            "direct payment has no recorder or escrow residue"
+        );
+        require(
+            entropy.revealFeeEscrow(1) == count * REVEAL_FEE
+                && address(entropy).balance == count * REVEAL_FEE
+                && address(claims).balance == credit && claims.refundLiability() == credit
+                && provider.nextRequestId() == 1,
+            "manual reveal fees and native payer excess remain separate from revenue"
+        );
+    }
+
+    function _counterKey(Claim.Purchase memory p) internal view returns (bytes32) {
+        bytes32 phase = claims.saleRecord(p.mint.saleId).sale.config.phaseId;
+        bool merkle = phase == MERKLE_PHASE;
+        bytes32 counter = merkle ? PRICE_COUNTER : keccak256("supply");
+        bytes32 subject = manager.previewSubjectKey(
+            merkle
+                ? IStreamMintManager.CounterKeyMode.RECIPIENT
+                : IStreamMintManager.CounterKeyMode.CONSTANT,
+            1,
+            phase,
+            counter,
+            p.mint.payer,
+            p.mint.beneficiary,
+            address(claims),
+            address(0),
+            0
+        );
+        return manager.previewCounterValueKey(1, phase, counter, subject);
+    }
+
+    function _counter(Claim.Purchase memory p) internal view returns (uint64) {
+        return ledger.counterValue(_counterKey(p));
+    }
+
+    // Small independently grouped snapshots avoid a single wide ABI expression under via-IR.
+    function _adapterState(Claim.Purchase memory p, bytes32 executionId)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes32 saleState = keccak256(
+            abi.encode(
+                claims.saleRecord(p.mint.saleId),
+                claims.nextExecutionNonce(p.mint.saleId, p.mint.payer),
+                claims.executionStatus(executionId),
+                claims.executionReceipt(executionId),
+                claims.activePublicNativeCandidate(executionId)
+            )
+        );
+        bytes32 refunds = keccak256(
+            abi.encode(
+                address(claims).balance,
+                claims.refundLiability(),
+                claims.refundAccountCount(),
+                claims.refundableBalance(p.mint.saleId, p.mint.payer),
+                claims.refundableBalance(p.mint.saleId, p.mint.beneficiary)
+            )
+        );
+        return
+            keccak256(abi.encode(payerSafe.nonce(), address(payerSafe).balance, saleState, refunds));
+    }
+
+    function _paymentState(bytes32 key) private view returns (bytes32) {
+        bytes32 official = keccak256(
+            abi.encode(
+                recorder.settlementConsumed(key),
+                recorder.settlementResult(key),
+                recorder.totalOfficialSettled(address(0)),
+                recorder.officialSettled(PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
+            )
+        );
+        return keccak256(
+            abi.encode(
+                official,
+                wallet.balance,
+                address(recorder).balance,
+                revenueEscrow.totalOwed(address(0)),
+                address(revenueEscrow).balance
+            )
+        );
+    }
+
+    function _floorState(bytes32 key) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                commerceFloor.firstSale(1),
+                commerceFloor.settlementReceipt(key),
+                commerceFloor.directPrimarySaleFloorReceipt(key),
+                core.declaredConservationTier(1)
+            )
+        );
+    }
+
+    function _mintState(Claim.Purchase memory p, bytes32 root) private view returns (bytes32) {
+        bytes32 mintState = keccak256(
+            abi.encode(
+                manager.nextOperationNonce(),
+                ledger.isManagerOperationRootUsed(address(manager), root),
+                _counter(p),
+                core.collectionMintedEver(1),
+                core.lastAllocatedTokenId(),
+                core.balanceOf(p.mint.initialRecipient)
+            )
+        );
+        return keccak256(
+            abi.encode(
+                mintState,
+                entropy.revealFeeEscrow(1),
+                address(entropy).balance,
+                provider.nextRequestId(),
+                address(provider).balance
+            )
+        );
+    }
+
+    function _effectsState(Claim.Purchase memory p, Native.NativeSettlementCandidate memory c)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes32 key = recorder.settlementKey(address(claims), c.executionBinding.executionId);
+        return keccak256(
+            abi.encode(
+                _adapterState(p, c.executionBinding.executionId),
+                _paymentState(key),
+                _floorState(key),
+                _mintState(p, c.operationIdentityCommitment)
+            )
+        );
+    }
+
+    function _purchaseState(
+        Claim.Purchase memory p,
+        Native.NativeSettlementCandidate memory c,
+        bytes32 auth
+    ) internal view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _effectsState(p, c), ledger.isManagerAuthorizationUsed(address(manager), auth)
+            )
+        );
+    }
+
+    function _expectSavedFailure(
+        bytes memory saved,
+        Claim.Purchase memory p,
+        Native.NativeSettlementCandidate memory c,
+        bytes32 auth
+    ) internal returns (bytes memory reason) {
+        bytes32 before_ = _purchaseState(p, c, auth);
+        bool ok;
+        (ok, reason) = address(payerSafe).call(saved);
+        require(
+            !ok && _purchaseState(p, c, auth) == before_,
+            "failed Safe envelope leaves payment, mint, refund and replay state unchanged"
+        );
+    }
+
+    function _assertSafeTargetFailure(bytes memory reason) internal pure {
+        require(
+            keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
+            "actual threshold Safe reached reverting target call"
+        );
+    }
+
+    function _expectSignedFailure(
+        Claim.Purchase memory p,
+        Sales.SaleAuthorization memory a,
+        Native.NativeSettlementCandidate memory tracked,
+        bytes memory expected
+    ) internal {
+        IStreamPrivateSaleAdapter.Signature memory proof = _saleProof(a);
+        vm.expectRevert(expected);
+        claims.previewSignedPurchase(p, a, proof);
+        _expectSavedFailure(
+            _signedSafeCall(
+                p.chosenUnitPrice + REVEAL_FEE, abi.encodeCall(claims.purchaseSigned, (p, a, proof))
+            ),
+            p,
+            tracked,
+            _authorizationId(_literalDigest(a))
+        );
+    }
+
+    function _voidByArtist(
+        Sales.SaleAuthorization memory a,
+        Native.NativeSettlementCandidate memory c
+    ) internal {
+        Claim.Purchase memory p = _purchase(a.saleId, 0, 0);
+        bytes32 auth = _authorizationId(_literalDigest(a));
+        require(
+            !ledger.isManagerAuthorizationUsed(address(manager), auth),
+            "original Sales ID initially unused"
+        );
+        bytes32 state = _effectsState(p, c);
+        uint256 nonce = artistSafe.nonce();
+        vm.recordLogs();
+        require(
+            executeSafe(
+                artistSafe,
+                artistKeys,
+                address(manager),
+                0,
+                abi.encodeCall(
+                    IStreamMintImmediateSaleAuthorizationRevocation.voidMintImmediateSaleAuthorization,
+                    (a, address(artistSafe), uint8(2), bytes(""))
+                ),
+                0
+            ),
+            "actual original authorizer Safe voids full Sales payload"
+        );
+        _assertVoidEvents(vm.getRecordedLogs(), a, auth);
+        require(
+            artistSafe.nonce() == nonce + 1
+                && ledger.isManagerAuthorizationUsed(address(manager), auth)
+                && _effectsState(p, c) == state,
+            "only void map and actual authorizer Safe nonce change"
+        );
+    }
+
+    function _assertVoidEvents(Vm.Log[] memory logs, Sales.SaleAuthorization memory a, bytes32 auth)
+        private
+        view
+    {
+        uint256 ledgerEvents;
+        uint256 managerEvents;
+        for (uint256 i; i < logs.length; ++i) {
+            Vm.Log memory log = logs[i];
+            require(
+                log.emitter != address(recorder) && log.emitter != address(commerceFloor),
+                "void emits no payment events"
+            );
+            if (
+                log.emitter == address(ledger) && log.topics.length != 0
+                    && log.topics[0]
+                        == keccak256("MintLedgerAuthorizationVoided(uint16,bytes32,address)")
+            ) {
+                require(
+                    log.topics.length == 3 && log.topics[1] == auth
+                        && log.topics[2] == bytes32(uint256(uint160(address(manager))))
+                        && keccak256(log.data) == keccak256(abi.encode(uint16(1))),
+                    "exact manager-scoped Ledger void event"
+                );
+                ++ledgerEvents;
+            }
+            if (
+                log.emitter == address(manager) && log.topics.length != 0
+                    && log.topics[0]
+                        == keccak256(
+                            "MintAuthorizationVoided(uint16,uint256,bytes32,bytes32,address,address,uint8)"
+                        )
+            ) {
+                require(
+                    log.topics.length == 4 && log.topics[1] == bytes32(a.collectionId)
+                        && log.topics[2] == a.phaseId && log.topics[3] == auth
+                        && keccak256(log.data)
+                            == keccak256(
+                                abi.encode(
+                                    uint16(1), address(artistSafe), address(claims), uint8(2)
+                                )
+                            ),
+                    "exact original Sales family and authorizer in Manager void event"
+                );
+                ++managerEvents;
+            }
+        }
+        require(ledgerEvents == 1 && managerEvents == 1, "one Ledger and one Manager void receipt");
+    }
+}
+
+/// @notice Original eight actual-current claim cases, over the shared host-local fixture.
+contract StreamCurrentNativeClaimSalesTest is StreamCurrentNativeClaimSalesFixture {
     function testActualSafeSignedFreeClaimConsumesOriginalSalesAuthorityWithoutPaymentReceipt()
         public
     {
@@ -698,803 +1499,5 @@ contract StreamCurrentNativeClaimSalesTest is CurrentCommerceConservationFixture
                 && claims.refundableBalance(id, address(payerSafe)) == SURPLUS,
             "identical Safe envelope pays and mints exactly once after receiver repair"
         );
-    }
-
-    function _register(uint8 mode, uint8 kind, uint64 cap, bytes32 phase)
-        internal
-        returns (bytes32 id)
-    {
-        Claim.Configuration memory c;
-        c.sale.collectionId = 1;
-        c.sale.phaseId = phase;
-        c.sale.saleKind = kind;
-        c.sale.authorityMode = mode;
-        c.sale.endsAt = this.claimsScenarioTime() + 30 days;
-        c.sale.saleSupplyLimit = cap;
-        c.sale.mintPolicyHash = manager.phasePolicyHash(1, phase);
-        if (kind == 13) {
-            c.maxUnitPrice = 2000;
-            c.sale.expectedPrimaryPolicyHash = _nativePrimaryPolicyHash();
-        }
-        if (phase == MERKLE_PHASE) c.sale.priceCounterId = PRICE_COUNTER;
-        if (mode == 1) {
-            this.governClaims(
-                abi.encodeCall(
-                    claims.configureCollectionSigner,
-                    (
-                        uint256(1),
-                        address(artistSafe),
-                        uint8(2),
-                        keccak256("current immutable claim signer"),
-                        true
-                    )
-                )
-            );
-            bool enabled;
-            (c.sale.signer, enabled) = claims.collectionSigner(1, address(artistSafe), 2);
-            require(
-                enabled && c.sale.signer.installingAuthority == address(executor),
-                "actual governed signer installation"
-            );
-        }
-        id = claims.saleIdFor(1, phase, claims.nextSaleNonce());
-        this.governClaims(abi.encodeCall(claims.registerSale, (c)));
-        Claim.Record memory record = claims.saleRecord(id);
-        bytes32 expected = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_CLAIM_SALES_CONFIG_V1"),
-                block.chainid,
-                address(claims),
-                c
-            )
-        );
-        require(
-            keccak256(abi.encode(record.sale.config)) == keccak256(abi.encode(c.sale))
-                && record.maxUnitPrice == c.maxUnitPrice && record.sale.configHash == expected,
-            "actual immutable configuration with independent hash"
-        );
-        _recordConsent(id, expected);
-    }
-
-    function _recordConsent(bytes32 id, bytes32 configHash) private {
-        require(artists.saleConsentScope(1) == 1, "actual REQUIRED sale-consent election");
-        SaleConsent.Consent memory terms = SaleConsent.Consent(1, address(claims), id, configHash);
-        T.Authorization memory authorization = T.Authorization(
-            IStreamArtistAuthorizationRevocation(address(artists))
-            .artistAuthorizationState(fixtureArtistId, 0, 0)
-            .nextUnusedNonce,
-            this.claimsScenarioTime() + 1 days,
-            ""
-        );
-        require(
-            executeSafe(
-                artistSafe,
-                artistKeys,
-                address(artists),
-                0,
-                abi.encodeCall(
-                    IStreamArtistSaleAuthority.recordSaleConsent, (terms, authorization)
-                ),
-                0
-            ),
-            "actual Artist Safe consents to exact claim sale"
-        );
-        (bool consented, bytes32 receipt) = artists.isSaleConsented(1, id, configHash);
-        SaleConsent.Record memory consent = artists.saleConsentRecord(receipt);
-        require(
-            consented && consent.signer == address(artistSafe)
-                && consent.artistId == fixtureArtistId
-                && keccak256(abi.encode(consent.terms)) == keccak256(abi.encode(terms)),
-            "actual permanent Artist sale record"
-        );
-    }
-
-    function _configureClaimAllowlist() private {
-        // Independent canonical double-hashed leaf: the counter subject is the beneficiary.
-        bytes32 leaf = keccak256(
-            bytes.concat(
-                keccak256(
-                    abi.encode(
-                        keccak256("6529STREAM_MINT_ALLOWLIST_LEAF_V1"),
-                        block.chainid,
-                        address(manager),
-                        uint256(1),
-                        MERKLE_PHASE,
-                        PRICE_COUNTER,
-                        SECOND_OWNER,
-                        uint64(1),
-                        true,
-                        uint256(0)
-                    )
-                )
-            )
-        );
-        bytes32 definition = IStreamMintCounterPolicy(address(ledger))
-            .registerCounterDefinition(
-                IStreamMintCounterPolicy.Definition(
-                    IStreamMintCounterPolicy.CounterScope.PHASE,
-                    IStreamMintManager.CounterKeyMode.RECIPIENT,
-                    leaf,
-                    DEPLOYMENT_HASH
-                )
-            );
-        bytes32[] memory counters = new bytes32[](1);
-        counters[0] = PRICE_COUNTER;
-        IStreamMintManager.MintCounterConfig[] memory configs =
-            new IStreamMintManager.MintCounterConfig[](1);
-        configs[0] = IStreamMintManager.MintCounterConfig(
-            true,
-            IStreamMintManager.CounterKeyMode.RECIPIENT,
-            IStreamMintLedger.CounterCapMode.MERKLE_STATIC,
-            IStreamMintLedger.CounterDeltaMode.STATIC,
-            1,
-            1,
-            definition
-        );
-        IStreamMintManager.MintGateConfig memory gate;
-        IStreamMintManager.MintPhaseConfig memory config =
-            IStreamMintManager.MintPhaseConfig(false, 0, 0, 1, DEPLOYMENT_HASH, DEPLOYMENT_HASH);
-        address[] memory phaseExecutors = new address[](0);
-        _recordFixturePolicy(
-            MERKLE_PHASE,
-            manager.previewPhasePolicyHash(
-                1, MERKLE_PHASE, config, gate, counters, configs, phaseExecutors
-            )
-        );
-        manager.configurePhase(1, MERKLE_PHASE, config, gate, counters, configs);
-        phaseExecutors = new address[](1);
-        phaseExecutors[0] = address(claims);
-        _recordFixturePolicy(
-            MERKLE_PHASE,
-            manager.previewPhasePolicyHash(
-                1, MERKLE_PHASE, config, gate, counters, configs, phaseExecutors
-            )
-        );
-        manager.setPhaseExecutor(1, MERKLE_PHASE, address(claims), true);
-    }
-
-    function _allowlistData() private pure returns (bytes memory) {
-        IStreamMintCounterPolicy.AllowlistProof[][] memory proofs =
-            new IStreamMintCounterPolicy.AllowlistProof[][](1);
-        proofs[0] = new IStreamMintCounterPolicy.AllowlistProof[](1);
-        proofs[0][0] = IStreamMintCounterPolicy.AllowlistProof(1, true, 0, new bytes32[](0));
-        return abi.encode(proofs);
-    }
-
-    function _purchase(bytes32 id, uint256 tag, uint256 chosen)
-        internal
-        view
-        returns (Claim.Purchase memory p)
-    {
-        p.mint.saleId = id;
-        p.mint.payer = address(payerSafe);
-        p.mint.executor = address(payerSafe);
-        p.mint.initialRecipient = address(payerSafe);
-        p.mint.beneficiary = SECOND_OWNER;
-        p.mint.tokenData = abi.encode(TOKEN_DATA, tag);
-        p.mint.mintCommitment = keccak256(abi.encode("current claims commitment", tag));
-        p.mint.executionNonce = claims.nextExecutionNonce(id, p.mint.payer);
-        p.chosenUnitPrice = chosen;
-    }
-
-    function _authorization(Claim.Purchase memory p, uint256 nonce, uint256 minimum)
-        internal
-        view
-        returns (Sales.SaleAuthorization memory a)
-    {
-        Immediate.Configuration memory c = claims.saleRecord(p.mint.saleId).sale.config;
-        a.chainId = block.chainid;
-        a.saleAdapter = address(claims);
-        a.mintManager = address(manager);
-        a.collectionId = 1;
-        a.phaseId = c.phaseId;
-        a.saleId = p.mint.saleId;
-        a.saleKind = c.saleKind;
-        a.revenueClass = PRIMARY_REVENUE_CLASS;
-        a.expectedPrimaryPolicyHash = c.expectedPrimaryPolicyHash;
-        address[] memory recipients = new address[](1);
-        recipients[0] = p.mint.initialRecipient;
-        address[] memory beneficiaries = new address[](1);
-        beneficiaries[0] = p.mint.beneficiary;
-        bytes[] memory data = new bytes[](1);
-        data[0] = p.mint.tokenData;
-        bytes32[] memory commitments = new bytes32[](1);
-        commitments[0] = p.mint.mintCommitment;
-        a.initialRecipientsHash =
-            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_RECIPIENTS_V1"), recipients));
-        a.beneficiariesHash = keccak256(
-            abi.encode(keccak256("6529STREAM_MINT_BATCH_BENEFICIARIES_V1"), beneficiaries)
-        );
-        a.tokenDataArrayHash =
-            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_TOKEN_DATA_V1"), data));
-        a.mintCommitmentsHash =
-            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_COMMITMENTS_V1"), commitments));
-        a.payer = p.mint.payer;
-        a.executor = p.mint.executor;
-        a.unitPrice = minimum;
-        a.quantity = 1;
-        a.policyHash = c.mintPolicyHash;
-        a.nonce = bytes32(nonce);
-        a.deadline = this.claimsScenarioTime() + 30 days;
-    }
-
-    function _literalDigest(Sales.SaleAuthorization memory a) internal view returns (bytes32) {
-        bytes32 domain = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256("6529Stream Sales"),
-                keccak256("1"),
-                block.chainid,
-                address(claims)
-            )
-        );
-        bytes32 body = keccak256(
-            abi.encode(
-                keccak256(
-                    "SaleAuthorization(uint256 chainId,address saleAdapter,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 saleId,uint8 saleKind,bytes32 revenueClass,bytes32 expectedPrimaryPolicyHash,uint8 primaryPolicyMode,bytes32 initialRecipientsHash,bytes32 beneficiariesHash,bytes32 tokenDataArrayHash,bytes32 mintCommitmentsHash,address payer,address executor,address asset,uint256 unitPrice,uint256 quantity,bytes32 contentSelectionHash,bytes32 policyHash,bytes32 nonce,uint64 deadline,uint64 finalizeBy)"
-                ),
-                a
-            )
-        );
-        return keccak256(abi.encodePacked(hex"1901", domain, body));
-    }
-
-    function _authorizationId(bytes32 digest) internal pure returns (bytes32) {
-        return keccak256(abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest));
-    }
-
-    function _publicAuthorizationId(Claim.Purchase memory p) private view returns (bytes32) {
-        bytes32 configHash = claims.saleRecord(p.mint.saleId).sale.configHash;
-        bytes32 request = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_CLAIM_SALES_REQUEST_V1"),
-                block.chainid,
-                address(claims),
-                configHash,
-                p
-            )
-        );
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_PUBLIC_CLAIM_MINT_AUTHORIZATION_V1"),
-                block.chainid,
-                address(claims),
-                address(manager),
-                configHash,
-                request
-            )
-        );
-    }
-
-    function _saleProof(Sales.SaleAuthorization memory a)
-        internal
-        returns (IStreamPrivateSaleAdapter.Signature memory)
-    {
-        return IStreamPrivateSaleAdapter.Signature(
-            address(artistSafe),
-            2,
-            safeThresholdSignature(
-                artistKeys, safeMessageDigest(artistSafe, abi.encode(_literalDigest(a)))
-            )
-        );
-    }
-
-    function _signedSafeCall(uint256 value, bytes memory data) internal returns (bytes memory) {
-        bytes memory signatures = safeThresholdSignature(
-            payerKeys,
-            payerSafe.getTransactionHash(
-                address(claims), value, data, 0, 0, 0, 0, address(0), address(0), payerSafe.nonce()
-            )
-        );
-        return abi.encodeCall(
-            payerSafe.execTransaction,
-            (
-                address(claims),
-                value,
-                data,
-                uint8(0),
-                0,
-                0,
-                0,
-                address(0),
-                payable(address(0)),
-                signatures
-            )
-        );
-    }
-
-    function _executeSaved(bytes memory callData) internal {
-        (bool ok, bytes memory result) = address(payerSafe).call(callData);
-        require(
-            ok && result.length == 32 && abi.decode(result, (bool)), "actual threshold Safe CALL"
-        );
-    }
-
-    function _requestAndFulfill(uint256 tokenId) private {
-        require(
-            executeSafe(
-                payerSafe,
-                payerKeys,
-                address(entropy),
-                0,
-                abi.encodeCall(entropy.requestEntropy, (tokenId)),
-                0
-            ),
-            "actual reveal-owner Safe request"
-        );
-        (,,,,, bytes32 requestKey, uint256 requestId,) = entropy.tokenEntropy(tokenId);
-        require(
-            requestKey != 0 && requestId == 1 && entropy.revealFeeEscrow(1) == 0
-                && address(provider).balance == REVEAL_FEE,
-            "actual Coordinator consumes escrow for upstream fee"
-        );
-        provider.fulfill(requestId, bytes32(0));
-        (, bool finalized) = entropy.tokenSeed(tokenId);
-        require(
-            finalized && bytes(core.tokenURI(tokenId)).length != 0,
-            "actual Coordinator and Metadata finish with upstream raw zero"
-        );
-    }
-
-    function _assertReceipt(
-        Claim.Purchase memory p,
-        Native.NativeSettlementCandidate memory c,
-        Immediate.Receipt memory r,
-        bytes32 auth,
-        bytes32 digest,
-        uint256 credit
-    ) internal view {
-        require(
-            r.saleId == p.mint.saleId && r.executionId == c.executionBinding.executionId
-                && r.authorizationId == auth && r.saleAuthorizationDigest == digest
-                && r.operationRoot == c.operationIdentityCommitment
-                && r.operationId == c.operationId,
-            "exact original authority and operation receipt"
-        );
-        require(
-            r.tokenId != 0 && r.chargedAmount == p.chosenUnitPrice && r.revealFee == REVEAL_FEE
-                && r.revealCredit == credit,
-            "chosen amount and actual reveal accounting"
-        );
-        require(
-            claims.executionStatus(r.executionId) == 2
-                && core.ownerOf(r.tokenId) == p.mint.initialRecipient
-                && core.coordinatorAtMint(r.tokenId) == address(entropy)
-                && c.sale.beneficiary == p.mint.beneficiary,
-            "actual recipient distinct from bound beneficiary, coordinator retained"
-        );
-        require(
-            ledger.isManagerAuthorizationUsed(address(manager), auth)
-                && ledger.isManagerOperationRootUsed(address(manager), r.operationRoot),
-            "actual Ledger replay consumed"
-        );
-        require(
-            claims.activePublicNativeCandidate(r.executionId) == 0,
-            "no lingering public paid witness"
-        );
-        if (p.chosenUnitPrice == 0) _assertFreeReceipt(r);
-        else _assertPaidReceipt(p, c, r);
-    }
-
-    function _assertFreeReceipt(Immediate.Receipt memory r) private view {
-        bytes32 key = recorder.settlementKey(address(claims), r.executionId);
-        require(
-            r.settlementKey == 0 && !recorder.settlementConsumed(key)
-                && recorder.settlementResult(key).candidateCommitment == 0
-                && commerceFloor.directPrimarySaleFloorReceipt(key).receiptHash == 0,
-            "zero price creates no official or DIRECT payment receipt"
-        );
-        _assertNoCommerceFloorReceipt(key);
-        require(
-            wallet.balance == 0 && recorder.totalOfficialSettled(address(0)) == 0
-                && revenueEscrow.totalOwed(address(0)) == 0 && address(revenueEscrow).balance == 0,
-            "reveal payment is never official sale revenue"
-        );
-    }
-
-    function _assertPaidReceipt(
-        Claim.Purchase memory p,
-        Native.NativeSettlementCandidate memory c,
-        Immediate.Receipt memory r
-    ) private view {
-        bytes32 key = recorder.settlementKey(address(claims), r.executionId);
-        Settlement.PrimarySettlementResult memory result = recorder.settlementResult(key);
-        require(
-            r.settlementKey == key && recorder.settlementConsumed(key)
-                && result.settlementKey == key
-                && result.candidateCommitment == _candidateCommitment(c),
-            "independently bound original native settlement"
-        );
-        require(
-            result.profileId == profile && result.wallet == wallet && result.asset == address(0)
-                && result.amount == p.chosenUnitPrice && result.executor == address(payerSafe)
-                && !result.escrowed,
-            "whole chosen amount reaches original official PROFILE wallet"
-        );
-        require(
-            result.executionId == r.executionId
-                && result.operationIdentityCommitment == r.operationRoot
-                && result.currentPolicyHash == c.currentPolicyHash
-                && result.boundPolicyHash == c.boundPolicyHash,
-            "official result retains actual mint operation and policy"
-        );
-        _assertWaivedCommerceReceipt(address(recorder), key);
-        StreamConservationFloorTypes.SettlementReceipt memory floorReceipt =
-            commerceFloor.settlementReceipt(key);
-        require(
-            floorReceipt.candidateCommitment == result.candidateCommitment
-                && floorReceipt.resultHash == keccak256(abi.encode(result))
-                && floorReceipt.releaseReceiptHash == 0 && commerceFloor.sourceCount() == 0
-                && commerceFloor.firstSale(1).sourceId == 0,
-            "actual WAIVED Floor binds original result with no documentary evidence"
-        );
-        require(
-            commerceFloor.firstSale(1).sourceSetHash == commerceFloor.sourceSetHashAt(0)
-                && commerceFloor.sourceSetHashAt(0) != 0
-                && commerceFloor.directPrimarySaleFloorReceipt(key).receiptHash == 0,
-            "permanent first sale has exact empty source head and no duplicate DIRECT receipt"
-        );
-    }
-
-    /// @dev The permissionless preparation boundary diagnoses genuine missing evidence before
-    /// payment. This prospective result creates neither an official payment nor a Floor receipt.
-    function _assertMissingDocumentaryFloor(Native.NativeSettlementCandidate memory n) private {
-        Settlement.ERC20SettlementCandidate memory c;
-        c.saleAdapter = n.saleAdapter;
-        c.executor = n.executor;
-        c.sale = n.sale;
-        c.executionBinding = n.executionBinding;
-        c.orchestrationOrder = n.orchestrationOrder;
-        c.mintManager = n.mintManager;
-        c.operationIdentityCommitment = n.operationIdentityCommitment;
-        c.operationId = n.operationId;
-        c.currentPolicyHash = n.currentPolicyHash;
-        c.boundPolicyHash = n.boundPolicyHash;
-        c.rights = n.rights;
-        c.saleExecutionHash = n.saleExecutionHash;
-        Settlement.PrimarySettlementResult memory r;
-        r.candidateCommitment = _candidateCommitment(n);
-        r.settlementKey = recorder.settlementKey(address(claims), n.executionBinding.executionId);
-        r.profileId = n.rights.profileId;
-        r.wallet = n.rights.wallet;
-        r.amount = n.sale.amount;
-        r.executor = n.executor;
-        r.executionId = n.executionBinding.executionId;
-        r.operationIdentityCommitment = n.operationIdentityCommitment;
-        r.currentPolicyHash = n.currentPolicyHash;
-        r.boundPolicyHash = n.boundPolicyHash;
-        require(commerceFloor.sourceCount() == 0, "no documentary source installed");
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamConservationFloor.ConservationFloorSourceUnavailable.selector
-            )
-        );
-        commerceFloor.preparePrimarySale(address(recorder), c, r);
-    }
-
-    function _candidateCommitment(Native.NativeSettlementCandidate memory c)
-        private
-        view
-        returns (bytes32)
-    {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_SETTLEMENT_CANDIDATE_V1"),
-                block.chainid,
-                address(recorder),
-                c
-            )
-        );
-    }
-
-    function _assertFreeEvents(Vm.Log[] memory logs, Immediate.Receipt memory r) internal view {
-        uint256 seen;
-        for (uint256 i; i < logs.length; ++i) {
-            require(
-                logs[i].emitter != address(recorder) && logs[i].emitter != address(commerceFloor),
-                "zero path emits no recorder or conservation events"
-            );
-            if (
-                logs[i].emitter == address(claims) && logs[i].topics.length != 0
-                    && logs[i].topics[0]
-                        == keccak256("FreeClaimExecuted(bytes32,bytes32,uint256,bytes32)")
-            ) {
-                require(
-                    logs[i].topics.length == 4 && logs[i].topics[1] == r.saleId
-                        && logs[i].topics[2] == r.executionId
-                        && uint256(logs[i].topics[3]) == r.tokenId
-                        && keccak256(logs[i].data) == keccak256(abi.encode(r.authorizationId)),
-                    "exact free event identity"
-                );
-                ++seen;
-            }
-        }
-        require(seen == 1, "one explicit free event");
-    }
-
-    function _assertMoney(uint256 payerBefore, uint256 revenue, uint256 count, uint256 credit)
-        internal
-        view
-    {
-        require(
-            address(payerSafe).balance == payerBefore - revenue - count * REVEAL_FEE - credit
-                && wallet.balance == revenue && recorder.totalOfficialSettled(address(0)) == revenue
-                && recorder.officialSettled(PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
-                    == revenue,
-            "actual native revenue and payer conservation"
-        );
-        require(
-            revenueEscrow.totalOwed(address(0)) == 0 && address(revenueEscrow).balance == 0
-                && address(recorder).balance == 0,
-            "direct payment has no recorder or escrow residue"
-        );
-        require(
-            entropy.revealFeeEscrow(1) == count * REVEAL_FEE
-                && address(entropy).balance == count * REVEAL_FEE
-                && address(claims).balance == credit && claims.refundLiability() == credit
-                && provider.nextRequestId() == 1,
-            "manual reveal fees and native payer excess remain separate from revenue"
-        );
-    }
-
-    function _counterKey(Claim.Purchase memory p) private view returns (bytes32) {
-        bytes32 phase = claims.saleRecord(p.mint.saleId).sale.config.phaseId;
-        bool merkle = phase == MERKLE_PHASE;
-        bytes32 counter = merkle ? PRICE_COUNTER : keccak256("supply");
-        bytes32 subject = manager.previewSubjectKey(
-            merkle
-                ? IStreamMintManager.CounterKeyMode.RECIPIENT
-                : IStreamMintManager.CounterKeyMode.CONSTANT,
-            1,
-            phase,
-            counter,
-            p.mint.payer,
-            p.mint.beneficiary,
-            address(claims),
-            address(0),
-            0
-        );
-        return manager.previewCounterValueKey(1, phase, counter, subject);
-    }
-
-    function _counter(Claim.Purchase memory p) internal view returns (uint64) {
-        return ledger.counterValue(_counterKey(p));
-    }
-
-    // Small independently grouped snapshots avoid a single wide ABI expression under via-IR.
-    function _adapterState(Claim.Purchase memory p, bytes32 executionId)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes32 saleState = keccak256(
-            abi.encode(
-                claims.saleRecord(p.mint.saleId),
-                claims.nextExecutionNonce(p.mint.saleId, p.mint.payer),
-                claims.executionStatus(executionId),
-                claims.executionReceipt(executionId),
-                claims.activePublicNativeCandidate(executionId)
-            )
-        );
-        bytes32 refunds = keccak256(
-            abi.encode(
-                address(claims).balance,
-                claims.refundLiability(),
-                claims.refundAccountCount(),
-                claims.refundableBalance(p.mint.saleId, p.mint.payer),
-                claims.refundableBalance(p.mint.saleId, p.mint.beneficiary)
-            )
-        );
-        return
-            keccak256(abi.encode(payerSafe.nonce(), address(payerSafe).balance, saleState, refunds));
-    }
-
-    function _paymentState(bytes32 key) private view returns (bytes32) {
-        bytes32 official = keccak256(
-            abi.encode(
-                recorder.settlementConsumed(key),
-                recorder.settlementResult(key),
-                recorder.totalOfficialSettled(address(0)),
-                recorder.officialSettled(PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
-            )
-        );
-        return keccak256(
-            abi.encode(
-                official,
-                wallet.balance,
-                address(recorder).balance,
-                revenueEscrow.totalOwed(address(0)),
-                address(revenueEscrow).balance
-            )
-        );
-    }
-
-    function _floorState(bytes32 key) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                commerceFloor.firstSale(1),
-                commerceFloor.settlementReceipt(key),
-                commerceFloor.directPrimarySaleFloorReceipt(key),
-                core.declaredConservationTier(1)
-            )
-        );
-    }
-
-    function _mintState(Claim.Purchase memory p, bytes32 root) private view returns (bytes32) {
-        bytes32 mintState = keccak256(
-            abi.encode(
-                manager.nextOperationNonce(),
-                ledger.isManagerOperationRootUsed(address(manager), root),
-                _counter(p),
-                core.collectionMintedEver(1),
-                core.lastAllocatedTokenId(),
-                core.balanceOf(p.mint.initialRecipient)
-            )
-        );
-        return keccak256(
-            abi.encode(
-                mintState,
-                entropy.revealFeeEscrow(1),
-                address(entropy).balance,
-                provider.nextRequestId(),
-                address(provider).balance
-            )
-        );
-    }
-
-    function _effectsState(Claim.Purchase memory p, Native.NativeSettlementCandidate memory c)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes32 key = recorder.settlementKey(address(claims), c.executionBinding.executionId);
-        return keccak256(
-            abi.encode(
-                _adapterState(p, c.executionBinding.executionId),
-                _paymentState(key),
-                _floorState(key),
-                _mintState(p, c.operationIdentityCommitment)
-            )
-        );
-    }
-
-    function _purchaseState(
-        Claim.Purchase memory p,
-        Native.NativeSettlementCandidate memory c,
-        bytes32 auth
-    ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _effectsState(p, c), ledger.isManagerAuthorizationUsed(address(manager), auth)
-            )
-        );
-    }
-
-    function _expectSavedFailure(
-        bytes memory saved,
-        Claim.Purchase memory p,
-        Native.NativeSettlementCandidate memory c,
-        bytes32 auth
-    ) internal returns (bytes memory reason) {
-        bytes32 before_ = _purchaseState(p, c, auth);
-        bool ok;
-        (ok, reason) = address(payerSafe).call(saved);
-        require(
-            !ok && _purchaseState(p, c, auth) == before_,
-            "failed Safe envelope leaves payment, mint, refund and replay state unchanged"
-        );
-    }
-
-    function _assertSafeTargetFailure(bytes memory reason) internal pure {
-        require(
-            keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
-            "actual threshold Safe reached reverting target call"
-        );
-    }
-
-    function _expectSignedFailure(
-        Claim.Purchase memory p,
-        Sales.SaleAuthorization memory a,
-        Native.NativeSettlementCandidate memory tracked,
-        bytes memory expected
-    ) private {
-        IStreamPrivateSaleAdapter.Signature memory proof = _saleProof(a);
-        vm.expectRevert(expected);
-        claims.previewSignedPurchase(p, a, proof);
-        _expectSavedFailure(
-            _signedSafeCall(
-                p.chosenUnitPrice + REVEAL_FEE, abi.encodeCall(claims.purchaseSigned, (p, a, proof))
-            ),
-            p,
-            tracked,
-            _authorizationId(_literalDigest(a))
-        );
-    }
-
-    function _voidByArtist(
-        Sales.SaleAuthorization memory a,
-        Native.NativeSettlementCandidate memory c
-    ) private {
-        Claim.Purchase memory p = _purchase(a.saleId, 0, 0);
-        bytes32 auth = _authorizationId(_literalDigest(a));
-        require(
-            !ledger.isManagerAuthorizationUsed(address(manager), auth),
-            "original Sales ID initially unused"
-        );
-        bytes32 state = _effectsState(p, c);
-        uint256 nonce = artistSafe.nonce();
-        vm.recordLogs();
-        require(
-            executeSafe(
-                artistSafe,
-                artistKeys,
-                address(manager),
-                0,
-                abi.encodeCall(
-                    IStreamMintImmediateSaleAuthorizationRevocation.voidMintImmediateSaleAuthorization,
-                    (a, address(artistSafe), uint8(2), bytes(""))
-                ),
-                0
-            ),
-            "actual original authorizer Safe voids full Sales payload"
-        );
-        _assertVoidEvents(vm.getRecordedLogs(), a, auth);
-        require(
-            artistSafe.nonce() == nonce + 1
-                && ledger.isManagerAuthorizationUsed(address(manager), auth)
-                && _effectsState(p, c) == state,
-            "only void map and actual authorizer Safe nonce change"
-        );
-    }
-
-    function _assertVoidEvents(Vm.Log[] memory logs, Sales.SaleAuthorization memory a, bytes32 auth)
-        private
-        view
-    {
-        uint256 ledgerEvents;
-        uint256 managerEvents;
-        for (uint256 i; i < logs.length; ++i) {
-            Vm.Log memory log = logs[i];
-            require(
-                log.emitter != address(recorder) && log.emitter != address(commerceFloor),
-                "void emits no payment events"
-            );
-            if (
-                log.emitter == address(ledger) && log.topics.length != 0
-                    && log.topics[0]
-                        == keccak256("MintLedgerAuthorizationVoided(uint16,bytes32,address)")
-            ) {
-                require(
-                    log.topics.length == 3 && log.topics[1] == auth
-                        && log.topics[2] == bytes32(uint256(uint160(address(manager))))
-                        && keccak256(log.data) == keccak256(abi.encode(uint16(1))),
-                    "exact manager-scoped Ledger void event"
-                );
-                ++ledgerEvents;
-            }
-            if (
-                log.emitter == address(manager) && log.topics.length != 0
-                    && log.topics[0]
-                        == keccak256(
-                            "MintAuthorizationVoided(uint16,uint256,bytes32,bytes32,address,address,uint8)"
-                        )
-            ) {
-                require(
-                    log.topics.length == 4 && log.topics[1] == bytes32(a.collectionId)
-                        && log.topics[2] == a.phaseId && log.topics[3] == auth
-                        && keccak256(log.data)
-                            == keccak256(
-                                abi.encode(
-                                    uint16(1), address(artistSafe), address(claims), uint8(2)
-                                )
-                            ),
-                    "exact original Sales family and authorizer in Manager void event"
-                );
-                ++managerEvents;
-            }
-        }
-        require(ledgerEvents == 1 && managerEvents == 1, "one Ledger and one Manager void receipt");
     }
 }

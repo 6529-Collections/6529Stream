@@ -132,9 +132,9 @@ contract CurrentFreeClaimCallbackReceiver {
 }
 
 /// @notice Actual threshold Artist/payer/Governor Safes and the original current Claim graph.
-/// @dev Select the single new named test explicitly: the eight inherited tests are unchanged
-/// existing cases, not eight additional acceptance cases. No EVM or cold-gas result is implied.
-contract StreamCurrentFreeClaimCallbackTest is StreamCurrentNativeClaimSalesTest {
+/// @dev Shared setup remains in this host; the original eight cases remain in their own
+/// concrete test host. No EVM or cold-gas result is implied.
+contract StreamCurrentFreeClaimCallbackTest is StreamCurrentNativeClaimSalesFixture {
     function testActualSignedZeroCallbackRollsBackAndRetriesIdenticalSafeEnvelope() public {
         bytes32 id = _register(1, 12, 1, CLAIM_PHASE);
         CurrentFreeClaimCallbackReceiver receiver =
