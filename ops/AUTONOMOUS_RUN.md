@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI155 `e93cb091`: 4,014 sources / zero errors; six archive correspondence tests plus fuzz256 pass. Dossier `fcf5af68` has 25 offline passes. Provider12 exposed a reachable reference-reader compiler failure; B owns repair. |
+| Source checkpoint | Retrieval `0c14acde` and reader repair `51c3210b` integrated. Reader5/fuzz256 passes with root native-artifact review. ABI156 finds two remaining actual-witness constructor migrations; C owns repair. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -36,18 +36,21 @@ continue coherent features while frozen native campaigns run.
 - A: HISTORY_CONTENT `51d8ed8f` is integrated and source-reviewed. Build accepted
   Platform history with closed original zero-Artist collection rows, then native24
   and full mixed/multiplicity composition. Preserve old tags and original writers.
-- B: both provider repairs are integrated as `9d4af023`; repair the reachable
-  ReferenceReads.original Yul failure exposed by provider12. C's combined
-  retrieval source/oracle review is clear after its Artist/scope epoch repair. Registry fixture `7a9fd077` awaits
-  runtime; retain native3's 12 passes and six previously unexecuted cases.
-- C: metadata split `1dbc0c66` is integrated and both products fit. Build the
-  approved attributed retrieval satellite, immutable inventory companion and
-  explicit bundle witness association; preserve original Archive authority.
+- B: provider and reference-reader repairs are integrated; the five focused
+  reader cases pass with root artifact review. Independently review A's final
+  Platform history production and its bounded size-factoring follow-ups.
+- C: retrieval producer and inventory/bundle consumer are integrated. Finish
+  the two missed genuine-witness constructors on the actual graph, then own
+  the 42-case retrieval campaign on the joined source.
 - Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: the sole Mint/terminal/Safe44
-  native campaign runs at `9db6df06`; Artist13 independent oracle review is clear.
+  native campaign timed out at its 5,400-second bound on `9db6df06`, before
+  execution. Own bounded parallel native-compilation work; Artist14 source
+  oracle review is clear with its recorded typed-boundary qualifications.
 - Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: selected VIEW18 capacity failure
   is sealed and the repairs are integrated. Independently review the Collector
   structural proposal while original ceremony/browser awaits actual execution.
+  Registry6 setup exposed the wrong fixed context document name; isolated
+  correction `bb38c4de` is integrated and the bounded successor is authorized.
 - Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: VIEW consumers/export/package
   and locator are integrated with root83/23/31/34 passing. Dossier `fcf5af68`
   passes 25 new/shared tests; complete existing dossier composition and consume
@@ -58,7 +61,8 @@ continue coherent features while frozen native campaigns run.
   actual Safe caller pass for the built operations.
 - Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: publication11 failed capture
   is sealed. Historical8 passes and is sealed on `7053ab06`. Refresh actual
-  publication11 at `9d4af023`; coordinate native ownership with Prepared.
+  publication11 at `9d4af023`: native/artifact gates and actual export now pass;
+  fresh independent replay and eleven-case execution remain.
 - Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: reader51 passes and is
   sealed. Actual3 execution is authorized at `9d4af023`; refresh all source,
   constructor and library selections before the single native capture.
@@ -75,7 +79,8 @@ continue coherent features while frozen native campaigns run.
   components. Measure real Core/Floor/guard/retention and propose a structural
   reduction; coordinate shared Core changes with root before editing them.
 
-Root ABI155 and exact source bridges pass. Preserve supported RC1 and every
+Root ABI156 preserves two actual constructor type errors awaiting C repair.
+The five-case native reader repair is independently verified. Preserve RC1 and every
 failed capture. Full current/Safe, stateful/fuzz, gas/size, CI, freeze and matching
 testnet remain. No new funding or onchain action is needed for current coding.
 

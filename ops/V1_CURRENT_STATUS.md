@@ -18,17 +18,21 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-Integrated Solidity checkpoint: `e93cb091`. ABI155 checks all 4,014 Solidity
-sources with zero errors in 47.781 seconds and exact committed-source readback.
-It includes the four-format V2 archive correspondence repair; six focused
-native tests and 256 fuzz cases pass, and the old-library control fails as
-expected. Museum dossier `fcf5af68` follows without Solidity changes.
-This is source compatibility; complete candidate execution remains.
+Retrieval producer/consumer source is integrated as `0c14acde`, with the
+independent fixture follow-up `523a8f27`. The reference-reader compiler repair
+is integrated as `51c3210b`: five native cases and 256 fuzz inputs pass on exact
+`5678cad2`, with root matching all 45 sources and 50 native artifacts.
+ABI156 checks 4,031 committed sources and finds two missed actual VIEW inventory
+constructor migrations. C is fixing those genuine-witness fixtures before the
+next combined check. ABI155's earlier 4,014-source pass remains historical.
+These are source and focused-test milestones; combined acceptance remains.
 
 - **Preservation and finality:** complete VIEW binding, both provider dispatch
   paths and Discovery are integrated. Same-host gas tests pass eight cases on
   their recorded source. Exact HTTPS/Arweave locator support is integrated;
-  general attributed origin/mirror/redirect witnesses are being built.
+  general attributed origin/mirror/redirect witnesses and their immutable
+  inventory/bundle bindings are now source integrated. Thirty-six authored
+  retrieval tests await execution; fourteen selected products fit size limits.
   A separate fresh constructor-budget fixture (`dcf9a037`) preserves the old
   diagnostic controls and measures complete two-token checkpoint revalidation.
   Its execution is now authorized on the joined provider repairs below.
@@ -43,8 +47,9 @@ This is source compatibility; complete candidate execution remains.
   independently reviewed artifacts and traces. Both provider repairs are
   integrated as `9d4af023`: 24,206 and 24,190 runtime bytes; complete initcode
   is 40,303 and 40,665 bytes. The provider12 campaign then exposed a
-  reachable reference-reader Yul compiler stack failure before execution. B
-  owns the narrow repair; the failed capture remains preserved.
+  reachable reference-reader Yul compiler stack failure before execution. The
+  repair now fits at 19,833/12,901 runtime bytes and passes its focused five
+  cases; complete provider and fresh-checkpoint execution remain pending.
 - **Artist history:** joined original content, royalty/freeze and ratification
   histories across accepted, disputed and sanctioned generations are integrated
   as `51d8ed8f`. Production and 13 new test oracles are independently reviewed;
@@ -54,8 +59,10 @@ This is source compatibility; complete candidate execution remains.
   The earlier current-Artist preservation campaign now executes 12 cases
   successfully, but three Registry setups fail on a zero collection ID in an
   original golden-vector fixture, leaving six intended cases unexecuted.
-  Fixture correction `7a9fd077` sets the original collection ID; execution
-  remains pending and the earlier failure is retained.
+  Fixture correction `7a9fd077` clears that failure. The next run compiled
+  and passed size checks but exposed a wrong renderer context document name
+  during setup. Its one-literal correction is integrated as `bb38c4de`; the
+  six test bodies remain unexecuted, with both failed captures retained.
 - **Museum:** complete VIEW inventory and bundle verification has 83 root passes;
   the ceremony-export adapter has 23. Retained VIEW BagIt/OCFL packaging is now
   integrated as `a8562dc5`, with all 31 new/shared offline cases passing at root.
@@ -80,8 +87,11 @@ This is source compatibility; complete candidate execution remains.
   The repair is independently source-reviewed, with eight endpoint regressions
   integrated as `7053ab06`; all eight now pass on that source, with
   independent artifact/trace review and a sealed packet. The full publication
-  successor is authorized at `9d4af023`; its acceptance remains pending.
-  The actual Mint/terminal/Safe44 campaign continues on frozen `9db6df06`.
+  successor at `9d4af023` now compiles, passes production gates and exports
+  its actual Safe/publication state. Fresh independent replay and all eleven
+  cases remain pending. Mint/terminal/Safe44 reached its 5,400-second compiler
+  deadline without EVM execution. Mint owns a bounded parallel compilation
+  successor; the timed-out capture is preserved.
 - **Collector gas:** isolated experiment `2e43e6b6` passes 44 native cases,
   including 256 fuzz inputs, and 28 matched RPC checks. The cheapest exact
   payment is now 516,891 gross gas, down 87,245 from the prior experiment,
