@@ -7,7 +7,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 20 September 2026. The owner authorizes autonomous completion of the
+Updated 21 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -21,65 +21,60 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `842eb31e`: reviewed current-authority STATIC/preservation graph, root dispatch, VIEW binding/reference and metric retention source integrated. ABI141: 3,779 / zero errors. Source-specific standard24, VIEW46 and Rights8 pass; full acceptance remains open. |
+| Source checkpoint | `e3bfd9b0`: V2 preservation, stored-root reads, actual VIEW ceremony, current-Artist producer and inventory/archive clients integrated. ABI142: 3,832 / zero errors. Source-specific component acceptance remains separate from complete-system delivery. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-20 UTC` |
+| Last updated | `2026-09-21 UTC` |
 
-## Active continuation: 20 September
+## Active continuation: 21 September
 
-Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact source and acceptance
-boundaries. Root owns shared interfaces, integration, architecture and delivery.
-Keep builders implementing while bounded frozen test batches run.
+Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact evidence boundaries.
+Root owns shared interfaces, integration, architecture and delivery. Keep
+builders implementing while bounded frozen test batches run.
 
-- A: finish complete dispute/repudiation and prior-era history transport.
-  Isolate remaining selected-worker codegen failure before a full native run;
-  four newly framed workers fit. Wider history composition remains required.
-- B: current-authority STATIC source is integrated. Own fixture-only native
-  loading repair, real cold A/B/C read checks and the distinct preservation
-  renderer/admission pair. No production size or read-budget waiver.
-- C: VIEW output46 passed. Reference source `df6363e5` is integrated as
-  `842eb31e`; build complete VIEW inventory and finality with Burn. Snapshot/root
-  and reference runtime campaigns remain distinct from the output result.
-- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: callback regression integrated;
-  actual Mint/archive acceptance remains. Fresh independent Museum preservation
-  review is the current bounded assignment.
-- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: actual preservation fixtures and
-  pending-to-bound VIEW provider source are integrated as `31117240`. Continue
-  genuine declaration/adoption/reference/inventory/finality ceremony; C owns
-  the underlying VIEW contracts. Original scoped27 remains stopped/incomplete.
-- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: V9 repair and original VIEW
-  capture pass root checks. Distinct preservation capture `a398077c` has 82
-  builder passes and fresh review pending. Build a wire oracle from the actual
-  completed native output46 without recompilation or synthetic finality claims.
-- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: scoped reference/VIEW source
-  passes root55. Complete original scoped inventory/archive callers and Safe
-  reconciliation; keep historical ABI129 and newer profiles explicit.
-- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 passed with exact
-  actual CREATE and retained-byte joins; independent seal/readback is complete.
-  Launch the reviewed frozen metric48 next, one bounded capture, original caps.
-- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: Rights8 passed; graph-reader
-  review and eight test-only cases integrated. Prepare the exact root16 native
-  selection before launch. Actual successor3 awaits completed Prepared helpers.
-- Metric retention `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: `53cfb5c1` source
-  is integrated as `401ede45`. Exact 155-source/48-case native selection reviewed;
-  Testing owns execution. Original publication22 stays closed until parity/size.
-- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: current-authority graph is
-  integrated. Complete the explicitly versioned V2 token-producer family across
-  checkpoints, snapshots, references, inventory, factories and root writes.
-  Root owns ordinary COLLECTION/scoped stored-root read dispatch. Old V1
-  definitions remain literal; do not relabel the current-Artist producer as V1.
-- Collector gas `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: prior concrete packing
-  drafts do not meet 500,000. Cost a single late-published shared immutable
-  receipt with exact original callback and replay semantics before prototype
-  compilation. Experimental files only; no cap or payload reduction.
+- A: join the existing `e2713593` transport/export repair with complete dispute
+  history and the fixed import phases. Finish original confirmed/op13,
+  Platform/content/freeze history composition; closed unsupported branches
+  are remaining work, not scope exclusions.
+- B: preservation producer `432a61de` is integrated. Finish the one-case
+  chain-restoration rerun and actual producer/Registry admission tests.
+  Retain the native 21/1 capture and all three cold-source passes.
+- C: finish complete VIEW inventory, payload correspondence, fixed worker
+  size repairs and the exact source-selection validator. Preserve all actual
+  bytes and original caps; diagnostic oversized configurations are not acceptance.
+- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: root V2 read review is clear.
+  Check the specified VIEW/Artist confirmation boundary; actual Mint24 and
+  archive4 runtime remain pending on their recorded sources.
+- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: VIEW ceremony is integrated as
+  `40c714a9`. Build actual WORK/RIGHTS/waiver and complete once-bound source
+  selection, inventory, archive and finality with C. Do not rerun old scoped27.
+- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: preservation capture and
+  actual native wire bridge pass root checks. Build exact VIEW reference
+  consumers against `df6363e5`; future inventory APIs remain C-owned.
+- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: inventory/archive22 CALLs
+  integrated as `e3bfd9b0`. Continue historical ABI129 provider/discovery and
+  governed Registry callers; distinguish newer unsupported profiles.
+- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 and corrected
+  metric13 are sealed. Own the one next publication22 campaign after root
+  reads back the exact frozen successor; fresh export/context checks required.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: root16 is sealed. Prepare
+  and run the exact new V2 reader29 selection at `e3bfd9b0`, one bounded
+  capture. Genuine successor3 remains separate until Prepared hands off helpers.
+- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: prepare publication22 from
+  immutable native21 plus only the three reviewed retention production files;
+  no compiler duplication. Preserve original nine tests, fixtures and caps.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: V2 family is integrated.
+  Finish actual B producer admission, TOKEN/RELEASE/SEASON A-to-B-to-C
+  ceremonies, exact byte collection and authenticated source export.
+- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: the isolated shared receipt
+  prototype passes 20 cases; optimize measured byte-copy and duplicate decode
+  costs. No broad production overlay or changed 500,000 target.
 
-Root ABI141 has complete committed-source readback at `842eb31e`; root120
-tooling regressions and 23 documentation regressions pass. No root compiler
-is left running. Check current owned PIDs before any launch or intervention.
-Full current/Safe/stateful/fuzz/gas/capacity/CI, candidate freeze and matching
-testnet remain. RC1 stays immutable. No new funding or onchain action is needed.
+Root ABI142 and its committed-source bridge pass; 23 documentation regressions,
+links and changelog checks pass. No root compiler remains. Check exact process
+ownership before starting or stopping any native campaign. Full current/Safe,
+stateful/fuzz, gas/size, CI, freeze and matching testnet remain.
 
 ## Earlier source-specific assignments
 

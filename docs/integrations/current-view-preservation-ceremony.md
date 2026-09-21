@@ -89,6 +89,13 @@ Locally signed archival observations and producer-derived admission goldens are
 fixture evidence, not independent analysis or public archival retrieval.
 
 Complete VIEW inventory, archive-bundle closure, provider finality dispatch,
-sanction archival, original finalization and confirmation remain separate
-required work. Preserve the original failed full-output sanction-cycle capture.
+sanction archival and original scope finalization remain separate required work.
+Artist `confirmSanctionFinalized(collectionId)` applies only to an executed
+COLLECTION finality record; independently finalized VIEW evidence does not
+change collection attribution. A VIEW-only fixture must check that boundary.
+Separate valid COLLECTION evidence can still permit confirmation. This follows
+[ADR0039](../adr/0039-canonical-finality-governance-and-evidence.md) and the
+[Artist authority specification](../stream-artist-authority.md); it does not
+require a new VIEW confirmation operation.
+Preserve the original failed full-output sanction-cycle capture.
 Full current-stack, gas, size, fuzz, CI and testnet acceptance remain open.

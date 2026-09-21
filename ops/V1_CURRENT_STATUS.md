@@ -1,6 +1,6 @@
 # Full-v1 current delivery status
 
-Updated 20 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+Updated 21 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
 records every feature family with separate build, testing and integration status.
 Use it for the common delivery scope and remaining work. This file retains the
 current narrative and historical evidence boundaries.
@@ -16,69 +16,71 @@ owner approval. The separate ERC-20 payable reveal-fee implementation now has re
 approval and is source integrated for runtime validation; it is not deployed.
 Other held proposals remain separate.
 
-## 20 September integrated batch
+## 21 September integrated batch
 
-Integrated source checkpoint: `842eb31e`. ABI141 checks all 3,779 Solidity
-sources with zero errors in 42.906 seconds and exact committed-source readback.
-This checks source compatibility; it does not execute the combined system.
-The full-v1 candidate remains unfinished.
+Integrated source checkpoint: `e3bfd9b0`. ABI142 checks all 3,832 Solidity
+sources with zero errors in 43.609 seconds and exact committed-source readback.
+This is source compatibility, not execution of the complete candidate.
 
-- **Preservation root publication:** the frozen standard batch at `ae540f10`
-  passes all 24 cases, including 256 fuzz inputs. Its trace joins 2,150 native
-  CREATE observations and 122 exact retained-byte carriers; all 79 production
-  coordinates actually created fit the deployment limits. The evidence packet is sealed
-  after independent readback. These results do not cover later source or the full
-  Artist/Safe ceremony.
-- **VIEW preservation:** the first producer/checkpoint/manifest batch at
-  `7701ad89` passes all 46 cases, including 256 fuzz inputs. All 47 captured
-  production products fit; the surrounding Router, Artist, Registry, Archive
-  and finality boundaries are explicitly typed. Root's governed read-budget
-  kernel (`ea2c431f`) separately passes 20 cases and 256 fuzz inputs. Snapshot,
-  Router publication, reference and full ceremony execution remain separate.
-- **VIEW construction and references:** the actual preservation construction
-  and publication fixtures plus once-only governed source binding are integrated
-  as `31117240`, with 31 new authored cases. The reviewed VIEW reference batch
-  is integrated as `842eb31e`; its five selected products fit and 15 cases are
-  authored. Complete inventory, combined-provider finality and actual ceremony
-  composition continue in build. Original gas ceilings remain unchanged.
-- **Artist succession and STATIC:** current-authority Rights selection at
-  `cd3451c7` passes all eight unit cases; all 43 captured production products
-  fit. The distinct current-authority STATIC direct-read path (`6c4ddd9e`) and
-  preservation graph (`b84e0ef2`) are source-integrated. The exact COLLECTION
-  reader (`b8fdb7fd`) has eight independently reviewed new regressions.
-  Actual A/B/C succession, current-Artist producer admission and complete
-  provenance histories remain in build or runtime acceptance. The first
-  STATIC runtime attempt hit test-harness initcode size before executing any
-  cases; a fixture-only loading correction is under test, with production
-  size limits preserved.
-- **Current mint callbacks:** `48599f11` adds one actual-Core signed free-claim
-  receiver/reentry and Safe retry regression. It is source-integrated; runtime
-  is pending. The older archive correspondence kernel retains its six passes,
-  including 256 fuzz inputs; four actual archive cases remain unexecuted.
-- **Clients and Museum:** root verifies 55 scoped-reference/VIEW caller cases,
-  generation, strict types and the exact ABI fixture on `158cd291`. The
-  repaired V9 Museum cohort passes 124 cases plus both schemas and 15 streaming
-  package cases at `a59ffd8f`; the first four fixture errors are retained as
-  superseded evidence. Original VIEW capture passes 72 cases on `158cd291`.
-  The next preservation capture batch is under fresh independent review.
-  Offline/synthetic evidence does not establish chain or complete Safe acceptance.
-- **Testing throughput:** exact compiler import-snapshot verification is
-  integrated as `8a7ee8cd`; root passes all 120 focused tooling regressions.
-  Completed native output can be verified without repeating its compiler run.
-  Original failed captures remain intact; no broad AST or bytecode waiver was
-  introduced.
-- **Gas:** compact metric retention is source-integrated as `401ede45`; its
-  reviewed 48-case native batch is next. Original publication native21 remains
-  eight passes and one gas failure; native22 awaits component parity and sizes.
-  Collector gas remains an architectural gap: the isolated paid frame measures
-  2,920,259 gross gas, and concrete compressed drafts still exceed the unchanged
-  500,000 target. A shared-record design is being costed before compilation.
+- **Preservation and succession:** the explicit V2 family is integrated as
+  `1fe169a9`, with exact stored-root reads (`1f1f05c3`) and the reviewed test
+  batch (`0860e2f8`). It carries the actual original or current-Artist producer
+  profile through checkpoints, outputs, snapshots, references, inventories and
+  factories. Original V1 meanings remain unchanged. The preceding standard
+  suite passes 24 cases plus 256 fuzz inputs at `ae540f10`; the preceding
+  current-authority root suite passes all 16 cases at `b8fdb7fd`. Both packets
+  are independently sealed. Those results do not execute the later V2 source;
+  its 29 reader cases and genuine succession ceremonies are separate work.
+- **VIEW preservation:** the frozen output suite passes 46 cases plus 256 fuzz
+  inputs at `7701ad89`; the shared route-budget kernel passes 20 plus 256 at
+  `ea2c431f`. Reviewed reference source is integrated as `842eb31e`. The actual
+  declaration, adoption, checkpoint, snapshot and root ceremony has 11 further
+  authored cases integrated as `40c714a9`. Complete inventory, archive and
+  once-bound finality composition remain in build. Two new inventory workers
+  need size repairs. Diagnostic nested read allowances exceed the original
+  transaction envelope; their configuration is not gas acceptance. Unsupported
+  external media correspondence remains an explicit completeness gap.
+- **Current Artist rendering:** the distinct preservation renderer, attribution
+  and immutable source catalogue are integrated as `c9fa7669`. The native
+  component run at producer commit `432a61de` passes 21 cases and fails one
+  chain-restoration fixture. All three fully cooled succession reads pass the
+  original 250,000 callee allowance. The exact failed case then passes with
+  test-only fix `5302ca42` (integrated `5b4d68f2`), preserving the 21/1 capture.
+  The analogous new attribution case remains unexecuted. Full rendering and
+  transaction gas are separate. Artist
+  dispute-history transport and the required remaining history combinations
+  continue in build; fixed import workers now avoid the original codegen failure.
+- **Clients:** `e3bfd9b0` adds 17 inventory and five archive CALL workflows with
+  direct and Safe receipt reconciliation. The exact producer commit
+  `51621c36` passes all 2,068 package tests, generation and strict types.
+  These clients explicitly target their historical ABI129 contracts; later
+  V2/current-authority/VIEW profiles and actual Safe execution require their
+  own integration. Root generation, build and strict test types pass; its
+  separate five-file focused rerun timed out at 300 seconds without a case
+  result. That timeout is retained, rather than treated as another pass.
+- **Museum:** preservation capture is integrated at `b99c8c75` and passes all
+  83 root cases after the independently found zero-selector mismatch was fixed.
+  The native byte-oracle bridge (`5d412cb3`) passes 27 root cases and reads two
+  actual cached checkpoint/manifest traces. These are separate components,
+  not a complete chain capture. VIEW reference consumers are being built.
+- **Metric gas:** the frozen 48-case component run at `53cfb5c1` remains 47
+  passes and one test-setup failure. The exact test-only fix `9d02a97b`,
+  integrated as `76815df3`, passes all 13 corrected Compact cases, including
+  256 fuzz inputs, in a separate sealed run. Together with the unchanged
+  parent Retention/Execution cases this covers all 48 component cases across
+  two sources; it is not a retroactive single-run pass. The actual nine-case
+  publication successor is next, preserving original gas and cooling checks.
+- **Collector gas:** the experimental shared receipt component passes 20 cases
+  including 256 fuzz inputs. Its first measured codec and duplicate reads are
+  too costly; no production overlay or 500,000-gas acceptance is claimed.
+  The builder is optimizing the measured representation in isolation.
 
 Complete current-stack/all-call Safe integration, stateful campaigns, full gas
 and size acceptance, full CI, candidate freeze and matching testnet deployment
-remain. Held proposals are still unapplied. RC1 at
+remain. Source-specific tests above cannot establish those results. Held
+proposals remain unapplied. RC1 at
 `569bf87f1fa808787d324f6e1582924b5ccf1d40` is unchanged; no new funding or onchain
-action is required for the current coding batches.
+action is required for current coding.
 
 ## Earlier source-specific evidence
 
