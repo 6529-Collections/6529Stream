@@ -25,7 +25,7 @@ contract StreamInventoryAbiCorrespondenceTest {
     }
 
     function _rows() private pure returns (T.Item[] memory rows) {
-        rows = new T.Item[](14);
+        rows = new T.Item[](18);
         rows[0] =
             _row("REFERENCE_MANIFEST", "STREAM_REFERENCE_MODE_ABI_V1", "STREAM_SOLIDITY_ABI_V1");
         rows[1] = _row(
@@ -95,6 +95,28 @@ contract StreamInventoryAbiCorrespondenceTest {
             "STREAM_SOLIDITY_ABI_V1"
         );
         rows[13].kind = T.Kind.NATIVE_BYTES;
+        // These four fixed-family tuples are emitted by the collection/scoped
+        // preservation producers after their separate V2 publication checks.
+        rows[14] = _row(
+            "POLICY_SNAPSHOT_MANIFEST_V2",
+            "STREAM_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_ABI_V2",
+            "STREAM_ABI_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_V2"
+        );
+        rows[15] = _row(
+            "REFERENCE_MANIFEST",
+            "STREAM_PRESERVATION_POLICY_COLLECTION_REFERENCE_ABI_V2",
+            "STREAM_ABI_PRESERVATION_POLICY_COLLECTION_REFERENCE_V2"
+        );
+        rows[16] = _row(
+            "SCOPED_POLICY_SNAPSHOT_MANIFEST_V2",
+            "STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_ABI_V2",
+            "STREAM_ABI_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2"
+        );
+        rows[17] = _row(
+            "SCOPED_PRESERVATION_POLICY_REFERENCE_MANIFEST",
+            "STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_ABI_V2",
+            "STREAM_ABI_SCOPED_PRESERVATION_POLICY_REFERENCE_V2"
+        );
     }
 
     function testEverySourceQualifiedNativeAbiTupleIsSupported() public pure {

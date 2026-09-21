@@ -50,25 +50,34 @@ library StreamInventoryAbiCorrespondence {
             return (schema == keccak256("STREAM_POLICY_COLLECTION_SNAPSHOT_ABI_V2")
                     && canon == keccak256("STREAM_ABI_POLICY_COLLECTION_SNAPSHOT_V2"))
                 || (schema == keccak256("STREAM_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_ABI_V1")
-                    && canon == keccak256("STREAM_ABI_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_V1"));
+                    && canon == keccak256("STREAM_ABI_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_V1"))
+                || (schema == keccak256("STREAM_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_ABI_V2")
+                    && canon == keccak256("STREAM_ABI_PRESERVATION_POLICY_COLLECTION_SNAPSHOT_V2"));
         }
         if (role == keccak256("REFERENCE_MANIFEST")) {
             return (schema == keccak256("STREAM_POLICY_COLLECTION_REFERENCE_ABI_V2")
                     && canon == keccak256("STREAM_ABI_POLICY_COLLECTION_REFERENCE_V2"))
                 || (schema == keccak256("STREAM_PRESERVATION_POLICY_COLLECTION_REFERENCE_ABI_V1")
-                    && canon == keccak256("STREAM_ABI_PRESERVATION_POLICY_COLLECTION_REFERENCE_V1"));
+                    && canon == keccak256("STREAM_ABI_PRESERVATION_POLICY_COLLECTION_REFERENCE_V1"))
+                || (schema == keccak256("STREAM_PRESERVATION_POLICY_COLLECTION_REFERENCE_ABI_V2")
+                    && canon == keccak256("STREAM_ABI_PRESERVATION_POLICY_COLLECTION_REFERENCE_V2"));
         }
         if (role == keccak256("SCOPED_POLICY_SNAPSHOT_MANIFEST_V2")) {
             return (schema == keccak256("STREAM_SCOPED_POLICY_SNAPSHOT_ABI_V2")
                     && canon == keccak256("STREAM_ABI_SCOPED_POLICY_SNAPSHOT_V2"))
                 || (schema == keccak256("STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_ABI_V1")
-                    && canon == keccak256("STREAM_ABI_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1"));
+                    && canon == keccak256("STREAM_ABI_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V1"))
+                || (schema == keccak256("STREAM_SCOPED_PRESERVATION_POLICY_SNAPSHOT_ABI_V2")
+                    && canon == keccak256("STREAM_ABI_SCOPED_PRESERVATION_POLICY_SNAPSHOT_V2"));
         }
         return (role == keccak256("SCOPED_POLICY_REFERENCE_MANIFEST")
                 && schema == keccak256("STREAM_SCOPED_POLICY_REFERENCE_ABI_V2")
                 && canon == keccak256("STREAM_ABI_SCOPED_POLICY_REFERENCE_V2"))
             || (role == keccak256("SCOPED_PRESERVATION_POLICY_REFERENCE_MANIFEST")
                 && schema == keccak256("STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_ABI_V1")
-                && canon == keccak256("STREAM_ABI_SCOPED_PRESERVATION_POLICY_REFERENCE_V1"));
+                && canon == keccak256("STREAM_ABI_SCOPED_PRESERVATION_POLICY_REFERENCE_V1"))
+            || (role == keccak256("SCOPED_PRESERVATION_POLICY_REFERENCE_MANIFEST")
+                && schema == keccak256("STREAM_SCOPED_PRESERVATION_POLICY_REFERENCE_ABI_V2")
+                && canon == keccak256("STREAM_ABI_SCOPED_PRESERVATION_POLICY_REFERENCE_V2"));
     }
 }

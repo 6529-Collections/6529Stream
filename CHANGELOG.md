@@ -1,5 +1,14 @@
 # Changelog
 
+## Current preservation-family archive correspondence
+
+- Recognize the four exact collection/scoped V2 preservation snapshot and
+  reference ABI tuples already emitted by the authenticated inventory producers.
+  Archive byte correspondence no longer rejects those current native payloads.
+- Keep original profile tuples and all role, schema, canonicalization, kind,
+  algorithm and size restrictions; extend cross-profile and fuzz regressions.
+  Publication authority and full Archive coverage checks remain separate.
+
 ## Original historical metadata serialization
 
 - Restore the original ordinary and script-bundle serializers for historical
