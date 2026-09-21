@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Retained VIEW attributed retrieval evidence](../../docs/museum-view-attributed-retrieval-v1.md)
+joins the new inventory, immutable witness, original/current Archive evidence,
+ordered routes and complete received media. Source observations and route
+interpretations retain their explicit attribution and captured-block limits.
+
 [Conservation documentary evidence and semantic mappings](../../docs/museum-conservation-dossier-v2.md)
 join every original reference occurrence to retained materials and original
 Archive evidence, with typed resources, exact source provenance and offline
