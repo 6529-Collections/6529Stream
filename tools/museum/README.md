@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Retained VIEW reference evidence](../../docs/museum-view-preservation-reference-v1.md)
+checks exact original reference records, full preservation source proofs and
+environment file-inventory parts. Browser execution, historical authority and
+complete finality remain separate.
+
 [Original VIEW preservation evidence](../../docs/museum-view-preservation-v1.md)
 adds a distinct capture of the full-output content tree, root-free snapshot and
 typed Router CONTENT_ROOT. It recovers the original checkpoint source from the

@@ -929,6 +929,10 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add a bounded original VIEW reference consumer with exact native definitions,
+  source proofs, first/last output samples and environment inventory parts.
+  Supplied evidence checks do not establish browser execution or full finality.
+
 - Add an offline native trace oracle for original VIEW preservation output and
   manifest bytes, with separate source pins and explicit typed test boundaries.
   It checks extracted native vectors without implying complete capture or finality.
