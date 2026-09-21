@@ -156,6 +156,72 @@ evidence profile. It never proves a legal operative valuation or professional
 countersignature. A later book-value statement does not silently supersede an
 insurance statement merely because its timestamp is later.
 
+## Opt-in single-process RPC composition
+
+`tools.museum.current_owner_rpc_capture` combines the original token governance,
+native Artist graph and paid-mint helpers with `CurrentMuseumFixture`. It owns
+one new loopback Anvil through the existing process runner. The ordinary
+`CurrentTokenFixture` and its defaults remain unchanged. This is an authored
+composition; positive native/RPC execution remains pending.
+
+```text
+python -m tools.museum.current_owner_rpc_capture --native-manifest NATIVE_MANIFEST.json --native-manifest-sha256 SHA256 --output NEW_OUTPUT --disclosure public --anvil ANVIL_EXECUTABLE
+```
+
+The manifest must use the existing `current_museum_native_products_v1` format,
+pin every artifact by SHA-256 and include the original official Safe inputs.
+`OWNER_PRODUCT_ROOTS` in the new module is the explicit root inventory: the
+existing token roots plus OwnerRecords, CollectionAttestations, IndependentReads,
+ConservationFloor and the DIRECT receipt interface. Supply their complete native
+creation/runtime link closure, ABI, method identifiers, metadata and AST from
+each producing compilation. The token graph also requires the existing
+authenticated `graphImmutableProjection`, including declaration parents. This
+command neither compiles nor discovers replacement artifacts. Deployment checks
+retain the 24,576-byte runtime and 49,152-byte full-initcode bounds.
+
+Before signing the paid mint, the bridge admits the original native sale under
+the exact DIRECT module type/version/interface, binds an actual ConservationFloor
+through the delayed Executor, and grants only collection-1 authorization class 7
+for the CONSERVATION family to the governor Safe. That Safe explicitly declares
+WAIVED. Floor read/producer/call configuration is 300,000/1,000,000/2,000,000 with
+failure class 2; these are local fixture values, not gas-conformance evidence.
+The bridge checks the original complete DIRECT and first-sale floor receipts.
+This WAIVED path does not establish the MUSEUM/LITE documentary floor.
+
+The original paid-mint evidence retains its EOA buyer. A separate actual
+`transferFrom` transaction moves that token to a distinct official two-owner
+Safe; the sender, receipt, Transfer event and current owner are checked before
+constructing OwnerRecords. Its original manifest CID and constructor/runtime
+bindings are checked. Five owner publications then run through the existing
+direct and relayed Safe recipe after media publication, before the final block
+is selected. Controlled local entropy remains explicit.
+
+The combined schema registry reuses a definition only when its status is ACTIVE
+and its declaration hash, complete specification, ordered chunk hashes, every
+chunk and reconstructed bytes match exactly. A retired or conflicting definition
+fails; an absent definition uses the original delayed registration and full
+readback. Repeated chunks retain their order.
+
+`owner-anchor.json` copies the account capture's final Core/block identity and
+adds all five selected records. `owner-plan.json` and `owner-input-pins.json`
+pin the loan/valuation transaction selection and input hashes. The same Anvil remains alive for
+the RPC history capture and offline dossier export into `owner-dossier`.
+Original account source files remain byte-identical; canonical ancestor history
+retains its 256-block bound. A failed run leaves its evidence/journal for diagnosis
+and does not restart a partially completed ceremony.
+
+The 24 focused pure/transport-double tests cover composition order, original
+receipt encoding, exact schema reuse, genuine-transaction requirements, explicit
+waiver setup, refusal cases, integer preservation and process ownership:
+
+```text
+python -m unittest tools.museum.test_current_owner_rpc_capture tools.museum.test_current_owner_rpc_commerce -v
+```
+
+They do not execute a compiler, Anvil, paid mint or actual RPC capture. The
+integration/testing owner must authenticate native inputs, run the joined
+composition and replay both outputs before claiming positive capture acceptance.
+
 ## Validation boundary
 
 The three Solidity cases are ABI/type-checked and authored for the next native

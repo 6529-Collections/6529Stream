@@ -32,6 +32,16 @@
   Artist or unbound composition remain separate. See the
   [integration guide](docs/integrations/artist-recovered-history-records.md).
 
+## Current owner single-process RPC bridge
+
+- Add an opt-in local composition of the original paid-mint graph, explicit
+  WAIVED conservation floor, actual EOA-to-Safe transfer and OwnerRecords
+  publications before one shared account/owner anchor.
+- Reuse only exact ACTIVE schema definitions and retain original receipt hashes,
+  ordered history and account package bytes. Focused Python tests pass; joined
+  native/RPC execution remains pending. See the
+  [capture recipe](docs/museum-current-owner-capture.md#opt-in-single-process-rpc-composition).
+
 ## Recovered Platform Works and correction lineage
 
 - Add the explicit HISTORY_PLATFORM operation-60 profile for complete original
