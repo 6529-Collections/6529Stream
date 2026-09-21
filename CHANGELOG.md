@@ -1237,6 +1237,10 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add read-only genesis Registry coverage for the fixed 29-schema and 22-support
+  plan, with original definition/chunk reconstruction and explicit missing,
+  conflicting and retired results. Preserve registration and conformance limits.
+
 - Add preserved Museum source/runtime archives and explicit offline V10/V3
   regeneration, with original native release-hash correspondence and complete
   dossier requirement retention. Keep release and institutional limits explicit.

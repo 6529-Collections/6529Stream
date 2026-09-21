@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Genesis Registry coverage](GENESIS-REGISTRY-COVERAGE-V1.md) compares the fixed
+29-schema and 22-support plan with the current selected Registry, retaining
+every missing, conflicting and retired definition through offline replay.
+
 [Preserved tool archives and offline replay](PRESERVED-TOOLS-V1.md) retain pinned
 source, runtime and complete vectors, then regenerate V10/V3 outputs without an
 operator service. Native release selection and original Archive evidence remain
