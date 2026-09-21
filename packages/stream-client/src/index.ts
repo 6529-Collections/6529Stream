@@ -119,3 +119,5 @@ export * from "./current-view-complete-binding.js";
 export * from "./current-view-complete-binding-workflow.js";
 export * from "./current-token-preservation-output-v2.js";
 export * from "./current-token-preservation-output-v2-workflow.js";
+export * from "./current-token-preservation-snapshot-v2.js";
+export * from "./current-token-preservation-snapshot-v2-workflow.js";

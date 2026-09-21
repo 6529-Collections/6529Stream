@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Token preservation V2 snapshots](docs/current-token-preservation-snapshot-v2.md)
+  covers collection/scoped publication, original family-writer authority,
+  canonical retained bytes and separate history/current admission.
+
 - [Token preservation V2 output](docs/current-token-preservation-output-v2.md)
   covers original/current-Artist producer admission, token-family checkpoints
   and exact covered output manifests for COLLECTION, TOKEN, RELEASE and SEASON.

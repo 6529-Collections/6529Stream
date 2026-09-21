@@ -130,6 +130,12 @@ same ABI146 source. Each selected Registry admission retains its actual
 original or current-Artist producer profile. Large append calldata has a local
 bounded transport path; the original historical transport limits remain fixed.
 
+The [token preservation V2 snapshot client](current-token-preservation-snapshot-v2.md)
+adds collection and scoped `publishSnapshot` calls with the actual caller's
+SNAPSHOT and IDENTITY family-writer grants. Preview, retained canonical bytes,
+direct/Safe receipt evidence and operative currentness remain distinct stages.
+Currentness reuses recorded grants; a new publication checks fresh grants.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

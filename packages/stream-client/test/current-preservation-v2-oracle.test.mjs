@@ -40,8 +40,8 @@ test("shared preservation witness is exact ABI146 with no native execution claim
 });
 
 test("every ordinary ABI is complete and matches its compiler method identifiers", () => {
-  assert.equal(Object.keys(fixture.abis).length, 148);
-  assert.equal(Object.values(fixture.abis).reduce((n, a) => n + a.length, 0), 5416);
+  assert.equal(Object.keys(fixture.abis).length, 151);
+  assert.equal(Object.values(fixture.abis).reduce((n, a) => n + a.length, 0), 5433);
   let count = 0;
   for (const [name, iface] of Object.entries(compiledInterfaces)) {
     assert.deepEqual(fixture.selections[name], {
@@ -54,7 +54,7 @@ test("every ordinary ABI is complete and matches its compiler method identifiers
       count++;
     }
   }
-  assert.equal(count, 3635);
+  assert.equal(count, 3650);
 });
 
 test("raw family and linked worker ABIs retain nominal selectors outside wallet interfaces", () => {
