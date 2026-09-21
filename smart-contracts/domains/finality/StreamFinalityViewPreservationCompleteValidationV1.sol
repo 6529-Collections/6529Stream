@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamFinalityViewInventoryAnchorV1 as Anchor
+} from "./StreamFinalityViewInventoryAnchorV1.sol";
+import {
     StreamFinalityNativeProviderReads as Native
 } from "./StreamFinalityNativeProviderReads.sol";
 import {
@@ -61,8 +64,7 @@ library StreamFinalityViewPreservationCompleteValidationV1 {
         Inventory.Dependencies memory d = abi.decode(raw, (Inventory.Dependencies));
         if (
             original.chainId != block.chainid || d.chainId != original.chainId
-                || keccak256(raw) != keccak256(abi.encode(d))
-                || keccak256(raw) != original.inventoryDependencyHash
+                || keccak256(raw) != keccak256(abi.encode(d)) || !Anchor.matches(original, d)
                 || d.artistTargets[0] != original.targets[11]
                 || d.artistCodeHashes[0] != original.codeHashes[11]
         ) revert Complete.InvalidViewPreservationCompleteBinding();

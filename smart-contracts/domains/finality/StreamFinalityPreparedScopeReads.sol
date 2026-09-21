@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamFinalityBoundedReads.sol";
+import {
+    StreamFinalityViewSanctionReviewCodecV1 as ViewReview
+} from "./StreamFinalityViewSanctionReviewCodecV1.sol";
 import "./StreamFinalitySanctionReviewReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityPreparedSanctionReview.sol";
 import "../../interfaces/stream/finality/IStreamFinalityPreparedScopeEvidence.sol";
@@ -51,12 +54,13 @@ library StreamFinalityPreparedScopeReads {
                     IStreamFinalityPreparedSanctionReview.requirePreparedFinalityScopeInputsAndReview,
                     (scope, manifestHash, validatedComponents)
                 ),
-                1152,
+                scope.scopeType == StreamFinalityScopeType.VIEW ? ViewReview.PREPARED_INPUTS : 1152,
                 cap
             );
             review = StreamFinalitySanctionReviewReads.review(raw, 416);
             (StreamFinalityScopeInputs memory facts, bytes32 schema, bytes32 canon) =
                 abi.decode(raw, (StreamFinalityScopeInputs, bytes32, bytes32));
+            if (review.profile == 3) ViewReview.requireScope(scope, schema, canon);
             inputs = abi.encode(facts, schema, canon);
         } else {
             inputs = read(provider, scope, manifestHash, validatedComponents, cap);
@@ -65,10 +69,15 @@ library StreamFinalityPreparedScopeReads {
                 abi.encodeCall(
                     IStreamFinalitySanctionReview.requireSanctionReviewFacts, (scope, manifestHash)
                 ),
-                768,
+                scope.scopeType == StreamFinalityScopeType.VIEW ? ViewReview.STANDALONE : 768,
                 cap
             );
             review = StreamFinalitySanctionReviewReads.review(raw, 32);
+            if (review.profile == 3) {
+                (, bytes32 schema, bytes32 canon) =
+                    abi.decode(inputs, (StreamFinalityScopeInputs, bytes32, bytes32));
+                ViewReview.requireScope(scope, schema, canon);
+            }
         }
     }
 }

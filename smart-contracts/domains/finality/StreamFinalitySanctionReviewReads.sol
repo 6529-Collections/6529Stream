@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamFinalityBoundedReads.sol";
+import {
+    StreamFinalityViewSanctionReviewCodecV1 as ViewReview
+} from "./StreamFinalityViewSanctionReviewCodecV1.sol";
 import "../../interfaces/stream/finality/IStreamFinalitySanctionReview.sol";
 
 /// @notice Bounded canonical native review envelopes; no dynamic decoder sees unchecked lengths.
@@ -25,6 +28,12 @@ library StreamFinalitySanctionReviewReads {
             size := returndatasize()
         }
         if (!ok || size > maximum || size < 32) revert SanctionReviewReadFailed(target);
+        // New VIEW calls reserve both original sixteen-entry arrays. Other profiles retain
+        // their exact former transport maximum, including unknown-profile failure ordering.
+        uint256 base = maximum == 1280 ? 32 : maximum == 1408 ? 160 : maximum == 1664 ? 416 : 0;
+        if (base != 0 && (size < base + 64 || _word(raw, base + 32) != 3) && size > base + 736) {
+            revert SanctionReviewReadFailed(target);
+        }
         assembly ("memory-safe") { mstore(raw, size) }
     }
 
@@ -35,6 +44,12 @@ library StreamFinalitySanctionReviewReads {
         pure
         returns (IStreamFinalitySanctionReview.ReviewFacts memory result)
     {
+        if (
+            (base == 32 || base == 160 || base == 416) && raw.length >= base + 256
+                && _word(raw, base + 32) == 3
+        ) {
+            return ViewReview.review(raw, base);
+        }
         if (
             (base != 32 && base != 160 && base != 416) || raw.length < base + 256
                 || _word(raw, base - 32) != base

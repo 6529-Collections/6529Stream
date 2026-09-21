@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistSanctionHashes.sol";
+import {
+    StreamFinalityViewSanctionReviewCodecV1 as ViewReview
+} from "../finality/StreamFinalityViewSanctionReviewCodecV1.sol";
 import "./StreamArtistSanctionCeremony.sol";
 import "../finality/StreamFinalitySanctionReviewReads.sol";
 import "../../interfaces/stream/finality/IStreamArtistSanctionReviewPreparation.sol";
@@ -62,7 +65,7 @@ library StreamArtistSanctionCandidate {
                     IStreamArtistSanctionReviewPreparation.prepareSanctionWithReview,
                     (scope, q.nonSanctionComponents, q.manifest)
                 ),
-                896,
+                scope.scopeType == StreamFinalityScopeType.VIEW ? ViewReview.PREPARATION : 896,
                 pins.readGas
             );
             IStreamFinalitySanctionReview.ReviewFacts memory review =
@@ -109,25 +112,32 @@ library StreamArtistSanctionCandidate {
                     IStreamFinalitySanctionReview.requireSanctionReviewFacts,
                     (scope, q.manifest.contentHash)
                 ),
-                pins.readGas
+                pins.readGas,
+                scope.scopeType == StreamFinalityScopeType.VIEW
             );
         }
-        uint256 referenceCount = _word(raw, 224);
-        uint256 profile = _word(raw, 64);
-        // Two explicitly admitted native ONCHAIN profiles. Both retain every ordered original
-        // reference artifact occurrence, including repeated bytes, and have no media objects.
-        if (
-            _word(raw, 0) != 32 || _word(raw, 32) != 1 || _word(raw, 96) == 0
-                || _word(raw, 128) != 160 || _word(raw, 160) != 192 || _word(raw, 192) != 0
-                || referenceCount == 0 || referenceCount > 16
-                || raw.length != 256 + referenceCount * 32
-                || !((profile == 1 && referenceCount == 1) || (profile == 2 && referenceCount >= 2))
-        ) revert S.InvalidSanctionCeremony();
-        for (uint256 i; i < referenceCount; ++i) {
-            if (_word(raw, 256 + i * 32) == 0) revert S.InvalidSanctionCeremony();
+        IStreamFinalitySanctionReview.ReviewFacts memory reviewed;
+        if (raw.length >= 288 && _word(raw, 64) == 3) {
+            ViewReview.requireScope(scope, q.manifest.schemaId, q.manifest.canonicalizationHash);
+            reviewed = ViewReview.review(raw, 32);
+        } else {
+            uint256 referenceCount = _word(raw, 224);
+            uint256 profile = _word(raw, 64);
+            // Two explicitly admitted native ONCHAIN profiles. Both retain every ordered original
+            // reference artifact occurrence, including repeated bytes, and have no media objects.
+            if (
+                _word(raw, 0) != 32 || _word(raw, 32) != 1 || _word(raw, 96) == 0
+                    || _word(raw, 128) != 160 || _word(raw, 160) != 192 || _word(raw, 192) != 0
+                    || referenceCount == 0 || referenceCount > 16
+                    || raw.length != 256 + referenceCount * 32
+                    || !((profile == 1 && referenceCount == 1)
+                        || (profile == 2 && referenceCount >= 2))
+            ) revert S.InvalidSanctionCeremony();
+            for (uint256 i; i < referenceCount; ++i) {
+                if (_word(raw, 256 + i * 32) == 0) revert S.InvalidSanctionCeremony();
+            }
+            reviewed = abi.decode(raw, (IStreamFinalitySanctionReview.ReviewFacts));
         }
-        IStreamFinalitySanctionReview.ReviewFacts memory reviewed =
-            abi.decode(raw, (IStreamFinalitySanctionReview.ReviewFacts));
         S.Ceremony memory c = S.Ceremony(
             reviewed.contentRoot,
             reviewed.mediaContentHashes,
@@ -157,13 +167,14 @@ library StreamArtistSanctionCandidate {
     }
 
     // Match the shared finality reader: cap is an upper bound, measured after allocation.
-    function _readReview(address target, bytes memory data, uint256 cap)
+    function _readReview(address target, bytes memory data, uint256 cap, bool viewScope)
         private
         view
         returns (bytes memory raw)
     {
         if (cap == 0 || cap > type(uint256).max / 64) revert T.InvalidBinding();
-        raw = new bytes(768);
+        uint256 maximum = viewScope ? ViewReview.STANDALONE : 768;
+        raw = new bytes(maximum);
         uint256 available = gasleft();
         if (available <= 100000) revert SanctionParentGas(available, 100000);
         uint256 forwarded = available - 100000;
@@ -171,10 +182,13 @@ library StreamArtistSanctionCandidate {
         bool ok;
         uint256 returned;
         assembly ("memory-safe") {
-            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(raw, 32), 768)
+            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(raw, 32), maximum)
             returned := returndatasize()
         }
-        if (!ok || returned < 288 || returned > 768) revert SanctionReadFailed(target);
+        if (!ok || returned < 288 || returned > maximum || (_word(raw, 64) != 3 && returned > 768))
+        {
+            revert SanctionReadFailed(target);
+        }
         assembly ("memory-safe") { mstore(raw, returned) }
     }
 

@@ -7,6 +7,8 @@ import "./StreamArtworkFinalityTypes.sol";
 interface IStreamFinalitySanctionReview {
     /// @dev Version1 profile1 retains exactly one ONCHAIN reference capture; profile2 retains
     ///      the complete ordered two-to-sixteen capture list. Both have no mediaContentHashes.
+    ///      Profile3 is the explicitly admitted VIEW preservation media profile: one-to-sixteen
+    ///      media and one-to-sixteen reference occurrences, with the exact VIEW input schema.
     ///      Unknown profiles remain unsupported; future profiles require explicit admission.
     ///      Lists are ordered artifact content hashes, never metadata record hashes or component
     ///      commitments. Each list has at most16 entries; repeated bytes at separate positions
@@ -23,7 +25,8 @@ interface IStreamFinalitySanctionReview {
     /// @dev Unknown/unsupported profiles, stale evidence, missing actual reference payloads and wrong
     ///      scope membership revert. Callers do not supply the covered hash lists. The canonical
     ///      native return encoding is256+32*n bytes: profile1 is288, profile2 is320..768.
-    ///      The generic two-array vocabulary can encode1280 bytes; that does not admit other profiles.
+    ///      Profile3 is256+32*(mediaCount+referenceCount) bytes, bounded by1280. Its consumers
+    ///      require canonical VIEW scope and the exact VIEW preservation input schema/canonicalization.
     function requireSanctionReviewFacts(
         StreamFinalityScope calldata scope,
         bytes32 manifestContentHash
