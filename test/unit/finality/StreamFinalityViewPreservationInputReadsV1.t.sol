@@ -265,6 +265,15 @@ contract StreamFinalityViewPreservationInputReadsV1Test is
         require(!ok, "must reject");
     }
 
+    function _shapeFails(StreamFinalityViewPreservationInputTypesV1.Statement memory s) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamFinalityViewPreservationInputReadsV1.InvalidInputManifest.selector
+            )
+        );
+        consumer.encoded(s);
+    }
+
     function _word(bytes memory raw, uint256 index) private pure returns (bytes32 result) {
         require((index + 1) * 32 <= raw.length, "word bounds");
         assembly ("memory-safe") { result := mload(add(add(raw, 32), mul(index, 32))) }
@@ -373,44 +382,44 @@ contract StreamFinalityViewPreservationInputReadsV1Test is
     function testMissingDuplicateUnsortedOrSanctionComponentRejects() public {
         StreamFinalityViewPreservationInputTypesV1.Statement memory s = statement;
         s.nonSanctionComponents[0].componentType = keccak256("ARTIST_SANCTION");
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.nonSanctionComponents[1] = s.nonSanctionComponents[0];
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         (s.nonSanctionComponents[0], s.nonSanctionComponents[1]) =
         (s.nonSanctionComponents[1], s.nonSanctionComponents[0]);
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.nonSanctionComponents = new StreamFinalityComponentExpectation[](8);
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
     }
 
     function testIncompleteInputsWaiverAndUnsupportedPoliciesReject() public {
         StreamFinalityViewPreservationInputTypesV1.Statement memory s = statement;
         s.inputs.bundleCoverageHash = 0;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.inputs.renderCriticalEvidenceHash = 0;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.inputs.intentWaiverRecordHash = bytes32(uint256(9));
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.inputs.intentRecordHash = 0;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.inputs.interviewEvidenceHash = 0;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.entropy.sourceSetProfile = bytes32(uint256(2));
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.postFreezePolicy = 2;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
         s = statement;
         s.sanctionPolicy = 2;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
     }
 
     function testExplicitIntentWaiverAdmitsWithoutInventingAnInterviewRecord() public {
@@ -571,10 +580,10 @@ contract StreamFinalityViewPreservationInputReadsV1Test is
         consumer.checked(s, hash);
         s.scope.scopeType = StreamFinalityScopeType.TOKEN;
         s.scope.tokenId = 1;
-        _checkFails(s, hash);
+        _shapeFails(s);
         s = statement;
         s.scope.tokenId = 1;
-        _checkFails(s, manifestHash);
+        _shapeFails(s);
     }
 
     function testInsufficientParentGasRejectsThenExactRetrySucceeds() public {
@@ -598,7 +607,8 @@ contract StreamFinalityViewPreservationInputReadsV1Test is
             else if (i == 6) s.scope.scopeId = keccak256("different same-view scope");
             else if (i == 7) s.adoptionProfile = keccak256("unversioned or old adopted profile");
             else s.outputProfile = keccak256("public live output is not preservation bytes");
-            _checkFails(s, manifestHash);
+            if (i >= 7) _shapeFails(s);
+            else _checkFails(s, manifestHash);
             consumer.checked(statement, manifestHash);
         }
     }
