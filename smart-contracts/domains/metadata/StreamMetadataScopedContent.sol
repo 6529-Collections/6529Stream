@@ -30,6 +30,12 @@ import {
 import {
     StreamPreservationPolicyOutputSchemasV1 as PreservationOutput
 } from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
+import {
+    StreamScopedPreservationPolicyContentRootSchemasV2 as PreservationSchemasV2
+} from "../finality/StreamScopedPreservationPolicyContentRootSchemasV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as PreservationFamilies
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 import {
     StreamMetadataViewPreservationContentV1 as ViewPreservation
@@ -103,7 +109,8 @@ library StreamMetadataScopedContent {
             bytes32 hash = state.heads[State.subject(core, scope)];
             R.Record memory record = state.records[hash];
             bytes32 profile = _policyProfile(state, hash, scope);
-            bytes32 schema = profile == PreservationSchemas.PROFILE
+            bytes32 schema = (profile == PreservationSchemas.PROFILE
+                    || profile == PreservationSchemasV2.PROFILE)
                 ? PreservationOutput.LEAF_SCHEMA
                 : profile == PolicyRootSchemas.PROFILE
                     ? PolicyOutputSchemas.LEAF_SCHEMA
@@ -124,7 +131,10 @@ library StreamMetadataScopedContent {
         bytes32 preservation = PreservationState.state().bindings[hash].profileId;
         if (preservation != 0) {
             if (
-                preservation != PreservationSchemas.PROFILE || profile != 0
+                (preservation != PreservationSchemas.PROFILE
+                        && (preservation != PreservationSchemasV2.PROFILE
+                            || PreservationState.state().bindings[hash].preservationOutputProfile
+                                != PreservationFamilies.V2)) || profile != 0
                     || keccak256(abi.encode(state.records[hash].publication.scope))
                         != keccak256(abi.encode(scope))
             ) revert R.InvalidScopedContentRoot();

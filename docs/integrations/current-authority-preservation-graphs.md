@@ -76,6 +76,10 @@ Plan and output-row widths remain 448 and 1,152 bytes. The output manifest remai
 definition. Original content consent, one-use books, root histories and scoped
 aggregates remain shared. Stored-root readers recognize an exact V2 root-profile
 and family pair and preserve the original V1 branch.
+The COLLECTION factory reader also checks both fixed children: canonical
+checkpoint/output capabilities, exact V2 profiles, Core and Router identity,
+and the output-to-checkpoint link. A consistent V1 pair cannot replace them.
+The standard factory keeps its original dispatch.
 
 The finality input envelope is producer-neutral and retains its original schema
 and Registry input domain. Its existing snapshot and reference profile-hash

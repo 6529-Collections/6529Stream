@@ -37,6 +37,12 @@ import {
 import {
     StreamPreservationPolicyOutputSchemasV1 as PreservationOutput
 } from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
+import {
+    StreamPreservationPolicyContentRootSchemasV2 as PreservationSchemasV2
+} from "../finality/StreamPreservationPolicyContentRootSchemasV2.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as PreservationFamilies
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 /// @notice Authoritative root state in Router storage, using its fixed library and artist consent.
 library StreamMetadataContentRoot {
@@ -212,7 +218,10 @@ library StreamMetadataContentRoot {
         bytes32 preservation = PreservationState.state().bindings[head].profileId;
         if (preservation != 0) {
             if (
-                preservation != PreservationSchemas.PROFILE
+                (preservation != PreservationSchemas.PROFILE
+                        && (preservation != PreservationSchemasV2.PROFILE
+                            || PreservationState.state().bindings[head].preservationOutputProfile
+                                != PreservationFamilies.V2))
                     || PolicyRootState.state().bindings[head].profileId != 0
             ) revert R.InvalidContentRootPublication();
             return (

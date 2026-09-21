@@ -1,4 +1,13 @@
 # Changelog
+## V2 preservation stored-root reads
+
+- Recognize exact V2 collection and scoped root/family pairs through the
+  ordinary read interfaces. Authenticate the fixed current-authority V2
+  checkpoint/output children and reject mixed or downgraded pairs. Original
+  V1 dispatch and the common six-field token leaf remain unchanged.
+- Add eight stored-state read cases and five further factory-pair cases;
+  these are source and ABI checks pending native execution.
+
 ## Current-authority COLLECTION publication reader
 
 - Join the distinct authority-bound preservation factory to the ordinary

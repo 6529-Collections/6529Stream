@@ -33,6 +33,15 @@ import {
     StreamFinalityRouterEvidence as Reads
 } from "../finality/StreamFinalityRouterEvidence.sol";
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
+import {
+    IStreamPreservationPolicyContentCheckpointV1 as Checkpoint
+} from "../../interfaces/stream/finality/IStreamPreservationPolicyContentCheckpointV1.sol";
+import {
+    IStreamPreservationPolicyOutputManifestV1 as Output
+} from "../../interfaces/stream/finality/IStreamPreservationPolicyOutputManifestV1.sol";
+import {
+    StreamPreservationPolicyRootFamiliesV2 as Families
+} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 /// @notice Root-free resolution of explicitly named COLLECTION preservation recipe products.
 /// @dev The caller has already authenticated the original provider through actual Finality.
@@ -152,7 +161,48 @@ library StreamMetadataPreservationPolicyPublicationGraphReadsV1 {
         for (uint256 i; i < 7; ++i) {
             _pin(g.children[i], g.codeHashes[i]);
         }
+        if (profile == Current.FACTORY_PROFILE) _currentOutputPair(c, g);
         return (g.children[2], g.codeHashes[2]);
+    }
+
+    /// @dev The undeployed current-authority recipe fixes V2 children. Same-width
+    /// legacy checkpoints or manifests cannot stand in for that family.
+    function _currentOutputPair(Context memory c, Graph.Graph memory g) private view {
+        address checkpoint = g.children[1];
+        address outputHost = g.children[2];
+        if (
+            _word(
+                        checkpoint,
+                        abi.encodeCall(IERC165.supportsInterface, (type(Checkpoint).interfaceId)),
+                        c.readGas
+                    ) != bytes32(uint256(1))
+                || _word(
+                        checkpoint,
+                        abi.encodeCall(Checkpoint.preservationPolicyProfile, ()),
+                        c.readGas
+                    ) != Families.checkpointProfile(Families.V2, false)
+                || _word(
+                        checkpoint,
+                        abi.encodeCall(Checkpoint.preservationOutputProfile, ()),
+                        c.readGas
+                    ) != Families.V2
+                || _word(checkpoint, abi.encodeCall(Checkpoint.core, ()), c.readGas)
+                    != _address(c.core)
+                || _word(checkpoint, abi.encodeCall(Checkpoint.metadataRouter, ()), c.readGas)
+                    != _address(c.router)
+        ) revert PreservationPolicyPublicationGraphUnavailable(checkpoint);
+        if (
+            _word(
+                        outputHost,
+                        abi.encodeCall(IERC165.supportsInterface, (type(Output).interfaceId)),
+                        c.readGas
+                    ) != bytes32(uint256(1))
+                || _word(outputHost, abi.encodeCall(Output.outputProfile, ()), c.readGas)
+                    != Families.outputProfile(Families.V2, false)
+                || _word(outputHost, abi.encodeCall(Output.core, ()), c.readGas) != _address(c.core)
+                || _word(outputHost, abi.encodeCall(Output.contentCheckpoint, ()), c.readGas)
+                    != _address(checkpoint)
+        ) revert PreservationPolicyPublicationGraphUnavailable(outputHost);
     }
 
     /// @dev Supplemental selectors are shared with SCOPED factories. Both the base
