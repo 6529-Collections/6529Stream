@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI169 `ea4cf6b0`: 4,168 sources, zero errors; production `91ac2ce2`. Fixed runtime-test snapshot; full-v1 acceptance remains. |
+| Source checkpoint | ABI170 `b546af9f`:4,205 sources/zero errors; production `3d634a3f`; runtime campaign retains `ea4cf6b0`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,48 +29,42 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 21 September
 
-ABI169 checks all **4,168 Solidity sources** at `ea4cf6b0` with
-zero errors in 49.922 seconds. Production source last changed at `91ac2ce2`.
-This is the next fixed source for runtime testing, not a release candidate.
-Types, ABI and storage pass; full current-contract execution remains.
+ABI170 checks all **4,205 Solidity sources** at `b546af9f` with zero errors
+in 49.984 seconds. Production source last changed at `3d634a3f`. The active
+runtime campaign remains on `ea4cf6b0`; it does not accept these later changes.
+Expanded full v1 remains incomplete and is not a frozen release candidate.
 
-Root owns source integration, shared interfaces and final delivery. Runtime
-captures are pinned to `ea4cf6b0`; new feature builders remain on isolated branches.
+Root owns shared architecture, source integration, cross-domain joins and final
+delivery. Builders complete coherent feature batches before broad acceptance.
+Preserve the fixed runtime source and immutable original inputs/results.
 
-- Artist: additive recovered MULTIPLE_CONSENTS with global grant/nonces/usage
-  across supported multiple Artists/collections; old profiles stay strict.
-- Local independent reviewer: Artist validator and later source/oracle review.
-- Local finality reviewer: reviewed compiler fix integrated; bounded review as
-  new handoffs arrive, no duplicate native campaigns.
-- Mint: typed test-only ProductActivation extraction based on retained IR;
-  original900s timeout preserved, no unchanged retry.
-- Burn: RecordStages compiler repair integrated; coordinate remaining actual
-  preservation/current-stack acceptance and fresh-source capture support.
-- Museum: native semantic selection/export from canonical V10/V3, preserving
-  complete field denominator, authority, attributed alternatives and disclosure.
-- Clients: recovered MULTIPLE_BASE callers at exact99e/ABI167; broader all-call
-  Safe execution remains distinct from pure/mock clients.
-- Testing: exact fresh native plan at `ea4cf6b0`, genuine owner reuse, repaired
-  products and smaller part006 groups; 16 workers/max 20 coordinated compilers.
-- Metric: OwnerRecords-to-Museum51 Registry capture adapter; Provider12 frozen
-  execution accepted at eda, no repeat seal/review.
-- Capacity: refresh materially reduced Actual3 local capture from new literal
-  getters; original115-output timeout retained, one finite changed attempt.
-- Prepared: exact corrected baseline/helper/outer native refresh and caller
-  export, with historical06a client witness and current source bridge explicit.
-- Collector: isolated optimization and exact baseline/candidate owner joins;
-  actual whole-purchase cold gas remains unproved.
+- Artist lead: aggregate recovered op24/C2PA composition after integrated consent
+  multiplicity; complete original Archive completion clocks and grant totals.
+- Local fact-worker lead: canonical Identity projection compiler repair for
+  aggregate op24; preserve API and keep pure facts distinct from source admission.
+- Local stage lead: seven Description/Interview sibling capacity repairs.
+- Mint: activation11 passes; four-operation test slot/split boundary next.
+- Burn: six Record/Token siblings and sole ownership of four shared stage guards.
+- Metric: V2 three-read repair integrated; V1 RootAuthorization next.
+- Capacity: five scoped V1 repairs committed, selected native15 pending; Actual3
+  local57 timeout preserved, no unchanged retry or denied handoff relay.
+- Collector: three non-scoped V1 read repairs; final changed8-product capture.
+- Prepared: shared baseline6 passes; remaining full-export compiler extraction.
+- Museum: remaining named owner-family semantics after integrated semantic and
+  script/dependency exports.
+- Clients: remaining named mockRPC/Safe workflows after measured schema caching.
+- Testing: fresh983 library products plus243 reused; exact v4 routing now admits
+  all2678 selected source files. Continue named current-host execution and joins.
 
-All twelve recorded size failures and both isolated Yul failures have source
-repairs; combined current-native and full runtime acceptance remain. Use the
-feature register for remaining product work. Held proposals remain held.
+Global maximum is20 coordinated compiler processes; future Testing plans use
+at most13, with explicit external slots. Completed captures release their slots.
+Do not repeat inventories, compilers, test packets or review loops without a
+changed source, failed check or unresolved specific question. Publish coherent
+reviewed source while frozen tests run. No current funding/onchain action.
 
-Subsequent source intake is `b283d0ba`: Owner/Registry adapter `81f4daa9`
-plus test-only activation extraction. Keep `ea4cf6b0` for the active runtime
-campaign. Capacity's reduced local57 and Prepared's two captures are active;
-Testing owns production-library groups. Global compiler cap is 20, with the
-Testing allowance temporarily reduced when independent focused workers run.
-Museum semantic intake is held for a concrete cross-token selection fix.
+Seven of the29 newly observed preservation overages have integrated repairs;
+remaining batches are owned above. Actual all-call Safe, stateful/fuzz, full
+gas/size/CI, final freeze and testnet remain. Held proposals remain held.
 
 ## Earlier source-specific assignments
 
