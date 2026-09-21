@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Solidity `9db6df06`, client batch `4c2b62ed`. ABI149: 3,977 / zero errors; VIEW client41 and Museum83 root cases pass. Runtime acceptance remains separate. |
+| Source checkpoint | ABI153 `7053ab06`: 4,008 sources / zero errors; reference clients `28c145eb` follow. Reader51 passes on `9db6df06`; current publication setup fails, source repair integrated. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -33,51 +33,46 @@ Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact evidence boundaries.
 Root owns shared interfaces, integration, architecture and delivery. Builders
 continue coherent features while frozen native campaigns run.
 
-- A: sanction/confirmation history `8e15d977` and size repair `dfa48c48` are
-  integrated. Build explicit joined history/content profile, then remaining
-  Platform, operation-24 and multiplicity compositions; old profile tags remain.
-- B: correct same-native AST output selection for the 18-case preservation
-  campaign; all bytecode products compiled, but verification stopped before EVM.
-  Preserve that failure, use all-source AST with the same product selection,
-  and independently review Museum's ceremony-export adapter.
-- C: VIEW kernels and composed tests are integrated. Finish the four closed
-  same-host getter gas correction and bounded signed locator correspondence.
-  Keep original dependency caps, old profiles and archived captures explicit.
-- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: independently review Prepared's
-  Discovery/actual-VIEW join. Museum WORK and composed VIEW reviews are clear.
-  Actual Mint24 and archive4 execution remain pending.
-- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: one selected 18-product VIEW
-  native size baseline from root `9db6df06`/ABI149, then actual original-provider
-  ceremony/browser inputs. Preserve the declared browser/environment source.
-- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: full VIEW consumer integrated,
-  root83 passes. Export adapter `893972aa` is ready for independent intake;
-  consume new locator semantics only after their coherent source freeze.
-- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: complete VIEW and token V2
-  checkpoint/output callers integrated. Build snapshot, reference and current
-  inventory/archive callers with the existing shared fixture; final all-call
-  current-contract/Safe acceptance remains separate.
-- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: current publication11 compiles
-  exact `d667908b`; require sizes, six fresh exports, independent replay and
-  original gas/cooling. Three actual entropy/Safe cases are `14ece06b`.
-- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: failed reader51 is sealed;
-  seven-product split integrated `9db6df06` fits. Complete focused11 execution,
-  then fresh joined reader51 and genuine successor3 under original controls.
-- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: current Router fits without
-  another repair. Source split and focused11 reviews are clear. Support exact
-  current publication exports/replay without rewriting source observations.
-- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: both provider dispatches and
-  actual scoped drivers are integrated. Own both Discovery hosts/shared VIEW
-  selection/serving worker and actual current VIEW adoption/publication flow.
-  Coordinate C's bounded self-read correction; no legacy fallback.
-- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: isolated common path passes
-  34 native cases/28 RPC checks but exceeds 500,000 gross gas even at the minimal
-  boundary. Continue staged-alias/common-path optimization; no target waiver or
-  production overlay. Refund helper is a separate bounded experiment.
+- A: HISTORY_CONTENT `51d8ed8f` is integrated and source-reviewed. Build accepted
+  Platform history with closed original zero-Artist collection rows, then native24
+  and full mixed/multiplicity composition. Preserve old tags and original writers.
+- B: repair both oversized provider facades using fixed workers. The original Registry
+  golden-vector fixture correction is integrated as `7a9fd077`; retain native3's 12 passes and six
+  unexecuted cases. Do not repeat the old oversized provider build.
+- C: metadata split `1dbc0c66` is integrated and both products fit. Build the
+  approved attributed retrieval satellite, immutable inventory companion and
+  explicit bundle witness association; preserve original Archive authority.
+- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: the sole Mint/terminal/Safe44
+  native campaign runs at `9db6df06`; Artist13 independent oracle review is clear.
+- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: selected VIEW18 capacity failure
+  is sealed and assigned to B/C. Original-provider ceremony/browser inputs await
+  an accepted executable graph; retain the fresh Chrome153 environment plan.
+- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: VIEW consumers/export/package
+  are integrated with root83/23/31 passing; build separate locator consumer and
+  consume the new retrieval handoff once frozen. Historical profiles stay exact.
+- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: snapshot/reference workflows
+  are integrated with exact producer58/65 evidence. Build current-authority
+  inventory19 and archive5 writes per host, then the combined package pass.
+- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: publication11 failed capture
+  is sealed. Run one focused historical-serialization8 campaign at `7053ab06`;
+  root repair is `ecb6c29e`, tests `7053ab06`. Do not rebuild publication11 yet.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: reader51 passes and is
+  sealed. Keep actual3 executable capture held until provider/metadata/Router
+  repairs are joined; source and constructor planning may proceed.
+- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: historical repair and metadata
+  seven-oracle reviews clear. Own one focused metadata7 native capture at
+  `7053ab06`; no duplicate publication/native work.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: fresh constructor-budget
+  fixture `dcf9a037` is integrated. Its actual setup creates all three provider
+  generations; wait for accepted size repairs before the sole checkpoint probe.
+- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: experimental `2e43e6b6`
+  passes44/28 but minimum516,891 gross still exceeds target before actual
+  components. Measure real Core/Floor/guard/retention and propose a structural
+  reduction; coordinate shared Core changes with root before editing them.
 
-Root ABI149/source bridge passes. Latest documentation17, links, changelog and
-Windows whitespace checks pass on their recorded source. Inspect exact process
-ownership before native runs. Full current/Safe, stateful/fuzz, gas/size, CI,
-freeze and matching testnet remain; preserve supported RC1.
+Root ABI153 and exact source bridges pass. Preserve supported RC1 and every
+failed capture. Full current/Safe, stateful/fuzz, gas/size, CI, freeze and matching
+testnet remain. No new funding or onchain action is needed for current coding.
 
 ## Earlier source-specific assignments
 
