@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI166 `b1bd2bae`: 4,121 sources, zero errors. Artist/finality capacity repairs and canonical Museum composition integrated; full runtime acceptance remains separate. |
+| Source checkpoint | ABI168 `c648b31a`: 4,141 sources, zero errors; production last changed at `99e95030`. Full runtime acceptance remains separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,34 +29,46 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 21 September
 
-ABI166 checks all **4,121 Solidity sources** at `b1bd2bae` with
-zero errors in 49.969 seconds. This is a combined type, ABI and storage
-check. Full current-contract execution and the matching testnet candidate remain.
+ABI168 checks all **4,141 Solidity sources** at `c648b31a` with
+zero errors in 49.063 seconds. Production source last changed at `99e95030`.
+This checks types, ABI and storage; full current-contract execution and the
+matching testnet candidate remain.
 
-Root owns architecture, shared interfaces, integration and delivery. Builders
-continue features while frozen native campaigns run. Artist is implementing
-recovered multiple-Artist/collection history after integrated op24 and selected
-size repair. Finality lead owns actual source/output retrieval; its full-policy
-and scoped Metadata/Reads size repairs are integrated and source-reviewed.
-Independent review covers coherent source handoffs and actual evidence.
+Root owns architecture, shared interfaces, integration and delivery. Current
+source and evidence are summarized in [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md).
+Builders continue coherent source batches while frozen campaigns run.
 
-- Mint / independent review: Shared fixture extraction integrated ecfd88e6; retain original eight plus callback case. Changed callback-only trial also timed out900s/zeroEVM. Diagnose concrete remaining test-host construction; retain all three host timeouts and original acceptance cases.
-- Burn / preservation ceremony: Monitor integrated d8e42dc5 with25root passes. Browser package ready for genuine exports; independent owner-source compatibility reviewed. Complete actual preservation/browser acceptance.
-- Museum: Canonical V10/dossierV3 integrated4784061d with72root passes. Build preserved release-tool/source archives and offline regeneration; actual captures and institutional conformance remain separate.
-- Clients / Safe callers: Retrieval5928 passes42root tests. VIEW22-write consumers integrated791cb767, independent73mock/oracle passes and root generation/build/types; finish complete Safe inventory and actual caller execution.
-- Testing / native tooling: Canonical owner tooling integrated9aaf with62root passes. Own shared physical execution view/dispatch and coordinated eda native product plan; then execute Genesis50/OwnerRecords with actual Safe.
-- Capacity / Rights: Actual3ec832 deliberately canceled for required size failures. Resume changed exacteda native plan with original cases/caps; held task handoff stays held.
-- Metric retention: Original Provider19owners/131products retained; scoped repair now integratededa. Coordinate fresh changed closure withTesting/C, then actualProvider12/OwnerRecords RPC.
-- Prepared / successor preservation: Bootstrap17 and synthetic63RPC roundtrip pass scoped sources. Complete fullcaller export oneda using coordinated genuine owners; interlude25 offline controls ready, source rejoin required.
-- Collector gas redesign: Prototype isolated. Fix confirmed checkpoint generator/builder identity mismatch with authentic producer-to-builder regression; audit coherent eda successor before actual purchase/coldgas.
+- Artist lead: repair six recovery helper size failures; recovered multiple-base
+  `99e95030` integrated. Broader aggregate profiles follow this repair batch.
+- Independent local capacity builder: repair the four Dormancy/Estate helpers
+  in `codex/artist-recovery-estate-dormancy-capacity`; cross-review with Artist.
+- Local finality lead: cold-bound test source integrated `c648b31a`; localize the
+  twelve preservation outputs in the failed 64-library Yul cohort.
+- Mint: repair the test-only setup planner's localized Yul issue, preserve all
+  original host cases/layout/CREATE behavior, then one changed callback trial.
+- Burn: independent native-tool review and browser preparation; actual preserved
+  browser execution needs genuine exports. Monitor source already integrated.
+- Museum: preserved-tool batch `186dcc3f` integrated; build complete 51-document
+  genesis catalog capture/reconstruction without inventing registration evidence.
+- Clients: root interlude v1/v2 integrated `cfcbc4ea`/`34d27678` with64 focused
+  passes; finish Executor9, RoleRegistry2 and bounded caller-export consumer.
+- Testing: canonical native tools integrated `b07b0099`/`9b905794`; coordinate
+  existing finite captures and exact owner reuse. Hold not-started `eda052c7`
+  requests until a stable repaired production source is selected.
+- Metric: finish frozen Provider12 actual execution, preserving its exact source;
+  separately repair scoped-policy V2 Metadata/Reads size failures.
+- Capacity: preserve the finite Actual3 host/embedded-child capture and explicit
+  owned compiler; consume shared owners through the reviewed canonical adapter.
+- Prepared: baseline source `06a361af` integrated; complete genuine native-library
+  admission, actual caller export and unsigned consent/root interlude.
+- Collector: prototype remains isolated; consume matching genuine shared owners
+  before actual baseline/candidate whole-purchase cold-gas comparison.
 
-Testing owns canonical native execution infrastructure and coordinates production
-owner groups. Metric, Prepared and the retrieval lead supply exact needs and
-retain separate test-host/capture identities. Do not duplicate compilers, forge
-composite build information or silently drop dynamic constructors. Account access
-is restored. Previously held proposals remain held. Final full-stack/Safe,
-stateful/fuzz, gas/size, CI, freeze and testnet acceptance remain. No new funding
-or onchain action is needed for current coding.
+At most eight Testing native workers and twelve coordinated compilers in total;
+no duplicate captures or competing file writers. Runtime evidence applies only
+to its source and actual test boundaries. Twelve observed production size
+failures and the separate Yul failure remain open; no full candidate acceptance.
+Previously held proposals remain held. No new funding or onchain action needed.
 
 ## Earlier source-specific assignments
 

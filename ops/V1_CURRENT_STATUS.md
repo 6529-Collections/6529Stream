@@ -18,78 +18,62 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-ABI166 checks all **4,121 Solidity sources** at `b1bd2bae` with
-zero errors in 49.969 seconds. This is a combined type, ABI and storage
-check. Full current-contract execution and the matching testnet candidate remain.
+ABI168 checks all **4,141 Solidity sources** at `c648b31a` with
+zero errors in 49.063 seconds. Production source last changed at `99e95030`.
+This checks types, ABI and storage; full current-contract execution and the
+matching testnet candidate remain.
 
-- **Artist:** complete recovered operation-24 record history is source integrated
-  as `bf8839c7`, independently reviewed with 16 authored actual-owner/Safe cases.
-  Four-host capacity repair `158121c2` passes an independent selected-product
-  compile at `9aaf196b`: all 12 repaired hosts/workers fit original runtime and
-  complete-initcode limits. The Coordinator is exactly 24,576 runtime bytes, so
-  further features must use its existing satellite routes. Complete Artist
-  execution and recovered multiple-Artist/collection composition remain;
-  the latter is being built under a distinct explicit profile.
-- **Finality:** full-policy provider `ae34ca07` falls from 31,070 to 22,588 runtime
-  bytes. Scoped provider repair `eda052c7` reduces Metadata from 48,292 to 22,590
-  and Reads from 26,120 to 14,538 bytes; all four new workers fit. Original ABI,
-  checks and caps are preserved, with independent source review. Six and seven
-  respective parity cases are authored/typechecked, not executed. Additional
-  delegate frames still need composed gas acceptance. Earlier Provider12
-  compilation now has 19 genuine owner captures/131 products; its two size
-  failures and preceding timeout remain retained as historical evidence.
-- **Clients and Safe:** retrieval callers `5928ebf7` pass generation, build,
-  strict test types and 42 focused root tests. The older combined package has
-  2,408 passes on `26051498`; driver mock groups pass separately on `5353f026`.
-  Genuine caller/bootstrap export `1bdd3742` has 17 small native controls at its
-  recorded producer source. A synthetic account export/import round trip also
-  verifies six accounts, 18 slots and 13 getters through 63 real local RPC reads.
-  This is transport evidence; the full production graph and actual Safe/client
-  campaign remain pending. VIEW Inventory/Bundle callers `791cb767` add all 22 writes, with an independent
-  combined 73-test pass and root fixture/generation/build/strict-type checks.
-  Test-only file entry `e3584dd7` and outer TEST adapter `b1bd2bae` are source
-  integrated; actual export requires a successful explicit run, not a skipped
-  default test or a completion marker alone.
-- **Museum:** canonical acquisition composition V10 and conservation dossier V3
-  are integrated as `4784061d`, with 72 focused root passes. They join supplied
-  preservation, work, recovery and attributed-observation sources and retain
-  all 19 packet/49 dossier completeness requirements. OwnerRecords composition
-  `65312baa` has 24 root passes. These are offline/source-consumer checks;
-  actual RPC capture, full release archives and institutional conformance remain.
-- **Current integration:** all 37 genesis roles and 51 canonical schemas have
-  the source-integrated 50-case cohort. Native-owner tooling `9aaf196b` has 62
-  focused root passes plus independent review; it preserves compiler identities
-  and physical owner paths. Whole-graph execution remains pending. Test-only
-  inheritance repair `d9cb879e` fixes ABI162's 74 errors; ABI163 and ABI164 pass.
-  Claim fixture extraction `ecfd88e6` removes eight duplicated inherited cases
-  from the callback host while retaining the original eight plus callback case.
-  Its changed callback-only native trial also timed out at 900 seconds before
-  any EVM execution. All three finite host failures remain retained; the reduced
-  test count did not resolve that compiler bottleneck.
-- **Operations:** read-only deployment monitor `d8e42dc5` has 25 focused root
-  passes, covering pinned blocks, code, genesis bindings, failed reads and reorgs.
-  It has not yet monitored the completed current-stack/testnet deployment.
-- **Collector gas:** isolated Floor factoring retains 43 component passes;
-  Manager/Dutch `0434eec1` has selected sizes and independent source review.
-  Old actual baseline/candidate builds were deliberately canceled after exact
-  required Artist size failures were proven. A reviewed-source successor is
-  being prepared. The prototype is not adopted; actual whole-purchase cold gas
-  remains unproved, including the original 500,000-gas paid single-step ceiling.
+- **Artist:** recovered operation-24 history `bf8839c7` and the recovered
+  multiple-Artist/collection base profile `99e95030` are source integrated.
+  The latter preserves existing interfaces/storage and adds nine reviewed,
+  authored actual-owner/Safe scenarios. Its seven selected affected products
+  fit; Coordinator remains exactly 24,576 bytes. Broader recovered aggregate
+  record/delegation/generation combinations and actual operation60 execution remain.
+- **New capacity blockers:** a wider native cohort at frozen `eda052c7` found
+  ten additional Artist recovery helpers above 24,576 bytes, and a subsequent
+  cohort found two distinct scoped-policy V2 helpers over the same limit.
+  Two local builders own the Artist repairs in a six/four split; Metric owns
+  the V2 pair. An additional 64-library cohort hit a Yul failure with no source
+  location. Preservation's twelve outputs are being isolated; attribution to
+  any of the 52 Mint outputs remains unproven. Failed captures stay retained.
+- **Native execution:** Provider's 135 selected products now have twenty genuine
+  native contexts. All 172 production emissions in those contexts fit their
+  runtime and base-init limits; this does not establish full-system deployment.
+  Tooling `b07b0099` and routing repair `9b905794` preserve original artifacts
+  and compiler identities. Root focused owner/consumer checks and thirty
+  latest routing tests pass. Provider's actual twelve-case execution is pending.
+  Shared builds ran with eight workers; not-started old-source batches are held
+  until repaired production stabilizes. Earlier `eda052c7` captures do not
+  automatically certify `99e95030` or later source.
+- **Clients and Safe:** VIEW Inventory/Bundle's 22 writes `791cb767` retain their
+  independent 73-test evidence. Closed consent/root transport `cfcbc4ea` and
+  its separately pinned repaired-source companion `34d27678` pass 64 combined
+  root pure/mock tests and exact generator/source/ABI checks. Executor lifecycle
+  and operational RoleRegistry clients continue. Genuine caller baseline
+  `06a361af` is source integrated; captured candidate state still requires
+  independent native/library admission before actual export or RPC execution.
+- **Museum:** canonical V10 acquisition/V3 dossier `4784061d` retain 72 focused
+  root passes. Preserved source/runtime tools `186dcc3f` are independently
+  reviewed with 37 focused passes and exact archive/dependency checks. Four
+  archived synthetic replay vectors reproduced twice at their recorded source.
+  All 19 packet/49 dossier requirements remain. The 51-document genesis consumer
+  is being built; actual native release, complete RPC capture and institutional
+  acceptance remain separate.
+- **Cold-gas tooling:** `c648b31a` adds fresh signed transaction tests, with six
+  passing primitive controls at the producer source and three authored actual
+  graph cases. Earlier cooling/recorder methods failed adversarial controls;
+  they are preserved and excluded from cold acceptance. Full graph gas and
+  actual transaction receipts are not claimed by the primitive tests.
+- **Other lanes:** read-only monitor `d8e42dc5` retains 25 focused passes;
+  OwnerRecords `65312baa` retains 24. Mint's test-only planner extraction is
+  undergoing a localized compiler repair. Collector's optimization remains
+  isolated; actual whole-purchase cold gas and its 500,000-gas target are unproved.
 
-Testing owns shared native execution infrastructure and the coordinated compiler
-product plan. Existing task owners retain their actual test cases and captures;
-Artist, Museum and client builders continue implementing in parallel. Codex
-access returned at 19:28 UTC after the account-limit interruption; saved work
-was preserved. No account block remains.
-
-Earlier scoped successes include 42 retrieval cases on `a2973d36`, eleven
-publication cases with independent replay on `9d4af023`, six Registry cases on
-`6d9729c6`, and six scoped-reader cases with 256 fuzz inputs on `4fb225ed`.
-They do not certify subsequent source. Full current-stack/all-call Safe,
-stateful/fuzz, whole-system gas/size, full CI, freeze and matching testnet
-demonstration remain. Previously held proposals stay unapplied. Supported RC1
-and its Sepolia evidence at `569bf87f1fa808787d324f6e1582924b5ccf1d40` remain
-unchanged. No funding or onchain action is needed for current coding.
+Full current-stack/all-call Safe execution, stateful/fuzz campaigns, complete
+gas/size checks, full CI, source freeze and matching testnet demonstration remain.
+Previously held proposals stay unapplied. Supported RC1 and its Sepolia evidence
+at `569bf87f1fa808787d324f6e1582924b5ccf1d40` are unchanged. No new funding or
+onchain action is needed for current coding.
 
 ## Earlier source-specific evidence
 
