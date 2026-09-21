@@ -16,10 +16,10 @@ different milestones.
 
 ## Latest integration checkpoint: 21 September
 
-Integrated Solidity checkpoint: `7053ab06`. ABI153 checks all 4,008 Solidity
-sources with zero errors in 46.968 seconds and exact committed-source readback.
-Reference clients `28c145eb` and the one-line Registry fixture correction
-`7a9fd077` follow that source; the latter awaits its own runtime check.
+Integrated Solidity checkpoint: `9d4af023`. ABI154 checks all 4,014 Solidity
+sources with zero errors in 47.125 seconds and exact committed-source readback.
+This includes both provider repairs, reference clients, locator consumers and
+the Registry fixture correction; that fixture still awaits its runtime check.
 This is source compatibility; complete candidate execution remains.
 
 - **Preservation and finality:** complete VIEW binding, both provider dispatch
@@ -28,7 +28,7 @@ This is source compatibility; complete candidate execution remains.
   general attributed origin/mirror/redirect witnesses are being built.
   A separate fresh constructor-budget fixture (`dcf9a037`) preserves the old
   diagnostic controls and measures complete two-token checkpoint revalidation.
-  Its execution waits for the provider size repairs below.
+  Its execution is now authorized on the joined provider repairs below.
 - **Deployment size:** the repaired snapshot readers (`9db6df06`) now pass all
   51 joined cases, including 256 fuzz inputs, on exact `9db6df06`. Independent
   artifact/trace review and the sealed packet pass. The selected VIEW
@@ -36,8 +36,10 @@ This is source compatibility; complete candidate execution remains.
   (38,563 and 38,947 runtime bytes) and a 26,213-byte metadata worker.
   The metadata worker repair is integrated as `1dbc0c66`: its two products
   measure 19,001 and 21,299 bytes. Seven independently reviewed differential
-  cases are entering focused execution. The provider repairs now measure
-  24,369 and 24,364 bytes on the builder source; final review/integration remains.
+  cases now pass on exact `7053ab06`, including 256 fuzz inputs, with
+  independently reviewed artifacts and traces. Both provider repairs are
+  integrated as `9d4af023`: 24,206 and 24,190 runtime bytes; complete initcode
+  is 40,303 and 40,665 bytes. Twelve focused cases are ready for execution.
 - **Artist history:** joined original content, royalty/freeze and ratification
   histories across accepted, disputed and sanctioned generations are integrated
   as `51d8ed8f`. Production and 13 new test oracles are independently reviewed;
@@ -52,7 +54,8 @@ This is source compatibility; complete candidate execution remains.
 - **Museum:** complete VIEW inventory and bundle verification has 83 root passes;
   the ceremony-export adapter has 23. Retained VIEW BagIt/OCFL packaging is now
   integrated as `a8562dc5`, with all 31 new/shared offline cases passing at root.
-  Exact locator consumers are in build. Actual contract capture, browser replay,
+  Exact locator consumers (`1576e5f2`) now pass all 34 new/shared offline
+  cases at root. Actual contract capture, browser replay,
   complete dossier scope and institutional conformance remain separate.
 - **Clients and Safe:** token V2 snapshots (`b454c032`) and all five reference
   publication writes (`28c145eb`) are integrated. Root verifies exact source,
@@ -66,7 +69,9 @@ This is source compatibility; complete candidate execution remains.
   newer citation serializer. Repair `ecb6c29e` restores only the original
   historical dispatch; current output and strict matchers remain unchanged.
   The repair is independently source-reviewed, with eight endpoint regressions
-  integrated as `7053ab06`; the focused native campaign is running.
+  integrated as `7053ab06`; all eight now pass on that source, with
+  independent artifact/trace review and a sealed packet. The full publication
+  successor is authorized at `9d4af023`; its acceptance remains pending.
   The actual Mint/terminal/Safe44 campaign continues on frozen `9db6df06`.
 - **Collector gas:** isolated experiment `2e43e6b6` passes 44 native cases,
   including 256 fuzz inputs, and 28 matched RPC checks. The cheapest exact
@@ -113,16 +118,16 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | Full Solidity check `7053ab0648cb84cfbfa1f5952adde6a6828345ce`; later reference client `28c145eb`; see the [21 September batch](#latest-integration-checkpoint-21-september). |
+| Current integration source | Full Solidity check `9d4af0235b76c60c4ec062f9ebf4a175013bd97d`; see the [21 September batch](#latest-integration-checkpoint-21-september). |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | ABI153: 4,008 sources at `7053ab06`, zero errors in 46.968 seconds; complete committed-source bridge. This is not whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | ABI154: 4,014 sources at `9d4af023`, zero errors in 47.125 seconds; complete committed-source bridge. This is not whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Reader51 passes all 51 cases plus 256 fuzz inputs at exact `9db6df06`. Publication11 passes compilation/production gates but fails export setup before any body; source repair and eight regressions are integrated, execution pending. Other captures remain source-specific. |
+| Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Full publication successor and provider12 are authorized at `9d4af023`, acceptance pending. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.

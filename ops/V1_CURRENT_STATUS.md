@@ -18,10 +18,10 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-Integrated Solidity checkpoint: `7053ab06`. ABI153 checks all 4,008 Solidity
-sources with zero errors in 46.968 seconds and exact committed-source readback.
-Reference clients `28c145eb` and the one-line Registry fixture correction
-`7a9fd077` follow that source; the latter awaits its own runtime check.
+Integrated Solidity checkpoint: `9d4af023`. ABI154 checks all 4,014 Solidity
+sources with zero errors in 47.125 seconds and exact committed-source readback.
+This includes both provider repairs, reference clients, locator consumers and
+the Registry fixture correction; that fixture still awaits its runtime check.
 This is source compatibility; complete candidate execution remains.
 
 - **Preservation and finality:** complete VIEW binding, both provider dispatch
@@ -30,7 +30,7 @@ This is source compatibility; complete candidate execution remains.
   general attributed origin/mirror/redirect witnesses are being built.
   A separate fresh constructor-budget fixture (`dcf9a037`) preserves the old
   diagnostic controls and measures complete two-token checkpoint revalidation.
-  Its execution waits for the provider size repairs below.
+  Its execution is now authorized on the joined provider repairs below.
 - **Deployment size:** the repaired snapshot readers (`9db6df06`) now pass all
   51 joined cases, including 256 fuzz inputs, on exact `9db6df06`. Independent
   artifact/trace review and the sealed packet pass. The selected VIEW
@@ -38,8 +38,10 @@ This is source compatibility; complete candidate execution remains.
   (38,563 and 38,947 runtime bytes) and a 26,213-byte metadata worker.
   The metadata worker repair is integrated as `1dbc0c66`: its two products
   measure 19,001 and 21,299 bytes. Seven independently reviewed differential
-  cases are entering focused execution. The provider repairs now measure
-  24,369 and 24,364 bytes on the builder source; final review/integration remains.
+  cases now pass on exact `7053ab06`, including 256 fuzz inputs, with
+  independently reviewed artifacts and traces. Both provider repairs are
+  integrated as `9d4af023`: 24,206 and 24,190 runtime bytes; complete initcode
+  is 40,303 and 40,665 bytes. Twelve focused cases are ready for execution.
 - **Artist history:** joined original content, royalty/freeze and ratification
   histories across accepted, disputed and sanctioned generations are integrated
   as `51d8ed8f`. Production and 13 new test oracles are independently reviewed;
@@ -54,7 +56,8 @@ This is source compatibility; complete candidate execution remains.
 - **Museum:** complete VIEW inventory and bundle verification has 83 root passes;
   the ceremony-export adapter has 23. Retained VIEW BagIt/OCFL packaging is now
   integrated as `a8562dc5`, with all 31 new/shared offline cases passing at root.
-  Exact locator consumers are in build. Actual contract capture, browser replay,
+  Exact locator consumers (`1576e5f2`) now pass all 34 new/shared offline
+  cases at root. Actual contract capture, browser replay,
   complete dossier scope and institutional conformance remain separate.
 - **Clients and Safe:** token V2 snapshots (`b454c032`) and all five reference
   publication writes (`28c145eb`) are integrated. Root verifies exact source,
@@ -68,7 +71,9 @@ This is source compatibility; complete candidate execution remains.
   newer citation serializer. Repair `ecb6c29e` restores only the original
   historical dispatch; current output and strict matchers remain unchanged.
   The repair is independently source-reviewed, with eight endpoint regressions
-  integrated as `7053ab06`; the focused native campaign is running.
+  integrated as `7053ab06`; all eight now pass on that source, with
+  independent artifact/trace review and a sealed packet. The full publication
+  successor is authorized at `9d4af023`; its acceptance remains pending.
   The actual Mint/terminal/Safe44 campaign continues on frozen `9db6df06`.
 - **Collector gas:** isolated experiment `2e43e6b6` passes 44 native cases,
   including 256 fuzz inputs, and 28 matched RPC checks. The cheapest exact

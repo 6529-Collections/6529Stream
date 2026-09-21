@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI153 `7053ab06`: 4,008 sources / zero errors; reference clients `28c145eb` follow. Reader51 passes on `9db6df06`; current publication setup fails, source repair integrated. |
+| Source checkpoint | ABI154 `9d4af023`: 4,014 sources / zero errors; both provider repairs integrated. Historical8 and Metadata7 pass on `7053ab06`; complete current publication acceptance remains. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -36,41 +36,42 @@ continue coherent features while frozen native campaigns run.
 - A: HISTORY_CONTENT `51d8ed8f` is integrated and source-reviewed. Build accepted
   Platform history with closed original zero-Artist collection rows, then native24
   and full mixed/multiplicity composition. Preserve old tags and original writers.
-- B: repair both oversized provider facades using fixed workers. The original Registry
-  golden-vector fixture correction is integrated as `7a9fd077`; retain native3's 12 passes and six
-  unexecuted cases. Do not repeat the old oversized provider build.
+- B: both provider repairs are integrated as `9d4af023`; independently review
+  C's retrieval producer and consumer next. Registry fixture `7a9fd077` awaits
+  runtime; retain native3's 12 passes and six previously unexecuted cases.
 - C: metadata split `1dbc0c66` is integrated and both products fit. Build the
   approved attributed retrieval satellite, immutable inventory companion and
   explicit bundle witness association; preserve original Archive authority.
 - Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: the sole Mint/terminal/Safe44
   native campaign runs at `9db6df06`; Artist13 independent oracle review is clear.
 - Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: selected VIEW18 capacity failure
-  is sealed and assigned to B/C. Original-provider ceremony/browser inputs await
-  an accepted executable graph; retain the fresh Chrome153 environment plan.
+  is sealed and the repairs are integrated. Independently review the Collector
+  structural proposal while original ceremony/browser awaits actual execution.
 - Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: VIEW consumers/export/package
-  are integrated with root83/23/31 passing; build separate locator consumer and
-  consume the new retrieval handoff once frozen. Historical profiles stay exact.
+  and locator are integrated with root83/23/31/34 passing. Build the bounded
+  MUSEUM-10 dossier projection; consume C's retrieval handoff once frozen.
 - Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: snapshot/reference workflows
   are integrated with exact producer58/65 evidence. Build current-authority
   inventory19 and archive5 writes per host, then the combined package pass.
 - Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: publication11 failed capture
-  is sealed. Run one focused historical-serialization8 campaign at `7053ab06`;
-  root repair is `ecb6c29e`, tests `7053ab06`. Do not rebuild publication11 yet.
+  is sealed. Historical8 passes and is sealed on `7053ab06`. Refresh actual
+  publication11 at `9d4af023`; coordinate native ownership with Prepared.
 - Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: reader51 passes and is
-  sealed. Keep actual3 executable capture held until provider/metadata/Router
-  repairs are joined; source and constructor planning may proceed.
-- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: historical repair and metadata
-  seven-oracle reviews clear. Own one focused metadata7 native capture at
-  `7053ab06`; no duplicate publication/native work.
+  sealed. Actual3 execution is authorized at `9d4af023`; refresh all source,
+  constructor and library selections before the single native capture.
+- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: Metadata7 passes and is sealed
+  on `7053ab06`. Own the twelve focused provider guard/transport regressions
+  at `9d4af023`, including fuzzing; do not duplicate full publication work.
 - Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: fresh constructor-budget
   fixture `dcf9a037` is integrated. Its actual setup creates all three provider
-  generations; wait for accepted size repairs before the sole checkpoint probe.
+  generations; the sole checkpoint probe is authorized at `9d4af023`. Share
+  matching native projection with Testing where exact source/products permit.
 - Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: experimental `2e43e6b6`
   passes44/28 but minimum516,891 gross still exceeds target before actual
   components. Measure real Core/Floor/guard/retention and propose a structural
   reduction; coordinate shared Core changes with root before editing them.
 
-Root ABI153 and exact source bridges pass. Preserve supported RC1 and every
+Root ABI154 and exact source bridges pass. Preserve supported RC1 and every
 failed capture. Full current/Safe, stateful/fuzz, gas/size, CI, freeze and matching
 testnet remain. No new funding or onchain action is needed for current coding.
 
