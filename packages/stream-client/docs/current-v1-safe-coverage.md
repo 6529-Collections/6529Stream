@@ -110,6 +110,13 @@ add the original seventeen inventory and five bundle writes under ABI129.
 Authenticated ordered segment rows, immutable admissions, current inventory
 sources and current-environment refresh retain their separate evidence roles.
 
+The [historical scoped-policy finality client](current-scoped-policy-finality-v2.md)
+adds Registry manifest staging and the original Executor's payload publication,
+class-2 scheduling and execution. Archived Registry finalization is the nested
+target call. Provider and Discovery are read-only, and a Safe does not acquire
+the Executor's authority by encoding the Registry call. This profile remains
+tied to ABI129 and rejects unsupported newer current-authority and VIEW profiles.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

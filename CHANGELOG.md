@@ -917,6 +917,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add historical ABI129 scoped finality clients for canonical manifest staging,
+  provider/discovery validation and archived canonical-Executor finalization.
+
 - Add original scoped-policy inventory and bundle archive clients with ordered
   source objects, authenticated segment events and current coverage refresh.
 

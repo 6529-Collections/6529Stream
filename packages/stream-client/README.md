@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Historical scoped-policy finality](docs/current-scoped-policy-finality-v2.md)
+  joins the original ABI129 provider and discovery with canonical manifest
+  staging and archived finalization through the original class-2 Executor.
+
 - [Scoped full-policy inventory and bundle archive](docs/current-scoped-policy-inventory-archive-v2.md)
   covers the original ordered inventory and archival proof calls under ABI129,
   with separate immutable evidence, current sources and environment refresh.

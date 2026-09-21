@@ -34,6 +34,8 @@ export * from "./current-scoped-policy-inventory-v2.js";
 export * from "./current-scoped-policy-inventory-v2-workflow.js";
 export * from "./current-scoped-policy-bundle-v2.js";
 export * from "./current-scoped-policy-bundle-v2-workflow.js";
+export * from "./current-scoped-policy-finality-v2.js";
+export * from "./current-scoped-policy-finality-v2-workflow.js";
 export * from "./current-manifests.js";
 export * from "./current-secondary.js";
 export * from "./current-native-sale-credits.js";
