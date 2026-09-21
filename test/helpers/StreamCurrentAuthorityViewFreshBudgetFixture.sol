@@ -12,6 +12,12 @@ import {
 abstract contract StreamCurrentAuthorityViewFreshBudgetFixture is
     StreamCurrentAuthorityViewReferenceFixture
 {
+    function _authorityViewRetrievalSourceGas(uint256) internal pure override returns (uint256) {
+        // A seven-million checkpoint-source child leaves reserve room under Bundle's unchanged
+        // eight-million witness cap. This necessary inequality does not prove execution fits.
+        return 7000000;
+    }
+
     function _authorityViewConstructionBudgets()
         internal
         pure

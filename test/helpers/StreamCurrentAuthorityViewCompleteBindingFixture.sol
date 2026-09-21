@@ -166,6 +166,17 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
         });
     }
 
+    /// @dev The witness calls the checkpoint source directly. Preserve the original diagnostic
+    /// snapshot allowance by default; a new graph may choose its witness allowance independently.
+    function _authorityViewRetrievalSourceGas(uint256 snapshotSourceGas)
+        internal
+        pure
+        virtual
+        returns (uint256)
+    {
+        return snapshotSourceGas;
+    }
+
     AVStaticAttribution internal avOriginalAttribution;
     AVAttribution internal avAttribution;
     AVRenderer internal avRenderer;
@@ -550,7 +561,7 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
 
     function _avDeployRetrieval(AVS.Dependencies memory d) private {
         AVSnapshotTypes.Dependencies memory snapshot = avSnapshot.dependencies();
-        uint256 sourceGas = snapshot.sourceGas;
+        uint256 sourceGas = _authorityViewRetrievalSourceGas(snapshot.sourceGas);
         require(
             snapshot.targets[6] == address(avCheckpoint)
                 && snapshot.codeHashes[6] == address(avCheckpoint).codehash,

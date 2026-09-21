@@ -58,7 +58,9 @@ contract StreamCurrentAuthorityViewFreshBudgetTest is StreamCurrentAuthorityView
         require(parent == 12000000 && b.outputValidationGas == 7000000, "original parent ceiling");
         require(
             avCheckpoint.configuration().servingGas == b.checkpointServingGas
-                && avOutput.configuration().checkpointGas == b.outputValidationGas,
+                && avOutput.configuration().checkpointGas == b.outputValidationGas
+                && avRetrieval.configuration().sourceGas == 7000000
+                && avBundle.dependencies().archiveGas == 8000000,
             "actual fresh constructor values"
         );
         bytes memory input = abi.encodeCall(
