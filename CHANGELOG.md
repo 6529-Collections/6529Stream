@@ -1,5 +1,15 @@
 # Changelog
 
+## Pinned current-stack operational observations
+
+- Add a read-only monitoring CLI that consumes existing deployment captures,
+  checks pinned chain/block/runtime identities and explicit genesis role
+  bindings, and observes ABI-supported policy, pause and recovery views.
+- Retain deterministic reports and exact offline RPC replay, including failed
+  reads and reorg detection. Offline transport regressions are covered; actual
+  current-stack and testnet rehearsals remain pending. See the
+  [operator guide](docs/current-stack-monitoring.md).
+
 ## CI hygiene and workflow checks
 
 - Recognize preserved CRLF line endings in the existing raw Museum retrieval
