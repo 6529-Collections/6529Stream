@@ -32,6 +32,13 @@ library StreamArtistRecoveredPreparationConsentSelection {
         bool hasIdentityDelegations,
         bytes memory attestationRecords
     ) public view returns (bytes memory consent, uint256 features) {
+        if ((context.features & RH.HISTORY_CONTENT) != 0) {
+            // The complete history stage already reconciled every row/signature/grant use.
+            if (context.hasAttestations) revert T.UnsupportedProfile();
+            if (context.hasContent) context.features |= RH.CONTENT_CONSENTS;
+            if (RatificationStage.selected(context.provenance.journals[6])) context.features |= RH.RATIFICATIONS;
+            return (context.consent,context.features);
+        }
         if ((context.features & RH.DISPUTE_HISTORY) != 0) {
             // Complete base/dispute grant reconciliation already ran in the fixed history stage.
             if (context.hasContent || royaltyFreezes.length != 0 || context.hasAttestations) revert T.UnsupportedProfile();

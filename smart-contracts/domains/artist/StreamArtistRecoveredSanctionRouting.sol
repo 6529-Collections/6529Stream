@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredHistoryContentTypes as HistoryContentTypes } from "./StreamArtistRecoveredHistoryContentTypes.sol";
+import { StreamArtistRecoveredHistoryContentCodec as HistoryContentCodec } from "./StreamArtistRecoveredHistoryContentCodec.sol";
 
 import {
     StreamArtistRecoveredHydrationTypes as RH
@@ -80,6 +82,11 @@ library StreamArtistRecoveredSanctionRouting {
     {
         (RH.ExportHeader memory h, Payload.Payload memory payload) = Payload.decode(consentOuter, 6);
         if ((h.requiredFeatures & RH.SANCTION_HISTORY) == 0) return;
+        if ((h.requiredFeatures & RH.HISTORY_CONTENT) != 0) {
+            HistoryContentTypes.Bundle memory full = HistoryContentCodec.decode(q,payload.provenance,payload.semanticState);
+            Catalogue.requireCurrent(p,full.sanctions.catalogues,full.sanctions.operations);
+            return;
+        }
         Consent.Bundle memory b = Consent.decode(q, payload.provenance, payload.semanticState);
         Catalogue.requireCurrent(p, b.history.catalogues, b.history.operations);
     }

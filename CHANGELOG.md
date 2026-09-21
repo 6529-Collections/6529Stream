@@ -97,6 +97,15 @@
   original COLLECTION confirmation boundary. Runtime, browser provenance and
   transaction-capacity acceptance remain pending.
 
+## Recovered content across complete accepted and disputed history
+
+- Add the explicit HISTORY_CONTENT operation-60 profile for original content,
+  royalty/content freeze and ratification rows across accepted generations,
+  disputes and sanctions. Preserve original domains, keys and complete grant use.
+- Retain existing selectors/codecs/storage and atomic seven-owner import. Add
+  thirteen actual-owner/Safe regression cases; native and capacity acceptance remain
+  separate. See the [integration guide](docs/integrations/artist-recovered-history-content.md).
+
 ## Recovered sanction and confirmed-attribution history
 
 - Add the explicit operation-60 sanction-history profile, retaining complete

@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredHistoryContentSelection as HistoryContentSelection
+} from "./StreamArtistRecoveredHistoryContentSelection.sol";
+import {
+    StreamArtistRecoveredHistoryContentStage as HistoryContentStage
+} from "./StreamArtistRecoveredHistoryContentStage.sol";
+import {
     StreamArtistRecoveredSanctionStage as SanctionStage
 } from "./StreamArtistRecoveredSanctionStage.sol";
 import { StreamArtistRecoveredDisputeStage as DisputeStage } from "./StreamArtistRecoveredDisputeStage.sol";
@@ -111,7 +117,22 @@ library StreamArtistRecoveredPreparation {
                 context.identity, c.provenance, c.source.owners[2], payoutContinuations
             );
         uint8 consentMode;
-        if (SanctionStage.selected(c.provenance)) {
+        (uint8 historyRoute, bool sanctioned) =
+            HistoryContentSelection.select(c.source, prepared.query, c.provenance);
+        if (historyRoute == 3) {
+            if (context.hasAttestations) revert T.UnsupportedProfile();
+            context.features |= RH.DISPUTE_HISTORY | RH.HISTORY_CONTENT;
+            if (sanctioned) context.features |= RH.SANCTION_HISTORY;
+            (context.generations, context.consent, consentMode, context.hasGenerations) =
+                HistoryContentStage.collect(
+                    c.source,
+                    prepared.query,
+                    c.provenance,
+                    context.identity,
+                    context.economics,
+                    royaltyFreezes
+                );
+        } else if (historyRoute == 2) {
             if (context.hasAttestations) revert T.UnsupportedProfile();
             context.features |= RH.DISPUTE_HISTORY | RH.SANCTION_HISTORY;
             (context.generations, context.consent, consentMode, context.hasGenerations) =
@@ -123,7 +144,7 @@ library StreamArtistRecoveredPreparation {
                     context.economics,
                     royaltyFreezes.length
                 );
-        } else if (DisputeSelection.selected(c.source,prepared.query,c.provenance)) {
+        } else if (historyRoute == 1) {
             if (context.hasAttestations) revert T.UnsupportedProfile();
             context.features |= RH.DISPUTE_HISTORY;
             (context.generations,context.consent,consentMode,context.hasGenerations) = DisputeStage.collect(

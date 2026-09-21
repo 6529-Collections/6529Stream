@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredHistoryContentOwnerImport as HistoryContentOwnerImport
+} from "./StreamArtistRecoveredHistoryContentOwnerImport.sol";
+import {
+    StreamArtistRecoveredHistoryContentImport as HistoryContentImport
+} from "./StreamArtistRecoveredHistoryContentImport.sol";
+import {
     StreamArtistRecoveredSanctionConsentImport as SanctionImport
 } from "./StreamArtistRecoveredSanctionConsentImport.sol";
 import {
@@ -89,7 +95,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function recoveryApprovalRecord(bytes32 recordHash)
         external
         view
-        returns (Recovery.ApprovalRecord memory, Approval.Admission memory)
+        returns (Recovery.ApprovalRecord calldata, Approval.Admission calldata)
     {
         _returnSanction(
             StreamArtistRecoveryApprovalState.recordEncodedRead(_recoveryApprovals, recordHash)
@@ -137,18 +143,18 @@ contract StreamArtistConsentFinalityLifecycle is
         return (hash, _sanctions.records[hash]);
     }
 
-    function sanctionRecord(bytes32 recordHash) external view returns (S.Record memory) {
+    function sanctionRecord(bytes32 recordHash) external view returns (S.Record calldata) {
         _returnSanction(StreamArtistSanctionState.recordEncodedRead(_sanctions, recordHash));
     }
 
-    function sanctionArchiveBytes(bytes32 recordHash) external view returns (bytes memory) {
+    function sanctionArchiveBytes(bytes32 recordHash) external view returns (bytes calldata) {
         _returnSanction(StreamArtistSanctionState.archiveEncodedRead(_sanctions, recordHash));
     }
 
     function sanctionArchiveFacts(bytes32 recordHash)
         external
         view
-        returns (IStreamArtistSanctionArchiveFacts.Facts memory)
+        returns (IStreamArtistSanctionArchiveFacts.Facts calldata)
     {
         _returnSanction(StreamArtistSanctionState.factsEncodedRead(_sanctions, recordHash));
     }
@@ -183,7 +189,7 @@ contract StreamArtistConsentFinalityLifecycle is
         _forwardConsentWriter();
     }
 
-    function saleConsentRecord(bytes32 recordHash) external view returns (Sale.Record memory) {
+    function saleConsentRecord(bytes32 recordHash) external view returns (Sale.Record calldata) {
         _returnSanction(StreamArtistConsentReadEncoding.sale(_saleRecords, recordHash));
     }
 
@@ -248,7 +254,7 @@ contract StreamArtistConsentFinalityLifecycle is
         external
         view
         override
-        returns (Association memory)
+        returns (Association calldata)
     {
         _returnSanction(
             StreamArtistConsentReadEncoding.association(_economicsAssociations, recordHash)
@@ -258,7 +264,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function firstReleaseRatification(uint256 collectionId)
         external
         view
-        returns (T.RatificationRecord memory)
+        returns (T.RatificationRecord calldata)
     {
         _returnSanction(
             StreamArtistConsentReadEncoding.firstRatification(_ratifications, collectionId)
@@ -268,7 +274,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function ratificationRecord(bytes32 record)
         external
         view
-        returns (T.RatificationRecord memory)
+        returns (T.RatificationRecord calldata)
     {
         _returnSanction(StreamArtistConsentReadEncoding.ratification(_ratificationRecords, record));
     }
@@ -415,7 +421,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function contentConsentRecord(bytes32 recordHash)
         external
         view
-        returns (IStreamArtistContentRecordsOwner.ConsentRecord memory)
+        returns (IStreamArtistContentRecordsOwner.ConsentRecord calldata)
     {
         _returnSanction(StreamArtistConsentReadEncoding.content(_contentConsents, recordHash));
     }
@@ -423,7 +429,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function contentConsentAt(Content.Consent calldata p, uint64 generation)
         external
         view
-        returns (IStreamArtistContentRecordsOwner.ConsentRecord memory)
+        returns (IStreamArtistContentRecordsOwner.ConsentRecord calldata)
     {
         _returnSanction(
             StreamArtistConsentReadEncoding.contentAt(
@@ -435,7 +441,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function contentFreezeRecord(bytes32 recordHash)
         external
         view
-        returns (Content.FreezeRecord memory)
+        returns (Content.FreezeRecord calldata)
     {
         _returnSanction(StreamArtistConsentReadEncoding.freeze(_contentFreezes, recordHash));
     }
@@ -445,7 +451,7 @@ contract StreamArtistConsentFinalityLifecycle is
         uint64 generation,
         address metadata,
         bytes32 lockClass
-    ) external view returns (Content.FreezeRecord memory) {
+    ) external view returns (Content.FreezeRecord calldata) {
         _returnSanction(
             StreamArtistConsentReadEncoding.freezeAt(
                     _contentFreezes,
@@ -582,7 +588,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.SANCTION_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.HISTORY_CONTENT_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -597,6 +603,28 @@ contract StreamArtistConsentFinalityLifecycle is
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 6)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (HistoryContentImport.selected(p.typedState)) {
+                HistoryContentOwnerImport.applyState(
+                    _sanctions,
+                    _policies,
+                    _economics,
+                    _associatedEconomicsRecords,
+                    _economicsAssociations,
+                    _recordDelegation,
+                    _saleRecords,
+                    _latestSaleConsents,
+                    _contentConsents,
+                    _latestContentConsent,
+                    _royaltyFreezes,
+                    _contentFreezes,
+                    _latestContentFreeze,
+                    _ratifications,
+                    _ratificationRecords,
+                    q,
+                    p.typedState
+                );
+                return;
+            }
             if (RecoveredSanctions.selected(p.typedState)) {
                 SanctionImport.importState(
                     _sanctions,

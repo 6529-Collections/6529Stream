@@ -88,9 +88,11 @@ production deployment/gas limits remain unchanged. Repeated catalogue scans and
 complete provenance have material cost; type checking or fitting bytecode does
 not establish maximum-size or transaction-gas acceptance.
 
-Platform declarations, native attestation 24, content/freeze/ratification
-combinations and multi-Artist/multi-collection composition remain required
-following work. They continue to fail before import rather than lose records.
+Content/freeze/ratification combinations use the separate
+[HISTORY_CONTENT profile](artist-recovered-history-content.md); this earlier
+sanction codec stays unchanged. Platform declarations, native attestation 24 and
+multi-Artist/multi-collection composition remain required following work. They
+continue to fail before import rather than lose records.
 
 ## Evidence scope
 
