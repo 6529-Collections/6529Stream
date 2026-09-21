@@ -573,6 +573,18 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
   if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n) throw Error("Unsupported internal recovered profile");
   const multiple = knownFeatures === 262175n;
   const coder = AbiCoder.defaultAbiCoder();
+  const schemaTypes = new Map<string, ParamType>();
+
+  // Cache immutable schemas, never supplied values or observations. Keep legacy
+  // adapters on their original path and bound even private caller-selected types.
+  function schemaType(tuple: string): ParamType {
+    if (!multiple || typeof tuple !== "string" || tuple.length > 65_536) return ParamType.from(tuple);
+    const existing = schemaTypes.get(tuple);
+    if (existing) return existing;
+    const parsed = ParamType.from(tuple);
+    if (schemaTypes.size < 128) schemaTypes.set(tuple, parsed);
+    return parsed;
+  }
 
   const ZERO = ZeroHash as Hex;
 
@@ -658,7 +670,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
   }
 
   function normalize<T>(tuple: string, value: T): T {
-    const type = ParamType.from(tuple);
+    const type = schemaType(tuple);
     if (multiple) {
       // Closed aggregate profile: budget the entire supplied tree before allocating copies.
       let size = 0;
@@ -698,19 +710,20 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
   }
 
   function encode(types: readonly string[], values: readonly unknown[]): Hex {
-    return bytes(coder.encode(types, values));
+    return bytes(coder.encode(multiple ? types.map(schemaType) : types, values));
   }
 
   function decode<T>(tuple: string, raw: Hex, maximum = ARTIST_RECOVERED_HYDRATION_MAX_BYTES): T {
     const input = bytes(raw, undefined, maximum);
-    const type = ParamType.from(tuple);
-    const result = normalizeValue(type, plain(type, coder.decode([tuple], input)[0])) as T;
-    if (coder.encode([tuple], [result]) !== input) throw Error("Noncanonical recovered hydration bytes");
+    const type = schemaType(tuple);
+    const types = multiple ? [type] : [tuple];
+    const result = normalizeValue(type, plain(type, coder.decode(types, input)[0])) as T;
+    if (coder.encode(types, [result]) !== input) throw Error("Noncanonical recovered hydration bytes");
     return result;
   }
 
   function hash(types: readonly string[], values: readonly unknown[]): Hex {
-    return keccak256(coder.encode(types, values)) as Hex;
+    return keccak256(coder.encode(multiple ? types.map(schemaType) : types, values)) as Hex;
   }
 
   function same(type: string, a: unknown, b: unknown): boolean {

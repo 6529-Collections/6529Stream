@@ -184,10 +184,21 @@ export const ARTIST_RECOVERED_MULTIPLE_HYDRATION_STATE_TUPLE = `tuple(${ARTIST_H
 export interface ArtistRecoveredMultipleHydrationState { readonly artists: readonly ArtistHydrationQuery[]; readonly collections: readonly ArtistHydrationQuery[]; readonly rows: readonly Hex[]; }
 
 const coder = AbiCoder.defaultAbiCoder();
+const schemaTypes = new Map<string, ParamType>();
+// Preserve complete named schemas. Only immutable ABI types are retained; supplied
+// values, encoded payloads, hashes and contextual observations are always checked.
+function schemaType(tuple: string): ParamType {
+  if (typeof tuple !== "string" || tuple.length > 65_536) return ParamType.from(tuple);
+  const existing = schemaTypes.get(tuple);
+  if (existing) return existing;
+  const parsed = ParamType.from(tuple);
+  if (schemaTypes.size < 128) schemaTypes.set(tuple, parsed);
+  return parsed;
+}
 const Z = ZeroHash as Hex;
-const hash = (types: readonly string[], values: readonly unknown[]): Hex => keccak256(coder.encode(types, values)) as Hex;
+const hash = (types: readonly string[], values: readonly unknown[]): Hex => keccak256(coder.encode(types.map(schemaType), values)) as Hex;
 const same = (type: string, a: unknown, b: unknown): boolean => hash([type], [a]) === hash([type], [b]);
-const stateType = ParamType.from(ARTIST_RECOVERED_MULTIPLE_HYDRATION_STATE_TUPLE);
+const stateType = schemaType(ARTIST_RECOVERED_MULTIPLE_HYDRATION_STATE_TUPLE);
 const payoutSchema = id("6529STREAM_ARTIST_RECOVERED_PAYOUT_HYDRATION_V1");
 
 /** Before ABI decoding, bound every dynamic allocation, including repeated offset aliases. */
@@ -237,7 +248,7 @@ function preflight(types: readonly string[], raw: Hex, maximum = shared.ARTIST_R
     } else if (at + 32 > bytes) throw Error("Truncated recovered ABI word");
     if (materialized > maximum) throw Error("Recovered ABI cumulative allocation capacity");
   };
-  visit(ParamType.from(`tuple(${types.join(",")})`), 0, 0);
+  visit(schemaType(`tuple(${types.join(",")})`), 0, 0);
   return input;
 }
 
@@ -249,9 +260,10 @@ function plain(t: ParamType, value: any): unknown {
 
 function decode<T>(type: string, raw: Hex): T {
   const bytes = preflight([type], raw);
-  const result = coder.decode([type], bytes);
-  if (coder.encode([type], result) !== bytes) throw Error("Noncanonical multiple row");
-  return codec.normalizeTuple(type, plain(ParamType.from(type), result[0]) as T);
+  const parsed = schemaType(type);
+  const result = coder.decode([parsed], bytes);
+  if (coder.encode([parsed], result) !== bytes) throw Error("Noncanonical multiple row");
+  return codec.normalizeTuple(type, plain(parsed, result[0]) as T);
 }
 
 /** Structural tuple only. validateState adds the original complete membership predicates. */
@@ -320,9 +332,10 @@ export function decodeArtistRecoveredMultipleHydrationState(
   raw: Hex, index: ArtistHydrationOwnerIndex, provenance: shared.ArtistRecoveredHydrationOwnerProvenance,
 ): ArtistRecoveredMultipleHydrationState {
   const types = ["bytes32", "uint16", "uint8", ARTIST_RECOVERED_MULTIPLE_HYDRATION_STATE_TUPLE];
-  const bytes = preflight(types, raw), result = coder.decode(types, bytes);
+  const parsed = types.map(schemaType);
+  const bytes = preflight(types, raw), result = coder.decode(parsed, bytes);
   if (result[0] !== ARTIST_RECOVERED_MULTIPLE_HYDRATION_SCHEMA || result[1] !== 1n || result[2] !== BigInt(index)
-    || coder.encode(types, result) !== bytes) throw Error("Noncanonical multiple State tag/version/owner");
+    || coder.encode(parsed, result) !== bytes) throw Error("Noncanonical multiple State tag/version/owner");
   return validateArtistRecoveredMultipleHydrationState(index, plain(stateType, result[3]) as ArtistRecoveredMultipleHydrationState, provenance);
 }
 
@@ -341,10 +354,11 @@ export function encodeArtistRecoveredMultipleHydrationPayout(value: ArtistRecove
 }
 export function decodeArtistRecoveredMultipleHydrationPayout(raw: Hex): ArtistRecoveredMultipleHydrationPayout {
   const types = ["bytes32", ARTIST_RECOVERED_MULTIPLE_HYDRATION_PAYOUT_TUPLE];
-  const bytes = preflight(types, raw), v = coder.decode(types, bytes);
-  if (v[0] !== payoutSchema || coder.encode(types, v) !== bytes) throw Error("Noncanonical recovered Payout row");
+  const parsed = types.map(schemaType);
+  const bytes = preflight(types, raw), v = coder.decode(parsed, bytes);
+  if (v[0] !== payoutSchema || coder.encode(parsed, v) !== bytes) throw Error("Noncanonical recovered Payout row");
   return codec.normalizeTuple(ARTIST_RECOVERED_MULTIPLE_HYDRATION_PAYOUT_TUPLE,
-    plain(ParamType.from(ARTIST_RECOVERED_MULTIPLE_HYDRATION_PAYOUT_TUPLE), v[1]) as ArtistRecoveredMultipleHydrationPayout);
+    plain(schemaType(ARTIST_RECOVERED_MULTIPLE_HYDRATION_PAYOUT_TUPLE), v[1]) as ArtistRecoveredMultipleHydrationPayout);
 }
 
 export type ArtistRecoveredMultipleHydrationNonceLane = ArtistRecoveredMultipleHydrationIdentity["nonces"][number];
@@ -421,7 +435,7 @@ export function artistRecoveredMultipleHydrationBindingHash(
   value: ArtistRecoveredMultipleHydrationBinding["item"],
 ): Hex {
   const o = codec.normalizeArtistRecoveredHydrationOriginEnvironment(origin);
-  const itemType = ParamType.from(ARTIST_RECOVERED_MULTIPLE_HYDRATION_BINDING_TUPLE).components!.find(c => c.name === "item")!;
+  const itemType = schemaType(ARTIST_RECOVERED_MULTIPLE_HYDRATION_BINDING_TUPLE).components!.find(c => c.name === "item")!;
   const b = codec.normalizeTuple(itemType.format("full"), value);
   if (typeof collectionId !== "bigint" || collectionId < 0n || collectionId >= 1n << 256n) throw Error("Expected collection uint256");
   return hash(["bytes32", "uint256", "address", "address", "uint256", "uint64", "bytes32", "address", "bytes32", "uint8", "uint8", "uint8", "bytes32", "bytes32"],
@@ -468,7 +482,7 @@ function collectionRows(index: ArtistHydrationOwnerIndex, s: ArtistRecoveredMult
       const b = decode<ArtistRecoveredMultipleHydrationBinding>(ARTIST_RECOVERED_MULTIPLE_HYDRATION_BINDING_TUPLE, s.rows[i]!);
       const j = occurrence(p, q, 1n, q.bindingHash), e = era(j.position.point.environmentHash);
       counts[e] = counts[e]! + 1n; records++;
-      const fields = ParamType.from(ARTIST_RECOVERED_MULTIPLE_HYDRATION_BINDING_TUPLE).components!;
+      const fields = schemaType(ARTIST_RECOVERED_MULTIPLE_HYDRATION_BINDING_TUPLE).components!;
       if (!same(fields[0]!.format("full"), b.scope, scope) || b.provenanceCommitment !== commitment
         || b.item.artistId !== q.artistId || b.item.bindingHash !== q.bindingHash || b.item.artistAddress === ZeroAddress
         || b.item.identityRecordHash === Z || b.item.proposer === ZeroAddress || b.item.generation !== 1n || !b.item.accepted

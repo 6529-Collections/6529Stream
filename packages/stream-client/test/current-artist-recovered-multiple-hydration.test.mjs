@@ -5,6 +5,7 @@ import * as m from "../dist/current-artist-recovered-multiple-hydration.js";
 import * as old from "../dist/current-artist-recovered-hydration.js";
 import * as consent from "../dist/current-artist-recovered-consent-hydration.js";
 import * as h from "../dist/current-artist-authority-hydration.js";
+import { createArtistRecoveredHydrationCodec } from "../dist/internal/artist-recovered-hydration-codec.js";
 import { fixture, compiledInterfaces, compiledLibraryValueInterface, libraryValueABI } from "./current-artist-recovered-multiple-hydration-source-fixture.mjs";
 
 const coder = AbiCoder.defaultAbiCoder(), Z = ZeroHash;
@@ -375,6 +376,65 @@ test("strict owned values, immutable copies and aggregate allocation guards prec
   assert.throws(() => m.normalizeArtistRecoveredMultipleHydrationState(state), /allocation/);
   const hugeCount = "0x" + "ff".repeat(32);
   assert.throws(() => m.decodeArtistRecoveredMultipleHydrationIdentity(hugeCount), /offset|allocation/);
+});
+
+test("warm Identity schemas avoid reparsing while preserving ABI bytes and fresh value validation", () => {
+  const f = sample(), identity = f.identities[0];
+  const expected = coder.encode([T.identity], [identity]);
+  assert.equal(m.encodeArtistRecoveredMultipleHydrationIdentity(identity), expected);
+  const saved = m.decodeArtistRecoveredMultipleHydrationIdentity(expected);
+  assert.deepEqual(saved, identity);
+  const original = ParamType.from;
+  let parsedStrings = 0;
+  ParamType.from = function(value, ...args) {
+    if (typeof value === "string") parsedStrings++;
+    return Reflect.apply(original, this, [value, ...args]);
+  };
+  try {
+    assert.equal(m.encodeArtistRecoveredMultipleHydrationIdentity(identity), expected);
+    assert.deepEqual(m.decodeArtistRecoveredMultipleHydrationIdentity(expected), saved);
+    identity.nonces[0].words[0].words[31] = 9n;
+    const changed = m.encodeArtistRecoveredMultipleHydrationIdentity(identity);
+    assert.notEqual(changed, expected);
+    assert.equal(changed, coder.encode([T.identity], [identity]));
+    assert.equal(saved.nonces[0].words[0].words[31], 0n);
+    identity.nextRegistrationNonce = 2;
+    assert.throws(() => m.encodeArtistRecoveredMultipleHydrationIdentity(identity), /bigint/);
+    Object.defineProperty(identity, "nextRegistrationNonce", { get() { throw Error("Getter must not execute"); } });
+    assert.throws(() => m.normalizeArtistRecoveredMultipleHydrationIdentity(identity), /owned/);
+    assert.throws(() => m.decodeArtistRecoveredMultipleHydrationIdentity(expected + "00".repeat(32)), /canonical/);
+    assert.equal(parsedStrings, 0, "warm known schemas must not be reparsed for each payload");
+  } finally {
+    ParamType.from = original;
+  }
+});
+
+test("schema reuse retains tuple field names and validation after the private cache fills", () => {
+  const engine = createArtistRecoveredHydrationCodec(262175n);
+  const left = "tuple(uint256 source)", right = "tuple(uint256 destination)";
+  const input = { source: 7n }, saved = engine.normalizeTuple(left, input);
+  const bytes = coder.encode([left], [input]);
+  assert.deepEqual(engine.decodeTuple(left, bytes), { source: 7n });
+  assert.deepEqual(engine.decodeTuple(right, bytes), { destination: 7n });
+  assert.throws(() => engine.normalizeTuple(right, input), /exact/);
+  // JavaScript callers of the private engine can still supply mutable ABI objects.
+  const schema = { type: "tuple", components: [{ type: "uint256", name: "before" }] };
+  assert.deepEqual(engine.normalizeTuple(schema, { before: 7n }), { before: 7n });
+  schema.components[0].name = "after";
+  assert.deepEqual(engine.decodeTuple(schema, bytes), { after: 7n });
+  assert.throws(() => engine.normalizeTuple(schema, { before: 7n }), /exact/);
+  for (let i = 0; i < 130; i++) {
+    const name = `field${i}`, type = `tuple(uint256 ${name})`;
+    assert.deepEqual(engine.decodeTuple(type, bytes), { [name]: 7n });
+  }
+  input.source = 8n;
+  assert.equal(saved.source, 7n);
+  assert.equal(engine.encodeTupleValues([left], [engine.normalizeTuple(left, input)]), coder.encode([left], [input]));
+  assert.throws(() => engine.decodeTuple(right, bytes + "00".repeat(32)), /canonical/);
+  assert.throws(() => engine.normalizeTuple(left, { source: 8 }), /bigint/);
+  // Oversize valid schema keys remain accepted but are parsed without retention.
+  const longName = "x".repeat(65_536), longType = `tuple(uint256 ${longName})`;
+  assert.deepEqual(engine.normalizeTuple(longType, { [longName]: 9n }), { [longName]: 9n });
 });
 
 test("same original owner commitment transition is applied once across a plural graph", () => {
