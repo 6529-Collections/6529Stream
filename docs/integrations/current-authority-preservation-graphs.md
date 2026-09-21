@@ -150,8 +150,34 @@ The complete proposal, rather than its inner basic proposal, must be authorized.
 drift; `viewFinalitySources()` revalidates the operative source bindings. Neither
 getter substitutes for current reference, inventory, archive or Finality
 evidence. This thin forwarding layer retains the four constructor arguments and
-source-configuration hash formula. Complete VIEW ceremony and media review
-integration remain separately tracked work.
+source-configuration hash formula.
+
+VIEW Finality dispatch uses the separately reviewed shared Configuration,
+Components, Metadata and Operations workers with the original constructor-owned
+configuration. The provider selects VIEW before probing token-preservation
+graphs in all ten source, component, manifest, input, review, prepared and
+metadata surfaces. Both prepared entrypoints first authenticate the original
+Registry caller and runtime. Pending or invalid VIEW sources fail on that route;
+they cannot fall back to a token or collection profile. Other scopes keep their
+existing dispatch and fixed token-family checks. Native execution and complete
+VIEW ceremony acceptance remain pending.
+
+The [actual current-authority VIEW binding tests](../../test/current/StreamCurrentAuthorityViewCompleteBinding.t.sol)
+use a distinct [constructor fixture](../../test/helpers/StreamCurrentAuthorityViewCompleteBindingFixture.sol)
+over the real current-authority graph. They check the original inventory's full
+profile, source, origin and authority commitment through complete binding and
+catalogue dispatch. That commitment differs from a hash of the ordinary source
+tuple alone. The shared original-anchor reader must authenticate the complete
+original configuration without replacing it with projected current sources.
+
+The positive construction and Safe binding use real contracts. Runtime drift
+and explicitly injected getter faults exercise refusal, retained historical
+receipts and restored retries. These are source-identity and admission cases;
+they do not mint artwork, publish observations or prove a complete VIEW Finality
+ceremony. The VIEW renderer uses its required original attribution profile; the
+current-Artist token producer remains a separate interface and family. The
+typed dispatch cases separately isolate all ten host routes and prepared-call
+guards, and do not replace this genuine configuration coverage.
 
 Preservation excludes only sanction-derived display. It does not freeze or
 ignore C2PA, claims, corrections or other provenance changes. Such changes can

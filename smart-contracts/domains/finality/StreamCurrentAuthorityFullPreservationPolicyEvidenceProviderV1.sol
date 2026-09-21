@@ -93,11 +93,23 @@ import {
 import {
     StreamFinalityViewPreservationCompleteBindingTypesV1 as CompleteViewBinding
 } from "../../interfaces/stream/finality/StreamFinalityViewPreservationCompleteBindingTypesV1.sol";
+import {
+    StreamFinalityViewPreservationConfigurationV1 as ViewConfiguration
+} from "./StreamFinalityViewPreservationConfigurationV1.sol";
+import {
+    StreamFinalityViewPreservationComponentsV1 as ViewComponents
+} from "./StreamFinalityViewPreservationComponentsV1.sol";
+import {
+    StreamFinalityViewPreservationMetadataV1 as ViewMetadata
+} from "./StreamFinalityViewPreservationMetadataV1.sol";
+import {
+    StreamFinalityViewPreservationOperationsV1 as ViewOperations
+} from "./StreamFinalityViewPreservationOperationsV1.sol";
 
 /// @notice Current-authority provider for original static and genuine preservation graphs.
 /// @dev COLLECTION/scoped catalogues are constructor-only; VIEW is one-time class2 bound. Current canonical Router profile
 /// chooses the collection branch; no source receipt is cast across profiles. Prior deployment
-/// identities and records are not inherited. VIEW retains its separately implemented route.
+/// identities and records are not inherited. VIEW uses its separately bound complete sources.
 contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
     StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2,
     Catalogue,
@@ -390,6 +402,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (Profiles.Sources memory)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewConfiguration.catalogue(_graph.original, scope);
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             return GraphSelection.sources(_graph, scope);
         }
@@ -426,6 +441,18 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (StreamFinalityHostComponentFacts memory f)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            (f.frozen, f.dataHash) = ViewComponents.facts(_graph.original, scope, family);
+            if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
+                f.moduleVersion = metadataModuleVersion;
+                f.manifestHash = metadataModuleManifestHash;
+            } else {
+                componentHost(family);
+                f.moduleVersion = routerModuleVersion;
+                f.manifestHash = routerModuleManifestHash;
+            }
+            return f;
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             ScopedPolicyReads.Config memory configured = _scopedPolicyConfig(scope);
             _pins();
@@ -477,6 +504,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes memory)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewOperations.manifest(_graph.original, scope);
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             return ScopedPolicyOperations.manifest(_scopedPolicyConfig(scope), scope);
         }
@@ -490,6 +520,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (StreamFinalityScopeInputs memory, bytes32, bytes32)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewOperations.inputs(_graph.original, scope, manifestHash);
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             return ScopedPolicyOperations.inputs(_scopedPolicyConfig(scope), scope, manifestHash);
         }
@@ -503,6 +536,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (IStreamFinalitySanctionReview.ReviewFacts memory)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewOperations.review(_graph.original, scope, manifestHash);
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             return ScopedPolicyOperations.review(_scopedPolicyConfig(scope), scope, manifestHash);
         }
@@ -516,6 +552,11 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         StreamFinalityComponentExpectation[] calldata components
     ) public view override returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
         _originalRegistry();
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            (StreamFinalityScopeInputs memory inputs_, bytes32 schema_, bytes32 canon_,) =
+                ViewOperations.prepared(_graph.original, scope, manifestHash, components, false);
+            return (inputs_, schema_, canon_);
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             (StreamFinalityScopeInputs memory inputs_, bytes32 schema_, bytes32 canon_,) = ScopedPolicyOperations.prepared(
                 _scopedPolicyConfig(scope), scope, manifestHash, components, false
@@ -547,6 +588,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         )
     {
         _originalRegistry();
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewOperations.prepared(_graph.original, scope, manifestHash, components, true);
+        }
         if (GraphSelection.isPolicy(_graph, scope)) {
             return ScopedPolicyOperations.prepared(
                 _scopedPolicyConfig(scope), scope, manifestHash, components, true
@@ -613,6 +657,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes32, uint64, bytes32)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewMetadata.root(_graph.original, scope);
+        }
         if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedContentRoot(scope);
         return ScopedPolicyMetadata.root(
             _metadataConfigV2(scope), scope, keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")
@@ -625,6 +672,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bytes32)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewMetadata.snapshot(_graph.original, scope);
+        }
         if (!GraphSelection.isPolicy(_graph, scope)) {
             return super.scopedSnapshotHash(scope);
         }
@@ -639,6 +689,9 @@ contract StreamCurrentAuthorityFullPreservationPolicyEvidenceProviderV1 is
         override
         returns (bool, bytes32)
     {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewMetadata.manifest(_graph.original, scope);
+        }
         if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedManifest(scope);
         return ScopedPolicyMetadata.manifest(
             _metadataConfigV2(scope), scope, keccak256("6529STREAM_TOKEN_PRESERVATION_FAMILY_V2")

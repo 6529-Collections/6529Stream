@@ -9,6 +9,17 @@
 - Add only the current profile's preservation-schema read permission. Native
   execution and transaction-cap acceptance remain pending.
 
+## Current-authority VIEW Finality dispatch
+
+- Route all ten VIEW Finality surfaces through the shared bound-source workers
+  before token-preservation graph selection. Keep original Registry caller and
+  runtime guards before both prepared entrypoints.
+- Preserve other scope routes, the constructor and source hash formula. Add
+  nine focused dispatch cases and four actual current-graph binding cases with
+  the complete original inventory commitment, Safe admission, drift refusal,
+  historical receipts and restored retries. Native and complete VIEW ceremony
+  execution remain pending.
+
 ## Current-authority complete VIEW source binding
 
 - Forward the shared complete VIEW admission API through the current-authority
