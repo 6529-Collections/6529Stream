@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Collection script and dependency preservation](COLLECTION-SCRIPT-DEPENDENCY-V1.md)
+replays exact current and original bundle observations, native commitments and
+available bytes while retaining unavailable outcomes and original registry pins.
+
 [Native semantic export](CANONICAL-SEMANTIC-EXPORT-V1.md) selects from replayed
 WORK, owner and condition evidence with a fixed occurrence inventory, original
 authority, attributed alternatives and offline Linked Art expansion.

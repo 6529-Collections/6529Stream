@@ -1266,6 +1266,10 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add offline collection script and dependency preservation with exact native
+  manifest and bundle commitments, original registry versions and explicit
+  unavailable outcomes, without execution or external URI retrieval claims.
+
 - Add native semantic selection and offline expansion for canonical dossiers,
   preserving all source occurrences, original authority, conflicting statements,
   exact model dependencies and unchanged dossier acceptance requirements.
