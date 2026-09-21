@@ -64,6 +64,36 @@ test('Safe1.3 and1.4 canonical signed envelopes reconcile both event layouts thr
   for(const version of ['1.3.0','1.4.1'])for(const layout of ['legacy','indexed']){const x=setup('output',{version}),p=await x.driver.captureScenario(x.scenario),s=await x.driver.saveSignedEnvelope(p.id,x.envelope(p)),t=x.mine(p,s,layout),r=await x.driver.inspectSubmission(s.id,t.hash);assert.equal(r.outcome,'success');assert.equal(r.observations.nonceAfter,8n);assert.equal(r.safeSignaturesRetryable,false);assert.ok(r.reconciled);}
 });
 
+test('Safe post-execution guard logs follow success without breaking original family reconciliation',async()=>{
+  for(const family of ['output','snapshot','reference','inventory','archive']){
+    const x=setup(family),p=await x.driver.captureScenario(x.scenario),s=await x.driver.saveSignedEnvelope(p.id,x.envelope(p)),t=x.mine(p,s),r=x.receipt(t),execution=r.logs.at(-1);
+    r.logs.push({...execution,address:A(9100),topics:[H(9101)],data:'0x',index:execution.index+1});
+    const result=await x.driver.inspectSubmission(s.id,t.hash);
+    assert.equal(result.outcome,'success');assert.ok(result.reconciled);assert.equal(result.observations.nonceAfter,8n);
+  }
+  const x=setup(),p=await x.driver.captureScenario(x.scenario),s=await x.driver.saveSignedEnvelope(p.id,x.envelope(p,{safeTxGas:3000000n})),t=x.mine(p,s,'indexed','failure'),r=x.receipt(t),execution=r.logs.at(-1);
+  r.logs.push({...execution,address:A(9100),topics:[H(9101)],data:'0x',index:execution.index+1});
+  const result=await x.driver.inspectSubmission(s.id,t.hash);
+  assert.equal(result.outcome,'safe-execution-failure');assert.equal(result.safeSignaturesRetryable,false);assert.equal(result.reconciled,null);
+});
+
+test('guard logs do not permit duplicate, malformed or wrong-hash Safe execution events',async()=>{
+  for(const layout of ['legacy','indexed']){
+    const x=setup(),p=await x.driver.captureScenario(x.scenario),s=await x.driver.saveSignedEnvelope(p.id,x.envelope(p)),t=x.mine(p,s,layout),r=x.receipt(t),execution=structuredClone(r.logs.at(-1));
+    r.logs.push({...execution,index:execution.index+1});await assert.rejects(x.driver.inspectSubmission(s.id,t.hash),/nonce\/event attribution/);
+    r.logs.pop();r.logs[r.logs.length-1]={...execution,data:execution.data+'00'};
+    await assert.rejects(x.driver.inspectSubmission(s.id,t.hash),/hash\/encoding differs/);
+    const eventInterface=layout==='indexed'?indexed:safeABI,wrong=eventInterface.encodeEventLog('ExecutionSuccess',[H(9102),0n]);
+    r.logs[r.logs.length-1]={...execution,...wrong};await assert.rejects(x.driver.inspectSubmission(s.id,t.hash),/hash\/encoding differs/);
+  }
+});
+
+test('application events must still precede Safe success even when later guard logs are permitted',async()=>{
+  const x=setup(),p=await x.driver.captureScenario(x.scenario),s=await x.driver.saveSignedEnvelope(p.id,x.envelope(p)),t=x.mine(p,s),r=x.receipt(t),execution=r.logs.pop(),application=r.logs.pop();
+  assert.ok(application);r.logs.push({...execution,index:application.index},{...application,index:execution.index});
+  await assert.rejects(x.driver.inspectSubmission(s.id,t.hash),/Original events must precede Safe success/);
+});
+
 test('save once preserves exact Safe bytes; wrong inner CALL, signatures, independent hash or nonce rejects',async()=>{
   const x=setup(),p=await x.driver.captureScenario(x.scenario),valid=x.envelope(p);
   for(const fields of [{operation:1n},{to:A(991)},{value:1n},{data:'0x1234'}])await assert.rejects(x.driver.saveSignedEnvelope(p.id,x.envelope(p,fields)),/inner CALL/);

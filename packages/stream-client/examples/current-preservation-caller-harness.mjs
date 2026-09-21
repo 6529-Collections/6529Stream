@@ -196,7 +196,7 @@ export function createPreservationCallerHarness({provider,manifest: supplied}) {
     if(e.safe){nonceBefore=(await observeSafe(e.safe.address,n-1)).nonce;nonceAfter=(await observeSafe(e.safe.address,n)).nonce;if(nonceBefore!==e.nonce)throw Error('Prior Safe nonce differs');
       const events=receipt.logs.filter(l=>l.address===e.safe.address&&['ExecutionSuccess','ExecutionFailure'].some(name=>safeABI.getEvent(name).topicHash===l.topics[0])).map(l=>{const iface=l.topics.length===2?safeIndexed:safeABI;const parsed=iface.parseLog(l);const encoded=iface.encodeEventLog(parsed.fragment,parsed.args);if(encoded.data.toLowerCase()!==l.data||JSON.stringify(encoded.topics.map(x=>x.toLowerCase()))!==JSON.stringify(l.topics)||parsed.args.txHash.toLowerCase()!==e.expectedSafeTxHash)throw Error('Safe event hash/encoding differs');return{name:parsed.name,index:l.index};});
       if(receipt.status===0){if(receipt.logs.length||events.length||nonceAfter!==nonceBefore)throw Error('Reverted Safe attribution differs');outcome='safe-outer-reverted';}
-      else {if(events.length!==1||nonceAfter!==nonceBefore+1n||events[0].index!==last)throw Error('Safe nonce/event attribution differs');outcome=events[0].name==='ExecutionFailure'?'safe-execution-failure':'success';
+      else {if(events.length!==1||nonceAfter!==nonceBefore+1n)throw Error('Safe nonce/event attribution differs');outcome=events[0].name==='ExecutionFailure'?'safe-execution-failure':'success';
         if(outcome==='safe-execution-failure'&&e.fields.safeTxGas===0n&&e.fields.gasPrice===0n)throw Error('Impossible failure event for GS013 gas mode');
       }
     }else outcome=receipt.status===1?'success':'direct-outer-reverted';
