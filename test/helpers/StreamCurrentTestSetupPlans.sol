@@ -90,9 +90,9 @@ library StreamCurrentTestSetupPlans {
     }
 
     function operatingPolicies(
-        Targets memory t,
+        Targets calldata t,
         bytes32 deploymentHash,
-        GovernanceActionPolicyEntry[] memory additional
+        GovernanceActionPolicyEntry[] calldata additional
     ) public view returns (GovernanceActionPolicyEntry[] memory rows) {
         rows = new GovernanceActionPolicyEntry[](76 + additional.length);
         rows[0] =
