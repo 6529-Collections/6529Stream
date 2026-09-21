@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Current-authority preservation archive coverage](docs/current-authority-preservation-archive-v1.md)
+  covers five collection/scoped archive operations, exact original proofs,
+  resolver-selected archive origins and current coverage refresh.
+
 - [Current-authority preservation inventories](docs/current-authority-preservation-inventory-v1.md)
   covers collection/scoped materialization, captured Artist authority,
   original receipt witnesses and authenticated archive-origin history.

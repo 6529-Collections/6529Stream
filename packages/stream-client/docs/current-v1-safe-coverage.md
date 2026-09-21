@@ -150,6 +150,13 @@ original receipt witnesses, ordered archive origins and their runtime rows.
 The nominal V1 hosts use the fixed token preservation V2 family. Sealed
 inventory evidence and current eligibility remain separate from archive coverage.
 
+The [current-authority preservation archive client](current-authority-preservation-archive-v1.md)
+adds five operations per collection/scoped host under the ABI155 source witness.
+It preserves original proofs, exact V2 byte correspondence and ordered archive
+origins, with separate historical evidence and current coverage refresh.
+Initial automatic refresh observation chains remain observed-only; explicit
+refresh transitions can be reconstructed from their captured prior state.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a
