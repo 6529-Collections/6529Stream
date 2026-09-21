@@ -279,6 +279,154 @@ contract StreamPreservationPolicySnapshotFamiliesV2Test {
         Scoped.original(d, p.scope, r.recordHash, 1, Producers.FAMILY_PROFILE);
     }
 
+    function testScopedOriginalDefaultAndExplicitOverloadsReturnSameEvidence() public {
+        (Scoped.Dependencies memory d, S.Publication memory p, S.Receipt memory r) =
+            _scoped(false, StreamFinalityScopeType.TOKEN);
+        (S.Publication memory defaultP, S.Receipt memory defaultR) =
+            Scoped.original(d, p.scope, r.recordHash, 1);
+        (S.Publication memory explicitP, S.Receipt memory explicitR) =
+            Scoped.original(d, p.scope, r.recordHash, 1, Producers.ORIGINAL_PROFILE);
+        require(keccak256(abi.encode(defaultP, defaultR)) == keccak256(abi.encode(p, r)));
+        require(keccak256(abi.encode(explicitP, explicitR)) == keccak256(abi.encode(p, r)));
+        require(
+            keccak256(abi.encode(Scoped.requireCurrent(d, p.scope, r.recordHash, 1)))
+                == keccak256(
+                    abi.encode(
+                        Scoped.requireCurrent(
+                            d, p.scope, r.recordHash, 1, Producers.ORIGINAL_PROFILE
+                        )
+                    )
+                )
+        );
+        host.set(
+            abi.encodeCall(SI.snapshotLock, (p.scope)),
+            abi.encode(S.Lock(r.recordHash, 1, keccak256("action"), 100))
+        );
+        StreamFinalitySnapshotEvidence memory locked =
+            Scoped.requireLocked(d, p.scope, r.recordHash, 1);
+        require(locked.locked);
+        require(
+            keccak256(abi.encode(locked))
+                == keccak256(
+                    abi.encode(
+                        Scoped.requireLocked(
+                            d, p.scope, r.recordHash, 1, Producers.ORIGINAL_PROFILE
+                        )
+                    )
+                )
+        );
+    }
+
+    function testScopedWorkerPreservesFamilyThenScopeThenPinGuards() public {
+        (Scoped.Dependencies memory d, S.Publication memory p, S.Receipt memory r) =
+            _scoped(true, StreamFinalityScopeType.TOKEN);
+        d.coreCodeHash = 0;
+        p.scope.tokenId = 0;
+        bytes32 unknown = keccak256("unknown snapshot family");
+        vm.expectRevert(abi.encodeWithSelector(Families.InvalidSnapshotFamily.selector));
+        Scoped.original(d, p.scope, r.recordHash, 1, unknown);
+        vm.expectRevert(abi.encodeWithSelector(Families.InvalidSnapshotFamily.selector));
+        Scoped.requireCurrent(d, p.scope, r.recordHash, 1, unknown);
+        vm.expectRevert(abi.encodeWithSelector(Families.InvalidSnapshotFamily.selector));
+        Scoped.requireLocked(d, p.scope, r.recordHash, 1, unknown);
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamMetadataSubjects.InvalidMetadataScope.selector)
+        );
+        Scoped.original(d, p.scope, r.recordHash, 1, Producers.FAMILY_PROFILE);
+        p.scope.tokenId = 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(Scoped.InvalidScopedPreservationPolicySnapshotEvidence.selector)
+        );
+        Scoped.original(d, p.scope, r.recordHash, 1, Producers.FAMILY_PROFILE);
+    }
+
+    function testScopedWorkerRejectsTrailingRecordBytesForBothFamilies() public {
+        for (uint256 i; i < 2; ++i) {
+            (Scoped.Dependencies memory d, S.Publication memory p, S.Receipt memory r) =
+                _scoped(i == 1, StreamFinalityScopeType.TOKEN);
+            bytes32 family = i == 1 ? Producers.FAMILY_PROFILE : Producers.ORIGINAL_PROFILE;
+            bytes memory canonical = abi.encode(p, r);
+            host.set(
+                abi.encodeCall(SI.snapshotRecord, (r.recordHash)),
+                bytes.concat(canonical, bytes32(0))
+            );
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    Scoped.InvalidScopedPreservationPolicySnapshotEvidence.selector
+                )
+            );
+            Scoped.original(d, p.scope, r.recordHash, 1, family);
+            host.set(abi.encodeCall(SI.snapshotRecord, (r.recordHash)), canonical);
+            (S.Publication memory retainedP, S.Receipt memory retainedR) =
+                Scoped.original(d, p.scope, r.recordHash, 1, family);
+            require(keccak256(abi.encode(retainedP, retainedR)) == keccak256(canonical));
+        }
+    }
+
+    function testScopedWorkerKeepsFreshCurrentnessAndLockSeparateFromOriginal() public {
+        for (uint256 i; i < 2; ++i) {
+            (Scoped.Dependencies memory d, S.Publication memory p, S.Receipt memory r) =
+                _scoped(i == 1, StreamFinalityScopeType.TOKEN);
+            bytes32 family = i == 1 ? Producers.FAMILY_PROFILE : Producers.ORIGINAL_PROFILE;
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    Scoped.InvalidScopedPreservationPolicySnapshotEvidence.selector
+                )
+            );
+            Scoped.requireLocked(d, p.scope, r.recordHash, 1, family);
+            S.Receipt memory drift = abi.decode(abi.encode(r), (S.Receipt));
+            drift.sourceHash = keccak256("changed current source");
+            bytes memory currentCall =
+                abi.encodeCall(SI.requireCurrent, (p.scope, r.recordHash, uint64(1)));
+            host.set(currentCall, abi.encode(drift));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    Scoped.InvalidScopedPreservationPolicySnapshotEvidence.selector
+                )
+            );
+            Scoped.requireCurrent(d, p.scope, r.recordHash, 1, family);
+            (, S.Receipt memory retained) = Scoped.original(d, p.scope, r.recordHash, 1, family);
+            require(keccak256(abi.encode(retained)) == keccak256(abi.encode(r)));
+            host.set(currentCall, abi.encode(r));
+            bytes memory lockCall = abi.encodeCall(SI.snapshotLock, (p.scope));
+            host.set(lockCall, abi.encode(S.Lock(r.recordHash, 1, keccak256("action"), 100)));
+            require(Scoped.requireLocked(d, p.scope, r.recordHash, 1, family).locked);
+            host.set(lockCall, abi.encode(S.Lock(r.recordHash, 2, keccak256("action"), 100)));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    Scoped.InvalidScopedPreservationPolicySnapshotEvidence.selector
+                )
+            );
+            Scoped.requireCurrent(d, p.scope, r.recordHash, 1, family);
+            (, retained) = Scoped.original(d, p.scope, r.recordHash, 1, family);
+            require(keccak256(abi.encode(retained)) == keccak256(abi.encode(r)));
+        }
+    }
+
+    function testScopedWorkerRechecksEveryDependencyPinForBothFamilies() public {
+        for (uint256 i; i < 2; ++i) {
+            (Scoped.Dependencies memory d, S.Publication memory p, S.Receipt memory r) =
+                _scoped(i == 1, StreamFinalityScopeType.TOKEN);
+            bytes32 family = i == 1 ? Producers.FAMILY_PROFILE : Producers.ORIGINAL_PROFILE;
+            for (uint256 j; j < 4; ++j) {
+                Scoped.Dependencies memory changed =
+                    abi.decode(abi.encode(d), (Scoped.Dependencies));
+                if (j == 0) changed.coreCodeHash = 0;
+                else if (j == 1) changed.metadataCodeHash = 0;
+                else if (j == 2) changed.routerCodeHash = 0;
+                else changed.snapshotsCodeHash = 0;
+                vm.expectRevert(
+                    abi.encodeWithSelector(
+                        Scoped.InvalidScopedPreservationPolicySnapshotEvidence.selector
+                    )
+                );
+                Scoped.original(changed, p.scope, r.recordHash, 1, family);
+            }
+            (, S.Receipt memory retained) = Scoped.original(d, p.scope, r.recordHash, 1, family);
+            require(keccak256(abi.encode(retained)) == keccak256(abi.encode(r)));
+        }
+    }
+
     function testUnknownFamilyFailsBeforeReadingSources() public {
         Collection.Dependencies memory d;
         StreamFinalityScope memory scope;
