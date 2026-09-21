@@ -29,6 +29,14 @@
   Cases are type-checked; full current execution and added-frame gas remain pending.
   See the [frame note](docs/integrations/policy-inventory-current-frames.md).
 
+## Artist recovery history capacity
+
+- Move existing recovery/history validation into nine fixed typed workers,
+  preserving original host interfaces, storage, checks and receipt positions.
+- Add eight focused regression cases. Type/source comparisons and selected
+  native size captures are retained; runtime, gas and combined acceptance
+  remain pending. See the [worker guide](docs/integrations/artist-recovery-history-capacity.md).
+
 ## Complete recovered base multiplicity
 
 - Add a distinct typed operation60 profile for multiple recovered class1/class3

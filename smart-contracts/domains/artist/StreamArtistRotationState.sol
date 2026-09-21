@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRotationExecution as Worker } from "./StreamArtistRotationExecution.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -26,6 +27,8 @@ import {
 /// @notice Linked state mechanics for Identity's guardian and rotation domain.
 /// @dev Identity retains typed caller/snapshot guards and the single semantic commit.
 library StreamArtistRotationState {
+    // Retain the original error ABI entry now raised by the fixed worker.
+    error RotationNotExecutable(bytes32 rotationRecordHash);
     error InvalidGuardianSet();
     error EstateCapabilityUnavailable(bytes32 artistId, uint32 requiredCapabilities);
     // Retain original error ABI entries now raised by the fixed acceptance worker.
@@ -628,68 +631,7 @@ library StreamArtistRotationState {
         bytes32 artistId,
         bytes32 expected
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
-        R.RotationRecord storage r = _pending(s, artistId, expected);
-        T.Identity storage principal = identity.identities[artistId];
-        if (
-            !StreamArtistAuthorityPolicy.ordinary(principal.authorityClass, principal.status, false)
-                || principal.authorityAddress != r.terms.oldAddress
-                || identity.activeIdentity[r.terms.oldAddress] != artistId
-        ) revert T.InvalidIdentity(artistId);
-        if (
-            block.timestamp < r.transition.contestEndsAt
-                && (r.approvalThreshold == 0 || r.guardianApprovals < r.approvalThreshold)
-        ) {
-            revert R.RotationNotExecutable(expected);
-        }
-        if (identity.activeIdentity[r.terms.newAddress] != bytes32(0)) {
-            revert T.AddressAlreadyRegistered(r.terms.newAddress);
-        }
-        bytes32 executionKey = _consume(
-            replay,
-            o,
-            keccak256("identity_authority.replay.rotation_execution_key"),
-            expected,
-            expected
-        );
-        bytes32 retirementKey = _consume(
-            replay,
-            o,
-            keccak256("identity_authority.replay.standing_retirement"),
-            keccak256(abi.encode(artistId, r.terms.oldAddress, expected)),
-            expected
-        );
-        uint64 observed = _now();
-        r.transition.executedAt = observed;
-        r.transition.postWindowEndsAt = _windowEnd(observed, r.effectiveWindow);
-        r.transition.phase = 2;
-        s.latestExecution[artistId] = expected;
-        StreamArtistRecoveredAuthorityPreimages.rotation(o.environment, r);
-        s.retirement[artistId][r.terms.oldAddress] = expected;
-        delete s.pending[artistId];
-        delete identity.activeIdentity[r.terms.oldAddress];
-        identity.activeIdentity[r.terms.newAddress] = artistId;
-        principal.authorityAddress = r.terms.newAddress;
-        // Permissionless execution and guardian approvals do not establish artist activity.
-        // The owner separately records finding-only activity for an authenticated current-principal
-        // veto; neither veto branch is a living-principal estate cancellation.
-        m = StreamArtistIdentityState.Mutation(
-            bytes32(0),
-            keccak256(abi.encode(artistId, expected, c.actor)),
-            keccak256(abi.encode(r.transition, principal, r.terms.oldAddress, r.terms.newAddress)),
-            keccak256(abi.encode(executionKey, retirementKey, expected))
-        );
-        emit ArtistAddressRotated(
-            1,
-            artistId,
-            r.terms.oldAddress,
-            r.terms.newAddress,
-            principal.authorityClass,
-            r.terms.reasonHash,
-            expected
-        );
-        StreamArtistAuthorityRecordEvents.rotation(
-            o.environment, c.actor, r.transition, principal.authorityClass
-        );
+        return Worker.execute(s, identity, replay, o, c, artistId, expected);
     }
 
     function revokeStanding(

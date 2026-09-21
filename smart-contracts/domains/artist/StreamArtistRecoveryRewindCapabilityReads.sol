@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveryRewindCapabilityBounds as Fixed } from "./StreamArtistRecoveryRewindCapabilityBounds.sol";
+import { StreamArtistRecoveryRewindCurrentCapabilities as Worker } from "./StreamArtistRecoveryRewindCurrentCapabilities.sol";
 
 import { StreamArtistRecoveryRewindState as Rewind } from "./StreamArtistRecoveryRewindState.sol";
 import { StreamArtistIdentityState as Identity } from "./StreamArtistIdentityState.sol";
@@ -71,6 +73,8 @@ import {
 /// @dev The cheap owner read uses its own committed state. The full history proof independently
 /// joins the original35 and its immutable completed plan; it never re-runs a current selection.
 library StreamArtistRecoveryRewindCapabilityReads {
+    // Retain the original error ABI entry now raised by the fixed worker.
+    error InvalidIdentity(bytes32 artistId);
     struct SavedPlan {
         W.CapabilityContinuationV3 continuation;
         W.EvidenceStateV3 evidence;
@@ -92,60 +96,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
         Dormancy.State storage dormancy,
         bytes32 artistId
     ) public view returns (E.AuthorityCapabilities memory f) {
-        T.Identity storage p = identity.identities[artistId];
-        if (
-            p.authorityClass != 3 || (p.status != 3 && p.status != 4)
-                || p.authorityAddress == address(0)
-                || identity.activeIdentity[p.authorityAddress] != artistId
-        ) {
-            revert T.InvalidIdentity(artistId);
-        }
-        f = E.AuthorityCapabilities(p.authorityAddress, 3, p.status, 0, bytes32(0));
-        bytes32 origin = dormancy.activation[artistId];
-        if (origin != 0) {
-            Dorm.Terminal storage terminal = dormancy.terminals[origin];
-            Dorm.Notice storage notice = dormancy.notices[terminal.noticeHash];
-            if (
-                terminal.recordHash != origin || terminal.authorityClass != 3
-                    || terminal.plan.authorityClass != 3 || terminal.plan.authority == address(0)
-                    || notice.terms.artistId != artistId
-                    || dormancy.phases[terminal.noticeHash] != 3
-                    || dormancy.terminalForNotice[terminal.noticeHash] != origin
-                    || terminal.observedAt == 0 || terminal.delegationEpoch == 0
-            ) revert T.InvalidIdentity(artistId);
-            f.effectiveCapabilities = terminal.plan.capabilities;
-        } else {
-            origin = estate.authorityActivation[artistId];
-            E.RequestRecord storage request = estate.requests[origin];
-            E.ExecutionFacts storage execution = estate.executions[origin];
-            if (
-                origin == 0 || estate.phases[origin] != 2 || request.recordHash != origin
-                    || request.terms.artistId != artistId
-                    || execution.activationRecordHash != origin || execution.executedAt == 0
-                    || execution.delegationEpoch == 0
-            ) revert T.InvalidIdentity(artistId);
-            f.effectiveCapabilities = execution.effectiveCapabilities;
-        }
-        f.activationRecordHash = origin;
-        bytes32 head = rewind.capabilityHead[artistId];
-        if (head == 0) return f;
-        W.CapabilityContinuationV3 memory c = rewind.capabilityContinuations[head];
-        W.EnvironmentV3 memory e = _environment();
-        if (Imported.commitment() != 0) {
-            e = Runtime.rewindEnvironment(_origin(e, head).environment);
-        }
-        if (
-            c.artistId != artistId || c.recoveryRecordHash != head || c.actionId == 0
-                || c.manifestHash == 0 || c.planCommitment == 0 || c.designationRecordHash == 0
-                || c.originalActivationRecordHash != origin
-                || c.originalActivationCapabilities != f.effectiveCapabilities
-                || c.effectiveCapabilities & ~uint32(4095) != 0 || c.authorityAddress == address(0)
-                || c.commitment == 0 || W.capabilityContinuationHash(e, c) != c.commitment
-        ) {
-            revert W.InvalidRecoveryRewindRecord(head);
-        }
-        // A later rotation changes the live address, not the restored capability ceiling.
-        f.effectiveCapabilities = c.effectiveCapabilities;
+        return Worker.current(rewind, identity, estate, dormancy, artistId);
     }
 
     function proof(
@@ -159,14 +110,14 @@ library StreamArtistRecoveryRewindCapabilityReads {
         IStreamArtistIdentityRecoveryOwnerV3 owner =
             IStreamArtistIdentityRecoveryOwnerV3(address(this));
         bytes32 head = owner.latestRecoveryCapabilityContinuationV3(artistId);
-        uint256 member = _latest(artistId, head, members);
+        uint256 member = Fixed._latest(artistId, head, members);
         if (head == 0) {
             if (live.effectiveCapabilities != originalMask) {
                 revert W.InvalidRecoveryRewindRecord(origin.transitionRecordHash);
             }
             return 0;
         }
-        W.EnvironmentV3 memory e = _environment();
+        W.EnvironmentV3 memory e = Worker._environment();
         if (
             originalEnvironment.chainId != e.chainId || originalEnvironment.registry != e.registry
                 || originalEnvironment.core != e.core || originalEnvironment.manager != e.manager
@@ -181,7 +132,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
         s.imported = Imported.commitment() != 0;
         s.sourceEnvironment = e;
         if (s.imported) {
-            s.original = _origin(e, head);
+            s.original = Worker._origin(e, head);
             s.sourceEnvironment = Runtime.rewindEnvironment(s.original.environment);
         }
         s.continuation = owner.recoveryCapabilityContinuationV3(head);
@@ -196,7 +147,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
                 || s.recovered.record.fields.vestedAuthorityClass != 3 || c.commitment == 0
                 || c.commitment != W.capabilityContinuationHash(s.sourceEnvironment, c)
                 || c.effectiveCapabilities != live.effectiveCapabilities
-                || c.effectiveCapabilities & ~uint32(4095) != 0 || !_afterOrigin(e, s, origin)
+                || c.effectiveCapabilities & ~uint32(4095) != 0 || !Fixed._afterOrigin(e, s, origin)
                 || keccak256(abi.encode(s.recovered.vesting, s.recovered.transition))
                     != keccak256(abi.encode(members[member].vesting, members[member].transition))
         ) {
@@ -204,7 +155,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
         }
         s.evidence = owner.identityRecoveryEvidenceStateV3(artistId, c.actionId);
         _saved(s.sourceEnvironment, s);
-        bytes32 selectedProof = _bounds(e, s);
+        bytes32 selectedProof = Fixed._bounds(e, s);
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_CAPABILITY_HISTORY_V3"),
@@ -222,44 +173,6 @@ library StreamArtistRecoveryRewindCapabilityReads {
                 selectedProof
             )
         );
-    }
-
-    function _latest(bytes32 artistId, bytes32 head, Ancestry.Member[] memory members)
-        private
-        view
-        returns (uint256 chosen)
-    {
-        IStreamArtistIdentityRecoveryOwnerV3 owner =
-            IStreamArtistIdentityRecoveryOwnerV3(address(this));
-        bool found;
-        for (uint256 i; i < members.length; ++i) {
-            V.Snapshot memory v = members[i].vesting;
-            if (v.operationId != 35 || v.authorityClass != 3) continue;
-            W.CapabilityContinuationV3 memory c =
-                owner.recoveryCapabilityContinuationV3(v.transitionRecordHash);
-            Recovery.Record memory r = IStreamArtistIdentityRecoveryOwner(address(this))
-                .identityRecoveryRecord(v.transitionRecordHash);
-            W.EvidenceStateV3 memory evidence =
-                owner.identityRecoveryEvidenceStateV3(artistId, r.fields.governanceActionId);
-            if (c.commitment == 0) {
-                W.CapabilityContinuationV3 memory empty;
-                if (
-                    keccak256(abi.encode(c)) != keccak256(abi.encode(empty))
-                        || evidence.manifestHash != 0
-                ) revert W.InvalidRecoveryRewindRecord(v.transitionRecordHash);
-                continue;
-            }
-            if (
-                evidence.manifestHash == 0 || c.artistId != artistId
-                    || c.recoveryRecordHash != v.transitionRecordHash
-            ) revert W.InvalidRecoveryRewindRecord(v.transitionRecordHash);
-            if (!found) {
-                if (head != v.transitionRecordHash) revert W.InvalidRecoveryRewindRecord(head);
-                chosen = i;
-                found = true;
-            }
-        }
-        if ((head != 0) != found) revert W.InvalidRecoveryRewindRecord(head);
     }
 
     function _saved(W.EnvironmentV3 memory e, SavedPlan memory s) private view {
@@ -281,7 +194,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
         ) revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
         if (s.imported) {
             Runtime.Context memory clock =
-                Recovered.load(address(this), _environment().registry, e.chainId);
+                Recovered.load(address(this), Worker._environment().registry, e.chainId);
             s.preparation = Recovered.preparation(clock, association);
             if (
                 s.preparation.point.environmentHash != s.original.point.environmentHash
@@ -333,7 +246,7 @@ library StreamArtistRecoveryRewindCapabilityReads {
         ) {
             revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
         }
-        IStreamArtistRecoveryRewindEvidence publisher = _publisher(e);
+        IStreamArtistRecoveryRewindEvidence publisher = Worker._publisher(e);
         bytes32 identityPin;
         bytes32 payoutPin;
         (s.manifest, identityPin, payoutPin) = publisher.resolutionManifestV3(c.manifestHash);
@@ -354,168 +267,4 @@ library StreamArtistRecoveryRewindCapabilityReads {
         }
     }
 
-    function _bounds(W.EnvironmentV3 memory e, SavedPlan memory s) private view returns (bytes32) {
-        W.CapabilityContinuationV3 memory c = s.continuation;
-        if (
-            c.designationRecordHash == 0
-                || s.selected.designation.operative.recordHash != c.designationRecordHash
-                || s.selected.directive.operative.recordHash != c.forbiddenDirectiveRecordHash
-        ) revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
-        Records.Facts memory designation =
-            _selected(e, s, W.RecordKind.SUCCESSOR_DESIGNATION, s.selected.designation.operative);
-        if (designation.pairedDirective != c.pairedDirectiveRecordHash) {
-            revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
-        }
-        uint32 caps = designation.grantedCapabilities;
-        bytes32 pairedProof;
-        if (c.pairedDirectiveRecordHash != 0) {
-            (uint32 granted, bytes32 p) = _paired(e, s, c.pairedDirectiveRecordHash);
-            caps &= granted;
-            pairedProof = p;
-        }
-        Records.Facts memory forbidden;
-        if (c.forbiddenDirectiveRecordHash != 0) {
-            forbidden =
-                _selected(e, s, W.RecordKind.ESTATE_DIRECTIVE, s.selected.directive.operative);
-            caps &= ~forbidden.forbiddenCapabilities;
-        } else {
-            W.SelectedRecordV3 memory empty;
-            if (
-                keccak256(abi.encode(s.selected.directive.operative))
-                    != keccak256(abi.encode(empty))
-            ) revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
-        }
-        if (caps != c.effectiveCapabilities || caps & ~uint32(4095) != 0) {
-            revert W.InvalidRecoveryRewindRecord(c.recoveryRecordHash);
-        }
-        return keccak256(
-            abi.encode(
-                designation.selected.originalDataHash,
-                pairedProof,
-                forbidden.selected.originalDataHash,
-                caps
-            )
-        );
-    }
-
-    function _selected(
-        W.EnvironmentV3 memory e,
-        SavedPlan memory s,
-        W.RecordKind kind,
-        W.SelectedRecordV3 memory expected
-    ) private view returns (Records.Facts memory f) {
-        if (
-            expected.recordHash == 0 || expected.admissionProof == 0
-                || expected.nativeIndex >= s.manifest.identity.receiptCount
-        ) {
-            revert W.InvalidRecoveryRewindRecord(expected.recordHash);
-        }
-        f = Records.read(e, kind, s.continuation.artistId, expected.nativeIndex);
-        if (
-            f.selected.recordHash != expected.recordHash
-                || f.selected.originalDataHash != expected.originalDataHash
-                || f.selected.nonce != expected.nonce
-                || !_admittedBefore(e, s, expected.nativeIndex, f.admissionRevision)
-                || !R.eligible(
-                    s.continuation.artistId,
-                    f.association,
-                    f.transition,
-                    s.recovered.record.fields.recoveredAt
-                )
-        ) revert W.InvalidRecoveryRewindRecord(expected.recordHash);
-        // Mutable later closures are authenticated by Records.read, but do not alter the frozen
-        // admissionProof in this historical completed result or select a different old winner.
-    }
-
-    function _paired(W.EnvironmentV3 memory e, SavedPlan memory s, bytes32 hash)
-        private
-        view
-        returns (uint32 granted, bytes32 proof_)
-    {
-        (address target,) = IStreamArtistIdentityRecoveryOwnerV3(s.sourceEnvironment.identityOwner)
-            .recoveryRewindSelectionBinding();
-        (W.RecordKind kind, W.SelectedRecordV3 memory selected, bool retained, bool eligible) = IStreamArtistRecoveryRewindSelection(
-                target
-            ).selectionRecordV3(s.selected.sourceKey, hash);
-        if (
-            kind != W.RecordKind.ESTATE_DIRECTIVE || selected.recordHash != hash || !retained
-                || !eligible
-        ) revert W.InvalidRecoveryRewindRecord(hash);
-        Records.Facts memory f = _selected(e, s, kind, selected);
-        return (f.grantedCapabilities, keccak256(abi.encode(kind, selected, retained, eligible)));
-    }
-
-    function _origin(W.EnvironmentV3 memory e, bytes32 head)
-        private
-        view
-        returns (Runtime.OriginFact memory original)
-    {
-        Runtime.Context memory clock = Runtime.load(e, 2);
-        original = Runtime.auxiliary(
-            clock, keccak256("identity_authority.hydration.capability_continuation_v3"), head
-        );
-        Recovery.Record memory r =
-            IStreamArtistIdentityRecoveryOwner(address(this)).identityRecoveryRecord(head);
-        Runtime.ReceiptFact memory receipt =
-            Recovered.nativeFact(clock, 35, r.fields.artistId, head);
-        if (!Recovered.samePoint(receipt.position.point, original.point)) {
-            revert W.InvalidRecoveryRewindRecord(head);
-        }
-    }
-
-    function _afterOrigin(W.EnvironmentV3 memory e, SavedPlan memory s, V.Snapshot memory origin)
-        private
-        view
-        returns (bool)
-    {
-        if (!s.imported) return s.recovered.vesting.ownerRevision > origin.ownerRevision;
-        Runtime.Context memory clock = Runtime.load(e, 2);
-        return Runtime.before(clock, Recovered.vesting(clock, origin).point, s.original.point);
-    }
-
-    function _admittedBefore(
-        W.EnvironmentV3 memory e,
-        SavedPlan memory s,
-        uint256 index,
-        uint64 revision
-    ) private view returns (bool) {
-        if (!s.imported) return revision <= s.manifest.identity.snapshot.revision;
-        // A complete imported prefix keeps every original logical index unchanged.
-        // The original preparation immediately follows its saved before-snapshot.
-        Runtime.Context memory clock = Runtime.load(e, 2);
-        Runtime.ReceiptFact memory receipt = Runtime.receiptAt(clock, index);
-        return receipt.position.point.ownerRevision == revision
-            && Runtime.before(clock, receipt.position.point, s.preparation.point);
-    }
-
-    function _environment() private view returns (W.EnvironmentV3 memory) {
-        IStreamArtistOwner owner = IStreamArtistOwner(address(this));
-        return Environment.fromFixed(
-            address(this),
-            owner.artistRegistry(),
-            owner.operationCoordinator(),
-            owner.archiveV2(),
-            owner.core(),
-            owner.mintManager()
-        );
-    }
-
-    function _publisher(W.EnvironmentV3 memory e)
-        private
-        view
-        returns (IStreamArtistRecoveryRewindEvidence p)
-    {
-        (address target, bytes32 pin) = IStreamArtistIdentityRecoveryOwnerV3(e.identityOwner)
-            .recoveryRewindEvidenceBinding();
-        if (target.code.length == 0 || pin == 0 || target.codehash != pin) {
-            revert W.RecoveryRewindDependencyChanged(target);
-        }
-        p = IStreamArtistRecoveryRewindEvidence(target);
-        if (
-            p.owner() != e.identityOwner || p.payoutOwner() != e.payoutOwner
-                || p.artistRegistry() != e.registry || p.deploymentChainId() != e.chainId
-                || p.coordinator() != e.coordinator || p.archive() != e.archive
-                || p.core() != e.core || p.mintManager() != e.manager
-        ) revert W.RecoveryRewindDependencyChanged(target);
-    }
 }
