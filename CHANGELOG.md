@@ -1020,6 +1020,9 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Recompute the full native WORK selection commitment and its description and
+  original receipt joins in the retained VIEW inventory consumer.
+
 - Add a distinct offline full VIEW render-critical inventory and original bundle
   consumer, with ordered source stages, complete member output bytes and explicit
   recorded-source/coverage trust. Native execution and full finality remain separate.

@@ -42,6 +42,10 @@ original payload bytes. Inactive fields must remain empty, and the reference
 walk retains all catalog entries, participants and captures in order. Catalog
 bytes must match the global registered-document evidence. These pure byte
 checks do not establish the truth of an artist, rights or format declaration.
+The complete WORK selection hash is recomputed under its native chain, WORK
+host, Core, Metadata, Schemas, Store, collection and subject domain. Its payload
+and revision join the description evidence; its original receipt joins the
+recorder, record index and chain, definitions and Artist publication identity.
 Conservation language tags also pass the existing validator's pinned
 2026-08-08 IANA registry checks. This consumer condition is stricter than the
 native serializer's language-syntax check.

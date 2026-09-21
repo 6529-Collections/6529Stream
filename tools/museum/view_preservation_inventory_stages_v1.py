@@ -27,6 +27,8 @@ CONSENT_RECORD = ("bytes32", "bytes32", "uint64", CONSENT, "uint8")
 EVIDENCE_METADATA = ("bytes32", "address", "uint32", "uint64")
 PUBLICATION_RECORD = artist.PUBLICATION_RECORD
 WORK_ASSOCIATION = ("bytes32", "bytes32", "uint64", "bytes32")
+# fd861 StreamWorkRecordDefinitions.CANON_HASH (not its JSON PROFILE_HASH).
+WORK_CANON_HASH = "0xbc33af15c6b6374052871a5fdfa255f900f56fa594f650b2d0814c681fdb35a9"
 WORK_SELECTION = ("bytes32", "bytes32", "bytes32", "address", "uint8", "uint256",
     "uint64", "uint64", "uint64", "bytes32", "uint64", "uint8", "address", "uint8",
     "uint8", "uint8", WORK_ASSOCIATION, artist.EVIDENCE, "bytes32", "bytes32", "bytes32", "bytes32")
@@ -377,13 +379,31 @@ def _typed_stage(stage, context, deps, source, documents):
         record_hash, payload_hash = descriptions[1], descriptions[3]
         selected = _typed(WORK_SELECTION, source["selection"],
                           "VIEW inventory work selection")
-        require(selected[0] == record_hash and selected[21] == descriptions[5],
+        require(selected[0] == record_hash and selected[21] == descriptions[5]
+                and selected[2] == payload_hash and selected[7] == descriptions[7]
+                and record_hash != ZERO and payload_hash != ZERO and selected[7] > 0,
                 "VIEW inventory work selected record/hash")
+        unhashed = selected[:21] + (ZERO,)
+        require(selected[21] == keccak256(encode(
+            ("bytes32", "uint256", "address", "address", "address", "address",
+             "address", "uint256", "bytes32", WORK_SELECTION),
+            (schema_id("6529STREAM_WORK_SELECTION_V1"), deps[6], deps[0][7],
+             deps[0][0], deps[0][1], deps[0][2], deps[0][3], context[0][1],
+             context[1], unhashed))), "VIEW inventory work selection preimage")
         _, exact, refs = references.derive_work(
             deps[0][1], record_hash, payload_hash, source["typedWitness"])
         originals, payload = _original(context, deps, record_hash, payload_hash,
                                        source["original"])
         require(payload == exact, "VIEW inventory work exact original payload")
+        receipt = _typed(RECEIPT, source["original"]["receipt"],
+                         "VIEW inventory work original receipt")
+        definitions = {name: digest for name, _, digest in DEFINITIONS}
+        require(receipt[4] == selected[8] and receipt[1] == selected[12]
+                and receipt[2] == selected[13] and receipt[5] == selected[9]
+                and receipt[6] == definitions["STREAM_WORK_DESCRIPTION_V1"]
+                and receipt[7] == WORK_CANON_HASH
+                and receipt[8] == selected[17][0],
+                "VIEW inventory work selection/original receipt")
         if selected[17][0] != ZERO:
             require(source["artist"] is not None,
                     "VIEW inventory work original Artist source")

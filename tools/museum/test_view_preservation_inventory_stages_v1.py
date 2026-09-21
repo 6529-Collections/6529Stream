@@ -58,8 +58,10 @@ def _original_source(context, deps, subject, payload, index, authority_class,
               "", schema_id(schema_name), ZERO, (0, b"", ZERO), 100 + index)
     receipt = (int(context["collectionId"]), A(84000 + index), authority_class,
                101 + index, 0, H(record_type + " chain"),
-               definitions[schema_name]["hash"], definitions[profile_name]["hash"],
-               H(record_type + " authorization"))
+               definitions[schema_name]["hash"],
+               ("0xbc33af15c6b6374052871a5fdfa255f900f56fa594f650b2d0814c681fdb35a9"
+                if record_type == "WORK_DESCRIPTION" else definitions[profile_name]["hash"]),
+               H(record_type + " authorization") if authority_class == 1 else ZERO)
     record_hash = generic_hash(int(context["chainId"]), deps[0][1], deps[0][0],
                                int(context["collectionId"]), receipt[1], record)
     source = {"record": record, "receipt": receipt, "recordHashAt": record_hash,
@@ -67,6 +69,20 @@ def _original_source(context, deps, subject, payload, index, authority_class,
               "pointer": A(84100 + index),
               "pointerRuntime": "0x" + (b"\x00" + payload).hex()}
     return record_hash, source, receipt
+
+
+def work_selection(deps, scope, subject, record_hash, payload_hash, receipt):
+    """Native WORK selection preimage, independently authored test input."""
+    selection = list(zero(stages.WORK_SELECTION))
+    selection[0], selection[2], selection[7] = record_hash, payload_hash, 1
+    selection[8], selection[9] = receipt[4], receipt[5]
+    selection[12], selection[13], selection[14] = receipt[1], receipt[2], 1
+    selection[21] = keccak256(encode(
+        ("bytes32", "uint256", "address", "address", "address", "address",
+         "address", "uint256", "bytes32", stages.WORK_SELECTION),
+        (schema_id("6529STREAM_WORK_SELECTION_V1"), deps[6], deps[0][7],
+         *deps[0][:4], scope[1], subject, tuple(selection))))
+    return tuple(selection)
 
 
 def _suite(deps):
@@ -257,7 +273,7 @@ def build_fixed_stages(value, context, graph):
     work_witness[5] = ("Original description unavailable", 20260921)
     work_witness = tuple(work_witness)
     work_payload = references.serialize_work(work_witness)
-    work_hash, work_original, _ = _original_source(
+    work_hash, work_original, work_receipt = _original_source(
         context, deps, subject, work_payload, 1, 7, "WORK_DESCRIPTION",
         "STREAM_WORK_DESCRIPTION_V1", "STREAM_WORK_DESCRIPTION_JSON_PROFILE_V1")
 
@@ -289,12 +305,10 @@ def build_fixed_stages(value, context, graph):
         context, deps, suite, subject, artist_id, binding_hash, generation,
         waiver_hash, waiver_original, "fixture ARTIST_INTENT_WAIVER")
 
-    work_selection = list(zero(stages.WORK_SELECTION))
-    work_selection[0], work_selection[2], work_selection[7] = (
-        work_hash, keccak256(work_payload), 1)
-    work_selection[14], work_selection[21] = 1, H("fixture work selection")
+    selected_work = work_selection(deps, reference_source[2][0], subject,
+                                   work_hash, keccak256(work_payload), work_receipt)
     descriptions = (subject, work_hash, rights_hash, keccak256(work_payload),
-                    keccak256(rights_payload), work_selection[21],
+                    keccak256(rights_payload), selected_work[21],
                     H("fixture rights selection"), 1, 1)
 
     record_evidence = (waiver_hash, 1, keccak256(waiver_payload),
@@ -355,7 +369,7 @@ def build_fixed_stages(value, context, graph):
     native_context = from_json(types.CONTEXT, value["context"])
     sources = (
         {"original": work_original, "typedWitness": work_witness,
-         "selection": tuple(work_selection), "artist": None},
+         "selection": selected_work, "artist": None},
         {"original": rights_original, "typedWitness": rights_witness},
         {"original": waiver_original, "typedWitness": waiver_witness,
          "artist": artist_source},
@@ -410,10 +424,13 @@ class FixedStageTests(unittest.TestCase):
         witness[5] = ("original description unavailable", 20260921)
         witness = tuple(witness)
         payload = stages.references.serialize_work(witness)
-        record_hash, payload_hash, original = f.original(payload)
-        selection = list(zero(stages.WORK_SELECTION))
-        selection[0], selection[2], selection[7] = record_hash, payload_hash, 1
-        selection[21] = H("work selection")
+        record_hash, original, receipt = _original_source(
+            {"chainId":"31337", "collectionId":"7"}, f.deps, f.context[1],
+            payload, 1, 7, "WORK_DESCRIPTION", "STREAM_WORK_DESCRIPTION_V1",
+            "STREAM_WORK_DESCRIPTION_JSON_PROFILE_V1")
+        payload_hash = keccak256(payload)
+        selection = work_selection(f.deps, f.context[0], f.context[1],
+                                   record_hash, payload_hash, receipt)
         descriptions = (f.context[1], record_hash, H("rights record"), payload_hash,
                         H("rights payload"), selection[21], H("rights selection"), 1, 1)
         context = list(f.context); context[5] = descriptions; context = tuple(context)
