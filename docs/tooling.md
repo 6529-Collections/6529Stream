@@ -147,9 +147,18 @@ The version-1 manifest has exactly `version`, `contexts`, and `owners` fields.
 `contexts` maps local labels to these required strings: `out`, `cache`, `buildId`,
 `compilerCapture`, `buildInfoSha256`, `nativeInputSha256`, and
 `nativeOutputSha256`. An optional `compilerAdmission` binds an existing explicit
-readmission receipt. Paths resolve relative to the manifest. The three digests
+readmission receipt for the default `scoped-paired` capture kind. For a retained
+native partition, set `captureKind: partition-native` and `partitionProvenance`
+to an explicit provenance descriptor; `compilerAdmission` is forbidden. The
+descriptor pins the original partition plan/index/record and its exact original
+parent analysis. This intake validates the partition's own raw `input.json` and
+`output.json`, own native AST and exact Forge envelope transport. Analysis ASTs
+remain separate. It does not rename original captures, create scoped records,
+merge outputs, or infer current-source acceptance. The loader, exporter and
+projector use this explicit discriminator throughout. Paths resolve relative to the manifest. The three digests
 are SHA-256 of the original raw full build-info file, `codegen-input.json`, and
-`codegen-output.json`; they are not hashes of reserialized JSON. `owners` maps
+`codegen-output.json` (or `input.json`/`output.json` for a native partition);
+they are not hashes of reserialized JSON. `owners` maps
 exact `smart-contracts/path.sol:Name` or `test/path.sol:Name` coordinates to labels.
 Each selected host, creation helper, projection product, linked library, concrete
 embedded-construction dependency, and literal artifact coordinate in their
@@ -185,6 +194,81 @@ construct a merged Forge cache or execution view, compile Solidity, deploy
 contracts, check constructor argument capacity, or establish runtime/release
 acceptance. A separate execution harness must preserve and bind the actual
 physical owner used by every `getCode` lookup. Python assertions must be enabled.
+
+### Native execution views
+
+The canonical preparer accepts explicit non-test roots with repeatable
+`--entrypoint test/helpers/Scenario.sol:Scenario` or `script/current/Run.sol:Run`.
+These roots receive the same native ownership, source, import, executable and size
+checks as hosts. They are not test cases. For an ordinary suite without the graph
+creation helper, use `--owners-only`, explicit hosts/entrypoints, and an empty
+`--products` JSON object. This exports and checks every assigned owner through the
+same exporter/projector, but does not require `StreamNativeAssemblyCreation` or
+write flat graph projections.
+
+Prepare a separate execution cache after canonical preparation:
+
+```text
+python -m tools.build.current_native_execution_view --project PROJECT --products PRODUCTS.json --owners OWNERS.json --preparation PREPARATION.json --preparation-sha256 SHA256 --destination NEW_VIEW --host test/current/Suite.t.sol:SuiteTest
+```
+
+The view reauthenticates the original captures and physical/cache ownership and
+checks the pinned canonical preparation, native exports and projections. It
+requires the complete literal artifact inventory, actual native library links
+(including address-only library references) and embedded construction owners.
+Sources, standard fixture directories, configuration, tools and original native
+evidence are hashed and rechecked. Add other input files/directories with
+`--input PATH`. No source or original native output is rewritten.
+
+Each physical artifact and original full build-info file is copied byte for byte.
+Only cache routing is derived. Unassigned source-only cache rows are retained only when their original literal
+source bytes and full transitive import closures match the current project. Their
+artifact maps remain empty, and their current raw source hashes are sealed with
+all other inputs. Stale/unknown rows stay absent, so the deny-compiler gate refuses
+a rebuild rather than inventing an artifact.
+Build-info filenames and cache `build_id` values
+use full owner identities so colliding short Forge IDs cannot combine source-ID
+maps. Forge reads these files as separate build contexts; their original embedded
+IDs and compiler fields remain untouched. The derived cache is never compiler
+evidence. Case-insensitive artifact path collisions are refused. Rechecks allow
+only JSON representation and known path-separator transport in the derived cache;
+all routing values, profiles, source hashes and artifact inventories remain exact.
+Forge output intake also permits omission of native `generatedSources: []` and
+`functionDebugData: {}` only when empty. Nonempty/changed debug fields, code,
+links, immutables and source IDs still fail.
+
+By default cache profiles and source layouts must match. An explicit
+`--routing-context LABEL --routing-profile PROFILE` uses that original context's
+cache profiles and test/script paths. Every selected artifact's original profile
+and actual native input must match the target Solidity settings apart from
+`outputSelection`; source/library paths and cache format must still agree. This
+is execution routing only, not replacement compiler output or proof of cache use.
+A cached listing with the compiler disabled must succeed before runtime use.
+
+```text
+python -m tools.development.run_native_execution_view --view NEW_VIEW/execution-view.json --view-sha256 SHA256 --forge FORGE --forge-sha256 SHA256 --chain-id 31337 --destination NEW_LISTING
+```
+
+Omitting `--execute` only lists the exact complete native ABI case roster. The
+runner rejects compilation, inherited environment filters, missing/extra cases,
+artifact/source/cache mutations, RPC/fork configuration and unsupported
+helper-only execution. The caller explicitly pins local chain 31337; the runner
+records and verifies Forge's effective numeric or `anvil-hardhat` representation
+and requires the original non-isolated mode. With
+`--execute`, it runs each complete test host with 256 fuzz inputs and seed
+`0x6529`, retains process and result evidence, and checks the original current
+profile's 10-billion gas, 1-GiB memory and 2-million test-code limits. Production
+runtime/base-init limits remain 24,576/49,152 bytes; constructor arguments,
+actual CREATE/runtime/link values and protocol acceptance need separate trace
+validation. An explicit `--verbosity 4` or `--verbosity 5` retains successful
+setup/test traces for an independently checked campaign. This is not enabled by
+default. Fuzz traces represent retained executions, not every generated input.
+A listing is not EVM or `getCode` runtime evidence.
+
+Forge script dispatch is deliberately unsupported. Its dependency-only linker
+can leave dynamically obtained products unlinked even when the same cached test
+works. Authenticating a helper/script entrypoint does not establish an RPC
+execution view or deployed library prestate.
 
 ### Scoped acceptance captures
 

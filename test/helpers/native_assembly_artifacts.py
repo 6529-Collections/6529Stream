@@ -26,8 +26,9 @@ def object_hex(value: str) -> str:
 
 def project(build_info: Path, artifact_root: Path, destination: Path,
             products: dict[str, str], current_native_exports: bool = False, *, compiler_capture: Path | None = None,
-            compiler_admission: Path | None = None) -> dict:
-    if compiler_admission is not None and compiler_capture is None:
+            compiler_admission: Path | None = None, capture_kind: str = "scoped-paired",
+            partition_provenance: Path | None = None) -> dict:
+    if (compiler_admission is not None or partition_provenance is not None or capture_kind != "scoped-paired") and compiler_capture is None:
         raise ValueError('Compiler admission requires its matching compiler capture')
     raw_build = build_info.read_bytes()
     build = json.loads(raw_build)
@@ -36,8 +37,9 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
     if compiler_capture is not None:
         import sys
         sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-        from tools.build.scoped_standard_json import bind_build_capture
-        build, _, capture_evidence = bind_build_capture(build, compiler_capture, admission=compiler_admission)
+        from tools.build.native_capture import bind_native_capture
+        build, _, capture_evidence = bind_native_capture(build, compiler_capture, kind=capture_kind,
+                                                        provenance=partition_provenance, admission=compiler_admission)
     compiler_input, output = build["input"], build["output"]
     context = sha(canonical(compiler_input))
     declarations: dict[int, dict] = {}
@@ -159,10 +161,13 @@ def main() -> None:
     parser.add_argument("--current-native-exports", action="store_true")
     parser.add_argument("--compiler-capture", type=Path)
     parser.add_argument("--compiler-admission", type=Path)
+    parser.add_argument("--capture-kind", choices=("scoped-paired", "partition-native"), default="scoped-paired")
+    parser.add_argument("--partition-provenance", type=Path)
     args = parser.parse_args()
     products = json.loads(args.products.read_bytes())
     report = project(args.build_info, args.artifact_root, args.destination, products, args.current_native_exports,
-                     compiler_capture=args.compiler_capture, compiler_admission=args.compiler_admission)
+                     compiler_capture=args.compiler_capture, compiler_admission=args.compiler_admission,
+                     capture_kind=args.capture_kind, partition_provenance=args.partition_provenance)
     print(json.dumps({"products": len(report["products"]),
                       "productionRuntimes": len(report["productionRuntimeSizes"]),
                       "compilationHash": report["compilerInputSha256"]}))

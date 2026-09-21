@@ -15,8 +15,10 @@ p.add_argument('--out',type=Path)
 p.add_argument('--cache-path',type=Path)
 p.add_argument('--compiler-capture',type=Path)
 p.add_argument('--compiler-admission',type=Path)
+p.add_argument('--capture-kind', choices=('scoped-paired','partition-native'), default='scoped-paired')
+p.add_argument('--partition-provenance',type=Path)
 a=p.parse_args()
-if a.compiler_admission and not a.compiler_capture:
+if (a.compiler_admission or a.partition_provenance or a.capture_kind != 'scoped-paired') and not a.compiler_capture:
     p.error('--compiler-admission requires --compiler-capture')
 base=a.out or a.project/'out/current'
 cache_path=(a.cache_path or a.project/'cache/current')/'solidity-files-cache.json'
@@ -27,8 +29,9 @@ capture_evidence=None
 if a.compiler_capture:
     import sys
     sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
-    from tools.build.scoped_standard_json import bind_build_capture, forge_ast_transport, forge_storage_transport, forge_abi_transport
-    current,_,capture_evidence=bind_build_capture(current,a.compiler_capture,admission=a.compiler_admission)
+    from tools.build.scoped_standard_json import forge_ast_transport, forge_storage_transport, forge_abi_transport
+    from tools.build.native_capture import bind_native_capture
+    current,_,capture_evidence=bind_native_capture(current,a.compiler_capture,kind=a.capture_kind,provenance=a.partition_provenance,admission=a.compiler_admission)
 products=json.loads((a.products or a.project/'projection-products.json').read_bytes())
 helpers={'StreamNativeAssemblyCreation':'test/helpers/StreamNativeAssemblyCreation.sol', 'StreamNativeFinalityAssemblyTest':'test/current/StreamNativeFinalityAssembly.t.sol'}
 if a.helpers: helpers=json.loads(a.helpers.read_bytes())
@@ -50,7 +53,7 @@ for name,source in sorted(products.items()):
         assert build['id']==ident and build['solcVersion']=='0.8.19'
         assert all(k in build['input']['sources'] for k in build['output']['sources'])
         if a.compiler_capture and ident==a.build_id:
-            build,_,_=bind_build_capture(build,a.compiler_capture,admission=a.compiler_admission)
+            build,_,_=bind_native_capture(build,a.compiler_capture,kind=a.capture_kind,provenance=a.partition_provenance,admission=a.compiler_admission)
         prior_builds[ident]=build
         report['priorBuilds'][ident]={'path':str(bp),'sha256':sha(br),
             'compilerInputSha256':sha(canonical(build['input'])),

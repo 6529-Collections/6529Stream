@@ -532,6 +532,10 @@ def forge_output_transport(native: dict, serialized: dict) -> list[str]:
             for field in ("bytecode", "deployedBytecode"):
                 original = contract.get("evm", {}).get(field, {})
                 serialized_code = actual.get("evm", {}).get(field, {})
+                for omitted, empty in (("generatedSources", []), ("functionDebugData", {})):
+                    if omitted in original and same_json(original[omitted], empty) and omitted not in serialized_code:
+                        del target["evm"][field][omitted]
+                        changes.append(label + ": omitted empty " + field + " " + omitted)
                 if original.get("immutableReferences") == {} and "immutableReferences" not in serialized_code:
                     del target["evm"][field]["immutableReferences"]
                     changes.append(label + ": omitted empty " + field + " immutable references")

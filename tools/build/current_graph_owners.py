@@ -10,7 +10,8 @@ import subprocess
 import sys
 import tempfile
 
-from tools.build.scoped_standard_json import bind_build_capture, canonical
+from tools.build.scoped_standard_json import canonical
+from tools.build.native_capture import bind_native_capture, native_filenames, validate_capture_options
 
 
 def strict_json(raw: bytes):
@@ -36,13 +37,13 @@ def coordinate(value: str) -> tuple[str, str]:
     return source, name
 
 
-def owner_manifest(data: dict, products: dict, hosts: tuple, creation: str) -> dict:
+def owner_manifest(data: dict, products: dict, hosts: tuple, creation: str | None) -> dict:
     if not isinstance(data, dict) or set(data) != {"version", "contexts", "owners"} or type(data["version"]) is not int or data["version"] != 1:
         raise ValueError("Expected native owner manifest version 1")
     contexts, owners = data["contexts"], data["owners"]
     if not isinstance(contexts, dict) or not contexts or not isinstance(owners, dict):
         raise ValueError("Nonempty native contexts and coordinate owners required")
-    if not isinstance(products, dict) or not products:
+    if not isinstance(products, dict) or (not products and creation is not None):
         raise ValueError("Nonempty projection product mapping required")
     for name, source in products.items():
         if not isinstance(name, str) or not isinstance(source, str):
@@ -50,7 +51,7 @@ def owner_manifest(data: dict, products: dict, hosts: tuple, creation: str) -> d
         coordinate(source + ":" + name)
         if not source.startswith("smart-contracts/"):
             raise ValueError("Projection products must be production coordinates")
-    required = {s + ":" + n for n, s in products.items()} | {s + ":" + n for s, n in hosts} | {creation}
+    required = {s + ":" + n for n, s in products.items()} | {s + ":" + n for s, n in hosts} | ({creation} if creation is not None else set())
     if not required <= set(owners):
         raise ValueError(f"Missing explicit native owners: {sorted(required - set(owners))}")
     for value, label in owners.items():
@@ -62,10 +63,12 @@ def owner_manifest(data: dict, products: dict, hosts: tuple, creation: str) -> d
     fields = {"out", "cache", "buildId", "compilerCapture", "buildInfoSha256", "nativeInputSha256", "nativeOutputSha256"}
     for label, row in contexts.items():
         if (not isinstance(label, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", label) or not isinstance(row, dict)
-                or not fields <= set(row) or set(row) - fields - {"compilerAdmission"}):
+                or not fields <= set(row) or set(row) - fields - {"compilerAdmission", "captureKind", "partitionProvenance"}):
             raise ValueError(f"Invalid native context: {label}")
         if not all(isinstance(v, str) and v for v in row.values()):
             raise ValueError(f"Native context values must be nonempty strings: {label}")
+        validate_capture_options(row.get("captureKind", "scoped-paired"),
+                                 row.get("partitionProvenance"), row.get("compilerAdmission"))
         if not re.fullmatch(r"[A-Za-z0-9_-]+", row["buildId"]):
             raise ValueError("Invalid native build ID")
         for key in ("buildInfoSha256", "nativeInputSha256", "nativeOutputSha256"):
@@ -141,7 +144,10 @@ def load_context(project: Path, config: Path, label: str, row: dict, assignments
     build_path = output / "build-info" / (row["buildId"] + ".json")
     cache_path = cache_dir / "solidity-files-cache.json"
     raw = build_path.read_bytes(); cache_raw = cache_path.read_bytes()
-    input_path, output_path = capture / "codegen-input.json", capture / "codegen-output.json"
+    kind = row.get("captureKind", "scoped-paired")
+    provenance = resolve(row["partitionProvenance"]) if "partitionProvenance" in row else None
+    input_name, output_name = native_filenames(kind)
+    input_path, output_path = capture / input_name, capture / output_name
     pins = {"buildInfoSha256": sha(raw), "nativeInputSha256": sha(input_path.read_bytes()),
             "nativeOutputSha256": sha(output_path.read_bytes())}
     if any(row[key] != value for key, value in pins.items()):
@@ -149,7 +155,7 @@ def load_context(project: Path, config: Path, label: str, row: dict, assignments
     envelope = json.loads(raw); cache = json.loads(cache_raw)
     if envelope["id"] != row["buildId"]:
         raise ValueError(f"Native owner build ID differs: {label}")
-    build, analysis, evidence = bind_build_capture(envelope, capture, admission=admission)
+    build, analysis, evidence = bind_native_capture(envelope, capture, kind=kind, provenance=provenance, admission=admission)
     inventory = {}; physical = {}
     for coord, owner in assignments.items():
         if owner != label:
@@ -168,7 +174,9 @@ def load_context(project: Path, config: Path, label: str, row: dict, assignments
     transports = validate_sources(project, build, source_roots=roots, analysis=analysis)
     identity = {"out": str(output), "cache": str(cache_dir), "capture": str(capture),
                 "admission": str(admission) if admission else None, "buildInfo": str(build_path), "cacheSha256": sha(cache_raw), **pins}
-    return {"identity": sha(canonical(identity)), "identityFields": identity, "buildId": row["buildId"],
+    if kind == "partition-native":
+        identity.update(captureKind=kind, partitionProvenance=str(provenance), partitionProvenanceSha256=sha(provenance.read_bytes()))
+    return {"captureKind": kind, "partitionProvenance": provenance, "identity": sha(canonical(identity)), "identityFields": identity, "buildId": row["buildId"],
             "build": build, "analysis": analysis, "captureEvidence": evidence,
             "capture": capture, "admission": admission, "path": build_path, "raw": raw,
             "out": output, "cache": cache_dir, "cachePath": cache_path, "cacheRaw": cache_raw,
@@ -276,22 +284,27 @@ def recheck_context(project: Path, context: dict) -> None:
     for path, digest in context["physical"].items():
         if sha(path.read_bytes()) != digest:
             raise ValueError(f"Physical artifact changed during preparation: {path}")
-    _, _, evidence = bind_build_capture(json.loads(context["raw"]), context["capture"], admission=context["admission"])
+    _, _, evidence = bind_native_capture(json.loads(context["raw"]), context["capture"],
+                                         kind=context.get("captureKind", "scoped-paired"),
+                                         provenance=context.get("partitionProvenance"), admission=context["admission"])
     if evidence != context["captureEvidence"]:
         raise ValueError("Native capture changed during preparation")
     validate_sources(project, context["build"], source_roots=context["roots"], analysis=context["analysis"])
 
 
 def prepare_owned(project: Path, products_path: Path, config: Path, hosts: tuple,
-                  artifact_root: Path) -> dict:
+                  artifact_root: Path, *, owners_only: bool = False) -> dict:
     from tools.build.prepare_current_graph import ROOT, CREATION_SOURCE, CREATION_NAME, sha, retain_exports
     config = config.resolve(); products_raw = products_path.read_bytes(); config_raw = config.read_bytes()
     if sys.flags.optimize or os.environ.get("PYTHONOPTIMIZE", "0") not in ("", "0"):
         raise ValueError("Graph preparation requires enabled Python assertions")
     products = strict_json(products_raw)
-    if not products:
+    if owners_only:
+        if products:
+            raise ValueError("Export-only ownership requires an empty projection map")
+    elif not products:
         raise ValueError("Nonempty projection products required")
-    data = owner_manifest(strict_json(config_raw), products, hosts, CREATION_SOURCE + ":" + CREATION_NAME)
+    data = owner_manifest(strict_json(config_raw), products, hosts, None if owners_only else CREATION_SOURCE + ":" + CREATION_NAME)
     contexts = {label: load_context(project, config, label, row, data["owners"])
                 for label, row in data["contexts"].items()}
     validate_destinations(artifact_root, project, contexts)
@@ -311,6 +324,8 @@ def prepare_owned(project: Path, products_path: Path, config: Path, hosts: tuple
                        "--project", str(project), "--build-id", context["buildId"], "--products", str(inventory),
                        "--helpers", str(helpers), "--out", str(context["out"]), "--cache-path", str(context["cache"]),
                        "--output", str(exports), "--compiler-capture", str(context["capture"])]
+            if context.get("captureKind") == "partition-native":
+                command += ["--capture-kind", "partition-native", "--partition-provenance", str(context["partitionProvenance"])]
             if context["admission"]:
                 command += ["--compiler-admission", str(context["admission"])]
             subprocess.run(command, check=True)
@@ -319,7 +334,9 @@ def prepare_owned(project: Path, products_path: Path, config: Path, hosts: tuple
             retained = retain_exports(exports, artifact_root, context["identity"])
             projected = folder / "compiled"
             report = projector.project(context["path"], retained, projected, selected, True,
-                                       compiler_capture=context["capture"], compiler_admission=context["admission"])
+                                       compiler_capture=context["capture"], compiler_admission=context["admission"],
+                                       capture_kind=context.get("captureKind", "scoped-paired"),
+                                       partition_provenance=context.get("partitionProvenance"))
             context["retained"] = retained
             reports[context["identity"]] = report
             for name in selected:
@@ -335,7 +352,7 @@ def prepare_owned(project: Path, products_path: Path, config: Path, hosts: tuple
                                           "projectionBytes": len(projections[name + ".json"])}
                                  for name, source in products.items()}}
         projections["manifest.json"] = canonical(manifest)
-        destinations = [project / p for p in ("artifacts/current-graph/compiled", "artifacts/native-assembly/compiled")]
+        destinations = [] if owners_only else [project / p for p in ("artifacts/current-graph/compiled", "artifacts/native-assembly/compiled")]
         for destination in destinations:
             if destination.exists() and {p.name for p in destination.iterdir()} - set(projections):
                 raise ValueError(f"Unexpected files in managed graph directory: {destination}")
@@ -343,7 +360,8 @@ def prepare_owned(project: Path, products_path: Path, config: Path, hosts: tuple
             destination.mkdir(parents=True, exist_ok=True)
             for name, raw in projections.items():
                 path = destination / (name + ".tmp"); path.write_bytes(raw); path.replace(destination / name)
-        result = {"mode": "explicit-native-owners", "ownerManifestSha256": sha(config_raw),
+        result = {"mode": "explicit-native-owners", "projectionMode": "none" if owners_only else "flat",
+                  "ownerManifestSha256": sha(config_raw),
                   "products": len(products), "owners": owners, "literalArtifactSources": literal_artifacts,
                   "compilerContexts": {c["identity"]: {**c["identityFields"], "label": label,
                       "buildId": c["buildId"], "compilerCapture": c["captureEvidence"],
@@ -351,7 +369,7 @@ def prepare_owned(project: Path, products_path: Path, config: Path, hosts: tuple
                       "sourceLineEndingTransports": c["transports"],
                       "physicalArtifactHashes": {str(p): digest for p, digest in c["physical"].items()}}
                       for label, c in contexts.items()},
-                  "projectionManifestSha256": sha(projections["manifest.json"]),
+                  "projectionManifestSha256": None if owners_only else sha(projections["manifest.json"]),
                   "qualification": "Separate authenticated native owners; no bytecode or AST merging. No compiler, runtime or release accepted."}
         (artifact_root / "preparation.json").write_bytes(canonical(result))
         return result

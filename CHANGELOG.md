@@ -1,5 +1,16 @@
 # Changelog
 
+## Native execution cache views
+
+- Build a separate Forge execution view from explicit original native owners and
+  pinned canonical preparation, preserving every original artifact and build-info
+  file. Namespace routing by full owner identity and recheck sources, cache,
+  native links, projections and exact test rosters with compilation disabled.
+- Add explicit helper entrypoints and owner-only preparation for suites without
+  graph projections. Cached listing and synthetic regression checks do not claim
+  EVM, RPC or deployment acceptance; script dispatch remains unsupported. See
+  [tooling](docs/tooling.md#native-execution-views).
+
 ## Current Artist and finality deployment capacity
 
 - Factor complete existing Artist recovery and finality read paths into fixed

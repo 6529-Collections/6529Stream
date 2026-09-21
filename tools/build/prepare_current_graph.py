@@ -50,6 +50,15 @@ def host_coordinate(value: str) -> tuple[str, str]:
     return source, name
 
 
+def helper_coordinate(value: str) -> tuple[str, str]:
+    """Explicit non-test entrypoint; authentication does not imply script execution."""
+    from tools.build.current_graph_owners import coordinate
+    source, name = coordinate(value)
+    if not source.startswith(("test/helpers/", "script/")) or source.endswith(".t.sol"):
+        raise ValueError(f"Expected test/helpers/*.sol or script/*.sol entrypoint: {value!r}")
+    return source, name
+
+
 def select_build(cache: dict, hosts: tuple | None = None) -> str:
     # Select an actual cache-owned product; never infer an owner from recency.
     for source, name in hosts or GRAPH_HOSTS:
@@ -139,7 +148,11 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             selected_hosts: tuple[tuple[str, str], ...] | None = None,
             compiler_captures: dict[str, Path] | None = None,
             compiler_admissions: dict[str, Path] | None = None,
-            owners_path: Path | None = None) -> dict:
+            owners_path: Path | None = None,
+            selected_entrypoints: tuple[tuple[str, str], ...] = (),
+            owners_only: bool = False) -> dict:
+    if owners_only and (owners_path is None or (selected_hosts is None and not selected_entrypoints)):
+        raise ValueError("Export-only preparation requires explicit owners and entrypoints")
     if owners_path is not None and (out is not None or cache_dir is not None or compiler_captures or compiler_admissions):
         raise ValueError("Explicit owners cannot be combined with legacy out/cache/capture options")
     if sys.flags.optimize or os.environ.get("PYTHONOPTIMIZE", "0") not in ("", "0"):
@@ -151,13 +164,18 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
     project = project.resolve()
     out = (project / (out or 'out/current')).resolve()
     cache_dir = (project / (cache_dir or 'cache/current')).resolve()
-    if campaign and selected_hosts is not None:
+    if campaign and (selected_hosts is not None or selected_entrypoints):
         raise ValueError('Campaign host selection is fixed; do not combine --campaign and --host')
     hosts = selected_hosts if selected_hosts is not None else (CAMPAIGN_HOSTS if campaign else GRAPH_HOSTS)
-    if not hosts or len({name for _, name in hosts}) != len(hosts):
+    if selected_entrypoints and selected_hosts is None:
+        hosts = ()  # Explicit helper-only preparation never adds default test hosts.
+    for source, name in selected_entrypoints:
+        helper_coordinate(source + ':' + name)
+    if not (hosts or selected_entrypoints) or len({name for _, name in hosts + selected_entrypoints}) != len(hosts + selected_entrypoints):
         raise ValueError('Select nonempty, uniquely named test hosts')
     for source, name in hosts:
         host_coordinate(source + ':' + name)
+    hosts = hosts + selected_entrypoints
     artifact_root = project / 'artifacts/current-graph'
     artifact_root.mkdir(parents=True, exist_ok=True)
     lock = artifact_root / '.prepare.lock'
@@ -170,10 +188,10 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
         check_campaign_owner(project, campaign)
         if owners_path is not None:
             from tools.build.current_graph_owners import prepare_owned
-            return prepare_owned(project, products_path, owners_path, hosts, artifact_root)
+            return prepare_owned(project, products_path, owners_path, hosts, artifact_root, owners_only=owners_only)
         cache_path = cache_dir / 'solidity-files-cache.json'
         cache_raw = cache_path.read_bytes(); cache = json.loads(cache_raw)
-        if (campaign or selected_hosts is not None) and any(source not in cache['files'] for source, _ in hosts):
+        if (campaign or selected_hosts is not None or selected_entrypoints) and any(source not in cache['files'] for source, _ in hosts):
             raise ValueError('Every selected test host must be compiled before preparation')
         select_build(cache, hosts)  # At least one selected test host is required.
         helper = {CREATION_NAME: CREATION_SOURCE}
@@ -309,9 +327,13 @@ def main() -> int:
     parser.add_argument("--out", type=Path, help="Completed Forge output directory, relative to project or absolute")
     parser.add_argument("--cache-path", type=Path, help="Matching Forge cache directory")
     parser.add_argument("--owners", type=Path, help="Explicit native context/coordinate owner manifest; paths relative to this file")
+    parser.add_argument("--owners-only", action="store_true",
+                        help="Export/size-check explicit owners without NativeAssembly or flat projections; products must be {}")
     parser.add_argument("--campaign", action="store_true", help="Bind both executed fuzz/invariant hosts")
     parser.add_argument("--host", action="append", type=host_coordinate,
                         help="Exact test/path.t.sol:ContractName to authenticate (repeatable)")
+    parser.add_argument("--entrypoint", action="append", type=helper_coordinate,
+                        help="Authenticate explicit helper/script coordinate; does not execute it")
     parser.add_argument("--compiler-capture", action="append", default=[], metavar="BUILD_ID=PATH",
                         help="Verified split native capture for an actual selected Forge build (repeatable)")
     parser.add_argument("--compiler-admission", action="append", default=[], metavar="BUILD_ID=PATH",
@@ -328,7 +350,8 @@ def main() -> int:
         print(json.dumps(prepare(args.project, args.products, out=args.out,
                                  cache_dir=args.cache_path, campaign=args.campaign,
                                  selected_hosts=tuple(args.host) if args.host else None,
-                                 compiler_captures=captures, compiler_admissions=admissions, owners_path=args.owners), indent=2))
+                                 compiler_captures=captures, compiler_admissions=admissions, owners_path=args.owners,
+                                 selected_entrypoints=tuple(args.entrypoint or ()), owners_only=args.owners_only), indent=2))
         return 0
     except (AssertionError, KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Graph preparation failed: {exc}", file=sys.stderr)
