@@ -406,8 +406,7 @@ contract StreamCurrentAuthorityViewFinalityDispatchV1Test {
             StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 7, 0, 0),
             StreamFinalityScope(StreamFinalityScopeType.RELEASE, 7, 0, keccak256("release"))
         ];
-        bytes memory reason =
-            abi.encodeWithSelector(Host.NativeProviderOriginalRegistryOnly.selector);
+        bytes memory reason = abi.encodeWithSignature("NativeProviderOriginalRegistryOnly()");
         for (uint256 i; i < scopes.length; ++i) {
             _reject(
                 abi.encodeCall(
@@ -430,8 +429,7 @@ contract StreamCurrentAuthorityViewFinalityDispatchV1Test {
     function testOriginalAddressWithChangedRuntimeCannotReachEitherPreparedWorker() public {
         bytes memory runtime = original.targets[12].code;
         vm.etch(original.targets[12], hex"00");
-        bytes memory reason =
-            abi.encodeWithSelector(Host.NativeProviderOriginalRegistryOnly.selector);
+        bytes memory reason = abi.encodeWithSignature("NativeProviderOriginalRegistryOnly()");
         StreamFinalityComponentExpectation[] memory components = _components();
         _reject(
             abi.encodeCall(
