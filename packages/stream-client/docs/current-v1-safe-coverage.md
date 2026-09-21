@@ -136,6 +136,13 @@ SNAPSHOT and IDENTITY family-writer grants. Preview, retained canonical bytes,
 direct/Safe receipt evidence and operative currentness remain distinct stages.
 Currentness reuses recorded grants; a new publication checks fresh grants.
 
+The [token preservation V2 reference client](current-token-preservation-reference-v2.md)
+adds four permissionless environment/inventory preparation calls and the
+collection/scoped `publishReference` call. Publication uses the actual
+recorder's class-3/class-8 CURATOR grant and retains both payload and submitted
+publication bytes. First/last samples verify the saved producer's current
+Registry admission; fresh coverage and current receipt-pair checks remain distinct.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

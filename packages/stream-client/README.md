@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Token preservation V2 references](docs/current-token-preservation-reference-v2.md)
+  covers environment preparation, collection/scoped reference publication,
+  admitted producer samples and original archive coverage semantics.
+
 - [Token preservation V2 snapshots](docs/current-token-preservation-snapshot-v2.md)
   covers collection/scoped publication, original family-writer authority,
   canonical retained bytes and separate history/current admission.

@@ -1029,6 +1029,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add collection and scoped token preservation V2 reference clients with exact
+  environment preparation, producer admission and retained archive evidence.
+
 - Add collection and scoped token preservation V2 snapshot publication clients
   with original writer grants, exact canonical bytes and receipt evidence.
 
