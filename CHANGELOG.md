@@ -1,5 +1,19 @@
 # Changelog
 
+## Current-authority VIEW publication and discovery composition
+
+- Add actual original-Artist VIEW adoption, publication and reference fixtures
+  on the complete-bound current-authority graph. Retain exact op17/op24 lineage,
+  preservation output, archive receipts, snapshot, root and final freezes.
+- Add two publication and three genuine nine-component discovery cases, including
+  identical signed Safe retry, missing reference, runtime restore and wrong-scope
+  refusal. Original COLLECTION state, full inventory commitment and Registry
+  anchors remain independently asserted.
+- Reference observations are explicitly synthetic in the default tests. Source
+  review and formatting pass; compilation, native execution, gas fit and browser
+  acceptance remain pending. Preserve the diagnostic constructor budgets.
+
+
 ## Bound VIEW discovery
 
 - Add a shared closed VIEW selection and serving worker to both full-preservation

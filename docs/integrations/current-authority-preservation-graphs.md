@@ -205,6 +205,28 @@ isolate binding, framing, scope, runtime, receipt and serving joins with typed
 transport doubles. They do not establish genuine nine-component composition,
 native gas fit or browser acceptance; those validation steps remain separate.
 
+The [actual VIEW publication tests](../../test/current/StreamCurrentAuthorityViewPublication.t.sol)
+extend the bound current-authority graph through paid minting, complete membership,
+declaration, live renderer admission and adoption. Missing operation-17 consent
+rejects the original signed Safe transaction; the same bytes retry after consent.
+The publication path retains VIEW Work and waiver operation-24 records, the
+separately authorized Rights record, preservation admission, complete output
+checkpoint, archive receipts, locked snapshot, distinct content-root consent and
+final artwork locks. Original COLLECTION records and the full original inventory
+commitment remain independently checked.
+
+The [discovery composition tests](../../test/current/StreamCurrentAuthorityViewDiscovery.t.sol)
+continue through the already-bound reference host and its governed lock, then
+request all nine genuine non-sanction components. The reference helper accepts
+explicit supplied observation inputs; the default tests use clearly labelled
+synthetic PNG and ZIP bytes with real local archive proof verification. These
+observations do not establish browser execution or image-to-HTML correspondence.
+Compilation and runtime acceptance of these new cases remain pending. In
+particular, the current discovery component budget is below the reference host's
+nested source/snapshot reservations. The authored composition retains those
+original values and cannot be treated as passing evidence until the production
+call path fits and executes under the supported limits.
+
 Preservation excludes only sanction-derived display. It does not freeze or
 ignore C2PA, claims, corrections or other provenance changes. Such changes can
 still make preservation observations stale. Sharing a retained reference or
