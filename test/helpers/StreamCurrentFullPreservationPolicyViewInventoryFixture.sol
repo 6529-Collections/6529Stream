@@ -214,8 +214,7 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
     function _viewRequireInventoryHosts() private view {
         require(
             address(viewInventory).code.length != 0 && address(viewBundle).code.length != 0
-                && viewInventory.inventoryProfile()
-                    == keccak256("6529STREAM_VIEW_PRESERVATION_RENDER_CRITICAL_V1")
+                && viewInventory.inventoryProfile() == ViewInventory.PROFILE
                 && viewBundle.bundleProfile()
                     == keccak256("6529STREAM_VIEW_PRESERVATION_BUNDLE_IMMUTABLE_STOP_AGGREGATE_V1")
                 && viewInventory.core() == address(assemblyCore)
@@ -475,10 +474,31 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
         VIAdoption.Payload memory p = VIPayload.decode(fullPolicyViewPayload);
         _viewRememberInventoryBytes(p.script);
         _viewRememberInventoryBytes(bytes(p.imageURI));
+        _viewRequireArtworkImage(p);
+    }
+
+    function _viewRequireArtworkImage(VIAdoption.Payload memory p) internal pure virtual {
         require(
             bytes(p.imageURI).length == 0,
             "this authored artwork has no external image; no fake coverage"
         );
+    }
+
+    function _viewIsSpecialCoverage(VI.Item memory) internal pure virtual returns (bool) {
+        return false;
+    }
+
+    function _viewPrepareSpecialCoverage(VI.Item memory) internal virtual returns (bool) {
+        return false;
+    }
+
+    function _viewCoverInventoryOccurrence(
+        bytes32 id,
+        VI.Item memory item,
+        bytes32 nextLink,
+        VIBundle.Proof memory proof
+    ) internal virtual {
+        viewBundle.coverNext(id, item, nextLink, proof);
     }
 
     function _viewRetainRendererBytes(VIReference.SourceFacts memory f) private {
@@ -536,6 +556,7 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
     }
 
     function _viewNeedsSourceBytes(VI.Item memory item) private pure returns (bool) {
+        if (_viewIsSpecialCoverage(item)) return false;
         return item.kind == VI.Kind.NATIVE_BYTES || item.kind == VI.Kind.CONTRACT_RUNTIME
             || item.kind == VI.Kind.ORIGINAL_PAYLOAD || item.kind == VI.Kind.REGISTERED_DOCUMENT
             || (item.kind == VI.Kind.EXTERNAL_REFERENCE
@@ -571,7 +592,9 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
             proofs[i] = new VIBundle.Proof[](rows[i].length);
             for (uint256 j; j < rows[i].length; ++j) {
                 VI.Item memory item = rows[i][j];
-                if (item.kind == VI.Kind.EMPTY_PACKAGE_MEMBER) {
+                if (_viewPrepareSpecialCoverage(item)) {
+                    require(_viewIsSpecialCoverage(item), "explicit special occurrence only");
+                } else if (item.kind == VI.Kind.EMPTY_PACKAGE_MEMBER) {
                     ++packageMembers;
                     VIObservation.PackageFile memory member = viewReferencePublication.observation
                     .environment
@@ -646,7 +669,7 @@ abstract contract StreamCurrentFullPreservationPolicyViewInventoryFixture is
                         "cannot skip first actual source coverage"
                     );
                 }
-                viewBundle.coverNext(id, rows[i][j], next[j], proofs[i][j]);
+                _viewCoverInventoryOccurrence(id, rows[i][j], next[j], proofs[i][j]);
                 ++processed;
             }
         }

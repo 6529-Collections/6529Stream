@@ -193,6 +193,11 @@ abstract contract StreamCurrentFullPreservationPolicyViewAdoptionFixture is
         require(VSourceSet(set).sourceCount() == 1 && VSourceSet(set).sourcePolicyAt(0).frozen);
     }
 
+    /// @dev Existing recipes retain the exact absent-image payload.
+    function _fullPolicyViewImageURI() internal pure virtual returns (string memory) {
+        return "";
+    }
+
     function _fullPolicyViewDeclare() internal {
         _document(
             "STREAM_STATIC_POLICY_VIEW_PAYLOAD_V2",
@@ -205,7 +210,7 @@ abstract contract StreamCurrentFullPreservationPolicyViewAdoptionFixture is
                 VP.CONTEXT,
                 "Actual alternate view",
                 "Original two-token VIEW with complete admitted entropy policy.",
-                "",
+                _fullPolicyViewImageURI(),
                 bytes(FULL_POLICY_SCRIPT)
             )
         );
