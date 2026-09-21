@@ -26,7 +26,22 @@ ABI78 checks 117 sources with zero errors. Four new authored regressions compare
 complete direct/composed Configuration results under 12m/44m outer envelopes
 and 24m/48m source ceilings, preserve the strict 2m child allowance, and test
 insufficient gas, closed selectors, wrong widths and noncanonical addresses.
-The surrounding constructor/getter graph is explicit and typed. These tests
-have not been executed; no actual provider ceremony, cold capacity or bytecode
-size result is claimed. Previous captures remain evidence for their exact
-source.
+The surrounding constructor/getter graph is explicit and typed.
+
+The immutable `01f71ceb` capture now passes all eight Configuration cases.
+Native code generation completed in 74.485 seconds over 117 exact sources with
+all 164 ABI products selected up front. Complete native artifact, AST, metadata,
+link and source checks passed. The original size check incorrectly classified
+the 30,574-byte aggregate test root as a deployed protocol product; that failed
+record is retained. Applying the repository's existing aggregate-test policy
+allowed the exact unchanged cached artifacts to run: eight passed, zero failed,
+1.531 seconds, with source/artifact/cache/capture/config hashes unchanged. All
+70 other nonempty products retained the 24,576/49,152 limits; created fixtures
+have no constructor arguments. The test-only runtime code-size allowance was
+2,000,000; the original 100m test gas allowance remained unchanged.
+
+The first unsupported AST-only preflight and a later sandbox version-command
+refusal also remain retained. An unused loader-only test draft at ABI81 was
+restored to exact `01f71ceb` before execution and was never compiled. No actual
+nine-component provider/Discovery ceremony, complete cold capacity or shipping
+transaction conclusion follows from these typed eight cases.
