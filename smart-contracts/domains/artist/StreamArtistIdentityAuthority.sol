@@ -2076,7 +2076,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.RECORDS_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.MULTIPLE_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(

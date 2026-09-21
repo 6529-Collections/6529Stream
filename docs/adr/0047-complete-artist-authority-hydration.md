@@ -274,3 +274,22 @@ original historical grant associations remain immutable. Compact typed owner
 envelopes retain the original all-owner guards, commit and Archive sequence and
 finite carrier bound, without new host selectors. See the
 [combined profile guide](../guides/artist-multiple-delegation-hydration.md).
+
+## Recovered multiple-Artist base composition
+
+The explicit bit262144 and canonical owner aggregate schema add complete recovered
+class1/class3 multiplicity under the existing Request and operation60 entry points.
+The first aggregate profile requires accepted generation-one PRIMARY_ONLY bindings,
+base Attribution and direct policy history, with complete supported Identity,
+Payout, timing, auxiliary and nonce dependencies. Broader collection families and
+retained delegation grants reject under this distinct profile. The existing
+singleton path and its guards remain unchanged.
+
+There is one complete original provenance, nonce inventory and publication catalog
+per owner, one guarded owner apply/commit, and one activation per unique lane.
+Per-Artist nonce projections form an exact disjoint union of the authentic global
+inventory in original index order. Shared timing and the registration counter are
+verified across principals and installed once. The
+[aggregate integration guide](../integrations/artist-recovered-multiple-base.md)
+defines exact rows, scope and authored direct/Safe regressions. Source/type checks
+do not establish native execution, gas, capacity or release acceptance.

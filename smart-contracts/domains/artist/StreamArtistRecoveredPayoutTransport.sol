@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleCodec as Aggregate } from "./StreamArtistRecoveredMultipleCodec.sol";
+import { StreamArtistRecoveredMultiplePayoutImport as MultipleImport } from "./StreamArtistRecoveredMultiplePayoutImport.sol";
 
 import {
     StreamArtistRecoveredHydrationTypes as RH
@@ -57,6 +59,10 @@ library StreamArtistRecoveredPayoutTransport {
     function importEncoded(uint256[6] memory roots, bytes calldata data) public {
         (, AH.Query memory query, AH.OwnerData memory ownerData,) =
             abi.decode(data[4:], (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (Aggregate.selected(ownerData.typedState, 5)) {
+            MultipleImport.importState(roots, query, ownerData.typedState);
+            return;
+        }
         (, Payload.Payload memory payload) = Payload.decode(ownerData.typedState, 5);
         if (payload.nonces.length != 0) revert RH.InvalidRecoveredHydrationProvenance();
         P.Bundle memory bundle = Codec.decodeLocal(payload.semanticState, payload.provenance);

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleCodec as Aggregate } from "./StreamArtistRecoveredMultipleCodec.sol";
+import { StreamArtistRecoveredMultipleIdentityImport as MultipleImport } from "./StreamArtistRecoveredMultipleIdentityImport.sol";
 
 import {
     StreamArtistAuthorityHydrationTypes as AH
@@ -26,6 +28,10 @@ library StreamArtistRecoveredIdentityTransportImport {
     function importEncoded(uint256[17] memory roots, bytes calldata encoded) public {
         (, AH.Query memory query, AH.OwnerData memory data, bytes32 value) =
             abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (Aggregate.selected(data.typedState, 2)) {
+            MultipleImport.importState(roots, query, data.typedState, value);
+            return;
+        }
         (, Payload.Payload memory payload) = Payload.decode(data.typedState, 2);
         bytes memory bundle = Codec.decode(payload.semanticState, payload.provenance);
         // This profile carries one complete recovered subject. A different subject's nonce lane

@@ -8,7 +8,7 @@ entry point. Its seven-owner masks remain `0x7f`. Existing hydration selectors
 keep their existing profiles and exclusions.
 
 This is a source implementation with ABI-only checks. The seven concrete owners
-advertise feature mask 1023 for these graphs; the base owner stays disabled. The positive
+advertise explicit combined capabilities for the implemented graphs; the base owner stays disabled. The positive
 import scenarios are authored but have not run. Safe execution, current-stack
 integration, bytecode size, gas, invariants and release acceptance remain pending.
 
@@ -26,10 +26,11 @@ The pending-generation extension carries earlier refusals and withdrawals before
 one final accepted binding, with direct policy history. The generation/attestation
 composition additionally retains complete original operation-24 history for that
 final binding, using both existing feature bits128 and512.
-Complete Identity and Payout histories are transported together. Class 4,
-multiple Artists or collections,
-collaborator graphs, wider generation-aware records and broader collection histories
-remain separate full-v1 obligations. A capability bit does not bypass these
+Complete Identity and Payout histories are transported together. The distinct
+[multiple-Artist base profile](../integrations/artist-recovered-multiple-base.md)
+adds complete recovered class1/class3 graphs with multiple accepted generation-one
+collections and direct policy history. Wider aggregate families, class4,
+collaborator graphs and broader collection compositions remain separate full-v1 obligations. A capability bit does not bypass these
 typed source restrictions.
 
 | Feature bit | Required source state |

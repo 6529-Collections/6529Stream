@@ -1,5 +1,16 @@
 # Changelog
 
+## Complete recovered base multiplicity
+
+- Add a distinct typed operation60 profile for multiple recovered class1/class3
+  Artists and accepted generation-one collections with direct policy history.
+  Preserve complete original owner provenance, global nonce/guard inventories,
+  shared timing/registration state and one atomic apply per owner.
+- Keep existing singleton paths and Coordinator source unchanged. Nine
+  actual-owner/Safe scenarios are authored and type-checked; native, gas and
+  joined capacity acceptance remain pending. Broader aggregate families are
+  subsequent work. See the [integration guide](docs/integrations/artist-recovered-multiple-base.md).
+
 ## Native execution cache views
 
 - Build a separate Forge execution view from explicit original native owners and

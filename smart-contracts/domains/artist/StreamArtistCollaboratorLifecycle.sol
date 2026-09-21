@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleCollectionImport as MultipleImport } from "./StreamArtistRecoveredMultipleCollectionImport.sol";
 import {
     StreamArtistRecoveredSimpleHydration as RecoveredSimple
 } from "./StreamArtistRecoveredSimpleHydration.sol";
@@ -174,7 +175,7 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return RecoveredRH.RECORDS_GRAPH_FEATURES;
+        return RecoveredRH.MULTIPLE_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -188,6 +189,7 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
         if (RecoveredCodec.isState(p.typedState, 1)) {
             // All collaborator writes advance this counter even when they create no native row.
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (MultipleImport.collaborator(q, p.typedState)) return;
             RecoveredSimple.importCollaborator(q, p.typedState);
             return;
         }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultiplePreparation as Multiple } from "./StreamArtistRecoveredMultiplePreparation.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -38,7 +39,7 @@ library StreamArtistRecoveredHydrationPrepared {
         view
         returns (Commit.Prepared memory prepared)
     {
-        _return(Preparation.encode(destination, request, new T.RoyaltyFreeze[](0), true));
+        _return(_encode(destination, request, new T.RoyaltyFreeze[](0), true));
     }
 
     function collect(
@@ -46,7 +47,7 @@ library StreamArtistRecoveredHydrationPrepared {
         RH.Request memory request,
         T.RoyaltyFreeze[] memory royaltyFreezes
     ) public view returns (Commit.Prepared memory prepared) {
-        _return(Preparation.encode(destination, request, royaltyFreezes, true));
+        _return(_encode(destination, request, royaltyFreezes, true));
     }
 
     /// @notice Read-only certificate construction so callers can compute the expected inventory.
@@ -57,7 +58,7 @@ library StreamArtistRecoveredHydrationPrepared {
         view
         returns (Commit.Prepared memory prepared)
     {
-        _return(Preparation.encode(destination, request, new T.RoyaltyFreeze[](0), false));
+        _return(_encode(destination, request, new T.RoyaltyFreeze[](0), false));
     }
 
     /// @notice Additional exact original royalty-freeze terms without changing the old Request.
@@ -67,7 +68,7 @@ library StreamArtistRecoveredHydrationPrepared {
         RH.Request memory request,
         T.RoyaltyFreeze[] memory royaltyFreezes
     ) public view returns (Commit.Prepared memory prepared) {
-        _return(Preparation.encode(destination, request, royaltyFreezes, false));
+        _return(_encode(destination, request, royaltyFreezes, false));
     }
 
     /// @notice Canonical inventory identifier, independent of the caller's expected value.
@@ -84,6 +85,21 @@ library StreamArtistRecoveredHydrationPrepared {
         assembly ("memory-safe") {
             return(add(encoded, 0x20), mload(encoded))
         }
+    }
+
+    function _encode(
+        T.SuiteConfiguration memory destination,
+        RH.Request memory request,
+        T.RoyaltyFreeze[] memory royalties,
+        bool requireInventory
+    ) private view returns (bytes memory) {
+        if (
+            request.records.authority.artistIds.length > 1
+                || request.records.authority.collections.length > 1
+        ) {
+            return Multiple.encode(destination, request, royalties, requireInventory);
+        }
+        return Preparation.encode(destination, request, royalties, requireInventory);
     }
 
     function requiredFeatures(IH.Bundle calldata identity, P.Bundle calldata payout, uint256 eras)

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleCollectionImport as MultipleImport } from "./StreamArtistRecoveredMultipleCollectionImport.sol";
 import { StreamArtistRecoveredAcceptanceHistory as RecoveredAcceptanceHistory } from "./StreamArtistRecoveredAcceptanceHistory.sol";
 import {
     StreamArtistRecoveredSimpleHydration as RecoveredSimple
@@ -248,7 +249,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return RecoveredRH.RECORDS_GRAPH_FEATURES;
+        return RecoveredRH.MULTIPLE_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -261,6 +262,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (RecoveredCodec.isState(p.typedState, 3)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (MultipleImport.acceptances(acceptanceRecord, acceptedAt, q, p.typedState)) return;
             if (RecoveredAcceptanceHistory.importIfSelected(acceptanceRecord, acceptedAt, q, p.typedState)) return;
             RecoveredSimple.importAcceptance(acceptanceRecord, acceptedAt, q, p.typedState);
             return;
