@@ -9,6 +9,15 @@
   Pure/transport-double checks pass; actual joined RPC execution remains pending.
   See the [capture recipe](docs/museum-current-owner-capture.md#optional-genesis-registry-coverage-at-the-same-anchor).
 
+## Scoped policy render-critical read capacity
+
+- Factor complete native-item, historical root-authorization and current-source
+  reads into fixed linked workers, retaining original interfaces, storage,
+  hashes, validation order and complete returned memory values.
+- Add focused segmentation, provenance and current-context regression cases.
+  Complete runtime and added-call gas acceptance remain separate; see the
+  [capacity guide](docs/integrations/scoped-policy-render-critical-read-capacity.md).
+
 ## Estate and dormancy recovery capacity
 
 - Split four existing recovery libraries into six fixed typed workers while

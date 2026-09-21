@@ -469,6 +469,68 @@ contract StreamScopedPolicyRenderCriticalInventoryV2Test is ScopedPolicyReferenc
         require(segmentProbe.id(inventoryD, changed) != id, "full scope enters new plan domain");
     }
 
+    function testScopedPolicyReadWorkerNativeSegmentGuardPrecedesSourceReads() public {
+        D.Dependencies memory absent;
+        C.Context memory context;
+        vm.expectRevert(abi.encodeWithSelector(I.InvalidInventorySegment.selector));
+        Native.items(absent, context, 0, 0);
+        vm.expectRevert(abi.encodeWithSelector(I.InvalidInventorySegment.selector));
+        Native.items(absent, context, 0, 65);
+    }
+
+    function testScopedPolicyReadWorkerNativeFactoryPolicyBoundaryAndFinalRow() public {
+        _inventory(1, 2);
+        (I.Item[] memory boundary, uint64 total) = Native.items(inventoryD, inventoryC, 43, 2);
+        require(boundary.length == 2 && total == 44 + 2 * inventoryF.snapshotSource.entropy.policies.length);
+        require(
+            boundary[0].role == keccak256("SCOPED_POLICY_FACTORY_DEPENDENCY_RUNTIME_V2")
+                && boundary[0].source == scopedFactory.dependencies().targets[3]
+                && boundary[0].sourceIndex == 3
+                && boundary[1].role == keccak256("ORIGINAL_COORDINATOR_RUNTIME")
+                && boundary[1].source == inventoryF.snapshotSource.entropy.policies[0].coordinator
+                && boundary[1].sourceIndex == 0,
+            "factory-to-policy segment preserves both original roles"
+        );
+        (I.Item[] memory last, uint64 repeatedTotal) = Native.items(inventoryD, inventoryC, total - 1, 64);
+        uint256 finalIndex = inventoryF.snapshotSource.entropy.policies.length - 1;
+        require(last.length == 1 && repeatedTotal == total && last[0].sourceIndex == finalIndex);
+        require(last[0].role == keccak256("ORIGINAL_COORDINATOR_POLICY_V2"));
+        _digest(last[0], abi.encode(inventoryF.snapshotSource.entropy.policies[finalIndex]));
+        vm.expectRevert(abi.encodeWithSelector(I.InventorySourceChanged.selector));
+        Native.items(inventoryD, inventoryC, total, 1);
+    }
+
+    function testScopedPolicyReadWorkerReturnsCompleteOriginalAuthorizationProvenance() public {
+        _archivedRoot();
+        I.Item memory row = RootAuth.contentItem(
+            inventoryD, inventoryC, address(this), 1000, originalAggregate, originalLegacy
+        );
+        RootV2.Binding memory binding = router.scopedPolicyContentRootBinding(adoptedRoot);
+        (bytes32 hash, address pointer, uint32 size, uint64 appendedAt) =
+            rootArchive.artistEvidenceMetadataV2(rootEvidenceId, 1);
+        bytes32 retained = keccak256(
+            abi.encode(rootEvidenceId, hash, pointer, pointer.codehash, size, appendedAt)
+        );
+        bytes32 family = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CONTENT_ROOT_FAMILY_WITH_SCOPES_V1"),
+                block.chainid, address(router), address(core), inventoryC.scope.collectionId,
+                originalLegacy, originalAggregate
+            )
+        );
+        require(
+            row.provenanceHash == keccak256(
+                abi.encode(
+                    adoptedRoot, binding, originalAggregate, originalLegacy, family,
+                    address(this), uint64(1000), retained, keccak256(abi.encode(inventoryD))
+                )
+            ),
+            "all historical provenance words survive the worker return"
+        );
+        require(row.source == address(rootArchive) && row.sourceRecord == rootEvidenceId && row.sourceIndex == 1);
+        _digest(row, rootEnvelope);
+    }
+
     function _archivedRoot() private {
         _reference(1, 1);
         ConservationSelectionCoordinatorBoundary coordinator =

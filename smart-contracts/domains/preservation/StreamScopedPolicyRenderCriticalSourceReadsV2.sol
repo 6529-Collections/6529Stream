@@ -44,41 +44,16 @@ import {
     StreamFinalityScopeType
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
+import {
+    StreamScopedPolicyRenderCriticalCurrentReadsV2 as Current
+} from "./StreamScopedPolicyRenderCriticalCurrentReadsV2.sol";
+
 /// @notice Full current scoped originals from fixed source producers, never a supplied descriptor.
 /// @dev Dependencies use the original named roster; slots5/6 are the distinct scoped producers.
 /// This worker does not by itself materialize or seal a complete inventory.
 library StreamScopedPolicyRenderCriticalSourceReadsV2 {
-    function _snapshotOutput(S.Dependencies memory d, Scoped.Context memory c)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes memory raw = IO.read(
-            d.targets[5],
-            abi.encodeCall(
-                IStreamScopedPolicySnapshotPublicationV2.snapshotRecord, (c.snapshot.recordHash)
-            ),
-            16384,
-            d.sourceGas
-        );
-        (
-            StreamScopedPolicySnapshotTypesV2.Publication memory p,
-            StreamScopedPolicySnapshotTypesV2.Receipt memory receipt
-        ) = abi.decode(
-            raw,
-            (
-                StreamScopedPolicySnapshotTypesV2.Publication,
-                StreamScopedPolicySnapshotTypesV2.Receipt
-            )
-        );
-        IO.canonical(d.targets[5], raw, abi.encode(p, receipt));
-        if (
-            keccak256(abi.encode(receipt)) != keccak256(abi.encode(c.snapshot))
-                || keccak256(abi.encode(p.scope)) != keccak256(abi.encode(c.scope))
-                || p.outputManifestRecord == 0
-        ) revert T.InventorySourceChanged();
-        return p.outputManifestRecord;
-    }
+    // Preserve errors previously inferred from the complete inlined read body.
+    error InvalidMetadataScope();
 
     function snapshotBindings(S.Dependencies memory d)
         public
@@ -129,90 +104,7 @@ library StreamScopedPolicyRenderCriticalSourceReadsV2 {
         view
         returns (Scoped.Context memory c)
     {
-        if (
-            scope.scopeType != StreamFinalityScopeType.TOKEN
-                && scope.scopeType != StreamFinalityScopeType.RELEASE
-                && scope.scopeType != StreamFinalityScopeType.SEASON
-        ) revert T.InventorySourceChanged();
-        // This original method checks the immutable named pins and common Core/archive getters;
-        // it neither reads nor accepts a COLLECTION snapshot/reference record.
-        Original.bindings(d);
-        snapshotBindings(d);
-        c.scope = scope;
-        c.subject = StreamMetadataSubjects.scopeSubject(d.chainId, d.targets[0], scope);
-        bytes memory raw = IO.fixedRead(
-            d.targets[6], abi.encodeCall(Reference.currentReference, (scope)), 672, d.readGas
-        );
-        c.referenceRender = abi.decode(raw, (R.Receipt));
-        IO.canonical(d.targets[6], raw, abi.encode(c.referenceRender));
-        References.requireCurrent(
-            referenceDependencies(d),
-            scope,
-            c.referenceRender.observation.recordHash,
-            c.referenceRender.observation.revision
-        );
-        // The original current producer has just checked the complete snapshot, authoritative
-        // membership, selected source, scoped Artist root, environment and observations.
-        // Read the same retained source and independently bind its entire original hash.
-        R.Dependencies memory rd = referenceBindings(d);
-        raw = IO.read(
-            d.targets[6],
-            abi.encodeCall(Reference.referenceSource, (c.referenceRender.observation.recordHash)),
-            524288,
-            d.referenceGas
-        );
-        R.SourceFacts memory f = abi.decode(raw, (R.SourceFacts));
-        IO.canonical(d.targets[6], raw, abi.encode(f));
-        if (
-            keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_SCOPED_POLICY_REFERENCE_SOURCES_V2"),
-                            d.chainId,
-                            d.targets[6],
-                            rd.targets,
-                            rd.codeHashes,
-                            f
-                        )
-                    ) != c.referenceRender.observation.sourcesHash || f.scopeSubject != c.subject
-                || c.referenceRender.scopeSubject != c.subject
-                || keccak256(abi.encode(f.snapshotSource.scope)) != keccak256(abi.encode(scope))
-                || f.snapshot.scopeSubject != c.subject
-                || f.snapshot.recordHash != c.referenceRender.observation.snapshotRecordHash
-                || f.snapshot.revision != c.referenceRender.observation.snapshotRevision
-        ) revert T.InventorySourceChanged();
-        c.snapshot = f.snapshot;
-        c.snapshotSource = f.snapshotSource;
-        c.outputManifestRecord = _snapshotOutput(d, c);
-        c.descriptions = Descriptions.requireCurrent(descriptionDependencies(d), scope);
-        StreamFinalityConservationEvidence memory conservation =
-            Conservation.requireCurrent(conservationDependencies(d), scope);
-        c.conservation = conservation.selected;
-        c.interviewEvidenceHash = conservation.interviewEvidenceHash;
-        Original.requireSameArtistAssociation(
-            d.artistTargets[0],
-            d.artistCodeHashes[0],
-            f.snapshotSource.artist,
-            c.conservation.association
-        );
-        c.artistId = f.snapshotSource.artist.artistId;
-        c.nativeHash = keccak256(abi.encode(f.snapshotSource));
-        c.rootRecordHash = f.contentRootRecordHash;
-        c.tokenInventoryHash = f.snapshotSource.membership.membershipHash;
-        c.checkpointHash = f.snapshotSource.outputs.checkpointHash;
-        c.selectionId = f.snapshotSource.content.selectionId;
-        c.selectionHash = f.snapshotSource.content.selectionHash;
-        uint256 count = f.snapshotSource.membership.tokenCount;
-        if (
-            count == 0 || count > type(uint64).max || c.rootRecordHash == 0
-                || c.subject != c.descriptions.scopeSubject
-                || c.subject != conservation.scopeSubject
-                || c.subject != f.snapshotSource.membership.scopeSubject
-                || c.artistId != c.conservation.association.artistId
-                || f.snapshotSource.content.tokenCount != count
-                || f.snapshotSource.selection.tokenCount != count
-                || f.snapshotSource.outputs.tokenCount != count
-        ) revert T.InventorySourceChanged();
-        c.tokenCount = uint64(count);
+        return Current.current(d, scope);
     }
 
     function referenceBindings(S.Dependencies memory d)
