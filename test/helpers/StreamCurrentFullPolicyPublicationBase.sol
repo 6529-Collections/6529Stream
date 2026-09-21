@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentFinalityGraph } from "../../script/current/StreamCurrentFinalityGraph.sol";
+
 import { StreamArtistSuiteFixture } from "./StreamArtistSuiteFixture.sol";
 import {
     StreamCurrentFinalityArtifacts
@@ -180,6 +182,64 @@ abstract contract StreamCurrentFullPolicyPublicationBase is
     StreamFullV1ActivationFixture,
     StreamCurrentFullPolicyGraph
 {
+    // Resolve the existing test/script diamond to the fixed test slot worker.
+    function _slot()
+        internal
+        virtual
+        override(StreamCurrentFinalityGraph, StreamArtistSuiteFixture)
+        returns (StreamDeploymentSlot slot, address expected)
+    {
+        return StreamArtistSuiteFixture._slot();
+    }
+
+    function _deploySlot(
+        StreamDeploymentSlot slot,
+        address expected,
+        bytes memory creation,
+        bytes memory args,
+        bytes memory runtime
+    )
+        internal
+        virtual
+        override(StreamCurrentFinalityGraph, StreamArtistSuiteFixture)
+        returns (address product)
+    {
+        return StreamArtistSuiteFixture._deploySlot(slot, expected, creation, args, runtime);
+    }
+
+    function _deploySplitArtistFacade(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p,
+        bytes32 deploymentHash,
+        string memory uri,
+        bytes32 manifestHash
+    )
+        internal
+        virtual
+        override(StreamCurrentFinalityGraph, StreamArtistSuiteFixture)
+        returns (StreamArtistOnboardingRegistry)
+    {
+        return StreamArtistSuiteFixture._deploySplitArtistFacade(
+            creation, operator_, factory_, p, deploymentHash, uri, manifestHash
+        );
+    }
+
+    function _deploySplitArtistIdentity(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p
+    )
+        internal
+        virtual
+        override(StreamCurrentFinalityGraph, StreamArtistSuiteFixture)
+        returns (address host)
+    {
+        return StreamArtistSuiteFixture._deploySplitArtistIdentity(creation, operator_, factory_, p);
+    }
+
     // Select the test verifier explicitly where the test and script graph bases join.
     function _runtime(
         string memory artifactPath,

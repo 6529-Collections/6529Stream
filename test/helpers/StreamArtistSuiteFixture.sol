@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentTestSlots } from "./StreamCurrentTestSlots.sol";
+import { StreamDeploymentSlot } from "../../script/current/StreamDeploymentSlot.sol";
 import { StreamCurrentTestRuntime } from "./StreamCurrentTestRuntime.sol";
 import {
     StreamArtistIdentityCreationPart
@@ -262,6 +264,59 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                 revert(ptr, returndatasize())
             }
         }
+    }
+
+    // Keep artifact/runtime selection in this host at its original post-factory position.
+    function _slot()
+        internal
+        virtual
+        override
+        returns (StreamDeploymentSlot slot, address expected)
+    {
+        return StreamCurrentTestSlots.reserve(graphOperator);
+    }
+
+    function _deploySlot(
+        StreamDeploymentSlot slot,
+        address expected,
+        bytes memory creation,
+        bytes memory args,
+        bytes memory runtime
+    ) internal virtual override returns (address product) {
+        return StreamCurrentTestSlots.deploySlot(
+            graphOperator, slot, expected, creation, args, runtime
+        );
+    }
+
+    function _deploySplitArtistFacade(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p,
+        bytes32 deploymentHash,
+        string memory uri,
+        bytes32 manifestHash
+    ) internal virtual override returns (StreamArtistOnboardingRegistry) {
+        StreamCurrentTestSlots.FacadeContext memory c =
+            StreamCurrentTestSlots.FacadeContext(
+                operator_, factory_, p, deploymentHash, uri, manifestHash
+            );
+        StreamCurrentTestSlots.SplitPlan memory plan = StreamCurrentTestSlots.prepareFacade(c);
+        bytes memory runtime = _productRuntime(plan.name, plan.parents, creation, plan.values);
+        return StreamCurrentTestSlots.finishFacade(c, plan, creation, runtime);
+    }
+
+    function _deploySplitArtistIdentity(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p
+    ) internal virtual override returns (address host) {
+        StreamCurrentTestSlots.IdentityContext memory c =
+            StreamCurrentTestSlots.IdentityContext(operator_, factory_, p);
+        StreamCurrentTestSlots.SplitPlan memory plan = StreamCurrentTestSlots.prepareIdentity(c);
+        bytes memory runtime = _productRuntime(plan.name, plan.parents, creation, plan.values);
+        return StreamCurrentTestSlots.finishIdentity(c, plan, creation, runtime);
     }
 
     function _runtime(

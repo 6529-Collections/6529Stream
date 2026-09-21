@@ -1685,7 +1685,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         );
     }
 
-    function _slot() internal returns (StreamDeploymentSlot slot, address expected) {
+    function _slot() internal virtual returns (StreamDeploymentSlot slot, address expected) {
         slot = new StreamDeploymentSlot(graphOperator);
         expected = slot.product();
         require(
@@ -1704,7 +1704,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         bytes memory creation,
         bytes memory args,
         bytes memory runtime
-    ) internal returns (address product) {
+    ) internal virtual returns (address product) {
         require(
             slot.operator() == graphOperator && slot.product() == expected && !slot.consumed(),
             "original operator reservation"
@@ -1727,7 +1727,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         bytes32 deploymentHash,
         string memory uri,
         bytes32 manifestHash
-    ) internal returns (StreamArtistOnboardingRegistry) {
+    ) internal virtual returns (StreamArtistOnboardingRegistry) {
         StreamDeploymentSlot slot = new StreamDeploymentSlot(operator_);
         address[3] memory children;
         for (uint8 i; i < 3; ++i) {
@@ -1799,7 +1799,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         address operator_,
         address factory_,
         address[5] memory p
-    ) internal returns (address host) {
+    ) internal virtual returns (address host) {
         StreamDeploymentSlot slot = new StreamDeploymentSlot(operator_);
         address[3] memory children;
         address[6] memory pins = [slot.product(), p[0], p[1], p[2], p[3], p[4]];
