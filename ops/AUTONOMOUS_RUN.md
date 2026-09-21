@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI154 `9d4af023`: 4,014 sources / zero errors; both provider repairs integrated. Historical8 and Metadata7 pass on `7053ab06`; complete current publication acceptance remains. |
+| Source checkpoint | ABI155 `e93cb091`: 4,014 sources / zero errors; six archive correspondence tests plus fuzz256 pass. Dossier `fcf5af68` has 25 offline passes. Provider12 exposed a reachable reference-reader compiler failure; B owns repair. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -36,8 +36,9 @@ continue coherent features while frozen native campaigns run.
 - A: HISTORY_CONTENT `51d8ed8f` is integrated and source-reviewed. Build accepted
   Platform history with closed original zero-Artist collection rows, then native24
   and full mixed/multiplicity composition. Preserve old tags and original writers.
-- B: both provider repairs are integrated as `9d4af023`; independently review
-  C's retrieval producer and consumer next. Registry fixture `7a9fd077` awaits
+- B: both provider repairs are integrated as `9d4af023`; repair the reachable
+  ReferenceReads.original Yul failure exposed by provider12. C's combined
+  retrieval source/oracle review is clear after its Artist/scope epoch repair. Registry fixture `7a9fd077` awaits
   runtime; retain native3's 12 passes and six previously unexecuted cases.
 - C: metadata split `1dbc0c66` is integrated and both products fit. Build the
   approved attributed retrieval satellite, immutable inventory companion and
@@ -48,8 +49,9 @@ continue coherent features while frozen native campaigns run.
   is sealed and the repairs are integrated. Independently review the Collector
   structural proposal while original ceremony/browser awaits actual execution.
 - Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: VIEW consumers/export/package
-  and locator are integrated with root83/23/31/34 passing. Build the bounded
-  MUSEUM-10 dossier projection; consume C's retrieval handoff once frozen.
+  and locator are integrated with root83/23/31/34 passing. Dossier `fcf5af68`
+  passes 25 new/shared tests; complete existing dossier composition and consume
+  C's retrieval handoff once frozen.
 - Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: snapshot/reference workflows
   are integrated with exact producer58/65 evidence. Build current-authority
   inventory19 and archive5 writes per host, then the combined package pass.
@@ -61,7 +63,8 @@ continue coherent features while frozen native campaigns run.
   constructor and library selections before the single native capture.
 - Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: Metadata7 passes and is sealed
   on `7053ab06`. Own the twelve focused provider guard/transport regressions
-  at `9d4af023`, including fuzzing; do not duplicate full publication work.
+  after B's exact compiler repair. The failed `9d4af023` capture is sealed;
+  refresh the accepted 121-product reachable closure at the repaired anchor.
 - Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: fresh constructor-budget
   fixture `dcf9a037` is integrated. Its actual setup creates all three provider
   generations; the sole checkpoint probe is authorized at `9d4af023`. Share
@@ -71,7 +74,7 @@ continue coherent features while frozen native campaigns run.
   components. Measure real Core/Floor/guard/retention and propose a structural
   reduction; coordinate shared Core changes with root before editing them.
 
-Root ABI154 and exact source bridges pass. Preserve supported RC1 and every
+Root ABI155 and exact source bridges pass. Preserve supported RC1 and every
 failed capture. Full current/Safe, stateful/fuzz, gas/size, CI, freeze and matching
 testnet remain. No new funding or onchain action is needed for current coding.
 

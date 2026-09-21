@@ -18,10 +18,11 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-Integrated Solidity checkpoint: `9d4af023`. ABI154 checks all 4,014 Solidity
-sources with zero errors in 47.125 seconds and exact committed-source readback.
-This includes both provider repairs, reference clients, locator consumers and
-the Registry fixture correction; that fixture still awaits its runtime check.
+Integrated Solidity checkpoint: `e93cb091`. ABI155 checks all 4,014 Solidity
+sources with zero errors in 47.781 seconds and exact committed-source readback.
+It includes the four-format V2 archive correspondence repair; six focused
+native tests and 256 fuzz cases pass, and the old-library control fails as
+expected. Museum dossier `fcf5af68` follows without Solidity changes.
 This is source compatibility; complete candidate execution remains.
 
 - **Preservation and finality:** complete VIEW binding, both provider dispatch
@@ -41,7 +42,9 @@ This is source compatibility; complete candidate execution remains.
   cases now pass on exact `7053ab06`, including 256 fuzz inputs, with
   independently reviewed artifacts and traces. Both provider repairs are
   integrated as `9d4af023`: 24,206 and 24,190 runtime bytes; complete initcode
-  is 40,303 and 40,665 bytes. Twelve focused cases are ready for execution.
+  is 40,303 and 40,665 bytes. The provider12 campaign then exposed a
+  reachable reference-reader Yul compiler stack failure before execution. B
+  owns the narrow repair; the failed capture remains preserved.
 - **Artist history:** joined original content, royalty/freeze and ratification
   histories across accepted, disputed and sanctioned generations are integrated
   as `51d8ed8f`. Production and 13 new test oracles are independently reviewed;
@@ -57,7 +60,9 @@ This is source compatibility; complete candidate execution remains.
   the ceremony-export adapter has 23. Retained VIEW BagIt/OCFL packaging is now
   integrated as `a8562dc5`, with all 31 new/shared offline cases passing at root.
   Exact locator consumers (`1576e5f2`) now pass all 34 new/shared offline
-  cases at root. Actual contract capture, browser replay,
+  cases at root. Conservation/interview dossier `fcf5af68` now passes
+  25 new/shared original-capture tests, retaining complete declared fields and
+  separate Artist/estate histories. Actual contract capture, browser replay,
   complete dossier scope and institutional conformance remain separate.
 - **Clients and Safe:** token V2 snapshots (`b454c032`) and all five reference
   publication writes (`28c145eb`) are integrated. Root verifies exact source,
