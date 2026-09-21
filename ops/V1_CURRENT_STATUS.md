@@ -18,62 +18,60 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-ABI168 checks all **4,141 Solidity sources** at `c648b31a` with
-zero errors in 49.063 seconds. Production source last changed at `99e95030`.
-This checks types, ABI and storage; full current-contract execution and the
-matching testnet candidate remain.
+ABI169 checks all **4,168 Solidity sources** at `ea4cf6b0` with
+zero errors in 49.922 seconds. Production source last changed at `91ac2ce2`.
+This is the next fixed source for runtime testing, not a release candidate.
+Types, ABI and storage pass; full current-contract execution remains.
 
-- **Artist:** recovered operation-24 history `bf8839c7` and the recovered
-  multiple-Artist/collection base profile `99e95030` are source integrated.
-  The latter preserves existing interfaces/storage and adds nine reviewed,
-  authored actual-owner/Safe scenarios. Its seven selected affected products
-  fit; Coordinator remains exactly 24,576 bytes. Broader recovered aggregate
-  record/delegation/generation combinations and actual operation60 execution remain.
-- **New capacity blockers:** a wider native cohort at frozen `eda052c7` found
-  ten additional Artist recovery helpers above 24,576 bytes, and a subsequent
-  cohort found two distinct scoped-policy V2 helpers over the same limit.
-  Two local builders own the Artist repairs in a six/four split; Metric owns
-  the V2 pair. An additional 64-library cohort hit a Yul failure with no source
-  location. Preservation's twelve outputs are being isolated; attribution to
-  any of the 52 Mint outputs remains unproven. Failed captures stay retained.
-- **Native execution:** Provider's 135 selected products now have twenty genuine
-  native contexts. All 172 production emissions in those contexts fit their
-  runtime and base-init limits; this does not establish full-system deployment.
-  Tooling `b07b0099` and routing repair `9b905794` preserve original artifacts
-  and compiler identities. Root focused owner/consumer checks and thirty
-  latest routing tests pass. Provider's actual twelve-case execution is pending.
-  Shared builds ran with eight workers; not-started old-source batches are held
-  until repaired production stabilizes. Earlier `eda052c7` captures do not
-  automatically certify `99e95030` or later source.
-- **Clients and Safe:** VIEW Inventory/Bundle's 22 writes `791cb767` retain their
-  independent 73-test evidence. Closed consent/root transport `cfcbc4ea` and
-  its separately pinned repaired-source companion `34d27678` pass 64 combined
-  root pure/mock tests and exact generator/source/ABI checks. Executor lifecycle
-  and operational RoleRegistry clients continue. Genuine caller baseline
-  `06a361af` is source integrated; captured candidate state still requires
-  independent native/library admission before actual export or RPC execution.
-- **Museum:** canonical V10 acquisition/V3 dossier `4784061d` retain 72 focused
-  root passes. Preserved source/runtime tools `186dcc3f` are independently
-  reviewed with 37 focused passes and exact archive/dependency checks. Four
-  archived synthetic replay vectors reproduced twice at their recorded source.
-  All 19 packet/49 dossier requirements remain. The 51-document genesis consumer
-  is being built; actual native release, complete RPC capture and institutional
-  acceptance remain separate.
-- **Cold-gas tooling:** `c648b31a` adds fresh signed transaction tests, with six
-  passing primitive controls at the producer source and three authored actual
-  graph cases. Earlier cooling/recorder methods failed adversarial controls;
-  they are preserved and excluded from cold acceptance. Full graph gas and
-  actual transaction receipts are not claimed by the primitive tests.
-- **Other lanes:** read-only monitor `d8e42dc5` retains 25 focused passes;
-  OwnerRecords `65312baa` retains 24. Mint's test-only planner extraction is
-  undergoing a localized compiler repair. Collector's optimization remains
-  isolated; actual whole-purchase cold gas and its 500,000-gas target are unproved.
+- **Capacity repairs:** all ten Artist recovery helpers and both scoped-policy
+  V2 helpers that exceeded the earlier native cohort's runtime limit now have
+  independently reviewed repairs integrated (`294c36e3`, `89571bc5`, `832de99d`).
+  All affected products fit in selected captures. Original interfaces, storage,
+  validation and provenance are preserved. Coordinator remains exactly 24,576
+  bytes. These checks do not establish full deployment or transaction gas.
+- **Compiler repairs:** the two failed preservation groups were isolated to
+  CurrentAuthority PolicyRenderCriticalCurrentV2 and MultiOriginRecordStages.
+  Minimal reviewed fixes `b0fcd18f` and `91ac2ce2` compile within original limits.
+  Four and five regressions respectively are authored; their actual execution
+  remains pending. Original failed inputs and timeouts are retained.
+- **Actual provider execution:** all original twelve Provider cases pass on
+  frozen `eda052c7`, including one 256-run fuzz case. Independent review checks
+  actual native creations, links, immutables and membership callers. This is
+  component evidence for that source, not acceptance of this later full graph.
+- **Clients/Safe:** nine Executor and operational two RoleRegistry clients `e6a00086`
+  pass all 78 focused root tests together, build and strict types. The bounded
+  eight-file bootstrap decoder `98e964f2` has 14 independent synthetic passes
+  and four hostile-input controls. Its strict historical source is retained;
+  actual Safe execution, deployed authority and full-call coverage remain.
+- **Museum:** the complete 51-document Registry consumer `6be384af` is integrated:
+  29 canonical schemas and 22 support documents, exact declaration/chunk/byte
+  reconstruction and explicit missing/conflicting/retired results. Independent
+  review and 23 focused synthetic tests pass. Actual registration/capture and
+  the adopted 19 packet and 49 dossier semantic/institutional obligations remain.
+- **Test construction:** the Mint setup planner `c00ee4b0`/`f407acea` passes nine
+  actual-library tests, but its large callback host still times out at 900s.
+  Actual3's 115-output capture also timed out at 1800s. Closed test-only creation
+  mappings `ea4cf6b0` reduce the latter host's fresh direct constructor
+  dependencies from 77 to 13 while preserving CREATE bodies/order/arguments and
+  all original assertions. New six mapping cases and original Actual3 runtime remain.
+  A larger typed Mint activation extraction is being implemented separately.
+- **Caller baseline:** `c8690bab` reads an explicit authenticated address list
+  before dumping actual state, fixing Foundry's omission of untouched deployed
+  accounts. It preserves the 16-word baseline and eight-file export. Ten tests
+  are authored, native execution pending; the dump remains unadmitted evidence.
 
-Full current-stack/all-call Safe execution, stateful/fuzz campaigns, complete
-gas/size checks, full CI, source freeze and matching testnet demonstration remain.
-Previously held proposals stay unapplied. Supported RC1 and its Sepolia evidence
-at `569bf87f1fa808787d324f6e1582924b5ccf1d40` are unchanged. No new funding or
-onchain action is needed for current coding.
+The completed shared frozen-source campaign yielded 695 size-qualified products
+across 12 genuine contexts. Failed size/Yul/timeout contexts were refused. The next
+campaign reuses only source-compatible native products, with 16 Testing workers
+and at most 20 coordinated compilers. Root owns the fixed snapshot and decisions;
+builders continue new features on isolated branches while it is tested.
+
+Remaining work includes broader Artist history combinations, actual full-stack
+and all-call Safe campaigns, stateful/fuzz, complete gas/size/CI, a tested release
+freeze and matching testnet demonstration. Collector cold paid-mint optimization
+is still isolated and unproved. Previously held proposals remain unapplied.
+RC1/main/Sepolia `569bf87f1fa808787d324f6e1582924b5ccf1d40` remain unchanged.
+No new funding or onchain action is needed for current coding.
 
 ## Earlier source-specific evidence
 

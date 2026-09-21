@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI168 `c648b31a`: 4,141 sources, zero errors; production last changed at `99e95030`. Full runtime acceptance remains separate. |
+| Source checkpoint | ABI169 `ea4cf6b0`: 4,168 sources, zero errors; production `91ac2ce2`. Fixed runtime-test snapshot; full-v1 acceptance remains. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,46 +29,41 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 21 September
 
-ABI168 checks all **4,141 Solidity sources** at `c648b31a` with
-zero errors in 49.063 seconds. Production source last changed at `99e95030`.
-This checks types, ABI and storage; full current-contract execution and the
-matching testnet candidate remain.
+ABI169 checks all **4,168 Solidity sources** at `ea4cf6b0` with
+zero errors in 49.922 seconds. Production source last changed at `91ac2ce2`.
+This is the next fixed source for runtime testing, not a release candidate.
+Types, ABI and storage pass; full current-contract execution remains.
 
-Root owns architecture, shared interfaces, integration and delivery. Current
-source and evidence are summarized in [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md).
-Builders continue coherent source batches while frozen campaigns run.
+Root owns source integration, shared interfaces and final delivery. Runtime
+captures are pinned to `ea4cf6b0`; new feature builders remain on isolated branches.
 
-- Artist lead: repair six recovery helper size failures; recovered multiple-base
-  `99e95030` integrated. Broader aggregate profiles follow this repair batch.
-- Independent local capacity builder: repair the four Dormancy/Estate helpers
-  in `codex/artist-recovery-estate-dormancy-capacity`; cross-review with Artist.
-- Local finality lead: cold-bound test source integrated `c648b31a`; localize the
-  twelve preservation outputs in the failed 64-library Yul cohort.
-- Mint: repair the test-only setup planner's localized Yul issue, preserve all
-  original host cases/layout/CREATE behavior, then one changed callback trial.
-- Burn: independent native-tool review and browser preparation; actual preserved
-  browser execution needs genuine exports. Monitor source already integrated.
-- Museum: preserved-tool batch `186dcc3f` integrated; build complete 51-document
-  genesis catalog capture/reconstruction without inventing registration evidence.
-- Clients: root interlude v1/v2 integrated `cfcbc4ea`/`34d27678` with64 focused
-  passes; finish Executor9, RoleRegistry2 and bounded caller-export consumer.
-- Testing: canonical native tools integrated `b07b0099`/`9b905794`; coordinate
-  existing finite captures and exact owner reuse. Hold not-started `eda052c7`
-  requests until a stable repaired production source is selected.
-- Metric: finish frozen Provider12 actual execution, preserving its exact source;
-  separately repair scoped-policy V2 Metadata/Reads size failures.
-- Capacity: preserve the finite Actual3 host/embedded-child capture and explicit
-  owned compiler; consume shared owners through the reviewed canonical adapter.
-- Prepared: baseline source `06a361af` integrated; complete genuine native-library
-  admission, actual caller export and unsigned consent/root interlude.
-- Collector: prototype remains isolated; consume matching genuine shared owners
-  before actual baseline/candidate whole-purchase cold-gas comparison.
+- Artist: additive recovered MULTIPLE_CONSENTS with global grant/nonces/usage
+  across supported multiple Artists/collections; old profiles stay strict.
+- Local independent reviewer: Artist validator and later source/oracle review.
+- Local finality reviewer: reviewed compiler fix integrated; bounded review as
+  new handoffs arrive, no duplicate native campaigns.
+- Mint: typed test-only ProductActivation extraction based on retained IR;
+  original900s timeout preserved, no unchanged retry.
+- Burn: RecordStages compiler repair integrated; coordinate remaining actual
+  preservation/current-stack acceptance and fresh-source capture support.
+- Museum: native semantic selection/export from canonical V10/V3, preserving
+  complete field denominator, authority, attributed alternatives and disclosure.
+- Clients: recovered MULTIPLE_BASE callers at exact99e/ABI167; broader all-call
+  Safe execution remains distinct from pure/mock clients.
+- Testing: exact fresh native plan at `ea4cf6b0`, genuine owner reuse, repaired
+  products and smaller part006 groups; 16 workers/max 20 coordinated compilers.
+- Metric: OwnerRecords-to-Museum51 Registry capture adapter; Provider12 frozen
+  execution accepted at eda, no repeat seal/review.
+- Capacity: refresh materially reduced Actual3 local capture from new literal
+  getters; original115-output timeout retained, one finite changed attempt.
+- Prepared: exact corrected baseline/helper/outer native refresh and caller
+  export, with historical06a client witness and current source bridge explicit.
+- Collector: isolated optimization and exact baseline/candidate owner joins;
+  actual whole-purchase cold gas remains unproved.
 
-At most eight Testing native workers and twelve coordinated compilers in total;
-no duplicate captures or competing file writers. Runtime evidence applies only
-to its source and actual test boundaries. Twelve observed production size
-failures and the separate Yul failure remain open; no full candidate acceptance.
-Previously held proposals remain held. No new funding or onchain action needed.
+All twelve recorded size failures and both isolated Yul failures have source
+repairs; combined current-native and full runtime acceptance remain. Use the
+feature register for remaining product work. Held proposals remain held.
 
 ## Earlier source-specific assignments
 
