@@ -67,8 +67,10 @@ This is source compatibility; complete candidate execution remains.
 - **Clients and Safe:** token V2 snapshots (`b454c032`) and all five reference
   publication writes (`28c145eb`) are integrated. Root verifies exact source,
   independent reviews and producer logs: 58 and 65 focused passes respectively.
-  Current-authority inventory and archive workflows are next. Full combined
-  package and actual current-contract Safe execution remain.
+  Current-authority inventories (`38308a93`) now cover all nineteen
+  writes per collection/scoped host; the exact reviewed source and 70 passing
+  producer tests are verified at root. Archive workflows are next. Full
+  combined package and actual current-contract Safe execution remain.
 - **Current-stack testing:** publication11 at exact `d667908b` passes native
   compilation and all 191 production size/artifact gates, but export setup
   fails with `CheckpointPayloadMismatch(1)`. No export, replay or test body is

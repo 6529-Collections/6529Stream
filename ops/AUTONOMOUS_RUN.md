@@ -53,8 +53,9 @@ continue coherent features while frozen native campaigns run.
   passes 25 new/shared tests; complete existing dossier composition and consume
   C's retrieval handoff once frozen.
 - Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: snapshot/reference workflows
-  are integrated with exact producer58/65 evidence. Build current-authority
-  inventory19 and archive5 writes per host, then the combined package pass.
+  and current inventories are integrated with exact producer58/65/70 evidence.
+  Build archive5 per host at `e93cb091`/ABI155, then one combined package and
+  actual Safe caller pass for the built operations.
 - Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: publication11 failed capture
   is sealed. Historical8 passes and is sealed on `7053ab06`. Refresh actual
   publication11 at `9d4af023`; coordinate native ownership with Prepared.
