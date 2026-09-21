@@ -45,6 +45,10 @@ import {
 
 /// @notice Typed stages using the actual host storage reference.
 library StreamScopedPolicyRenderCriticalRecordStagesV2 {
+    // Preserve the existing ABI entries for failures bubbled by the linked guard.
+    error InventoryIncomplete();
+    error InventorySourceChanged();
+
     function appendIntent(State.State storage state, bytes calldata input) public {
         (bytes32 id, StreamConservationRecordTypes.Intent memory witness, address originalActor) =
             abi.decode(input[4:], (bytes32, StreamConservationRecordTypes.Intent, address));
