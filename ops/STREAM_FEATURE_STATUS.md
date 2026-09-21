@@ -16,22 +16,26 @@ different milestones.
 
 ## Latest integration checkpoint: 21 September
 
-The current client package passes **2,408 tests** on `26051498`, including
-current-authority Archive workflows and the retained Burn/Safe fixes. Museum
-documentary/semantic V2 dossier `e278ddcf` passes all 33 focused tests at root.
-Publication11 passes on exact `9d4af023`, including independent archive replay;
-Registry6 passes on `6d9729c6`. Each campaign retains its declared typed boundaries.
+ABI160 checks all **4,067 Solidity sources** at `76773306` with zero errors.
+Reviewed retrieval/Safe setup, fresh gas profiles, the 50-case genesis/Museum
+cohort and genuine creation-artifact test adapter are source integrated; complete
+current-contract execution remains pending.
 
-ABI157 checks all 4,059 Solidity sources at `a2973d36` with zero errors.
-The subsequent Provider12 native build found a scoped-reader compiler failure;
-its repair is underway. Artist operation24/history composition, actual retrieval
-ceremony, combined genesis/Museum cases and current Safe scenario/driver work
-continue in parallel. The actual Collector receipt prototype is not adopted.
+The combined client package passes **2,408 tests** at `26051498`. The later Safe
+RPC driver separately passes 18 mock groups. Museum dossier and attributed
+retrieval consumers pass 33 and 42 offline cases on their recorded sources.
+Native evidence includes 42 retrieval cases at `a2973d36`, eleven publication
+cases with independent replay at `9d4af023`, six Registry cases at `6d9729c6`,
+and six scoped-reader cases plus 256 fuzz inputs at `4fb225ed`.
 
-[Current delivery status](V1_CURRENT_STATUS.md) records each active campaign,
-its source and remaining acceptance. Full current-stack/Safe, stateful/fuzz,
-whole-system gas/size, CI, freeze and matching testnet demonstration remain.
-RC1 `569bf87f` and its existing Sepolia evidence are preserved.
+Provider12 and the partitioned Mint capture timed out before EVM execution;
+their failed captures remain preserved. Artist history composition, canonical
+Museum packets and actual current-contract Safe integration continue. The
+Collector prototype passes 43 component cases but is not adopted at root.
+
+[Current delivery status](V1_CURRENT_STATUS.md) records exact evidence boundaries.
+Full current-stack/Safe execution, stateful/fuzz, whole-system gas/size, CI,
+freeze and matching testnet demonstration remain. RC1 `569bf87f` is preserved.
 
 ## How to read this document
 

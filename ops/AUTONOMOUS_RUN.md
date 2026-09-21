@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI157 `a2973d36`: 4,059 sources / zero errors, 48.110 seconds. Retrieval, actual witness fixtures and Platform histories `7b0f918e` integrated. Reader5/fuzz256 has independent native artifact verification. |
+| Source checkpoint | ABI160 `76773306`: 4,067 sources, zero errors, 48.313 seconds. Scoped repair, actual retrieval/Safe recipes, fresh budgets, Genesis50 and creation adapter are source integrated; runtime acceptance remains separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,55 +29,50 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 21 September
 
-Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact evidence boundaries.
-Root owns shared interfaces, integration, architecture and delivery. Keep
-building coherent features while source-frozen native campaigns run.
+Account access returned at 19:28 UTC after the usage-limit interruption. Read
+[V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact evidence boundaries and
+the external checkpoint for capture paths. Root owns interfaces, integration,
+architecture and delivery. Keep building while frozen native campaigns run.
 
-- A `/root/protocol_review`: content and Platform histories are integrated.
-  Finish operation24/full authority histories, then complete mixed/multiple-Artist
-  and unbound composition, retaining original tags/writers and exact evidence.
-- B `/root/remote_delivery_review`: CI repair is integrated as `6e4033fc`.
-  Repair scoped-original reference-reader compiler frames; Metric independently
-  reviews the stable production delta before root integrates it.
-- C `/root/release_evidence_review`: own the frozen 42-case retrieval native
-  campaign at `a2973d36`. Build the actual nonempty-image/Archive/Safe witness
-  ceremony through current adoption, complete inventory and finality in parallel.
-- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: preserve the 5,400-second
-  Mint44 timeout. Validate the test-only real creation-byte adapter and bounded
-  native partitions against original actual paid-Dutch behavior/artifacts.
-- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: Registry6 now passes on
-  `6d9729c6`. Independently review Collector Floor factoring; retain ownership
-  of original full preservation/browser acceptance. C owns its added fixture seam.
-- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: V2 conservation dossier
-  is integrated as `e278ddcf` with 33 root passes. Finish the exact retrieval
-  consumer, then remaining full canonical packet/source composition.
-- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: Archive workflows are
-  integrated as `26051498`; the combined root package passes 2,408 tests.
-  Finish retrieval clients and the real five-family RPC/Safe campaign driver;
-  preserve the nine original root-only Burn/Safe changes when bringing forward.
-- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: publication11 is sealed
-  PASS on `9d4af023`, including fresh independent replay. Build combined actual
-  37-role activation/all51schemas and strengthened OwnerRecords capture cases;
-  coordinate exact products with Prepared without changing its frozen run.
-- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: Actual3 source/AST and
-  constructor plan is prepared at `a2973d36`. Hold codegen for B's scoped
-  repair, then refresh affected source and run one finite existing native path.
-  Previously denied task handoff stays pending; do not retry or indirectly relay.
-- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: publication replay passes.
-  Provider12 scoped-original Yul failure at `a2973d36` is sealed. Review B's
-  exact repair, then execute one current successor after root integration.
-- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: frozen fresh-checkpoint
-  native build runs at `a2973d36`; preserve its outcome. Author actual factory
-  graph setup and five-family/eleven-host Safe scenarios with Clients in parallel.
-- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: isolated Core/Floor
-  receipt source reviews are clear, but first component build failed Floor size.
-  Factoring successor `145c74c2` fits selected size; run original 43 cases and
-  obtain Burn review before root adoption/actual whole-purchase measurement.
+- Artist lead: resume the saved `codex/artist-history-attestations` worktree.
+  Complete operation 24 and the five Platform worker size repairs, obtain final
+  review, then finish mixed/multiple-Artist and unbound composition.
+- Independent review: finish current retrieval client review, then review the
+  final Artist helper extraction and original-Platform fallback oracle.
+- Retrieval lead: resume the actual source/output/two-case measurement plan at
+  `76773306`; the 42-case component campaign already passes. Complete genuine
+  image/Archive/Safe retrieval, inventory and finality acceptance.
+- Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: retain the failed native partition
+  run (six verified, one timeout, eight not started). Fix the specific failed
+  capture and execute actual FreeClaim9. Share explicit dynamic artifact owners.
+- Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: finish Collector `0434eec1`
+  source review, then original preservation/browser acceptance. Do not duplicate
+  the retrieval lead's added source/output measurement.
+- Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: finish full canonical packet
+  and source composition. Funding/drill release artifacts remain distinct from
+  current contract facts; actual capture owners remain separate.
+- Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: retrieval batch `68714e6c`
+  awaits root intake. Preserve the nine root Burn/Safe differences when bringing
+  forward; finish retrieval inventory consumers and actual caller inputs.
+- Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: execute reviewed Genesis50 at
+  `76773306`. Preserve full product requirements, including dynamically loaded
+  artifacts, and coordinate genuine OwnerRecords RPC capture with Metric.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: one finite Actual3 attempt
+  runs at `ec832e86`. Previously denied handoff remains held; do not retry or
+  relay it indirectly. No duplicate compiler or repeated planning cycle.
+- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: retain the Provider12
+  `ec832e86` code-generation timeout; diagnose a changed bounded successor.
+  Build the genuine OwnerRecords RPC bridge with Testing in parallel.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: resume the fresh checkpoint
+  successor at `76773306` with 6m/7m/8m budgets and explicit artifact ownership.
+  Complete genuine RPC state export and five-family/eleven-host Safe inputs.
+- Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: finish actual whole-purchase
+  and cold gross-gas measurement plus callback/rollback cases. Do not repeat the
+  unchanged 43-case component cohort or claim prototype adoption.
 
-Root ABI157, combined clients, Museum and focused CI tooling pass on their
-recorded source. Preserve RC1 and every failed capture. Full current/Safe,
-stateful/fuzz, gas/size, full CI, freeze and matching testnet remain.
-No new funding or onchain action is needed for current coding.
+Root ABI160 and focused component/client/Museum checks pass only for their
+recorded sources. Full current-stack/Safe, stateful/fuzz, gas/size, full CI,
+freeze and matching testnet demonstration remain. No new funding is required.
 
 ## Earlier source-specific assignments
 
