@@ -123,7 +123,7 @@ abstract contract CurrentArtistPreservationRegistryFixture is CurrentArtistPrese
         original.manifest = renderer.rendererManifest();
         original.schemaDocument = _doc("ORIGINAL_SCHEMA", Docs.DocumentKind.SCHEMA, bytes("schema"));
         original.contextDocument =
-            _doc("ORIGINAL_CONTEXT", Docs.DocumentKind.SCHEMA, bytes("context"));
+            _doc("STREAM_CONTEXT_V1", Docs.DocumentKind.SCHEMA, bytes("context"));
         original.manifestDocument =
             _doc("ORIGINAL_MANIFEST", Docs.DocumentKind.CATALOG, bytes("manifest"));
         V.Read[] memory oldReads = new V.Read[](0);
