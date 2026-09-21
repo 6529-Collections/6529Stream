@@ -85,3 +85,11 @@ complete occurrence accounting and exact refusal/restoration. They do not
 establish actual source admission, Safe authorization, whole-profile import,
 maximum aggregate capacity or transaction-gas acceptance. Native evidence,
 when available, is pinned separately to the exact tested source.
+
+At source commit 199b0c85b8370ace06439885d9b053d999c6814a, the fourteen
+focused cases passed, including 256 fuzz runs. The capture verified 38 genuine
+native artifacts and all 37 fixed production-library size limits; the one
+aggregate test host used the existing test-only fixture allowance. The new
+aggregate and row workers measured 23,096 and 13,634 runtime bytes. Sources and
+artifacts remained unchanged during execution. This evidence covers the pure
+workers with typed original evidence, subject to the composition boundaries above.
