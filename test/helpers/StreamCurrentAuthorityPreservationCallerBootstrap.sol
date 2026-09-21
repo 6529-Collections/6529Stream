@@ -32,6 +32,8 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
     PreservationCallerBootstrapVm private constant vm =
         PreservationCallerBootstrapVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant CUT_PROFILE = keccak256("6529STREAM_CALLER_BOOTSTRAP_FOUNDRY_171_V1");
+    bytes32 private constant BASELINE_PROFILE =
+        keccak256("6529STREAM_CALLER_PRESTATE_BASELINE_FOUNDRY_171_V1");
     string private constant SCENARIO_ARTIFACT =
         "test/helpers/StreamCurrentAuthorityPreservationCallerScenario.sol:StreamCurrentAuthorityPreservationCallerScenario";
     string private constant OUTPUT_ROOT = "./artifacts/native-assembly/";
@@ -75,6 +77,25 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
         Cut cut;
     }
 
+    struct BaselineCut {
+        bytes32 profile;
+        address recorder;
+        address caller;
+        address origin;
+        bytes32 recorderCodeHash;
+        uint256 recorderBalance;
+        uint64 recorderNonce;
+        uint256 chainId;
+        uint256 blockNumber;
+        uint256 timestamp;
+        uint256 baseFee;
+        uint256 gasLimit;
+        address coinbase;
+        uint256 prevrandao;
+        bytes32 dumpHash;
+        bytes32 accountsHash;
+    }
+
     error InvalidArtifactPrefix();
     error ExistingArtifact(string path);
     error InvalidPrestateEncoding();
@@ -88,13 +109,59 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
     error PreparationChanged();
     error UnknownFinalAccount(address account);
 
+    /// @notice Capture a candidate baseline from the actual VM without preparing the protocol.
+    /// @dev Invoke from the same compiled outer TEST/caller/context later used for export. The dump
+    /// can omit runner or otherwise undiscovered state: this only validates its included accounts
+    /// against live code/hash/balance/nonce/slots. No omitted account is invented or appended.
+    /// Native library deployment identity, omitted accounts, complete closure, environment and
+    /// successful outer execution require independent admission before these bytes may become an
+    /// admitted input. This never writes admitted-prestate.abi or the export's complete.abi marker.
+    /// Baseline files survive a later revert; their distinct completion marker is not export proof.
+    function capturePrestateFile(string memory artifactPrefix)
+        public
+        returns (BaselineCut memory cut)
+    {
+        _freshBaselinePaths(artifactPrefix);
+        string memory path = string.concat(artifactPrefix, ".baseline-dump.json");
+        vm.dumpState(path);
+        string memory raw = vm.readFile(path);
+        Export.Account[] memory accounts = Dump.parse(raw);
+        _validatePrestate(accounts);
+        bytes memory accountsABI = abi.encode(accounts);
+
+        cut.profile = BASELINE_PROFILE;
+        cut.recorder = address(this);
+        cut.caller = msg.sender;
+        cut.origin = tx.origin;
+        cut.recorderCodeHash = address(this).codehash;
+        cut.recorderBalance = address(this).balance;
+        cut.recorderNonce = vm.getNonce(address(this));
+        cut.chainId = block.chainid;
+        cut.blockNumber = block.number;
+        cut.timestamp = block.timestamp;
+        cut.baseFee = block.basefee;
+        cut.gasLimit = block.gaslimit;
+        cut.coinbase = block.coinbase;
+        cut.prevrandao = block.prevrandao;
+        cut.dumpHash = keccak256(bytes(raw));
+        cut.accountsHash = keccak256(accountsABI);
+        bytes memory contextABI = abi.encode(cut);
+        vm.writeFileBinary(string.concat(artifactPrefix, ".candidate-prestate.abi"), accountsABI);
+        vm.writeFileBinary(string.concat(artifactPrefix, ".baseline-context.abi"), contextABI);
+        // Last baseline write only; independent outer success and admission remain mandatory.
+        vm.writeFileBinary(
+            string.concat(artifactPrefix, ".baseline-complete.abi"),
+            abi.encode(BASELINE_PROFILE, keccak256(contextABI))
+        );
+    }
+
     /// @notice Read the admitted prestate from a fixed local artifact path without a large argv.
-    /// @dev Local invocation: forge script <this source>:<this contract>
-    /// --sig "exportPreparationFile(string)" "./artifacts/native-assembly/<label>".
+    /// @dev Invoke internally through the opt-in outer TEST adapter with an admitted native
+    /// context supplying the linked Scenario artifact and its genuinely deployed libraries.
     /// The input file is exactly <artifactPrefix>.admitted-prestate.abi. This internal call preserves
     /// this recorder and the original msg.sender; canonical/live validation and recording order
     /// are the same as exportPreparation. The external runner must require a successful outer
-    /// script result as well as authenticate the retained files; a completion file alone is not
+    /// execution result as well as authenticate the retained files; a completion file alone is not
     /// acceptance, and this local entrypoint does not broadcast or establish RPC transport.
     function exportPreparationFile(string memory artifactPrefix) public returns (Cut memory cut) {
         _validateArtifactPrefix(artifactPrefix);
@@ -350,6 +417,21 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
             if (vm.exists(path)) revert ExistingArtifact(path);
         }
         vm.createDir(OUTPUT_ROOT, true);
+    }
+
+    function _freshBaselinePaths(string memory prefix) private {
+        // Preserve all eight export-path guards and the identical restricted prefix validation.
+        _freshPaths(prefix);
+        string[4] memory suffixes = [
+            ".baseline-dump.json",
+            ".candidate-prestate.abi",
+            ".baseline-context.abi",
+            ".baseline-complete.abi"
+        ];
+        for (uint256 i; i < suffixes.length; ++i) {
+            string memory path = string.concat(prefix, suffixes[i]);
+            if (vm.exists(path)) revert ExistingArtifact(path);
+        }
     }
 
     function _validateArtifactPrefix(string memory prefix) private pure {

@@ -10,6 +10,8 @@ interface BootstrapFileTestVm {
     function expectRevert(bytes calldata reason) external;
     function writeFileBinary(string calldata path, bytes calldata data) external;
     function readFileBinary(string calldata path) external view returns (bytes memory);
+    function readFile(string calldata path) external view returns (string memory);
+    function exists(string calldata path) external view returns (bool);
     function createDir(string calldata path, bool recursive) external;
     function removeFile(string calldata path) external;
 }
@@ -70,5 +72,58 @@ contract StreamCurrentAuthorityPreservationCallerBootstrapFileTest {
         require(keccak256(vm.readFileBinary(output)) == keccak256(hex"012345"));
         vm.removeFile(input);
         vm.removeFile(output);
+    }
+
+    function testBaselineCapturesLiveAccountsWithSeparateBoundMarker() public {
+        string memory prefix = "./artifacts/native-assembly/bootstrap-file-baseline";
+        Bootstrap.BaselineCut memory cut = bootstrap.capturePrestateFile(prefix);
+        bytes memory candidate = vm.readFileBinary(string.concat(prefix, ".candidate-prestate.abi"));
+        Export.Account[] memory accounts = abi.decode(candidate, (Export.Account[]));
+        require(keccak256(abi.encode(accounts)) == keccak256(candidate));
+        require(cut.accountsHash == keccak256(candidate));
+        require(
+            cut.dumpHash
+                == keccak256(bytes(vm.readFile(string.concat(prefix, ".baseline-dump.json"))))
+        );
+        require(cut.recorder == address(bootstrap) && cut.caller == address(this));
+        require(cut.origin == tx.origin && cut.recorderCodeHash == address(bootstrap).codehash);
+        bool recorderFound;
+        for (uint256 i; i < accounts.length; ++i) {
+            if (accounts[i].account == address(bootstrap)) {
+                recorderFound = true;
+                require(accounts[i].codeHash == address(bootstrap).codehash);
+                require(keccak256(accounts[i].code) == keccak256(address(bootstrap).code));
+                require(accounts[i].nonce == cut.recorderNonce);
+                require(accounts[i].balance == cut.recorderBalance);
+            }
+        }
+        // This ordinary created child is not the special outer test account omitted by dumpState.
+        require(recorderFound);
+        bytes memory context = vm.readFileBinary(string.concat(prefix, ".baseline-context.abi"));
+        require(keccak256(context) == keccak256(abi.encode(cut)));
+        (bytes32 profile, bytes32 contextHash) = abi.decode(
+            vm.readFileBinary(string.concat(prefix, ".baseline-complete.abi")), (bytes32, bytes32)
+        );
+        require(profile == cut.profile && contextHash == keccak256(context));
+        require(!vm.exists(string.concat(prefix, ".admitted-prestate.abi")));
+        require(!vm.exists(string.concat(prefix, ".complete.abi")));
+        vm.removeFile(string.concat(prefix, ".baseline-dump.json"));
+        vm.removeFile(string.concat(prefix, ".candidate-prestate.abi"));
+        vm.removeFile(string.concat(prefix, ".baseline-context.abi"));
+        vm.removeFile(string.concat(prefix, ".baseline-complete.abi"));
+    }
+
+    function testBaselineRefusesExistingContextWithoutWritingCandidate() public {
+        string memory prefix = "./artifacts/native-assembly/bootstrap-file-baseline-existing";
+        string memory context = string.concat(prefix, ".baseline-context.abi");
+        vm.writeFileBinary(context, hex"5678");
+        vm.expectRevert(abi.encodeWithSelector(Bootstrap.ExistingArtifact.selector, context));
+        bootstrap.capturePrestateFile(prefix);
+        require(keccak256(vm.readFileBinary(context)) == keccak256(hex"5678"));
+        require(!vm.exists(string.concat(prefix, ".baseline-dump.json")));
+        require(!vm.exists(string.concat(prefix, ".candidate-prestate.abi")));
+        require(!vm.exists(string.concat(prefix, ".baseline-complete.abi")));
+        require(!vm.exists(string.concat(prefix, ".complete.abi")));
+        vm.removeFile(context);
     }
 }
