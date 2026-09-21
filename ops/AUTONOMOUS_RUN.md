@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `9381dd99`: adds scoped sanction/finality fixtures, explicit V2 dispatch, fixed snapshot reader and complete VIEW forwarding. ABI145 at `feb24a2e`: 3,913 / zero errors; later forwarding has separate producer ABI evidence. Runtime acceptance remains separate. |
+| Source checkpoint | Solidity `9381dd99`, client batch `5776d191`. ABI146: 3,914 / zero errors; new client64 root cases pass. Runtime acceptance remains separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -57,11 +57,13 @@ builders implementing while bounded frozen test batches run.
   actual native wire bridge and new VIEW reference45 pass root checks. Build
   full render-critical inventory/bundle consumers against frozen `fd861f3f`.
 - Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: inventory/archive22 CALLs
-  integrated as `e3bfd9b0`. Continue historical ABI129 provider/discovery and
-  governed Registry callers; distinguish newer unsupported profiles.
+  integrated as `e3bfd9b0`; historical finality callers are `5776d191`, producer
+  2,132 and root focused 64 pass. Build current preservation V2 and shared VIEW
+  binding callers from exact `9381dd99`/ABI146 with one shared fixture.
 - Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 and corrected
-  metric13 are sealed. Own the one next publication22 campaign after root
-  reads back the exact frozen successor; fresh export/context checks required.
+  metric13 are sealed. Publication22 is sealed failed before export/EVM on
+  captured MetadataRouter size. Map coherent current fixture/API migration while
+  Metric establishes current Router size; no historical retry or cap changes.
 - Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: root16 and failed reader29
   are sealed. Own the fresh reader campaign at `feb24a2e`, adding the repaired
   worker and complete snapshot-family regression file under original controls.
@@ -69,8 +71,9 @@ builders implementing while bounded frozen test batches run.
   refresh its selection after the remaining finality fixture batch stabilizes.
 - Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: publication22 inputs are
   frozen and Testing owns execution. The reader split is integrated as
-  `feb24a2e`, with source/ABI/selected-size review clear. Independently check
-  Capacity's fresh linked selection; do not duplicate its compiler.
+  `feb24a2e`, with source/ABI/selected-size review clear. Now establish current
+  MetadataRouter size and choose a coherent current publication repair/migration
+  with Testing; do not copy one current Router into the old dependency graph.
 - Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: V2 family is integrated.
   Actual scoped succession/export/resume is integrated as `f8486206`.
   Explicit V2 dispatch and scoped finality fixtures are integrated as `679c489e`;
@@ -82,7 +85,7 @@ builders implementing while bounded frozen test batches run.
   benchmark using actual bounded refund/Ledger leaves; no production overlay
   or changed 500,000 target.
 
-Root ABI145 and its committed-source bridge pass; 23 documentation regressions,
+Root ABI146 and its committed-source bridge pass; 23 documentation regressions,
 links and changelog checks pass. No root compiler remains. Check exact process
 ownership before starting or stopping any native campaign. Full current/Safe,
 stateful/fuzz, gas/size, CI, freeze and matching testnet remain.

@@ -18,10 +18,11 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-Integrated ABI checkpoint: `feb24a2e`. ABI145 checks all 3,913 Solidity
-sources with zero errors in 45.422 seconds and exact committed-source readback.
-The subsequent thin complete-VIEW forwarding (`9381dd99`) has its separate
-2,002-source producer ABI check and seven authored cases; runtime is pending.
+Integrated Solidity checkpoint: `9381dd99`. ABI146 checks all 3,914 Solidity
+sources with zero errors in 45.781 seconds and exact committed-source readback.
+The subsequent client-only batch is integrated as `5776d191`; its 64 focused
+root cases, generation, build and strict types pass. Runtime acceptance of the
+combined contracts remains pending.
 This is source compatibility, not execution of the complete candidate.
 
 - **Preservation and succession:** the explicit V2 family is integrated as
@@ -68,9 +69,12 @@ This is source compatibility, not execution of the complete candidate.
   preserves the existing import-size repair and adds its required operation-48
   point. Remaining sanction/confirmation, Platform, content and freeze history
   combinations continue in build; these tests have not executed.
-- **Clients:** `e3bfd9b0` adds 17 inventory and five archive CALL workflows with
-  direct and Safe receipt reconciliation. The exact producer commit
-  `51621c36` passes all 2,068 package tests, generation and strict types.
+- **Clients:** `e3bfd9b0` adds 17 inventory and five archive CALL workflows.
+  `5776d191` adds scoped finality staging, call-data publication, scheduling
+  and execution with direct and Safe receipt reconciliation. Its exact producer
+  `f13e9c8f` passes all 2,132 package tests; all 15 changed package files match
+  integration. Root independently passes the 64 new cases in 98.453 seconds,
+  plus generation, build and strict types.
   These clients explicitly target their historical ABI129 contracts; later
   V2/current-authority/VIEW profiles and actual Safe execution require their
   own integration. Root generation, build and strict test types pass; its
@@ -90,8 +94,13 @@ This is source compatibility, not execution of the complete candidate.
   256 fuzz inputs, in a separate sealed run. Together with the unchanged
   parent Retention/Execution cases this covers all 48 component cases across
   two sources; it is not a retroactive single-run pass. The actual nine-case
-  publication successor is running from its independently verified 367-source
-  composite, preserving original gas/cooling and fresh export/replay checks.
+  publication successor's native build completed from its 367-source composite,
+  but stopped before export or EVM: its reached MetadataRouter is 39,393 runtime
+  bytes, above 24,576. The failed packet is sealed with zero executed cases.
+  That Router predates the current integration's fixed readers and additional
+  features. Current Router size and a coherent current fixture migration are
+  being assessed before choosing the repair; original gas/cooling and fresh
+  export/replay requirements remain.
 - **Collector gas:** the optimized experimental shared receipt passes 24 cases
   including 256 fuzz inputs. The official-record read falls from 471,985 to
   44,913 gas; attachment remains 456,631. Separate transaction frames cannot

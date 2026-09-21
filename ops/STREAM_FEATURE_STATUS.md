@@ -16,10 +16,11 @@ different milestones.
 
 ## Latest integration checkpoint: 21 September
 
-Integrated ABI checkpoint: `feb24a2e`. ABI145 checks all 3,913 Solidity
-sources with zero errors in 45.422 seconds and exact committed-source readback.
-The subsequent thin complete-VIEW forwarding (`9381dd99`) has its separate
-2,002-source producer ABI check and seven authored cases; runtime is pending.
+Integrated Solidity checkpoint: `9381dd99`. ABI146 checks all 3,914 Solidity
+sources with zero errors in 45.781 seconds and exact committed-source readback.
+The subsequent client-only batch is integrated as `5776d191`; its 64 focused
+root cases, generation, build and strict types pass. Runtime acceptance of the
+combined contracts remains pending.
 This is source compatibility, not execution of the complete candidate.
 
 - **Preservation and succession:** the explicit V2 family is integrated as
@@ -66,9 +67,12 @@ This is source compatibility, not execution of the complete candidate.
   preserves the existing import-size repair and adds its required operation-48
   point. Remaining sanction/confirmation, Platform, content and freeze history
   combinations continue in build; these tests have not executed.
-- **Clients:** `e3bfd9b0` adds 17 inventory and five archive CALL workflows with
-  direct and Safe receipt reconciliation. The exact producer commit
-  `51621c36` passes all 2,068 package tests, generation and strict types.
+- **Clients:** `e3bfd9b0` adds 17 inventory and five archive CALL workflows.
+  `5776d191` adds scoped finality staging, call-data publication, scheduling
+  and execution with direct and Safe receipt reconciliation. Its exact producer
+  `f13e9c8f` passes all 2,132 package tests; all 15 changed package files match
+  integration. Root independently passes the 64 new cases in 98.453 seconds,
+  plus generation, build and strict types.
   These clients explicitly target their historical ABI129 contracts; later
   V2/current-authority/VIEW profiles and actual Safe execution require their
   own integration. Root generation, build and strict test types pass; its
@@ -88,8 +92,13 @@ This is source compatibility, not execution of the complete candidate.
   256 fuzz inputs, in a separate sealed run. Together with the unchanged
   parent Retention/Execution cases this covers all 48 component cases across
   two sources; it is not a retroactive single-run pass. The actual nine-case
-  publication successor is running from its independently verified 367-source
-  composite, preserving original gas/cooling and fresh export/replay checks.
+  publication successor's native build completed from its 367-source composite,
+  but stopped before export or EVM: its reached MetadataRouter is 39,393 runtime
+  bytes, above 24,576. The failed packet is sealed with zero executed cases.
+  That Router predates the current integration's fixed readers and additional
+  features. Current Router size and a coherent current fixture migration are
+  being assessed before choosing the repair; original gas/cooling and fresh
+  export/replay requirements remain.
 - **Collector gas:** the optimized experimental shared receipt passes 24 cases
   including 256 fuzz inputs. The official-record read falls from 471,985 to
   44,913 gas; attachment remains 456,631. Separate transaction frames cannot
@@ -136,16 +145,16 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `842eb31e5bfc1bedc746f3b802742f789232eff6`; see the [20 September batch](#latest-integration-checkpoint-21-september) for bounded source, execution and remaining work |
+| Current integration source | Solidity `9381dd999075693a4f63092d9924856a0dd72834`, subsequent client batch `5776d191`; see the [21 September batch](#latest-integration-checkpoint-21-september) for evidence and remaining work |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | ABI141: 3,779 sources at `842eb31e`, zero errors in 42.906 seconds; complete committed-source bridge. This is not whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | ABI146: 3,914 sources at `9381dd99`, zero errors in 45.781 seconds; complete committed-source bridge. This is not whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
+| Latest focused native evidence | Source-specific standard24, VIEW46, current-root16 and corrected metric13 pass as described above. Repaired reader51 is in preparation; metric publication22 stopped before EVM on the captured MetadataRouter size limit. Earlier captures below remain historical. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.
