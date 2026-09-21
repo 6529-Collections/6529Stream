@@ -13,6 +13,7 @@ interface PreservationCallerBootstrapVm {
     function load(address account, bytes32 slot) external view returns (bytes32);
     function dumpState(string calldata path) external;
     function readFile(string calldata path) external view returns (string memory);
+    function readFileBinary(string calldata path) external view returns (bytes memory);
     function writeFileBinary(string calldata path, bytes calldata data) external;
     function exists(string calldata path) external view returns (bool);
     function createDir(string calldata path, bool recursive) external;
@@ -86,6 +87,21 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
     error ScenarioNotRecorded();
     error PreparationChanged();
     error UnknownFinalAccount(address account);
+
+    /// @notice Read the admitted prestate from a fixed local artifact path without a large argv.
+    /// @dev Local invocation: forge script <this source>:<this contract>
+    /// --sig "exportPreparationFile(string)" "./artifacts/native-assembly/<label>".
+    /// The input file is exactly <artifactPrefix>.admitted-prestate.abi. This internal call preserves
+    /// this recorder and the original msg.sender; canonical/live validation and recording order
+    /// are the same as exportPreparation. The external runner must require a successful outer
+    /// script result as well as authenticate the retained files; a completion file alone is not
+    /// acceptance, and this local entrypoint does not broadcast or establish RPC transport.
+    function exportPreparationFile(string memory artifactPrefix) public returns (Cut memory cut) {
+        _validateArtifactPrefix(artifactPrefix);
+        bytes memory admittedPrestateABI =
+            vm.readFileBinary(string.concat(artifactPrefix, ".admitted-prestate.abi"));
+        return exportPreparation(admittedPrestateABI, artifactPrefix);
+    }
 
     /// @param admittedPrestateABI Canonical abi.encode(Export.Account[]) from the independently
     /// admitted initial-state manifest. Include native libraries and initially absent recipients.
@@ -318,21 +334,7 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
     }
 
     function _freshPaths(string memory prefix) private {
-        bytes memory p = bytes(prefix);
-        bytes memory root = bytes(OUTPUT_ROOT);
-        if (p.length <= root.length || p.length > root.length + 128) {
-            revert InvalidArtifactPrefix();
-        }
-        for (uint256 i; i < root.length; ++i) {
-            if (p[i] != root[i]) revert InvalidArtifactPrefix();
-        }
-        for (uint256 i = root.length; i < p.length; ++i) {
-            uint8 ch = uint8(p[i]);
-            if (
-                !(ch >= 48 && ch <= 57) && !(ch >= 65 && ch <= 90) && !(ch >= 97 && ch <= 122)
-                    && ch != 45 && ch != 95
-            ) revert InvalidArtifactPrefix();
-        }
+        _validateArtifactPrefix(prefix);
         string[8] memory suffixes = [
             ".initial-dump.json",
             ".final-dump.json",
@@ -348,5 +350,23 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap {
             if (vm.exists(path)) revert ExistingArtifact(path);
         }
         vm.createDir(OUTPUT_ROOT, true);
+    }
+
+    function _validateArtifactPrefix(string memory prefix) private pure {
+        bytes memory p = bytes(prefix);
+        bytes memory root = bytes(OUTPUT_ROOT);
+        if (p.length <= root.length || p.length > root.length + 128) {
+            revert InvalidArtifactPrefix();
+        }
+        for (uint256 i; i < root.length; ++i) {
+            if (p[i] != root[i]) revert InvalidArtifactPrefix();
+        }
+        for (uint256 i = root.length; i < p.length; ++i) {
+            uint8 ch = uint8(p[i]);
+            if (
+                !(ch >= 48 && ch <= 57) && !(ch >= 65 && ch <= 90) && !(ch >= 97 && ch <= 122)
+                    && ch != 45 && ch != 95
+            ) revert InvalidArtifactPrefix();
+        }
     }
 }
