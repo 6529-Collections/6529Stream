@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredSanctionStage as SanctionStage
+} from "./StreamArtistRecoveredSanctionStage.sol";
 import { StreamArtistRecoveredDisputeStage as DisputeStage } from "./StreamArtistRecoveredDisputeStage.sol";
 import { StreamArtistRecoveredDisputeSelection as DisputeSelection } from "./StreamArtistRecoveredDisputeSelection.sol";
 import { StreamArtistRecoveredAcceptedGenerationStage as AcceptedStage } from "./StreamArtistRecoveredAcceptedGenerationStage.sol";
@@ -108,7 +111,19 @@ library StreamArtistRecoveredPreparation {
                 context.identity, c.provenance, c.source.owners[2], payoutContinuations
             );
         uint8 consentMode;
-        if (DisputeSelection.selected(c.source,prepared.query,c.provenance)) {
+        if (SanctionStage.selected(c.provenance)) {
+            if (context.hasAttestations) revert T.UnsupportedProfile();
+            context.features |= RH.DISPUTE_HISTORY | RH.SANCTION_HISTORY;
+            (context.generations, context.consent, consentMode, context.hasGenerations) =
+                SanctionStage.collect(
+                    c.source,
+                    prepared.query,
+                    c.provenance,
+                    context.identity,
+                    context.economics,
+                    royaltyFreezes.length
+                );
+        } else if (DisputeSelection.selected(c.source,prepared.query,c.provenance)) {
             if (context.hasAttestations) revert T.UnsupportedProfile();
             context.features |= RH.DISPUTE_HISTORY;
             (context.generations,context.consent,consentMode,context.hasGenerations) = DisputeStage.collect(

@@ -17,6 +17,23 @@ import {
 /// @dev This validates retained cells; it neither writes replay state nor creates authorization.
 library StreamArtistRecoveredDisputeHistoryGuards {
     function validate(D.Bundle memory b, RH.OwnerProvenance memory p) public pure {
+        _validate(b, p, new RH.Point[](0));
+    }
+
+    /// @dev Additional zero-native/zero-replay op13 commits have independently proven points.
+    function validateSanctioned(
+        D.Bundle memory b,
+        RH.OwnerProvenance memory p,
+        RH.Point[] memory confirmations
+    ) public pure {
+        _validate(b, p, confirmations);
+    }
+
+    function _validate(
+        D.Bundle memory b,
+        RH.OwnerProvenance memory p,
+        RH.Point[] memory confirmations
+    ) private pure {
         D.Guard[] memory expected = guards(b);
         uint256[] memory mutations = new uint256[](p.eras.length);
         uint256[] memory nativeCounts = new uint256[](p.eras.length);
@@ -40,6 +57,10 @@ library StreamArtistRecoveredDisputeHistoryGuards {
             if (phase >= 2 && phase <= 4) {
                 ++mutations[A.era(p, b.repudiations[i].terminalPoint.environmentHash)];
             }
+        }
+        for (uint256 i; i < confirmations.length; ++i) {
+            Clock.validateOwnerPoint(p, 4, confirmations[i]);
+            ++mutations[A.era(p, confirmations[i].environmentHash)];
         }
         // Opening/staging invalidations are part of that same original owner commit, never
         // invented native records or extra revisions. Claim + acceptance/termination is two; pending arbiter revocation has only the claim.

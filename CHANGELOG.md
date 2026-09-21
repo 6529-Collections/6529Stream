@@ -62,6 +62,17 @@
   original COLLECTION confirmation boundary. Runtime, browser provenance and
   transaction-capacity acceptance remain pending.
 
+## Recovered sanction and confirmed-attribution history
+
+- Add the explicit operation-60 sanction-history profile, retaining complete
+  original signed sanction records and archived operation-13 confirmations,
+  separate owner clocks, state-3 restoration and historical replay/nonce evidence.
+- Keep old encodings and producers unchanged; authenticate complete original
+  Archive catalogues before and after the atomic seven-owner import.
+- Add twelve actual-owner/Safe source cases and eight pure encoding/proof cases.
+  Execution and transaction capacity remain separately pending. See the
+  [integration guide](docs/integrations/artist-recovered-sanction-history.md).
+
 ## Scoped current-Artist preservation ceremony source
 
 - Add separate V2 graph and fixture helpers for actual current-Artist producer

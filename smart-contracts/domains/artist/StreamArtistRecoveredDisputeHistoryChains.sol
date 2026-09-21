@@ -21,6 +21,15 @@ import {
 /// records are never authorized again against the current principal or current grant head.
 library StreamArtistRecoveredDisputeHistoryChains {
     function validate(D.Bundle memory b, RH.OwnerProvenance memory p) public pure {
+        _validate(b, p, false);
+    }
+
+    /// @dev The new profile separately proves every original confirmed-state restoration.
+    function validateSanctioned(D.Bundle memory b, RH.OwnerProvenance memory p) public pure {
+        _validate(b, p, true);
+    }
+
+    function _validate(D.Bundle memory b, RH.OwnerProvenance memory p, bool sanctioned) private pure {
         for (uint256 i; i < b.disputes.length; ++i) {
             D.DisputeRow memory r = b.disputes[i];
             AD.Record memory a = r.record;
@@ -38,7 +47,7 @@ library StreamArtistRecoveredDisputeHistoryChains {
                 }
                 if (a.previousRecordHash != previous) _invalid();
                 if (_reopened(b, r, p) && a.governanceActionId == 0) _invalid();
-                _outcome(b, i, p);
+                _outcome(b, i, p, sanctioned);
             } else {
                 uint256 opening = _opening(b, a.disputeRecordHash);
                 D.DisputeRow memory o = b.disputes[opening];
@@ -91,11 +100,16 @@ library StreamArtistRecoveredDisputeHistoryChains {
             if (r.record.previousResolutionActionId != previous) _invalid();
         }
         for (uint256 g; g < b.generations.length; ++g) {
-            _head(b, uint64(g + 1), p);
+            _head(b, uint64(g + 1), p, sanctioned);
         }
     }
 
-    function _head(D.Bundle memory b, uint64 generation, RH.OwnerProvenance memory p) private pure {
+    function _head(
+        D.Bundle memory b,
+        uint64 generation,
+        RH.OwnerProvenance memory p,
+        bool sanctioned
+    ) private pure {
         AD.Head memory h = b.heads[generation - 1];
         uint256 latest = type(uint256).max;
         bytes32 resolution;
@@ -147,7 +161,7 @@ library StreamArtistRecoveredDisputeHistoryChains {
                 h.disputeRecordHash != o.record.recordHash
                     || h.counterStatementRecordHash != counter || h.resolutionActionId != resolution
                     || h.open != open || h.reopened != _reopened(b, o, p) || h.restoreState < 1
-                    || h.restoreState > 2
+                    || h.restoreState > (sanctioned ? 3 : 2)
                     || (o.withdrawal.recordHash != 0
                         && (h.restoreState != o.withdrawal.restoredState
                             || (h.revocationReason != 0 && h.revocationReason != 3)))
@@ -169,12 +183,18 @@ library StreamArtistRecoveredDisputeHistoryChains {
             if (
                 (b.current.state == 4) != h.open
                     || (b.current.state == 5 && h.revocationReason != 3 && h.revocationReason != 4)
-                    || (b.current.state == 2 && h.revocationReason != 0)
+                    || ((b.current.state == 2 || (sanctioned && b.current.state == 3))
+                        && h.revocationReason != 0)
             ) _invalid();
         }
     }
 
-    function _outcome(D.Bundle memory b, uint256 index, RH.OwnerProvenance memory p) private pure {
+    function _outcome(
+        D.Bundle memory b,
+        uint256 index,
+        RH.OwnerProvenance memory p,
+        bool sanctioned
+    ) private pure {
         D.DisputeRow memory opening = b.disputes[index];
         W.Outcome memory outcome = opening.withdrawal;
         if (outcome.recordHash == 0) {
@@ -182,7 +202,10 @@ library StreamArtistRecoveredDisputeHistoryChains {
             if (keccak256(abi.encode(outcome)) != keccak256(abi.encode(empty))) _invalid();
             return;
         }
-        if (outcome.restoredState != 2 || _reopened(b, opening, p)) _invalid();
+        if (
+            (outcome.restoredState != 2 && (!sanctioned || outcome.restoredState != 3))
+                || _reopened(b, opening, p)
+        ) _invalid();
         uint256 matches;
         for (uint256 i = index + 1; i < b.disputes.length; ++i) {
             if (

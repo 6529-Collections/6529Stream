@@ -37,6 +37,23 @@ library StreamArtistRecoveredDisputeHistoryRows {
         public
         pure
     {
+        _validate(b, q, p, false);
+    }
+
+    /// @dev Only the new profile calls this after validating its complete op13 Archive proof.
+    function validateSanctioned(D.Bundle memory b, AH.Query memory q, RH.OwnerProvenance memory p)
+        public
+        pure
+    {
+        _validate(b, q, p, true);
+    }
+
+    function _validate(
+        D.Bundle memory b,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        bool sanctioned
+    ) private pure {
         if (
             P.validateOwner(p, 4) != b.provenance || b.artistId != q.artistId
                 || b.collectionId != q.collectionId || b.bindingHash != q.bindingHash
@@ -44,7 +61,7 @@ library StreamArtistRecoveredDisputeHistoryRows {
                 || b.generations.length == 0 || b.generations.length > 128
                 || b.heads.length != b.generations.length
                 || b.current.generation != b.generations.length || b.current.state < 2
-                || b.current.state > 5 || b.current.state == 3
+                || b.current.state > 5 || (!sanctioned && b.current.state == 3)
                 || !b.generations[b.generations.length - 1].accepted
                 || b.generations[b.generations.length - 1].bindingHash != q.bindingHash
                 || b.disputes.length + b.repudiations.length != p.journal.length

@@ -248,7 +248,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return RecoveredRH.DISPUTE_GRAPH_FEATURES;
+        return RecoveredRH.SANCTION_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(

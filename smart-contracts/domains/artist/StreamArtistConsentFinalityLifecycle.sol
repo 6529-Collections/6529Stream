@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionConsentImport as SanctionImport
+} from "./StreamArtistRecoveredSanctionConsentImport.sol";
+import {
+    StreamArtistRecoveredSanctionConsentHistory as RecoveredSanctions
+} from "./StreamArtistRecoveredSanctionConsentHistory.sol";
+import {
     StreamArtistRecoveredCollectionHydration
 } from "./StreamArtistRecoveredCollectionHydration.sol";
 import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
@@ -576,7 +582,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.DISPUTE_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.SANCTION_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -591,6 +597,21 @@ contract StreamArtistConsentFinalityLifecycle is
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 6)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (RecoveredSanctions.selected(p.typedState)) {
+                SanctionImport.importState(
+                    _sanctions,
+                    _policies,
+                    _economics,
+                    _associatedEconomicsRecords,
+                    _economicsAssociations,
+                    _recordDelegation,
+                    _saleRecords,
+                    _latestSaleConsents,
+                    q,
+                    p.typedState
+                );
+                return;
+            }
             if (RecoveredContent.selected(p.typedState)) {
                 RecoveredContent.Bundle memory imported = RecoveredContent.importState(
                     _policies,

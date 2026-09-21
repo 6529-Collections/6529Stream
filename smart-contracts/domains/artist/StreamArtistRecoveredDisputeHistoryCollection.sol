@@ -52,6 +52,27 @@ library StreamArtistRecoveredDisputeHistoryCollection {
         RH.Provenance memory p,
         CB.Bundle memory bindings
     ) public view returns (D.Bundle memory b) {
+        return _collect(source, q, p, bindings, false);
+    }
+
+    /// @notice Typed source facts for the new profile; its complete Archive/state proof is mandatory.
+    /// @dev This read never imports. The caller must validate returned facts before any owner write.
+    function collectForSanctionHistory(
+        address source,
+        AH.Query memory q,
+        RH.Provenance memory p,
+        CB.Bundle memory bindings
+    ) public view returns (D.Bundle memory b) {
+        return _collect(source, q, p, bindings, true);
+    }
+
+    function _collect(
+        address source,
+        AH.Query memory q,
+        RH.Provenance memory p,
+        CB.Bundle memory bindings,
+        bool sanctioned
+    ) private view returns (D.Bundle memory b) {
         RH.OwnerProvenance memory local = RH.ownerProvenance(p, 4);
         P.validateOwnerSource(local, 4, source);
         b.provenance = RH.ownerProvenanceHash(local, 4);
@@ -127,7 +148,7 @@ library StreamArtistRecoveredDisputeHistoryCollection {
             }
             if (Repudiation(source).repudiationCount(q.artistId, cohort) != count) _invalid();
         }
-        Validation.validate(b, q, local);
+        if (!sanctioned) Validation.validate(b, q, local);
         _causes(b, bindings);
     }
 

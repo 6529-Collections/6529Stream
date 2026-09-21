@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionRouting as SanctionRouting
+} from "./StreamArtistRecoveredSanctionRouting.sol";
+import {
     StreamArtistRecoveredExternalGuards as External
 } from "./StreamArtistRecoveredExternalGuards.sol";
 import {
@@ -111,6 +114,7 @@ library StreamArtistRecoveredHydrationCommit {
         // Exact immutable prefix, native suffix, key/cell inventory and all source checkpoints
         // are checked again after writes. Separate timing mutations have their own checkpoint.
         Provenance.validateSource(c.provenance, c.sourceCoordinator);
+        SanctionRouting.requireCurrent(prepared.query, c.provenance, prepared.data[6].typedState);
         External.requireCurrent(prepared.externalGuards);
         for (uint8 i; i < 7; ++i) {
             (, Payload.Payload memory payload) = Payload.decode(prepared.data[i].typedState, i);
