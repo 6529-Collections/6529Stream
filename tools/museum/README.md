@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Native semantic export](CANONICAL-SEMANTIC-EXPORT-V1.md) selects from replayed
+WORK, owner and condition evidence with a fixed occurrence inventory, original
+authority, attributed alternatives and offline Linked Art expansion.
+
 [Genesis Registry coverage](GENESIS-REGISTRY-COVERAGE-V1.md) compares the fixed
 29-schema and 22-support plan with the current selected Registry, retaining
 every missing, conflicting and retired definition through offline replay.

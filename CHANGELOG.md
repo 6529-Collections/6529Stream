@@ -1246,6 +1246,10 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add native semantic selection and offline expansion for canonical dossiers,
+  preserving all source occurrences, original authority, conflicting statements,
+  exact model dependencies and unchanged dossier acceptance requirements.
+
 - Add read-only genesis Registry coverage for the fixed 29-schema and 22-support
   plan, with original definition/chunk reconstruction and explicit missing,
   conflicting and retired results. Preserve registration and conformance limits.
