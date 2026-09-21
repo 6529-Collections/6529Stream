@@ -56,6 +56,41 @@ It reuses the three hosts fixed by the original complete bind. It neither runs a
 browser nor supplies synthetic default observations. The authored artwork has an
 empty image field; it does not demonstrate external-image archive acceptance.
 
+## Original provider and finality ceremony
+
+The combined provider dispatches VIEW catalogue, component, manifest, review,
+prepared-input and metadata reads to the fixed VIEW kernels using its original
+constructor configuration. VIEW dispatch precedes the older scoped selector.
+Both prepared-input methods first authenticate the original Registry address and
+runtime. The complete binding receipt selects producers; every operative finality
+read still requires the relevant current evidence.
+
+`runSuppliedViewFinalityObservation(environmentJSON, browserJSON, capturesJSON,
+packageMembersDirectory, measuredArtistReadGas)` extends the explicit observation
+entry through the original sanction and scoped finalization. It constructs the
+same complete graph, publishes the supplied observations, materializes the full
+inventory and covers its bytes before preparing the ceremony. It then registers
+the original four sanction definitions and the exact VIEW input/schema/media
+definitions supplied by the fixed producers.
+
+The source recipe obtains nine sorted independent components and the provider's
+non-sanction manifest, prepares exact VIEW terms and signs original Artist op12
+with the actual Artist Safe. It archives the original sanction bytes, obtains
+the ten-component set and executes original class-2 scoped finality through the
+Root Safe. Readback joins the stored components, execution action and archive
+witness. Preservation JSON/HTML and the independent manifest must remain stable
+while the live sanction display changes.
+
+`measuredArtistReadGas = 0` retains the original allowance. A nonzero target must
+come from separate measurements; the helper applies only original delayed,
+at-most-twofold class-1 raises with exact state readback. Its 16,777,216 ceiling
+is a diagnostic guard, not a whole-transaction capacity result. The authority
+regression's 3m input tests governance behavior and is not a measured target.
+
+This supplied-observation entry has not been executed. It supplies no browser
+defaults and does not establish observation provenance, external-image support
+for this empty-image fixture, gas capacity or completed finality acceptance.
+
 ## Diagnostic budgets and remaining acceptance
 
 The new hosts use explicit constructor configurations:
@@ -77,8 +112,8 @@ the later ceremony must follow measured need, exact governance and readback.
 High-budget provider previews do not prove that the real Artist signing callback
 or executed finalization fits.
 
-Complete provider dispatch, executed inventory/archive closure, sanction,
-finalization and combined acceptance remain required. Original
+Executed inventory/archive closure, sanction, finalization and combined
+acceptance remain required. Original
 `confirmSanctionFinalized(uint256)` is COLLECTION-only. VIEW evidence alone does
 not confirm a COLLECTION sanction or change collection attribution; genuine
 separate COLLECTION finality can satisfy its own confirmation rules.
@@ -91,6 +126,11 @@ separate COLLECTION finality can satisfy its own confirmation rules.
 - [Complete construction fixture](../../test/helpers/StreamCurrentFullPreservationPolicyViewCompleteFixture.sol)
 - [Inventory and byte coverage fixture](../../test/helpers/StreamCurrentFullPreservationPolicyViewInventoryFixture.sol)
 - [Actual Safe construction cases](../../test/current/StreamCurrentFullPreservationPolicyViewCompleteBinding.t.sol)
+- [Original authority fixture](../../test/helpers/StreamCurrentFullPreservationPolicyViewFinalityAuthorityFixture.sol)
+- [Original VIEW sanction and finality fixture](../../test/helpers/StreamCurrentFullPreservationPolicyViewFinalityFixture.sol)
+- [Explicit finality observation entry](../../test/current/StreamCurrentFullPreservationPolicyViewFinality.t.sol)
+- [Actual provider routing cases](../../test/current/StreamCurrentFullPreservationPolicyViewFinalityRouting.t.sol)
+- [Actual Safe authority cases](../../test/current/StreamCurrentFullPreservationPolicyViewFinalityAuthority.t.sol)
 
 Keep the original failed scoped27 and full-output sanction-cycle captures intact.
 Neither this source recipe nor new ABI evidence supersedes those execution results.

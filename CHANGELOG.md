@@ -30,6 +30,16 @@
 - ABI and independent source checks pass. Native, gas, fresh browser and full
   ceremony acceptance remain pending; see the [recipe boundaries](docs/integrations/current-authority-scoped-preservation-ceremony.md).
 
+## Original VIEW finality dispatch and ceremony source
+
+- Connect the original combined provider to the fixed VIEW catalogue, component,
+  input, review and metadata kernels, preserving original Registry-only prepared
+  reads and existing collection/scoped routes.
+- Add the explicit supplied-observation Safe sanction/archive/scoped-finality
+  recipe and focused routing/governance cases. VIEW-only finality retains the
+  original COLLECTION confirmation boundary. Runtime, browser provenance and
+  transaction-capacity acceptance remain pending.
+
 ## Scoped current-Artist preservation ceremony source
 
 - Add separate V2 graph and fixture helpers for actual current-Artist producer
