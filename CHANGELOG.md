@@ -31,6 +31,14 @@
   acceptance remains separate. See the
   [bounded evidence](docs/guides/scoped-preservation-reference-read-frames.md).
 
+## Current Artist contract capacity
+
+- Extract fixed typed read/forwarding helpers for the current compromise, notice,
+  identity-recovery and Coordinator contracts, retaining original ABI/storage and
+  host operation guards. All twelve selected products fit the unchanged deployment
+  limits; Coordinator has zero runtime-byte headroom. Native execution and workload
+  gas acceptance remain pending. See the [capacity note](docs/integrations/artist-current-read-capacity.md).
+
 ## Recovered op24 across complete Artist history
 
 - Add the explicit HISTORY_RECORDS operation-60 profile for original attestations,

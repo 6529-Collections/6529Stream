@@ -66,7 +66,14 @@ import {
 
 /// @notice Same-owner recovery mutations after the fixed State wrapper derives the full context.
 /// @dev The supplied context is internal linked-call evidence, not an external owner admission surface.
+import {
+    StreamArtistIdentityRecoveryPreparationReads as PreparationReads
+} from "./StreamArtistIdentityRecoveryPreparationReads.sol";
+
 library StreamArtistIdentityRecoveryMutation {
+    // Retained for the unchanged error bubbled by the fixed preparation reader.
+    error UnsupportedIdentityRecoveryProfile(bytes32 artistId);
+
     function recover(
         RecoveryState.State storage s,
         StreamArtistIdentityState.State storage identity,
@@ -78,7 +85,7 @@ library StreamArtistIdentityRecoveryMutation {
         Recovery.Context memory c
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
         _governance(i, c);
-        _requireAppealWitness(
+        PreparationReads.requireAppealWitness(
             s,
             rotations,
             i.owner,
@@ -354,7 +361,8 @@ library StreamArtistIdentityRecoveryMutation {
                     estate.transitions[activation].postWindowEndsAt
                 );
         } else {
-            guardian = _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
+            guardian =
+                PreparationReads.guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
         }
         return prepareWithGuardian(s, rotations, replay, i, c, guardian);
     }
@@ -369,7 +377,7 @@ library StreamArtistIdentityRecoveryMutation {
         R.GuardianRecord memory guardian
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 associationHash) {
         A.Witness memory w = i.witness;
-        _requireAppealWitness(
+        PreparationReads.requireAppealWitness(
             s, rotations, i.owner, i.request, w.proposer, w.roleMutationHash, w.roleRevision
         );
         if (
@@ -453,67 +461,6 @@ library StreamArtistIdentityRecoveryMutation {
             associationHash
         );
         // No semantic primary, sequence append, signature consumption or authority mutation.
-    }
-
-    function _requireAppealWitness(
-        RecoveryState.State storage s,
-        StreamArtistRotationState.State storage rotations,
-        StreamArtistIdentityState.OwnerContext memory o,
-        Recovery.Request memory p,
-        address proposer,
-        bytes32 mutation,
-        uint64 revision
-    ) private view {
-        if (
-            p.supersededRecordHashes.length != 0
-                && GuardianSupersession.authorityRole(
-                        s.guardianSupersession,
-                        s.guardianHistory,
-                        s.vestingHistory,
-                        rotations,
-                        p.artistId,
-                        p.supersededRecordHashes,
-                        s.guardianRecordsSeen[p.artistId]
-                    ) == Appeal.APPEAL
-        ) {
-            StreamArtistGuardianAppealReads.requireWitness(
-                o.environment, proposer, mutation, revision
-            );
-        }
-    }
-
-    function _guardian(
-        RecoveryState.State storage s,
-        StreamArtistRotationState.State storage r,
-        StreamArtistIdentityState.OwnerContext memory o,
-        bytes32 artistId,
-        address incumbent
-    ) private view returns (R.GuardianRecord memory g) {
-        if (r.latestExecution[artistId] != bytes32(0)) {
-            return Predecessor.guardian(
-                s.guardianHistory, r, o.environment, artistId, s.guardianRecordsSeen[artistId]
-            );
-        }
-        bytes32 head = r.stableGuardian[artistId];
-        uint64 count = s.guardianRecordsSeen[artistId];
-        if (head == bytes32(0)) {
-            if (count != 0) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
-            return g;
-        }
-        GuardianHistory.requireComplete(s.guardianHistory, artistId, count);
-        g = r.guardians[head];
-        if (
-            count == 0 || g.recordHash != head || g.terms.artistId != artistId
-                || g.authorityClass != 1 || g.signer != incumbent
-                || g.provisional.transitionRecordHash != bytes32(0)
-                || g.provisional.windowEndsAt != 0 || g.terms.guardians.length > 8
-                || g.terms.minContestSeconds > 30 days
-                || StreamArtistRotationHashes.guardianRecord(
-                        o.environment, g.terms, T.Authorization(g.nonce, g.signedAt, bytes(""))
-                    ) != head
-        ) {
-            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
-        }
     }
 
     function _requirePrepared(

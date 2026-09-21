@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistCoordinatorFinalityReads as FinalityReads
+} from "./StreamArtistCoordinatorFinalityReads.sol";
+import {
+    StreamArtistCoordinatorSanctionConfirmation as SanctionConfirmation
+} from "./StreamArtistCoordinatorSanctionConfirmation.sol";
+import { StreamArtistCoordinatorSanctionRecord } from "./StreamArtistCoordinatorSanctionRecord.sol";
 import { StreamArtistCurrentFinalityRoute } from "./StreamArtistCurrentFinalityRoute.sol";
 import {
     IStreamArtistCurrentFinality
@@ -139,6 +146,8 @@ contract StreamArtistOnboardingCoordinator is
     IStreamArtistCollaboratorCoordinator,
     IStreamArtistSaleCoordinator
 {
+    // Retained for the unchanged error bubbled by the fixed finality reader.
+    error InvalidCurrentAuthority();
     /// @notice A required artist fact is absent; retained for errors propagated by linked recipes.
     error MissingMintPrerequisite(bytes32 prerequisite);
     /// @notice Retained for errors propagated by the linked identity recipes.
@@ -308,7 +317,9 @@ contract StreamArtistOnboardingCoordinator is
         for (uint256 i; i < 16;) {
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
             // The constructor-fixed sixteen pins bound this loop.
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
         if (
             msg.sig != this.coordinateCommitArtistHistoryImportRoot.selector
@@ -399,8 +410,14 @@ contract StreamArtistOnboardingCoordinator is
         Q.Request calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        return StreamArtistSanctionOperations.record(
-            _economicContext(), _sanctionPins(p.terms.collectionId), actor, p, a
+        return StreamArtistCoordinatorSanctionRecord.record(
+            _suite,
+            address(reads),
+            configurationHash,
+            _sanctionPins(p.terms.collectionId),
+            actor,
+            p,
+            a
         );
     }
 
@@ -427,11 +444,7 @@ contract StreamArtistOnboardingCoordinator is
     }
 
     function _finalityReadGas() private view returns (uint256 cap) {
-        uint8 failure;
-        uint64 revision;
-        (cap,, failure, revision) = IStreamGasParameterHost(_suite.registry)
-            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
-        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        return FinalityReads.finalityReadGas(_suite);
     }
 
     function _recoveryApprovalPins()
@@ -511,7 +524,9 @@ contract StreamArtistOnboardingCoordinator is
         for (uint256 i; i < 16;) {
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
             // The constructor-fixed sixteen pins bound this loop.
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
         if (
             _suite.core.codehash != _runtimeHashes[9]
@@ -526,34 +541,14 @@ contract StreamArtistOnboardingCoordinator is
         external
         operation
     {
-        uint256 cap = _finalityReadGas();
-        if (StreamArtistCurrentFinalityRoute.isAnchoredCapability(
-                _suite.metadata, collectionId, cap
-            )) {
-            CurrentAuthority.Route memory route = currentFinalityRoute(collectionId);
-            StreamArtistSanctionConfirmationOperations.confirmCurrentAuthority(
-                _economicContext(),
-                StreamArtistSanctionConfirmationReads.Pins(
-                    route.finalityRegistry,
-                    route.finalityCodeHash,
-                    _runtimeHashes[9],
-                    _runtimeHashes[7],
-                    cap
-                ),
-                actor,
-                collectionId
-            );
-            return;
-        }
-        StreamArtistSanctionConfirmationOperations.confirm(
-            _economicContext(),
-            StreamArtistSanctionConfirmationReads.Pins(
-                finalityRegistry,
-                finalityRegistryCodeHash,
-                _runtimeHashes[9],
-                _runtimeHashes[7],
-                cap
-            ),
+        SanctionConfirmation.confirm(
+            _suite,
+            _runtimeHashes,
+            address(reads),
+            configurationHash,
+            deploymentChainId,
+            finalityRegistry,
+            finalityRegistryCodeHash,
             actor,
             collectionId
         );
@@ -584,15 +579,13 @@ contract StreamArtistOnboardingCoordinator is
     }
 
     function currentFinalityRoute(uint256 collectionId)
-        public
+        external
         view
-        returns (CurrentAuthority.Route memory route)
+        returns (CurrentAuthority.Route calldata route)
     {
-        bool supported;
-        (supported, route) = StreamArtistCurrentFinalityRoute.resolve(
-            _suite, deploymentChainId, collectionId, _finalityReadGas()
-        );
-        if (!supported) revert CurrentAuthority.InvalidCurrentAuthority();
+        bytes memory encoded =
+            FinalityReads.currentFinalityRouteEncoded(_suite, deploymentChainId, collectionId);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function _sanctionPins(uint256 collectionId)
@@ -600,24 +593,14 @@ contract StreamArtistOnboardingCoordinator is
         view
         returns (StreamArtistSanctionCandidate.Pins memory)
     {
-        uint256 cap = _finalityReadGas();
-        (bool supported, CurrentAuthority.Route memory route) =
-            StreamArtistCurrentFinalityRoute.resolve(_suite, deploymentChainId, collectionId, cap);
-        if (supported) {
-            return StreamArtistSanctionCandidate.Pins(
-                route.finalityRegistry,
-                route.finalityCodeHash,
-                route.provider,
-                route.providerCodeHash,
-                cap
-            );
-        }
-        return StreamArtistSanctionCandidate.Pins(
+        return FinalityReads.sanctionPins(
+            _suite,
+            deploymentChainId,
+            collectionId,
             finalityRegistry,
             finalityRegistryCodeHash,
             finalityEvidenceProvider,
-            finalityEvidenceProviderCodeHash,
-            cap
+            finalityEvidenceProviderCodeHash
         );
     }
 
@@ -1214,7 +1197,9 @@ contract StreamArtistOnboardingCoordinator is
         for (uint256 j; j < 16;) {
             if (_targets[j].codehash != _runtimeHashes[j]) revert T.ComponentChanged(_targets[j]);
             // The constructor-fixed sixteen pins bound this read-only loop.
-            unchecked { ++j; }
+            unchecked {
+                ++j;
+            }
         }
         bytes memory encoded = StreamArtistCoordinatorRecoveryRead.suiteEncoded(_suite);
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
