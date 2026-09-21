@@ -927,6 +927,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified complete VIEW preservation binding clients with original
+  class-2 governance calls and distinct historical and operative source reads.
+
 - Add historical ABI129 scoped finality clients for canonical manifest staging,
   provider/discovery validation and archived canonical-Executor finalization.
 

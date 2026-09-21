@@ -117,6 +117,13 @@ target call. Provider and Discovery are read-only, and a Safe does not acquire
 the Executor's authority by encoding the Registry call. This profile remains
 tied to ABI129 and rejects unsupported newer current-authority and VIEW profiles.
 
+The [complete VIEW binding client](current-view-complete-binding.md) starts the
+separate ABI146 profile for both genuine preservation providers. Its three
+outer writes publish, schedule and execute one complete class-2 binding through
+the original Executor. The nested provider call consumes the same one-use guard
+as basic binding and records both receipts. Direct and Safe CALL preparation
+does not establish native execution or complete VIEW finality.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

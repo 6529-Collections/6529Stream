@@ -115,3 +115,5 @@ export * from "./current-artist-recovered-hydration.js";
 export * from "./current-artist-recovered-hydration-workflow.js";
 export * from "./current-artist-recovered-consent-hydration.js";
 export * from "./current-artist-recovered-consent-hydration-workflow.js";
+export * from "./current-view-complete-binding.js";
+export * from "./current-view-complete-binding-workflow.js";

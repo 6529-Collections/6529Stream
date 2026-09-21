@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Complete VIEW preservation binding](docs/current-view-complete-binding.md)
+  covers the five shared ABI146 methods, one original class-2 governance action,
+  and separate historical-receipt and operative-source reads on both providers.
+
 - [Historical scoped-policy finality](docs/current-scoped-policy-finality-v2.md)
   joins the original ABI129 provider and discovery with canonical manifest
   staging and archived finalization through the original class-2 Executor.
