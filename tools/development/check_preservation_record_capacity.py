@@ -18,12 +18,18 @@ PIN = "ea4cf6b0a2cfa7bba529284a3cfe46bb19b6604b"
 DIRECTORY = "smart-contracts/domains/preservation/"
 RECORDS = DIRECTORY + "StreamPreservationPolicyReferenceRecordsV1.sol"
 READS = DIRECTORY + "StreamPreservationPolicyReferenceRecordReadsV1.sol"
-FILES = (RECORDS, READS)
+PREPARATION = DIRECTORY + "StreamPreservationPolicyReferencePreparationV1.sol"
+FILES = (RECORDS, READS, PREPARATION)
 BASE_BLOB = "c9868cf13d837e5a76d0e6b28cd09fec8f8fa945"
 MAX_SOURCE_BYTES = 524288
+PROPAGATED_ERROR = "error InvalidPolicyReference();"
 ADDED_IMPORT = '''
 import { StreamPreservationPolicyReferenceRecordReadsV1 as RecordReads }
     from "./StreamPreservationPolicyReferenceRecordReadsV1.sol";
+'''
+PREPARATION_IMPORT = '''
+import { StreamPreservationPolicyReferencePreparationV1 as Preparation }
+    from "./StreamPreservationPolicyReferencePreparationV1.sol";
 '''
 HELPER_PREFIX = '''
 pragma solidity ^0.8.19;
@@ -36,11 +42,21 @@ import { StreamPreservationPolicyReferenceSourceReadsV1 as Sources }
 import { StreamSnapshotManifestBytes as Bytes }
     from "../records/StreamSnapshotManifestBytes.sol";
 '''
-WRAPPERS = {
+READ_WRAPPERS = {
     "requireCurrent": "{ definitions(d, family); RecordReads.requireCurrent(original, payload, receipt, d, family); }",
     "recordBytes": "{ return RecordReads.recordBytes(original, receipt); }",
     "source": "{ return RecordReads.source(payload, family); }",
 }
+WRAPPERS = {**READ_WRAPPERS, "prepare": '''{
+    (hash, canonical) = Preparation.prepare(inventories, d, p, receipt, current, family);
+    receipt.observation.sourcesHash = hash;
+    p.observation.expectedSourcesHash = 0;
+    receipt.observation.recordHash = 0;
+    receipt.observation.recordChainHash = 0;
+    receipt.observation.payloadHash = 0;
+    receipt.observation.payloadBytes = 0;
+    receipt.observation.recordedAt = 0;
+}'''}
 # Preserve quoted literals and compound operators as indivisible tokens. In
 # particular, comments cannot turn <= into < = or hide a string-content change.
 LEXER = re.compile(
@@ -106,10 +122,13 @@ class Library:
     prefix: tuple
     name: str
     functions: tuple
+    errors: tuple = ()
 
     @property
     def tokens(self):
         return self.prefix + ("library", self.name, "{") + tuple(
+            token for error in self.errors for token in error
+        ) + tuple(
             token for function in self.functions for token in function.tokens
         ) + ("}",)
 
@@ -122,8 +141,18 @@ def parse_library(source):
     require(at + 2 < len(tokens) and tokens[at + 2] == "{", "unexpected library header")
     end = closing(tokens, at + 2)
     require(end == len(tokens) - 1, "unaccounted code after library")
-    cursor, functions = at + 3, []
+    cursor, functions, errors = at + 3, [], []
     while cursor < end:
+        if tokens[cursor] == "error":
+            require(not functions, "ABI-only errors must precede all functions")
+            last = cursor + 1
+            while last < end and tokens[last] != ";":
+                require(tokens[last] not in ("{", "}"), "unexpected error body")
+                last += 1
+            require(last < end, "unterminated error declaration")
+            errors.append(tokens[cursor:last + 1])
+            cursor = last + 1
+            continue
         require(tokens[cursor] == "function", "unaccounted library member")
         require(cursor + 2 < end, "incomplete function")
         opening = cursor + 2
@@ -135,7 +164,7 @@ def parse_library(source):
         require(last < end, "function consumes library boundary")
         functions.append(Function(tokens[cursor + 1], tokens[cursor:opening], tokens[opening:last + 1]))
         cursor = last + 1
-    return Library(tokens[:at], tokens[at + 1], tuple(functions))
+    return Library(tokens[:at], tokens[at + 1], tuple(functions), tuple(errors))
 
 
 def original_function(library, name, family=False):
@@ -152,23 +181,29 @@ def git_blob(raw):
 
 
 def validate(sources, baseline):
-    require(set(sources) == set(FILES), "exact two-file working source inventory required")
+    require(set(sources) == set(FILES), "exact three-file working source inventory required")
     require(set(baseline) == {RECORDS}, "exact one-file baseline inventory required")
     require(git_blob(baseline[RECORDS].encode("utf-8")) == BASE_BLOB, "pinned baseline blob differs")
     old = parse_library(baseline[RECORDS])
-    records, reads = (parse_library(sources[path]) for path in FILES)
+    records, reads, preparation = (parse_library(sources[path]) for path in FILES)
     require(records.name == old.name, "Records library identity changed")
     require(reads.name == "StreamPreservationPolicyReferenceRecordReadsV1", "helper identity changed")
     pragma = lex("pragma solidity ^0.8.19;")
     equal(old.prefix[:len(pragma)], pragma, "baseline pragma")
-    equal(records.prefix, pragma + lex(ADDED_IMPORT) + old.prefix[len(pragma):], "Records imports/pragma")
+    equal(records.prefix, pragma + lex(ADDED_IMPORT) + lex(PREPARATION_IMPORT) + old.prefix[len(pragma):], "Records imports/pragma")
     equal(reads.prefix, lex(HELPER_PREFIX), "helper imports/pragma")
+
+    # The only added declaration restores the propagated error in the original
+    # Records ABI. Helpers must not acquire any extra declarations.
+    equal(records.errors, (lex(PROPAGATED_ERROR),), "exact propagated Records error declaration")
+    for library in (old, reads, preparation):
+        equal(library.errors, (), "unexpected baseline/helper error declaration")
 
     # Signature and position distinguish overloads and forbid hidden members.
     equal(tuple(f.signature for f in records.functions), tuple(f.signature for f in old.functions),
           "complete Records function roster/signatures")
     moved = {
-        name: original_function(old, name, family=name != "recordBytes") for name in WRAPPERS
+        name: original_function(old, name, family=name != "recordBytes") for name in READ_WRAPPERS
     }
     publication = original_function(old, "publication")
     expected_helper = tuple(moved.values()) + (publication,)
@@ -182,8 +217,22 @@ def validate(sources, baseline):
             body = ("{",) + body[len(first):]
         equal(actual.body, body, "helper moved/copied body " + expected.name)
 
-    # Reinsert exactly the three authenticated bodies. Every other member,
-    # including both prepare/definitions overloads and publication, is exact.
+    # The preparation worker has a literal family-aware body and a private
+    # literal definitions copy. No Records import/call can introduce a link cycle.
+    require(preparation.name == "StreamPreservationPolicyReferencePreparationV1", "preparation helper identity changed")
+    equal(preparation.prefix, old.prefix, "preparation helper imports/pragma")
+    original_prepare = original_function(old, "prepare", family=True)
+    original_definitions = original_function(old, "definitions", family=True)
+    private_signature = tuple("private" if token == "public" else token for token in original_definitions.signature)
+    equal(tuple(f.signature for f in preparation.functions),
+          (original_prepare.signature, private_signature), "complete preparation helper roster/signatures")
+    equal(preparation.functions[0].tokens, original_prepare.tokens, "literal complete preparation body")
+    equal(preparation.functions[1].body, original_definitions.body, "literal private definitions copy")
+    moved["prepare"] = original_prepare
+
+    # Reinsert exactly four authenticated bodies. The prepare wrapper restores
+    # every original caller-owned memory write after the ABI-copy boundary.
+    # Both definitions overloads and the original-profile prepare stay exact.
     reconstructed = []
     for current, original in zip(records.functions, old.functions):
         if original.signature in {f.signature for f in moved.values()}:
@@ -192,6 +241,7 @@ def validate(sources, baseline):
         else:
             equal(current.tokens, original.tokens, "unchanged Records member " + original.name)
             reconstructed.append(current)
+    # Omit only the exact ABI-only declaration authenticated above.
     inverse = Library(old.prefix, records.name, tuple(reconstructed))
     equal(inverse.tokens, lex(baseline[RECORDS]), "complete Records source inverse")
     return {
@@ -201,7 +251,10 @@ def validate(sources, baseline):
         "sourceSha256": {path: hashlib.sha256(sources[path].encode("utf-8")).hexdigest() for path in FILES},
         "comparison": "Solidity tokens; ignores whitespace/comments only; source hashes use exact file bytes.",
         "wrapperFunctions": list(WRAPPERS),
+        "preservedErrorDeclaration": PROPAGATED_ERROR,
         "helperFunctionRoster": [f.name for f in reads.functions],
+        "preparationFunctionRoster": [f.name for f in preparation.functions],
+        "preparationVisibilityException": "definitions public to private; signature otherwise exact",
         "originalFunctionCount": len(old.functions),
         "reconstructedTokenCount": len(inverse.tokens),
         "scope": "Source inverse only; ABI/storage layout, runtime/creation size, execution and gas remain separate checks.",

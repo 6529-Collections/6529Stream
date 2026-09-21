@@ -9,26 +9,31 @@ The retained shared native capture measured these exact products together.
 
 ## Fixed extraction boundaries
 
-The record library retains preparation, receipt/publication memory normalization,
-and definition admission. `StreamPreservationPolicyReferenceRecordReadsV1`
-owns the original historical payload decoder, record-byte getter and the current
-source/payload checks that follow definition admission. Its storage arguments
-refer to the same original host slots.
+The record library retains its exported definition checks.
+`StreamPreservationPolicyReferencePreparationV1` owns the exact original
+preparation body and a private copy of its definition checks. On successful
+return, the original facade reapplies the seven original publication/receipt
+memory assignments, including the computed source hash. The private definition
+copy avoids a runtime link back to the facade.
+`StreamPreservationPolicyReferenceRecordReadsV1` owns the historical payload
+decoder, record-byte getter and current source/payload checks that follow
+facade definition admission. Its storage arguments refer to the same host slots.
 
-`StreamPreservationPolicyReferenceSnapshotPayloadReadsV1` owns the complete
-snapshot payload read and canonical nested decoder. It retains the original
-receipt deep copy before normalization. The original reader restores the
-publication's `expectedSourceHash = 0` in its caller's memory after a successful
-linked return, preserving the internal call's memory effect. Its saved receipt,
-root joins, archive validation and ordered samples retain their original values
-and sequence.
+`StreamPreservationPolicyReferenceDependencyReadsV1` owns the exact dependency
+binding and archive object-identity checks. Their facade forwarding calls remain
+at the original positions in the source-read sequence.
+`StreamPreservationPolicyReferenceSnapshotPayloadReadsV1` owns the current
+snapshot evidence, canonical record and payload reads. The payload decoder keeps
+the original receipt deep copy and publication normalization. Its returned
+receipt retains the original record fields, and the facade continues with the
+same root-head check, count guard, archive validation and ordered samples.
 
 `StreamPreservationPolicyTokenOriginalReadsV1` owns the original selection,
 output, preservation admission, token identity, entropy, configuration and raw
 source reads. The original host still declares `Original`, including its dynamic
 entropy bytes, so both the ABI's nominal tuple and the literal source commitment
 remain unchanged. The helper's import of this type creates no runtime link back
-to the host. The host retains its five propagated error ABI declarations.
+to the host. The three original facades retain their propagated error ABI declarations.
 
 All calls use fixed linked-library delegation. Dependencies observe the same
 host, hashes retain `address(this)`, and caller identity is preserved. There is
@@ -48,12 +53,15 @@ canaries. Existing collection publication and token inventory tests retain their
 full source-hash, producer, terminal/finalized entropy and late-retry cases.
 
 The bounded native capture selects only the three original libraries and their
-three new workers. It retains actual native ASTs, metadata, ABI, storage layout,
+five new workers. It retains actual native ASTs, metadata, ABI, storage layout,
 complete creation/runtime outputs, link references and method identifiers under
 the original Solidity 0.8.19, via-IR, optimizer-200, Paris, no-CBOR configuration.
 The complete initcode limit remains 49,152 bytes; these libraries have no
-constructor arguments. Native measurement and regression execution remain
-pending until the associated evidence is recorded.
+constructor arguments. The first retained six-product capture correctly refused Records at 26,464
+bytes and SourceReads at 28,955 bytes, while the token reader and the first three
+workers fit. The further typed extraction retains that failed evidence; its
+final native measurement and Solidity regression execution remain pending until
+the associated evidence is recorded.
 
 Selected library capacity and source checks do not establish linked deployment,
 complete collection publication, finality, cold transaction cost or full-graph

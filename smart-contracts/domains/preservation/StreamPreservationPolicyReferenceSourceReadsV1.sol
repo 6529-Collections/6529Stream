@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPreservationPolicyReferenceDependencyReadsV1 as DependencyReads
+} from "./StreamPreservationPolicyReferenceDependencyReadsV1.sol";
+import {
     StreamPreservationPolicyReferenceSnapshotPayloadReadsV1 as SnapshotPayloadReads
 } from "./StreamPreservationPolicyReferenceSnapshotPayloadReadsV1.sol";
 import {
@@ -58,6 +61,10 @@ import {
 /// @notice Current complete scoped snapshot and original Router authority, with bounded samples.
 /// @dev A first/last capture is never substituted for the complete snapshot membership or archive.
 library StreamPreservationPolicyReferenceSourceReadsV1 {
+    // Retain the original ABI for errors propagated by fixed linked workers.
+    error InvalidPreservationReferenceFamily();
+    error PolicyReferenceDependency(address target);
+
     function subject(T.Dependencies memory d, StreamFinalityScope memory scope)
         internal
         pure
@@ -80,71 +87,7 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         view
         returns (S.Dependencies memory source)
     {
-        F.isV2(family);
-        if (
-            d.chainId != block.chainid || d.readGas < 50000 || d.sourceGas < d.readGas
-                || d.snapshotGas < d.sourceGas || d.archiveGas < d.readGas
-        ) revert T.InvalidPolicyReference();
-        for (uint256 i; i < 7; ++i) {
-            if (d.targets[i].code.length == 0 || d.targets[i].codehash != d.codeHashes[i]) {
-                revert T.PolicyReferenceDependency(d.targets[i]);
-            }
-        }
-        if (
-            abi.decode(
-                        Reads.read(
-                            d.targets[5],
-                            abi.encodeWithSignature(
-                                "supportsInterface(bytes4)", type(Snap).interfaceId
-                            ),
-                            32,
-                            d.readGas
-                        ),
-                        (uint256)
-                    ) != 1
-                || abi.decode(
-                        Reads.read(
-                            d.targets[5],
-                            abi.encodeCall(Snap.preservationPolicySnapshotProfile, ()),
-                            32,
-                            d.readGas
-                        ),
-                        (bytes32)
-                    )
-                    != (F.isV2(family)
-                            ? keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V2")
-                            : keccak256("6529STREAM_PRESERVATION_POLICY_SNAPSHOT_V1"))
-        ) revert T.InvalidPolicyReference();
-        bytes memory raw =
-            Reads.read(d.targets[5], abi.encodeCall(Snap.dependencies, ()), 832, d.readGas);
-        source = abi.decode(raw, (S.Dependencies));
-        _canonical(d.targets[5], raw, abi.encode(source));
-        if (source.chainId != d.chainId) revert T.InvalidPolicyReference();
-        for (uint256 i; i < 5; ++i) {
-            if (source.targets[i] != d.targets[i] || source.codeHashes[i] != d.codeHashes[i]) {
-                revert T.PolicyReferenceDependency(d.targets[5]);
-            }
-        }
-        if (
-            abi.decode(
-                        Reads.read(d.targets[6], abi.encodeCall(Archive.core, ()), 32, d.readGas),
-                        (address)
-                    ) != d.targets[0]
-                || abi.decode(
-                        Reads.read(
-                            d.targets[6],
-                            abi.encodeCall(
-                                Archive.supportsInterface,
-                                (type(IStreamExternalArtifactCurrentPair).interfaceId)
-                            ),
-                            32,
-                            d.readGas
-                        ),
-                        (uint256)
-                    ) != 1
-        ) {
-            revert T.PolicyReferenceDependency(d.targets[6]);
-        }
+        return DependencyReads.bindings(d, family);
     }
 
     function requireSource(T.Dependencies memory d, T.Publication memory p, bool current)
@@ -164,39 +107,14 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
         f.scopeSubject = subject(d, p.scope);
         if (p.observation.collectionId != p.scope.collectionId) revert T.InvalidPolicyReference();
         S.Dependencies memory source = bindings(d, family);
-        SnapRead.Dependencies memory reader = SnapRead.Dependencies(
-            d.targets[0],
-            d.targets[1],
-            d.targets[5],
-            d.codeHashes[0],
-            d.codeHashes[1],
-            d.codeHashes[5],
-            d.chainId,
-            d.readGas,
-            d.snapshotGas
-        );
-        SnapRead.Evidence memory snapshot = SnapRead.requireCurrent(
-            reader,
+        (f.snapshot, f.snapshotSource, f.contentRootRecordHash) = SnapshotPayloadReads.readFacts(
+            d,
+            source,
             p.scope,
             p.observation.snapshotRecordHash,
             p.observation.snapshotRevision,
             family
         );
-        bytes memory raw = Reads.dynamicRead(
-            d.targets[5],
-            abi.encodeCall(Snap.snapshotRecord, (p.observation.snapshotRecordHash)),
-            4096,
-            d.readGas
-        );
-        (S.Publication memory original, S.Receipt memory receipt) =
-            abi.decode(raw, (S.Publication, S.Receipt));
-        _canonical(d.targets[5], raw, abi.encode(original, receipt));
-        if (keccak256(abi.encode(receipt)) != keccak256(abi.encode(snapshot.receipt))) {
-            revert T.InvalidPolicyReference();
-        }
-        f.snapshot = receipt;
-        f.snapshotSource = _snapshot(d, source, original, receipt, family);
-        f.contentRootRecordHash = original.contentRootRecord;
         f.contentRoot = f.snapshotSource.root;
         f.contentRootBinding = f.snapshotSource.rootBinding;
         if (
@@ -208,7 +126,7 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
                         d.readGas
                     ),
                     (bytes32)
-                ) != original.contentRootRecord
+                ) != f.contentRootRecordHash
         ) revert T.InvalidPolicyReference();
         uint256 count = f.snapshotSource.membership.tokenCount;
         if (
@@ -292,19 +210,7 @@ library StreamPreservationPolicyReferenceSourceReadsV1 {
     }
 
     function _runtime(R.Dependencies memory d, E.Coverage memory e) private view {
-        bytes memory raw = Reads.read(
-            d.targets[6], abi.encodeCall(Archive.objectIdentity, (e.objectHash)), 320, d.archiveGas
-        );
-        E.ObjectIdentity memory o = abi.decode(raw, (E.ObjectIdentity));
-        _canonical(d.targets[6], raw, abi.encode(o));
-        if (
-            o.artistId != e.artistId || o.contentHash != e.contentHash
-                || o.sha256Digest != e.sha256Digest || o.arweaveDataRoot != e.arweaveDataRoot
-                || o.byteSize != e.byteSize || o.canonicalizationId != keccak256("RAW_BYTES")
-                || o.schemaId != D.ZIP_SCHEMA_ID || o.formatId != keccak256("IANA:application/zip")
-                || o.formatCatalogId != D.FORMAT_CATALOG_ID
-                || o.formatCatalogHash != D.FORMAT_CATALOG_HASH
-        ) revert T.InvalidPolicyReference();
+        DependencyReads.requireRuntime(d, e);
     }
 
     function _canonical(address target, bytes memory raw, bytes memory encoded) private pure {

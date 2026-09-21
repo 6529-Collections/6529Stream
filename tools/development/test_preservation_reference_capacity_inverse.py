@@ -109,6 +109,63 @@ class PreservationReferenceCapacityInverseTests(unittest.TestCase):
         self.reject(check.TOKENS, "error InvalidPreservationBinding();",
                     "error InvalidPreservationBinding(); error ExtraError();")
 
+    def test_read_facts_keeps_exact_return_tuple_and_host_arguments(self):
+        self.reject(check.SNAPSHOT, "uint64 revision,", "uint256 revision,")
+        self.reject(check.REFERENCE, "p.observation.snapshotRevision,", "uint64(0),")
+        self.reject(check.REFERENCE, ") != f.contentRootRecordHash", ") != f.snapshot.recordHash")
+
+    def test_read_facts_preserves_current_record_canonical_and_receipt_checks(self):
+        self.reject(check.SNAPSHOT, "SnapRead.requireCurrent(", "SnapRead.original(")
+        self.reject(check.SNAPSHOT, "_canonical(d.targets[5], raw, abi.encode(original, receipt));", "")
+        self.reject(check.SNAPSHOT, "abi.encode(currentSnapshot.receipt)", "abi.encode(receipt)")
+        self.reject(check.SNAPSHOT, "4096,", "8192,")
+
+    def test_read_facts_retains_current_before_record_external_read(self):
+        source = self.sources[check.SNAPSHOT]
+        first_start = source.index("SnapRead.Evidence memory currentSnapshot")
+        first_end = source.index(");", first_start) + 2
+        second_start = source.index("bytes memory raw = Reads.dynamicRead(", first_end)
+        second_end = source.index(");", second_start) + 2
+        first, second = source[first_start:first_end], source[second_start:second_end]
+        changed = dict(self.sources)
+        changed[check.SNAPSHOT] = source.replace(first, "__CURRENT__").replace(second, first).replace(
+            "__CURRENT__", second)
+        with self.assertRaises(check.InverseError):
+            check.validate(changed, self.baseline)
+
+    def test_read_facts_internal_snapshot_call_is_exact(self):
+        self.reject(check.SNAPSHOT, "sourceFacts = snapshot(d, source, original, receipt, family);",
+                    "sourceFacts = SnapshotPayloadReads.snapshot(d, source, original, receipt, family);")
+        self.reject(check.SNAPSHOT, "contentRootRecord = original.contentRootRecord;",
+                    "contentRootRecord = receipt.recordHash;")
+
+    def test_dependency_forwarders_cannot_change_arguments_or_import(self):
+        self.reject(check.REFERENCE, "return DependencyReads.bindings(d, family);",
+                    "return DependencyReads.bindings(d, Profiles.ORIGINAL_PROFILE);")
+        self.reject(check.REFERENCE, "DependencyReads.requireRuntime(d, e);", "")
+        self.reject(check.REFERENCE, './StreamPreservationPolicyReferenceDependencyReadsV1.sol',
+                    './DifferentDependencies.sol')
+
+    def test_dependency_authentication_and_runtime_tuple_remain_exact(self):
+        self.reject(check.DEPENDENCIES, "F.isV2(family);", "")
+        self.reject(check.DEPENDENCIES, "i < 7;", "i < 6;")
+        self.reject(check.DEPENDENCIES, "source.codeHashes[i] != d.codeHashes[i]", "false")
+        self.reject(check.DEPENDENCIES, "o.canonicalizationId != keccak256(\"RAW_BYTES\")", "false")
+        self.reject(check.DEPENDENCIES, ") public view {", ") private view {")
+
+    def test_dependency_helper_roster_and_canonical_guard_remain_exact(self):
+        self.reject(check.DEPENDENCIES, "library StreamPreservationPolicyReferenceDependencyReadsV1 {",
+                    "library StreamPreservationPolicyReferenceDependencyReadsV1 { uint256 extra;")
+        self.reject(check.DEPENDENCIES, "revert T.PolicyReferenceDependency(target);",
+                    "revert T.InvalidPolicyReference();")
+
+    def test_reference_error_abi_declarations_are_exact(self):
+        for declaration in check.REFERENCE_PROPAGATED_ERRORS:
+            with self.subTest(declaration=declaration):
+                self.reject(check.REFERENCE, declaration, "")
+        self.reject(check.REFERENCE, "error PolicyReferenceDependency(address target);",
+                    "error PolicyReferenceDependency(bytes32 target);")
+
     def test_untouched_host_logic_cannot_change(self):
         self.reject(check.TOKENS, "16384,", "16385,")
         self.reject(check.REFERENCE, "count > type(uint64).max", "count >= type(uint64).max")

@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamPreservationPolicyReferenceRecordReadsV1 as RecordReads
-} from "./StreamPreservationPolicyReferenceRecordReadsV1.sol";
-import {
-    StreamPreservationPolicyReferencePreparationV1 as Preparation
-} from "./StreamPreservationPolicyReferencePreparationV1.sol";
-import {
     StreamPreservationPolicyReferenceFamiliesV2 as F
 } from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
 import {
@@ -37,21 +31,10 @@ import {
     IStreamSchemaRegistry as Schema
 } from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
 
-/// @notice Fixed byte construction and typed historical/current reads for the scoped host.
-library StreamPreservationPolicyReferenceRecordsV1 {
-    // Retain the original ABI for errors propagated by fixed linked workers.
-    error InvalidPolicyReference();
-
-    function prepare(
-        mapping(bytes32 => Bytes.Manifest) storage inventories,
-        T.Dependencies memory d,
-        T.Publication memory p,
-        T.Receipt memory receipt,
-        bool current
-    ) public view returns (bytes32 hash, bytes memory canonical) {
-        return prepare(inventories, d, p, receipt, current, Profiles.ORIGINAL_PROFILE);
-    }
-
+/// @notice Fixed preparation worker for the original collection reference host.
+/// @dev Literal preparation and definitions preserve read order, hashing and host context.
+///      Public library calls copy memory; Records restores its caller-owned normalized fields.
+library StreamPreservationPolicyReferencePreparationV1 {
     function prepare(
         mapping(bytes32 => Bytes.Manifest) storage inventories,
         T.Dependencies memory d,
@@ -60,71 +43,28 @@ library StreamPreservationPolicyReferenceRecordsV1 {
         bool current,
         bytes32 family
     ) public view returns (bytes32 hash, bytes memory canonical) {
-        (hash, canonical) = Preparation.prepare(inventories, d, p, receipt, current, family);
+        definitions(d, family);
+        T.SourceFacts memory f = Sources.requireSource(d, p, current, family);
+        hash = Sources.sourceHash(d, f, family);
         receipt.observation.sourcesHash = hash;
+        bytes memory environment = Prepared.environment(inventories, p.observation.environment);
+        if (
+            keccak256(environment) != p.observation.environment.manifestHash
+                || environment.length != p.observation.environment.manifestBytes
+        ) revert T.InvalidPolicyReference();
         p.observation.expectedSourcesHash = 0;
         receipt.observation.recordHash = 0;
         receipt.observation.recordChainHash = 0;
         receipt.observation.payloadHash = 0;
         receipt.observation.payloadBytes = 0;
         receipt.observation.recordedAt = 0;
+        canonical = abi.encode(
+            F.payloadDomain(family, false), d.chainId, address(this), p, receipt, f, environment
+        );
+        if (canonical.length == 0 || canonical.length > 524288) revert T.InvalidPolicyReference();
     }
 
-    function requireCurrent(
-        Bytes.Manifest storage original,
-        Bytes.Manifest storage payload,
-        T.Receipt storage receipt,
-        T.Dependencies memory d
-    ) public view {
-        requireCurrent(original, payload, receipt, d, Profiles.ORIGINAL_PROFILE);
-    }
-
-    function requireCurrent(
-        Bytes.Manifest storage original,
-        Bytes.Manifest storage payload,
-        T.Receipt storage receipt,
-        T.Dependencies memory d,
-        bytes32 family
-    ) public view {
-        definitions(d, family);
-        RecordReads.requireCurrent(original, payload, receipt, d, family);
-    }
-
-    function recordBytes(Bytes.Manifest storage original, T.Receipt storage receipt)
-        public
-        view
-        returns (bytes memory)
-    {
-        return RecordReads.recordBytes(original, receipt);
-    }
-
-    function source(Bytes.Manifest storage payload) public view returns (bytes memory) {
-        return source(payload, Profiles.ORIGINAL_PROFILE);
-    }
-
-    function source(Bytes.Manifest storage payload, bytes32 family)
-        public
-        view
-        returns (bytes memory)
-    {
-        return RecordReads.source(payload, family);
-    }
-
-    function publication(Bytes.Manifest storage original)
-        internal
-        view
-        returns (T.Publication memory p)
-    {
-        bytes memory raw = Bytes.read(original);
-        p = abi.decode(raw, (T.Publication));
-        if (keccak256(raw) != keccak256(abi.encode(p))) revert T.InvalidPolicyReference();
-    }
-
-    function definitions(T.Dependencies memory d) public view {
-        definitions(d, Profiles.ORIGINAL_PROFILE);
-    }
-
-    function definitions(T.Dependencies memory d, bytes32 family) public view {
+    function definitions(T.Dependencies memory d, bytes32 family) private view {
         F.Definition memory definition = F.definition(family, false);
         Documents.Dependencies memory known;
         for (uint256 i; i < 4; ++i) {

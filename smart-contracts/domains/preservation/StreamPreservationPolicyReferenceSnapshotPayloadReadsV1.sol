@@ -55,6 +55,49 @@ import {
 /// @notice Current complete scoped snapshot and original Router authority, with bounded samples.
 /// @dev Fixed linked snapshot-payload decoder; retains the complete canonical read and hash checks.
 library StreamPreservationPolicyReferenceSnapshotPayloadReadsV1 {
+    function readFacts(
+        T.Dependencies memory d,
+        S.Dependencies memory source,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision,
+        bytes32 family
+    ) public view returns (S.Receipt memory savedReceipt, S.Source memory sourceFacts, bytes32 contentRootRecord) {
+        SnapRead.Dependencies memory reader = SnapRead.Dependencies(
+            d.targets[0],
+            d.targets[1],
+            d.targets[5],
+            d.codeHashes[0],
+            d.codeHashes[1],
+            d.codeHashes[5],
+            d.chainId,
+            d.readGas,
+            d.snapshotGas
+        );
+        SnapRead.Evidence memory currentSnapshot = SnapRead.requireCurrent(
+            reader,
+            scope,
+            recordHash,
+            revision,
+            family
+        );
+        bytes memory raw = Reads.dynamicRead(
+            d.targets[5],
+            abi.encodeCall(Snap.snapshotRecord, (recordHash)),
+            4096,
+            d.readGas
+        );
+        (S.Publication memory original, S.Receipt memory receipt) =
+            abi.decode(raw, (S.Publication, S.Receipt));
+        _canonical(d.targets[5], raw, abi.encode(original, receipt));
+        if (keccak256(abi.encode(receipt)) != keccak256(abi.encode(currentSnapshot.receipt))) {
+            revert T.InvalidPolicyReference();
+        }
+        savedReceipt = receipt;
+        sourceFacts = snapshot(d, source, original, receipt, family);
+        contentRootRecord = original.contentRootRecord;
+    }
+
     function snapshot(
         T.Dependencies memory d,
         S.Dependencies memory source,

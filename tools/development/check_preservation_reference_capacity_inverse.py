@@ -1,6 +1,6 @@
 """Token-exact source inverse for two fixed preservation reader extractions.
 
-This read-only check is bounded to four named Solidity files at PIN. It proves
+This read-only check is bounded to five named Solidity files at PIN. It proves
 source relocation against authenticated Git blobs; it does not compile Solidity,
 prove runtime/ABI equality, establish gas behavior, or approve contract size.
 """
@@ -19,7 +19,8 @@ REFERENCE = DIRECTORY + "StreamPreservationPolicyReferenceSourceReadsV1.sol"
 TOKENS = DIRECTORY + "StreamPreservationPolicyRenderCriticalTokenReadsV1.sol"
 SNAPSHOT = DIRECTORY + "StreamPreservationPolicyReferenceSnapshotPayloadReadsV1.sol"
 ORIGINAL = DIRECTORY + "StreamPreservationPolicyTokenOriginalReadsV1.sol"
-FILES = (REFERENCE, TOKENS, SNAPSHOT, ORIGINAL)
+DEPENDENCIES = DIRECTORY + "StreamPreservationPolicyReferenceDependencyReadsV1.sol"
+FILES = (REFERENCE, TOKENS, SNAPSHOT, ORIGINAL, DEPENDENCIES)
 BASE_BLOBS = {
     REFERENCE: "6e32f00de7e41cfdef5ca3f0846284b232f6658a",
     TOKENS: "882a183ce9b422e85d43ce1ae5539c2e72edea51",
@@ -35,6 +36,14 @@ TOKEN_IMPORT = (
 ORIGINAL_TYPE_IMPORT = (
     'import { StreamPreservationPolicyRenderCriticalTokenReadsV1 as Tokens } '
     'from "./StreamPreservationPolicyRenderCriticalTokenReadsV1.sol";'
+)
+DEPENDENCY_IMPORT = (
+    'import { StreamPreservationPolicyReferenceDependencyReadsV1 as DependencyReads } '
+    'from "./StreamPreservationPolicyReferenceDependencyReadsV1.sol";'
+)
+REFERENCE_PROPAGATED_ERRORS = (
+    "error InvalidPreservationReferenceFamily();",
+    "error PolicyReferenceDependency(address target);",
 )
 PROPAGATED_ERRORS = (
     "error InvalidPreservationBinding();",
@@ -194,11 +203,57 @@ def inverse_function(member, new_name, original_name, qualify=False, make_privat
     return Member("function", original_name, tuple(head) + member.tokens[len(signature(member)):])
 
 
+def replace_sequence(tokens, before, after, label, count=1):
+    before, after = tuple(before), tuple(after)
+    found = [i for i in range(len(tokens) - len(before) + 1) if tokens[i:i + len(before)] == before]
+    require(len(found) == count, label + ": exact occurrence count differs")
+    for at in reversed(found):
+        tokens = tokens[:at] + after + tokens[at + len(before):]
+    return tokens
+
+
+def family_member(library, name):
+    found = [m for m in library.members if m.kind == "function" and m.name == name
+             and any(signature(m)[i:i + 2] == ("bytes32", "family")
+                     for i in range(len(signature(m)) - 1))]
+    require(len(found) == 1, "expected one family overload: " + name)
+    return found[0]
+
+
+def replace_exact_member(library, before, after):
+    require(library.members.count(before) == 1, "exact inverse member missing")
+    return Library(library.prefix, library.name, tuple(after if m == before else m for m in library.members))
+
+
+def inverse_read_facts(member):
+    equal(signature(member), lex("""function readFacts(
+        T.Dependencies memory d, S.Dependencies memory source, StreamFinalityScope memory scope,
+        bytes32 recordHash, uint64 revision, bytes32 family
+    ) public view returns (
+        S.Receipt memory savedReceipt, S.Source memory sourceFacts, bytes32 contentRootRecord
+    )"""), "readFacts exact typed boundary")
+    body = member.tokens[len(signature(member)) + 1:-1]
+    substitutions = (
+        ("scope", "p.scope", 1),
+        ("recordHash", "p.observation.snapshotRecordHash", 2),
+        ("revision", "p.observation.snapshotRevision", 1),
+        ("currentSnapshot", "snapshot", 2),
+        ("savedReceipt", "f.snapshot", 1),
+        ("sourceFacts", "f.snapshotSource", 1),
+        ("contentRootRecord =", "f.contentRootRecordHash =", 1),
+        ("snapshot(d, source, original, receipt, family)",
+         "_snapshot(d, source, original, receipt, family)", 1),
+    )
+    for before, after, count in substitutions:
+        body = replace_sequence(body, lex(before), lex(after), "readFacts inverse " + before, count)
+    return body
+
+
 def validate(sources, baseline):
-    require(set(sources) == set(FILES), "exact four-file working source inventory required")
+    require(set(sources) == set(FILES), "exact five-file working source inventory required")
     require(set(baseline) == set(BASE_BLOBS), "exact two-file baseline inventory required")
     old_reference, old_tokens = (parse_library(baseline[p]) for p in (REFERENCE, TOKENS))
-    reference, tokens, snapshot, original = (parse_library(sources[p]) for p in FILES)
+    reference, tokens, snapshot, original, dependencies = (parse_library(sources[p]) for p in FILES)
 
     # Whole helper shape includes all imports and every member, so hidden code,
     # redirected aliases, overloads, and altered canonical checks cannot escape.
@@ -206,7 +261,8 @@ def validate(sources, baseline):
             "snapshot helper identity changed")
     equal(snapshot.prefix, old_reference.prefix, "snapshot helper imports/pragma")
     require([(m.kind, m.name) for m in snapshot.members] ==
-            [("function", "snapshot"), ("function", "_canonical")], "snapshot helper members changed")
+            [("function", "readFacts"), ("function", "snapshot"), ("function", "_canonical")],
+            "snapshot helper members changed")
     moved_snapshot = inverse_function(one(snapshot, "function", "snapshot"), "snapshot", "_snapshot",
                                       make_private=True)
     equal(moved_snapshot.tokens, one(old_reference, "function", "_snapshot").tokens, "snapshot moved function")
@@ -217,9 +273,61 @@ def validate(sources, baseline):
               f = SnapshotPayloadReads.snapshot(d, source, original, receipt, family);
               original.expectedSourceHash = 0;
           }"""), "snapshot wrapper and post-call caller-memory normalization")
-    reconstructed_reference = replace_member(reference, "_snapshot", (moved_snapshot,))
-    reconstructed_reference = Library(remove_import(reconstructed_reference.prefix, REFERENCE_IMPORT),
-                                      reconstructed_reference.name, reconstructed_reference.members)
+    # Recover the exact contiguous host block from the new linked reader.
+    old_source = family_member(old_reference, "requireSource")
+    moved_facts = inverse_read_facts(one(snapshot, "function", "readFacts"))
+    start = lex("SnapRead.Dependencies memory reader =")
+    finish = lex("f.contentRootRecordHash = original.contentRootRecord;")
+    starts = [i for i in range(len(old_source.tokens)) if old_source.tokens[i:i + len(start)] == start]
+    ends = [i + len(finish) for i in range(len(old_source.tokens))
+            if old_source.tokens[i:i + len(finish)] == finish]
+    require(len(starts) == len(ends) == 1 and starts[0] < ends[0], "pinned source block bounds")
+    equal(moved_facts, old_source.tokens[starts[0]:ends[0]], "readFacts moved contiguous body")
+    current_source = family_member(reference, "requireSource")
+    call = lex("""(f.snapshot, f.snapshotSource, f.contentRootRecordHash) = SnapshotPayloadReads.readFacts(
+        d, source, p.scope, p.observation.snapshotRecordHash, p.observation.snapshotRevision, family
+    );""")
+    restored_source = replace_sequence(current_source.tokens, call, moved_facts, "readFacts host tuple/arguments")
+    # The original local now lives in the helper; its exact returned word feeds
+    # the same later root-head comparison. No other operand substitution is allowed.
+    restored_source = replace_sequence(restored_source, lex(") != f.contentRootRecordHash"),
+                                       lex(") != original.contentRootRecord"), "returned root-head operand")
+    equal(restored_source, old_source.tokens, "requireSource complete inverse/read order")
+    reconstructed_reference = replace_exact_member(
+        reference, current_source, Member("function", "requireSource", restored_source))
+    reconstructed_reference = replace_member(reconstructed_reference, "_snapshot", (moved_snapshot,))
+
+    require(dependencies.name == "StreamPreservationPolicyReferenceDependencyReadsV1",
+            "dependency helper identity changed")
+    equal(dependencies.prefix, old_reference.prefix, "dependency helper imports/pragma")
+    require([(m.kind, m.name) for m in dependencies.members] ==
+            [("function", "bindings"), ("function", "requireRuntime"), ("function", "_canonical")],
+            "dependency helper members changed")
+    moved_bindings = one(dependencies, "function", "bindings")
+    old_bindings = family_member(old_reference, "bindings")
+    equal(moved_bindings.tokens, old_bindings.tokens, "dependency bindings moved function")
+    current_bindings = family_member(reference, "bindings")
+    equal(current_bindings.tokens, wrapper(old_bindings, "{ return DependencyReads.bindings(d, family); }"),
+          "dependency bindings host forwarder")
+    moved_runtime = inverse_function(one(dependencies, "function", "requireRuntime"),
+                                     "requireRuntime", "_runtime", make_private=True)
+    equal(moved_runtime.tokens, one(old_reference, "function", "_runtime").tokens, "runtime moved function")
+    equal(one(reference, "function", "_runtime").tokens,
+          wrapper(one(old_reference, "function", "_runtime"), "{ DependencyReads.requireRuntime(d, e); }"),
+          "runtime host forwarder")
+    equal(one(dependencies, "function", "_canonical").tokens,
+          one(old_reference, "function", "_canonical").tokens, "dependency canonical guard")
+    reconstructed_reference = replace_exact_member(reconstructed_reference, current_bindings, moved_bindings)
+    reconstructed_reference = replace_member(reconstructed_reference, "_runtime", (moved_runtime,))
+    prefix = remove_import(reconstructed_reference.prefix, REFERENCE_IMPORT)
+    prefix = remove_import(prefix, DEPENDENCY_IMPORT)
+    reference_errors = tuple(m for m in reference.members if m.kind == "error")
+    equal(tuple(m.tokens for m in reference_errors), tuple(lex(e) for e in REFERENCE_PROPAGATED_ERRORS),
+          "exact reference propagated error ABI declarations")
+    require(reference.members[:len(reference_errors)] == reference_errors,
+            "reference propagated errors must remain first host members")
+    reconstructed_reference = Library(prefix, reconstructed_reference.name,
+                                      tuple(m for m in reconstructed_reference.members if m.kind != "error"))
     equal(reconstructed_reference.tokens(), lex(baseline[REFERENCE]), "reference full-host inverse")
 
     require(original.name == "StreamPreservationPolicyTokenOriginalReadsV1", "original helper identity changed")
@@ -253,6 +361,7 @@ def validate(sources, baseline):
         "base": PIN,
         "baselineBlobs": BASE_BLOBS,
         "preservedErrorDeclarations": list(PROPAGATED_ERRORS),
+        "preservedReferenceErrorDeclarations": list(REFERENCE_PROPAGATED_ERRORS),
         "files": {p: hashlib.sha256(sources[p].encode("utf-8")).hexdigest() for p in FILES},
         "reconstructedTokenCounts": {
             REFERENCE: len(reconstructed_reference.tokens()), TOKENS: len(reconstructed_tokens.tokens())

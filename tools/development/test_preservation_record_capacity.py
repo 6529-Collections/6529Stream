@@ -103,10 +103,71 @@ class PreservationRecordCapacityTest(unittest.TestCase):
 
     def test_publication_normalization_guard_remains_in_both_copies(self):
         guard = "if (keccak256(raw) != keccak256(abi.encode(p))) revert T.InvalidPolicyReference();"
-        for path in check.FILES:
+        for path in (check.RECORDS, check.READS):
             with self.subTest(path=path):
                 self.reject(path, guard, "")
                 self.reject(path, "p = abi.decode(raw, (T.Publication));", "p = abi.decode(raw, (T.Publication)); p.observation.expectedSourcesHash = 0;")
+
+    def test_preparation_worker_body_and_private_definitions_are_literal(self):
+        for before, after in (
+            ("definitions(d, family);", ""),
+            ("receipt.observation.sourcesHash = hash;", "receipt.observation.sourcesHash = bytes32(0);"),
+            ("p.observation.expectedSourcesHash = 0;", ""),
+            ("environment.length != p.observation.environment.manifestBytes", "environment.length == 0"),
+            ("F.payloadDomain(family, false), d.chainId, address(this), p, receipt, f, environment",
+             "F.payloadDomain(family, false), d.chainId, msg.sender, p, receipt, f, environment"),
+            ("canonical.length > 524288", "canonical.length > 1048576"),
+            ("known.readGas = d.readGas;", "known.readGas = 1;"),
+            ("bytes32 family) private view", "bytes32 family) public view"),
+        ):
+            with self.subTest(after=after):
+                self.reject(check.PREPARATION, before, after)
+
+    def test_preparation_read_order_cannot_relocate(self):
+        self.reject(check.PREPARATION,
+                    "definitions(d, family);\n        T.SourceFacts memory f = Sources.requireSource(d, p, current, family);",
+                    "T.SourceFacts memory f = Sources.requireSource(d, p, current, family);\n        definitions(d, family);")
+
+    def test_preparation_wrapper_arguments_and_memory_restoration_are_exact(self):
+        self.reject(check.RECORDS,
+                    "Preparation.prepare(inventories, d, p, receipt, current, family)",
+                    "Preparation.prepare(inventories, d, p, receipt, false, family)")
+        self.reject(check.RECORDS,
+                    "(hash, canonical) = Preparation.prepare(inventories, d, p, receipt, current, family);\n        receipt.observation.sourcesHash = hash;",
+                    "receipt.observation.sourcesHash = hash;\n        (hash, canonical) = Preparation.prepare(inventories, d, p, receipt, current, family);")
+
+    def test_preparation_has_no_unknown_members_or_host_link_cycle(self):
+        self.reject(check.PREPARATION, "library StreamPreservationPolicyReferencePreparationV1 {",
+                    "library StreamPreservationPolicyReferencePreparationV1 {\n    function hidden() public pure {}")
+        self.reject(check.PREPARATION, "definitions(d, family);", "Records.definitions(d, family);")
+        self.reject(check.PREPARATION, "pragma solidity ^0.8.19;",
+                    'pragma solidity ^0.8.19; import { StreamPreservationPolicyReferenceRecordsV1 as Records } from "./StreamPreservationPolicyReferenceRecordsV1.sol";')
+
+    def test_original_prepare_overload_is_unchanged(self):
+        self.reject(check.RECORDS,
+                    "return prepare(inventories, d, p, receipt, current, Profiles.ORIGINAL_PROFILE);",
+                    "return prepare(inventories, d, p, receipt, current, Profiles.FAMILY_PROFILE);")
+
+    def test_propagated_error_must_exist_exactly_once_with_original_signature(self):
+        for replacement in ("", "error InvalidPolicyReference(uint256 reason);",
+                            "error InvalidReference();",
+                            "error InvalidPolicyReference(); error InvalidPolicyReference();",
+                            "error InvalidPolicyReference(); error Unexpected();"):
+            with self.subTest(replacement=replacement):
+                self.reject(check.RECORDS, "error InvalidPolicyReference();", replacement)
+
+    def test_propagated_error_cannot_hide_in_helper_or_move_after_functions(self):
+        for path, name in ((check.READS, "StreamPreservationPolicyReferenceRecordReadsV1"),
+                           (check.PREPARATION, "StreamPreservationPolicyReferencePreparationV1")):
+            with self.subTest(path=path):
+                self.reject(path, "library " + name + " {",
+                            "library " + name + " { error InvalidPolicyReference();")
+        sources = dict(self.sources)
+        current = sources[check.RECORDS].replace("error InvalidPolicyReference();", "")
+        at = current.rfind("}")
+        sources[check.RECORDS] = current[:at] + "error InvalidPolicyReference();" + current[at:]
+        with self.assertRaises(check.InverseError):
+            check.validate(sources, self.baseline)
 
     def test_helper_import_cannot_redirect_fixed_reader(self):
         self.reject(check.READS, 'from "./StreamPreservationPolicyReferenceSourceReadsV1.sol";',
