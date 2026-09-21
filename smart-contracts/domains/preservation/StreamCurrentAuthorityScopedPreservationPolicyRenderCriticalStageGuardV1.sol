@@ -11,4 +11,3 @@ library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalStageGuardV1
         State.stage(state, id, expected);
     }
 }
-

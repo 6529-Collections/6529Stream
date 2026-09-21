@@ -11,4 +11,3 @@ library StreamCurrentAuthorityScopedRenderCriticalStageGuard {
         State.stage(state, id, expected);
     }
 }
-
