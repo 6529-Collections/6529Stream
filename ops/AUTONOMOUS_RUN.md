@@ -65,6 +65,13 @@ All twelve recorded size failures and both isolated Yul failures have source
 repairs; combined current-native and full runtime acceptance remain. Use the
 feature register for remaining product work. Held proposals remain held.
 
+Subsequent source intake is `b283d0ba`: Owner/Registry adapter `81f4daa9`
+plus test-only activation extraction. Keep `ea4cf6b0` for the active runtime
+campaign. Capacity's reduced local57 and Prepared's two captures are active;
+Testing owns production-library groups. Global compiler cap is 20, with the
+Testing allowance temporarily reduced when independent focused workers run.
+Museum semantic intake is held for a concrete cross-token selection fix.
+
 ## Earlier source-specific assignments
 
 These retain historical context; current assignments above take precedence.

@@ -73,6 +73,27 @@ is still isolated and unproved. Previously held proposals remain unapplied.
 RC1/main/Sepolia `569bf87f1fa808787d324f6e1582924b5ccf1d40` remain unchanged.
 No new funding or onchain action is needed for current coding.
 
+
+### Subsequent source integration
+
+The Owner-to-Registry reader (`81f4daa9`) joins the original ownership and
+account evidence to all 51 schema declarations at the same recorded block.
+The caller supplies a separately pinned runtime-admission artifact; the reader
+does not infer its semantic validity. Independent review and 26 changed-module
+tests pass. Actual combined capture remains pending.
+
+The test-only product activation extraction (`b283d0ba`) preserves the original
+fixture state, virtual hooks, governance caller, payload creator and ordering.
+Eleven regression cases and exact original-control comparisons are reviewed;
+paired compilation preserves both host ABIs and all 99 storage entries.
+Those eleven cases have not executed. The first broader IR/AST diagnostic timed
+out; it supplies no compilation-speed measurement.
+
+These changes follow the fixed `ea4cf6b0` runtime snapshot and do not change
+production contracts. Runtime workers keep their original source. The next
+Museum semantic export batch is held for a confirmed cross-token selection
+correction; its records must retain their original subjects.
+
 ## Earlier source-specific evidence
 
 The entries below retain their recorded sources and outcomes. The current

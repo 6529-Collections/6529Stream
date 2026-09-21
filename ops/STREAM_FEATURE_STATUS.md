@@ -30,6 +30,11 @@ Large test-host timeouts led to concrete test-only construction changes; no
 original assertions or production limits were relaxed. Detailed sources and
 remaining campaigns are recorded in the current status and assignments.
 
+Owner/Registry fixed-block composition `81f4daa9` and the reviewed test-only
+activation extraction `b283d0ba` are now source integrated. Independent
+Owner/Registry tests pass; activation execution and actual combined capture
+remain pending. The following runtime snapshot is unchanged.
+
 [Current delivery status](V1_CURRENT_STATUS.md) records exact evidence boundaries.
 Full current-stack/Safe execution, stateful/fuzz, gas/size, full CI, freeze and
 matching testnet demonstration remain. RC1 `569bf87f` is preserved. These facts
@@ -67,16 +72,16 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `c648b31af624b49590379eea664466e2aba946d6`; production last changed at `99e95030`; see the [21 September batch](#latest-integration-checkpoint-21-september). |
+| Current integration source | `b283d0ba95a2c6de23049155d7ee5d55e1a770c6`; production last changed at `91ac2ce2`. Current runtime campaign remains fixed at `ea4cf6b0`. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | Original `57ac8d04`; composition `65312baa` adds 24 focused root passes, actual RPC pending; MUSEUM-36. |
-| Latest broad cheap compilation evidence | ABI168: 4,141 sources at `c648b31a`, zero errors in49.063 seconds; complete committed-source bridge. This is not runtime acceptance. |
+| Latest broad cheap compilation evidence | ABI169: 4,168 sources at `ea4cf6b0`, zero errors in 49.922 seconds; committed-source bridge. Later test-only activation has paired ABI/99-layout evidence; no later whole-repository compilation is claimed. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 at `a2973d36` stopped before EVM on the scoped-reader Yul failure; repair assigned. |
+| Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 passes all 12 original cases at frozen `eda052c7`, including one 256-run fuzz case, with independent native creation/link/caller review. This does not accept the later complete graph. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.
