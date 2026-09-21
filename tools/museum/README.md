@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Conservation documentary evidence and semantic mappings](../../docs/museum-conservation-dossier-v2.md)
+join every original reference occurrence to retained materials and original
+Archive evidence, with typed resources, exact source provenance and offline
+model dependencies. Unresolved correspondence blocks source-family completion.
+
 [Retained conservation and interview dossiers](../../docs/museum-conservation-dossier-v1.md)
 project original intent, waiver, instrument, participant, transcript and capture
 declarations with exact source replay and field accounting. Identity, consent

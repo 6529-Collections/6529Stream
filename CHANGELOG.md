@@ -1134,6 +1134,9 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add conservation documentary Archive correspondence and typed museum mappings
+  with complete original reference accounting and offline reconstruction.
+
 - Add a replayable conservation and interview dossier supplement preserving
   original intent, waiver, participant, instrument and media declarations,
   selection histories and exact reference/field provenance.
