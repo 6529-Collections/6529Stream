@@ -1147,6 +1147,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add closed consent/root Safe transport for source-pinned unsigned packets,
+  preserving exact envelope fields and separate original record verification.
+
 - Add preserved Museum source/runtime archives and explicit offline V10/V3
   regeneration, with original native release-hash correspondence and complete
   dossier requirement retention. Keep release and institutional limits explicit.

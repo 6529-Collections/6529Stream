@@ -6,6 +6,10 @@ provider and reviewed deployment data, then dispatches to the original output,
 snapshot, reference, inventory and archive clients. It creates no provider and
 contains no signing keys, deployment defaults or automatic submissions.
 
+Consent and root-publication interludes use the separate
+[closed root transport](current-preservation-root-interlude.md). They are not
+additional capture families in this driver.
+
 ## Supply admitted deployment data
 
 The manifest has the following fields:

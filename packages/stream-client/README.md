@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Consent and root-publication Safe transport](docs/current-preservation-root-interlude.md)
+  binds the original unsigned op17/root packets to exact signed Safe envelopes
+  and keeps protocol-record verification separate from transport outcomes.
+
 - [VIEW inventory and Bundle consumers](docs/current-view-preservation-consumers-v1.md)
   cover all 22 original writes, the separate retrieval companion binding,
   ordered witness admissions and distinct cached/full currentness checks.
