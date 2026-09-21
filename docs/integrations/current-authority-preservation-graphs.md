@@ -179,6 +179,32 @@ current-Artist token producer remains a separate interface and family. The
 typed dispatch cases separately isolate all ten host routes and prepared-call
 guards, and do not replace this genuine configuration coverage.
 
+Both full-preservation discovery hosts now select VIEW through the fixed
+`StreamFinalityViewPreservationDiscoveryV1` worker before their token catalogue,
+reference-pin and serving branches. The worker reconstructs the exact existing
+eight-field VIEW profile from the bound provider's operative complete selection,
+operative snapshot getter, canonical original capability and receipts. It checks
+their hashes, action/time joins, runtime pins, ERC-165 capabilities and reciprocal
+source identities. The provider remains responsible for authenticating its full
+original inventory profile, source, origin and authority commitment. Historical
+receipts or a basic-only binding cannot enable VIEW discovery. This avoids a
+nested aggregate catalogue call without changing the profile hash, constructor
+configuration or component budgets.
+
+Serving requires the actual same-scope Router adoption, selected live renderer,
+complete admitted read roster, preservation producer and original declaration.
+The fixed checkpoint source reader checks those facts, and discovery joins the
+result to its original Core, Metadata, Router, provider, Artist and Registry
+anchors. The reader's caller-dependent checkpoint context hash is not reused as
+a discovery commitment. This route preserves the current VIEW requirement that
+the retained original Artist remain selected; it does not imply successor
+Artist VIEW support. Existing token routes and sanction projection are unchanged.
+
+Fourteen focused [worker cases](../../test/unit/finality/StreamFinalityViewPreservationDiscoveryV1.t.sol)
+isolate binding, framing, scope, runtime, receipt and serving joins with typed
+transport doubles. They do not establish genuine nine-component composition,
+native gas fit or browser acceptance; those validation steps remain separate.
+
 Preservation excludes only sanction-derived display. It does not freeze or
 ignore C2PA, claims, corrections or other provenance changes. Such changes can
 still make preservation observations stale. Sharing a retained reference or

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamFinalityViewPreservationDiscoveryV1 as ViewDiscovery
+} from "./StreamFinalityViewPreservationDiscoveryV1.sol";
 
 import "./StreamFinalityRouterEvidence.sol";
 import {
@@ -600,6 +603,11 @@ contract StreamFinalityFullPreservationPolicyDiscoveryV1 is
                     (bytes32)
                 ) != sourceConfigurationHash
         ) revert DiscoveryDependency(scopeEvidenceProvider);
+        // VIEW authenticates its fixed complete binding directly. The token catalogue path
+        // has a larger nested reservation and is not a VIEW discovery dependency.
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            return ViewDiscovery.profile(_configuration, scope);
+        }
         bytes memory raw = _read(
             scopeEvidenceProvider,
             abi.encodeCall(Catalogue.finalitySourcesForScope, (scope)),
@@ -668,6 +676,12 @@ contract StreamFinalityFullPreservationPolicyDiscoveryV1 is
     /// selected new-profile reference may instead use its actual per-scope factory record;
     /// this is not a generic dynamically admitted component address.
     function _pinReference(StreamFinalityScope memory scope, address target) private view {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            Profiles.Profile memory selected = _selectedProfile(scope);
+            if (target != selected.referenceRender) revert DiscoveryDependency(target);
+            _exact(target, selected.referenceRenderCodeHash);
+            return;
+        }
         if (_codeHashes[target] != 0) {
             _pin(target);
             return;
@@ -704,6 +718,10 @@ contract StreamFinalityFullPreservationPolicyDiscoveryV1 is
         StreamFinalityScope memory scope,
         StreamFinalityDiscoveryTypes.Configuration memory c
     ) private view {
+        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
+            ViewDiscovery.requireServing(c, scope);
+            return;
+        }
         Profiles.Profile memory p = _selectedProfile(scope);
         if (p.profileHash == _profiles[0].profileHash) {
             IStreamMetadataServingFacts.ServingFacts memory original =

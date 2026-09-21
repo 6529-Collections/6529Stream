@@ -1,4 +1,16 @@
 # Changelog
+
+## Bound VIEW discovery
+
+- Add a shared closed VIEW selection and serving worker to both full-preservation
+  discovery hosts. Authenticate the complete binding, exact frozen profile and
+  matching live adoption without an aggregate catalogue callback or token fallback.
+- Add fourteen focused binding, framing, receipt, scope, runtime and serving
+  regression cases. Original Artist anchors, token routes, Registry behavior and
+  component budgets remain unchanged.
+- Source review and formatting pass. Compilation, native composition, gas fit
+  and browser acceptance remain pending.
+
 ## Scoped preservation terminal composition tests
 
 - Add distinct executable TOKEN, RELEASE and SEASON contract-composition cases
