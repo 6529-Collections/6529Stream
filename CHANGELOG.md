@@ -18,6 +18,14 @@
   Complete runtime and added-call gas acceptance remain separate; see the
   [capacity guide](docs/integrations/scoped-policy-render-critical-read-capacity.md).
 
+## Scoped preservation root-authorization capacity
+
+- Move the complete original V1 root-authorization proof to a fixed linked read
+  worker, preserving public types, ABI errors, stage updates and full provenance.
+- Add focused frame and original-proof regressions. EVM execution and composed
+  gas acceptance remain pending. See the
+  [capacity guide](docs/integrations/scoped-preservation-root-authorization-capacity.md).
+
 ## Estate and dormancy recovery capacity
 
 - Split four existing recovery libraries into six fixed typed workers while
