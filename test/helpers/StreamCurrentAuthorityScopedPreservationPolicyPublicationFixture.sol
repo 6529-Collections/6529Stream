@@ -138,15 +138,28 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
         internal
         returns (AuthorityScopedPublication memory p)
     {
+        p = _authorityPrepareScopedPreservationPolicy(kind);
+        _spCheckpoint(p);
+        _spOutput(p);
+        _spSnapshot(p);
+        _spRoot(p);
+        require(assemblyRouter.collectionContentRootHead(1) == 0, "native root remains absent");
+    }
+
+    /// @dev Construct the real membership and seven children, leaving the client publication
+    /// stages untouched. The returned publication contains setup facts only, not source evidence.
+    function _authorityPrepareScopedPreservationPolicy(SPScopeType kind)
+        internal
+        returns (AuthorityScopedPublication memory p)
+    {
         require(
             address(assemblyArtists) == assemblyAuthorityResolver.anchors().targets[3],
             "scoped original Router writes finish in Artist A"
         );
-        _spPrepare();
-        p.legacyFamily = spLegacyFamily;
+        p.legacyFamily = _authorityPreparePreservationPolicySourcePrefix();
         (p.scope, p.membershipRecord, p.membershipPayload) = _spScope(kind);
         p.membership = assemblyMembership.requireScopeMembership(p.scope);
-        uint256 count = kind == SPScopeType.TOKEN ? 1 : 2;
+        uint256 count = kind == SPScopeType.TOKEN ? 1 : _assemblyArtworkTokenCount();
         require(p.membership.tokenCount == count && p.membership.membershipHash != 0);
         require(
             p.membership.scopeSubject
@@ -156,11 +169,19 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
             require(assemblyMembership.scopeTokenAt(p.scope, i) == i + 1);
         }
         p.graph = _spChildren(p.scope, count);
-        _spCheckpoint(p);
-        _spOutput(p);
-        _spSnapshot(p);
-        _spRoot(p);
-        require(assemblyRouter.collectionContentRootHead(1) == 0, "native root remains absent");
+    }
+
+    /// @dev A caller bootstrap may grant a real Safe without impersonating it. An override uses
+    /// the prepare-only path and submits publication transactions from that Safe separately;
+    /// the legacy full-publication helpers still make their calls directly from this fixture.
+    function _authorityScopedPublicationWriter() internal view virtual returns (address) {
+        return address(this);
+    }
+
+    /// @dev Shared collection/scoped setup only; no scope or publication child is selected here.
+    function _authorityPreparePreservationPolicySourcePrefix() internal returns (bytes32) {
+        _spPrepare();
+        return spLegacyFamily;
     }
 
     /// @dev One actual token/collection inventory and set of locks supports all three scopes.
@@ -184,16 +205,23 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
         require(known && actualFamily == spLegacyFamily, "known canonical empty native family");
         _assemblySetupArchiveAdmissions();
         _spDefinitions();
-        _spGrant(SPFamilies.SNAPSHOT);
-        _spGrant(SPFamilies.IDENTITY);
-        uint256[] memory ids = new uint256[](2);
-        ids[0] = 1;
-        ids[1] = 2;
+        _spGrant(SPFamilies.SNAPSHOT, _authorityScopedPublicationWriter());
+        _spGrant(SPFamilies.IDENTITY, address(this));
+        if (_authorityScopedPublicationWriter() != address(this)) {
+            _spGrant(SPFamilies.IDENTITY, _authorityScopedPublicationWriter());
+        }
+        uint256 count = _assemblyArtworkTokenCount();
+        uint256[] memory ids = new uint256[](count);
+        for (uint256 i; i < count; ++i) {
+            ids[i] = i + 1;
+        }
         assemblyTokens.appendCollectionTokens(1, ids);
         bytes32 collectionPlan =
             assemblyCoordinators.beginInventory(SPScope(SPScopeType.COLLECTION, 1, 0, 0));
-        assemblyCoordinators.appendInventory(collectionPlan, 2);
-        require(assemblyCoordinators.requireCompleteInventory(collectionPlan).processedTokens == 2);
+        assemblyCoordinators.appendInventory(collectionPlan, count);
+        require(
+            assemblyCoordinators.requireCompleteInventory(collectionPlan).processedTokens == count
+        );
         assemblyCoordinatorInventoryPlan = collectionPlan;
         _assemblyLockContent();
         spPrepared = true;
@@ -240,7 +268,12 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
         } else {
             require(policy.family == SPFamilies.IDENTITY && policy.authorizationMask == 384);
         }
-        bytes memory tokenBytes = abi.encode(uint256(1), uint256(2));
+        uint256 count = _assemblyArtworkTokenCount();
+        bytes memory tokenBytes;
+        for (uint256 i; i < count; ++i) {
+            // The membership payload is concatenated uint256 words, without dynamic-array framing.
+            tokenBytes = bytes.concat(tokenBytes, abi.encode(i + 1));
+        }
         (bytes32 chunk, address pointer) = assemblyStore.publishChunk(tokenBytes);
         require(chunk == keccak256(tokenBytes) && pointer.code.length == tokenBytes.length + 1);
         bytes32[] memory parts = new bytes32[](1);
@@ -252,7 +285,7 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
                 address(assemblyCore),
                 1,
                 uint8(kind),
-                2,
+                count,
                 keccak256(tokenBytes),
                 parts
             )
@@ -283,7 +316,7 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
             facts.sourceRecordHash == membershipRecord
                 && facts.scopeManifestHash == keccak256(payload)
         );
-        require(facts.tokenCount == 2 && facts.tokenListHash == keccak256(tokenBytes));
+        require(facts.tokenCount == count && facts.tokenListHash == keccak256(tokenBytes));
         require(
             assemblyMetadata.registerScopeSubject(membershipRecord) == facts.scopeSubject,
             "real Metadata derives subject from the published membership record"
@@ -341,12 +374,20 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
         }
     }
 
-    function _spCheckpoint(AuthorityScopedPublication memory p) private {
+    /// @dev Prepare the genuine selection prerequisite only. Client content-checkpoint progress
+    /// remains untouched; the complete legacy helper calls this at its original stage boundary.
+    function _authorityPrepareScopedPreservationSelection(AuthorityScopedPublication memory p)
+        internal
+    {
         SPSelection selections = SPSelection(sourceStaticSelection);
         p.selectionId = selections.begin(p.scope);
         selections.append(p.selectionId, p.membership.tokenCount);
         p.selection = selections.requireCurrentCheckpoint(p.selectionId);
         require(p.selection.nextIndex == p.membership.tokenCount && p.selection.selectionRoot != 0);
+    }
+
+    function _spCheckpoint(AuthorityScopedPublication memory p) private {
+        _authorityPrepareScopedPreservationSelection(p);
         SPCheckpoint checkpoint = SPCheckpoint(p.graph.children[1]);
         require(
             checkpoint.selectionCheckpoint() == sourceStaticSelection
@@ -479,11 +520,14 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
             keccak256("complete actual original scope, STATIC output and frozen policy")
         );
         (p.snapshotPublication.expectedSourceHash, p.snapshotPayload) =
-            snapshot.previewSnapshot(p.snapshotPublication, address(this));
+            snapshot.previewSnapshot(p.snapshotPublication, _authorityScopedPublicationWriter());
         _assemblyUpload(p.snapshotPayload);
         bytes32 recordHash = snapshot.publishSnapshot(p.snapshotPublication);
         p.snapshot = snapshot.requireCurrent(p.scope, recordHash, 1);
-        require(p.snapshot.recordHash == recordHash && p.snapshot.publisher == address(this));
+        require(
+            p.snapshot.recordHash == recordHash
+                && p.snapshot.publisher == _authorityScopedPublicationWriter()
+        );
         require(
             p.snapshot.manifestHash == keccak256(p.snapshotPayload)
                 && p.snapshot.manifestBytes == p.snapshotPayload.length
@@ -584,9 +628,10 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyPublicationFixtu
         require(known && actualFamily == p.signedFamily, "known exact resulting scoped family");
     }
 
-    function _spGrant(bytes32 family) private {
-        (bool enabled, uint64 revision) = assemblyMetadata.familyWriter(1, family, 7, address(this));
-        if (!enabled) _assemblyGrantFamily(family, 7, address(this));
+    function _spGrant(bytes32 family, address writer) private {
+        require(writer != address(0), "nonzero scoped publication writer");
+        (bool enabled, uint64 revision) = assemblyMetadata.familyWriter(1, family, 7, writer);
+        if (!enabled) _assemblyGrantFamily(family, 7, writer);
         else require(revision != 0);
     }
 

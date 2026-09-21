@@ -136,8 +136,10 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyReferenceFixture
         _scopedReferencePrepareEnvironment(
             host, p.observation.environment, result.environmentManifest
         );
-        (p.observation.expectedSourcesHash,) = host.previewReference(p, address(this));
-        (bytes32 sourceHash, bytes memory canonical) = host.previewReference(p, address(this));
+        (p.observation.expectedSourcesHash,) =
+            host.previewReference(p, _authorityScopedPublicationWriter());
+        (bytes32 sourceHash, bytes memory canonical) =
+            host.previewReference(p, _authorityScopedPublicationWriter());
         require(
             sourceHash == p.observation.expectedSourcesHash && sourceHash != 0,
             "stable complete reference source"
@@ -200,11 +202,18 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyReferenceFixture
                     == checkpoint.tokenCount,
             "same complete current snapshot, checkpoint and membership"
         );
+        _authorityPrepareScopedPreservationPolicyReferenceWriter();
+    }
+
+    /// @dev Prepare only definitions and the collection-1 writer grant. This does not prepare
+    /// an environment or accept a reference. A Safe override submits its own later transactions.
+    function _authorityPrepareScopedPreservationPolicyReferenceWriter() internal {
         _scopedReferenceDefinitions();
-        (bool enabled,) = assemblyMetadata.familyWriter(
-            publication.scope.collectionId, ScopedReferenceFamilies.CURATOR, 3, address(this)
-        );
-        if (!enabled) _assemblyGrantFamily(ScopedReferenceFamilies.CURATOR, 3, address(this));
+        address writer = _authorityScopedPublicationWriter();
+        require(writer != address(0), "nonzero scoped reference writer");
+        (bool enabled,) =
+            assemblyMetadata.familyWriter(1, ScopedReferenceFamilies.CURATOR, 3, writer);
+        if (!enabled) _assemblyGrantFamily(ScopedReferenceFamilies.CURATOR, 3, writer);
     }
 
     function _scopedReferenceDefinitions() private {
@@ -449,7 +458,8 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyReferenceFixture
             keccak256(abi.encode(saved.publication)) == keccak256(abi.encode(submitted))
                 && saved.receipt.scopeSubject == original.snapshot.scopeSubject
                 && receipt.recordHash == saved.recordHash && receipt.revision == 1
-                && receipt.predecessor == 0 && receipt.recorder == address(this)
+                && receipt.predecessor == 0
+                && receipt.recorder == _authorityScopedPublicationWriter()
                 && receipt.authorizationClass == 3 && receipt.grantRevision != 0
                 && receipt.snapshotRecordHash == original.snapshot.recordHash
                 && receipt.snapshotRevision == original.snapshot.revision

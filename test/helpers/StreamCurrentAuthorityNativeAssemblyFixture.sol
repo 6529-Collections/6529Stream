@@ -259,6 +259,11 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
     bytes32 internal assemblySnapshotRecord;
     address internal assemblyEntropySourceSet;
 
+    /// @dev Caller scenarios may select a larger genuine collection; all mint limits use this count.
+    function _assemblyArtworkTokenCount() internal pure virtual returns (uint64) {
+        return 2;
+    }
+
     function _activateAssemblyArtwork() internal {
         _deployAssemblyMintProducts();
         _installAssemblyProductPointers();
@@ -288,10 +293,13 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         _configureAssemblyMintPhase();
         assemblyManager.transferOwnership(address(assemblyExecutor));
         assemblyVm.deal(address(this), 1 ether);
-        _mintAssemblyToken(1);
-        _mintAssemblyToken(2);
+        uint256 tokenCount = _assemblyArtworkTokenCount();
+        for (uint256 i; i < tokenCount; ++i) {
+            _mintAssemblyToken(i + 1);
+        }
         require(
-            assemblyCore.collectionMintedEver(1) == 2 && assemblyCore.totalSupply() == 2,
+            assemblyCore.collectionMintedEver(1) == tokenCount
+                && assemblyCore.totalSupply() == tokenCount,
             "actual complete minted collection"
         );
     }
@@ -728,7 +736,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
             IStreamMintManager.CounterKeyMode.CONSTANT,
             IStreamMintLedger.CounterCapMode.STATIC,
             IStreamMintLedger.CounterDeltaMode.STATIC,
-            2,
+            _assemblyArtworkTokenCount(),
             1,
             keccak256("counter")
         );
@@ -1292,8 +1300,9 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         creation.actionClass = 1;
         creation.calls = new GovernanceCall[](1);
         creation.callDatas = new bytes[](1);
-        (creation.calls[0], creation.callDatas[0]) =
-            StreamCurrentStackPlan.createCollectionCall(assemblyCore, 1, 2);
+        (creation.calls[0], creation.callDatas[0]) = StreamCurrentStackPlan.createCollectionCall(
+            assemblyCore, 1, _assemblyArtworkTokenCount()
+        );
         _assemblyGovernance(
             creation, "https://fixtures.example.invalid/native-assembly/create-collection"
         );
