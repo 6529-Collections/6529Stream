@@ -16,8 +16,8 @@ different milestones.
 
 ## Latest integration checkpoint: 21 September
 
-Integrated source checkpoint: `e3bfd9b0`. ABI142 checks all 3,832 Solidity
-sources with zero errors in 43.609 seconds and exact committed-source readback.
+Integrated source checkpoint: `dd619588`. ABI144 checks all 3,907 Solidity
+sources with zero errors in 44.609 seconds and exact committed-source readback.
 This is source compatibility, not execution of the complete candidate.
 
 - **Preservation and succession:** the explicit V2 family is integrated as
@@ -28,16 +28,24 @@ This is source compatibility, not execution of the complete candidate.
   suite passes 24 cases plus 256 fuzz inputs at `ae540f10`; the preceding
   current-authority root suite passes all 16 cases at `b8fdb7fd`. Both packets
   are independently sealed. Those results do not execute the later V2 source;
-  its 29 reader cases and genuine succession ceremonies are separate work.
+  the V2 reader29 native build succeeded, but execution stopped at the
+  production-size gate: one scoped snapshot reader is 28,901 bytes, 4,325 over
+  the limit. The other 211 selected production products fit. Its fixed-worker
+  repair is assigned; no V2 case has executed. Actual TOKEN/RELEASE/SEASON
+  A-to-B-to-C ceremony and export/resume helpers are integrated as `f8486206`,
+  with three authored cases and separate finality composition still in build.
 - **VIEW preservation:** the frozen output suite passes 46 cases plus 256 fuzz
   inputs at `7701ad89`; the shared route-budget kernel passes 20 plus 256 at
   `ea2c431f`. Reviewed reference source is integrated as `842eb31e`. The actual
   declaration, adoption, checkpoint, snapshot and root ceremony has 11 further
-  authored cases integrated as `40c714a9`. Complete inventory, archive and
-  once-bound finality composition remain in build. Two new inventory workers
-  need size repairs. Diagnostic nested read allowances exceed the original
-  transaction envelope; their configuration is not gas acceptance. Unsupported
-  external media correspondence remains an explicit completeness gap.
+  authored cases integrated as `40c714a9`. Complete inventory and source
+  selection (`bed02d87`) plus once-only complete binding, genuine records and
+  archive fixtures (`dd619588`) are source-integrated, with 30 and 17 further
+  authored cases. The two new oversized inventory workers were split; all
+  eleven affected products now fit on their exact source. Final host/stage
+  review and runtime remain open. VIEW finality kernels and provider dispatch
+  are still being built. Diagnostic nested read allowances exceed the original
+  transaction envelope; unsupported external media correspondence remains open.
 - **Current Artist rendering:** the distinct preservation renderer, attribution
   and immutable source catalogue are integrated as `c9fa7669`. The native
   component run at producer commit `432a61de` passes 21 cases and fails one
@@ -45,9 +53,11 @@ This is source compatibility, not execution of the complete candidate.
   original 250,000 callee allowance. The exact failed case then passes with
   test-only fix `5302ca42` (integrated `5b4d68f2`), preserving the 21/1 capture.
   The analogous new attribution case remains unexecuted. Full rendering and
-  transaction gas are separate. Artist
-  dispute-history transport and the required remaining history combinations
-  continue in build; fixed import workers now avoid the original codegen failure.
+  transaction gas are separate. Complete dispute/repudiation history and 23
+  reviewed actual-owner/Safe tests are source-integrated as `f526845f`. The merge
+  preserves the existing import-size repair and adds its required operation-48
+  point. Remaining sanction/confirmation, Platform, content and freeze history
+  combinations continue in build; these tests have not executed.
 - **Clients:** `e3bfd9b0` adds 17 inventory and five archive CALL workflows with
   direct and Safe receipt reconciliation. The exact producer commit
   `51621c36` passes all 2,068 package tests, generation and strict types.
@@ -55,23 +65,29 @@ This is source compatibility, not execution of the complete candidate.
   V2/current-authority/VIEW profiles and actual Safe execution require their
   own integration. Root generation, build and strict test types pass; its
   separate five-file focused rerun timed out at 300 seconds without a case
-  result. That timeout is retained, rather than treated as another pass.
+  result. The successful producer log shows the longest workflow takes about
+  605 seconds, explaining the inadequate guard; the timeout is retained.
 - **Museum:** preservation capture is integrated at `b99c8c75` and passes all
   83 root cases after the independently found zero-selector mismatch was fixed.
   The native byte-oracle bridge (`5d412cb3`) passes 27 root cases and reads two
-  actual cached checkpoint/manifest traces. These are separate components,
-  not a complete chain capture. VIEW reference consumers are being built.
+  actual cached checkpoint/manifest traces. The exact VIEW reference consumer
+  (`20334f07`) passes 45 root cases in 22.766 seconds. These are bounded offline
+  consumers and separate native components, not a complete chain capture.
+  Full render-critical inventory consumers are the next Museum build.
 - **Metric gas:** the frozen 48-case component run at `53cfb5c1` remains 47
   passes and one test-setup failure. The exact test-only fix `9d02a97b`,
   integrated as `76815df3`, passes all 13 corrected Compact cases, including
   256 fuzz inputs, in a separate sealed run. Together with the unchanged
   parent Retention/Execution cases this covers all 48 component cases across
   two sources; it is not a retroactive single-run pass. The actual nine-case
-  publication successor is next, preserving original gas and cooling checks.
-- **Collector gas:** the experimental shared receipt component passes 20 cases
-  including 256 fuzz inputs. Its first measured codec and duplicate reads are
-  too costly; no production overlay or 500,000-gas acceptance is claimed.
-  The builder is optimizing the measured representation in isolation.
+  publication successor is running from its independently verified 367-source
+  composite, preserving original gas/cooling and fresh export/replay checks.
+- **Collector gas:** the optimized experimental shared receipt passes 24 cases
+  including 256 fuzz inputs. The official-record read falls from 471,985 to
+  44,913 gas; attachment remains 456,631. Separate transaction frames cannot
+  be summed into purchase acceptance. An atomic benchmark with actual refund
+  and counter components is being built; no production overlay or 500,000-gas
+  whole-purchase result is claimed.
 
 Complete current-stack/all-call Safe integration, stateful campaigns, full gas
 and size acceptance, full CI, candidate freeze and matching testnet deployment

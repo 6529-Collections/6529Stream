@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `e3bfd9b0`: V2 preservation, stored-root reads, actual VIEW ceremony, current-Artist producer and inventory/archive clients integrated. ABI142: 3,832 / zero errors. Source-specific component acceptance remains separate from complete-system delivery. |
+| Source checkpoint | `dd619588`: Artist dispute history, V2 preservation, actual succession, complete VIEW binding/inventory and Museum reference source integrated. ABI144: 3,907 / zero errors. Runtime acceptance and remaining feature composition are separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -33,25 +33,27 @@ Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact evidence boundaries.
 Root owns shared interfaces, integration, architecture and delivery. Keep
 builders implementing while bounded frozen test batches run.
 
-- A: join the existing `e2713593` transport/export repair with complete dispute
-  history and the fixed import phases. Finish original confirmed/op13,
-  Platform/content/freeze history composition; closed unsupported branches
-  are remaining work, not scope exclusions.
+- A: dispute history is integrated as `f526845f`; the existing `e1fa284c`
+  import pipeline is preserved with the required operation-48 point. Build
+  original sanction/confirmation history from authenticated Archive catalogues,
+  then remaining Platform/content/freeze combinations. Do not infer chronology.
 - B: preservation producer `432a61de` is integrated. Finish the one-case
   chain-restoration rerun and actual producer/Registry admission tests.
   Retain the native 21/1 capture and all three cold-source passes.
-- C: finish complete VIEW inventory, payload correspondence, fixed worker
-  size repairs and the exact source-selection validator. Preserve all actual
-  bytes and original caps; diagnostic oversized configurations are not acceptance.
+- C: VIEW inventory and source selection are integrated as `bed02d87`; all
+  eleven repaired products fit. Finish explicit VIEW finality kernels and expose
+  exact APIs to Burn and Prepared. Mint reviews host/stage/archive source.
+  Diagnostic oversized configurations remain separate from acceptance.
 - Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: root V2 read review is clear.
-  Check the specified VIEW/Artist confirmation boundary; actual Mint24 and
-  archive4 runtime remain pending on their recorded sources.
+  A's 23-oracle and C media reviews are clear. Finish C host/stage/archive
+  review; actual Mint24 and archive4 runtime remain pending.
 - Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: VIEW ceremony is integrated as
-  `40c714a9`. Build actual WORK/RIGHTS/waiver and complete once-bound source
-  selection, inventory, archive and finality with C. Do not rerun old scoped27.
+  `40c714a9`; complete binding/records/archive are integrated as `dd619588`.
+  Own thin original-provider dispatch and the genuine scope-finality ceremony
+  against C's new kernels. Do not rerun old scoped27.
 - Museum `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350`: preservation capture and
-  actual native wire bridge pass root checks. Build exact VIEW reference
-  consumers against `df6363e5`; future inventory APIs remain C-owned.
+  actual native wire bridge and new VIEW reference45 pass root checks. Build
+  full render-critical inventory/bundle consumers against frozen `fd861f3f`.
 - Clients `01a0a68e-8f38-7a33-95b6-45d8ac943569`: inventory/archive22 CALLs
   integrated as `e3bfd9b0`. Continue historical ABI129 provider/discovery and
   governed Registry callers; distinguish newer unsupported profiles.
@@ -59,19 +61,23 @@ builders implementing while bounded frozen test batches run.
   metric13 are sealed. Own the one next publication22 campaign after root
   reads back the exact frozen successor; fresh export/context checks required.
 - Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: root16 is sealed. Prepare
-  and run the exact new V2 reader29 selection at `e3bfd9b0`, one bounded
-  capture. Genuine successor3 remains separate until Prepared hands off helpers.
-- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: prepare publication22 from
-  immutable native21 plus only the three reviewed retention production files;
-  no compiler duplication. Preserve original nine tests, fixtures and caps.
+  V2 reader29 build passed but pre-EVM size gate failed on one reader; seal
+  the failure without executing or retrying. Genuine successor3 source is ready;
+  prepare its exact reached-artifact selection while the reader repair proceeds.
+- Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: publication22 inputs are
+  frozen and Testing owns execution. Now own only the oversized
+  `StreamFinalityScopedPreservationPolicySnapshotReadsV1` fixed-worker split;
+  preserve public overloads, nominal dependencies, domains, reads and caps.
 - Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: V2 family is integrated.
-  Finish actual B producer admission, TOKEN/RELEASE/SEASON A-to-B-to-C
-  ceremonies, exact byte collection and authenticated source export.
+  Actual scoped succession/export/resume is integrated as `f8486206`.
+  Fix explicit V2 sanction-review/provider dispatch and build current-authority
+  sanction/archive/terminal finality. Forward Burn's shared complete VIEW API.
 - Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: the isolated shared receipt
-  prototype passes 20 cases; optimize measured byte-copy and duplicate decode
-  costs. No broad production overlay or changed 500,000 target.
+  optimized prototype passes 24 cases. Build a cold atomic full-sequence
+  benchmark using actual bounded refund/Ledger leaves; no production overlay
+  or changed 500,000 target.
 
-Root ABI142 and its committed-source bridge pass; 23 documentation regressions,
+Root ABI144 and its committed-source bridge pass; 23 documentation regressions,
 links and changelog checks pass. No root compiler remains. Check exact process
 ownership before starting or stopping any native campaign. Full current/Safe,
 stateful/fuzz, gas/size, CI, freeze and matching testnet remain.
