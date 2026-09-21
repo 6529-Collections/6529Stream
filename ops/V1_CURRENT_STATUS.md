@@ -18,81 +18,74 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-The latest combined source is `76773306`. ABI160 checks all **4,067 Solidity
-sources** with zero errors in 48.313 seconds. This includes the repaired scoped
-reader, actual retrieval and Safe setup, fresh gas profiles, expanded genesis
-tests and genuine creation-artifact test fixtures. This is a type, ABI and storage
-check; full current-contract execution and a matching testnet demonstration remain.
+ABI164 checks all **4,119 Solidity sources** at `eda052c7` with
+zero errors in 49.937 seconds. This is a combined type, ABI and storage
+check. Full current-contract execution and the matching testnet candidate remain.
 
-- **Clients and Safe:** the combined package passes **2,408 tests** on
-  `26051498`, with generation, build and strict test types passing. The later
-  RPC driver and guard-log correction `d6991b49` separately pass **18 focused
-  mock groups** at root on `5353f026`. Actual four-token, five-family Safe setup
-  is integrated as `3f9af4a7`; genuine RPC/Safe execution remains pending.
-- **Artist:** original content and Platform histories are integrated as
-  `51d8ed8f` and `7b0f918e`, with independent source/oracle reviews and qualified
-  selected-product size evidence. Operation 24/full authority history is being
-  completed. Its latest unintegrated size capture fixed Preparation but exposed
-  five oversized Platform workers; narrow factoring is in progress. Mixed and
-  multiple-Artist/unbound history composition remains. None of these source
-  checks substitutes for the complete Artist runtime campaign.
-- **Preservation and finality:** **42 focused retrieval cases** pass on
-  `a2973d36`, including fuzzing and actual Archive/Store/Safe components with
-  declared typed source boundaries. Actual nonempty-image recipe `482537e3`
-  is integrated. Fresh test profiles `63931f05` and `206732a0` set checkpoint,
-  witness and bundle allowances to 6m/7m/8m, removing a known impossible nested
-  reservation. Original diagnostic profiles and production limits are retained;
-  actual cold source/output and complete ceremony gas remain unproved.
-- **Compiler repairs and integration:** scoped-reader repair `ec832e86` has
-  **six native cases and 256 fuzz inputs passing** on exact `4fb225ed`, with
-  independent source review. Its full Provider12 successor at `ec832e86` timed
-  out during code generation after 1,212 seconds; no EVM tests ran. The Mint
-  partition attempt verified six partitions, but another timed out and prevented
-  the remaining eight from starting; FreeClaim9 did not run. Both failed captures
-  are retained. Actual3 has resumed one finite attempt on its pinned `ec832e86`
-  source. Owners are addressing concrete capture failures without relabeling
-  older component evidence as current acceptance.
-- **Museum:** documentary Archive correspondence, typed conservation resources
-  and reconstruction of supplied V2 dossier packages are integrated as
-  `e278ddcf`, with **33 focused root passes** on `6e4033fc`. General attributed
-  retrieval consumer `5353f026` adds **42 root passes**, covering exact
-  source/adoption, routes, original Archive and received-media joins. These are
-  offline supplied-evidence checks. Full canonical packet composition, genuine
-  RPC capture and institutional conformance remain in progress.
-- **Genesis and current integration:** reviewed **50-case** genesis/Museum
-  source `3987eb30` covers combined 37-role activation, all 51 canonical schemas,
-  exact signed-Safe retry and OwnerRecords transfer/burn history. Native
-  execution remains pending. Test adapter `76773306` loads genuine creation
-  artifacts; all 65 mappings and 18 Artist constructor replacements have source
-  review. Explicit artifact requirements remain even when imports disappear.
-  Its earlier 191-CREATE pilot proves only the recorded pilot scope.
-- **Publication and Registry:** eleven publication cases pass on `9d4af023`
-  following fresh export and independent archive replay. Actual Safe, Metadata,
-  Schema, Store, Archive and coordinators are exercised; Core/Artist/network
-  boundaries remain typed. Measured publication transactions use 15,780,632 and
-  15,777,163 gas, below the 16,777,216 limit. Six Registry cases pass on
-  `6d9729c6` with actual Registry/Schema/Store/Router and typed surroundings.
-- **Collector gas:** isolated Floor factoring `145c74c2` passes **43 native
-  component cases**, fuzzing, strict captured sizes and independent source
-  review. Subsequent Manager/Dutch repair `0434eec1` fits selected sizes and is
-  under review. Actual whole-purchase execution and the cold gross-gas target
-  remain unproved. The prototype is not adopted into root production.
-- **CI:** `6e4033fc` preserves retained evidence bytes while repairing CRLF and
-  workflow/checker expectations. Forty focused tooling tests and the strict
-  policy check pass. Slither's source-bound baseline still needs genuine
-  recapture after implementation stabilizes; full CI remains pending.
+- **Artist:** complete recovered operation-24 record history is source integrated
+  as `bf8839c7`, independently reviewed with 16 authored actual-owner/Safe cases.
+  Four-host capacity repair `158121c2` passes an independent selected-product
+  compile at `9aaf196b`: all 12 repaired hosts/workers fit original runtime and
+  complete-initcode limits. The Coordinator is exactly 24,576 runtime bytes, so
+  further features must use its existing satellite routes. Complete Artist
+  execution and recovered multiple-Artist/collection composition remain;
+  the latter is being built under a distinct explicit profile.
+- **Finality:** full-policy provider `ae34ca07` falls from 31,070 to 22,588 runtime
+  bytes. Scoped provider repair `eda052c7` reduces Metadata from 48,292 to 22,590
+  and Reads from 26,120 to 14,538 bytes; all four new workers fit. Original ABI,
+  checks and caps are preserved, with independent source review. Six and seven
+  respective parity cases are authored/typechecked, not executed. Additional
+  delegate frames still need composed gas acceptance. Earlier Provider12
+  compilation now has 19 genuine owner captures/131 products; its two size
+  failures and preceding timeout remain retained as historical evidence.
+- **Clients and Safe:** retrieval callers `5928ebf7` pass generation, build,
+  strict test types and 42 focused root tests. The older combined package has
+  2,408 passes on `26051498`; driver mock groups pass separately on `5353f026`.
+  Genuine caller/bootstrap export `1bdd3742` has 17 small native controls at its
+  recorded producer source. A synthetic account export/import round trip also
+  verifies six accounts, 18 slots and 13 getters through 63 real local RPC reads.
+  This is transport evidence; the full production graph and actual Safe/client
+  campaign remain pending. VIEW Inventory/Bundle callers are in intake review.
+- **Museum:** canonical acquisition composition V10 and conservation dossier V3
+  are integrated as `4784061d`, with 72 focused root passes. They join supplied
+  preservation, work, recovery and attributed-observation sources and retain
+  all 19 packet/49 dossier completeness requirements. OwnerRecords composition
+  `65312baa` has 24 root passes. These are offline/source-consumer checks;
+  actual RPC capture, full release archives and institutional conformance remain.
+- **Current integration:** all 37 genesis roles and 51 canonical schemas have
+  the source-integrated 50-case cohort. Native-owner tooling `9aaf196b` has 62
+  focused root passes plus independent review; it preserves compiler identities
+  and physical owner paths. Whole-graph execution remains pending. Test-only
+  inheritance repair `d9cb879e` fixes ABI162's 74 errors; ABI163 and ABI164 pass.
+  Claim fixture extraction `ecfd88e6` removes eight duplicated inherited cases
+  from the callback host while retaining the original eight plus callback case.
+  Its changed callback-only native trial also timed out at 900 seconds before
+  any EVM execution. All three finite host failures remain retained; the reduced
+  test count did not resolve that compiler bottleneck.
+- **Operations:** read-only deployment monitor `d8e42dc5` has 25 focused root
+  passes, covering pinned blocks, code, genesis bindings, failed reads and reorgs.
+  It has not yet monitored the completed current-stack/testnet deployment.
+- **Collector gas:** isolated Floor factoring retains 43 component passes;
+  Manager/Dutch `0434eec1` has selected sizes and independent source review.
+  Old actual baseline/candidate builds were deliberately canceled after exact
+  required Artist size failures were proven. A reviewed-source successor is
+  being prepared. The prototype is not adopted; actual whole-purchase cold gas
+  remains unproved, including the original 500,000-gas paid single-step ceiling.
 
-Codex's usage limit interrupted delivery on 21 September. Access returned at
-19:28 UTC and the existing tasks resumed. No source was discarded and no blocked
-write was bypassed. Prepared's earlier `a2973d36` build remains explicitly
-canceled for an independently established shared compiler failure, with no
-accepted native result.
+Testing owns shared native execution infrastructure and the coordinated compiler
+product plan. Existing task owners retain their actual test cases and captures;
+Artist, Museum and client builders continue implementing in parallel. Codex
+access returned at 19:28 UTC after the account-limit interruption; saved work
+was preserved. No account block remains.
 
-Complete current-stack/all-call Safe integration, stateful/fuzz campaigns,
-whole-system gas/size acceptance, full CI, freeze and matching testnet deployment
-remain. Previously held proposals remain unapplied. Supported RC1 and its
-Sepolia evidence at `569bf87f1fa808787d324f6e1582924b5ccf1d40` are unchanged.
-No new funding or onchain action is required for current coding.
+Earlier scoped successes include 42 retrieval cases on `a2973d36`, eleven
+publication cases with independent replay on `9d4af023`, six Registry cases on
+`6d9729c6`, and six scoped-reader cases with 256 fuzz inputs on `4fb225ed`.
+They do not certify subsequent source. Full current-stack/all-call Safe,
+stateful/fuzz, whole-system gas/size, full CI, freeze and matching testnet
+demonstration remain. Previously held proposals stay unapplied. Supported RC1
+and its Sepolia evidence at `569bf87f1fa808787d324f6e1582924b5ccf1d40` remain
+unchanged. No funding or onchain action is needed for current coding.
 
 ## Earlier source-specific evidence
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## Current Artist and finality deployment capacity
+
+- Factor complete existing Artist recovery and finality read paths into fixed
+  workers while preserving original interfaces, storage, checks and limits.
+- Selected products fit recorded native size checks; complete contract flows
+  and the extra call-frame gas remain part of current-stack acceptance. See the
+  [scoped provider note](docs/integrations/scoped-preservation-read-capacity.md)
+  and [current delivery status](ops/V1_CURRENT_STATUS.md).
+
 ## Pinned current-stack operational observations
 
 - Add a read-only monitoring CLI that consumes existing deployment captures,
