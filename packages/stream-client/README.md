@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Offline bootstrap packet decoder](docs/current-preservation-bootstrap-packet.md)
+  checks the eight original export files' canonical ABI and raw-byte hash joins,
+  retaining separate outer-execution, runtime and admission requirements.
+
 - [Governance lifecycle and operational roles](docs/current-governance-executor-v2.md)
   covers nine sealed Executor lifecycle calls and seven operational roles through
   the Registry's grant/revoke methods, with separate historical and current checks.

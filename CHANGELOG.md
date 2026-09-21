@@ -85,6 +85,15 @@
   separate owners and rejection boundaries; compiler and runtime acceptance are
   separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
 
+## Offline preservation bootstrap packet decoding
+
+- Add a bounded decoder for the original eight-file Foundry caller-bootstrap
+  export, including canonical tuple wrappers, completion-marker and raw-file
+  hash joins, and source-defined snapshot/preparation relationships. Retain
+  compiler and final-helper identities separately. Parsing does not establish
+  successful outer execution, native state, import or deployment admission.
+  See the [packet guide](packages/stream-client/docs/current-preservation-bootstrap-packet.md).
+
 ## Current governance client lifecycle
 
 - Add a source-bound client for the sealed Executor's nine scheduling, execution,
