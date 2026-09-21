@@ -1,5 +1,15 @@
 # Changelog
 
+## Estate and dormancy recovery capacity
+
+- Split four existing recovery libraries into six fixed typed workers while
+  retaining original provenance, guard order, hashes, public methods and storage.
+  Return the complete predecessor snapshot explicitly across the new call frame.
+- All ten selected products fit the unchanged runtime/initcode limits. Eight
+  focused regression cases are authored and type-checked; their EVM execution
+  and full current recovery/gas acceptance remain pending. See the
+  [capacity guide](docs/integrations/artist-recovery-estate-dormancy-capacity.md).
+
 ## Complete recovered base multiplicity
 
 - Add a distinct typed operation60 profile for multiple recovered class1/class3
