@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `dd619588`: Artist dispute history, V2 preservation, actual succession, complete VIEW binding/inventory and Museum reference source integrated. ABI144: 3,907 / zero errors. Runtime acceptance and remaining feature composition are separate. |
+| Source checkpoint | `9381dd99`: adds scoped sanction/finality fixtures, explicit V2 dispatch, fixed snapshot reader and complete VIEW forwarding. ABI145 at `feb24a2e`: 3,913 / zero errors; later forwarding has separate producer ABI evidence. Runtime acceptance remains separate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -37,16 +37,18 @@ builders implementing while bounded frozen test batches run.
   import pipeline is preserved with the required operation-48 point. Build
   original sanction/confirmation history from authenticated Archive catalogues,
   then remaining Platform/content/freeze combinations. Do not infer chronology.
-- B: preservation producer `432a61de` is integrated. Finish the one-case
-  chain-restoration rerun and actual producer/Registry admission tests.
-  Retain the native 21/1 capture and all three cold-source passes.
+- B: preservation producer `432a61de` and one-case correction are integrated.
+  Execute the frozen 18-case producer/Registry campaign with genuine artifact
+  loading (`bba39285`). Retain the native 21/1 and corrected one-pass captures.
 - C: VIEW inventory and source selection are integrated as `bed02d87`; all
   eleven repaired products fit. Finish explicit VIEW finality kernels and expose
-  exact APIs to Burn and Prepared. Mint reviews host/stage/archive source.
+  exact APIs to Burn and Prepared. Host/stage/archive source review is clear.
+  C owns the shared Candidate, SanctionReviewReads and PreparedScopeReads changes
+  for explicit media review profile 3; preserve existing profile 1/2 behavior.
   Diagnostic oversized configurations remain separate from acceptance.
 - Mint `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c`: root V2 read review is clear.
-  A's 23-oracle and C media reviews are clear. Finish C host/stage/archive
-  review; actual Mint24 and archive4 runtime remain pending.
+  A's 23-oracle, C host/stage/archive and snapshot-reader repair reviews are
+  clear; actual Mint24 and archive4 runtime remain pending.
 - Burn `01a0a68e-7594-7be0-b7bb-15849febcae4`: VIEW ceremony is integrated as
   `40c714a9`; complete binding/records/archive are integrated as `dd619588`.
   Own thin original-provider dispatch and the genuine scope-finality ceremony
@@ -60,24 +62,27 @@ builders implementing while bounded frozen test batches run.
 - Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 and corrected
   metric13 are sealed. Own the one next publication22 campaign after root
   reads back the exact frozen successor; fresh export/context checks required.
-- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: root16 is sealed. Prepare
-  V2 reader29 build passed but pre-EVM size gate failed on one reader; seal
-  the failure without executing or retrying. Genuine successor3 source is ready;
-  prepare its exact reached-artifact selection while the reader repair proceeds.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: root16 and failed reader29
+  are sealed. Own the fresh reader campaign at `feb24a2e`, adding the repaired
+  worker and complete snapshot-family regression file under original controls.
+  The separate genuine successor3 source/constructor plan is sealed at `f8486206`;
+  refresh its selection after the remaining finality fixture batch stabilizes.
 - Metric `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: publication22 inputs are
-  frozen and Testing owns execution. Now own only the oversized
-  `StreamFinalityScopedPreservationPolicySnapshotReadsV1` fixed-worker split;
-  preserve public overloads, nominal dependencies, domains, reads and caps.
+  frozen and Testing owns execution. The reader split is integrated as
+  `feb24a2e`, with source/ABI/selected-size review clear. Independently check
+  Capacity's fresh linked selection; do not duplicate its compiler.
 - Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: V2 family is integrated.
   Actual scoped succession/export/resume is integrated as `f8486206`.
-  Fix explicit V2 sanction-review/provider dispatch and build current-authority
-  sanction/archive/terminal finality. Forward Burn's shared complete VIEW API.
+  Explicit V2 dispatch and scoped finality fixtures are integrated as `679c489e`;
+  shared complete VIEW API forwarding is integrated as `9381dd99`. Build the
+  actual scoped-finality test drivers and current-authority VIEW finality dispatch
+  through C's exact kernels; original-provider dispatch remains Burn-owned.
 - Collector `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: the isolated shared receipt
   optimized prototype passes 24 cases. Build a cold atomic full-sequence
   benchmark using actual bounded refund/Ledger leaves; no production overlay
   or changed 500,000 target.
 
-Root ABI144 and its committed-source bridge pass; 23 documentation regressions,
+Root ABI145 and its committed-source bridge pass; 23 documentation regressions,
 links and changelog checks pass. No root compiler remains. Check exact process
 ownership before starting or stopping any native campaign. Full current/Safe,
 stateful/fuzz, gas/size, CI, freeze and matching testnet remain.

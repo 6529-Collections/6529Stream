@@ -18,8 +18,10 @@ Other held proposals remain separate.
 
 ## 21 September integrated batch
 
-Integrated source checkpoint: `dd619588`. ABI144 checks all 3,907 Solidity
-sources with zero errors in 44.609 seconds and exact committed-source readback.
+Integrated ABI checkpoint: `feb24a2e`. ABI145 checks all 3,913 Solidity
+sources with zero errors in 45.422 seconds and exact committed-source readback.
+The subsequent thin complete-VIEW forwarding (`9381dd99`) has its separate
+2,002-source producer ABI check and seven authored cases; runtime is pending.
 This is source compatibility, not execution of the complete candidate.
 
 - **Preservation and succession:** the explicit V2 family is integrated as
@@ -32,10 +34,13 @@ This is source compatibility, not execution of the complete candidate.
   are independently sealed. Those results do not execute the later V2 source;
   the V2 reader29 native build succeeded, but execution stopped at the
   production-size gate: one scoped snapshot reader is 28,901 bytes, 4,325 over
-  the limit. The other 211 selected production products fit. Its fixed-worker
-  repair is assigned; no V2 case has executed. Actual TOKEN/RELEASE/SEASON
-  A-to-B-to-C ceremony and export/resume helpers are integrated as `f8486206`,
-  with three authored cases and separate finality composition still in build.
+  the limit. The other 211 selected production products fit. The reviewed
+  fixed-worker repair is integrated as `feb24a2e`; its reader and worker now
+  measure 10,160 and 14,562 runtime bytes. The fresh linked reader campaign
+  remains separate and must preserve the original gas controls. Actual
+  TOKEN/RELEASE/SEASON succession/export helpers (`f8486206`) now have scoped
+  sanction/archive/finality fixtures and explicit V2 dispatch (`679c489e`),
+  with 15 new regression cases authored. Complete ceremony execution remains.
 - **VIEW preservation:** the frozen output suite passes 46 cases plus 256 fuzz
   inputs at `7701ad89`; the shared route-budget kernel passes 20 plus 256 at
   `ea2c431f`. Reviewed reference source is integrated as `842eb31e`. The actual
@@ -44,8 +49,10 @@ This is source compatibility, not execution of the complete candidate.
   selection (`bed02d87`) plus once-only complete binding, genuine records and
   archive fixtures (`dd619588`) are source-integrated, with 30 and 17 further
   authored cases. The two new oversized inventory workers were split; all
-  eleven affected products now fit on their exact source. Final host/stage
-  review and runtime remain open. VIEW finality kernels and provider dispatch
+  eleven affected products now fit on their exact source. Host, stage,
+  source-selection and archive source reviews are clear; runtime remains open.
+  Current-authority complete binding is forwarded by `9381dd99` through the
+  same shared one-use state and class-2 action. VIEW finality kernels and dispatch
   are still being built. Diagnostic nested read allowances exceed the original
   transaction envelope; unsupported external media correspondence remains open.
 - **Current Artist rendering:** the distinct preservation renderer, attribution
@@ -54,8 +61,9 @@ This is source compatibility, not execution of the complete candidate.
   chain-restoration fixture. All three fully cooled succession reads pass the
   original 250,000 callee allowance. The exact failed case then passes with
   test-only fix `5302ca42` (integrated `5b4d68f2`), preserving the 21/1 capture.
-  The analogous new attribution case remains unexecuted. Full rendering and
-  transaction gas are separate. Complete dispute/repudiation history and 23
+  A separate 18-case producer/admission run is active after the genuine
+  artifact-loading fixture repair (`bba39285`); all six test harnesses fit.
+  Full rendering and transaction gas are separate. Complete dispute/repudiation history and 23
   reviewed actual-owner/Safe tests are source-integrated as `f526845f`. The merge
   preserves the existing import-size repair and adds its required operation-48
   point. Remaining sanction/confirmation, Platform, content and freeze history
