@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Retained conservation and interview dossiers](../../docs/museum-conservation-dossier-v1.md)
+project original intent, waiver, instrument, participant, transcript and capture
+declarations with exact source replay and field accounting. Identity, consent
+and referenced-media delivery remain unverified.
+
 [Retained VIEW locator correspondence](../../docs/museum-view-locator-correspondence-v1.md)
 joins exact adopted HTTPS or Arweave locators to the original same-pair Archive
 admission and complete supplied media bytes under a separate source profile.
