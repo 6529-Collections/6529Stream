@@ -46,9 +46,16 @@ publisher caller, current/lock joins, error order, trailing-byte canonical
 refusal, normalized hash rejection, restoration and dynamic-tail fuzzing. These
 tests use explicit typed publisher and dependency boundaries; they do not prove
 publisher admission, Archive coverage or the complete Finality ceremony.
-They are authored and typechecked at this handoff, not executed. Existing actual
-publication and V2 family tests remain unchanged. This capture makes no gas
-parity or complete provider execution claim.
+The separate 45-source native capture passed all five tests, including 256 fuzz
+runs. Its 50 artifacts match the genuine native compiler output for ABI,
+bytecode, metadata, source maps, ASTs, links and immutable references; 408 source
+Keccak joins pass. All production products satisfy the original deployment
+limits. The cached execution preserved every artifact, source and configuration
+hash. Native build time was 33.51 seconds; the cached test stage took 2.29 seconds.
+The result SHA256 is
+`f529bb512eda5ae5e4e7a964bdd414836ae6f8e2376f819889d39017480ac371`.
+Existing actual publication and V2 family tests remain unchanged. This evidence
+makes no gas parity or complete provider execution claim.
 
 Local immutable captures and the source inverse proof are under
 `.tmp-preservation-reference-read-codegen`; the handoff identifies their hashes.

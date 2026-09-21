@@ -6,8 +6,9 @@
   reproducible via-IR stack-depth failure. Preserve both reference families,
   original public ABI, complete tuple/hash checks, validation order and caller.
 - Both affected libraries fit the original deployment limits. Five focused
-  transport and refusal regressions are authored and typechecked; execution,
-  gas and complete provider acceptance remain separately scoped.
+  transport and refusal regressions pass, including 256 fuzz runs, with genuine
+  native artifacts and unchanged cached execution inputs. Gas and complete
+  provider acceptance remain separately scoped.
 
 ## Current preservation-family archive correspondence
 
