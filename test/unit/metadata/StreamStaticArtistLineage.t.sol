@@ -566,7 +566,7 @@ contract StreamStaticArtistLineageContinuityTest is StaticArtistLineageFixture {
         lvm.expectRevert(Source.InvalidStaticArtistLineage.selector);
         source.currentSuite();
         lvm.etch(suites[1].owners[2], saved);
-        uint256 chain = block.chainid;
+        uint256 chain = source.sourceChainId();
         lvm.chainId(chain + 1);
         lvm.expectRevert(Source.InvalidStaticArtistLineage.selector);
         source.currentSuite();

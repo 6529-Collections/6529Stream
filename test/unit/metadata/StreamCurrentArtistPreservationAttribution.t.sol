@@ -117,7 +117,7 @@ contract StreamCurrentArtistPreservationAttributionTest is StaticArtistLineageFi
         value.preservationAttribution(1, 0);
         lvm.etch(address(report), saved);
         require(keccak256(value.preservationAttribution(1, 0)) == expected, "same source restored");
-        uint256 chain = block.chainid;
+        uint256 chain = source.sourceChainId();
         lvm.chainId(chain + 1);
         lvm.expectRevert(P.InvalidPreservationAttribution.selector);
         value.preservationAttribution(1, 0);
