@@ -1,5 +1,14 @@
 # Changelog
 
+## Preservation reference reader compiler and capacity repair
+
+- Split the complete original-record read into a fixed library to remove the
+  reproducible via-IR stack-depth failure. Preserve both reference families,
+  original public ABI, complete tuple/hash checks, validation order and caller.
+- Both affected libraries fit the original deployment limits. Five focused
+  transport and refusal regressions are authored and typechecked; execution,
+  gas and complete provider acceptance remain separately scoped.
+
 ## Current preservation-family archive correspondence
 
 - Recognize the four exact collection/scoped V2 preservation snapshot and
