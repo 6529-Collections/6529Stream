@@ -158,7 +158,8 @@ witnesses; nominal library selectors are never relabeled as wallet selectors.
 Fixture inclusion does not itself broaden supported client behavior.
 
 Build, strict TypeScript, pure-client and compiler checks pass for this batch.
-The 20 authored RPC/Safe workflow groups remain validation-pending after bounded
-runs; this batch does not claim a completed pass for them. Actual contract/Safe
-execution, runtime provenance, transaction rollback, linked deployment capacity,
-whole-system gas and release acceptance remain separate integration work.
+The 20 RPC/Safe workflow groups pass in bounded named partitions against client
+implementation `4cd89d360`. These use compiler-encoded mock responses and do not
+execute Solidity or a deployed Safe. Actual contract/Safe execution, runtime
+provenance, transaction rollback, linked deployment capacity, whole-system gas
+and release acceptance remain separate integration work.

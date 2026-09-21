@@ -134,7 +134,10 @@ test('Safe success must follow original application evidence but unrelated later
   const success=m.logs.find(v=>v.address===s.caller);m.logs.splice(m.logs.indexOf(success),1);m.logs.unshift(success);renumber(m.logs);
   await assert.rejects(run(s,c,m),/precedes complete/);
   const failure=install(s,c,'legacy');failure.emit(s.caller,'ExecutionFailure',[failure.options.expectedSafeTxHash,0n],safeABI);
-  await assert.rejects(run(s,c,failure),/failure|failed/i);
+  await assert.rejects(run(s,c,failure),{message:'Expected one matching Safe execution, got 2'});
+  const successIndex=failure.logs.findIndex(log=>log.address===s.caller&&log.topics[0]===safeABI.getEvent('ExecutionSuccess').topicHash);
+  assert.notEqual(successIndex,-1);failure.logs.splice(successIndex,1);renumber(failure.logs);
+  await assert.rejects(run(s,c,failure),{message:'Safe target execution failed'});
 });
 
 test('every owner commitment and exact immutable imported prefix is required once', async () => {
