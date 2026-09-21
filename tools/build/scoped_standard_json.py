@@ -1,9 +1,9 @@
 """Split Solidity 0.8.19 analysis from selected code generation, without joining outputs.
 
 The full source universe and every setting except outputSelection stay identical.
-The bytecode pass requests native ASTs for every source, including abstract bases
-that declare inherited immutables. Contract output fields remain explicitly selected.
-This can schedule additional compiler work; it does not request extra bytecode outputs.
+The bytecode pass requests native ASTs only for explicitly selected sources.
+Callers must include inherited immutable declaration sources in that finite roster.
+All-source ASTs are an explicit option that can schedule additional compiler work.
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def without_selection(request: dict) -> dict:
 
 
 def split_request(request: dict, selection: dict | None = None, *,
-                  all_source_asts: bool = True) -> tuple[dict, dict]:
+                  all_source_asts: bool = False) -> tuple[dict, dict]:
     """Return analysis and codegen requests; reject implicit/wildcard contract roots."""
     require(type(all_source_asts) is bool, "AST selection policy must be boolean")
     require(set(request) == {"language", "sources", "settings"} and request["language"] == "Solidity",
@@ -329,7 +329,7 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
 
 def capture_pair(request_raw: bytes, selection: dict, compiler: Path, compiler_sha256: str,
                  destination: Path, *, timeout: float, arguments: tuple[str, ...] = ("--standard-json",),
-                 all_source_asts: bool = True) -> dict:
+                 all_source_asts: bool = False) -> dict:
     """Run two bounded native requests, retaining exact stdin/stdout and process records."""
     require(math.isfinite(timeout) and timeout > 0, "Positive finite timeout required")
     require(arguments.count("--standard-json") == 1, "Expected standard JSON compiler arguments")
@@ -630,7 +630,7 @@ def forward(manifest_path: Path, arguments: list[str]) -> int:
     destination = Path(manifest["captureDirectory"])
     capture_pair(raw, manifest["actualOutputSelection"], compiler, manifest["compilerSha256"],
                  destination, timeout=manifest["timeoutSeconds"], arguments=tuple(arguments),
-                 all_source_asts=manifest.get("allSourceAsts", True))
+                 all_source_asts=manifest.get("allSourceAsts", False))
     sys.stdout.buffer.write((destination / "codegen-output.json").read_bytes())
     sys.stderr.buffer.write((destination / "codegen-stderr.log").read_bytes())
     return 0
@@ -646,8 +646,8 @@ def main() -> int:
     run.add_argument("--compiler-sha256", required=True)
     run.add_argument("--output", type=Path, required=True)
     run.add_argument("--timeout", type=float, required=True, help="Bound in seconds for each native pass")
-    run.add_argument("--selected-source-asts", action="store_true",
-                     help="Use the exact AST-source selection; caller must include inherited immutable sources")
+    run.add_argument("--all-source-asts", action="store_true",
+                     help="Explicitly request every source AST; may schedule broader compiler work")
     verify = commands.add_parser("verify")
     verify.add_argument("--capture", type=Path, required=True)
     verify.add_argument("--admission", type=Path)
@@ -666,7 +666,7 @@ def main() -> int:
     if args.command == "capture":
         record = capture_pair(args.input.read_bytes(), json.loads(args.selection.read_bytes()), args.solc,
                               args.compiler_sha256, args.output, timeout=args.timeout,
-                              all_source_asts=not args.selected_source_asts)
+                              all_source_asts=args.all_source_asts)
     elif args.command == "verify":
         _, _, record = read_capture(args.capture, admission=args.admission)
     elif args.command == "admit":

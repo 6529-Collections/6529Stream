@@ -24,32 +24,34 @@ The repaired requests retain the complete identical literal source universe and
 all settings except `outputSelection`:
 
 1. Analysis requests only `{"*":{"": ["ast"]}}`; it produces no bytecode.
-2. Code generation names exact source/contract outputs and requests AST for
-   every literal source in the same native pass. Abstract ancestors and free-struct
-   sources need no fictitious contract output. This default ensures inherited
-   immutable declarations are present in the bytecode pass's own AST.
+2. Code generation names exact source/contract outputs and requests AST only
+   for the finite selected sources in the same native pass. Include inherited
+   immutable declaration sources explicitly. Abstract ancestors and free-struct
+   sources need no fictitious contract output.
 
-Per-file AST still schedules every co-resident definition in that file. With
-all-source ASTs, internal compiler work can therefore cover the complete source
+Per-file AST still schedules every co-resident definition in that file. If
+all-source ASTs are explicitly requested, internal compiler work can cover the complete source
 universe even though serialized bytecode outputs remain explicitly selected.
 Embedded `new`/`type(...).creationCode` dependencies still generate code. The
 verification report lists scheduled definitions and their AST dependency closure.
-Keep a bounded timeout; do not claim this default reduces compile time.
+Keep a bounded timeout; do not claim all-source AST selection reduces compile time.
 
 A prior 416-source/150-product capture completed codegen but correctly failed
 verification because three unselected abstract ancestors held inherited immutable
 declarations. That failed output remains separate; its analysis AST cannot repair
-the native output. New captures include every source AST upfront. The verifier
+the native output. New captures prove their complete required AST roster upfront. The verifier
 can still inspect an older explicit partial-AST request without adding declarations
 or changing its original output selection.
 
-A bounded campaign may instead use `--selected-source-asts` (or
-`allSourceAsts: false` in the forwarding manifest). Its explicit selection must
+Finite selected-source ASTs remain the default (`allSourceAsts: false` in the
+forwarding manifest). The caller's explicit selection must
 include every product source, required constructor/library source and every
 inherited immutable declaration source, proven from the full analysis before
 code generation. Source-only `{ "": ["ast"] }` entries are valid. This policy is
 recorded with the capture; same-native immutable checks remain mandatory and
 missing declarations still fail. No fallback or automatic retry expands it.
+Use `--all-source-asts` or `allSourceAsts: true` only to explicitly opt into
+AST output and potential compiler scheduling for every source.
 
 Solidity's import traversal also depends on the requested source roots. In a
 circular import graph, a source's `exportedSymbols` snapshot can differ between

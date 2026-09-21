@@ -83,8 +83,7 @@ class SelectorTests(unittest.TestCase):
         for result in (analysis, native):
             self.assertEqual(scoped.without_selection(result), scoped.without_selection(original))
         self.assertEqual(analysis["settings"]["outputSelection"], {"*": {"": ["ast"]}})
-        self.assertEqual(set(native["settings"]["outputSelection"]), set(original["sources"]))
-        self.assertEqual(native["settings"]["outputSelection"]["Unused.sol"], {"": ["ast"]})
+        self.assertEqual(set(native["settings"]["outputSelection"]), {"Base.sol", "Owner.sol"})
         self.assertEqual(native["settings"]["outputSelection"]["Owner.sol"][""], ["ast"])
         native["sources"]["Base.sol"]["content"] = "changed"
         analysis["settings"]["optimizer"]["runs"] = 1
@@ -116,9 +115,9 @@ class SelectorTests(unittest.TestCase):
             with self.subTest(selection=selection), self.assertRaises(ValueError):
                 scoped.split_request(self.request, selection)
 
-    def test_default_native_ast_includes_unselected_base_without_extra_products(self):
+    def test_opt_in_native_ast_includes_unselected_base_without_extra_products(self):
         selection = {"Owner.sol": {"Owner": list(FIELDS)}}
-        analysis, native = scoped.split_request(self.request, selection)
+        analysis, native = scoped.split_request(self.request, selection, all_source_asts=True)
         self.assertEqual({(s, n) for s, rows in native["settings"]["outputSelection"].items()
                           for n in rows if n}, {("Owner.sol", "Owner")})
         self.assertEqual(native["settings"]["outputSelection"]["Base.sol"], {"": ["ast"]})
@@ -133,8 +132,8 @@ class SelectorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "native AST roster"):
             scoped.verify_pair(analysis, self.ao, native, output)
 
-    def test_default_all_ast_selection_is_idempotent_and_keeps_fields_exact(self):
-        analysis, native = scoped.split_request(self.request)
+    def test_opt_in_all_ast_selection_is_idempotent_and_keeps_fields_exact(self):
+        analysis, native = scoped.split_request(self.request, all_source_asts=True)
         self.assertEqual(scoped.split_request(native), (analysis, native))
         for source, rows in self.ni["settings"]["outputSelection"].items():
             self.assertEqual(native["settings"]["outputSelection"][source], rows)
@@ -427,7 +426,7 @@ class CaptureTests(unittest.TestCase):
         self.compiler.write_bytes(b"unit-test-only-not-an-executable")
         self.compiler_sha = scoped.sha(self.compiler.read_bytes())
         self.request, self.ai, self.ao, self.ni, self.no = fixture()
-        self.ai, self.ni = scoped.split_request(self.request)
+        self.ai, self.ni = scoped.split_request(self.request, all_source_asts=True)
         self.no["sources"] = copy.deepcopy(self.ao["sources"])
         self.processes = []
 
