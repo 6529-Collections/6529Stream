@@ -111,6 +111,7 @@ DEPENDENCY_MANIFEST_ABI = "(bytes32,bytes32,uint8,string,string,string,string,bo
 SCRIPT_FACTS_ABI = "(bytes32,bytes32,uint32,uint8,uint8,bool,bool)"
 REGISTRY_SOURCE_ABI = "(address,bytes32,bytes32,uint256,bytes32)"
 SELECTION_ABI = "(address,bytes32,bytes32)"
+BUNDLE_SELECTION_ABI = "(address,bytes32,bytes32,bytes32)"
 SIGNATURES = {
     "scriptManifestHash": ("scriptManifestHash(uint256)", "bytes32"),
     "scriptManifest": ("scriptManifest(uint256)", SCRIPT_MANIFEST_ABI),
@@ -121,7 +122,7 @@ SIGNATURES = {
     "scriptBundleChunk": ("scriptBundleChunk(bytes32,uint256)", "bytes"),
     "dependencyManifest": ("dependencyManifest(bytes32)", DEPENDENCY_MANIFEST_ABI),
     "dependencyChunk": ("dependencyChunk(bytes32,uint256)", "bytes"),
-    "collectionScriptBundle": ("collectionScriptBundle(uint256)", SELECTION_ABI),
+    "collectionScriptBundle": ("collectionScriptBundle(uint256)", BUNDLE_SELECTION_ABI),
     "registryCount": ("getDependencyScriptCountAtVersion(bytes32,uint256)", "uint256"),
     "registryChunkHash": ("getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)", "bytes32"),
     "registryContentHash": ("getDependencyScriptContentHashAtVersion(bytes32,uint256)", "bytes32"),

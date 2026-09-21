@@ -2,7 +2,7 @@ import copy
 import unittest
 
 from .canonical import MuseumError, keccak256
-from .chain_abi import Array, encode
+from .chain_abi import Array, decode, encode
 from . import collection_script_wire_v1 as wire
 
 
@@ -113,6 +113,23 @@ def stable_fixture():
 
 
 class CollectionScriptWireV1Tests(unittest.TestCase):
+    def test_collection_script_bundle_signature_preserves_all_four_native_words(self):
+        # IStreamScriptBundles.Selection: host, codeHash, bundleId, manifestHash.
+        expected = (context()['metadata'], H('original host code'),
+            H('distinct bundle identifier'), H('distinct manifest commitment'))
+        raw = b'\0' * 12 + bytes.fromhex(expected[0][2:]) + b''.join(
+            bytes.fromhex(value[2:]) for value in expected[1:])
+        signature, declaration = wire.SIGNATURES['collectionScriptBundle']
+        self.assertEqual(signature, 'collectionScriptBundle(uint256)')
+        declared = tuple(declaration.removeprefix('(').removesuffix(')').split(','))
+        self.assertEqual(len(raw), 128)
+        self.assertEqual(decode((declared,), raw), (expected,))
+        self.assertEqual(encode((declared,), (expected,)), raw)
+        # The separate three-word manifest selection cannot consume this return.
+        manifest_selection = tuple(wire.SELECTION_ABI[1:-1].split(','))
+        with self.assertRaises(MuseumError):
+            decode((manifest_selection,), raw)
+
     def test_generic_abi_encoder_independently_matches_native_commitments(self):
         value, c = chunked_fixture()
         manifest_kind = ("bytes32", "bytes32", "uint8", "string", "string",
