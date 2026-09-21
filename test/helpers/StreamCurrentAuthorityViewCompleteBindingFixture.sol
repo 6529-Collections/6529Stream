@@ -378,7 +378,14 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
                 && record.deploymentManifestHash == ASSEMBLY_DEPLOYMENT,
             "actual declaration module admission"
         );
-        _assemblyEnsureRawDefinition();
+        if (!assemblySchemas.document(assemblySchemas.RAW_BYTES()).exists) {
+            _assemblyRegisterDocument(
+                "RAW_BYTES",
+                AVSchema.DocumentKind.CANONICALIZATION,
+                bytes(assemblySchemas.RAW_BYTES_DEFINITION()),
+                assemblySchemas.RAW_BYTES()
+            );
+        }
         (bytes32 id, bytes32 hash, bytes memory raw) = avViews.viewSchema();
         require(
             id == keccak256("STREAM_COLLECTION_VIEW_MANIFEST_ABI_V1") && hash == keccak256(raw),
