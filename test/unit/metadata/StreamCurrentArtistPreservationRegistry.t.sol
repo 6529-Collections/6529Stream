@@ -145,6 +145,7 @@ abstract contract CurrentArtistPreservationRegistryFixture is CurrentArtistPrese
         );
         V.GoldenVector[] memory oldVectors = new V.GoldenVector[](1);
         oldVectors[0].request.core = address(core);
+        oldVectors[0].request.collectionId = 1;
         oldVectors[0].request.mode = R.MetadataMode.ONCHAIN;
         oldVectors[0].outputHash = keccak256(bytes(renderer.tokenURI(oldVectors[0].request)));
         original.goldenDocument = _catalog(abi.encode(oldVectors));
