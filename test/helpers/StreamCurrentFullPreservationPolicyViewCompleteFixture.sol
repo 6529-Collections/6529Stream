@@ -16,6 +16,15 @@ import {
     StreamViewPreservationRenderCriticalInventoryV1 as CompleteInventory
 } from "../../smart-contracts/domains/preservation/StreamViewPreservationRenderCriticalInventoryV1.sol";
 import {
+    StreamViewRetrievalWitnessV1 as CompleteRetrieval
+} from "../../smart-contracts/domains/preservation/StreamViewRetrievalWitnessV1.sol";
+import {
+    StreamViewRetrievalWitnessTypesV1 as CompleteRetrievalTypes
+} from "../../smart-contracts/interfaces/stream/preservation/StreamViewRetrievalWitnessTypesV1.sol";
+import {
+    StreamViewPreservationSnapshotTypesV1 as CompleteSnapshotTypes
+} from "../../smart-contracts/interfaces/stream/metadata/StreamViewPreservationSnapshotTypesV1.sol";
+import {
     StreamViewPreservationBundleArchiveCoverageV1 as CompleteBundle
 } from "../../smart-contracts/domains/preservation/StreamViewPreservationBundleArchiveCoverageV1.sol";
 
@@ -25,6 +34,7 @@ import {
 abstract contract StreamCurrentFullPreservationPolicyViewCompleteFixture is
     StreamCurrentFullPreservationPolicyViewInventoryFixture
 {
+    CompleteRetrieval internal viewRetrieval;
     CompleteSources.Selection internal viewCompleteSelection;
     CompleteSources.Receipt internal viewCompleteBindingReceipt;
     ViewPreservationBindingTypes.Configuration internal viewCompleteConfiguration;
@@ -129,11 +139,15 @@ abstract contract StreamCurrentFullPreservationPolicyViewCompleteFixture is
                 && d.artistContentOwner.codehash == d.artistContentOwnerCodeHash,
             "original content authority pin before complete binding"
         );
+        _viewDeployCompleteRetrieval(d);
         require(
-            type(CompleteInventory).creationCode.length + abi.encode(d).length <= 49152,
+            type(CompleteInventory).creationCode.length
+                    + abi.encode(d, address(viewRetrieval), address(viewRetrieval).codehash).length
+                <= 49152,
             "actual complete VIEW inventory initcode fits"
         );
-        viewInventory = new CompleteInventory(d);
+        viewInventory =
+            new CompleteInventory(d, address(viewRetrieval), address(viewRetrieval).codehash);
         require(
             address(viewInventory).code.length != 0 && address(viewInventory).code.length <= 24576,
             "actual complete VIEW inventory runtime fits"
@@ -142,6 +156,60 @@ abstract contract StreamCurrentFullPreservationPolicyViewCompleteFixture is
             keccak256(abi.encode(viewInventory.dependencies())) == keccak256(abi.encode(d))
                 && viewInventory.dependencyHash() == keccak256(abi.encode(d)),
             "exact complete VIEW inventory configuration"
+        );
+        (address witness, bytes32 witnessCodeHash) = viewInventory.retrievalWitnessBinding();
+        require(
+            witness == address(viewRetrieval) && witnessCodeHash == address(viewRetrieval).codehash,
+            "actual immutable complete VIEW retrieval companion"
+        );
+    }
+
+    function _viewDeployCompleteRetrieval(StreamRenderCriticalSourceTypes.Dependencies memory d)
+        private
+    {
+        CompleteSnapshotTypes.Dependencies memory snapshot =
+            assemblyViewPreservationSnapshot.dependencies();
+        uint256 sourceGas = snapshot.sourceGas;
+        require(
+            snapshot.targets[6] == address(assemblyViewPreservationCheckpoint)
+                && snapshot.codeHashes[6] == address(assemblyViewPreservationCheckpoint).codehash,
+            "retrieval uses the actual complete snapshot checkpoint"
+        );
+        require(
+            d.readGas <= type(uint32).max && sourceGas <= type(uint32).max,
+            "retrieval constructor gas widths"
+        );
+        // Preserve the graph's diagnostic budgets; operative capacity requires a later run.
+        CompleteRetrievalTypes.Configuration memory c = CompleteRetrievalTypes.Configuration(
+            d.targets[0],
+            d.codeHashes[0],
+            d.targets[4],
+            d.codeHashes[4],
+            snapshot.targets[6],
+            snapshot.codeHashes[6],
+            d.targets[11],
+            d.codeHashes[11],
+            d.chainId,
+            uint32(d.readGas),
+            uint32(sourceGas),
+            uint32(d.readGas),
+            400000
+        );
+        require(
+            type(CompleteRetrieval).creationCode.length + abi.encode(c).length <= 49152,
+            "actual complete VIEW retrieval initcode fits"
+        );
+        viewRetrieval = new CompleteRetrieval(c);
+        require(
+            address(viewRetrieval).code.length != 0 && address(viewRetrieval).code.length <= 24576,
+            "actual complete VIEW retrieval runtime fits"
+        );
+        require(
+            keccak256(abi.encode(viewRetrieval.configuration())) == keccak256(abi.encode(c))
+                && viewRetrieval.configurationHash()
+                    == keccak256(abi.encode(CompleteRetrievalTypes.PROFILE, c))
+                && viewRetrieval.retrievalProfile() == CompleteRetrievalTypes.PROFILE,
+            "actual complete VIEW retrieval configuration"
         );
     }
 

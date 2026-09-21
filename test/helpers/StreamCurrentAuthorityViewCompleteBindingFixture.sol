@@ -45,6 +45,12 @@ import {
     StreamViewPreservationRenderCriticalInventoryV1 as AVInventory
 } from "../../smart-contracts/domains/preservation/StreamViewPreservationRenderCriticalInventoryV1.sol";
 import {
+    StreamViewRetrievalWitnessV1 as AVRetrieval
+} from "../../smart-contracts/domains/preservation/StreamViewRetrievalWitnessV1.sol";
+import {
+    StreamViewRetrievalWitnessTypesV1 as AVRetrievalTypes
+} from "../../smart-contracts/interfaces/stream/preservation/StreamViewRetrievalWitnessTypesV1.sol";
+import {
     StreamViewPreservationBundleArchiveCoverageV1 as AVBundle
 } from "../../smart-contracts/domains/preservation/StreamViewPreservationBundleArchiveCoverageV1.sol";
 import {
@@ -169,6 +175,7 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
     AVViews internal avViews;
     AVReference internal avReference;
     AVInventory internal avInventory;
+    AVRetrieval internal avRetrieval;
     AVBundle internal avBundle;
     AVBasicTypes.Configuration internal avConfiguration;
     AVDeclaration.Binding internal avDeclaration;
@@ -499,13 +506,22 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
         d.selectionGas = 8000000;
         d.snapshotGas = 18000000;
         d.referenceGas = 24000000;
-        _avInit(type(AVInventory).creationCode, abi.encode(d));
-        avInventory = new AVInventory(d);
+        _avDeployRetrieval(d);
+        _avInit(
+            type(AVInventory).creationCode,
+            abi.encode(d, address(avRetrieval), address(avRetrieval).codehash)
+        );
+        avInventory = new AVInventory(d, address(avRetrieval), address(avRetrieval).codehash);
         _avRuntime(address(avInventory));
         require(
             keccak256(abi.encode(avInventory.dependencies())) == keccak256(abi.encode(d))
                 && avInventory.dependencyHash() == keccak256(abi.encode(d)),
             "selected VIEW keeps its genuine raw commitment"
+        );
+        (address witness, bytes32 witnessCodeHash) = avInventory.retrievalWitnessBinding();
+        require(
+            witness == address(avRetrieval) && witnessCodeHash == address(avRetrieval).codehash,
+            "actual immutable VIEW retrieval companion"
         );
         AVBundleTypes.Dependencies memory b;
         b.targets = [
@@ -529,6 +545,47 @@ abstract contract StreamCurrentAuthorityViewCompleteBindingFixture is
             keccak256(abi.encode(avBundle.dependencies())) == keccak256(abi.encode(b))
                 && avBundle.dependencyHash() == keccak256(abi.encode(b)),
             "actual VIEW bundle configuration"
+        );
+    }
+
+    function _avDeployRetrieval(AVS.Dependencies memory d) private {
+        AVSnapshotTypes.Dependencies memory snapshot = avSnapshot.dependencies();
+        uint256 sourceGas = snapshot.sourceGas;
+        require(
+            snapshot.targets[6] == address(avCheckpoint)
+                && snapshot.codeHashes[6] == address(avCheckpoint).codehash,
+            "retrieval uses the actual snapshot checkpoint"
+        );
+        require(
+            d.readGas <= type(uint32).max && sourceGas <= type(uint32).max,
+            "retrieval constructor gas widths"
+        );
+        // Identity-only construction: no unpublished adoption or checkpoint head is read.
+        // These diagnostic caps do not establish operative bundle/transaction capacity.
+        AVRetrievalTypes.Configuration memory c = AVRetrievalTypes.Configuration(
+            d.targets[0],
+            d.codeHashes[0],
+            d.targets[4],
+            d.codeHashes[4],
+            snapshot.targets[6],
+            snapshot.codeHashes[6],
+            d.targets[11],
+            d.codeHashes[11],
+            d.chainId,
+            uint32(d.readGas),
+            uint32(sourceGas),
+            uint32(d.readGas),
+            400000
+        );
+        _avInit(type(AVRetrieval).creationCode, abi.encode(c));
+        avRetrieval = new AVRetrieval(c);
+        _avRuntime(address(avRetrieval));
+        require(
+            keccak256(abi.encode(avRetrieval.configuration())) == keccak256(abi.encode(c))
+                && avRetrieval.configurationHash()
+                    == keccak256(abi.encode(AVRetrievalTypes.PROFILE, c))
+                && avRetrieval.retrievalProfile() == AVRetrievalTypes.PROFILE,
+            "actual VIEW retrieval configuration"
         );
     }
 
