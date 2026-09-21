@@ -124,10 +124,18 @@ library StreamMetadataRouterRendering {
                 mode, token, metadata, artist, nestedArtist, block.chainid, x.core, policy
             );
         }
+        // Historical checkpoints bind the original serializer. Current citation/provenance
+        // output has a distinct byte profile and must not replace those original entries.
+        if (historical && nestedArtist) artist = StreamArtistDisplayJSON.nested(artist);
         B.Selection memory bundle =
             StreamMetadataBundleRenderer.selection(selections[facts.collectionId][2]);
         if (bundle.bundleId != 0) {
             StreamMetadataBundleRenderer.requireLive(bundle, x.core);
+            if (historical) {
+                return StreamMetadataBundleRenderer.render(
+                    mode == 4 ? 2 : mode, token, metadata, artist, bundle, address(this), block.chainid
+                );
+            }
             return StreamMetadataBundleRenderer.renderCurrent(
                 mode == 4 ? 2 : mode,
                 token,
@@ -139,6 +147,11 @@ library StreamMetadataRouterRendering {
                 block.chainid,
                 x.core
             );
+        }
+        if (historical) {
+            return mode == 4
+                ? StreamMetadataTokenRenderer.fullJSON(token, metadata, artist)
+                : StreamMetadataTokenRenderer.render(token, metadata, artist);
         }
         if (mode == 3) return StreamMetadataTokenRenderer.html(token, metadata);
         return StreamMetadataTokenRenderer.renderCurrent(

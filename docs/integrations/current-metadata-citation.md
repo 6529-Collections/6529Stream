@@ -68,9 +68,11 @@ This change does not rewrite historical source manifests or golden artifacts.
 ## Historical boundary
 
 Original linked finality entries and the original STATIC public entries preserve
-their output. STATIC `historicalTokenMetadataJSON` and
-`historicalFullTokenMetadataJSON` explicitly retain those original entries. Current
-`tokenJSON` is distinct even though it can read a retained burned-token identity.
+their output. `historicalTokenMetadataJSON` and `historicalFullTokenMetadataJSON`
+retain the original ordinary, script-bundle and STATIC serializers, including
+their original Artist field composition. They do not append the current citation
+profile to bytes consumed by historical content checkpoints. Current `tokenJSON`
+is distinct even though it can read a retained burned-token identity.
 The original HTML and executable STREAM_CONTEXT_V1 are unchanged; citation is a
 JSON disclosure, not a new JavaScript context field. Existing finality-selected
 linked rendering still returns before the current ordinary path.

@@ -1,5 +1,14 @@
 # Changelog
 
+## Original historical metadata serialization
+
+- Restore the original ordinary and script-bundle serializers for historical
+  token JSON. Current citation output stays separate, preserving the original
+  JSON/HTML byte profile consumed by historical onchain content checkpoints.
+- Keep the original Artist field composition and strict checkpoint matchers;
+  current live and explicitly projected preservation outputs retain citations.
+
+
 ## Current-authority VIEW publication and discovery composition
 
 - Add actual original-Artist VIEW adoption, publication and reference fixtures
