@@ -54,5 +54,6 @@ schemas/museum/premis-retained/example/expected/premis.xml text eol=lf
 # Original LoC response bytes are raw evidence, including their line endings.
 schemas/museum/premis-authority-snapshot/example/input/ing.nt -text
 schemas/museum/premis-authority-coverage/example/input/**/*.nt -text
-schemas/museum/premis-authority-coverage/example/input/**/*.retrieval.json -text
+# Treat preserved CRLF as a line ending while retaining all whitespace checks.
+schemas/museum/premis-authority-coverage/example/input/**/*.retrieval.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 schemas/museum/premis-authority-coverage/example/input/discovery/*.bin -text

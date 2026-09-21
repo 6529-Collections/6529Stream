@@ -1,5 +1,16 @@
 # Changelog
 
+## CI hygiene and workflow checks
+
+- Recognize preserved CRLF line endings in the existing raw Museum retrieval
+  record paths without rewriting evidence bytes. Keep trailing spaces, tabs,
+  blank final lines and indentation checks, with actual Git regression controls.
+- Keep the call-free provider check in canonical workflow syntax and isolate the
+  cache-retry regression to its own step. Refresh the strict Museum command
+  inventory for the existing acquisition cohorts, retaining exact command order
+  and rejection of omitted checks. Slither baseline refresh remains a separate
+  source-freeze task.
+
 ## Recovered Platform Works and correction lineage
 
 - Add the explicit HISTORY_PLATFORM operation-60 profile for complete original

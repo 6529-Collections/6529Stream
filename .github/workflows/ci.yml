@@ -124,7 +124,8 @@ jobs:
 
       - name: Verify call-free instant provider runtime
         shell: bash
-        run: python -m tools.build.check_instant_provider_runtime --out out/current --cache-path cache/current
+        run: |
+          python -m tools.build.check_instant_provider_runtime --out out/current --cache-path cache/current
 
       - name: Save current compiler outputs
         if: ${{ fromJSON(steps.current_compiler_cache.outputs.cache-hit || 'false') == false }}

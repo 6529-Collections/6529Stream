@@ -576,6 +576,52 @@ class PythonToolchainTests(unittest.TestCase):
         self.assertIn("--output-dir ci-logs/current-candidate --check\n", validation)
         self.assertEqual(validation.count("generate_current_stack_artifacts"), 1)
 
+    def test_raw_retrieval_crlf_keeps_real_whitespace_checks(self) -> None:
+        attributes = (SCRIPT_PATH.parents[2] / ".gitattributes").read_bytes()
+        raw_path = "schemas/museum/premis-authority-coverage/example/input/discovery/receipt.retrieval.json"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+            git = [
+                "git", "-c", "core.autocrlf=false", "-c", "core.safecrlf=false",
+                "-c", "core.whitespace=blank-at-eol,blank-at-eof,space-before-tab",
+                "-C", str(root),
+            ]
+            subprocess.run(git + ["init", "--quiet"], env=env, check=True)
+            # An unmatched raw file proves the exception stays path-specific.
+            (root / ".gitattributes").write_bytes(
+                attributes + b"\nordinary.retrieval.json -text\n"
+            )
+            target = root / raw_path
+            target.parent.mkdir(parents=True)
+            for payload, accepted in (
+                (b'{"ok": true}\r\n', True),
+                (b'{"ok": true}\n', True),
+                (b'{"ok": true} \r\n', False),
+                (b'{"ok": true}\t\r\n', False),
+                (b'{"ok": true}\r\n\r\n', False),
+                (b' \t{"ok": true}\r\n', False),
+            ):
+                with self.subTest(payload=payload):
+                    target.write_bytes(payload)
+                    subprocess.run(git + ["add", "--", raw_path], env=env, check=True)
+                    self.assertEqual(
+                        subprocess.check_output(git + ["show", ":" + raw_path], env=env),
+                        payload,
+                    )
+                    result = subprocess.run(
+                        git + ["diff", "--cached", "--check", "--", raw_path],
+                        env=env, capture_output=True,
+                    )
+                    self.assertEqual(result.returncode == 0, accepted, result.stdout)
+            (root / "ordinary.retrieval.json").write_bytes(b'{"ok": true}\r\n')
+            subprocess.run(git + ["add", "--", "ordinary.retrieval.json"], env=env, check=True)
+            result = subprocess.run(
+                git + ["diff", "--cached", "--check", "--", "ordinary.retrieval.json"],
+                env=env, capture_output=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+
     def test_github_expression_operators_are_not_yaml_syntax(self) -> None:
         expression = "${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}"
         base = valid_workflow()
@@ -602,6 +648,16 @@ class PythonToolchainTests(unittest.TestCase):
             ("      - name: Test offline validation and export\n", "      - name: Test offline validation and export\n        if: false\n"),
             ("        run: python -m tools.museum.schemas --check", "        continue-on-error: true\n        run: python -m tools.museum.schemas --check"),
             ('      - "tools/preservation/**"', '      - "never-runs/**"'),
+            (' tools.metadata.test_acquisition_packet_v6', ''),
+            (' tools.metadata.test_acquisition_governance_transactions_v1', ''),
+            (' tools.metadata.test_acquisition_scoped_static_finality_v1', ''),
+            (' tools.metadata.test_acquisition_policy_collection_finality_v2', ''),
+            (' tools.metadata.test_acquisition_packet_v8', ''),
+            ('          python -m tools.metadata.acquisition_packet_v6 --check\n', ''),
+            ('          python -m tools.metadata.acquisition_governance_transactions_v1 --check\n', ''),
+            ('          python -m tools.metadata.acquisition_scoped_static_finality_v1 --check\n', ''),
+            ('          python -m tools.metadata.acquisition_policy_collection_finality_v2 --check\n', ''),
+            ('          python -m tools.metadata.acquisition_packet_v8 --check\n', ''),
         )
         for old, new in changes:
             with self.subTest(change=new):
@@ -657,7 +713,7 @@ class PythonToolchainTests(unittest.TestCase):
         workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")
         current = checker.workflow_job_blocks(workflow)["current-stack"]
         build = current.split("      - name: Build current compilation\n", 1)[1].split(
-            "      - name: Save current compiler outputs\n", 1
+            "      - name: ", 1
         )[0]
         commands = "\n".join(
             line[10:] for line in build.split("        run: |\n", 1)[1].splitlines()
