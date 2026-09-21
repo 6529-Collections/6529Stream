@@ -4,9 +4,6 @@ import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import {
-    StreamArtistRecoveredIdentityHydrationTypes as IH
-} from "../../interfaces/stream/artist/StreamArtistRecoveredIdentityHydrationTypes.sol";
-import {
     StreamArtistRecoveredMultipleTypes as M
 } from "../../interfaces/stream/artist/StreamArtistRecoveredMultipleTypes.sol";
 import {
@@ -46,6 +43,8 @@ import { StreamArtistC2PACredentials as Credentials } from "./StreamArtistC2PACr
 /// authenticates actual source bytes, accepted PRIMARY_ONLY bindings, Identity state and all
 /// seven owners. This pure worker does not infer present authority, compare saved live C2PA
 /// heads, install state or conclude grant equality across consent and attestation operations.
+/// Exact per-collection owner4 acceptance clocks must be authenticated from original Archive
+/// envelopes by the enclosing flow; era counters never establish within-era completion order.
 library StreamArtistRecoveredMultipleAttestationFacts {
     struct Context {
         Rows.IdentityRows[] identities;
@@ -82,13 +81,8 @@ library StreamArtistRecoveredMultipleAttestationFacts {
         c.identities = new Rows.IdentityRows[](scope.artists.length);
         uses = new uint256[][](scope.artists.length);
         for (uint256 a; a < scope.artists.length; ++a) {
-            IH.Bundle memory id = abi.decode(canonicalIdentities[a], (IH.Bundle));
-            if (
-                keccak256(canonicalIdentities[a]) != keccak256(abi.encode(id))
-                    || id.artistId != scope.artists[a].artistId
-            ) _invalid();
-            c.identities[a] = Rows.IdentityRows(id.artistId, id.signatures, id.delegations);
-            uses[a] = new uint256[](id.delegations.length);
+            c.identities[a] = Rows.identity(canonicalIdentities[a], scope.artists[a].artistId);
+            uses[a] = new uint256[](c.identities[a].delegations.length);
         }
         c.attestations = new Original.Bundle[](scope.collections.length);
         c.cursors = new uint256[](scope.collections.length);

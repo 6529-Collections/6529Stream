@@ -4,6 +4,9 @@ import {
     StreamArtistRecoveredMultipleAttestationFacts as Facts
 } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredMultipleAttestationFacts.sol";
 import {
+    StreamArtistRecoveredMultipleAttestationRows as Rows
+} from "../../../smart-contracts/domains/artist/StreamArtistRecoveredMultipleAttestationRows.sol";
+import {
     StreamArtistRecoveredAttestationHydration as Original
 } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredAttestationHydration.sol";
 import {
@@ -73,6 +76,90 @@ contract StreamArtistRecoveredMultipleAttestationFactsTest {
         RH.Provenance memory p
     ) external pure returns (uint256[][] memory) {
         return Facts.validate(ids, scope, rows, p);
+    }
+
+    function projectIdentity(bytes memory canonical, bytes32 artistId)
+        external
+        pure
+        returns (Rows.IdentityRows memory)
+    {
+        return Rows.identity(canonical, artistId);
+    }
+
+    /// @dev Literal old complete decoder and encoder, outside the aggregate caller frame.
+    function originalIdentityProjection(bytes memory canonical, bytes32 artistId)
+        external
+        pure
+        returns (Rows.IdentityRows memory)
+    {
+        IH.Bundle memory id = abi.decode(canonical, (IH.Bundle));
+        if (keccak256(canonical) != keccak256(abi.encode(id)) || id.artistId != artistId) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
+        return Rows.IdentityRows(id.artistId, id.signatures, id.delegations);
+    }
+
+    function testFixedIdentityProjectionPreservesWholeCanonicalEnvelope() external view {
+        Fixture memory f = _fixture();
+        IH.Bundle memory id = f.identities[0];
+        // These retained fields are deliberately outside the op24 projection. They still
+        // participate in the original full canonical decoder/reencoder.
+        id.identityDocument = hex"63616e6f6e6963616c";
+        id.documents = new IH.DocumentRow[](1);
+        id.documents[0] = IH.DocumentRow(bytes32(uint256(55)), hex"123456");
+        id.heads.latestExecution = bytes32(uint256(88));
+        bytes memory canonical = abi.encode(id);
+        // The complete original 34-field ABI has nine head words before Heads; its
+        // eighteenth word is the unreturned hasUncancelledFindings bool. A value of two
+        // must still fail typed decoding, although op24 uses none of this field.
+        bytes memory malformed = bytes.concat(canonical);
+        assembly ("memory-safe") { mstore(add(add(malformed, 32), 864), 2) }
+        (bool oldOK, bytes memory oldError) = address(this)
+            .staticcall(abi.encodeCall(this.originalIdentityProjection, (malformed, id.artistId)));
+        (bool newOK, bytes memory newError) = address(this)
+            .staticcall(abi.encodeCall(this.projectIdentity, (malformed, id.artistId)));
+        assert(!oldOK && !newOK && keccak256(oldError) == keccak256(newError));
+        assert(
+            keccak256(abi.encode(this.originalIdentityProjection(canonical, id.artistId)))
+                == keccak256(abi.encode(this.projectIdentity(canonical, id.artistId)))
+        );
+        Rows.IdentityRows memory expected =
+            Rows.IdentityRows(id.artistId, id.signatures, id.delegations);
+        assert(
+            keccak256(abi.encode(this.projectIdentity(canonical, id.artistId)))
+                == keccak256(abi.encode(expected))
+        );
+        id.heads.latestExecution = bytes32(uint256(99));
+        assert(
+            keccak256(abi.encode(this.projectIdentity(abi.encode(id), id.artistId)))
+                == keccak256(abi.encode(expected))
+        );
+        (bool ok, bytes memory error) = address(this)
+            .staticcall(
+                abi.encodeCall(
+                    this.projectIdentity, (bytes.concat(canonical, hex"00"), id.artistId)
+                )
+            );
+        assert(
+            !ok
+                && keccak256(error)
+                    == keccak256(
+                        abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)
+                    )
+        );
+        (ok, error) = address(this)
+            .staticcall(abi.encodeCall(this.projectIdentity, (canonical, bytes32(uint256(999)))));
+        assert(
+            !ok
+                && keccak256(error)
+                    == keccak256(
+                        abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)
+                    )
+        );
+        assert(
+            keccak256(abi.encode(this.projectIdentity(canonical, id.artistId)))
+                == keccak256(abi.encode(expected))
+        );
     }
 
     function testInterleavedArtistsCollectionsAndGrantIncrements() external view {
@@ -449,8 +536,7 @@ contract StreamArtistRecoveredMultipleAttestationFactsTest {
             b.item.generation = 1;
             b.records = new PubH.Row[](k == 0 ? 3 : k == 1 ? 1 : 2);
             f.attestations[k] = b;
-            f.p.journals[0][k] =
-                _entry(
+            f.p.journals[0][k] = _entry(
                 f.p.eras[0].originHash, 0, uint64(2 * k + 2), k, 1, artist, k + 1, b.bindingHash
             );
         }
@@ -604,9 +690,8 @@ contract StreamArtistRecoveredMultipleAttestationFactsTest {
                 : keccak256(
                     abi.encode(f.scope.collections[k].artistId, row.attestation.input.nonce)
                 );
-            f.p.aliases[2][aliasIndex++] = _alias(
-                delegated ? DELEGATE : NONCE, scope, digest, point
-            );
+            f.p.aliases[2][aliasIndex++] =
+                _alias(delegated ? DELEGATE : NONCE, scope, digest, point);
             if (!delegated) {
                 f.p.aliases[2][aliasIndex++] =
                     _alias(KEY, keccak256(abi.encode(record)), record, point);

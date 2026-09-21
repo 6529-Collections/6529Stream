@@ -25,6 +25,15 @@ other owner codecs. Collection queries retain their complete original record
 order and multiplicity. Artists and collections use the existing sorted,
 nonzero aggregate scope rules and original limits.
 
+`StreamArtistRecoveredMultipleAttestationRows.identity` performs the full original
+Identity decode and canonical re-encoding through the existing fixed
+IdentitySourceCanonical field groups, then returns
+only Artist identity, retained signatures and original delegations. Fields outside
+that projection remain part of the canonical envelope check. The aggregate uses
+the returned original delegation count and preserves its validation order. Only
+after whole-envelope equality does the existing typed SourceFrame.bundle view
+read those three fields. The full decoder dependency closure remains mandatory.
+
 The worker validates the complete original Attribution and Binding provenance
 shapes. Each accepted collection contributes its original two Attribution base
 commits in the era of its unique original op1 Binding occurrence. Each op24 adds
@@ -60,12 +69,16 @@ feature selection and the rest of the accepted graph remain caller obligations.
 The enclosing source/import flow must independently authenticate the actual
 complete source bundles, original Identity authority and standing/issuer facts,
 accepted PRIMARY_ONLY bindings, seven-owner provenance, nonce inventory, and
-actual retained per-record/current C2PA heads. This pure worker supplies no
-source-address proof and performs no state installation. Those composition and
+actual retained per-record/current C2PA heads. It must also authenticate each
+collection's exact owner4 proposal and accepted-completion points from original
+Archive operation envelopes and require every op24 to follow its own completion.
+The two base commits and proposal-era check do not locate those points within
+an era; revisions from different semantic owners cannot be compared. This pure
+worker supplies no source-address proof and performs no state installation. Those composition and
 actual op60 ceremony paths are not part of this additive batch.
 
-The focused tests execute the actual new workers and original semantic helpers
-against explicit typed source evidence. They cover two Artists, three
+The authored focused tests call the actual new workers and original semantic
+helpers against explicit typed source evidence. They cover two Artists, three
 collections, interleaved and repeated-era chains, direct/classes2/3 admission,
 original publication kinds7/8, personhood, grant chronology, canonical bytes,
 complete occurrence accounting and exact refusal/restoration. They do not

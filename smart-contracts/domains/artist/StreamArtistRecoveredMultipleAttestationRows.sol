@@ -31,6 +31,13 @@ import {
     StreamArtistRecoveredHydrationProvenance as Provenance
 } from "./StreamArtistRecoveredHydrationProvenance.sol";
 
+import {
+    StreamArtistRecoveredIdentitySourceCanonical as Canonical
+} from "./StreamArtistRecoveredIdentitySourceCanonical.sol";
+import {
+    StreamArtistRecoveredIdentitySourceFrame as Frame
+} from "./StreamArtistRecoveredIdentitySourceFrame.sol";
+
 /// @notice Original op24 fact predicates for one occurrence in a complete aggregate journal.
 /// @dev The aggregate caller owns occurrence bijection and semantic row validation. This leaf
 /// preserves original Identity aliases, retained signatures and grant chronology. It does not
@@ -53,6 +60,23 @@ library StreamArtistRecoveredMultipleAttestationRows {
     bytes32 private constant ATTESTATION = keccak256("identity_authority.replay.attestation_key");
     bytes32 private constant OBSERVED =
         keccak256("identity_authority.replay.authorization_consumed_digest");
+
+    /// @notice Project one complete, canonical original Identity envelope into op24 facts.
+    /// @dev Full decode/reencode remains mandatory, including fields not returned here. The
+    /// separate fixed frame avoids carrying the full Identity codec through the aggregate loop.
+    function identity(bytes calldata canonical, bytes32 artistId)
+        public
+        pure
+        returns (IdentityRows memory result)
+    {
+        // The existing fixed field groups decode and reencode every original Bundle field.
+        // Only after complete equality may the existing typed canonical view project fields.
+        bytes memory normalized = Canonical.canonical(canonical, false);
+        if (keccak256(canonical) != keccak256(normalized)) _invalid();
+        IH.Bundle calldata id = Frame.bundle(canonical);
+        if (id.artistId != artistId) _invalid();
+        result = IdentityRows(id.artistId, id.signatures, id.delegations);
+    }
 
     function validate(
         IdentityRows memory identity,
