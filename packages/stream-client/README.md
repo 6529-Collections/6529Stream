@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Attributed VIEW retrieval witnesses](docs/current-view-retrieval-v1.md)
+  covers the original witness's publish/revoke calls, raw observation signing,
+  exact retained bytes and separate history/current admission.
+
 - [Preservation RPC and Safe driver](docs/current-preservation-caller-harness.md)
   connects five original client families to an explicit provider and send
   transport, retaining exact signed Safe envelopes through receipt inspection.

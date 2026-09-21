@@ -1088,6 +1088,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add attributed VIEW retrieval witness clients with original raw signing,
+  canonical retained bytes and separate historical/current admission checks.
+
 - Add an explicit preservation RPC/Safe driver with immutable signed envelopes,
   original family receipt checks and distinct revert/nonce retry outcomes.
 
