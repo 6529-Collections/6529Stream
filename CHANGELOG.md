@@ -1336,6 +1336,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add an offline physical-production export from exact historical Artist
+  statements, with original declaration and evidence bindings, explicit event
+  status, conflict withholding and full source reconstruction. Keep physical
+  custody, legal title and museum accession separate from token activity.
+
 - Add an explicit recorded EXHIBITION location and TGN join, replaying both
   original source packages and requiring the owner's exact declaration payload
   commitment. Retain separate account review, unresolved mappings and historical

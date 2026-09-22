@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Recorded physical-production statements](../../docs/museum-recorded-physical-production-v1.md)
+join explicit completed Artist statements to distinct physical objects and
+Production events, retaining original evidence, status and historical authority.
+
 [Recorded exhibition location and TGN join](../../docs/museum-recorded-exhibition-geography-v1.md)
 connects the owner's exact location commitment to a separately reviewed account
 Place alignment, retaining both complete sources and their distinct authority.

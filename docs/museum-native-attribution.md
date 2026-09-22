@@ -1,5 +1,10 @@
 # Native Artist and general attestation evidence
 
+The additive [physical-production export](museum-recorded-physical-production-v1.md)
+consumes this exact dossier and its selected original Artist statements. It maps
+only explicit completed physical production, preserving source definitions and
+keeping custody, title and accession separate.
+
 `STREAM_MUSEUM_NATIVE_ATTRIBUTION_DOSSIER_V1` is a supplementary, source-preserving
 attribution package. It joins original native Artist evidence to Metadata records,
 optionally interprets an explicitly registered semantic profile, and optionally
