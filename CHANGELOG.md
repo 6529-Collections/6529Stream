@@ -1,5 +1,13 @@
 # Changelog
 
+## General-attestation semantic reviews
+
+- Add a separate General-to-General review profile, original receipt/grant and
+  publication-order proofs, exact historical authority selection and replayable
+  graph output. Preserve the earlier direct-only profile and original source
+  formats. Focused synthetic tests are separate from chain acceptance; see the
+  [General review guide](docs/museum-general-semantic-reviews.md).
+
 ## First-run preparation
 
 - Include required graph-fixture preparation between the current native build
