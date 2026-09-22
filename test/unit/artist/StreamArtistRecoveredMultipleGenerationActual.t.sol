@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import "./ArtistRecoveredMultipleGenerationFixture.sol";
 import {
     StreamArtistHashes as Hashes
@@ -1070,7 +1073,7 @@ contract StreamArtistRecoveredMultipleGenerationActualTest is
             Payload.decode(prepared.data[4].typedState, 4);
         require(
             (header.requiredFeatures & RH.ATTESTATIONS) == 0
-                && (header.requiredFeatures & RH.MULTIPLE_GENERATIONS) != 0,
+                && (header.requiredFeatures & XF.MULTIPLE_GENERATIONS) != 0,
             "closed generation profile without op24"
         );
         Routing.requireCurrent(

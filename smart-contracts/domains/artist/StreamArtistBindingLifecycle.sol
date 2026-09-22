@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import { StreamArtistRecoveredAcceptedBindingHydration as RecoveredAccepted } from "./StreamArtistRecoveredAcceptedBindingHydration.sol";
 import {
     StreamArtistRecoveredBindingCorrectionHydration as RecoveredCorrections
@@ -441,7 +444,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return RecoveredRH.MULTIPLE_GENERATIONS_GRAPH_FEATURES;
+        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(

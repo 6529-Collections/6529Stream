@@ -36,8 +36,7 @@ library StreamArtistRecoveredHydrationTypes {
     uint256 internal constant MULTIPLE_BASE = 262144;
     uint256 internal constant MULTIPLE_CONSENTS = 524288;
     uint256 internal constant MULTIPLE_ATTESTATIONS = 1048576;
-    uint256 internal constant MULTIPLE_GENERATIONS = 2097152;
-    uint256 internal constant KNOWN_FEATURES = 4194303;
+    uint256 internal constant KNOWN_FEATURES = 2097151;
     // Reviewed recovered graph only; typed exporters still reject broader collection profiles.
     // Keep this explicit so adding a future known feature does not advertise it automatically.
     uint256 internal constant FIRST_GRAPH_FEATURES =
@@ -66,8 +65,6 @@ library StreamArtistRecoveredHydrationTypes {
         MULTIPLE_GRAPH_FEATURES | MULTIPLE_CONSENTS;
     uint256 internal constant MULTIPLE_ATTESTATIONS_GRAPH_FEATURES =
         MULTIPLE_CONSENTS_GRAPH_FEATURES | MULTIPLE_ATTESTATIONS;
-    uint256 internal constant MULTIPLE_GENERATIONS_GRAPH_FEATURES =
-        MULTIPLE_ATTESTATIONS_GRAPH_FEATURES | MULTIPLE_GENERATIONS;
     // Finite transport-profile limits, not limits on validity of original lifetime history.
     uint256 internal constant MAX_ERAS = 16;
     uint256 internal constant MAX_JOURNAL_ENTRIES = 4096;

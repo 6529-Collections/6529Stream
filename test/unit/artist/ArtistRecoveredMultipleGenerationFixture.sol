@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import "./ArtistRecoveredMultipleFixture.sol";
 import {
     StreamArtistContentTypes as Content
@@ -92,7 +95,7 @@ abstract contract ArtistRecoveredMultipleGenerationFixture is ArtistRecoveredMul
     }
 
     function _multiFeature() internal pure override returns (uint256) {
-        return RH.MULTIPLE_GENERATIONS;
+        return XF.MULTIPLE_GENERATIONS;
     }
 
     function _multiDecode(Payload.Payload memory p)

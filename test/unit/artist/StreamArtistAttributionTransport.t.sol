@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import {
     StreamArtistAttributionLifecycle
@@ -579,7 +582,7 @@ contract StreamArtistAttributionTransportTest is CharacterizationTestBase {
         Recovered.Capability memory capability = owner.recoveredAuthorityHydrationCapability();
         require(
             (capability.supportedFeatures & uint256(31)) == 31
-                && (capability.supportedFeatures & ~Recovered.KNOWN_FEATURES) == 0,
+                && (capability.supportedFeatures & ~XF.KNOWN_FEATURES) == 0,
             "supported recovered baseline, no unknown feature promotion"
         );
         require(
