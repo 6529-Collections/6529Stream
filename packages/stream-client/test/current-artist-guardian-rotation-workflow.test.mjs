@@ -293,8 +293,28 @@ test("stale unsigned transition guard and occupied new address fail", async () =
 });
 
 test("active transition windows block a subsequent stage", async () => {
-  const s = setup("stageRotation"); s.state.activeWindow = [H("active"), s.state.timestamp + 10n, false];
-  await assert.rejects(capture(s));
+  const s = setup("stageRotation", { deadline: 2000000n, newDeadline: 2000000n });
+  const prior = s.state.rotationRecord;
+  const priorTerms = { ...prior.terms, oldAddress: A(59), newAddress: s.state.oldAddress };
+  const priorHash = hash(["bytes32", "uint256", "address", "bytes32", "address", "address", "bytes32", "uint256", "uint64", "uint64"],
+    ["0x8d7c32ae357c27253fd4480fe9d411cefc64a5634952ed8c8ebe7dcf63257ea5", 1n, s.deployment.registry.address,
+      s.state.artistId, priorTerms.oldAddress, priorTerms.newAddress, ZeroHash, prior.oldNonce, prior.transition.stagedAt, prior.transition.contestEndsAt]);
+  const executedAt = s.state.timestamp - 10n, postWindowEndsAt = executedAt + prior.effectiveWindow;
+  s.state.rotationRecord = { ...prior, recordHash: priorHash, terms: priorTerms, guardianApprovals: 2n,
+    transition: { ...prior.transition, recordHash: priorHash, executedAt, postWindowEndsAt, phase: 2n } };
+  s.state.latestTransition = priorHash;
+  s.state.activeWindow = [priorHash, postWindowEndsAt, false];
+  s.state.request.terms.expectedPreviousTransitionRecordHash = priorHash;
+  s.prepared = pure.prepareGuardianRotationCall(s.state.request);
+  await assert.rejects(capture(s), { message: "Active authority window blocks rotation" });
+
+  // The original read clears an uncontested active head at post-window equality; history remains.
+  s.state.timestamp = postWindowEndsAt;
+  s.state.activeWindow = [ZeroHash, 0n, false];
+  const mature = await capture(s);
+  assert.equal(mature.latestTransition, priorHash);
+  assert.equal(mature.activeWindow.transitionRecordHash, ZeroHash);
+  assert.equal(mature.activeTransition, null);
 });
 
 test("ordinary principal class/status and guardian-maintenance capability are required", async () => {
@@ -318,9 +338,19 @@ test("execution is permissionless with quorum; zero or insufficient threshold ca
   const s = setup("executeRotation"), c = await capture(s);
   assert.equal(c.prepared.request.caller, A(90));
   assert.equal(c.rotationRecord.effectiveWindow, 604800n);
-  await assert.rejects(capture(setup("executeRotation", { approvals: 1n })));
-  const noQuorum = setup("executeRotation", { approvals: 0n }); noQuorum.state.rotationRecord.approvalThreshold = 0n;
-  await assert.rejects(capture(noQuorum));
+  await assert.rejects(capture(setup("executeRotation", { approvals: 1n })), { message: "Rotation is not executable" });
+  const noQuorum = setup("executeRotation", { approvals: 0n });
+  noQuorum.state.rotationRecord.guardianSetRecordHash = ZeroHash;
+  noQuorum.state.rotationRecord.approvalThreshold = 0n;
+  noQuorum.state.hooks.push(({ method }) => method === "guardianSet" ? [[], 0n, 0n, ZeroHash] : undefined);
+  await assert.rejects(capture(noQuorum), { message: "Rotation is not executable" });
+  noQuorum.state.timestamp = noQuorum.state.rotationRecord.transition.contestEndsAt;
+  const mature = await capture(noQuorum);
+  assert.equal(mature.timestamp, mature.rotationRecord.transition.contestEndsAt);
+  assert.equal(mature.guardianSet.recordHash, ZeroHash);
+  assert.equal(mature.capturedGuardianRecord, null);
+  assert.equal(mature.rotationRecord.approvalThreshold, 0n);
+  assert.equal(mature.rotationRecord.guardianApprovals, 0n);
   await capture(setup("executeRotation", { approvals: 0n, timestamp: 1504800n }));
 });
 
