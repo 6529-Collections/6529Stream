@@ -28,10 +28,9 @@ import {
 } from "../../interfaces/stream/metadata/StreamViewAdoptionTypes.sol";
 import { StreamViewAdoptionReads as ViewRead } from "./StreamViewAdoptionReads.sol";
 import { StreamRendererCalls as Calls } from "./StreamRendererCalls.sol";
-
-interface IStreamPreservationRegistryCoordinates {
-    function deploymentChainId() external view returns (uint256);
-}
+import {
+    IStreamPreservationRegistryCoordinates
+} from "../../interfaces/stream/metadata/IStreamPreservationRegistryCoordinates.sol";
 
 /// @notice Fixed validator for the distinct preservation declaration. Original admission stays intact.
 library StreamPreservationAdmission {

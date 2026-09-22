@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-
-interface IStreamArtistCreationSource {
-    function extensionCreationCode(uint8 kind) external view returns (bytes memory);
-}
+import {
+    IStreamArtistCreationSource
+} from "../../interfaces/stream/artist/IStreamArtistCreationSource.sol";
 
 /// @dev CREATE remains in the linked wrapper's original delegate-host context.
 library StreamArtistCreationSource {

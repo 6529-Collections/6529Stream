@@ -15,6 +15,9 @@ import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle
 import {
     StreamEntropyPolicyImportState as ImportState
 } from "./StreamEntropyPolicyImportState.sol";
+import {
+    StreamEntropyContinuityTarget
+} from "../../interfaces/stream/entropy/StreamEntropyContinuityTarget.sol";
 
 /// @notice Fixed policy worker; data and replay protection live in the calling coordinator.
 library StreamEntropyRecoveryPolicies {
@@ -387,9 +390,4 @@ library StreamEntropyRecoveryPolicies {
         }
         actionId = currentId;
     }
-}
-
-interface StreamEntropyContinuityTarget {
-    function core() external view returns (IStreamCore);
-    function authority() external view returns (address);
 }

@@ -6,14 +6,9 @@ import "../../interfaces/stream/mint/IStreamMintFallbackRecovery.sol";
 import "../../interfaces/stream/mint/IStreamMintGovernanceRegistry.sol";
 import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
 import "../revenue/StreamSettlementAdmission.sol";
-
-/// @dev Fixed host getters; no arbitrary external call or caller-provided authority is accepted.
-interface IStreamMintFallbackBinding {
-    function core() external view returns (address);
-    function moduleRegistry() external view returns (address);
-    function governanceAuthority() external view returns (address);
-    function owner() external view returns (address);
-}
+import {
+    IStreamMintFallbackBinding
+} from "../../interfaces/stream/mint/IStreamMintFallbackBinding.sol";
 
 /// @notice Typed incident-only worker executed in the dedicated fallback Manager's context.
 library StreamMintFallbackRecovery {

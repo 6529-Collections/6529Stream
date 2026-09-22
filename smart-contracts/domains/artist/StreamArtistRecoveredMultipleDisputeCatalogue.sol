@@ -29,10 +29,9 @@ import { SSTORE2 } from "../../libraries/SSTORE2.sol";
 import {
     StreamArtistRecoveredMultipleDisputeTypes as MD
 } from "./StreamArtistRecoveredMultipleDisputeTypes.sol";
-
-interface IStreamRecoveredPlatformConfiguration {
-    function configurationHash() external view returns (bytes32);
-}
+import {
+    IStreamRecoveredPlatformConfiguration
+} from "../../interfaces/stream/artist/recovered-multiple-dispute/IStreamRecoveredPlatformConfiguration.sol";
 
 /// @notice Exhaustive bounded original Archive catalogue, authenticated independently of callers.
 /// @dev The original immutable Archive records transport integrity, not authority. Callers must

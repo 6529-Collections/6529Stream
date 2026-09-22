@@ -6,13 +6,9 @@ import {
 import {
     IStreamCollectionMetadataV1 as M
 } from "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
-
-interface IStreamMetadataArtistConfiguration {
-    function suiteConfiguration() external view returns (T.SuiteConfiguration memory);
-    function configurationHash() external view returns (bytes32);
-    function finalityRegistry() external view returns (address);
-    function finalityEvidenceProvider() external view returns (address);
-}
+import {
+    IStreamMetadataArtistConfiguration
+} from "../../interfaces/stream/metadata/IStreamMetadataArtistConfiguration.sol";
 
 /// @notice Authenticates the actual original Coordinator constructor commitment.
 /// @dev The preimage is byte-exact to StreamArtistOnboardingCoordinator's original

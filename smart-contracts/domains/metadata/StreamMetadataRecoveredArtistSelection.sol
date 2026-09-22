@@ -26,15 +26,9 @@ import {
     StreamMetadataArtistConfiguration,
     IStreamMetadataArtistConfiguration
 } from "./StreamMetadataArtistConfiguration.sol";
-
-interface IStreamMetadataCurrentCompletion {
-    function repeatedAncestor(
-        address core,
-        address original,
-        address current,
-        bytes calldata encodedSuite
-    ) external view returns (address);
-}
+import {
+    IStreamMetadataCurrentCompletion
+} from "../../interfaces/stream/metadata/IStreamMetadataCurrentCompletion.sol";
 
 /// @notice Original Metadata ancestry through the actual complete recovered op60 prefix.
 /// @dev The enclosing selector authenticates the original/current runtime, current suite,

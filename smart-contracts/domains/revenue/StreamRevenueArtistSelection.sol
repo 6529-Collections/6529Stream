@@ -14,13 +14,9 @@ import {
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
-
-interface IStreamRevenueArtistConfiguration {
-    function suiteConfiguration() external view returns (T.SuiteConfiguration memory);
-    function configurationHash() external view returns (bytes32);
-    function finalityRegistry() external view returns (address);
-    function finalityEvidenceProvider() external view returns (address);
-}
+import {
+    IStreamRevenueArtistConfiguration
+} from "../../interfaces/stream/revenue/IStreamRevenueArtistConfiguration.sol";
 
 /// @notice Fixed current-consumer proof for one completely hydrated Artist successor.
 /// @dev The Resolver keeps its original immutables, assignments and replay state. All

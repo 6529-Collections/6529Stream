@@ -9,10 +9,9 @@ import {
 import "./StreamCurrentAuthorityScopedPolicyProviderReadsV2.sol";
 import "./StreamCurrentAuthorityScopedPolicySanctionReviewV2.sol";
 import "./StreamFinalityRouteReads.sol";
-
-interface IStreamCurrentAuthorityScopedPolicyProviderOriginalAnchorV2 {
-    function requireCurrentRouterCandidate(uint256 collectionId, address registry) external view;
-}
+import {
+    IStreamCurrentAuthorityScopedPolicyProviderOriginalAnchorV2
+} from "../../interfaces/stream/finality/IStreamCurrentAuthorityScopedPolicyProviderOriginalAnchorV2.sol";
 
 /// @notice Fixed operations for the selected combined provider's distinct scoped profile.
 /// @dev Runs in that host's context using only its constructor-owned Config. Original Registry

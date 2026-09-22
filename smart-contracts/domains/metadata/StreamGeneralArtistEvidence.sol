@@ -8,13 +8,9 @@ import "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import "../../interfaces/stream/artist/IStreamArtistIngressBinding.sol";
-
-interface IGeneralArtistSuite {
-    function suiteConfiguration()
-        external
-        view
-        returns (StreamArtistOnboardingTypes.SuiteConfiguration memory);
-}
+import {
+    IGeneralArtistSuite
+} from "../../interfaces/stream/metadata/IGeneralArtistSuite.sol";
 
 /// @notice Exact original op24 receipts; historical authority never means current authority.
 library StreamGeneralArtistEvidence {

@@ -7,10 +7,9 @@ import { StreamNativeAuctionDelegation as D } from "../auctions/StreamNativeAuct
 import {
     IStreamGasParameterHost
 } from "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
-
-interface IPrivateOfferHost {
-    function paused() external view returns (bool);
-}
+import {
+    IPrivateOfferHost
+} from "../../interfaces/stream/mint/IPrivateOfferHost.sol";
 
 /// @notice Fixed original/delegated offer execution in the guarded adapter's caller/storage context.
 /// @dev Original buyer supplies native funds and receives the token. Delegation changes only who

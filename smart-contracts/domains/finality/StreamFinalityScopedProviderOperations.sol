@@ -3,10 +3,9 @@ pragma solidity ^0.8.19;
 import "./StreamFinalityScopedProviderReads.sol";
 import "./StreamFinalityScopedSanctionReview.sol";
 import "./StreamFinalityRouteReads.sol";
-
-interface IStreamScopedProviderOriginalAnchor {
-    function requireCurrentRouterCandidate(uint256 collectionId, address registry) external view;
-}
+import {
+    IStreamScopedProviderOriginalAnchor
+} from "../../interfaces/stream/finality/IStreamScopedProviderOriginalAnchor.sol";
 
 /// @notice Fixed operations for the selected combined provider's distinct scoped profile.
 /// @dev Runs in that host's context using only its constructor-owned Config. Original Registry

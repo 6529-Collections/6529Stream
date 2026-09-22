@@ -38,11 +38,9 @@ import {
 import {
     IStreamGasParameterHost
 } from "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
-
-interface IStreamRecordedCollectionManifests {
-    function recordedScriptManifest(bytes32 hash) external view returns (M.ScriptManifest memory);
-    function recordedMediaManifest(bytes32 hash) external view returns (M.MediaManifest memory);
-}
+import {
+    IStreamRecordedCollectionManifests
+} from "../../interfaces/stream/metadata/IStreamRecordedCollectionManifests.sol";
 
 /// @notice Fixed manifest execution in the original MetadataV1 caller/storage context.
 /// @dev Host selectors keep their original ABI; raw encoded returns avoid duplicated dynamic codecs.

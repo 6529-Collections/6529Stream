@@ -27,10 +27,9 @@ import {
 import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
-
-interface IStreamRecoveredEconomicsDelegation {
-    function recordDelegation(bytes32 record) external view returns (bytes32);
-}
+import {
+    IStreamRecoveredEconomicsDelegation
+} from "../../interfaces/stream/artist/IStreamRecoveredEconomicsDelegation.sol";
 
 /// @notice Complete direct14/15 transport for one accepted generation-one recovered binding.
 /// @dev The original fixed owner authenticates record hashes through its actual payload/maps,

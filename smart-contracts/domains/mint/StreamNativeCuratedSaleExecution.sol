@@ -32,10 +32,9 @@ import { StreamNativeCuratedSaleRuntime as Runtime } from "./StreamNativeCurated
 import {
     StreamNativeCuratedSaleSettlement as Settlement
 } from "./StreamNativeCuratedSaleSettlement.sol";
-
-interface ICuratedLiabilities {
-    function totalBuyerLiabilities() external view returns (uint256);
-}
+import {
+    ICuratedLiabilities
+} from "../../interfaces/stream/mint/ICuratedLiabilities.sol";
 
 /// @notice Fixed linked purchase orchestration; host guard and original caller survive delegatecall.
 library StreamNativeCuratedSaleExecution {

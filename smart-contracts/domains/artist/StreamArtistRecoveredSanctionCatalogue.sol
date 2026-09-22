@@ -23,10 +23,9 @@ import {
     IStreamArtistReconstruction as Reconstruction
 } from "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
 import { SSTORE2 } from "../../libraries/SSTORE2.sol";
-
-interface IStreamRecoveredSanctionConfiguration {
-    function configurationHash() external view returns (bytes32);
-}
+import {
+    IStreamRecoveredSanctionConfiguration
+} from "../../interfaces/stream/artist/IStreamRecoveredSanctionConfiguration.sol";
 
 /// @notice Exhaustive bounded original Archive catalogue, authenticated independently of callers.
 /// @dev The original immutable Archive records transport integrity, not authority. Callers must

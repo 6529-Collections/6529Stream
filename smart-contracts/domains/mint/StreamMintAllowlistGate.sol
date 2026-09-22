@@ -3,11 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/mint/IStreamMintAllowlistGate.sol";
 import "./StreamMintCounterPolicy.sol";
-
-/// @dev Existing public getter outside Manager's retained compatibility interface.
-interface IStreamAllowlistManagerLedger {
-    function mintLedger() external view returns (address);
-}
+import {
+    IStreamAllowlistManagerLedger
+} from "../../interfaces/stream/mint/IStreamAllowlistManagerLedger.sol";
 
 /// @notice Immutable allowlist gate that requires matching Manager/Ledger cap accounting.
 /// @dev Holds no allowance or replay state. All supplied Merkle caps are still reverified

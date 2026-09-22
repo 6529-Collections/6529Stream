@@ -28,13 +28,9 @@ import {
 import {
     StreamMetadataRenderTypes as T
 } from "../../interfaces/stream/metadata/StreamMetadataRenderTypes.sol";
-
-interface IStreamRouterLiveFrame {
-    function liveAttributionObject(uint256 collectionId, uint256 tokenId)
-        external
-        view
-        returns (bytes memory);
-}
+import {
+    IStreamRouterLiveFrame
+} from "../../interfaces/stream/metadata/IStreamRouterLiveFrame.sol";
 
 /// @notice Fixed delegatecall renderer orchestration; all storage roots and immutables come from Router.
 library StreamMetadataRouterRendering {

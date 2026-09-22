@@ -6,10 +6,9 @@ import {
 import "./StreamFinalityScopedPreservationPolicyProviderReadsV1.sol";
 import "./StreamFinalityScopedPreservationPolicySanctionReviewV1.sol";
 import "./StreamFinalityRouteReads.sol";
-
-interface IStreamScopedPolicyProviderOriginalAnchorV2 {
-    function requireCurrentRouterCandidate(uint256 collectionId, address registry) external view;
-}
+import {
+    IStreamScopedPolicyProviderOriginalAnchorV2
+} from "../../interfaces/stream/finality/scoped-preservation-policy-v1/IStreamScopedPolicyProviderOriginalAnchorV2.sol";
 
 /// @notice Fixed operations for the selected combined provider's distinct scoped profile.
 /// @dev Runs in that host's context using only its constructor-owned Config. Original Registry

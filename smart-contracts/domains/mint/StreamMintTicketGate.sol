@@ -5,11 +5,9 @@ import "../../interfaces/stream/mint/IStreamMintBatchGate.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "./StreamMintTicketHash.sol";
-
-/// @dev The existing Manager getter is intentionally outside its permanent compatibility ABI.
-interface IStreamMintTicketManagerBinding {
-    function mintLedger() external view returns (address);
-}
+import {
+    IStreamMintTicketManagerBinding
+} from "../../interfaces/stream/mint/IStreamMintTicketManagerBinding.sol";
 
 /// @notice Canonical full-payload EIP-712 ticket gate with an immutable authorized signer policy.
 /// @dev Gate evidence is view-only. Manager consumes the returned authorization ID in Ledger

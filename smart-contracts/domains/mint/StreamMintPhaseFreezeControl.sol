@@ -5,13 +5,9 @@ import "../../interfaces/stream/mint/IStreamMintPhaseFreeze.sol";
 import "../../interfaces/stream/mint/IStreamMintLedgerPhaseFreeze.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
 import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
-
-interface IStreamMintPhaseFreezeBinding {
-    function core() external view returns (address);
-    function mintLedger() external view returns (address);
-    function governanceAuthority() external view returns (address);
-    function owner() external view returns (address);
-}
+import {
+    IStreamMintPhaseFreezeBinding
+} from "../../interfaces/stream/mint/IStreamMintPhaseFreezeBinding.sol";
 
 /// @notice Fixed Manager worker for the optional, canonical Ledger-backed freeze.
 /// @dev Only the host owns entrypoint guards and executor storage references.

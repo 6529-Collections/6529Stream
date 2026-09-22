@@ -17,14 +17,9 @@ import "../../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
 import "../../interfaces/stream/finality/IStreamFinalityDeploymentBindings.sol";
 import "../../interfaces/stream/finality/IStreamFinalityDiscoverySources.sol";
 import "../finality/StreamFinalityNativeProviderReads.sol";
-
-// Selector projections of actual owner APIs. Absence/malformed replies fail; no fallback hash.
-interface IStreamArtistSnapshotConfiguration {
-    function nativeConfiguration()
-        external
-        view
-        returns (StreamFinalityNativeProviderReads.Config memory);
-}
+import {
+    IStreamArtistSnapshotConfiguration
+} from "../../interfaces/stream/artist/IStreamArtistSnapshotConfiguration.sol";
 
 /// @notice Exact admitted subject owners for original AA-ATTEST kinds 1 through 6.
 /// @dev Signatures bind the original subject ID/hash; descriptors only locate those facts.

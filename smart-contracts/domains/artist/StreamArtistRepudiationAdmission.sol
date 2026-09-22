@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistRepudiationFacts.sol";
-
-interface IStreamRepudiationSuite {
-    function suiteConfiguration() external view returns (T.SuiteConfiguration memory);
-}
+import {
+    IStreamRepudiationSuite
+} from "../../interfaces/stream/artist/IStreamRepudiationSuite.sol";
 
 /// @notice Fixed owner-side rechecks of the actual Attribution terminal and current Identity head.
 library StreamArtistRepudiationAdmission {

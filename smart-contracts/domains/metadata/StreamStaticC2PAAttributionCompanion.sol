@@ -12,17 +12,12 @@ import {
     IStreamC2PAConflicts as Conflicts,
     IStreamStaticC2PAConflicts
 } from "../../interfaces/stream/metadata/IStreamC2PAConflicts.sol";
-
-interface IStreamC2PAOriginalAttribution {
-    function core() external view returns (address);
-    function router() external view returns (address);
-    function artist() external view returns (address);
-    function attribution(uint256 collection, uint256 token) external view returns (bytes memory);
-}
-
-interface IStreamC2PARouterBinding {
-    function router() external view returns (address);
-}
+import {
+    IStreamC2PAOriginalAttribution
+} from "../../interfaces/stream/metadata/IStreamC2PAOriginalAttribution.sol";
+import {
+    IStreamC2PARouterBinding
+} from "../../interfaces/stream/metadata/IStreamC2PARouterBinding.sol";
 
 /// @notice Explicitly configured STATIC source; original Artist facts and verifier reports stay separate.
 /// @dev Both targets, their runtimes and every transitive target/selector must enter the renderer

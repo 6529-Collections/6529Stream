@@ -8,12 +8,9 @@ import "../../interfaces/stream/mint/IStreamMintGovernanceRegistry.sol";
 import "../../interfaces/stream/mint/IStreamMintLedgerContinuity.sol";
 import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
-
-/// @dev Existing immutable Manager getters, used only to authenticate exact continuity pairs.
-interface IStreamMintArtistManagerBinding {
-    function core() external view returns (address);
-    function mintLedger() external view returns (address);
-}
+import {
+    IStreamMintArtistManagerBinding
+} from "../../interfaces/stream/mint/IStreamMintArtistManagerBinding.sol";
 
 /// @notice Mandatory, bounded artist-authority reads shared by Manager registration and execution.
 library StreamMintArtistConsent {

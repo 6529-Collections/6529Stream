@@ -23,10 +23,9 @@ import {
 import {
     IStreamArtistAttributionClaimsOwner as Claims
 } from "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
-
-interface IStreamUnboundPlatformClaimHead {
-    function attributionClaims(uint256 id) external view returns (uint256, bytes32);
-}
+import {
+    IStreamUnboundPlatformClaimHead
+} from "../../interfaces/stream/artist/IStreamUnboundPlatformClaimHead.sol";
 
 /// @notice Complete original Platform keys come only from the authenticated native journal/head.
 library StreamArtistUnboundPlatformSource {

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistDisputeAdmission.sol";
-
-interface IStreamDisputeSuite {
-    function suiteConfiguration() external view returns (T.SuiteConfiguration memory);
-}
+import {
+    IStreamDisputeSuite
+} from "../../interfaces/stream/artist/IStreamDisputeSuite.sol";
 
 /// @notice Fixed stateless facade read codec. Every owner/authority stays in the immutable suite.
 library StreamArtistDisputeReadEncoding {

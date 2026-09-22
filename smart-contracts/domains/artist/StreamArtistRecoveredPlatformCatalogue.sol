@@ -26,10 +26,9 @@ import {
     StreamArtistRecoveredPlatformTypes as PLH
 } from "./StreamArtistRecoveredPlatformTypes.sol";
 import { SSTORE2 } from "../../libraries/SSTORE2.sol";
-
-interface IStreamRecoveredPlatformConfiguration {
-    function configurationHash() external view returns (bytes32);
-}
+import {
+    IStreamRecoveredPlatformConfiguration
+} from "../../interfaces/stream/artist/recovered-platform/IStreamRecoveredPlatformConfiguration.sol";
 
 /// @notice Exhaustive bounded original Archive catalogue, authenticated independently of callers.
 /// @dev The original immutable Archive records transport integrity, not authority. Callers must

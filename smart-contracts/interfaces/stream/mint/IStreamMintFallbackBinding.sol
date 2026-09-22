@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+/// @dev Fixed host getters; no arbitrary external call or caller-provided authority is accepted.
+interface IStreamMintFallbackBinding {
+    function core() external view returns (address);
+    function moduleRegistry() external view returns (address);
+    function governanceAuthority() external view returns (address);
+    function owner() external view returns (address);
+}

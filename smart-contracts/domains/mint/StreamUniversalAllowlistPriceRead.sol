@@ -11,22 +11,9 @@ import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySettlementBindings.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleFacts.sol";
-
-interface IStreamUniversalAllowlistPriceHost is IStreamPrimarySettlementBindings {
-    function coreCodeHash() external view returns(bytes32);
-    function moduleRegistryCodeHash() external view returns(bytes32);
-    function resolverCodeHash() external view returns(bytes32);
-    function factoryCodeHash() external view returns(bytes32);
-    function assetRegistryCodeHash() external view returns(bytes32);
-    function mintManager() external view returns(IStreamMintManager);
-    function mintManagerCodeHash() external view returns(bytes32);
-    function primarySaleSettlement() external view returns(address);
-    function settlementCodeHash() external view returns(bytes32);
-    function platformSigner() external view returns(address);
-    function artistRegistry() external view returns(IStreamArtistAttribution);
-    function artistRegistryCodeHash() external view returns(bytes32);
-    function paused() external view returns(bool);
-}
+import {
+    IStreamUniversalAllowlistPriceHost
+} from "../../interfaces/stream/mint/IStreamUniversalAllowlistPriceHost.sol";
 
 /// @notice View-only admission for the dedicated same-leaf carrier. Typed storage references only.
 library StreamUniversalAllowlistPriceRead {

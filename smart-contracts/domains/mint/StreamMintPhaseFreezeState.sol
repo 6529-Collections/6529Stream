@@ -6,13 +6,9 @@ import "../../interfaces/stream/mint/IStreamMintPhaseFreeze.sol";
 import "../../interfaces/stream/mint/IStreamMintCounterPolicy.sol";
 import "../../interfaces/stream/mint/IStreamMintLedgerImport.sol";
 import "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
-
-/// @dev Existing immutable Manager bindings, outside the retained Manager compatibility ABI.
-interface IStreamMintFreezeManagerBindings {
-    function core() external view returns (address);
-    function mintLedger() external view returns (address);
-    function moduleRegistry() external view returns (address);
-}
+import {
+    IStreamMintFreezeManagerBindings
+} from "../../interfaces/stream/mint/IStreamMintFreezeManagerBindings.sol";
 
 /// @notice Fixed Ledger worker for immutable phase constraints and monotonic executor rights.
 /// @dev All state belongs to the Ledger. Configuration is read from the actual Manager;

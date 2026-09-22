@@ -34,10 +34,9 @@ import { StreamNativeCuratedSaleRuntime as Runtime } from "./StreamNativeCurated
 import {
     StreamNativePrimaryOfferSettlement as Settlement
 } from "./StreamNativePrimaryOfferSettlement.sol";
-
-interface IPrimaryOfferLiabilities {
-    function totalBuyerLiabilities() external view returns (uint256);
-}
+import {
+    IPrimaryOfferLiabilities
+} from "../../interfaces/stream/mint/IPrimaryOfferLiabilities.sol";
 
 /// @notice Fixed linked atomic primary-offer orchestration; host guard and original caller survive delegatecall.
 library StreamNativePrimaryOfferExecution {

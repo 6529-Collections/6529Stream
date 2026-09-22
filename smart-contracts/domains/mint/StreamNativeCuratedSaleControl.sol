@@ -5,10 +5,9 @@ import { StreamNativeCuratedSaleState } from "./StreamNativeCuratedSaleState.sol
 import { StreamNativeCuratedSaleSupport } from "./StreamNativeCuratedSaleSupport.sol";
 import { StreamNativeCuratedClock } from "./StreamNativeCuratedClock.sol";
 import { StreamRefundWindowSupport } from "./StreamRefundWindowSupport.sol";
-
-interface ICuratedControlLiabilities {
-    function totalBuyerLiabilities() external view returns (uint256);
-}
+import {
+    ICuratedControlLiabilities
+} from "../../interfaces/stream/mint/ICuratedControlLiabilities.sol";
 
 /// @notice Fixed linked controls and earned-credit effects under the host's original shared guard.
 /// @dev The host authenticates own/delegated credit callers and passes only immutable role bindings.
