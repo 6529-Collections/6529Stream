@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "./StreamArtistCompleteHistoryChronologyActual.t.sol";
+import "./ArtistCompleteHistoryChronologyFixture.sol";
 import {
     StreamArtistCompleteHistoryTypes as AccountingCT
 } from "../../../smart-contracts/domains/artist/StreamArtistCompleteHistoryTypes.sol";
@@ -15,9 +15,7 @@ import {
 } from "../../../smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryTypes.sol";
 
 /// @notice Original owner writes supply the checkpoint; mutations target only the claimed census.
-contract StreamArtistCompleteHistoryAccountingActualTest is
-    StreamArtistCompleteHistoryChronologyActualTest
-{
+contract StreamArtistCompleteHistoryAccountingActualTest is ArtistCompleteHistoryChronologyFixture {
     function testCompleteAccountingPendingAndAcceptedSiblingConserveOriginalRevisions() external {
         (
             AccountingCT.Inventory memory inventory,

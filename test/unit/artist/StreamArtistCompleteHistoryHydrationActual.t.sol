@@ -4,8 +4,8 @@ pragma solidity ^0.8.19;
 import "./ArtistCompleteHistoryHydrationFixture.sol";
 
 /// @notice Actual guarded seven-owner operation60 after genuine55/56/57 and native source producers.
-/// @dev Authored integration regressions for pending shared-route activation. Native execution
-/// and gas acceptance remain pending; inherited Core/governance boundaries are unchanged.
+/// @dev Authored integration regressions through the shared route. Native execution and gas
+/// acceptance remain pending; inherited Core/governance/Finality boundaries are explicit.
 contract StreamArtistCompleteHistoryHydrationActualTest is ArtistCompleteHistoryHydrationFixture {
     function testCompleteHistoryActualImportsPendingNewArtistUnboundAndOriginalRepudiation()
         external
@@ -31,6 +31,9 @@ contract StreamArtistCompleteHistoryHydrationActualTest is ArtistCompleteHistory
         bytes32 source = _chSourceHash();
         uint256 nonce = artist.nonce();
         uint256 originalBlock = block.number;
+        OfficialSafe account = artist;
+        bytes memory envelope = _chSafeEnvelope(account, address(run.next.registry), call_, nonce);
+        bytes32 exactEnvelope = keccak256(envelope);
         // This exact first page belongs to the saved operation60 commitment. Three reaches
         // prove direct failure, Safe failure and identical successful retry all enter Archive.
         chVm.expectCall(address(run.next.archive), _chFirstPage(run), 3);
@@ -45,24 +48,64 @@ contract StreamArtistCompleteHistoryHydrationActualTest is ArtistCompleteHistory
             _chDestinationHash(run) == before_,
             "late direct failure restores every owner and artifact"
         );
-        vm.expectRevert(bytes("GS013"));
-        this.executeTargetSafe(address(run.next.registry), call_);
+        {
+            (bool ok, bytes memory reason) = address(account).call(envelope);
+            require(
+                !ok
+                    && keccak256(reason)
+                        == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
+                "exact signed Safe envelope reaches original GS013 rollback"
+            );
+        }
         require(
-            artist.nonce() == nonce && _chDestinationHash(run) == before_
-                && _chSourceHash() == source,
+            account.nonce() == nonce && keccak256(envelope) == exactEnvelope
+                && _chDestinationHash(run) == before_ && _chSourceHash() == source,
             "Safe nonce and complete PC MD U state restore"
         );
         vm.roll(originalBlock);
         require(
-            keccak256(call_) == exactRequest
-                && this.executeTargetSafe(address(run.next.registry), call_),
-            "byte-identical Safe retry"
+            keccak256(call_) == exactRequest && keccak256(envelope) == exactEnvelope,
+            "entire signed Safe envelope is unchanged before retry"
         );
+        {
+            (bool ok, bytes memory result) = address(account).call(envelope);
+            require(
+                ok && result.length == 32 && abi.decode(result, (bool)),
+                "same signed Safe envelope returns actual success"
+            );
+        }
         require(
-            artist.nonce() == nonce + 1 && _chSourceHash() == source,
+            account.nonce() == nonce + 1 && keccak256(envelope) == exactEnvelope
+                && _chSourceHash() == source,
             "only successful import consumes nonce"
         );
         _chAssert(run);
+    }
+
+    function _chSafeEnvelope(
+        OfficialSafe account,
+        address target,
+        bytes memory input,
+        uint256 nonce
+    ) private returns (bytes memory) {
+        bytes32 digest = account.getTransactionHash(
+            target, 0, input, 0, 0, 0, 0, address(0), address(0), nonce
+        );
+        return abi.encodeCall(
+            OfficialSafe.execTransaction,
+            (
+                target,
+                uint256(0),
+                input,
+                uint8(0),
+                uint256(0),
+                uint256(0),
+                uint256(0),
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(keys, digest)
+            )
+        );
     }
 
     function testCompleteHistoryActualSourceCheckpointMismatchRejectsAndOriginalRequestRetries()

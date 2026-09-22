@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./StreamArtistCompleteHistoryCompositionActual.t.sol";
+import "./ArtistCompleteHistoryCompositionFixture.sol";
+import "./ArtistCompleteHistoryFamiliesFixture.sol";
 import {
     StreamArtistCompleteHistoryCodec as CHCodec
 } from "../../../smart-contracts/domains/artist/StreamArtistCompleteHistoryCodec.sol";
@@ -33,9 +34,10 @@ interface CompleteHistoryHydrationVm {
 /// @notice Original Safe, all seven owners, Registry, Coordinator, Archive and complete lane import.
 /// @dev Core collection3 and governed action scheduling retain their explicit inherited unit
 /// boundaries. No capability, owner receipt, replay, nonce, checkpoint or Archive result is mocked.
-/// The tests require the integrator's shared complete-history activation; no test dispatch exists.
+/// The shared complete-history route is used directly; no test dispatch exists.
 abstract contract ArtistCompleteHistoryHydrationFixture is
-    StreamArtistCompleteHistoryCompositionActualTest
+    ArtistCompleteHistoryCompositionFixture,
+    ArtistCompleteHistoryFamiliesFixture
 {
     CompleteHistoryHydrationVm internal constant chVm =
         CompleteHistoryHydrationVm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -48,10 +50,24 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
         bytes32 latest;
     }
 
+    function _initialBindingProposal() internal view override returns (T.BindingProposal memory p) {
+        p = _proposal(0);
+        p.consentMode = 2;
+        p.saleConsentScope = 1;
+    }
+
     function _chRun() internal returns (CompleteRun memory run) {
         CHAdmissionType.Certificate memory source;
         (source, run.latest) = _compositionSource();
         _chAcceptedRepudiation();
+        return _chPrepare(source, run.latest);
+    }
+
+    function _chPrepare(CHAdmissionType.Certificate memory source, bytes32 latest)
+        internal
+        returns (CompleteRun memory run)
+    {
+        run.latest = latest;
         multiArtists = new bytes32[](source.artists.length);
         for (uint256 i; i < source.artists.length; ++i) {
             multiArtists[i] = source.artists[i].artistId;
@@ -66,6 +82,7 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
             run.request.records.authority.collections[k] =
                 MH.Collection(q.artistId, q.collectionId, q.policies);
         }
+        _chFamilyWitnesses(run.request);
         require(
             CHSelection.required(run.next.coordinator.suiteConfiguration(), run.request),
             "actual mixed source selects complete history"
@@ -74,9 +91,16 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
         run.request.expectedSemanticInventory = Prepared.inventory(run.prepared);
         (RH.ExportHeader memory header,) = Payload.decode(run.prepared.data[0].typedState, 0);
         require(
-            (header.requiredFeatures & CHType.FEATURE) != 0
-                && (header.requiredFeatures & RH.DISPUTE_HISTORY) != 0,
-            "shared preparation admits real complete MD graph"
+            (header.requiredFeatures
+                        & (CHType.FEATURE
+                            | RH.DISPUTE_HISTORY
+                            | RH.DELEGATED_CONSENT
+                            | RH.ATTESTATIONS
+                            | RH.RATIFICATIONS
+                            | RH.SANCTION_HISTORY))
+                == (CHType.FEATURE | RH.DISPUTE_HISTORY | RH.DELEGATED_CONSENT | RH.ATTESTATIONS
+                        | RH.RATIFICATIONS | RH.SANCTION_HISTORY),
+            "shared preparation admits every nonempty original family"
         );
     }
 
@@ -99,8 +123,9 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
         require(
             IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint
                 == acceptance.nonce + 1,
-            "original2 advances A nonce before original47"
+            "original2 advances A nonce before mixed family producers"
         );
+        _chMixedFamilies();
         CHAD.Filing memory filing =
             CHAD.Filing(1, 1, 4, 0, keccak256("complete mixed genuine pending repudiation"));
         T.Authorization memory authorization = T.Authorization(
@@ -242,6 +267,20 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
         _chAssert(run);
     }
 
+    function _chAdopt(CompleteRun memory run) internal {
+        ingress = run.next.registry;
+        coordinator = run.next.coordinator;
+        archive = run.next.archive;
+        suite = run.next.coordinator.suiteConfiguration();
+        // Preserve the actual ordinary principal Safe and keys; this source never recovered.
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).authorityAddress
+                == address(artist),
+            "original principal remains the actual imported authority"
+        );
+        nextNonce = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint;
+    }
+
     function _chAssert(CompleteRun memory run) internal view {
         Commit.Prepared memory p = run.prepared;
         T.SuiteConfiguration memory target = run.next.coordinator.suiteConfiguration();
@@ -298,6 +337,7 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
             _pcSemantics(target) == _pcSemantics(suite),
             "original partial collaborator and signatures retained"
         );
+        _chAssertFamilies(target);
         for (uint256 i; i < p.admission.artists.length; ++i) {
             bytes32 id = p.admission.artists[i].artistId;
             require(
@@ -450,6 +490,7 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
                 CHPlatformOwner(target.owners[4]).platformWorksState(3),
                 _chActivated(target.owners[2], 2, bytes32(uint256(3))),
                 _chRepudiationHash(target.owners[4]),
+                _chFamiliesHash(target),
                 _chGuardsHash(run),
                 _chArchiveHash(run.next.archive)
             )
@@ -508,6 +549,7 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
             abi.encode(
                 h,
                 _pcSemantics(suite),
+                _chFamiliesHash(suite),
                 _chRepudiationHash(suite.owners[4]),
                 CHPlatformOwner(suite.owners[4]).platformWorksState(3),
                 _chArchiveHash(archive)
@@ -565,6 +607,11 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
             CHEvidence.describe(profile),
             0
         );
-        return abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector, id);
+        uint256 size = profile.length < 20_480 ? profile.length : 20_480;
+        bytes memory page = new bytes(size);
+        for (uint256 i; i < size; ++i) {
+            page[i] = profile[i];
+        }
+        return abi.encodeCall(IStreamArtistArchiveV2.appendArtistEvidenceV2, (id, uint64(1), page));
     }
 }
