@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+import {
     StreamArtistRecoveredMultipleGenerationAttributionRecords as Storage
 } from "./StreamArtistRecoveredMultipleGenerationAttributionRecords.sol";
 import {
@@ -123,6 +126,7 @@ library StreamArtistPrimaryCollaboratorAttributionImport {
         if (!Codec.selected(outer, 4)) return false;
         Context memory c;
         (c.scope, c.payload) = Codec.outer(4, anchor, outer);
+        SanctionTransport.requireFeature(c.scope.rows, outer);
         (, bytes memory auxiliary) =
             Codec.decodeAuxiliary(4, c.payload.semanticState, c.payload.provenance);
         c.inventory = Codec.proof(4, auxiliary, c.payload.provenance);

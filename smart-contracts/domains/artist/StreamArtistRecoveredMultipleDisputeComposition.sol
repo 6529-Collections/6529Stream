@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionRows as SanctionRows
+} from "./StreamArtistRecoveredAggregateSanctionRows.sol";
+import {
+    StreamArtistRecoveredSanctionStage as SanctionSelection
+} from "./StreamArtistRecoveredSanctionStage.sol";
 
 import {
     StreamArtistRecoveredMultipleDisputeFamilyComposition as Families
@@ -80,11 +89,24 @@ library StreamArtistRecoveredMultipleDisputeComposition {
         A.AcceptanceBundle[] memory accepted = Acceptance.collect(
             x.source.owners[3], x.scope, RH.ownerProvenance(x.provenance, 3), inventory
         );
-        D.Bundle[] memory history =
-            Disputes.collect(x.source.owners[4], x.scope, x.provenance, inventory);
-        Proof.validateHistory(
-            history, x.scope, RH.ownerProvenance(x.provenance, 4), inventory, clocks
+        H.Inventory memory sanctions;
+        if (SanctionSelection.selected(x.provenance)) {
+            sanctions = SanctionRows.collect(
+                x.source.owners[6], x.scope.collections, x.provenance, inventory.bindings
+            );
+        }
+        D.Bundle[] memory history = Disputes.collect(
+            x.source.owners[4], x.scope, x.provenance, inventory, sanctions.sanctions.length != 0
         );
-        return Families.collect(Families.Context(x, inventory, clocks, accepted, history));
+        Proof.validateHistory(
+            history,
+            x.scope,
+            RH.ownerProvenance(x.provenance, 4),
+            inventory,
+            clocks,
+            sanctions.confirmations
+        );
+        return
+            Families.collect(Families.Context(x, inventory, clocks, accepted, history), sanctions);
     }
 }

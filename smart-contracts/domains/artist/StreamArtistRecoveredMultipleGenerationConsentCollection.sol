@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionConsentTransport as SanctionTransport
+} from "./StreamArtistRecoveredAggregateSanctionConsentTransport.sol";
+import {
     StreamArtistRecoveredAggregateRatificationSource as Ratifications
 } from "./StreamArtistRecoveredAggregateRatificationSource.sol";
 import {
@@ -110,6 +116,44 @@ library StreamArtistRecoveredMultipleGenerationConsentCollection {
         }
         ratifications = Ratifications.collect(c.source, c.scope.collections, p);
         rows = _collect(c, bindings, ratifications, true);
+    }
+
+    /// @notice Complete original12/13/52 composition, with all Archive facts already authenticated.
+    function collectSupplemented(
+        Context memory c,
+        CB.Bundle[] memory bindings,
+        H.Inventory memory sanctions
+    )
+        public
+        view
+        returns (G.Consents[] memory rows, T.RatificationRecord[][] memory ratifications)
+    {
+        if (sanctions.sanctions.length == 0) {
+            return collectRatified(c, bindings);
+        }
+        uint256 n = c.scope.collections.length;
+        if (c.economics.length != n || c.freezes.length != n || bindings.length != n) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
+        RH.OwnerProvenance memory p = RH.ownerProvenance(c.provenance, 6);
+        ratifications = Ratifications.collect(c.source, c.scope.collections, p);
+        rows = new G.Consents[](n);
+        for (uint256 k; k < n; ++k) {
+            uint256 count = bindings[k].bindings.rows.length;
+            rows[k].bindings = new T.Binding[](count);
+            for (uint256 g; g < count; ++g) {
+                rows[k].bindings[g] = bindings[k].bindings.rows[g].item;
+            }
+            rows[k].rows = Reads.collectSupplementedRows(
+                c.source, c.scope.collections[k], p, c.economics[k], c.freezes[k], rows[k].bindings
+            );
+        }
+        Validation.validate(
+            rows, ratifications, c.scope.collections, p, SanctionTransport.facts(sanctions)
+        );
+        for (uint256 k; k < n; ++k) {
+            Reads.requireHeads(c.source, rows[k].rows);
+        }
     }
 
     function _collect(

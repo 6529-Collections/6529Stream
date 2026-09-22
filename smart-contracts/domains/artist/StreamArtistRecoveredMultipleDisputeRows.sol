@@ -47,6 +47,17 @@ library StreamArtistRecoveredMultipleDisputeRows {
         RH.OwnerProvenance memory p,
         G.Inventory memory inventory
     ) public pure {
+        validate(rows, scope, p, inventory, false);
+    }
+
+    /// @dev State3 is admitted only with the caller's paired original confirmation proof.
+    function validate(
+        D.Bundle[] memory rows,
+        M.State memory scope,
+        RH.OwnerProvenance memory p,
+        G.Inventory memory inventory,
+        bool sanctioned
+    ) public pure {
         bytes32 provenance = Provenance.validateOwner(p, 4);
         if (rows.length != scope.collections.length || inventory.generations.length != rows.length) _invalid();
         uint256[] memory disputes = new uint256[](rows.length);
@@ -60,7 +71,10 @@ library StreamArtistRecoveredMultipleDisputeRows {
                     || b.generations.length == 0 || b.generations.length > 128
                     || b.heads.length != b.generations.length
                     || b.current.generation != b.generations.length
-                    || (b.current.state != 2 && b.current.state != 4 && b.current.state != 5)
+                    || (b.current.state != 2
+                        && b.current.state != 4
+                        && b.current.state != 5
+                        && (!sanctioned || b.current.state != 3))
                     || !b.generations[b.generations.length - 1].accepted
                     || b.generations[b.generations.length - 1].bindingHash != q.bindingHash
                     || keccak256(abi.encode(b.generations))
@@ -101,13 +115,17 @@ library StreamArtistRecoveredMultipleDisputeRows {
             if (disputes[k] != b.disputes.length || repudiations[k] != b.repudiations.length) {
                 _invalid();
             }
-            _resolutions(b, p);
+            _resolutions(b, p, sanctioned);
             Facts.pending(b);
-            Chains.validate(b, p);
+            if (sanctioned) Chains.validateSanctioned(b, p);
+            else Chains.validate(b, p);
         }
     }
 
-    function _resolutions(D.Bundle memory b, RH.OwnerProvenance memory p) private pure {
+    function _resolutions(D.Bundle memory b, RH.OwnerProvenance memory p, bool sanctioned)
+        private
+        pure
+    {
         for (uint256 i; i < b.resolutions.length; ++i) {
             D.ResolutionRow memory r = b.resolutions[i];
             AD.Resolution memory a = r.record;
@@ -124,7 +142,8 @@ library StreamArtistRecoveredMultipleDisputeRows {
                     || a.terms.reasonHash == 0
                     || (a.terms.resolution != 1 && a.terms.resolution != 2)
                     || (a.terms.resolution == 2 && (a.actionClass != 2 || a.restoredState != 5))
-                    || (a.terms.resolution == 1 && (a.restoredState < 1 || a.restoredState > 2))
+                    || (a.terms.resolution == 1
+                        && (a.restoredState < 1 || a.restoredState > (sanctioned ? 3 : 2)))
             ) _invalid();
             for (uint256 j; j < i; ++j) {
                 if (

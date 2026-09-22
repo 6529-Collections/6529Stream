@@ -1,5 +1,16 @@
 # Changelog
 
+## Aggregate original sanction history
+
+- Compose original sanction and confirmation history across the supported G,
+  MD and PRIMARY_ONLY collaborator recovery profiles. Preserve exact Archive
+  records, historical signatures, independent owner clocks, source heads and
+  confirmed attribution restoration.
+- Share the additive Consent carrier with original ratifications while keeping
+  previous tuple encodings and strict entry points. Focused regressions accompany
+  the source batch; native capacity and execution remain pending integration.
+  See the [integration guide](docs/integrations/artist-aggregate-sanctions.md).
+
 ## Aggregate original ratification history
 
 - Carry original operation-52 records through applicable recovered generation,

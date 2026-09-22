@@ -109,7 +109,7 @@ library StreamArtistRecoveredMultipleDisputePreparation {
         scope.collections = c.collections;
         Identity.preparationOwners(c.source.owners[2], scope, RH.ownerProvenance(c.provenance, 2));
         context.prepared.query = Codec.anchorQuery(scope);
-        Witnesses.Plan memory witnesses = Witnesses.collectRatified(
+        Witnesses.Plan memory witnesses = Witnesses.collectSupplemented(
             c.source, c.provenance, scope, input.request.records.witnesses, input.royalties
         );
         context.identities = new bytes[](c.artists.length);

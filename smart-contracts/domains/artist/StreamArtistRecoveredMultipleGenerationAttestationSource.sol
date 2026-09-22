@@ -96,6 +96,20 @@ library StreamArtistRecoveredMultipleGenerationAttestationSource {
         G.Inventory memory inventory,
         Clocks.Result memory clocks
     ) public view returns (bytes[] memory rows) {
+        return collect(source, scope, p, inputs, inventory, clocks, false);
+    }
+
+    /// @dev The selected aggregate profile separately proves each original confirmation and
+    /// its collection/generation timeline; this flag does not establish sanctioned authority.
+    function collect(
+        address source,
+        M.State memory scope,
+        RH.OwnerProvenance memory p,
+        ReadinessH.AttestationInput[][] memory inputs,
+        G.Inventory memory inventory,
+        Clocks.Result memory clocks,
+        bool sanctioned
+    ) public view returns (bytes[] memory rows) {
         Provenance.validateOwnerSource(p, 4, source);
         if (inputs.length != scope.collections.length || p.journal.length > RH.MAX_JOURNAL_ENTRIES) _invalid();
         Original.Bundle[] memory all = new Original.Bundle[](inputs.length);
@@ -172,7 +186,7 @@ library StreamArtistRecoveredMultipleGenerationAttestationSource {
             rows[k] = abi.encode(all[k]);
         }
         scope.rows = rows;
-        Validation.validate(scope, p, inventory, clocks);
+        Validation.validate(scope, p, inventory, clocks, sanctioned);
         Heads.requireMatches(source, scope, p, all, inventory);
     }
 

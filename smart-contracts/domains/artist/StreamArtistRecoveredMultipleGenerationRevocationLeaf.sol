@@ -26,6 +26,17 @@ library StreamArtistRecoveredMultipleGenerationRevocationLeaf {
         AH.Query memory q,
         RH.OriginEnvironment memory o
     ) public pure {
+        row(r, g, q, o, false);
+    }
+
+    /// @dev State3 is admitted only with the caller's paired original confirmation proof.
+    function row(
+        A.Revocation memory r,
+        A.Generation memory g,
+        AH.Query memory q,
+        RH.OriginEnvironment memory o,
+        bool sanctioned
+    ) public pure {
         AD.Record memory a = r.opening;
         AD.Resolution memory d = r.resolution;
         AD.Head memory h = r.head;
@@ -51,7 +62,8 @@ library StreamArtistRecoveredMultipleGenerationRevocationLeaf {
         ) _invalid();
         if (
             h.disputeRecordHash != a.recordHash || h.counterStatementRecordHash != 0
-                || h.resolutionActionId != d.actionId || h.restoreState != 2
+                || h.resolutionActionId != d.actionId
+                || (h.restoreState != 2 && (!sanctioned || h.restoreState != 3))
                 || h.revocationReason != 4 || h.open || h.reopened || d.actionId == 0
                 || d.actionId == a.governanceActionId || d.actor == address(0)
                 || d.proposer == address(0) || d.actionClass != 2 || d.restoredState != 5

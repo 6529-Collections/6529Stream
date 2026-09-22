@@ -42,15 +42,24 @@ library StreamArtistRecoveredMultipleGenerationConsentUses {
     }
 
     function validate(Context calldata x) public pure returns (uint256[][] memory totals) {
-        return _validate(x, false);
+        return _validate(x, false, false);
     }
 
     /// @dev Original52 facts must already be authenticated by the enclosing aggregate.
     function validateRatified(Context calldata x) public pure returns (uint256[][] memory totals) {
-        return _validate(x, true);
+        return _validate(x, true, false);
     }
 
-    function _validate(Context calldata x, bool allowRatifications)
+    /// @dev Complete original12/13/52 source facts precede this delegation-use census.
+    function validateSupplemented(Context calldata x)
+        public
+        pure
+        returns (uint256[][] memory totals)
+    {
+        return _validate(x, true, true);
+    }
+
+    function _validate(Context calldata x, bool allowRatifications, bool allowSanctions)
         private
         pure
         returns (uint256[][] memory totals)
@@ -103,11 +112,15 @@ library StreamArtistRecoveredMultipleGenerationConsentUses {
             );
             Content.Scope memory contentScope =
                 Content.Scope(q.artistId, q.collectionId, q.bindingHash);
-            uint256[] memory uses = allowRatifications
-                ? Content.validateRatifiedRows(
+            uint256[] memory uses = allowSanctions
+                ? Content.validateSupplementedRows(
                     contentIdentity, contentRows, contentScope, x.provenance
                 )
-                : Content.validateRows(contentIdentity, contentRows, contentScope, x.provenance);
+                : allowRatifications
+                    ? Content.validateRatifiedRows(
+                        contentIdentity, contentRows, contentScope, x.provenance
+                    )
+                    : Content.validateRows(contentIdentity, contentRows, contentScope, x.provenance);
             // Original14 has no saved generation. An accepted historical mode2 binding is
             // necessary for retained delegated14, without assigning it to that generation.
             // Each original16 instead carries its own exact accepted mode2 binding, checked

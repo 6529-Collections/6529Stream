@@ -113,6 +113,19 @@ library StreamArtistRecoveredSanctionRows {
         _confirmed(p, x);
     }
 
+    /// @notice The original singleton op12 proof, reusable after exact aggregate binding selection.
+    /// @dev The caller authenticates the full catalogue, original era and binding inventory.
+    function validateSanction(
+        RH.OriginEnvironment memory o,
+        RH.Era memory era,
+        H.Envelope memory e,
+        H.SanctionPayload memory s,
+        AH.Query memory q,
+        G.Bundle memory bindings
+    ) public pure {
+        _sanction(o, era, e, s, q, bindings);
+    }
+
     function _sanction(
         RH.OriginEnvironment memory o,
         RH.Era memory era,

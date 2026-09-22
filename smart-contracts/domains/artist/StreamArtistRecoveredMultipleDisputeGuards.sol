@@ -26,6 +26,10 @@ import {
     StreamArtistRecoveredHydrationChronology as Clock
 } from "./StreamArtistRecoveredHydrationChronology.sol";
 
+import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+
 /// @notice Exact whole-owner aliases, mutation counts and disjoint original owner4 clocks.
 library StreamArtistRecoveredMultipleDisputeGuards {
     function validate(
@@ -33,11 +37,20 @@ library StreamArtistRecoveredMultipleDisputeGuards {
         RH.OwnerProvenance memory p,
         Clocks.Result memory clocks
     ) public pure {
+        validate(rows, p, clocks, new H.ConfirmationRow[](0));
+    }
+
+    function validate(
+        D.Bundle[] memory rows,
+        RH.OwnerProvenance memory p,
+        Clocks.Result memory clocks,
+        H.ConfirmationRow[] memory confirmations
+    ) public pure {
         if (rows.length != clocks.collections.length || clocks.counts.length != p.eras.length) _invalid();
         bool[] memory used = new bool[](p.aliases.length);
         uint256[] memory cells = new uint256[](p.eras.length);
         uint256[] memory mutations = new uint256[](p.eras.length);
-        uint256 totalAuxiliary;
+        uint256 totalAuxiliary = confirmations.length;
         for (uint256 k; k < rows.length; ++k) {
             totalAuxiliary += rows[k].resolutions.length + rows[k].repudiations.length;
         }
@@ -61,6 +74,15 @@ library StreamArtistRecoveredMultipleDisputeGuards {
                     auxiliary[cursor++] = b.repudiations[i].terminalPoint;
                 }
             }
+        }
+        // Original13 advances owner4 without a native row or an owner4 replay cell.
+        // The paired history proof authenticates these exact original confirmation points.
+        for (uint256 i; i < confirmations.length; ++i) {
+            RH.Point memory point = confirmations[i].attributionPoint;
+            if (point.ownerRevision <= p.eras[A.era(p, point.environmentHash)].lowerRevision) {
+                _invalid();
+            }
+            auxiliary[cursor++] = point;
         }
         Aliases.complete(used);
         for (uint256 i; i < cursor; ++i) {

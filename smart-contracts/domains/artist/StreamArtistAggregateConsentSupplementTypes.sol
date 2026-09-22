@@ -15,7 +15,7 @@ import {
 /// @dev Empty supplements retain the exact original G.Consents bytes instead of this wrapper.
 /// sanctionInventory is reserved for canonical abi.encode of the existing sanction H.Inventory,
 /// validated by its fixed worker over the complete global catalogue, never a filtered certificate.
-/// Until that worker is selected and implemented, every nonempty sanctionInventory is rejected.
+/// Only the selected fixed sanction worker admits nonempty inventory; ratification-only entries reject it.
 library StreamArtistAggregateConsentSupplementTypes {
     bytes32 internal constant SCHEMA =
         keccak256("6529STREAM_ARTIST_AGGREGATE_CONSENT_SUPPLEMENT_V1");

@@ -32,6 +32,18 @@ import {
     StreamArtistPrimaryCollaboratorSourceProof as Source
 } from "./StreamArtistPrimaryCollaboratorSourceProof.sol";
 
+import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+
+import {
+    StreamArtistRecoveredAggregateSanctionLocalProof as SanctionLocal
+} from "./StreamArtistRecoveredAggregateSanctionLocalProof.sol";
+
 /// @notice Complete canonical owner4 rows, original clocks, revocations and attestations.
 /// @dev Keeps the original semantic rows for clock/revocation validation and a fresh
 /// attestation row view. Neither validation consumes or alters the original row bytes.
@@ -46,12 +58,21 @@ library StreamArtistPrimaryCollaboratorAttributionProof {
         RH.OwnerProvenance memory provenance,
         PC.Proof memory inventory
     ) public view returns (Result memory result) {
+        H.Inventory memory sanctions;
+        (scope, sanctions) = SanctionTransport.decode(scope);
+        if (sanctions.sanctions.length != 0) {
+            SanctionLocal.validate(provenance, 4, scope.collections, sanctions);
+        }
         result.histories = new A.AttributionBundle[](scope.rows.length);
         M.State memory attested =
             M.State(scope.artists, scope.collections, new bytes[](scope.rows.length));
         for (uint256 k; k < scope.rows.length; ++k) {
             G.Attribution memory row = abi.decode(scope.rows[k], (G.Attribution));
             if (keccak256(scope.rows[k]) != keccak256(abi.encode(row))) _invalid();
+            if (
+                keccak256(abi.encode(row.history.current))
+                    != keccak256(abi.encode(row.records.item))
+            ) _invalid();
             result.histories[k] = row.history;
             attested.rows[k] = abi.encode(row.records);
         }
@@ -61,10 +82,20 @@ library StreamArtistPrimaryCollaboratorAttributionProof {
         ) _invalid();
         Source.Result memory source = Source.requireCurrent(scope, inventory);
         Revocations.validate(
-            result.histories, scope, provenance, source.generations, source.clocks.clocks
+            result.histories,
+            scope,
+            provenance,
+            source.generations,
+            source.clocks.clocks,
+            sanctions.confirmations
         );
-        result.all =
-            Validation.validate(attested, provenance, source.generations, source.clocks.clocks);
+        result.all = Validation.validate(
+            attested,
+            provenance,
+            source.generations,
+            source.clocks.clocks,
+            sanctions.sanctions.length != 0
+        );
     }
 
     /// @dev Same complete proof with no unused external return-data decoding at the final currentness call.

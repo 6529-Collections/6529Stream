@@ -41,6 +41,22 @@ import {
     StreamArtistRecoveredMultipleDisputeArchive as Archive
 } from "./StreamArtistRecoveredMultipleDisputeArchive.sol";
 
+import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+
+import {
+    StreamArtistRecoveredAggregateSanctionLocalProof as SanctionLocal
+} from "./StreamArtistRecoveredAggregateSanctionLocalProof.sol";
+
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionFacts as SanctionFacts
+} from "./StreamArtistRecoveredAggregateSanctionAttributionFacts.sol";
+
 /// @notice Complete canonical owner4 rows, original clocks, revocations and attestations.
 /// @dev Keeps the original semantic rows for clock/revocation validation and a fresh
 /// attestation row view. Neither validation consumes or alters the original row bytes.
@@ -56,6 +72,11 @@ library StreamArtistRecoveredMultipleDisputeAttributionProof {
         RH.OwnerProvenance memory provenance,
         G.Inventory memory inventory
     ) public view returns (Result memory result) {
+        H.Inventory memory sanctions;
+        (scope, sanctions) = SanctionTransport.decode(scope);
+        if (sanctions.sanctions.length != 0) {
+            SanctionLocal.validate(provenance, 4, scope.collections, sanctions);
+        }
         result.histories = new D.Bundle[](scope.rows.length);
         M.State memory attested =
             M.State(scope.artists, scope.collections, new bytes[](scope.rows.length));
@@ -70,8 +91,12 @@ library StreamArtistRecoveredMultipleDisputeAttributionProof {
             attested.rows[k] = abi.encode(row.records);
         }
         Clocks.Result memory clocks = ClockProof.validateLocal(scope, provenance, inventory);
-        validateHistory(result.histories, scope, provenance, inventory, clocks);
-        result.all = Validation.validate(attested, provenance, inventory, clocks);
+        validateHistory(
+            result.histories, scope, provenance, inventory, clocks, sanctions.confirmations
+        );
+        result.all = Validation.validate(
+            attested, provenance, inventory, clocks, sanctions.sanctions.length != 0
+        );
     }
 
     function validateHistory(
@@ -81,10 +106,22 @@ library StreamArtistRecoveredMultipleDisputeAttributionProof {
         G.Inventory memory inventory,
         Clocks.Result memory clocks
     ) public view {
-        Rows.validate(histories, scope, p, inventory);
-        Guards.validate(histories, p, clocks);
+        validateHistory(histories, scope, p, inventory, clocks, new H.ConfirmationRow[](0));
+    }
+
+    function validateHistory(
+        D.Bundle[] memory histories,
+        M.State memory scope,
+        RH.OwnerProvenance memory p,
+        G.Inventory memory inventory,
+        Clocks.Result memory clocks,
+        H.ConfirmationRow[] memory confirmations
+    ) public view {
+        Rows.validate(histories, scope, p, inventory, confirmations.length != 0);
+        Guards.validate(histories, p, clocks, confirmations);
         Timeline.validate(histories, p, inventory, clocks);
         Archive.validate(histories, p, inventory);
+        if (confirmations.length != 0) SanctionFacts.disputes(histories, p, clocks, confirmations);
     }
 
     /// @dev Same complete proof with no unused external return-data decoding at the final currentness call.

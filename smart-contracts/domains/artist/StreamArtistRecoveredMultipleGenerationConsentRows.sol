@@ -62,7 +62,7 @@ library StreamArtistRecoveredMultipleGenerationConsentRows {
         Scope memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
-        return _validateRows(identity, consent, q, p, false);
+        return _validateRows(identity, consent, q, p, false, false);
     }
 
     /// @dev The enclosing aggregate must first authenticate all original52 rows and signatures.
@@ -73,7 +73,17 @@ library StreamArtistRecoveredMultipleGenerationConsentRows {
         Scope memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
-        return _validateRows(identity, consent, q, p, true);
+        return _validateRows(identity, consent, q, p, true, false);
+    }
+
+    /// @dev Original12/13/52 facts are authenticated by the enclosing aggregate; none consumes a grant.
+    function validateSupplementedRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p
+    ) public pure returns (uint256[] memory uses) {
+        return _validateRows(identity, consent, q, p, true, true);
     }
 
     function _validateRows(
@@ -81,7 +91,8 @@ library StreamArtistRecoveredMultipleGenerationConsentRows {
         ConsentRows memory consent,
         Scope memory q,
         RH.Provenance memory p,
-        bool allowRatifications
+        bool allowRatifications,
+        bool allowSanctions
     ) private pure returns (uint256[] memory uses) {
         if (
             q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0
@@ -100,7 +111,10 @@ library StreamArtistRecoveredMultipleGenerationConsentRows {
                     || native_.receipt.collectionId != q.collectionId
             ) continue;
             uint16 op = native_.receipt.operation;
-            if (op == 14 || op == 15 || op == 16 || (allowRatifications && op == 52)) continue;
+            if (
+                op == 14 || op == 15 || op == 16 || (allowRatifications && op == 52)
+                    || (allowSanctions && op == 12)
+            ) continue;
             if (op != 17 && op != 20 && op != 21) _invalid();
             if (
                 native_.receipt.artistId != q.artistId

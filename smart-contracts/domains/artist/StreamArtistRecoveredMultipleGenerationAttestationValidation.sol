@@ -88,6 +88,18 @@ library StreamArtistRecoveredMultipleGenerationAttestationValidation {
         G.Inventory memory inventory,
         Clocks.Result memory clocks
     ) public pure returns (Original.Bundle[] memory all) {
+        return validate(scope, p, inventory, clocks, false);
+    }
+
+    /// @dev The selected aggregate profile separately proves each original confirmation and
+    /// its collection/generation timeline; this flag does not establish sanctioned authority.
+    function validate(
+        M.State memory scope,
+        RH.OwnerProvenance memory p,
+        G.Inventory memory inventory,
+        Clocks.Result memory clocks,
+        bool sanctioned
+    ) public pure returns (Original.Bundle[] memory all) {
         Provenance.validateOwner(p, 4);
         Scope.validate(4, scope, p);
         if (
@@ -104,7 +116,8 @@ library StreamArtistRecoveredMultipleGenerationAttestationValidation {
             if (
                 keccak256(scope.rows[k]) != keccak256(abi.encode(b)) || b.provenance != whole
                     || b.artistId != q.artistId || b.collectionId != q.collectionId
-                    || b.bindingHash != q.bindingHash || b.item.state != 2
+                    || b.bindingHash != q.bindingHash
+                    || (b.item.state != 2 && (!sanctioned || b.item.state != 3))
                     || b.item.generation != inventory.bindings[k].bindings.rows.length
                     || b.records.length > 128 || b.personhood.length > 128
                     || b.records.length != q.records.length

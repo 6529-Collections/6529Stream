@@ -37,20 +37,34 @@ library StreamArtistRecoveredMultipleGenerationConservation {
     }
 
     function validate(Context calldata x) public pure {
-        _validate(x, false);
+        _validate(x, false, false);
     }
 
     /// @dev The complete original52 journal and facts must be validated before this entry.
     function validateRatified(Context calldata x) public pure {
-        _validate(x, true);
+        _validate(x, true, false);
     }
 
-    function _validate(Context calldata x, bool allowRatifications) private pure {
-        uint256[][] memory consent = allowRatifications
-            ? Consents.validateRatified(
+    /// @dev Original12/13/52 source facts and the complete combined Consent proof precede this census.
+    function validateSupplemented(Context calldata x) public pure {
+        _validate(x, true, true);
+    }
+
+    function _validate(Context calldata x, bool allowRatifications, bool allowSanctions)
+        private
+        pure
+    {
+        uint256[][] memory consent = allowSanctions
+            ? Consents.validateSupplemented(
                 Consents.Context(x.identities, x.scope, x.consents, x.provenance)
             )
-            : Consents.validate(Consents.Context(x.identities, x.scope, x.consents, x.provenance));
+            : allowRatifications
+                ? Consents.validateRatified(
+                    Consents.Context(x.identities, x.scope, x.consents, x.provenance)
+                )
+                : Consents.validate(
+                    Consents.Context(x.identities, x.scope, x.consents, x.provenance)
+                );
         uint256[][] memory attested = Attestations.validate(
             Attestations.Context(
                 x.identities,

@@ -1,6 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionIdentityFacts as SanctionIdentity
+} from "./StreamArtistRecoveredAggregateSanctionIdentityFacts.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionConsentTransport as SanctionConsent
+} from "./StreamArtistRecoveredAggregateSanctionConsentTransport.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionAttribution
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+import {
+    StreamArtistRecoveredSanctionCatalogue as SanctionCatalogue
+} from "./StreamArtistRecoveredSanctionCatalogue.sol";
+import {
     StreamArtistRecoveredAggregateRatificationFacts as RatificationFacts
 } from "./StreamArtistRecoveredAggregateRatificationFacts.sol";
 import {
@@ -86,7 +101,16 @@ library StreamArtistPrimaryCollaboratorFamilyComposition {
     }
 
     function collect(Context memory c) public view returns (Composition.Result memory result) {
-        (G.Consents[] memory consents, T.RatificationRecord[][] memory ratifications) = ConsentCollection.collectRatified(
+        H.Inventory memory empty;
+        return collect(c, empty);
+    }
+
+    function collect(Context memory c, H.Inventory memory sanctions)
+        public
+        view
+        returns (Composition.Result memory result)
+    {
+        (G.Consents[] memory consents, T.RatificationRecord[][] memory ratifications) = ConsentCollection.collectSupplemented(
             ConsentCollection.Context(
                 c.source.source.owners[6],
                 c.source.provenance,
@@ -94,7 +118,8 @@ library StreamArtistPrimaryCollaboratorFamilyComposition {
                 c.source.economics,
                 c.source.freezes
             ),
-            c.observed.generations.bindings
+            c.observed.generations.bindings,
+            sanctions
         );
         bytes[] memory attestations = Attestations.collect(
             c.source.source.owners[4],
@@ -102,7 +127,8 @@ library StreamArtistPrimaryCollaboratorFamilyComposition {
             RH.ownerProvenance(c.source.provenance, 4),
             c.source.attestations,
             c.observed.generations,
-            c.observed.clocks.clocks
+            c.observed.clocks.clocks,
+            sanctions.sanctions.length != 0
         );
         IdentityFacts.validate(
             IdentityFacts.Context(
@@ -114,6 +140,11 @@ library StreamArtistPrimaryCollaboratorFamilyComposition {
                 c.source.provenance
             )
         );
+        if (sanctions.sanctions.length != 0) {
+            SanctionIdentity.validate(
+                c.source.identities, c.source.scope, sanctions, c.source.provenance
+            );
+        }
         bool hasRatifications;
         for (uint256 i; i < ratifications.length; ++i) {
             if (ratifications[i].length != 0) hasRatifications = true;
@@ -131,12 +162,14 @@ library StreamArtistPrimaryCollaboratorFamilyComposition {
             c.observed.generations,
             c.source.provenance
         );
-        if (hasRatifications) {
+        if (sanctions.sanctions.length != 0) {
+            Conservation.validateSupplemented(conservation);
+        } else if (hasRatifications) {
             Conservation.validateRatified(conservation);
         } else {
             Conservation.validate(conservation);
         }
-        return Encoding.encodeRatified(
+        result = Encoding.encodeRatified(
             Encoding.Context(
                 c.source.scope.collections.length,
                 c.source.features,
@@ -148,5 +181,14 @@ library StreamArtistPrimaryCollaboratorFamilyComposition {
             ),
             ratifications
         );
+        if (sanctions.sanctions.length != 0) {
+            SanctionCatalogue.requireCurrent(
+                c.source.provenance, sanctions.catalogues, sanctions.operations
+            );
+            result.consents = SanctionConsent.encode(result.consents, sanctions);
+            result.attribution = SanctionAttribution.encode(result.attribution, sanctions);
+            result.features |= RH.SANCTION_HISTORY;
+        }
+        return result;
     }
 }

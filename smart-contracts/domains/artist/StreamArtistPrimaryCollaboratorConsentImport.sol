@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateConsentProof as SupplementProof
+} from "./StreamArtistRecoveredAggregateConsentProof.sol";
+import {
     StreamArtistRecoveredAggregateRatificationRows as Ratifications
 } from "./StreamArtistRecoveredAggregateRatificationRows.sol";
 import {
@@ -76,9 +79,8 @@ library StreamArtistPrimaryCollaboratorConsentImport {
     ) public returns (bool) {
         if (!Codec.selected(outer, 6)) return false;
         (M.State memory s, Payload.Payload memory p,) = Decode.collect(6, anchor, outer);
-        (G.Consents[] memory all, T.RatificationRecord[][] memory ratifications) =
-            Ratifications.decodeOwnerRows(s.rows, outer);
-        Validation.validate(all, ratifications, s.collections, p.provenance);
+        G.Consents[] memory all =
+            SupplementProof.validate(s.rows, s.collections, p.provenance, outer);
         for (uint256 i; i < all.length; ++i) {
             Base.install(
                 policies,

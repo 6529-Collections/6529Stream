@@ -1,6 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionIdentityFacts as SanctionIdentity
+} from "./StreamArtistRecoveredAggregateSanctionIdentityFacts.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionConsentTransport as SanctionConsent
+} from "./StreamArtistRecoveredAggregateSanctionConsentTransport.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionAttribution
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+import {
+    StreamArtistRecoveredSanctionCatalogue as SanctionCatalogue
+} from "./StreamArtistRecoveredSanctionCatalogue.sol";
+import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import {
@@ -57,7 +72,16 @@ library StreamArtistRecoveredMultipleDisputeFamilyComposition {
     }
 
     function collect(Context memory c) public view returns (Composition.Result memory result) {
-        (G.Consents[] memory consents, T.RatificationRecord[][] memory ratifications) = ConsentCollection.collectRatified(
+        H.Inventory memory empty;
+        return collect(c, empty);
+    }
+
+    function collect(Context memory c, H.Inventory memory sanctions)
+        public
+        view
+        returns (Composition.Result memory result)
+    {
+        (G.Consents[] memory consents, T.RatificationRecord[][] memory ratifications) = ConsentCollection.collectSupplemented(
             ConsentCollection.Context(
                 c.source.source.owners[6],
                 c.source.provenance,
@@ -65,7 +89,8 @@ library StreamArtistRecoveredMultipleDisputeFamilyComposition {
                 c.source.economics,
                 c.source.freezes
             ),
-            c.inventory.bindings
+            c.inventory.bindings,
+            sanctions
         );
         bytes[] memory attestations = Attestations.collect(
             c.source.source.owners[4],
@@ -73,13 +98,19 @@ library StreamArtistRecoveredMultipleDisputeFamilyComposition {
             RH.ownerProvenance(c.source.provenance, 4),
             c.source.attestations,
             c.inventory,
-            c.clocks
+            c.clocks,
+            sanctions.sanctions.length != 0
         );
         IdentityFacts.validate(
             IdentityFacts.Context(
                 c.source.identities, c.source.scope, c.inventory, c.accepted, c.source.provenance
             )
         );
+        if (sanctions.sanctions.length != 0) {
+            SanctionIdentity.validate(
+                c.source.identities, c.source.scope, sanctions, c.source.provenance
+            );
+        }
         bool hasRatifications;
         for (uint256 i; i < ratifications.length; ++i) {
             if (ratifications[i].length != 0) hasRatifications = true;
@@ -98,12 +129,14 @@ library StreamArtistRecoveredMultipleDisputeFamilyComposition {
             c.source.provenance,
             c.history
         );
-        if (hasRatifications) {
+        if (sanctions.sanctions.length != 0) {
+            Conservation.validateSupplemented(conservation);
+        } else if (hasRatifications) {
             Conservation.validateRatified(conservation);
         } else {
             Conservation.validate(conservation);
         }
-        return Encoding.encodeRatified(
+        result = Encoding.encodeRatified(
             Encoding.Context(
                 c.source.scope.collections.length,
                 c.source.features,
@@ -115,5 +148,14 @@ library StreamArtistRecoveredMultipleDisputeFamilyComposition {
             ),
             ratifications
         );
+        if (sanctions.sanctions.length != 0) {
+            SanctionCatalogue.requireCurrent(
+                c.source.provenance, sanctions.catalogues, sanctions.operations
+            );
+            result.consents = SanctionConsent.encode(result.consents, sanctions);
+            result.attribution = SanctionAttribution.encode(result.attribution, sanctions);
+            result.features |= RH.SANCTION_HISTORY;
+        }
+        return result;
     }
 }

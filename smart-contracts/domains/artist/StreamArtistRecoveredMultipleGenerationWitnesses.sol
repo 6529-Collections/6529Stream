@@ -34,7 +34,7 @@ library StreamArtistRecoveredMultipleGenerationWitnesses {
         MR.CollectionWitness[] memory witnesses,
         T.RoyaltyFreeze[] memory royalties
     ) public pure returns (Plan memory plan) {
-        return _collect(source, p, scope, witnesses, royalties, false);
+        return _collect(source, p, scope, witnesses, royalties, false, false);
     }
 
     /// @dev Original52 has no caller-supplied term witness. Its complete rows are proved separately.
@@ -45,7 +45,18 @@ library StreamArtistRecoveredMultipleGenerationWitnesses {
         MR.CollectionWitness[] memory witnesses,
         T.RoyaltyFreeze[] memory royalties
     ) public pure returns (Plan memory plan) {
-        return _collect(source, p, scope, witnesses, royalties, true);
+        return _collect(source, p, scope, witnesses, royalties, true, false);
+    }
+
+    /// @dev Terms are requested only for their original families; sanction bytes come from Archive.
+    function collectSupplemented(
+        T.SuiteConfiguration memory source,
+        RH.Provenance memory p,
+        M.State memory scope,
+        MR.CollectionWitness[] memory witnesses,
+        T.RoyaltyFreeze[] memory royalties
+    ) public pure returns (Plan memory plan) {
+        return _collect(source, p, scope, witnesses, royalties, true, true);
     }
 
     function _collect(
@@ -54,7 +65,8 @@ library StreamArtistRecoveredMultipleGenerationWitnesses {
         M.State memory scope,
         MR.CollectionWitness[] memory witnesses,
         T.RoyaltyFreeze[] memory royalties,
-        bool allowRatifications
+        bool allowRatifications,
+        bool allowSanctions
     ) private pure returns (Plan memory plan) {
         uint256 n = scope.collections.length;
         plan.economics = new T.EconomicsConsent[][](n);
@@ -77,6 +89,7 @@ library StreamArtistRecoveredMultipleGenerationWitnesses {
                 j.receipt.operation != 14 && j.receipt.operation != 16 && j.receipt.operation != 17
                     && j.receipt.operation != 21
                     && (!allowRatifications || j.receipt.operation != 52)
+                    && (!allowSanctions || j.receipt.operation != 12)
             ) {
                 _invalid();
             }

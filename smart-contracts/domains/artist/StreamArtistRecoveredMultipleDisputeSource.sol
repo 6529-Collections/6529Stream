@@ -60,6 +60,17 @@ library StreamArtistRecoveredMultipleDisputeSource {
         RH.Provenance memory p,
         G.Inventory memory inventory
     ) public view returns (D.Bundle[] memory all) {
+        return collect(source, scope, p, inventory, false);
+    }
+
+    /// @dev State3 is admitted only with the caller's paired original confirmation proof.
+    function collect(
+        address source,
+        M.State memory scope,
+        RH.Provenance memory p,
+        G.Inventory memory inventory,
+        bool sanctioned
+    ) public view returns (D.Bundle[] memory all) {
         all = new D.Bundle[](scope.collections.length);
         for (uint256 k; k < all.length; ++k) {
             all[k] = _collect(
@@ -95,7 +106,7 @@ library StreamArtistRecoveredMultipleDisputeSource {
                 }
             }
         }
-        Rows.validate(all, scope, RH.ownerProvenance(p, 4), inventory);
+        Rows.validate(all, scope, RH.ownerProvenance(p, 4), inventory, sanctioned);
     }
 
     function _collect(

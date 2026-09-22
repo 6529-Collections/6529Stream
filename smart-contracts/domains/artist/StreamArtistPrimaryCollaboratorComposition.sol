@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionRows as SanctionRows
+} from "./StreamArtistRecoveredAggregateSanctionRows.sol";
+import {
+    StreamArtistRecoveredSanctionStage as SanctionSelection
+} from "./StreamArtistRecoveredSanctionStage.sol";
+import {
     StreamArtistPrimaryCollaboratorFamilyComposition as Families
 } from "./StreamArtistPrimaryCollaboratorFamilyComposition.sol";
 import {
@@ -101,13 +110,20 @@ library StreamArtistPrimaryCollaboratorComposition {
     function collect(Context memory x) public view returns (Result memory result) {
         (PC.Proof memory proof, Source.Result memory observed) =
             Source.collect(x.scope, x.provenance);
+        H.Inventory memory sanctions;
+        if (SanctionSelection.selected(x.provenance)) {
+            sanctions = SanctionRows.collect(
+                x.source.owners[6], x.scope.collections, x.provenance, observed.generations.bindings
+            );
+        }
         A.AttributionBundle[] memory history = Revocations.collect(
             x.source.owners[4],
             x.scope,
             RH.ownerProvenance(x.provenance, 4),
             observed.generations,
-            observed.clocks.clocks
+            observed.clocks.clocks,
+            sanctions.confirmations
         );
-        return Families.collect(Families.Context(x, proof, observed, history));
+        return Families.collect(Families.Context(x, proof, observed, history), sanctions);
     }
 }

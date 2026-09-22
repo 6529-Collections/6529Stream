@@ -64,7 +64,7 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         T.RoyaltyFreeze[] memory royalties,
         T.Binding[] memory bindings
     ) public view returns (ContentH.Bundle memory b) {
-        return _collectRows(source, q, p, economics, royalties, bindings, false);
+        return _collectRows(source, q, p, economics, royalties, bindings, false, false);
     }
 
     function collectRatifiedRows(
@@ -75,7 +75,19 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         T.RoyaltyFreeze[] memory royalties,
         T.Binding[] memory bindings
     ) public view returns (ContentH.Bundle memory b) {
-        return _collectRows(source, q, p, economics, royalties, bindings, true);
+        return _collectRows(source, q, p, economics, royalties, bindings, true, false);
+    }
+
+    /// @dev Only the enclosing global supplement proof may admit the additional original12 rows.
+    function collectSupplementedRows(
+        address source,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        T.Binding[] memory bindings
+    ) public view returns (ContentH.Bundle memory) {
+        return _collectRows(source, q, p, economics, royalties, bindings, true, true);
     }
 
     function _collectRows(
@@ -85,7 +97,8 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         T.EconomicsConsent[] memory economics,
         T.RoyaltyFreeze[] memory royalties,
         T.Binding[] memory bindings,
-        bool allowRatifications
+        bool allowRatifications,
+        bool allowSanctions
     ) private view returns (ContentH.Bundle memory b) {
         Provenance.validateOwnerSource(p, 6, source);
         uint256 cc;
@@ -103,14 +116,17 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
                 ++rc;
             } else if (op == 21) {
                 ++fc;
-            } else if (op != 14 && op != 15 && op != 16 && (!allowRatifications || op != 52)) {
+            } else if (
+                op != 14 && op != 15 && op != 16 && (!allowRatifications || op != 52)
+                    && (!allowSanctions || op != 12)
+            ) {
                 revert T.UnsupportedProfile();
             }
         }
         if (cc > MAX_ROWS || rc > MAX_ROWS || fc > MAX_ROWS || royalties.length != rc) {
             revert T.UnsupportedProfile();
         }
-        b.original = _base(source, q, p, economics, allowRatifications);
+        b.original = _base(source, q, p, economics, allowRatifications, allowSanctions);
         b.consents = new ContentOwner.ConsentRecord[](cc);
         b.royalties = new ContentH.Royalty[](rc);
         b.freezes = new Content.FreezeRecord[](fc);
@@ -202,7 +218,8 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         AH.Query memory q,
         RH.OwnerProvenance memory p,
         T.EconomicsConsent[] memory terms,
-        bool allowRatifications
+        bool allowRatifications,
+        bool allowSanctions
     ) private view returns (Base.Bundle memory b) {
         if (q.policies.length > MAX_ROWS || terms.length > MAX_ROWS) {
             revert T.UnsupportedProfile();
@@ -258,7 +275,7 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
                 ++count;
             } else if (
                 op != 14 && op != 15 && op != 17 && op != 20 && op != 21
-                    && (!allowRatifications || op != 52)
+                    && (!allowRatifications || op != 52) && (!allowSanctions || op != 12)
             ) {
                 revert T.UnsupportedProfile();
             }

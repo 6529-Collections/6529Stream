@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistAggregateSanctionConsentTypes as SanctionFacts
+} from "./StreamArtistAggregateSanctionConsentTypes.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionConsentFacts as Sanctions
+} from "./StreamArtistRecoveredAggregateSanctionConsentFacts.sol";
+import {
+    StreamArtistRecoveredSanctionHistoryTypes as SanctionHistory
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
 
 import {
     StreamArtistRecoveredHydrationTypes as RH
@@ -84,12 +93,24 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
         AH.Query[] memory queries,
         RH.OwnerProvenance memory p
     ) public pure {
+        SanctionFacts.Facts memory empty;
+        validate(all, ratifications, queries, p, empty);
+    }
+
+    /// @dev Full original Archive evidence is proved by the fixed enclosing supplement worker.
+    function validate(
+        G.Consents[] memory all,
+        T.RatificationRecord[][] memory ratifications,
+        AH.Query[] memory queries,
+        RH.OwnerProvenance memory p,
+        SanctionFacts.Facts memory sanctions
+    ) public pure {
         Provenance.validateOwner(p, 6);
         if (
             all.length == 0 || all.length != queries.length || all.length > 128
                 || ratifications.length != all.length
         ) _invalid();
-        uint256 rows;
+        uint256 rows = sanctions.sanctions.length;
         for (uint256 i; i < all.length; ++i) {
             ContentH.Bundle memory b = all[i].rows;
             AH.Query memory q = queries[i];
@@ -117,9 +138,20 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
             _contentRows(b, all[i].bindings);
         }
         if (p.journal.length != rows) _invalid();
-        (bytes32[] memory surfaces, bytes32[] memory scopes) = _journal(all, ratifications, p);
-        _eras(p);
-        _aliases(p, surfaces, scopes);
+        bool sanctioned = sanctions.sanctions.length != 0;
+        if (!sanctioned && sanctions.confirmations.length != 0) _invalid();
+        if (sanctioned) {
+            Sanctions.validate(all, queries, p, sanctions);
+            Sanctions.nativeRows(p, sanctions);
+        }
+        (bytes32[] memory surfaces, bytes32[] memory scopes) =
+            _journal(all, ratifications, p, sanctioned);
+        if (sanctioned) {
+            Sanctions.clocksAndAliases(p, surfaces, scopes, sanctions);
+        } else {
+            _eras(p);
+            _aliases(p, surfaces, scopes);
+        }
     }
 
     function _contentRows(ContentH.Bundle memory b, T.Binding[] memory bindings) private pure {
@@ -174,13 +206,23 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
     function _journal(
         G.Consents[] memory all,
         T.RatificationRecord[][] memory ratifications,
-        RH.OwnerProvenance memory p
+        RH.OwnerProvenance memory p,
+        bool sanctioned
     ) private pure returns (bytes32[] memory surfaces, bytes32[] memory scopes) {
         surfaces = new bytes32[](p.journal.length);
         scopes = new bytes32[](p.journal.length);
         uint256[6][] memory counts = new uint256[6][](all.length);
         for (uint256 i; i < p.journal.length; ++i) {
             RH.JournalEntry memory row = p.journal[i];
+            for (uint256 j; j < i; ++j) {
+                if (p.journal[j].receipt.recordHash == row.receipt.recordHash) _invalid();
+            }
+            if (sanctioned && row.receipt.operation == 12) {
+                // The separate native12 bijection proved its exact original principal and binding.
+                surfaces[i] = SanctionHistory.SANCTION;
+                scopes[i] = keccak256(abi.encode(row.receipt.recordHash));
+                continue;
+            }
             uint256 selected = type(uint256).max;
             for (uint256 k; k < all.length; ++k) {
                 if (

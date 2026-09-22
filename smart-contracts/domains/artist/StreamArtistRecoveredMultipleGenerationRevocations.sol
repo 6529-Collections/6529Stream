@@ -51,6 +51,14 @@ import {
     StreamArtistRecoveredHydrationProvenance as Provenance
 } from "./StreamArtistRecoveredHydrationProvenance.sol";
 
+import {
+    StreamArtistRecoveredSanctionHistoryTypes as H
+} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionFacts as Sanctions
+} from "./StreamArtistRecoveredAggregateSanctionAttributionFacts.sol";
+
 /// @notice Complete governed44/class2-revoke46 history with original interleaved resolution coordinates.
 library StreamArtistRecoveredMultipleGenerationRevocations {
     bytes32 private constant OPEN = keccak256("attribution_lifecycle.replay.dispute_key");
@@ -72,6 +80,17 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
         RH.OwnerProvenance memory p,
         G.Inventory memory inventory,
         Clocks.Result memory clocks
+    ) public view returns (A.AttributionBundle[] memory rows) {
+        return collect(source, scope, p, inventory, clocks, new H.ConfirmationRow[](0));
+    }
+
+    function collect(
+        address source,
+        M.State memory scope,
+        RH.OwnerProvenance memory p,
+        G.Inventory memory inventory,
+        Clocks.Result memory clocks,
+        H.ConfirmationRow[] memory confirmations
     ) public view returns (A.AttributionBundle[] memory rows) {
         Provenance.validateOwnerSource(p, 4, source);
         rows = new A.AttributionBundle[](scope.collections.length);
@@ -123,7 +142,7 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
             }
             rows[k] = b;
         }
-        validate(rows, scope, p, inventory, clocks);
+        validate(rows, scope, p, inventory, clocks, confirmations);
     }
 
     function validate(
@@ -132,6 +151,17 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
         RH.OwnerProvenance memory p,
         G.Inventory memory inventory,
         Clocks.Result memory clocks
+    ) public pure {
+        validate(rows, scope, p, inventory, clocks, new H.ConfirmationRow[](0));
+    }
+
+    function validate(
+        A.AttributionBundle[] memory rows,
+        M.State memory scope,
+        RH.OwnerProvenance memory p,
+        G.Inventory memory inventory,
+        Clocks.Result memory clocks,
+        H.ConfirmationRow[] memory confirmations
     ) public pure {
         bytes32 provenance = Provenance.validateOwner(p, 4);
         if (
@@ -142,7 +172,7 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
         Context memory c;
         c.aliases = new bool[](p.aliases.length);
         c.revokes = new uint256[](p.eras.length);
-        c.resolutions = new RH.Point[](p.journal.length);
+        c.resolutions = new RH.Point[](p.journal.length + confirmations.length);
         uint256 openings;
         for (uint256 k; k < rows.length; ++k) {
             A.AttributionBundle memory b = rows[k];
@@ -150,7 +180,8 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
             if (
                 b.provenance != provenance || b.artistId != q.artistId
                     || b.collectionId != q.collectionId || b.bindingHash != q.bindingHash
-                    || b.current.state != 2 || b.current.generation != b.generations.length
+                    || (b.current.state != 2 && (confirmations.length == 0 || b.current.state != 3))
+                    || b.current.generation != b.generations.length
                     || keccak256(abi.encode(b.generations))
                         != keccak256(abi.encode(inventory.generations[k]))
             ) _invalid();
@@ -164,7 +195,7 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
                 RH.Point memory resolved =
                     Guards.resolved(p, RESOLVE, r.opening.recordHash, r.resolution.actionId);
                 uint256 era = A.era(p, opened.environmentHash);
-                Leaf.row(r, b.generations[g], q, p.origins[era]);
+                Leaf.row(r, b.generations[g], q, p.origins[era], confirmations.length != 0);
                 if (
                     resolved.ownerIndex != 4 || resolved.environmentHash != opened.environmentHash
                         || resolved.environmentHash
@@ -226,6 +257,16 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
             if (j.receipt.operation == 44) ++nativeOpenings;
         }
         if (nativeOpenings != openings) _invalid();
+        uint256[] memory confirmed = new uint256[](p.eras.length);
+        for (uint256 i; i < confirmations.length; ++i) {
+            RH.Point memory point = confirmations[i].attributionPoint;
+            Clock.validateOwnerPoint(p, 4, point);
+            uint256 eraIndex = A.era(p, point.environmentHash);
+            if (point.ownerRevision <= p.eras[eraIndex].lowerRevision) _invalid();
+            _distinct(p, clocks, c, point);
+            c.resolutions[c.cursor++] = point;
+            ++confirmed[eraIndex];
+        }
         uint256 total;
         for (uint256 e; e < p.eras.length; ++e) {
             total += c.revokes[e];
@@ -234,11 +275,12 @@ library StreamArtistRecoveredMultipleGenerationRevocations {
                 era.lowerRevision != (e == 0 ? 0 : 1)
                     || era.checkpoint.ownerState.revision
                         != era.lowerRevision + clocks.counts[e] + era.nativeCount + c.revokes[e]
-                    || era.checkpoint.replayCount != 4 * total
+                            + confirmed[e] || era.checkpoint.replayCount != 4 * total
                     || (total == 0 && era.checkpoint.replayRoot != 0)
                     || era.checkpoint.nonceIndexCount != 0 || era.checkpoint.nonceRoot != 0
             ) _invalid();
         }
+        if (confirmations.length != 0) Sanctions.generations(rows, p, clocks, confirmations);
     }
 
     function _distinct(
