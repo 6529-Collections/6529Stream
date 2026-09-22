@@ -31,7 +31,7 @@ library StreamArtistRecoveredMultipleGenerationTypes {
         keccak256("6529STREAM_ARTIST_RECOVERED_MULTIPLE_GENERATIONS_V1");
     uint16 internal constant VERSION = 1;
     uint256 internal constant FEATURE = 2097152;
-    uint256 internal constant ALLOWED = 2276351;
+    uint256 internal constant ALLOWED = 2277375;
 
     struct Attribution {
         A.AttributionBundle history;

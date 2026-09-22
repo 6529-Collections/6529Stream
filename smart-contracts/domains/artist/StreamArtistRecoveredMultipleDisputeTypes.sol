@@ -18,7 +18,7 @@ library StreamArtistRecoveredMultipleDisputeTypes {
     uint16 internal constant VERSION = 1;
     uint256 internal constant FEATURE = XF.MULTIPLE_DISPUTE_HISTORY;
     // The generation profile's original family bits, excluding its distinct profile bit.
-    uint256 internal constant ALLOWED = 2276351 - 2097152 + FEATURE;
+    uint256 internal constant ALLOWED = 2277375 - 2097152 + FEATURE;
 
     struct Attribution {
         D.Bundle history;

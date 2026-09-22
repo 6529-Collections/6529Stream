@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateRatificationImport as AggregateRatifications
+} from "./StreamArtistRecoveredAggregateRatificationImport.sol";
+import {
     StreamArtistExtendedHydrationFeatures as XF
 } from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import { StreamArtistRecoveredMultipleConsentImport as ConsentAggregate } from "./StreamArtistRecoveredMultipleConsentImport.sol";
@@ -611,6 +614,7 @@ contract StreamArtistConsentFinalityLifecycle is
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (StreamArtistRecoveredHydrationCodec.isState(p.typedState, 6)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            AggregateRatifications.applyState(_ratifications, _ratificationRecords, q, p.typedState);
             if (ConsentAggregate.applyState(_policies, _economics, _associatedEconomicsRecords, _economicsAssociations, _recordDelegation, _saleRecords, _latestSaleConsents, _contentConsents, _latestContentConsent, _royaltyFreezes, _contentFreezes, _latestContentFreeze, q, p.typedState)) return;
             if (MultipleImport.policies(_policies, _recordDelegation, q, p.typedState)) return;
             if (HistoryContentImport.selected(p.typedState)) {
