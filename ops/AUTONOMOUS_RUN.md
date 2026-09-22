@@ -55,9 +55,13 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   all **89 combined root tests pass**. These are software/replay controls.
   Actual local registered account-review capture `8967a96e1` and selection
   `9312a0cf2` now pass **21 root fixture/selection tests**, independently reviewed.
-  They use explicitly historical contract products. General and Artist review
-  adapters are being built separately; account qualification does not prove
-  human independence.
+  They use explicitly historical contract products. General review adapter
+  `869061b27` is now integrated with independent review and **36 focused root
+  tests passing**, including original curator grants, actual receipt ordering,
+  exact review scope, malformed-record isolation and offline replay. Those
+  tests use synthetic native responses; real General publication remains open.
+  The separate Artist review adapter is under construction. Account qualification
+  does not prove human independence.
 - **Clients and CI:** the original 51 Inventory lifecycles now run in 17
   independent stages, with all assertions retained. Platform11/53 provider
   regression coverage and measured timing inputs are integrated. The timing
@@ -66,7 +70,8 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   the same 16 shards and original time limits. The last remote matrix on the
   older `bf0e803e` source passed 15 shards; its unpartitioned Inventory unit
   timed out. The new `eb840cfb` remote preparation passes and its exact
-  246-file/3,354-registration/1,472-unit plan is authenticated; shards are running.
+  246-file/3,354-registration/1,472-unit plan is authenticated; shards 1-9 pass
+  and 10-16 are running.
   Follow-up source work stays local while this client run finishes, avoiding
   cancellation of its evidence. Full CI is not green.
 - **Preservation execution:** the frozen `39ed249c` campaign passes all
@@ -75,8 +80,12 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   then all 13 checkpoint cases failed in shared setup; the 31 manifest cases
   were not redispatched in that failed attempt. The cause was missing fixture
   module-interface and role-registry methods. Test-only repair `736bdadd8`
-  preserves production and all original test bodies; five changed native products
-  are being rebuilt before rerun. Two compiler-side lint failures remain recorded.
+  preserves production and all original test bodies. Its five new native
+  products pass; the next checkpoint run improves to **4 passed / 9 failed**.
+  Remaining failures are six scope-membership reads, one 256-item inventory
+  batch and two STATIC-lock cases. Their causes are being investigated; no
+  guard or gas ceiling has been weakened. Two earlier compiler-side lint
+  failures remain recorded.
   The new genuine
   checkpoint-to-manifest three-case batch is source-integrated as `158ba55c`
   and remains unexecuted.

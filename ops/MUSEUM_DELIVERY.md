@@ -26,8 +26,10 @@ The [retained qualified-review fixture](../docs/museum-qualified-review-fixture.
 adds actual local governance registration and independent-account publication,
 with offline replay and selection against the original records. It uses
 explicitly pinned historical native contract products. It does not establish
-full current-stack or public-testnet acceptance. General and Artist review
-adapters remain separate work at this checkpoint. External repository-family
+full current-stack or public-testnet acceptance. The later [General review adapter](../docs/museum-general-semantic-reviews.md)
+is integrated as `869061b27` with 36 focused root tests and independent review;
+its concrete native-response fixtures remain synthetic. Artist review and
+cross-family composition remain separate work. External repository-family
 ingests and practitioner reviews remain incomplete; no institutional engagement
 or acceptance is claimed.
 

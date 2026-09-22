@@ -382,6 +382,11 @@ original steward designations and recovery responses, registered interpretation
 bytes, native notice claims and executed-companion evidence in a separate
 offline-replayable dossier. Delivery claims remain distinct from recipient receipt.
 
+[General-attestation semantic reviews](../../docs/museum-general-semantic-reviews.md)
+join original signed or curatorial authority to authenticated publication order,
+exact review selection and offline graph replay. Malformed unselected statements
+remain ineligible evidence without blocking unrelated selected exports.
+
 ## Environment
 
 Run from the repository root with Python 3.11 or later. Create an isolated
