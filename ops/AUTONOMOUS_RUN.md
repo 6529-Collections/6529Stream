@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `845cae7cd`; dispute native10 PASS, Museum Artist72 and General4 PASS; client16-shard run complete; preservation44 producer PASS. Full current-stack and full CI pending. |
+| Source checkpoint | `4e88540ce`; ABI210 4,694 sources / zero errors; dispute native10 PASS, Museum Artist72 and General4 PASS; client16-shard run complete; preservation44 producer PASS. Full current-stack and full CI pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,7 +29,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-Expanded full v1 remains incomplete. Integrated source `845cae7cd` adds the
+Expanded full v1 remains incomplete. Integrated source `4e88540ce` adds the
 dispute validation size repair, corrected Artist Museum reviews, actual local
 General review capture, preservation fixture corrections and scoped bundle
 size repair. Source integration and successful component tests do not establish
@@ -58,7 +58,8 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   publications and passes four integrated offline replay tests. Its 30 native
   products are explicitly historical; the unused typed Artist constructor
   boundary and empty Artist lane are retained. This is not latest-stack,
-  institutional qualification or independent-human evidence. Portable Artist review dossier `f7e9da5da` passes eight integrated
+  institutional qualification or independent-human evidence. Portable Artist
+  review dossier `f7e9da5da` passes eight integrated
   replay/tamper tests and independent review. Broader Museum composition
   continues through an additive V5 join; earlier packages remain unchanged.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
@@ -80,14 +81,15 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   `6903b3b12` / `356d091d3` has independent source clearance. The measured
   builder deployment is 24,435 runtime bytes, below 24,576, and its two
   focused native tests pass. All 102 native-context and 191 test-source paths
-  match integrated `356d091d3`. Actual current paid-flow acceptance remains open. The
-  500,000-gas paid-flow ceiling is unchanged. Testing is preparing the original
+  match integrated `356d091d3`. Actual current paid-flow acceptance remains
+  open. The 500,000-gas paid-flow ceiling is unchanged. Testing is preparing the original
   Genesis/Owner execution closure with whole-context artifact reuse and
   disjoint captures; assembly is not execution acceptance.
 
-ABI209 checks 4,688 Solidity sources at `778991df4` with zero errors.
-The final generation batch adds six workers; the active inventory is refreshed
-to 3,143 production paths and the next combined type check is running. Full current-stack/Safe integration, comprehensive fuzz/stateful tests,
+ABI210 checks **4,694 Solidity sources with zero errors** at `4e88540ce`.
+The active inventory contains **3,143 production paths**. This combined source
+is the frozen input for the next parallel runtime work. Full current-stack/Safe
+integration, comprehensive fuzz/stateful tests,
 gas/code-size checks, full CI and matching release evidence remain, followed by
 a frozen candidate and testnet demonstration. No new funding is required.
 Audit, production ceremonies and Lean remain separate.

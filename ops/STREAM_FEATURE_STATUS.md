@@ -16,7 +16,7 @@ different milestones.
 
 ## Latest integration checkpoint: 22 September
 
-Expanded full v1 remains incomplete. Integrated source `845cae7cd` adds the
+Expanded full v1 remains incomplete. Integrated source `4e88540ce` adds the
 dispute validation size repair, corrected Artist Museum reviews, actual local
 General review capture, preservation fixture corrections and scoped bundle
 size repair. Source integration and successful component tests do not establish
@@ -45,7 +45,8 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   publications and passes four integrated offline replay tests. Its 30 native
   products are explicitly historical; the unused typed Artist constructor
   boundary and empty Artist lane are retained. This is not latest-stack,
-  institutional qualification or independent-human evidence. Portable Artist review dossier `f7e9da5da` passes eight integrated
+  institutional qualification or independent-human evidence. Portable Artist
+  review dossier `f7e9da5da` passes eight integrated
   replay/tamper tests and independent review. Broader Museum composition
   continues through an additive V5 join; earlier packages remain unchanged.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
@@ -67,14 +68,15 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   `6903b3b12` / `356d091d3` has independent source clearance. The measured
   builder deployment is 24,435 runtime bytes, below 24,576, and its two
   focused native tests pass. All 102 native-context and 191 test-source paths
-  match integrated `356d091d3`. Actual current paid-flow acceptance remains open. The
-  500,000-gas paid-flow ceiling is unchanged. Testing is preparing the original
+  match integrated `356d091d3`. Actual current paid-flow acceptance remains
+  open. The 500,000-gas paid-flow ceiling is unchanged. Testing is preparing the original
   Genesis/Owner execution closure with whole-context artifact reuse and
   disjoint captures; assembly is not execution acceptance.
 
-ABI209 checks 4,688 Solidity sources at `778991df4` with zero errors.
-The final generation batch adds six workers; the active inventory is refreshed
-to 3,143 production paths and the next combined type check is running. Full current-stack/Safe integration, comprehensive fuzz/stateful tests,
+ABI210 checks **4,694 Solidity sources with zero errors** at `4e88540ce`.
+The active inventory contains **3,143 production paths**. This combined source
+is the frozen input for the next parallel runtime work. Full current-stack/Safe
+integration, comprehensive fuzz/stateful tests,
 gas/code-size checks, full CI and matching release evidence remain, followed by
 a frozen candidate and testnet demonstration. No new funding is required.
 Audit, production ceremonies and Lean remain separate.
@@ -122,14 +124,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `845cae7cd`; latest bounded results and remaining work are recorded above. Runtime evidence remains source-specific. |
+| Current integration source | `4e88540ce`; latest bounded results and remaining work are recorded above. Runtime evidence remains source-specific. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | Original `57ac8d04`; composition `65312baa` adds 24 focused root passes, actual RPC pending; MUSEUM-36. |
-| Latest broad cheap compilation evidence | ABI209: 4,688 sources at `778991df4`, zero errors; final generation batch awaits combined ABI210. Active inventory 3,143. |
+| Latest broad cheap compilation evidence | ABI210: 4,694 sources at `4e88540ce`, zero errors in 55.812s. Active inventory 3,143 production paths. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 passes all 12 original cases at frozen `eda052c7`, including one 256-run fuzz case, with independent native creation/link/caller review. This does not accept the later complete graph. |
 
