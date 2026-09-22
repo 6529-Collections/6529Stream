@@ -218,6 +218,14 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
+    if isinstance(value, dict) and value.get("mode") == "native_work_lido_package_v1":
+        from .native_work_lido_package_v1 import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "semantic_authoring_history_v2":
+        from .semantic_authoring_history_v2 import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "semantic_field_correspondence_v1":
         from .semantic_field_correspondence_v1 import verify
         from .bagit import read_tree

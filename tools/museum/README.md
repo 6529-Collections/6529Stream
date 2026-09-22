@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Native WORK to LIDO](../../docs/museum-native-work-lido.md) exports exact
+native occurrences with separately attributed operator metadata and an original-field ledger.
+
+[General and V4 authoring histories](../../docs/museum-current-source-authoring.md)
+retain exact source bindings, plain-language capture, confirmations and review revisions.
+
 [Native token authoring binding](../../docs/museum-native-authoring-binding.md)
 retains an unchanged draft with a separate exact NativeAttribution source envelope.
 

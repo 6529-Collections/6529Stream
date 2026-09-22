@@ -36,6 +36,19 @@
   and real-owner/Safe regression cases; native capacity and execution remain
   pending. See the [integration guide](docs/integrations/artist-aggregate-ratifications.md).
 
+## Native WORK export and current-source authoring history
+
+- Map exact native WORK occurrences from verified V4 dossiers to validated
+  LIDO XML, with original-field correspondence and separately attributed
+  operator metadata. Retain all original source evidence and leave other
+  native formats explicitly unevaluated. See the
+  [native LIDO guide](docs/museum-native-work-lido.md).
+- Add portable General/V4 later-documentation histories around the unchanged
+  draft schema: plain-language capture, immutable source binding, contiguous
+  revisions, exact-text confirmation and preserved review snapshots. Source
+  evidence grants no draft-actor authentication or publication authority. See
+  the [current-source authoring guide](docs/museum-current-source-authoring.md).
+
 ## Museum source-field and format correspondence
 
 - Add a replayable schema-derived native field inventory and an exact-source

@@ -77,8 +77,8 @@ Source-version confirmation still concerns only the exact text confirmed.
 This first native envelope binds one draft snapshot. It does not provide a
 native revision-history workflow, authorize publication, sign or publish a
 record, authenticate RPC origin, prove consensus/finality, or establish
-institutional acceptance. General and canonical V4 authoring routes remain
-separate future adapters.
+institutional acceptance. General and canonical V4 use the separate
+[current-source authoring history](museum-current-source-authoring.md) adapter.
 
 ## Focused validation
 

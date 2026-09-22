@@ -17,6 +17,11 @@ equivalent four-format outputs for every native source. Its format cells report
 unsupported adapter applicability and retain the original values. They do not
 claim a successful comparison or mark those values semantically irrelevant.
 
+The additive [native WORK-to-LIDO package](museum-native-work-lido.md) now maps
+selected original WORK occurrences to actual XML with exact field provenance.
+It retains this complete native inventory without changing the frozen
+correspondence profile or claiming mappings for other native families/formats.
+
 ## Assemble and verify
 
 Use the [Museum Python environment](../tools/museum/README.md) and the original
