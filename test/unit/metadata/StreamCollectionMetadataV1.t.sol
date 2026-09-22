@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
+import {
+    MetadataExecutorBoundary,
+    MetadataCoreBoundary
+} from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 
 import "../../../smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol";
 import "../../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
@@ -9,67 +12,6 @@ import "../../../smart-contracts/core/StreamCoreExternalReads.sol";
 import "../../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadata.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
-
-/// @dev Explicit current-Core and governance boundaries. Real Core/Executor composition is separate.
-contract MetadataCoreBoundary {
-    mapping(bytes32 => address) public selected;
-    mapping(uint256 => address) public owners;
-    mapping(uint256 => uint8) public lifecycles;
-
-    function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == 0x80ac58cd || id == 0x01ffc9a7;
-    }
-
-    function collectionExists(uint256 id) external pure returns (bool) {
-        return id == 1 || id == 2;
-    }
-
-    function setPointer(bytes32 kind, address target) external {
-        selected[kind] = target;
-    }
-
-    function getSatellitePointer(bytes32 kind)
-        external
-        view
-        returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
-    {
-        address target = selected[kind];
-        return (
-            target,
-            target.codehash,
-            false,
-            kind,
-            type(IStreamCollectionMetadataV1).interfaceId,
-            address(this),
-            1,
-            bytes32(uint256(1)),
-            bytes32(uint256(2)),
-            1
-        );
-    }
-
-    function setToken(uint256 id, address owner, uint8 lifecycle) external {
-        owners[id] = owner;
-        lifecycles[id] = lifecycle;
-    }
-
-    function tokenCollectionIdentity(uint256 id)
-        external
-        view
-        returns (bool, uint256, uint256, bool)
-    {
-        return (lifecycles[id] != 0, 1, id, lifecycles[id] == 3);
-    }
-
-    function tokenLifecycle(uint256 id) external view returns (uint8) {
-        return lifecycles[id];
-    }
-
-    function ownerOf(uint256 id) external view returns (address) {
-        require(lifecycles[id] == 2, "not live");
-        return owners[id];
-    }
-}
 
 contract MetadataArtistBoundary {
     address public core;

@@ -11,11 +11,7 @@ import "../../../smart-contracts/domains/finality/StreamContentLeafManifest.sol"
 import "../../../smart-contracts/domains/preservation/StreamFinalityArtifactCoverage.sol";
 import "../../../smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol";
 
-interface LeafManifestVm {
-    function mockCall(address target, bytes calldata input, bytes calldata output) external;
-    function getNonce(address target) external view returns (uint64);
-    function computeCreateAddress(address target, uint256 nonce) external pure returns (address);
-}
+import { LeafManifestVm } from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
 
 contract LeafManifestSchemaBoundary {
     address public immutable chunkStore;

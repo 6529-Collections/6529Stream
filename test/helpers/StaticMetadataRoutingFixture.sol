@@ -24,8 +24,18 @@ import {
 import {
     IStreamScriptBundles as B
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamScriptBundles.sol";
-import { ManifestArtistBoundary } from "./scoped-preservation-boundaries/StreamCollectionManifestsBoundaries.sol";
-import "../unit/metadata/StreamCollectionMetadataV1.t.sol";
+import {
+    ManifestArtistBoundary
+} from "./scoped-preservation-boundaries/StreamCollectionManifestsBoundaries.sol";
+import "../../smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol";
+import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
+import "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadata.sol";
+import "../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "./OfficialSafeFixture.sol";
+import {
+    MetadataCoreBoundary,
+    MetadataExecutorBoundary
+} from "./scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import {
     StreamMetadataRouter
 } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";

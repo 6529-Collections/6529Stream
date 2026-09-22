@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "./StreamPreservationPolicyOutputManifestV1.t.sol";
+import "../../helpers/scoped-preservation-boundaries/StreamPreservationPolicyOutputManifestBoundaries.sol";
 import {
     StreamPreservationPolicyOutputManifestV2 as FamilyManifest
 } from "../../../smart-contracts/domains/finality/StreamPreservationPolicyOutputManifestV2.sol";
@@ -269,14 +269,14 @@ contract StreamPreservationPolicyOutputManifestV2Test is CharacterizationTestBas
 
     function _rejectBegin(bytes memory raw, bytes32 schema, bytes32 canon) private {
         // Use real admitted document bytes for the intentionally crossed archive tags too.
-        if (schema == Definitions.SCHEMA) {
+        if (schema == Definitions.SCHEMA && !schemas.document(schema).exists) {
             _register(
                 "STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_V1",
                 Schema.DocumentKind.SCHEMA,
                 Definitions.document(schema)
             );
         }
-        if (canon == Definitions.CANON) {
+        if (canon == Definitions.CANON && !schemas.document(canon).exists) {
             _register(
                 "STREAM_ABI_PRESERVATION_POLICY_OUTPUT_MANIFEST_V1",
                 Schema.DocumentKind.CANONICALIZATION,
