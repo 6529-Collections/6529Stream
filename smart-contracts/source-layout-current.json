@@ -711,6 +711,7 @@
     "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryChains.sol",
     "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryCollection.sol",
     "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryGuards.sol",
+    "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryHeads.sol",
     "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryImport.sol",
     "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryRowFacts.sol",
     "smart-contracts/domains/artist/StreamArtistRecoveredDisputeHistoryRows.sol",

@@ -38,8 +38,8 @@ The plan itself also needs an externally recorded Keccak-256 hash. Replay reads
 only those pinned local paths and refuses path escapes or an existing output:
 
 ```powershell
-.\.venv-museum\Scripts\python.exe -m tools.museum.native_artist_review_dossier_v1 replay capture\plan.json dossier --plan-hash 0x... --disclosure public
-.\.venv-museum\Scripts\python.exe -m tools.museum.native_artist_review_dossier_v1 verify dossier --manifest-hash 0x...
+.\.venv-tools\museum\Scripts\python.exe -m tools.museum.native_artist_review_dossier_v1 replay capture\plan.json dossier --plan-hash 0x... --disclosure public
+.\.venv-tools\museum\Scripts\python.exe -m tools.museum.native_artist_review_dossier_v1 verify dossier --manifest-hash 0x...
 ```
 
 Verification replays the three concrete readers, their registered interpretation

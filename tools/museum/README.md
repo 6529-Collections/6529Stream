@@ -388,7 +388,9 @@ exact review selection and offline graph replay. Malformed unselected statements
 remain ineligible evidence without blocking unrelated selected exports.
 
 [Native Artist review selection](../../docs/museum-native-artist-review.md)
-binds reviews to exact original assertion pointers and historical authority.
+binds reviews to exact original assertion pointers and historical authority. The
+[portable Artist review dossier](../../docs/museum-native-artist-review-dossier.md)
+retains complete originals and verifies every regenerated file offline.
 [Recorded General reviews](../../docs/museum-general-review-capture-v1.md)
 replay actual local signed and curator publications with explicit historical
 native-product and unused Artist-boundary qualifications.
