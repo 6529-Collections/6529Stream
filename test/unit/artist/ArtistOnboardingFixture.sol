@@ -3103,11 +3103,16 @@ abstract contract ArtistOnboardingFixture is
         vm.prank(governance);
         royalty.configureCollectionRoyalty(1, royaltyProfile, 500);
         _beforeInitialBindingProposal();
-        (artistId,) = ingress.proposeArtistBinding(
-            1, _initialBindingProposal(), bytes("unit identity document"), "Artist Safe"
-        );
-        POLICY = _prospective(false);
+        if (_createInitialBinding()) {
+            (artistId,) = ingress.proposeArtistBinding(
+                1, _initialBindingProposal(), bytes("unit identity document"), "Artist Safe"
+            );
+            POLICY = _prospective(false);
+        }
     }
+
+    /// @dev Default preserves the original proposal; unbound-registry fixtures opt out explicitly.
+    function _createInitialBinding() internal pure virtual returns (bool) { return true; }
 
     /// @dev Optional original-producer setup before the first binding; default is unchanged.
     function _beforeInitialBindingProposal() internal virtual {}

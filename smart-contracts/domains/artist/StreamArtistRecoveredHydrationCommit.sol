@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistUnboundPlatformCurrent as Unbound } from "./StreamArtistUnboundPlatformCurrent.sol";
 import {
     StreamArtistRecoveredHistoryRecordRouting as PlatformRouting
 } from "./StreamArtistRecoveredHistoryRecordRouting.sol";
@@ -119,7 +120,8 @@ library StreamArtistRecoveredHydrationCommit {
         Provenance.validateSource(c.provenance, c.sourceCoordinator);
         PlatformRouting.requireCurrent(c.provenance, prepared.query, prepared.data[4].typedState);
         SanctionRouting.requireCurrent(prepared.query, c.provenance, prepared.data[6].typedState);
-        External.requireCurrent(prepared.externalGuards);
+        if (!Unbound.recheck(c.provenance, prepared.query, prepared.data[4].typedState,
+            prepared.data[2].typedState, prepared.externalGuards)) External.requireCurrent(prepared.externalGuards);
         for (uint8 i; i < 7; ++i) {
             (, Payload.Payload memory payload) = Payload.decode(prepared.data[i].typedState, i);
             Publications.requireSource(c.source.owners[i], i, payload.publications);

@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistUnboundPlatformCollectionImport as Unbound } from "./StreamArtistUnboundPlatformCollectionImport.sol";
-import { StreamArtistRecoveredMultipleGenerationAttributionImport as GenerationAttribution } from "./StreamArtistRecoveredMultipleGenerationAttributionImport.sol";
-import { StreamArtistRecoveredMultipleGenerationCollectionImport as Generations } from "./StreamArtistRecoveredMultipleGenerationCollectionImport.sol";
-import { StreamArtistRecoveredMultipleAttestationCollectionImport as Attestations } from "./StreamArtistRecoveredMultipleAttestationCollectionImport.sol";
-import { StreamArtistRecoveredMultipleConsentCollectionImport as Next } from "./StreamArtistRecoveredMultipleConsentCollectionImport.sol";
+
 import {
     StreamArtistRecoveredMultipleTypes as M
 } from "../../interfaces/stream/artist/StreamArtistRecoveredMultipleTypes.sol";
@@ -26,12 +22,10 @@ import {
 import {
     StreamArtistBindingLifecycleTypes as L
 } from "../../interfaces/stream/artist/StreamArtistBindingLifecycleTypes.sol";
+import { StreamArtistUnboundPlatformCodec as Codec } from "./StreamArtistUnboundPlatformCodec.sol";
 import {
-    StreamArtistRecoveredMultipleCodec as Codec
-} from "./StreamArtistRecoveredMultipleCodec.sol";
-import {
-    StreamArtistRecoveredMultipleCollectionRows as Rows
-} from "./StreamArtistRecoveredMultipleCollectionRows.sol";
+    StreamArtistUnboundPlatformCollectionRows as Rows
+} from "./StreamArtistUnboundPlatformCollectionRows.sol";
 import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
@@ -40,8 +34,16 @@ import {
 } from "./StreamArtistRecoveredCollectionHydration.sol";
 import { StreamArtistAttributionStateTypes as AS } from "./StreamArtistAttributionStateTypes.sol";
 
+import { StreamArtistRecoveredPlatformTypes as P } from "./StreamArtistRecoveredPlatformTypes.sol";
+import {
+    StreamArtistRecoveredPlatformWrites as PlatformWrites
+} from "./StreamArtistRecoveredPlatformWrites.sol";
+import {
+    StreamArtistUnboundPlatformTimeline as Timeline
+} from "./StreamArtistUnboundPlatformTimeline.sol";
+
 /// @notice Fixed typed empty-key installation inside one original whole-owner operation60 apply.
-library StreamArtistRecoveredMultipleCollectionImport {
+library StreamArtistUnboundPlatformCollectionImport {
     function bindings(
         mapping(uint256 => T.Binding) storage bindings_,
         mapping(uint256 => mapping(uint64 => T.Binding)) storage history,
@@ -50,9 +52,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
         AH.Query memory anchor,
         bytes memory raw
     ) public returns (bool) {
-        if (Unbound.bindings(bindings_, history, terms, terminals, anchor, raw)) return true;
-        if (Attestations.bindings(bindings_, history, terms, terminals, anchor, raw)) return true;
-        if (Next.bindings(bindings_, history, terms, terminals, anchor, raw)) return true;
         if (!Codec.selected(raw, 0)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(0, anchor, raw);
         Rows.validate(0, s, p.provenance);
@@ -71,6 +70,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
         }
         for (uint256 i; i < s.rows.length; ++i) {
             uint256 id = s.collections[i].collectionId;
+            if (s.collections[i].artistId == 0) continue;
             S.Binding memory b = abi.decode(s.rows[i], (S.Binding));
             bindings_[id] = b.item;
             history[id][1] = b.history;
@@ -86,10 +86,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
         AH.Query memory anchor,
         bytes memory raw
     ) public returns (bool) {
-        if (Unbound.acceptances(records, times, anchor, raw)) return true;
-        if (Generations.acceptances(records, times, anchor, raw)) return true;
-        if (Attestations.acceptances(records, times, anchor, raw)) return true;
-        if (Next.acceptances(records, times, anchor, raw)) return true;
         if (!Codec.selected(raw, 3)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(3, anchor, raw);
         Rows.validate(3, s, p.provenance);
@@ -100,6 +96,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
             ) _invalid();
         }
         for (uint256 i; i < s.rows.length; ++i) {
+            if (s.collections[i].artistId == 0) continue;
             S.Acceptance memory b = abi.decode(s.rows[i], (S.Acceptance));
             records[s.collections[i].bindingHash] = b.record;
             times[s.collections[i].bindingHash] = b.acceptedAt;
@@ -108,10 +105,6 @@ library StreamArtistRecoveredMultipleCollectionImport {
     }
 
     function collaborator(AH.Query memory anchor, bytes memory raw) public pure returns (bool) {
-        if (Unbound.collaborator(anchor, raw)) return true;
-        if (Generations.collaborator(anchor, raw)) return true;
-        if (Attestations.collaborator(anchor, raw)) return true;
-        if (Next.collaborator(anchor, raw)) return true;
         if (!Codec.selected(raw, 1)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(1, anchor, raw);
         Rows.validate(1, s, p.provenance);
@@ -122,18 +115,23 @@ library StreamArtistRecoveredMultipleCollectionImport {
         public
         returns (bool)
     {
-        if (Unbound.attribution(state, anchor, raw)) return true;
-        if (GenerationAttribution.applyState(state, anchor, raw)) return true;
-        if (Attestations.attribution(state, anchor, raw)) return true;
-        if (Next.attribution(state, anchor, raw)) return true;
         if (!Codec.selected(raw, 4)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(4, anchor, raw);
         Rows.validate(4, s, p.provenance);
         for (uint256 i; i < s.rows.length; ++i) {
             AS.Attribution memory current = state.attributions[s.collections[i].collectionId];
             if (current.state != 0 || current.generation != 0) _invalid();
+            if (s.collections[i].artistId == 0) {
+                P.Platform memory item = abi.decode(s.rows[i], (P.Platform));
+                Timeline.validate(item, p.provenance);
+                PlatformWrites.requireEmpty(state, item);
+            }
         }
         for (uint256 i; i < s.rows.length; ++i) {
+            if (s.collections[i].artistId == 0) {
+                PlatformWrites.applyState(state, abi.decode(s.rows[i], (P.Platform)));
+                continue;
+            }
             Rows.AttributionRow memory b = abi.decode(s.rows[i], (Rows.AttributionRow));
             state.attributions[s.collections[i].collectionId] = b.state.item;
         }
@@ -146,11 +144,11 @@ library StreamArtistRecoveredMultipleCollectionImport {
         AH.Query memory anchor,
         bytes memory raw
     ) public returns (bool) {
-        if (Unbound.policies(policies_, delegations, anchor, raw)) return true;
         if (!Codec.selected(raw, 6)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(6, anchor, raw);
         Rows.validate(6, s, p.provenance);
         for (uint256 i; i < s.rows.length; ++i) {
+            if (s.collections[i].artistId == 0) continue;
             Original.PolicyBundle memory b = abi.decode(s.rows[i], (Original.PolicyBundle));
             for (uint256 j; j < b.records.length; ++j) {
                 if (
@@ -160,6 +158,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
             }
         }
         for (uint256 i; i < s.rows.length; ++i) {
+            if (s.collections[i].artistId == 0) continue;
             Original.PolicyBundle memory b = abi.decode(s.rows[i], (Original.PolicyBundle));
             for (uint256 j; j < b.records.length; ++j) {
                 policies_[_scope(b.collectionId, b.policies[j])] = b.records[j];

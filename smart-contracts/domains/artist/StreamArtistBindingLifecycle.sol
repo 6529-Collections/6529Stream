@@ -444,7 +444,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES;
+        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM;
     }
 
     function recoveredAuthorityHydrationState(
