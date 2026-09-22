@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleDisputePreparation as DisputeAggregate } from "./StreamArtistRecoveredMultipleDisputePreparation.sol";
 import { StreamArtistRecoveredMultipleGenerationPreparation as GenerationAggregate } from "./StreamArtistRecoveredMultipleGenerationPreparation.sol";
 import { StreamArtistRecoveredMultipleAttestationPreparation as AttestationAggregate } from "./StreamArtistRecoveredMultipleAttestationPreparation.sol";
 import {
@@ -90,6 +91,12 @@ library StreamArtistRecoveredMultiplePreparation {
         Commit.Prepared memory prepared;
         prepared.admission = Admission.collect(destination, request);
         Admission.Certificate memory c = prepared.admission;
+        if (DisputeAggregate.required(c.source, c.provenance)) {
+            DisputeAggregate.Context memory context;
+            context.destination = destination; context.request = request; context.royalties = royalties;
+            context.requireInventory = requireInventory; context.admission = c;
+            return DisputeAggregate.encodeAdmitted(context);
+        }
         if (GenerationAggregate.required(c.source.owners[0], c.collections)) {
             GenerationAggregate.Context memory context;
             context.destination = destination; context.request = request; context.royalties = royalties;

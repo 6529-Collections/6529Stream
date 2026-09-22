@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleDisputeBindingImport as AggregateDisputes } from "./StreamArtistRecoveredMultipleDisputeBindingImport.sol";
 import { StreamArtistRecoveredMultipleGenerationBindingImport as GenerationImport } from "./StreamArtistRecoveredMultipleGenerationBindingImport.sol";
 import { StreamArtistRecoveredMultipleCollectionImport as MultipleImport } from "./StreamArtistRecoveredMultipleCollectionImport.sol";
 import { StreamArtistRecoveredDisputeBindingHydration as DisputeHistory } from "./StreamArtistRecoveredDisputeBindingHydration.sol";
@@ -125,6 +126,7 @@ library StreamArtistRecoveredAcceptedBindingHydration {
         AH.Query memory q,
         bytes memory outer
     ) public returns (bool) {
+        if (AggregateDisputes.applyState(bindings, history, terms, terminals, corrections, q, outer)) return true;
         if (GenerationImport.applyState(bindings, history, terms, terminals, corrections, q, outer)) return true;
         if (MultipleImport.bindings(bindings, history, terms, terminals, q, outer)) return true;
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 0);

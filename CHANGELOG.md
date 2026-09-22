@@ -18,6 +18,17 @@
   deployment acceptance. See the
   [client guide](packages/stream-client/docs/current-artist-recovered-multiple-generation-hydration.md).
 
+## Recovered dispute and repudiation multiplicity
+
+- Add a separately tagged aggregate profile for original signed dispute,
+  withdrawal, repudiation and resolution histories across recovered Artists and
+  collections. Preserve complete global provenance, original Archive clocks,
+  nonce/grant accounting and one atomic seven-owner import.
+- Add 26 focused and actual-owner/Safe regression scenarios, including late
+  Archive rollback and identical retry. Native execution, gas and joined capacity
+  remain pending; see the
+  [integration guide](docs/integrations/artist-recovered-multiple-disputes.md).
+
 ## Registry writer deployment capacity
 
 - Move seven existing authority-hydration encodings to one fixed typed writer,

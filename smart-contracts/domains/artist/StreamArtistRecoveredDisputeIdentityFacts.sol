@@ -49,6 +49,31 @@ library StreamArtistRecoveredDisputeIdentityFacts {
         AH.Query memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
+        uses = validateRows(identity, b, q, p);
+        uint256 vetoes;
+        for (uint256 i; i < b.repudiations.length; ++i) {
+            if (b.repudiations[i].terminal.phase == 2) ++vetoes;
+        }
+        uint256 nativeVetoes;
+        for (uint256 i; i < p.journals[2].length; ++i) {
+            if (p.journals[2][i].receipt.operation == 48) ++nativeVetoes;
+        }
+        if (nativeVetoes != 2 * vetoes) _invalid();
+        // Original44/45/47/61 authorization commits do not append Identity native records.
+        for (uint256 i; i < p.journals[2].length; ++i) {
+            uint16 op = p.journals[2][i].receipt.operation;
+            if (op == 44 || op == 45 || op == 47 || op == 49 || op == 50 || op == 61) _invalid();
+        }
+    }
+
+    /// @notice Original row facts without a singleton-wide native veto count.
+    /// @dev Aggregate callers must check the complete owner2 veto inventory once across every collection.
+    function validateRows(
+        IdentityRows memory identity,
+        D.Bundle memory b,
+        AH.Query memory q,
+        RH.Provenance memory p
+    ) public pure returns (uint256[] memory uses) {
         if (
             identity.artistId != q.artistId || b.artistId != q.artistId
                 || b.collectionId != q.collectionId || b.bindingHash != q.bindingHash
@@ -75,25 +100,13 @@ library StreamArtistRecoveredDisputeIdentityFacts {
                 ++uses[at];
             }
         }
-        uint256 vetoes;
         for (uint256 i; i < b.repudiations.length; ++i) {
             D.RepudiationRow memory row = b.repudiations[i];
             _signature(identity, row.record.recordHash);
             _nonce(identity, p, 1, q.artistId, row.record.nonce, row.point.environmentHash);
             if (row.terminal.phase == 2) {
-                ++vetoes;
                 _veto(identity, p, row);
             }
-        }
-        uint256 nativeVetoes;
-        for (uint256 i; i < p.journals[2].length; ++i) {
-            if (p.journals[2][i].receipt.operation == 48) ++nativeVetoes;
-        }
-        if (nativeVetoes != 2 * vetoes) _invalid();
-        // Original44/45/47/61 authorization commits do not append Identity native records.
-        for (uint256 i; i < p.journals[2].length; ++i) {
-            uint16 op = p.journals[2][i].receipt.operation;
-            if (op == 44 || op == 45 || op == 47 || op == 49 || op == 50 || op == 61) _invalid();
         }
     }
 

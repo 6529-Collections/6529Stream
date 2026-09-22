@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredMultipleDisputeCurrent as Disputes
+} from "./StreamArtistRecoveredMultipleDisputeCurrent.sol";
+import {
     StreamArtistExtendedHydrationFeatures as XF
 } from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import { StreamArtistRecoveredMultipleGenerationCurrent as Generations } from "./StreamArtistRecoveredMultipleGenerationCurrent.sol";
@@ -93,6 +96,10 @@ library StreamArtistRecoveredHistoryRecordRouting {
         view
     {
         (RH.ExportHeader memory h, Payload.Payload memory payload) = Payload.decode(outer, 4);
+        if ((h.requiredFeatures & XF.MULTIPLE_DISPUTE_HISTORY) != 0) {
+            Disputes.requireCurrent(p, q, outer);
+            return;
+        }
         if ((h.requiredFeatures & XF.MULTIPLE_GENERATIONS) != 0) {
             Generations.requireCurrent(p,q,outer);
             return;

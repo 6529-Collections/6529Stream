@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 import { StreamArtistUnboundPlatformCodec as UnboundCodec } from "./StreamArtistUnboundPlatformCodec.sol";
 import { StreamArtistUnboundPlatformPayoutImport as UnboundImport } from "./StreamArtistUnboundPlatformPayoutImport.sol";
+import { StreamArtistRecoveredMultipleDisputePayoutImport as DisputeImport } from "./StreamArtistRecoveredMultipleDisputePayoutImport.sol";
+import { StreamArtistRecoveredMultipleDisputeCodec as DisputeAggregate } from "./StreamArtistRecoveredMultipleDisputeCodec.sol";
 import { StreamArtistRecoveredMultipleGenerationPayoutImport as GenerationImport } from "./StreamArtistRecoveredMultipleGenerationPayoutImport.sol";
 import { StreamArtistRecoveredMultipleGenerationCodec as GenerationAggregate } from "./StreamArtistRecoveredMultipleGenerationCodec.sol";
 import { StreamArtistRecoveredMultipleAttestationCodec as AttestationAggregate } from "./StreamArtistRecoveredMultipleAttestationCodec.sol";
@@ -69,6 +71,10 @@ library StreamArtistRecoveredPayoutTransport {
             abi.decode(data[4:], (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
         if (UnboundCodec.selected(ownerData.typedState, 5)) {
             UnboundImport.importState(roots, query, ownerData.typedState);
+            return;
+        }
+        if (DisputeAggregate.selected(ownerData.typedState, 5)) {
+            DisputeImport.importState(roots, query, ownerData.typedState);
             return;
         }
         if (GenerationAggregate.selected(ownerData.typedState, 5)) {

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import { StreamArtistUnboundPlatformCollectionImport as Unbound } from "./StreamArtistUnboundPlatformCollectionImport.sol";
+import { StreamArtistRecoveredMultipleDisputeCollectionImport as DisputeCollections } from "./StreamArtistRecoveredMultipleDisputeCollectionImport.sol";
+import { StreamArtistRecoveredMultipleDisputeAttributionImport as DisputeAttribution } from "./StreamArtistRecoveredMultipleDisputeAttributionImport.sol";
 import { StreamArtistRecoveredMultipleGenerationAttributionImport as GenerationAttribution } from "./StreamArtistRecoveredMultipleGenerationAttributionImport.sol";
 import { StreamArtistRecoveredMultipleGenerationCollectionImport as Generations } from "./StreamArtistRecoveredMultipleGenerationCollectionImport.sol";
 import { StreamArtistRecoveredMultipleAttestationCollectionImport as Attestations } from "./StreamArtistRecoveredMultipleAttestationCollectionImport.sol";
@@ -87,6 +89,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
         bytes memory raw
     ) public returns (bool) {
         if (Unbound.acceptances(records, times, anchor, raw)) return true;
+        if (DisputeCollections.acceptances(records, times, anchor, raw)) return true;
         if (Generations.acceptances(records, times, anchor, raw)) return true;
         if (Attestations.acceptances(records, times, anchor, raw)) return true;
         if (Next.acceptances(records, times, anchor, raw)) return true;
@@ -109,6 +112,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
 
     function collaborator(AH.Query memory anchor, bytes memory raw) public pure returns (bool) {
         if (Unbound.collaborator(anchor, raw)) return true;
+        if (DisputeCollections.collaborator(anchor, raw)) return true;
         if (Generations.collaborator(anchor, raw)) return true;
         if (Attestations.collaborator(anchor, raw)) return true;
         if (Next.collaborator(anchor, raw)) return true;
@@ -123,6 +127,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
         returns (bool)
     {
         if (Unbound.attribution(state, anchor, raw)) return true;
+        if (DisputeAttribution.applyState(state, anchor, raw)) return true;
         if (GenerationAttribution.applyState(state, anchor, raw)) return true;
         if (Attestations.attribution(state, anchor, raw)) return true;
         if (Next.attribution(state, anchor, raw)) return true;

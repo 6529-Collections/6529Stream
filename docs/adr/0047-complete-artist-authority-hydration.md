@@ -349,3 +349,16 @@ complete generation inventory even without op24. The
 defines the exact carrier, explicit exclusions and authored regressions.
 Source/type evidence and selected native diagnostics are separate from actual
 execution, gas, joined capacity and release acceptance.
+
+## Recovered dispute and repudiation multiplicity
+
+The additive feature16777216 and version1 tag
+`6529STREAM_ARTIST_MULTIPLE_DISPUTE_HISTORY_V1` retain original signed44/45/61,
+repudiation47–50 and resolution46/reopen histories across recovered class1/class3
+Artists and PRIMARY_ONLY collections. Complete original provenance, nonce union,
+per-Artist op24/C2PA order, global grant conservation and authentic Archive clocks
+precede one seven-owner apply/commit. Original tags and feature constants remain
+unchanged. The [integration guide](../integrations/artist-recovered-multiple-disputes.md)
+defines the separate carrier, finite scope, atomic rollback requirements and
+authored regressions. Runtime, gas, joined capacity and release acceptance remain
+pending.
