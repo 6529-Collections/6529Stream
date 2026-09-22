@@ -115,6 +115,12 @@ import {
     IStreamFinalityCurrentComponentRoutes as FallbackRoutes,
     StreamFinalityCurrentComponentRoute
 } from "../../../smart-contracts/interfaces/stream/finality/IStreamFinalityCurrentComponentRoutes.sol";
+import {
+    StreamCurrentAuthorityScopedProviderOperations as ScopedFallbackOperations
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedProviderOperations.sol";
+import {
+    IStreamScopedContentRootPublication as ScopedFallbackRoot
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
 
 interface DeferredScopedBindingVm {
     struct Log {
@@ -1136,5 +1142,206 @@ contract StreamCurrentAuthorityDeferredScopedPolicyProviderV2Test {
             abi.encode(s.inputs, FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID),
             true
         );
+    }
+
+    /// @dev Exact whole-Config fixed-library boundary for the unchanged scoped operation
+    /// producer. Only dispatch/config/tuple projection is claimed here: all source admission
+    /// inside the scoped worker remains outside this test. The host's actual graph selection
+    /// executes against the typed Router table and must observe an exact zero root head.
+    function _scopedFallbackMocks(StreamFinalityScope memory scope)
+        private
+        returns (bytes memory payload, bytes32 hash)
+    {
+        payload = abi.encode("synthetic original scoped operation bytes", scope);
+        hash = keccak256(payload);
+        FallbackTypes.Statement memory value = _fallbackStatement();
+        FallbackReviewInterface.ReviewFacts memory review = _fallbackReview();
+        FallbackReviewInterface.ReviewFacts memory noReview;
+        bytes32 schema = keccak256("scoped operation boundary schema");
+        bytes32 canon = keccak256("scoped operation boundary canon");
+        _workerVm()
+            .mockCall(
+                address(ScopedFallbackOperations),
+                abi.encodeWithSelector(ScopedFallbackOperations.manifest.selector, scoped, scope),
+                abi.encode(payload)
+            );
+        _workerVm()
+            .mockCall(
+                address(ScopedFallbackOperations),
+                abi.encodeWithSelector(
+                    ScopedFallbackOperations.inputs.selector, scoped, scope, hash
+                ),
+                abi.encode(value.inputs, schema, canon)
+            );
+        _workerVm()
+            .mockCall(
+                address(ScopedFallbackOperations),
+                abi.encodeWithSelector(
+                    ScopedFallbackOperations.review.selector, scoped, scope, hash
+                ),
+                abi.encode(review)
+            );
+        _workerVm()
+            .mockCall(
+                address(ScopedFallbackOperations),
+                abi.encodeWithSelector(
+                    ScopedFallbackOperations.prepared.selector,
+                    scoped,
+                    scope,
+                    hash,
+                    value.nonSanctionComponents,
+                    false
+                ),
+                abi.encode(value.inputs, schema, canon, noReview)
+            );
+        _workerVm()
+            .mockCall(
+                address(ScopedFallbackOperations),
+                abi.encodeWithSelector(
+                    ScopedFallbackOperations.prepared.selector,
+                    scoped,
+                    scope,
+                    hash,
+                    value.nonSanctionComponents,
+                    true
+                ),
+                abi.encode(value.inputs, schema, canon, review)
+            );
+    }
+
+    function _scopedFallbackZeroHead(StreamFinalityScope memory scope) private {
+        Table(original.targets[2])
+            .set(
+                abi.encodeCall(ScopedFallbackRoot.scopedContentRootHead, (scope)),
+                abi.encode(bytes32(0))
+            );
+    }
+
+    function testScopedFallbackPreservesExactOriginalConfigAndAllFiveOperationProjections() public {
+        FallbackBase baseline = new FallbackBase(original, scoped);
+        require(
+            keccak256(abi.encode(original)) != keccak256(abi.encode(scoped)),
+            "different original and scoped configurations"
+        );
+        StreamFinalityScope[3] memory scopes = [
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 7, bytes32(0)),
+            StreamFinalityScope(StreamFinalityScopeType.RELEASE, 1, 0, keccak256("release")),
+            StreamFinalityScope(StreamFinalityScopeType.SEASON, 1, 0, keccak256("season"))
+        ];
+        FallbackTypes.Statement memory value = _fallbackStatement();
+        bytes32 schema = keccak256("scoped operation boundary schema");
+        bytes32 canon = keccak256("scoped operation boundary canon");
+        for (uint256 i; i < scopes.length; ++i) {
+            StreamFinalityScope memory scope = scopes[i];
+            _scopedFallbackZeroHead(scope);
+            (bytes memory payload, bytes32 hash) = _scopedFallbackMocks(scope);
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(host.inputManifestBytes, (scope)),
+                true,
+                abi.encode(payload),
+                false
+            );
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(host.requireFinalityScopeInputs, (scope, hash)),
+                true,
+                abi.encode(value.inputs, schema, canon),
+                false
+            );
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(host.requireSanctionReviewFacts, (scope, hash)),
+                true,
+                abi.encode(_fallbackReview()),
+                false
+            );
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(
+                    host.requirePreparedFinalityScopeInputs,
+                    (scope, hash, value.nonSanctionComponents)
+                ),
+                true,
+                abi.encode(value.inputs, schema, canon),
+                true
+            );
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(
+                    host.requirePreparedFinalityScopeInputsAndReview,
+                    (scope, hash, value.nonSanctionComponents)
+                ),
+                true,
+                abi.encode(value.inputs, schema, canon, _fallbackReview()),
+                true
+            );
+        }
+        require(
+            keccak256(abi.encode(host.scopedConfiguration())) == keccak256(abi.encode(scoped)),
+            "host scoped configuration retained"
+        );
+        require(
+            keccak256(abi.encode(baseline.scopedConfiguration())) == keccak256(abi.encode(scoped)),
+            "base scoped configuration retained"
+        );
+    }
+
+    function testScopedFallbackCanonicalCoordinatesPrecedeSelectionAndMockedOperations() public {
+        FallbackBase baseline = new FallbackBase(original, scoped);
+        StreamFinalityScope[3] memory malformed = [
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 0, bytes32(0)),
+            StreamFinalityScope(StreamFinalityScopeType.RELEASE, 1, 7, keccak256("release")),
+            StreamFinalityScope(StreamFinalityScopeType.SEASON, 1, 0, bytes32(0))
+        ];
+        // Even an invalid advertised graph capability cannot precede canonical coordinates.
+        // Installing successful invalid-scope operation mocks makes bypassing either host's
+        // own canonical guard a false success, rather than an incidental producer failure.
+        Table(original.targets[2])
+            .set(
+                abi.encodeCall(IERC165.supportsInterface, (type(ScopedRoot).interfaceId)),
+                abi.encode(false)
+            );
+        for (uint256 i; i < malformed.length; ++i) {
+            (, bytes32 hash) = _scopedFallbackMocks(malformed[i]);
+            bytes memory rejected = abi.encodeWithSignature("InvalidMetadataScope()");
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(host.inputManifestBytes, (malformed[i])),
+                false,
+                rejected,
+                false
+            );
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(host.requireFinalityScopeInputs, (malformed[i], hash)),
+                false,
+                rejected,
+                false
+            );
+            _fallbackPair(
+                baseline,
+                abi.encodeCall(host.requireSanctionReviewFacts, (malformed[i], hash)),
+                false,
+                rejected,
+                false
+            );
+        }
+        StreamFinalityScope memory valid =
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 7, bytes32(0));
+        _scopedFallbackZeroHead(valid);
+        (bytes memory payload,) = _scopedFallbackMocks(valid);
+        // The combined host retains its earlier graph-selection admission. The original base
+        // has no such selection gate; successful scoped operation mocks do not waive it.
+        bytes memory input = abi.encodeCall(host.inputManifestBytes, (valid));
+        (bool ok, bytes memory raw) = address(host).staticcall(input);
+        bytes memory expected =
+            abi.encodeWithSignature("ScopedPolicyGraphSource(address)", original.targets[2]);
+        require(
+            !ok && raw.length == expected.length && keccak256(raw) == keccak256(expected),
+            "existing selection gate precedes scoped fallback"
+        );
+        _support(original.targets[2], type(ScopedRoot).interfaceId);
+        _fallbackPair(baseline, input, true, abi.encode(payload), false);
     }
 }

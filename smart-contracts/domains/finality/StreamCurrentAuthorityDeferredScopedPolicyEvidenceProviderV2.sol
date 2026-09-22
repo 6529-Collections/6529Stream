@@ -12,7 +12,7 @@ import {
 import {
     StreamCurrentAuthorityDeferredPolicyValidationV2 as DeferredValidation
 } from "./StreamCurrentAuthorityDeferredPolicyValidationV2.sol";
-import "./StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2.sol";
+import "./StreamCurrentAuthorityDeferredScopedPolicyBaseEvidenceProviderV2.sol";
 import {
     StreamFinalityPolicyProviderComponentsV2 as PolicyComponents
 } from "./StreamFinalityPolicyProviderComponentsV2.sol";
@@ -84,15 +84,11 @@ import {
     StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2 as GraphWorker
 } from "./StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2.sol";
 
-import {
-    StreamCurrentAuthorityDeferredScopedPolicyNativeWorkerV2 as NativeWorker
-} from "./StreamCurrentAuthorityDeferredScopedPolicyNativeWorkerV2.sol";
-
 /// @notice Original source profiles with one governed collection-policy binding after deployment.
 /// @dev Native, scoped and per-scope full-policy graphs retain their fixed original anchors.
 /// Only this distinct capability may add collection-policy sources, once, after full validation.
 contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
-    StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2,
+    StreamCurrentAuthorityDeferredScopedPolicyBaseEvidenceProviderV2,
     Profiles,
     IStreamPolicyOutputEvidenceBindingV2,
     IStreamPolicyPublicationEvidenceBindingV2,
@@ -100,6 +96,9 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
     GraphBinding,
     DeferredBinding
 {
+    // Preserve the original compiler-propagated error in the host ABI after worker dispatch.
+    error NativeProviderSource();
+
     StreamFinalityNativeProviderReads.Config private _policy;
     Selection.Context private _sourceSelection;
     GraphSelection.Context private _graph;
@@ -112,7 +111,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         StreamFinalityNativeProviderReads.Config memory original,
         StreamFinalityScopedProviderReads.Config memory scoped,
         GraphBinding.FactoryBinding memory publicationFactory
-    ) StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2(original, scoped) {
+    ) StreamCurrentAuthorityDeferredScopedPolicyBaseEvidenceProviderV2(original, scoped) {
         _sourceConfigurationHash = BindingWorker.initialize(
             _sourceSelection, _graph, _policyCapability, original, scoped, publicationFactory
         );
@@ -122,7 +121,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         public
         pure
         virtual
-        override(StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2, IERC165)
+        override(StreamCurrentAuthorityDeferredScopedPolicyBaseEvidenceProviderV2, IERC165)
         returns (bool)
     {
         return super.supportsInterface(id) || id == type(Profiles).interfaceId
@@ -317,9 +316,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return GraphWorker.manifest(_graph, scope);
         }
         if (!_policyScope(scope)) {
-            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-                return NativeWorker.inputManifestBytes(_graph.original, scope);
-            }
             return super.inputManifestBytes(scope);
         }
         return GraphWorker.policyManifest(_policy, scope);
@@ -335,9 +331,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return GraphWorker.inputs(_graph, scope, manifestHash);
         }
         if (!_policyScope(scope)) {
-            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-                return NativeWorker.requireFinalityScopeInputs(_graph.original, scope, manifestHash);
-            }
             return super.requireFinalityScopeInputs(scope, manifestHash);
         }
         return GraphWorker.policyInputs(_policy, scope, manifestHash);
@@ -353,9 +346,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return GraphWorker.review(_graph, scope, manifestHash);
         }
         if (!_policyScope(scope)) {
-            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-                return NativeWorker.requireSanctionReviewFacts(_graph.original, scope, manifestHash);
-            }
             return super.requireSanctionReviewFacts(scope, manifestHash);
         }
         return GraphWorker.policyReview(_policy, scope, manifestHash);
@@ -373,11 +363,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return (inputs_, schema_, canon_);
         }
         if (!_policyScope(scope)) {
-            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-                return NativeWorker.requirePreparedFinalityScopeInputs(
-                    _graph.original, scope, manifestHash, components
-                );
-            }
             return super.requirePreparedFinalityScopeInputs(scope, manifestHash, components);
         }
         (StreamFinalityScopeInputs memory v, bytes32 schema, bytes32 canon,) =
@@ -405,11 +390,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return GraphWorker.prepared(_graph, scope, manifestHash, components, true);
         }
         if (!_policyScope(scope)) {
-            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-                return NativeWorker.requirePreparedFinalityScopeInputsAndReview(
-                    _graph.original, scope, manifestHash, components
-                );
-            }
             return
                 super.requirePreparedFinalityScopeInputsAndReview(scope, manifestHash, components);
         }
@@ -513,5 +493,14 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
 
     function _policyScope(StreamFinalityScope memory scope) private view returns (bool) {
         return GraphWorker.isCollectionPolicy(_sourceSelection, scope);
+    }
+
+    function _deferredOriginal()
+        internal
+        view
+        override
+        returns (StreamFinalityNativeProviderReads.Config storage)
+    {
+        return _graph.original;
     }
 }
