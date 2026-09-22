@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredMultipleGenerationConsentImport as Generations } from "./StreamArtistRecoveredMultipleGenerationConsentImport.sol";
-import { StreamArtistRecoveredMultipleAttestationConsentImport as Attestations } from "./StreamArtistRecoveredMultipleAttestationConsentImport.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -18,14 +16,14 @@ import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
 import {
-    StreamArtistRecoveredMultipleConsentCodec as Codec
-} from "./StreamArtistRecoveredMultipleConsentCodec.sol";
+    StreamArtistRecoveredMultipleGenerationCodec as Codec
+} from "./StreamArtistRecoveredMultipleGenerationCodec.sol";
 import {
-    StreamArtistRecoveredMultipleConsentValidation as Validation
-} from "./StreamArtistRecoveredMultipleConsentValidation.sol";
+    StreamArtistRecoveredMultipleGenerationConsentValidation as Validation
+} from "./StreamArtistRecoveredMultipleGenerationConsentValidation.sol";
 import {
-    StreamArtistRecoveredMultipleConsentBaseImport as Base
-} from "./StreamArtistRecoveredMultipleConsentBaseImport.sol";
+    StreamArtistRecoveredMultipleGenerationConsentBaseImport as Base
+} from "./StreamArtistRecoveredMultipleGenerationConsentBaseImport.sol";
 import {
     StreamArtistRecoveredContentConsentHydration as ContentH
 } from "./StreamArtistRecoveredContentConsentHydration.sol";
@@ -42,8 +40,15 @@ import {
     StreamArtistContentTypes as Content
 } from "../../interfaces/stream/artist/StreamArtistContentTypes.sol";
 
+import {
+    StreamArtistRecoveredMultipleGenerationTypes as G
+} from "./StreamArtistRecoveredMultipleGenerationTypes.sol";
+import {
+    StreamArtistRecoveredMultipleGenerationContentImport as ContentImport
+} from "./StreamArtistRecoveredMultipleGenerationContentImport.sol";
+
 /// @notice One whole-owner validation and original empty-key installation of all Consent collections.
-library StreamArtistRecoveredMultipleConsentImport {
+library StreamArtistRecoveredMultipleGenerationConsentImport {
     function applyState(
         mapping(bytes32 => bytes32) storage policies,
         mapping(bytes32 => bytes32) storage economics,
@@ -62,13 +67,11 @@ library StreamArtistRecoveredMultipleConsentImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
-        if (Generations.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;
-        if (Attestations.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;
         if (!Codec.selected(outer, 6)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(6, anchor, outer);
-        ContentH.Bundle[] memory all = new ContentH.Bundle[](s.rows.length);
+        G.Consents[] memory all = new G.Consents[](s.rows.length);
         for (uint256 i; i < all.length; ++i) {
-            all[i] = abi.decode(s.rows[i], (ContentH.Bundle));
+            all[i] = abi.decode(s.rows[i], (G.Consents));
             if (keccak256(s.rows[i]) != keccak256(abi.encode(all[i]))) {
                 revert RH.InvalidRecoveredHydrationProfile();
             }
@@ -84,10 +87,10 @@ library StreamArtistRecoveredMultipleConsentImport {
                 sales,
                 latest,
                 s.collections[i],
-                all[i].original
+                all[i].rows.original
             );
-            ContentH.importContent(
-                content, latestContent, royalties, freezes, latestFreezes, delegations, all[i]
+            ContentImport.importContent(
+                content, latestContent, royalties, freezes, latestFreezes, delegations, all[i].rows
             );
         }
         return true;

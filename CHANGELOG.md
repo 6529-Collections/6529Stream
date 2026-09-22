@@ -65,6 +65,16 @@
   Cases are type-checked; full current execution and added-frame gas remain pending.
   See the [frame note](docs/integrations/policy-inventory-current-frames.md).
 
+## Recovered generation multiplicity
+
+- Add a distinct complete PRIMARY_ONLY recovered generation profile with original
+  Archive clocks, historical consent/attestation rows, global grants/nonces and
+  one atomic import per owner. Preserve repeated economics/sale terms and
+  interleaved governed-resolution coordinates.
+- Author eleven actual-owner/Safe scenarios and 29 focused worker cases. Source
+  and type checks are retained; native size diagnostics, runtime and joined
+  acceptance remain qualified in the [integration guide](docs/integrations/artist-recovered-multiple-generations.md).
+
 ## Recovered revocation alias coordinates
 
 - Preserve the original opening journal coordinate while checking both resolution

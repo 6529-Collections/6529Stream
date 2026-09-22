@@ -330,3 +330,22 @@ The [composition guide](../integrations/artist-recovered-multiple-attestations.m
 defines the exact carrier, supported generation-one class1/class3 scope,
 original-source boundaries and authored regressions. Actual composition runtime,
 gas, joined capacity and release acceptance remain pending.
+
+## Recovered multiple-generation composition
+
+The additive `MULTIPLE_GENERATIONS` bit2097152 and version1 tag
+`6529STREAM_ARTIST_RECOVERED_MULTIPLE_GENERATIONS_V1` compose same-Artist
+PRIMARY_ONLY histories across recovered class1/class3 Artists and collections,
+including accepted/corrected generations2–128 and original pending terminals.
+The allowed mask is2276351; combined owner advertisement is4194303. Request,
+operation60, existing tags, host selectors and storage remain unchanged.
+Complete original Archive admission and all seven cutoffs establish independent
+collection/generation clocks. Authentic resolution alias points allow interleaved
+owner4 writes. Original consent and attestation uses reconcile globally before
+one whole-owner apply/commit. Identical economics/sale terms retain their original
+per-generation records and replay scopes. A fixed post-write route rechecks the
+complete generation inventory even without op24. The
+[generation integration guide](../integrations/artist-recovered-multiple-generations.md)
+defines the exact carrier, explicit exclusions and authored regressions.
+Source/type evidence and selected native diagnostics are separate from actual
+execution, gas, joined capacity and release acceptance.

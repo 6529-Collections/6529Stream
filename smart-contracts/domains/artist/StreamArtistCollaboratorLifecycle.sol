@@ -175,7 +175,7 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return RecoveredRH.MULTIPLE_ATTESTATIONS_GRAPH_FEATURES;
+        return RecoveredRH.MULTIPLE_GENERATIONS_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(

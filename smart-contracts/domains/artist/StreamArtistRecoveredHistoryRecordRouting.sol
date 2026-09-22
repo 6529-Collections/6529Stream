@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleGenerationCurrent as Generations } from "./StreamArtistRecoveredMultipleGenerationCurrent.sol";
 import {
     StreamArtistRecoveredPlatformCurrent as Current
 } from "./StreamArtistRecoveredPlatformCurrent.sol";
@@ -89,6 +90,10 @@ library StreamArtistRecoveredHistoryRecordRouting {
         view
     {
         (RH.ExportHeader memory h, Payload.Payload memory payload) = Payload.decode(outer, 4);
+        if ((h.requiredFeatures & RH.MULTIPLE_GENERATIONS) != 0) {
+            Generations.requireCurrent(p,q,outer);
+            return;
+        }
         if ((h.requiredFeatures & RH.HISTORY_RECORDS) == 0) {
             Original.requireCurrent(p, q, outer);
             return;
