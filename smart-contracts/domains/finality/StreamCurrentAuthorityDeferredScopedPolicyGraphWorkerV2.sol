@@ -43,10 +43,101 @@ import {
     StreamFinalityPolicyProviderComponentsV2 as PolicyComponents
 } from "./StreamFinalityPolicyProviderComponentsV2.sol";
 
+import {
+    StreamFinalityScopedPolicyMetadataFactsV2 as ScopedFacts
+} from "./StreamFinalityScopedPolicyMetadataFactsV2.sol";
+import {
+    StreamFinalityScopedPolicyStaticComponentsV2 as ScopedStatic
+} from "./StreamFinalityScopedPolicyStaticComponentsV2.sol";
+import { StreamFinalityRouterEvidence as Router } from "./StreamFinalityRouterEvidence.sol";
+import { StreamMetadataSubjects } from "../metadata/StreamMetadataSubjects.sol";
+import {
+    StreamScopeMembershipFacts
+} from "../../interfaces/stream/finality/StreamScopeMembershipTypes.sol";
+import {
+    StreamFinalityHostComponentFacts
+} from "../../interfaces/stream/finality/StreamFinalityEvidenceTypes.sol";
+import {
+    StreamFinalityDomains
+} from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+
 /// @notice Fixed storage projections for the deferred provider's existing graph operations.
-/// @dev Host dispatch, pin/scope/component checks and original-Registry admission retain their
-/// original order. Every graph operation still performs its original current selection.
+/// @dev Host dispatch and original-Registry admission retain their original order. The
+/// component-facts worker reproduces the original pin/scope/component sequence after graph
+/// selection. Every graph operation still performs its original current selection.
 library StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2 {
+    struct ModuleIdentity {
+        bytes32 metadataVersion;
+        bytes32 metadataManifest;
+        bytes32 routerVersion;
+        bytes32 routerManifest;
+    }
+    error RouterProviderConfiguration();
+    error RouterProviderDependency(address target);
+    error RouterProviderScope();
+
+    /// @dev Resolve the selected graph before the original host pin/scope/family checks.
+    /// The graph's original Config is constructor-identical to those inherited immutables;
+    /// in particular the inherited sourceGas is original.componentSourceGas.
+    function componentFacts(
+        Graph.Context storage graph,
+        ModuleIdentity memory modules,
+        bytes32 family,
+        StreamFinalityScope memory scope
+    ) public view returns (StreamFinalityHostComponentFacts memory f) {
+        Reads.Config memory configured = configuration(graph, scope);
+        _pins(graph.original);
+        _scope(graph.original, scope);
+        if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
+            (f.frozen, f.dataHash) = ScopedFacts.facts(configured, scope);
+            f.moduleVersion = modules.metadataVersion;
+            f.manifestHash = modules.metadataManifest;
+        } else {
+            if (!Router.supported(family)) revert Router.RouterEvidenceFamily(family);
+            (f.frozen, f.dataHash) = ScopedStatic.facts(configured, scope, family);
+            f.moduleVersion = modules.routerVersion;
+            f.manifestHash = modules.routerManifest;
+        }
+    }
+
+    function _pins(Native.Config storage original) private view {
+        if (block.chainid != original.chainId) revert RouterProviderConfiguration();
+        for (uint256 i; i < 4; ++i) {
+            address target = original.targets[i];
+            if (target.code.length == 0 || target.codehash != original.codeHashes[i]) {
+                revert RouterProviderDependency(target);
+            }
+        }
+    }
+
+    function _scope(Native.Config storage original, StreamFinalityScope memory scope) private view {
+        if (
+            scope.collectionId == 0
+                || (scope.scopeType == StreamFinalityScopeType.COLLECTION
+                        ? scope.tokenId != 0 || scope.scopeId != 0
+                        : scope.scopeType == StreamFinalityScopeType.TOKEN
+                            ? scope.tokenId == 0 || scope.scopeId != 0
+                            : scope.tokenId != 0 || scope.scopeId == 0)
+        ) revert RouterProviderScope();
+        StreamScopeMembershipFacts memory f = abi.decode(
+            Router.read(
+                original.targets[3],
+                abi.encodeWithSignature(
+                    "requireScopeMembership((uint8,uint256,uint256,bytes32))", scope
+                ),
+                256,
+                original.componentSourceGas
+            ),
+            (StreamScopeMembershipFacts)
+        );
+        if (
+            f.scopeSubject
+                    != StreamMetadataSubjects.scopeSubject(
+                        original.chainId, original.targets[0], scope
+                    ) || f.membershipHash == 0
+        ) revert RouterProviderScope();
+    }
+
     function selectedSources(Selection.Context storage selection, StreamFinalityScope memory scope)
         public
         view

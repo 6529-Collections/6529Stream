@@ -276,20 +276,17 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         returns (StreamFinalityHostComponentFacts memory f)
     {
         if (GraphWorker.isPolicy(_graph, scope)) {
-            ScopedPolicyReads.Config memory configured = _scopedPolicyConfig(scope);
-            _pins();
-            _scope(scope);
-            if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
-                (f.frozen, f.dataHash) = ScopedPolicyFacts.facts(configured, scope);
-                f.moduleVersion = metadataModuleVersion;
-                f.manifestHash = metadataModuleManifestHash;
-            } else {
-                componentHost(family);
-                (f.frozen, f.dataHash) = ScopedPolicyStatic.facts(configured, scope, family);
-                f.moduleVersion = routerModuleVersion;
-                f.manifestHash = routerModuleManifestHash;
-            }
-            return f;
+            return GraphWorker.componentFacts(
+                _graph,
+                GraphWorker.ModuleIdentity(
+                    metadataModuleVersion,
+                    metadataModuleManifestHash,
+                    routerModuleVersion,
+                    routerModuleManifestHash
+                ),
+                family,
+                scope
+            );
         }
         if (!_policyScope(scope)) return super.finalityComponentFacts(family, scope);
         _pins();
@@ -472,14 +469,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
     {
         if (!GraphWorker.isPolicy(_graph, scope)) return super.scopedManifest(scope);
         return GraphWorker.scopeManifest(_graph, scope);
-    }
-
-    function _scopedPolicyConfig(StreamFinalityScope memory scope)
-        private
-        view
-        returns (ScopedPolicyReads.Config memory c)
-    {
-        return GraphWorker.configuration(_graph, scope);
     }
 
     function _originalRegistry() private view {

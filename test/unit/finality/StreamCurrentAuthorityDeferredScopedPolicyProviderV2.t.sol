@@ -121,6 +121,27 @@ import {
 import {
     IStreamScopedContentRootPublication as ScopedFallbackRoot
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
+import {
+    StreamCurrentAuthorityScopedPolicyGraphSelectionV2 as ComponentGraph
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPolicyGraphSelectionV2.sol";
+import {
+    StreamFinalityScopedPolicyProviderReadsV2 as ComponentConfig
+} from "../../../smart-contracts/domains/finality/StreamFinalityScopedPolicyProviderReadsV2.sol";
+import {
+    StreamFinalityScopedPolicyMetadataFactsV2 as ComponentMetadata
+} from "../../../smart-contracts/domains/finality/StreamFinalityScopedPolicyMetadataFactsV2.sol";
+import {
+    StreamFinalityScopedPolicyStaticComponentsV2 as ComponentStatic
+} from "../../../smart-contracts/domains/finality/StreamFinalityScopedPolicyStaticComponentsV2.sol";
+import {
+    StreamFinalityHostComponentFacts
+} from "../../../smart-contracts/interfaces/stream/finality/StreamFinalityEvidenceTypes.sol";
+import {
+    StreamScopeMembershipFacts
+} from "../../../smart-contracts/interfaces/stream/finality/StreamScopeMembershipTypes.sol";
+import {
+    StreamMetadataSubjects as ComponentSubjects
+} from "../../../smart-contracts/domains/metadata/StreamMetadataSubjects.sol";
 
 interface DeferredScopedBindingVm {
     struct Log {
@@ -133,6 +154,7 @@ interface DeferredScopedBindingVm {
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
     function prank(address caller) external;
+    function etch(address target, bytes calldata runtime) external;
 }
 
 /// @notice Actual deferred host constructor, pending guards and unaffected source dispatch.
@@ -1343,5 +1365,225 @@ contract StreamCurrentAuthorityDeferredScopedPolicyProviderV2Test {
         );
         _support(original.targets[2], type(ScopedRoot).interfaceId);
         _fallbackPair(baseline, input, true, abi.encode(payload), false);
+    }
+
+    // Graph-current and the two local fact producers are explicit, exact typed boundaries.
+    // Actual host graph selection, original runtime pins, membership admission, family check
+    // and constructor module-identity projection execute. No factory deployment/currentness,
+    // metadata sealing or STATIC publication readiness is asserted by these isolated tests.
+    function _componentGraphFixture()
+        private
+        returns (
+            ComponentGraph.Context memory context,
+            ComponentConfig.Config memory configured,
+            StreamFinalityScope memory scope
+        )
+    {
+        _set(
+            original.targets[1],
+            "streamModuleVersion()",
+            abi.encode(keccak256("distinct metadata version"))
+        );
+        _set(
+            original.targets[1],
+            "streamModuleManifest()",
+            abi.encode("fixture://distinct-metadata", keccak256("distinct metadata manifest"))
+        );
+        _set(
+            original.targets[2],
+            "streamModuleVersion()",
+            abi.encode(keccak256("distinct router version"))
+        );
+        _set(
+            original.targets[2],
+            "streamModuleManifest()",
+            abi.encode("fixture://distinct-router", keccak256("distinct router manifest"))
+        );
+        host = new Host(original, scoped, factoryBinding);
+        context.original = original;
+        context.binding = host.scopedPolicyPublicationBinding();
+        context.recipe = recipe;
+        context.origin = origin;
+        context.authority = authority;
+        scope = StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 7, bytes32(0));
+        configured.targets = original.targets;
+        configured.codeHashes = original.codeHashes;
+        configured.chainId = original.chainId;
+        configured.readGas = original.readGas;
+        configured.sourceGas = original.sourceGas;
+        configured.componentSourceGas = original.componentSourceGas;
+        configured.inventoryDependencyHash = keccak256("typed selected graph inventory");
+        for (uint256 i = 6; i <= 10; ++i) {
+            configured.targets[i] = address(new Table());
+            configured.codeHashes[i] = configured.targets[i].codehash;
+        }
+        bytes32 head = keccak256("typed selected graph root");
+        Table(original.targets[2])
+            .set(
+                abi.encodeCall(ScopedFallbackRoot.scopedContentRootHead, (scope)), abi.encode(head)
+            );
+        ScopedRoot.Binding memory root;
+        root.profileId = keccak256("6529STREAM_SCOPED_POLICY_CONTENT_ROOT_V2");
+        root.outputManifest = configured.targets[6];
+        root.outputManifestCodeHash = configured.codeHashes[6];
+        root.checkpoint = configured.targets[7];
+        root.checkpointCodeHash = configured.codeHashes[7];
+        Table(original.targets[2])
+            .set(
+                abi.encodeCall(ScopedRoot.scopedPolicyContentRootBinding, (head)), abi.encode(root)
+            );
+        _componentGraphCurrent(context, configured, scope);
+        _workerVm()
+            .mockCall(
+                address(ComponentMetadata),
+                abi.encodeWithSelector(ComponentMetadata.facts.selector, configured, scope),
+                abi.encode(true, keccak256("typed graph metadata facts"))
+            );
+        _workerVm()
+            .mockCall(
+                address(ComponentStatic),
+                abi.encodeWithSelector(
+                    ComponentStatic.facts.selector, configured, scope, keccak256("RENDERER")
+                ),
+                abi.encode(false, keccak256("typed graph static facts"))
+            );
+    }
+
+    function _componentGraphCurrent(
+        ComponentGraph.Context memory context,
+        ComponentConfig.Config memory configured,
+        StreamFinalityScope memory scope
+    ) private {
+        G.Graph memory graph;
+        graph.scope = scope;
+        graph.graphId = keccak256("typed complete graph projection");
+        graph.preparedChildren = 7;
+        _workerVm()
+            .mockCall(
+                address(ComponentGraph),
+                abi.encodeWithSelector(ComponentGraph.current.selector, context, scope),
+                abi.encode(configured, graph)
+            );
+    }
+
+    function _componentMembership(StreamFinalityScope memory scope, bool valid) private {
+        StreamScopeMembershipFacts memory facts;
+        facts.scopeSubject = valid
+            ? ComponentSubjects.scopeSubject(original.chainId, original.targets[0], scope)
+            : keccak256("different scope subject");
+        facts.membershipHash = keccak256("actual boundary membership commitment");
+        facts.tokenCount = 1;
+        Table(original.targets[3])
+            .set(
+                abi.encodeWithSignature(
+                    "requireScopeMembership((uint8,uint256,uint256,bytes32))", scope
+                ),
+                abi.encode(facts)
+            );
+    }
+
+    function _componentFactsCall(
+        bytes32 family,
+        StreamFinalityScope memory scope,
+        bool success,
+        bytes memory expected
+    ) private view {
+        (bool ok, bytes memory raw) = address(host)
+            .staticcall(abi.encodeCall(host.finalityComponentFacts, (family, scope)));
+        require(
+            ok == success && raw.length == expected.length && keccak256(raw) == keccak256(expected),
+            "exact graph component result/refusal"
+        );
+    }
+
+    function _componentExpected(bool metadata) private pure returns (bytes memory) {
+        StreamFinalityHostComponentFacts memory f;
+        f.frozen = metadata;
+        f.dataHash = metadata
+            ? keccak256("typed graph metadata facts")
+            : keccak256("typed graph static facts");
+        f.moduleVersion = metadata
+            ? keccak256("distinct metadata version")
+            : keccak256("distinct router version");
+        f.manifestHash = metadata
+            ? keccak256("distinct metadata manifest")
+            : keccak256("distinct router manifest");
+        return abi.encode(f);
+    }
+
+    function testGraphFactsCurrentMembershipAndFamilyChecksRetainOriginalOrder() public {
+        (
+            ComponentGraph.Context memory context,
+            ComponentConfig.Config memory configured,
+            StreamFinalityScope memory scope
+        ) = _componentGraphFixture();
+        bytes32 unsupported = keccak256("unsupported graph component family");
+        bytes memory graphFailure = abi.encodeWithSelector(
+            ComponentGraph.ScopedPolicyGraphSource.selector, address(factory)
+        );
+        _workerVm()
+            .mockCallRevert(
+                address(ComponentGraph),
+                abi.encodeWithSelector(ComponentGraph.current.selector, context, scope),
+                graphFailure
+            );
+        _componentFactsCall(unsupported, scope, false, graphFailure);
+        _componentGraphCurrent(context, configured, scope);
+        _componentFactsCall(
+            unsupported,
+            scope,
+            false,
+            abi.encodeWithSignature(
+                "RouterEvidenceRead(address,bytes4)",
+                original.targets[3],
+                bytes4(keccak256("requireScopeMembership((uint8,uint256,uint256,bytes32))"))
+            )
+        );
+        _componentMembership(scope, false);
+        _componentFactsCall(
+            unsupported, scope, false, abi.encodeWithSignature("RouterProviderScope()")
+        );
+        _componentMembership(scope, true);
+        _componentFactsCall(
+            unsupported,
+            scope,
+            false,
+            abi.encodeWithSignature("RouterEvidenceFamily(bytes32)", unsupported)
+        );
+        _componentFactsCall(keccak256("COLLECTION_METADATA"), scope, true, _componentExpected(true));
+        _componentFactsCall(keccak256("RENDERER"), scope, true, _componentExpected(false));
+    }
+
+    function testGraphFactsRetainOriginalPinsDistinctModuleIdentitiesAndComponentScopeCap() public {
+        (,, StreamFinalityScope memory scope) = _componentGraphFixture();
+        _componentMembership(scope, true);
+        bytes memory runtime = original.targets[1].code;
+        _workerVm().etch(original.targets[1], hex"60006000fd");
+        _componentFactsCall(
+            keccak256("COLLECTION_METADATA"),
+            scope,
+            false,
+            abi.encodeWithSignature("RouterProviderDependency(address)", original.targets[1])
+        );
+        _workerVm().etch(original.targets[1], runtime);
+        _componentFactsCall(keccak256("COLLECTION_METADATA"), scope, true, _componentExpected(true));
+        _componentFactsCall(keccak256("RENDERER"), scope, true, _componentExpected(false));
+        // Isolated forwarding regression only: synthetic deep graph/fact producers make this
+        // bound feasible. It cannot satisfy RouterEvidence's reservation if membership is
+        // accidentally read with original.sourceGas (40m), instead of componentSourceGas (16m).
+        // This is not measured full-graph, cold-state or transaction-limit acceptance.
+        uint256 cap = original.componentSourceGas + 3000000;
+        require(cap < original.sourceGas, "fixture distinguishes outer and component budgets");
+        (bool ok, bytes memory raw) = address(host).staticcall{ gas: cap }(
+            abi.encodeCall(host.finalityComponentFacts, (keccak256("RENDERER"), scope))
+        );
+        bytes memory expected = _componentExpected(false);
+        require(
+            ok && raw.length == expected.length && keccak256(raw) == keccak256(expected),
+            "original component scope cap retained"
+        );
+        require(
+            host.policyBindingHash() == 0, "graph facts never consume deferred collection binding"
+        );
     }
 }
