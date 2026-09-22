@@ -26,8 +26,8 @@ BODY_NAME = "STREAM_NATIVE_ARTIST_REVIEW_BODY_V1"
 POLICY_NAME = "STREAM_MUSEUM_NATIVE_ARTIST_REVIEW_POLICY_V1"
 CROSSWALK_NAME = "STREAM_NATIVE_ARTIST_REVIEW_CROSSWALK_V1"
 DEPENDENCY_NAME = "STREAM_NATIVE_ARTIST_REVIEW_DEPENDENCIES_V1"
-REVIEW_RELATION = "urn:6529stream:native-artist-review:v1"
-REVIEW_DATATYPE = "urn:6529stream:datatype:native-artist-review:v1"
+REVIEW_RELATION = "urn:6529stream:semantic-review:v1"
+REVIEW_DATATYPE = "urn:6529stream:datatype:semantic-review:v1"
 REVIEW_MAPPING_RULE = "urn:6529stream:museum:mapping:native-artist-review-v1"
 ARTIST_RECORD_TYPE = schema_id("ARTIST_SEMANTIC_ASSERTION")
 MAX_DOCUMENT_BYTES = 524288
@@ -37,7 +37,10 @@ QUALIFICATION = (
     "Same Artist ID or signer is SELF review and requires explicit opt-in. Distinct Artist IDs and signers permit "
     "only explicitly selected reviewer-account evidence; they establish neither independent humans nor institutional "
     "standing. Current authority, legal effect, professional qualification and a protocol veto are not established. "
-    "All originals remain retained; malformed unselected semantic reviews cannot veto selected assertions."
+    "Full original bytes remain retained. Shared envelope and registered/native definition gates remain mandatory; "
+    "semantic admission is individual to each exact /assertions/N pointer and does not claim whole-document "
+    "semantic conformance. Malformed unselected sibling assertions or reviews, including duplicate assertion IDs, "
+    "cannot veto a valid assertion selected by its complete original selector and pointer."
 )
 CLAIMS = {
     "newProfileOptInRequiredForBothRecords": True,
@@ -45,6 +48,7 @@ CLAIMS = {
     "originalNativeAssertionSchemaUnchanged": True,
     "v1EntityLayoutRetained": True,
     "typedContinuationSupported": False,
+    "wholeDocumentSemanticConformance": False,
     "humanIndependenceProven": False,
     "institutionalStandingProven": False,
     "currentAuthorityProven": False,
@@ -121,8 +125,11 @@ POLICY_BYTES = dumps({"name": POLICY_NAME, "version": "1",
         "distinct": "Both original artistId and signer differ; only explicit selected reviewer account evidence is permitted. This is not independent human or institutional review."},
     "publicationOrder": "Original authenticated blockNumber, transactionIndex and logIndex must precede the selected review lexicographically; createdAt is not publication order.",
     "selection": {"denominator": "Retain every authenticated original before selection, including unsupported or invalid semantic interpretations.",
-        "unselected": "Malformed or hostile unselected semantic review bodies, targets and revisions are diagnostics only and cannot veto a valid selection.",
-        "selected": "Invalid selected reviewer bodies or target/revision/scope/authority joins fail selection.",
+        "sharedGates": "The complete shared envelope, exact registered definitions and native original/authority joins remain checked before per-assertion admission.",
+        "perAssertion": "Each exact /assertions/N pointer has individual original-schema, historical signer and evidence eligibility; admission of one assertion does not claim whole-document semantic conformance.",
+        "unselected": "Malformed or hostile unselected sibling assertions and semantic review bodies, targets and revisions are retained diagnostics only and cannot veto a valid selection in the same original document.",
+        "selected": "Invalid selected assertions, reviewer bodies or target/revision/scope/authority joins fail selection.",
+        "identity": "Complete original selectors and /assertions/N pointers disambiguate duplicate assertion IDs. An unselected duplicate ID cannot poison a selected pointer; ID-only selection is not supported.",
         "conflicts": "Only exact selected source and reviewer sets influence admission; no recency winner or unselected veto.",
         "directStatements": "Direct statements do not acquire an invented reviewer requirement.",
         "disposition": "reviewed or rejected remains the selected account's recorded statement, not a protocol or legal veto."},

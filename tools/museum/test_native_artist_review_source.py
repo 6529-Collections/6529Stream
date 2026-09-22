@@ -19,7 +19,7 @@ from .native_attribution_semantics import selector
 from .test_metadata_catalog_source import A, H
 from .test_schema_inventory import assertion_document
 
-PROFILE_HASH = '0x9fb382bfe339879744169fa231b3cdaaa8e6ce52da0129a8bf8f9f400da44342'
+PROFILE_HASH = '0x5388a2d86f23ffd75f9ec089a88d081fa41812d797d66ca2b8af5d89306de407'
 
 
 def payload(context, *, origin='human_mapping', review=False, mutate=None, disposition='reviewed'):
@@ -50,7 +50,9 @@ def payload(context, *, origin='human_mapping', review=False, mutate=None, dispo
 def policy(source, *, sources=(0,), reviewers=(1,), allow_self=False):
     snapshot = loads(source.snapshot(), maximum=MAX_TRANSCRIPT, canonical=True)
     ordered = sorted(snapshot['statements'], key=lambda row: tuple(map(int, row['publicationPosition'])))
-    reference = lambda index: ordered[index]['source'] | {'pointer': '/assertions/0'}
+    def reference(item):
+        record, assertion = item if type(item) is tuple else (item, 0)
+        return ordered[record]['source'] | {'pointer': '/assertions/' + str(assertion)}
     return dumps({'profile': PROFILE, 'interpretationProfileHash': source.profile.profile_hash,
         'sourceSnapshotHash': keccak256(source.snapshot()), 'sourceAuthoritySet': [reference(i) for i in sources],
         'reviewerAuthoritySet': [reference(i) for i in reviewers], 'singleValuedRelations': [],
@@ -137,6 +139,122 @@ class NativeArtistReviewSourceTests(unittest.TestCase):
             self.assertEqual(len(result['interpretationDiagnostics']), 1)
             self.assertEqual(result['interpretationDiagnostics'][0]['status'], 'invalid')
             with self.assertRaisesRegex(MuseumError, 'unavailable or invalid'): self.select(source, reviewers=(2,))
+
+    def test_same_original_invalid_source_sibling_does_not_veto_exact_valid_selector(self):
+        changes = {
+            'not_an_assertion': lambda assertion: None,
+            'missing_field': lambda assertion: {k: v for k, v in assertion.items() if k != 'assertingAgent'},
+            'bad_origin': lambda assertion: assertion | {'origin': 'invalid'},
+            'impersonation': lambda assertion: assertion | {'assertingAgent': account_iri('31337', A(99))},
+            'forged_evidence': lambda assertion: assertion | {'evidence': [assertion['evidence'][0] | {
+                'source': assertion['evidence'][0]['source'] | {'digest': H('forged sibling evidence')}}]},
+            'bad_pointer': lambda assertion: assertion | {'evidence': [assertion['evidence'][0] | {
+                'selector': '/missing-sibling-evidence'}]},
+        }
+        for name, change in changes.items():
+            def sibling(value): value['assertions'].append(change(copy.deepcopy(value['assertions'][0])))
+            f = NativeArtistReviewFixture([{'payload': lambda c: payload(c, mutate=sibling)},
+                {'payload': lambda c: payload(c, review=True)}], profile=self.profile)
+            source = f.semantic()
+            with self.subTest(change=name):
+                result = self.select(source)
+                self.assertEqual(len(result['selected']), 1)
+                valid = result['selected'][0]['source']; invalid = valid | {'pointer': '/assertions/1'}
+                assertion, row = source.assertion(valid)
+                self.assertEqual(row['payloadHex'], f.publications[0]['original']['payloadHex'])
+                self.assertEqual(row['nativeEvidence']['metadataOriginal'], f.publications[0]['original'])
+                self.assertEqual(row['value']['assertions'], loads(hex_bytes(row['payloadHex']))['assertions'])
+                self.assertEqual([entry['status'] for entry in row['assertionInterpretations']], ['supported', 'invalid'])
+                self.assertEqual(result['interpretationDiagnostics'][0]['source'], invalid)
+                self.assertEqual(review_body(source, valid, 'reviewed')['assertionRevisionHash'], keccak256(dumps(assertion)))
+                with self.assertRaisesRegex(MuseumError, 'unavailable or invalid'): source.assertion(invalid)
+                with self.assertRaisesRegex(MuseumError, 'unavailable or invalid'): review_body(source, invalid, 'reviewed')
+                with self.assertRaisesRegex(MuseumError, 'unavailable or invalid'):
+                    self.select(source, sources=((0, 0), (0, 1)))
+
+    def test_same_original_hostile_review_sibling_is_ignored_until_selected(self):
+        def wrong_body(assertion, field):
+            literal = assertion['object']['literal']; body = loads(literal['lexicalValue'].encode())
+            if field == 'target': body['assertionRecord']['recordHash'] = H('forged sibling target')
+            else: body['assertionRevisionHash'] = H('forged sibling revision')
+            literal['lexicalValue'] = dumps(body).decode()
+        changes = {
+            'schema': lambda assertion: assertion.__setitem__('origin', 'invalid'),
+            'signer': lambda assertion: assertion.__setitem__('assertingAgent', account_iri('31337', A(99))),
+            'evidence': lambda assertion: assertion['evidence'][0]['source'].__setitem__('digest', H('forged sibling evidence')),
+            'malformed_body': lambda assertion: assertion['object']['literal'].__setitem__('lexicalValue', '{bad'),
+            'forged_target': lambda assertion: wrong_body(assertion, 'target'),
+            'forged_revision': lambda assertion: wrong_body(assertion, 'revision'),
+        }
+        for name, change in changes.items():
+            def sibling(value):
+                assertion = copy.deepcopy(value['assertions'][0]); assertion['id'] += ':sibling'
+                change(assertion); value['assertions'].append(assertion)
+            f = NativeArtistReviewFixture([{'payload': payload},
+                {'payload': lambda c: payload(c, review=True, mutate=sibling)}], profile=self.profile)
+            source = f.semantic()
+            with self.subTest(change=name):
+                result = self.select(source)
+                self.assertEqual(len(result['selected']), 1)
+                snapshot = loads(source.snapshot(), maximum=MAX_TRANSCRIPT)
+                row = next(row for row in snapshot['statements']
+                    if row['source']['recordHash'] == f.publications[1]['original']['recordHash'])
+                self.assertEqual(row['payloadHex'], f.publications[1]['original']['payloadHex'])
+                self.assertEqual(len(row['value']['assertions']), 2)
+                with self.assertRaises(MuseumError): self.select(source, reviewers=((1, 1),))
+                with self.assertRaises(MuseumError): self.select(source, reviewers=((1, 0), (1, 1)))
+
+    def test_same_original_sibling_diagnostics_replay_without_payload_rewriting(self):
+        def sibling(value): value['assertions'].append({'id': 'urn:invalid:sibling'})
+        f = NativeArtistReviewFixture([{'payload': lambda c: payload(c, mutate=sibling)},
+            {'payload': lambda c: payload(c, review=True)}], profile=self.profile)
+        source = f.semantic(); raw = source.snapshot(); result = self.select(source)
+        metadata_raw, artist_raw, semantic_raw = (source.catalogue.transcript(), source.artist.transcript(), source.transcript())
+        with patch('socket.socket', side_effect=AssertionError('offline Artist replay used a network')):
+            catalogue = MetadataCatalogSource(source.anchor_bytes, ReplayTransport(metadata_raw, keccak256(metadata_raw)))
+            artist = ArtistAttestationSource(catalogue, ReplayTransport(artist_raw, keccak256(artist_raw)))
+            replay = NativeArtistReviewSource(artist, ReplayTransport(semantic_raw, keccak256(semantic_raw)), profile=self.profile)
+            self.assertEqual(replay.snapshot(), raw)
+            self.assertEqual(self.select(replay), result)
+
+    def test_registered_definition_gate_is_fatal_even_for_invalid_assertion(self):
+        def invalid(value): value['assertions'][0]['origin'] = 'invalid'
+        f = NativeArtistReviewFixture([{'payload': lambda c: payload(c, mutate=invalid)}], profile=self.profile)
+        kind, raw = self.profile.documents[NAME]
+        value = loads(raw); value['wrong'] = 'changed registered definition'
+        f.install_document(NAME, kind, dumps(value), predecessor=self.profile.document_predecessors[NAME])
+        with self.assertRaisesRegex(MuseumError, 'registered interpretation differs'): f.semantic().snapshot()
+
+    def test_shared_envelope_scope_and_assertion_array_remain_required(self):
+        changes = (
+            lambda value: value.__setitem__('profileSchemaId', H('wrong schema')),
+            lambda value: value['anchorSubject'].__setitem__('subjectId', H('wrong subject')),
+            lambda value: value.__setitem__('assertions', []),
+            lambda value: value.__setitem__('assertions', None),
+            lambda value: value.pop('assertions'),
+        )
+        for change in changes:
+            f = NativeArtistReviewFixture([{'payload': lambda c: payload(c, mutate=change)}], profile=self.profile)
+            source = f.semantic(); snapshot = loads(source.snapshot(), maximum=MAX_TRANSCRIPT)
+            self.assertEqual(snapshot['statements'][0]['status'], 'invalid')
+            self.assertEqual(snapshot['statements'][0]['payloadHex'], f.publications[0]['original']['payloadHex'])
+            with self.assertRaisesRegex(MuseumError, 'unavailable or invalid'):
+                self.select(source, sources=(0,), reviewers=())
+
+    def test_duplicate_sibling_id_does_not_override_exact_selected_pointer(self):
+        def sibling(value):
+            assertion = copy.deepcopy(value['assertions'][0])
+            assertion['object'] = {'entity': 'urn:fixture:different-object'}
+            value['assertions'].append(assertion)
+        f = NativeArtistReviewFixture([{'payload': lambda c: payload(c, origin='direct_statement', mutate=sibling)}],
+            profile=self.profile)
+        source = f.semantic(); first = self.select(source, sources=((0, 0),), reviewers=())['selected'][0]
+        second = self.select(source, sources=((0, 1),), reviewers=())['selected'][0]
+        self.assertEqual(first['assertion']['id'], second['assertion']['id'])
+        self.assertNotEqual(first['assertion']['object'], second['assertion']['object'])
+        self.assertNotEqual(first['source'], second['source'])
+        self.assertNotEqual(review_body(source, first['source'], 'reviewed')['assertionRevisionHash'],
+            review_body(source, second['source'], 'reviewed')['assertionRevisionHash'])
 
     def test_wrong_profile_record_stays_unsupported_and_cannot_be_selected(self):
         old_hash = NativeAttributionProfile().profile_hash

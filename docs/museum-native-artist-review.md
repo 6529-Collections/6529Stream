@@ -22,6 +22,11 @@ review records, with separately registered profile, review-body, policy,
 crosswalk and export documents. Reusing an assertion schema does not reinterpret
 records committed to an older profile hash.
 
+Reviews use the adopted relation `urn:6529stream:semantic-review:v1` and datatype
+`urn:6529stream:datatype:semantic-review:v1`. The Artist-specific body and mapping
+rule remain bound by the new profile; those common literals do not admit another
+record family or an earlier profile.
+
 The profile retains the complete original Native Attribution document set,
 original dependency bytes, canonicalization identifiers and explicit predecessor
 edges. The new profile does not add typed entity continuation to the V1 assertion
@@ -76,7 +81,15 @@ withdrawn review revisions do not count as approvals. A reviewer cannot veto an
 otherwise selected direct statement.
 
 All native originals are authenticated. Unsupported or invalid semantic records
-remain in the source with diagnostics. Review bodies are interpreted only when
+remain in the source with diagnostics. The exact registered schema and definition
+closure are still required. Within a supported shared envelope, each
+`/assertions/N` has separate schema, signer and evidence eligibility. An invalid
+unselected sibling cannot invalidate a valid selected assertion in the same
+original. The source retains the full original payload and assertion indices;
+support for one assertion does not claim whole-document semantic conformance.
+Selecting an invalid assertion fails, including through `review_body`.
+
+Review bodies are interpreted only when
 their exact selectors are selected as reviewers. An unselected malformed body,
 forged target or forged revision cannot veto a selected claim. Selecting an
 invalid review fails rather than treating it as approval. A recorder-supplied

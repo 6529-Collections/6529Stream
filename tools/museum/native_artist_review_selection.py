@@ -13,6 +13,7 @@ def _assertions(snapshot):
     for row in snapshot['statements']:
         if row['status'] != 'supported': continue
         for index, assertion in enumerate(row['value']['assertions']):
+            if row['assertionInterpretations'][index]['status'] != 'supported': continue
             reference = row['source'] | {'pointer': '/assertions/' + str(index)}
             key = dumps(reference)
             require(key not in result, 'Artist review duplicate original assertion selector')
@@ -132,7 +133,10 @@ def _select(snapshot, policy_raw, policy_hash):
         'interpretationProfileHash': snapshot['interpretationProfileHash'], 'sourceScope': snapshot['sourceScope'],
         'sourceMode': snapshot['mode'], 'selected': selected, 'withheld': withheld, 'reviews': review_rows,
         'diagnostics': diagnostics, 'interpretationDiagnostics': [{'source': row['source'], 'status': row['status'],
-            'reason': row['reasonCode']} for row in snapshot['statements'] if row['status'] != 'supported'],
+            'reason': row['reasonCode']} for row in snapshot['statements'] if row['status'] != 'supported'] + [
+            {'source': row['source'] | {'pointer': entry['pointer']}, 'status': entry['status'],
+                'reason': entry['reasonCode']} for row in snapshot['statements']
+            for entry in row['assertionInterpretations'] if entry['status'] != 'supported'],
         'claims': CLAIMS, 'qualification': QUALIFICATION}
 
 

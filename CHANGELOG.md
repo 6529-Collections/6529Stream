@@ -8,6 +8,9 @@
   selected account review and opted-in SELF review without claiming human or
   institutional authority. See the
   [native Artist review guide](docs/museum-native-artist-review.md).
+- Use the adopted semantic-review relation and datatype. Keep semantic
+  eligibility local to each exact assertion selector so an unselected malformed
+  sibling cannot suppress a valid assertion from the same native original.
 
 ## Dispute history library deployment size
 

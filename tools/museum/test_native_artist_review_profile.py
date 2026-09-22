@@ -106,6 +106,23 @@ class NativeArtistReviewProfileTests(unittest.TestCase):
                     "datatype": review.REVIEW_DATATYPE, "language": None, "unit": None, "precision": None})
                 self.assertEqual(_validate(review.BODY_SCHEMA_BYTES, literal["lexicalValue"].encode()), value)
 
+    def test_adopted_review_relation_and_datatype_remain_normative(self):
+        # Adopted MSM review requirement: docs/museum-semantic-mapping.md,
+        # semantic review rule 219-220; docs/museum-review-literal.md quotes it.
+        relation = "urn:6529stream:semantic-review:v1"
+        datatype = "urn:6529stream:datatype:semantic-review:v1"
+        self.assertEqual(review.REVIEW_RELATION, relation)
+        self.assertEqual(review.REVIEW_DATATYPE, datatype)
+        policy = loads(review.POLICY_BYTES)
+        self.assertEqual(policy["body"]["relation"], relation)
+        self.assertEqual(policy["body"]["datatype"], datatype)
+        self.assertEqual(review.review_literal(body())["datatype"], datatype)
+        # Shared literals do not collapse the prospective Artist body or its
+        # explicit native authority/scope fields into the old review body.
+        self.assertEqual(review.BODY_NAME, "STREAM_NATIVE_ARTIST_REVIEW_BODY_V1")
+        self.assertEqual(review.REVIEW_MAPPING_RULE, "urn:6529stream:museum:mapping:native-artist-review-v1")
+        self.assertNotEqual(review.BODY_SCHEMA_BYTES, self.old.documents[review.OLD_BODY_NAME][1])
+
     def test_body_requires_every_exact_selector_scope_and_authority_field(self):
         original = body()
         for section in (None, "assertionRecord", "sourceScope", "assertionAuthority"):
@@ -171,6 +188,22 @@ class NativeArtistReviewProfileTests(unittest.TestCase):
         for key in ("humanIndependenceProven", "institutionalStandingProven", "currentAuthorityProven",
                     "reviewCreatesProtocolVeto", "typedContinuationSupported"):
             self.assertFalse(policy["claims"][key])
+
+    def test_policy_requires_shared_gates_but_admits_exact_assertion_pointers_individually(self):
+        policy = loads(review.POLICY_BYTES)
+        selection = policy["selection"]
+        self.assertIn("shared envelope", selection["sharedGates"])
+        self.assertIn("registered definitions", selection["sharedGates"])
+        self.assertIn("native original/authority", selection["sharedGates"])
+        self.assertIn("/assertions/N", selection["perAssertion"])
+        self.assertIn("original-schema, historical signer and evidence", selection["perAssertion"])
+        self.assertIn("unselected sibling assertions", selection["unselected"])
+        self.assertIn("same original document", selection["unselected"])
+        self.assertIn("duplicate assertion IDs", selection["identity"])
+        self.assertIn("unselected duplicate ID cannot poison a selected pointer", selection["identity"])
+        self.assertFalse(policy["claims"]["wholeDocumentSemanticConformance"])
+        self.assertIn("Full original bytes remain retained", policy["qualification"])
+        self.assertEqual(loads(review.CROSSWALK_BYTES)["qualification"], policy["qualification"])
 
     def test_registered_original_dependency_bytes_reconstruct_without_network(self):
         dependency = loads(self.profile.documents[review.DEPENDENCY_NAME][1], maximum=524288)

@@ -25,6 +25,7 @@ class PolicyFixture(SyntheticNativeAttributionFixture):
             'operationEvidenceId': h(2000 + self.next_record), 'operationEvidenceHash': h(3000 + self.next_record),
             'actor': history['signer'], 'grantRecordHash': h(0)}
         row['reasonCode'] = None
+        row['assertionInterpretations'] = [{'pointer': '/assertions/0', 'status': 'supported', 'reasonCode': None}]
         row['value']['anchorSubject'] = {'kind': 'collection', 'subjectId': row['source']['subjectId']}
         return row
 
