@@ -1306,6 +1306,10 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add native VIEW reference and file-role semantic exports with exact source
+  replay, occurrence-specific resources, qualified environment/output relations
+  and separate declared-file, received-byte and Archive correspondence evidence.
+
 - Add complete named owner-family interpretation to canonical semantic export,
   retaining every catalogue lane, historical authority, exact field provenance,
   unsupported encodings and unresolved notice/redemption state. Preserve the

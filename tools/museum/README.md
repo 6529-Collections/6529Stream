@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Native VIEW reference and file semantics](../../docs/museum-native-view-reference-semantics-v1.md)
+map exact native file roles and token/reference relationships with original
+source replay, separate received-byte evidence and an offline graph package.
+
 [Complete owner-family semantic export](CANONICAL-SEMANTIC-EXPORT-V2.md)
 interprets all ten named owner families from the complete retained catalogue,
 with exact definition commitments, qualified relations and opaque alternatives.
