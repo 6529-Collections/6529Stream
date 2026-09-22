@@ -22,7 +22,7 @@ import {
 import {
     IStreamScriptBundles as B
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamScriptBundles.sol";
-import { ManifestArtistBoundary } from "../unit/metadata/StreamCollectionManifests.t.sol";
+import { ManifestArtistBoundary } from "./scoped-preservation-boundaries/StreamCollectionManifestsBoundaries.sol";
 import "../unit/metadata/StreamCollectionMetadataV1.t.sol";
 import {
     StreamMetadataRouter

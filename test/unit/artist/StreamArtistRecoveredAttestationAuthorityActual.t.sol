@@ -136,7 +136,7 @@ import {
 import {
     IStreamC2PAReconciliation as CR
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
-import { MetadataExecutorBoundary } from "../metadata/StreamCollectionMetadataV1.t.sol";
+import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import {
     IStreamStaticMetadataRouter as SR
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";

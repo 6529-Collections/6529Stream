@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {
-    PreservationPolicyContentFixtureV1,
-    PreservationOutputBoundary
-} from "../finality/StreamPreservationPolicyContentCheckpointV1.t.sol";
+import { PreservationPolicyContentFixtureV1 } from "../finality/StreamPreservationPolicyContentCheckpointV1.t.sol";
+import { PreservationOutputBoundary } from "../../helpers/scoped-preservation-boundaries/StreamPreservationPolicyContentCheckpointV1Boundaries.sol";
 import { StaticRouteVm } from "../../helpers/StaticMetadataRoutingFixture.sol";
 import { OfficialSafe } from "../../helpers/OfficialSafeFixture.sol";
 import { Vm } from "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import { LeafManifestVm } from "../finality/StreamContentLeafManifest.t.sol";
 import {
     LeafManifestArchiveBoundary,
-    LeafManifestFinalityBoundary,
-    LeafManifestVm
-} from "../finality/StreamContentLeafManifest.t.sol";
+    LeafManifestFinalityBoundary
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestBoundaries.sol";
 import {
     StreamPreservationPolicySnapshotPublicationV1 as Snapshot
 } from "../../../smart-contracts/domains/metadata/StreamPreservationPolicySnapshotPublicationV1.sol";

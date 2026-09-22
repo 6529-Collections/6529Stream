@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { LeafManifestVm } from "./StreamContentLeafManifest.t.sol";
 import {
-    LeafManifestVm,
     LeafManifestArchiveBoundary,
     LeafManifestFinalityBoundary
-} from "./StreamContentLeafManifest.t.sol";
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestBoundaries.sol";
 import { CheckpointCoreBoundary } from "./StreamOnchainContentCheckpoint.t.sol";
 import {
     CharacterizationTestBase,
     Vm
 } from "../../regression/legacy/helpers/CharacterizationTestBase.sol";
-import { MetadataExecutorBoundary } from "../metadata/StreamCollectionMetadataV1.t.sol";
+import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import {
     StreamSchemaRegistry
 } from "../../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";

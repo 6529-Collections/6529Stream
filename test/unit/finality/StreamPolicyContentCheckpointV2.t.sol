@@ -13,11 +13,11 @@ import {
 import {
     StreamFinalityArtifactTypes as Coverage
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamFinalityArtifactTypes.sol";
+import { LeafManifestVm } from "./StreamContentLeafManifest.t.sol";
 import {
     LeafManifestArchiveBoundary,
-    LeafManifestFinalityBoundary,
-    LeafManifestVm
-} from "./StreamContentLeafManifest.t.sol";
+    LeafManifestFinalityBoundary
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestBoundaries.sol";
 import {
     StreamPolicyContentCheckpointV2
 } from "../../../smart-contracts/domains/finality/StreamPolicyContentCheckpointV2.sol";

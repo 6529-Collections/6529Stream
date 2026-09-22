@@ -7,11 +7,11 @@ import {
 import { StaticRouteVm } from "../../helpers/StaticMetadataRoutingFixture.sol";
 import { OfficialSafe } from "../../helpers/OfficialSafeFixture.sol";
 import { Vm } from "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import { LeafManifestVm } from "../finality/StreamContentLeafManifest.t.sol";
 import {
     LeafManifestArchiveBoundary,
-    LeafManifestFinalityBoundary,
-    LeafManifestVm
-} from "../finality/StreamContentLeafManifest.t.sol";
+    LeafManifestFinalityBoundary
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestBoundaries.sol";
 import {
     StreamScopedPolicySnapshotPublicationV2 as Snapshot
 } from "../../../smart-contracts/domains/metadata/StreamScopedPolicySnapshotPublicationV2.sol";

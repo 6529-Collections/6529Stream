@@ -8,7 +8,7 @@ import {
     StreamFinalityScopeType
 } from "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import "./StreamContentLeafManifest.t.sol";
-import { MetadataExecutorBoundary } from "../metadata/StreamCollectionMetadataV1.t.sol";
+import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import {
     StreamSchemaRegistry
 } from "../../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";

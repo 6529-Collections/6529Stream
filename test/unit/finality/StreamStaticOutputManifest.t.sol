@@ -18,7 +18,7 @@ import {
 import {
     IStreamSchemaRegistry
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamSchemaRegistry.sol";
-import { MetadataExecutorBoundary } from "../metadata/StreamCollectionMetadataV1.t.sol";
+import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import {
     StreamSchemaRegistry
 } from "../../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";

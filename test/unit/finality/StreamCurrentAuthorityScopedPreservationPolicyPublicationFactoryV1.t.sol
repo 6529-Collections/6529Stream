@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import {
-    ScopedPreservationReferenceFixtureV1,
-    ScopedPreservationReferenceExternalBoundary
-} from "../preservation/StreamScopedPreservationPolicyReferencePublicationV1.t.sol";
+import { ScopedPreservationReferenceFixtureV1 } from "../preservation/StreamScopedPreservationPolicyReferencePublicationV1.t.sol";
+import { ScopedPreservationReferenceExternalBoundary } from "../../helpers/scoped-preservation-boundaries/StreamScopedPreservationPolicyReferencePublicationV1Boundaries.sol";
 import {
     StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1 as GraphFactory
 } from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1.sol";

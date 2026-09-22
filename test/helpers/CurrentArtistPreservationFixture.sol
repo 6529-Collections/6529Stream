@@ -83,13 +83,13 @@ abstract contract CurrentArtistPreservationFixture is
         core.setEntropy(address(entropy));
         executor = MetadataExecutorBoundary(
             _preservationDeploy(
-                "test/unit/metadata/StreamCollectionMetadataV1.t.sol:MetadataExecutorBoundary",
+                "test/helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol:MetadataExecutorBoundary",
                 abi.encode()
             )
         );
         artist = ManifestArtistBoundary(
             _preservationDeploy(
-                "test/unit/metadata/StreamCollectionManifests.t.sol:ManifestArtistBoundary",
+                "test/helpers/scoped-preservation-boundaries/StreamCollectionManifestsBoundaries.sol:ManifestArtistBoundary",
                 abi.encode(address(core))
             )
         );

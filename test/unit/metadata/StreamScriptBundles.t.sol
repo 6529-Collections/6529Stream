@@ -30,12 +30,12 @@ import { Base64 } from "../../../smart-contracts/vendor/openzeppelin/Base64.sol"
 import {
     DependencyRegistry
 } from "../../../smart-contracts/domains/dependencies/DependencyRegistry.sol";
-import { ManifestArtistBoundary } from "./StreamCollectionManifests.t.sol";
+import { ManifestArtistBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionManifestsBoundaries.sol";
 import {
     PresentationCoreBoundary,
     PresentationEntropyBoundary
 } from "./StreamMetadataServing.t.sol";
-import { MetadataExecutorBoundary } from "./StreamCollectionMetadataV1.t.sol";
+import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import "../../helpers/MetadataRecoveryServingBoundaries.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";

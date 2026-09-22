@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./ArtistPublicationHydrationFixture.sol";
-import { MetadataExecutorBoundary } from "../metadata/StreamCollectionMetadataV1.t.sol";
+import { MetadataExecutorBoundary } from "../../helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol";
 import "../../../smart-contracts/domains/metadata/StreamConservationRecordSelection.sol";
 import "../../../smart-contracts/domains/metadata/StreamRightsRecordSelection.sol";
 import "../../../smart-contracts/domains/metadata/StreamNativeConservationFloorProvider.sol";
