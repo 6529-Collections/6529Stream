@@ -53,6 +53,15 @@ contract StreamArtistExtendedHydrationFeaturesTest {
         }
     }
 
+    function testCombinedExtensionsAndAdvertisedExtrasUseOnlyTheRequestedMask() external pure {
+        for (uint8 index; index < 7; ++index) {
+            RH.Capability memory c = _capability(index, type(uint256).max);
+            // Existing negotiation constrains the request, not unrelated advertised bits.
+            Codec.requireCapability(c, index, RH.FIRST_GRAPH_FEATURES);
+            Codec.requireCapability(c, index, RH.FIRST_GRAPH_FEATURES | 4194304 | 8388608 | 16777216);
+        }
+    }
+
     function testKnownExtensionDoesNotBypassOwnerIdentityOrSchema() external view {
         RH.Capability memory c = _capability(2, 4194304);
         _rejectCapability(c, 3, 4194304);

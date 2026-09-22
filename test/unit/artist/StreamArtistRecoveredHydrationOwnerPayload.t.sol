@@ -231,7 +231,9 @@ contract StreamArtistRecoveredHydrationOwnerPayloadTest {
         Payload.Payload memory p = _payload(2);
         RH.ExportHeader memory h = _header(2, p);
         h.requiredFeatures |= uint256(1) << (25 + uint256(offset) % 231);
-        _reject(h, p);
+        (bool ok, bytes memory reason) = address(this).call(abi.encodeCall(this.check, (uint8(2), h, p)));
+        assert(!ok);
+        assert(keccak256(reason) == keccak256(abi.encodeWithSelector(RH.InvalidRecoveredHydrationProfile.selector)));
     }
 
     function testOwnerPayloadRoundTripPreservesOneOwnerAndBothOriginal35Occurrences()
