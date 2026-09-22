@@ -161,6 +161,31 @@ contract StreamCurrentAuthorityBundleArchiveCoverageTest is CurrentAuthorityCons
         );
     }
 
+    function testScopedConstructorRejectsEachMissingDependencyIncludingLast() public {
+        for (uint256 i; i < 6; ++i) {
+            address originalTarget = bd.targets[i];
+            bytes32 originalHash = bd.codeHashes[i];
+            bd.targets[i] = address(0);
+            vm.expectRevert(abi.encodeWithSelector(T.InventorySourceChanged.selector));
+            new StreamCurrentAuthorityScopedBundleArchiveCoverage(
+                bd, od, ad, D.SCOPED_POLICY_INVENTORY_PROFILE
+            );
+            bd.targets[i] = originalTarget;
+            bd.codeHashes[i] = 0;
+            vm.expectRevert(abi.encodeWithSelector(T.InventorySourceChanged.selector));
+            new StreamCurrentAuthorityScopedBundleArchiveCoverage(
+                bd, od, ad, D.SCOPED_POLICY_INVENTORY_PROFILE
+            );
+            bd.codeHashes[i] = originalHash;
+        }
+        StreamCurrentAuthorityScopedBundleArchiveCoverage scoped =
+            new StreamCurrentAuthorityScopedBundleArchiveCoverage(
+                bd, od, ad, D.SCOPED_POLICY_INVENTORY_PROFILE
+            );
+        require(scoped.INVENTORY_PROFILE() == D.SCOPED_POLICY_INVENTORY_PROFILE);
+        require(keccak256(abi.encode(scoped.dependencies())) == keccak256(abi.encode(bd)));
+    }
+
     function testScopedProfileRequiresFullScopeAndCurrentSelectionSeal() public {
         _publishCurrent(D.SCOPED_INVENTORY_PROFILE);
         StreamCurrentAuthorityScopedBundleArchiveCoverage scoped = new StreamCurrentAuthorityScopedBundleArchiveCoverage(
@@ -190,6 +215,11 @@ contract StreamCurrentAuthorityBundleArchiveCoverageTest is CurrentAuthorityCons
         Scoped.BundleEvidence memory result =
             scoped.requireCoverage(scope, PLAN, full.inventory.renderCriticalEvidenceHash);
         require(result.coverage.bundleCoverageHash != 0);
+        require(
+            scoped.requireFullCurrentCoverage(PLAN).coverage.bundleCoverageHash
+                == result.coverage.bundleCoverageHash,
+            "full diagnostic checks the admitted item"
+        );
         StreamFinalityScope memory wrong = scope;
         wrong.tokenId += 1;
         _fails(
@@ -199,6 +229,9 @@ contract StreamCurrentAuthorityBundleArchiveCoverageTest is CurrentAuthorityCons
             )
         );
         _select(address(new FinalityMultiOriginReadTable()));
+        _fails(
+            address(scoped), abi.encodeCall(scoped.requireFullCurrentCoverage, (PLAN))
+        );
         _fails(
             address(scoped),
             abi.encodeCall(

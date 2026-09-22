@@ -93,10 +93,12 @@ contract StreamCurrentAuthorityScopedBundleArchiveCoverage is IStreamScopedBundl
         if (d.chainId != block.chainid || d.readGas < 50000 || d.archiveGas < d.readGas) {
             revert T.InventorySourceChanged();
         }
-        for (uint256 i; i < 6; ++i) {
+        for (uint256 i; i < 6;) {
             if (d.targets[i] == address(0) || d.codeHashes[i] == 0) {
                 revert T.InventorySourceChanged();
             }
+            // The fixed six-element bound makes the increment non-overflowing.
+            unchecked { ++i; }
         }
         if (
             o.worker == address(0) || o.workerCodeHash == 0 || o.profile != O.PROFILE
@@ -432,7 +434,7 @@ contract StreamCurrentAuthorityScopedBundleArchiveCoverage is IStreamScopedBundl
             revert T.InventoryIncomplete();
         }
         _environment(id);
-        for (uint256 i; i < _items[id].length; ++i) {
+        for (uint256 i; i < _items[id].length;) {
             Reads.current(
                 _dependencies,
                 id,
@@ -441,6 +443,8 @@ contract StreamCurrentAuthorityScopedBundleArchiveCoverage is IStreamScopedBundl
                 _admissions[id][i],
                 _originHashes[id][i]
             );
+            // i is strictly below a uint256 array length before every increment.
+            unchecked { ++i; }
         }
         return _completed[id];
     }
