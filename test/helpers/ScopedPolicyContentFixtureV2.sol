@@ -113,6 +113,12 @@ abstract contract ScopedPolicyContentFixtureV2 is
         vm.warp(1000);
     }
 
+    // Real Metadata payload reads nest its Store cap inside Membership's 500k budget.
+    // Configure that dependency at genesis; checkpoint read/render caps stay unchanged.
+    function _metadataDependencyReadGas() internal pure override returns (uint256) {
+        return 200000;
+    }
+
     function _scopedFixture(uint8 terminalStatus, bool finalize) internal {
         require(terminalStatus == 1 || terminalStatus == 2);
         scopedModules = ScopedPolicyOutputModulesBoundary(
@@ -200,13 +206,14 @@ abstract contract ScopedPolicyContentFixtureV2 is
         randomCoordinator.onTokenMinted(1, 92, address(this), keccak256("original random mint"));
         if (finalize) _scopedFinalize();
         S.ConfigInput memory input = _input(R.MetadataMode.ONCHAIN, true);
-        _approve(0, input, keccak256("original scoped collection config consent"));
-        router.setCollectionMetadataConfig(1, input);
         input.registry = address(randomVersions);
         input.versionKey = randomVersions.key();
         input.config.renderer = address(randomRenderer);
         _approve(92, input, keccak256("original scoped random token config consent"));
         router.setTokenMetadataConfig(92, input);
+        input = _input(R.MetadataMode.ONCHAIN, true);
+        _approve(0, input, keccak256("original scoped collection config consent"));
+        router.setCollectionMetadataConfig(1, input);
         StreamCollectionTokenInventory indexedTokens = StreamCollectionTokenInventory(
             _artistArtifactCreate(
                 "smart-contracts/domains/finality/StreamCollectionTokenInventory.sol:StreamCollectionTokenInventory",
@@ -440,10 +447,19 @@ abstract contract ScopedPolicyContentFixtureV2 is
         returns (Checkpoint host, bytes32 selection)
     {
         bytes32 plan = scopedSources.beginInventory(scope);
-        scopedSources.appendInventory(plan, 256);
+        if (!scopedSources.inventoryProgress(plan).complete) {
+            scopedSources.appendInventory(plan, 256);
+        }
+        scopedSources.requireCompleteInventory(plan);
         address set = scopedFactory.prepareSourceSet(scope);
         selection = scopedSelections.begin(scope);
-        scopedSelections.append(selection, 16);
+        if (
+            scopedSelections.checkpoint(selection).nextIndex
+                < scopedSelections.checkpoint(selection).tokenCount
+        ) {
+            scopedSelections.append(selection, 16);
+        }
+        scopedSelections.requireCurrentCheckpoint(selection);
         StreamTerminalEntropyReadiness readiness = StreamTerminalEntropyReadiness(
             _artistArtifactCreate(
                 "smart-contracts/domains/finality/StreamTerminalEntropyReadiness.sol:StreamTerminalEntropyReadiness",

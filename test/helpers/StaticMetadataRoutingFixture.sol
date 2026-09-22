@@ -357,7 +357,7 @@ abstract contract StaticMetadataRoutingFixture is
         mc.manifestHash = keccak256("metadata");
         mc.manifestURI = "ipfs://metadata";
         mc.dependencyReadGas = IStreamGasParameterHost.GasParameterConfig(
-            "METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2
+            "METADATA_DEPENDENCY_READ_GAS", _metadataDependencyReadGas(), 100000, 2
         );
         mc.artistReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_ARTIST_READ_GAS", 2000000, 1000000, 2
@@ -393,7 +393,9 @@ abstract contract StaticMetadataRoutingFixture is
             address(0),
             address(attribution)
         );
-        d.readGas = mc.dependencyReadGas;
+        d.readGas = IStreamGasParameterHost.GasParameterConfig(
+            "METADATA_DEPENDENCY_READ_GAS", 2000000, 100000, 2
+        );
         d.attributionGas = IStreamGasParameterHost.GasParameterConfig(
             "STATIC_ATTRIBUTION_GAS", 8000000, 8000000, 1
         );
@@ -444,6 +446,10 @@ abstract contract StaticMetadataRoutingFixture is
             TypedCitationRenderer.renderCurrent.selector,
             address(renderer).codehash
         );
+    }
+
+    function _metadataDependencyReadGas() internal pure virtual returns (uint256) {
+        return 2000000;
     }
 
     function _mint() internal {

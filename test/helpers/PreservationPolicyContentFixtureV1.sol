@@ -291,7 +291,10 @@ abstract contract PreservationPolicyContentFixtureV1 is ScopedPolicyContentFixtu
     {
         c.scope = scope;
         bytes32 plan = scopedSources.beginInventory(scope);
-        scopedSources.appendInventory(plan, 256);
+        if (!scopedSources.inventoryProgress(plan).complete) {
+            scopedSources.appendInventory(plan, 256);
+        }
+        scopedSources.requireCompleteInventory(plan);
         address source;
         if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
             CollectionFactory factory = CollectionFactory(
@@ -305,8 +308,13 @@ abstract contract PreservationPolicyContentFixtureV1 is ScopedPolicyContentFixtu
             source = scopedFactory.prepareSourceSet(scope);
         }
         c.selection = scopedSelections.begin(scope);
-        scopedSelections.append(c.selection, 16);
-        uint256 count = scopedSelections.checkpoint(c.selection).tokenCount;
+        if (
+            scopedSelections.checkpoint(c.selection).nextIndex
+                < scopedSelections.checkpoint(c.selection).tokenCount
+        ) {
+            scopedSelections.append(c.selection, 16);
+        }
+        uint256 count = scopedSelections.requireCurrentCheckpoint(c.selection).tokenCount;
         c.producers = new PreservationOutputBoundary[](count);
         for (uint256 i; i < count; ++i) {
             Selection.TokenSelection memory row = scopedSelections.selectionAt(c.selection, i);
