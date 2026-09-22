@@ -167,7 +167,25 @@ contract StreamArtistCompleteHistoryBindingActualTest is ArtistAttributionDisput
         );
         opening.artistId = b.bindings.current.artistId;
         a.causeData = abi.encode(end, head, opening, resolution);
+        a.governance.oldValueHash =
+            keccak256(abi.encode(a.previous, uint8(5), a.cause, a.causeRecord, a.causeData));
+        a.governance.newValueHash = keccak256(
+            abi.encode(
+                a.governance.scopeHash,
+                a.governance.oldValueHash,
+                a.proposalHash,
+                a.proposedArtistId,
+                a.registrationNonce
+            )
+        );
         b.corrections[1].approval = a;
+        CHRH.OriginEnvironment memory o = _origin();
+        b.corrections[1].recordHash = CorrectionHash.hash(
+            Hashes.Environment(o.chainId, o.registry, o.core, o.manager),
+            1,
+            b.bindings.current.bindingHash,
+            a
+        );
         avm.expectRevert(CHRH.InvalidRecoveredHydrationProfile.selector);
         Leaves.correction(b, scope.collections[0], 1, _origin());
     }
