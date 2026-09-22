@@ -6,6 +6,9 @@ import {
     StreamPreservationPolicyOutputManifestV1 as JoinManifest
 } from "../../smart-contracts/domains/finality/StreamPreservationPolicyOutputManifestV1.sol";
 import {
+    StreamScopedPreservationPolicyContentCheckpointV1 as JoinCheckpoint
+} from "../../smart-contracts/domains/finality/StreamScopedPreservationPolicyContentCheckpointV1.sol";
+import {
     IStreamPreservationPolicyOutputManifestV1 as JoinV
 } from "../../smart-contracts/interfaces/stream/finality/IStreamPreservationPolicyOutputManifestV1.sol";
 import {
@@ -44,6 +47,7 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
     bytes32 private constant JOIN_ARTIST = keccak256("artist");
     bytes32 private constant MANIFEST_READ =
         keccak256("6529STREAM_GGP_STATIC_OUTPUT_MANIFEST_READ_GAS");
+    uint256 private constant JOIN_TX_CEILING = 16777216;
     JoinCoverage private joinCoverage;
     JoinArchiveBoundary private joinArchive;
     StreamSchemaDocumentStore private joinStore;
@@ -63,6 +67,8 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         bytes32 indexed planHash,
         JoinV.Manifest manifest
     );
+
+    event CappedJoinCall(bytes4 indexed selector, uint256 callerGasSpent, uint256 ceiling);
 
     function testCheckpointManifestJoinAllCanonicalScopesAndOriginalGasMismatch() external {
         _joinFixture();
@@ -177,6 +183,69 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
                     == joinArchive.coverageValidationEpoch(),
             "new validation head preserves original immutable coverage receipt"
         );
+    }
+
+    function testCheckpointManifestJoinFreshBudgetsFitOriginalTransactionCeiling() external {
+        _joinFixture();
+        Joined memory j;
+        j.capture = _capture(_scope(1), true);
+        Preservation original = j.capture.host;
+        j.capture.host = Preservation(
+            address(
+                JoinCheckpoint(
+                    _artistArtifactCreate(
+                        "smart-contracts/domains/finality/StreamScopedPreservationPolicyContentCheckpointV1.sol:StreamScopedPreservationPolicyContentCheckpointV1",
+                        abi.encode(
+                            address(scopedSelections),
+                            original.entropySourceSet(),
+                            original.terminalReadiness(),
+                            address(executor),
+                            _scopedGas("STATIC_CONTENT_READ_GAS", 8000000, 2),
+                            _scopedGas("STATIC_CONTENT_RENDER_GAS", 2000000, 2)
+                        )
+                    )
+                )
+            )
+        );
+        require(
+            IStreamGasParameterHost(address(j.capture.host))
+                    .gasParameter(keccak256("6529STREAM_GGP_STATIC_CONTENT_READ_GAS"))
+                == 8000000
+                && IStreamGasParameterHost(address(j.capture.host))
+                        .gasParameter(keccak256("6529STREAM_GGP_STATIC_CONTENT_RENDER_GAS"))
+                    == 2000000,
+            "fresh checkpoint retains readiness read and uses measured render allowance"
+        );
+        j.capture.id = j.capture.host.begin(j.capture.selection, keccak256("capped preservation"));
+        j.capture.host.append(j.capture.id, _payload(j.capture));
+        _assertComplete(j.capture);
+        j.raw = _manifestBytes(j.capture);
+        (j.artifact, j.coverage) = _archiveManifest(j.raw);
+        j.verifier = _manifest(j.capture, 10000000);
+        (uint256 value, uint256 floor, uint8 failure, uint64 revision) =
+            j.verifier.gasParameterInfo(MANIFEST_READ);
+        require(
+            value == 10000000 && floor == 100000 && failure == 2 && revision == 1,
+            "fresh verifier genesis is lawful without lowering a governed parameter"
+        );
+        bytes memory input = abi.encodeCall(
+            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+        );
+        uint256 beforeGas = gasleft();
+        (bool ok, bytes memory result) =
+            address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
+        uint256 spent = beforeGas - gasleft();
+        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual begin transaction");
+        emit CappedJoinCall(JoinV.beginManifest.selector, spent, JOIN_TX_CEILING);
+        j.plan = abi.decode(result, (bytes32));
+        require(j.plan == _planHash(j.verifier, _expectedManifest(j)), "capped full plan identity");
+        input = abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, j.capture.producers.length));
+        beforeGas = gasleft();
+        (ok, result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
+        spent = beforeGas - gasleft();
+        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual verify transaction");
+        emit CappedJoinCall(JoinV.verifyNextOutputs.selector, spent, JOIN_TX_CEILING);
+        _assertJoined(j, abi.decode(result, (bytes32)));
     }
 
     function _joinFixture() private {
