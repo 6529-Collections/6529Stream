@@ -18,65 +18,67 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-Expanded full v1 remains incomplete. The complete-history routes are source
-integrated at `f54c2791`; ABI198 checks **4,620 Solidity sources with zero errors**
-after the publication repair at `5104c901`.
-Client test sharding is integrated through `992b9e03`. These checks establish
-source and interfaces; full current-stack acceptance is still pending. RC1 and
-its Sepolia evidence remain unchanged.
+Expanded full v1 remains incomplete. The integrated source is `fdb36e3f`;
+ABI201 checks **4,631 Solidity sources with zero errors**. The latest contract
+repair is `402bad28`, Artist test composition is `da61ee5f`, and native Museum
+formats are `fdb36e3f`. Source checks and scoped tests do not establish full
+current-stack acceptance. RC1 and its Sepolia evidence remain unchanged.
 
-- **Artist history:** the complete chronology, historical principals, combined
-  Consent, original sanctions/confirmations12/13, ratification52, all seven owner
-  imports and complete post-import source recheck are now connected. Independent
-  source reviews are clear. Four new routing/Safe rollback regressions are
-  authored and type-checked, but not executed. Six additional mixed-history and
-  repeated-composition cases are integrated as `d32087b0`, also unexecuted.
-  Existing class4/capability59
-  migration is separately built and source-reviewed; its shared activation is
-  still missing. Mixed histories and actual Safe execution remain open.
-- **Museum:** exact source-field/format correspondence and native authoring
-  passed **42 root checks** at `269dd02d`. Native WORK-to-LIDO and General/V4
-  authoring history passed **41 root checks** at `7e5209e5`. Both batches have
-  independent source/oracle review. Further native format/family coverage,
-  actual publication/capture and institutional acceptance remain open; draft
-  confirmation does not establish publication authority.
-- **Testing speed:** reviewed fixture changes preserve existing test bodies
-  while moving expensive deployment setup behind fixed test helpers. All five
-  selected products for the current Owner fixture compiled on `52de8dd2`;
-  physical linking and execution remain pending. The generation host still
-  failed after a single one-hour compiler trial. A material inherited-fixture
-  split is underway; no unchanged timeout retry is planned.
-- **Client CI:** the complete original 238 files/3,240 test registrations are
-  retained, with 14 new runner cases. CI distributes 1,417 units across 16
-  required shards. Root runner14, workflow-policy41 and policy checks pass;
-  full Ubuntu Node24 matrix execution remains pending. Existing time bounds
-  and the required aggregate check are preserved.
-- **Capacity:** both measured preservation publication overruns are repaired
-  at `5104c901`. Snapshot V1/V2 measure 23,258/23,101 runtime bytes; Reference
-  V1/V2 measure 23,521. All four and both workers fit the original runtime and
-  full-initcode limits. Public wrapper ABI/selectors/storage remain identical.
-  Six focused Reference-history tests pass, including 256 fuzz inputs. Full
-  Snapshot/current-stack execution and gas remain pending. Consent measured
-  exactly 49,152 full-initcode bytes on earlier `7f0e6fe6`; latest Artist routes
-  and Coordinator require fresh capacity evidence. Their planned 20-product
-  native run is held by automatic approval review.
-- **Scoped execution evidence:** original ratification workers pass 18 cases
-  on `c30f4f16`; preservation components retain their 61-case `e7286fa1` pass.
-  Earlier generation/collaborator/dispute results remain limited to their
-  recorded sources. None establishes the latest combined system. The canonical
-  source inventory now contains **3,093 production paths**.
+- **Artist history:** complete chronology, historical principals, combined
+  Consent, original sanctions/confirmations12/13, ratification52, all seven
+  imports and the post-import source recheck are connected. The latest reviewed
+  test batch combines real payout, policy, C2PA, sanction, ratification and
+  revoked-grant histories with collaborator/unbound histories. It adds a genuine
+  second op60 import after a fresh successor payout and compares/reuses the full
+  signed Safe retry envelope. Four strengthened cases and one new case are
+  authored and ABI-checked, not executed. Class3-rich and recovery-payout
+  combinations are being built; class4 activation and full execution remain open.
+- **Museum:** native Linked Art, PREMIS and IIIF adapters now join unchanged
+  native LIDO in one portable package. Complete field/family inventories and
+  exact provenance remain visible. All **49 new focused root tests pass** on
+  `fdb36e3f`, with independent source/oracle reviews clear. Earlier 42/41-case
+  batches remain source-specific evidence. Native media painting joins, broader
+  events/agents/rights, other required mappings, actual capture/publication and
+  institutional acceptance remain open. Retained synthetic records are explicit.
+- **Testing speed:** helper-only Guardian/Recovered/Unbound/Dispute and
+  Chronology/Identity/Composition fixtures are integrated. Existing named test
+  bodies and storage order are preserved while accidental inherited cases are
+  removed from unrelated hosts. The earlier one-hour generation compiler
+  failure remains recorded; the reduced host is not yet executed. Owner testing
+  has 14 fresh native/physical products and a 24-product named-library join on
+  its separate `52de8dd2` source; actual Owner execution remains pending.
+- **Client CI:** all original 238 files/3,240 registrations remain, plus 14
+  runner tests. Fourteen of 16 remote shards passed; shards4/7 timed out while
+  a late heavy case remained. Measured scheduling repair is being prepared
+  under unchanged deadlines, alongside Complete History client/Safe coverage.
+  No full CI success is claimed.
+- **Capacity:** the five preservation overruns reported by the frozen capacity
+  campaign are repaired in source. Snapshot/Reference at `5104c901` fit their
+  runtime/full-initcode limits and retain six focused passes including fuzz256.
+  At `402bad28`, all four content checkpoints measure **22,475 runtime bytes**;
+  output manifests V1/V2 measure **14,293**. These six wrappers and both new
+  libraries fit original runtime/full-initcode limits; wrapper ABIs, selectors
+  and storage remain identical. The admission/source-image worker passes
+  **19 tests, including two 256-input fuzz properties**. Full preservation flows
+  and gas are assigned to Burn. Current Artist/Coordinator capacity remains
+  pending; the separate proposed 20-product Artist run remains held.
+- **Remaining runtime:** collaborator transport/capacity repairs are still in
+  progress. Collector optimization remains isolated until actual paid flows
+  meet the original 500,000-gas ceiling. Earlier ratification18, preservation61
+  and other passes apply only to their recorded sources. The canonical source
+  inventory now contains **3,095 production paths**.
 
-Remaining delivery work is the missing feature combinations and Museum software,
-current deployment-size/gas repairs, actual current-stack and all-call Safe
-integration, full fuzz/stateful campaigns, full CI and matching release evidence,
-then a frozen candidate and new testnet demonstration. Collector optimization
-remains isolated until actual paid execution meets the original 500,000-gas
-ceiling. No new funding is required. Audit, production ceremonies and Lean remain
-separate. Earlier failed runs remain recorded; newer source does not inherit
-their acceptance. Automatic approval review has blocked several task handoffs
-pending destination-specific permission; those payloads remain held. A new
-Class4 handoff read and the separate Artist native run were also rejected; exact
-local-step permission has been requested. Unaffected work continues.
+Remaining delivery work includes missing feature combinations and Museum
+software, latest deployment-size/gas checks, actual current-stack and all-call
+Safe integration, full fuzz/stateful campaigns, full CI and matching release
+evidence, then a frozen candidate and new testnet demonstration. No new funding
+is required. Audit, production ceremonies and Lean remain separate.
+
+Automatic approval review has blocked several destination-specific task
+handoffs, a Class4 handoff read and the separate Artist native run. The exact
+permission questions remain pending; held payloads and operations have not
+been routed through alternative executors. Unaffected work continues.
+
 
 ## Earlier source-specific evidence
 
