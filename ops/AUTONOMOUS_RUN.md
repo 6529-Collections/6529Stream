@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI193 `9ac7c52f`: 4,502 sources / zero errors; Museum authoring `63d18fae`; runtime remains source-specific. |
+| Source checkpoint | ABI194 `c30f4f16`: 4,529 sources / zero errors; dispute client `f8c8c0a`; runtime remains source-specific. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,17 +29,31 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-Expanded full v1 remains incomplete. ABI193 checks **4,502 Solidity sources
-with zero errors** at `9ac7c52f`; the subsequent Museum-only commit is `63d18fae`.
-These checks establish types and interfaces, not complete deployed behavior.
-Immutable RC1 and its Sepolia evidence remain unchanged.
+Expanded full v1 remains incomplete. ABI194 checks **4,529 Solidity sources
+with zero errors** at `c30f4f16`. The dispute client and package exports are
+integrated through `f8c8c0a`. Type checks establish interfaces, not complete
+deployed behavior. Immutable RC1 and its Sepolia evidence remain unchanged.
+
+The latest source batch adds original ratification52 across generation, dispute
+and collaborator profiles, with the guarded two-map Consent import. Independent
+source review is clear; all26 new regression cases still await execution. The
+first CompleteHistory source phase is also integrated, including the independently
+corrected historical-principal regression. It collects binding and Platform
+chronology; complete combined import and profile activation remain unimplemented.
+Twenty actual-producer cases remain unexecuted; six small membership checks
+retain their producer-source pass. The next combined-history phase is under review.
+
+The dispute client has187 distinct producer-side passes and independent review;
+root build and strict consumer checks pass after the two package exports. Its
+recorded `b3ed602b` profile excludes later ratification52 and broader combinations.
+Provider and Safe-envelope tests do not establish actual Safe contract execution.
 
 - **Artist migration:** generation, unbound Platform, aggregate dispute and
   PRIMARY_ONLY collaborator profiles are source integrated. Twelve collaborator
   leaf/nonce tests, including 256 fuzz inputs, pass on `e5174d6f`. Twelve dispute
   worker tests retain their narrower `b3ed602b` result. Actual combined-owner and
   Safe acceptance remains open. Separate builders now own complete chronology
-  and mixed histories, original ratification52, sanction/confirmation12/13,
+  and mixed histories, combined Consent migration, sanction/confirmation12/13,
   and migration of existing class4 authority and capability59 records.
 - **Deployment size:** the reviewed fixed Binding storage worker is integrated
   as `9671a10a`. Its original ABI, selectors and storage are preserved; Binding
@@ -62,10 +76,10 @@ Immutable RC1 and its Sepolia evidence remain unchanged.
   Additional source-family adapters, field mappings, real publication/capture,
   schema activation and institutional acceptance remain open.
 - **Clients and repository:** Platform client build/types and 55 focused checks
-  retain their recorded pass; dispute callers are being completed. Actual Safe
+  retain their recorded pass; dispute callers are now source integrated. Actual Safe
   contract execution remains separate from client envelope/provider tests.
   Dedicated interfaces and the checksum-parser repair are integrated. The
-  canonical source inventory now contains 3,018 production paths.
+  canonical source inventory now contains 3,039 production paths.
 
 Remote `ff6973db` CI passes repository/orchestration and the Windows builder.
 The TypeScript job reached its ten-minute timeout; its full-suite throughput
@@ -90,11 +104,11 @@ Root owns architecture, integration and delivery. Current assignments:
 - **Mint:** Complete dispute capacity repairs and fourteen actual-owner/Safe cases. Its rejected result handoff remains held pending the task permission request.
 - **Burn:** Corrected preservation61 is complete on e728. Build aggregate original12/13 sanction and confirmation, sharing one consent carrier with Prepared.
 - **Museum:** Source-bound authoring and five-slot evidence joins are integrated and tested. Build remaining exact-source authoring adapters and cross-format field mappings.
-- **Clients:** Finish the dispute client batch, then improve full TypeScript test throughput with coverage-preserving parallel execution.
-- **Testing:** One canonical Owner four-product capture runs on be943 after typed planner isolation; retain exact tests and configuration.
+- **Clients:** Dispute client is integrated with187 producer checks plus root build/types. Improve full TypeScript test throughput with coverage-preserving parallel execution.
+- **Testing:** Owner be943 capture timed out; adapt the independently reviewed larger deployment-fixture boundary. No repeated tiny-cut compile trial.
 - **Capacity:** Execute the original remaining24 cases using reviewed a0 artifact-CREATE fixtures and a fresh complete constructor graph.
 - **Metric:** Independently review the CompleteHistory first source phase while builders continue later phases.
-- **Prepared:** Build aggregate original52 ratification with the agreed additive consent supplement and explicit root-owned hooks/masks.
+- **Prepared:** Original52 is source integrated. Build new CompleteHistory Consent adapters; prepare eighteen worker tests and affected shared capacity in parallel.
 - **Collector:** Complete changed documentary/paid captures on the isolated prototype; reuse agreed fixture boundaries and preserve the original gas ceiling.
 - **Complete Artist migration composition:** Build complete chronology, legal mixed Platform/collaborator/dispute histories, per-generation principals and complete seven-owner import; coordinate class4 and52/12/13.
 
