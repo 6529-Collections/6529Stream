@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Native four-format exports](../../docs/museum-native-multiformat.md) replay
+one V4 source into qualified Linked Art, PREMIS, IIIF and LIDO, with exact
+field comparisons and source-family coverage.
+
 [Native WORK to LIDO](../../docs/museum-native-work-lido.md) exports exact
 native occurrences with separately attributed operator metadata and an original-field ledger.
 

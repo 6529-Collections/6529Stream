@@ -1,5 +1,16 @@
 # Changelog
 
+## Native four-format export and family coverage
+
+- Add native V4 Linked Art, PREMIS and IIIF adapters alongside the unchanged
+  WORK-to-LIDO adapter. Preserve qualified native statements, source-payload
+  and conservation-file roles, exact WORK presentation extents and explicit
+  operator context without inventing artwork-media or institutional evidence.
+- Retain one complete source and validation closure, resolve actual target
+  values to original fields, compare same-field representations and report
+  source-family coverage. See the
+  [native four-format guide](docs/museum-native-multiformat.md).
+
 ## Preservation checkpoint and output-manifest capacity
 
 - Move complete checkpoint admission/source-image validation and unchanged

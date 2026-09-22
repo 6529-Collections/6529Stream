@@ -21,6 +21,9 @@ The additive [native WORK-to-LIDO package](museum-native-work-lido.md) now maps
 selected original WORK occurrences to actual XML with exact field provenance.
 It retains this complete native inventory without changing the frozen
 correspondence profile or claiming mappings for other native families/formats.
+The [native four-format package](museum-native-multiformat.md) adds bounded
+Linked Art, PREMIS and IIIF native adapters, family coverage and same-field
+comparisons under a separate profile.
 
 ## Assemble and verify
 

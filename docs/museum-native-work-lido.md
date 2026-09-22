@@ -12,6 +12,10 @@ other source families in the original V4 package. Those families have no LIDO
 mapping through this profile. Linked Art, PREMIS and IIIF are explicitly
 unevaluated here; this is not a four-format comparison.
 
+The separate [native four-format package](museum-native-multiformat.md) combines
+this unchanged LIDO adapter with native Linked Art, PREMIS and IIIF adapters
+and compares actual mappings of the same original fields.
+
 ## Select exact original records
 
 Supply a canonical JSON plan with these closed fields:
