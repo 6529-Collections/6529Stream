@@ -569,11 +569,12 @@ export interface ArtistRecoveredHydrationFeatureFacts {
 }
 
 /** Private closed profile engine. Public adapters permanently select their frozen feature ceiling. */
-export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n | 1049087n) {
-  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n && knownFeatures !== 1049087n) throw Error("Unsupported internal recovered profile");
+export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n | 1049087n | 2276351n) {
+  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n && knownFeatures !== 1049087n && knownFeatures !== 2276351n) throw Error("Unsupported internal recovered profile");
+  const multipleGenerations = knownFeatures === 2276351n;
   const multipleAttestations = knownFeatures === 1049087n;
   const multipleConsents = knownFeatures === 524671n;
-  const multipleExtended = multipleConsents || multipleAttestations;
+  const multipleExtended = multipleConsents || multipleAttestations || multipleGenerations;
   const multiple = knownFeatures === 262175n || multipleExtended;
   const coder = AbiCoder.defaultAbiCoder();
   const schemaTypes = new Map<string, ParamType>();
@@ -852,7 +853,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       let previous = -1, totalEconomics = 0, totalAttestations = 0;
       for (const witness of r.records.witnesses) {
         const at = a.collections.findIndex(c => c.collectionId === witness.collectionId);
-        list(witness.economics, 128); list(witness.attestations, multipleAttestations ? 128 : 0);
+        list(witness.economics, 128); list(witness.attestations, multipleAttestations || multipleGenerations ? 128 : 0);
         if (at <= previous || !(witness.economics.length + witness.attestations.length)
           || witness.economics.some(row => row.collectionId !== witness.collectionId)
           || witness.attestations.some(row => row.terms.collectionId !== witness.collectionId)) {
@@ -1220,7 +1221,8 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       || h.replayAliasesCommitment !== artistRecoveredHydrationAliasesHash(p.provenance.aliases, index)
       || h.semanticRecordCount !== BigInt(p.provenance.journal.length)
       || h.replayAliasCount !== BigInt(p.provenance.aliases.length) || h.eraCount !== BigInt(p.provenance.eras.length)
-      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (multipleAttestations ? 1048576n : multipleConsents ? 524288n : 262144n)) === 0n
+      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (multipleGenerations ? 2097152n : multipleAttestations ? 1048576n : multipleConsents ? 524288n : 262144n)) === 0n
+      || multipleGenerations && (h.requiredFeatures & 512n) === 0n
       || multipleAttestations && (h.requiredFeatures & 128n) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
       throw Error("Owner header differs from complete payload");
     }
@@ -1484,14 +1486,14 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     const economicsCount = c.provenance.journals[6].filter(entry => entry.receipt.operation === 15n).length;
     const attestationCount = c.provenance.journals[4].filter(entry => entry.receipt.operation === 24n).length;
     if (multipleExtended) {
-      if (multipleAttestations ? attestationCount === 0 || attestationCount > 128 : attestationCount !== 0) throw Error("Multiple attestation profile mismatch");
+      if (multipleGenerations ? attestationCount > 128 : multipleAttestations ? attestationCount === 0 || attestationCount > 128 : attestationCount !== 0) throw Error("Multiple attestation profile mismatch");
       const selected = c.collections.filter(q => c.provenance.journals[6].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n)
-        || multipleAttestations && c.provenance.journals[4].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n));
+        || (multipleAttestations || multipleGenerations) && c.provenance.journals[4].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n));
       if (selected.length !== request.records.witnesses.length) throw Error("Missing or extra multiple economics witnesses");
       for (let i = 0; i < selected.length; i++) {
         const q = selected[i]!, witness = request.records.witnesses[i]!;
         const count = c.provenance.journals[6].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n).length;
-        const attestations = multipleAttestations ? c.provenance.journals[4].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n).length : 0;
+        const attestations = multipleAttestations || multipleGenerations ? c.provenance.journals[4].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n).length : 0;
         if (witness.collectionId !== q.collectionId || witness.attestations.length !== attestations || witness.economics.length !== count
           || witness.economics.some(row => row.collectionId !== q.collectionId
             || row.resolver !== c.source.primaryResolver && row.resolver !== c.source.royaltyResolver)) {

@@ -8,6 +8,16 @@
   tests pass, including 256 fuzz cases; actual owner/Safe acceptance remains separate.
   See the [capacity guide](docs/guides/artist-consent-constructor-capacity.md).
 
+## Multiple recovered generation client profile
+
+- Add the separately pinned MULTIPLE_GENERATIONS client for complete supported
+  binding histories across recovered Artists and collections. Preserve original
+  generation clocks, signatures, consent associations and global replay/grant
+  accounting through operation 60 and direct/Safe receipt checks. Earlier
+  profiles remain closed; client evidence remains separate from contract and
+  deployment acceptance. See the
+  [client guide](packages/stream-client/docs/current-artist-recovered-multiple-generation-hydration.md).
+
 ## Registry writer deployment capacity
 
 - Move seven existing authority-hydration encodings to one fixed typed writer,

@@ -452,6 +452,11 @@ contract profiles and outstanding larger-script work.
   adds the separate MULTIPLE_ATTESTATIONS profile with original Archive completion
   clocks, per-Artist credential chains and combined consent/attestation grant totals.
 
+- [Multiple recovered binding generations](docs/current-artist-recovered-multiple-generation-hydration.md)
+  adds the separate MULTIPLE_GENERATIONS profile with complete binding and
+  governed revocation histories, original consent associations and global replay
+  accounting across collections and generations.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain
