@@ -7,7 +7,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 21 September 2026. The owner authorizes autonomous completion of the
+Updated 22 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -21,46 +21,49 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI171 `0a4739ec`:4,225 sources/zero errors; production `be7cfe0e`; runtime campaign retains `ea4cf6b0`. |
+| Source checkpoint | ABI172 `8c1b0d04`:4,273 sources/zero errors; production `22850ba4`; broad runtime retains `ea4cf6b0`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-21 UTC` |
+| Last updated | `2026-09-22 UTC` |
 
-## Active continuation: 21 September
+## Active continuation: 22 September
 
-ABI171 checks all **4,225 Solidity sources** at `0a4739ec` with zero errors
-in 50.594 seconds. Production source last changed at `be7cfe0e`. The broader
-runtime campaign remains on `ea4cf6b0`; it does not accept these later changes.
+ABI172 checks all **4,273 Solidity sources** at `8c1b0d04` with zero errors
+in 50.734 seconds. Production source last changed at `22850ba4`. The broader
+runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
-Root owns architecture, integration and delivery. Reviewed feature batches are
-integrated while fixed-source tests run. Twenty-four of 29 newly observed
-preservation overages have integrated repairs; the final five-facade batch has
-three residual oversizes. Complete source and runtime claims remain distinct.
+Root owns architecture, integration and delivery. Coherent source batches are
+integrated while fixed-source tests run; implementation and runtime acceptance
+remain distinct. All29 original preservation repairs are integrated.
 
-- Build complete aggregate op24 profile; fix independently found full-scope versus attestation-only record projection and measured Yul stack failure; nine actual scenarios plus explicit new nonce-bit assertions. Keep final native/source separate.
-- Facts/Rows199b integrated1d5d;14actual+256fuzz producerPASS. Independently review full Artist composition consumers, Archive and grant conservation; no compiler.
-- Seven siblings76a integrated06a74, Collector/Metric/Prepared source reviews clear. Independently verify C native14 evidence then review Mint e618 fixedSlot8file/14case source.
+- Build MULTIPLE_GENERATIONS complete accepted-generation chronology/consents/op24/global grants; deliver original Point alias correction separately. No WriterExtension overlap.
+- Independently review Artist chronology and alias correction; review bounded SetupPlans9 source/trace qualification. No compiler or duplicate broad inventory.
+- Repair Registry WriterDeployment size with fixed typed entropy/readiness/publication transport preserving original actor/constructor/CREATE; finite selected capture only.
 
-- Activation11 passes; fixedSlot e618 eight-file boundary committed,14focused cases and one bounded native/EVM capture; independent B review pending.
-- Six stages+four guards integrated19da/ec732, all10prod fit and22oracles clear. Execute closed plainScoped6; remaining16 require changed dependency snapshot after final capacity repairs. Existing2mtest allowance, strict24576prod.
-- Build all10 owner-family semantic interpreter and additive exportV2, retain originalV1/19/49 and unresolved/historical evidence. Prior semantic34 and script58 integrated.
-- MULTIPLE_BASE20 named mocked workflows pass/a258 integrated. Build complete MULTIPLE_CONSENTS frozen c636/ABI11 client, value checks/Safe plans/17workflow groups; no newerop24profile.
-- ea4 983physical+243reuse preserved; support29 native verified; Genesis33TIMEOUT900. SetupPlans6 and original remaining73 captures continue; split genuine Genesis per-host contexts, keep original50/65/18/84 and all production/constructor caps.
-- fcda five facades+10workers/20oracles nativePASSbut3originalfacades stillover26535/31068/35142. Repair three as final coherent five-facade batch; original failures preserved. No denied Testing handoff relay.
-- V1RootAuth0af integratedf3d6,2products fit/7oracles clear. Independently review Capacity exactfcda20tests/source; no compiler/writer overlap.
-- 905post-recording boundary integrated12f9dc;4actualEVMpass with full nativeprestate qualifier. Fullcaller bounded900capture pending;90literal concrete owners mandatory; no duplicate inventory.
-- Three V1 repairs7ba7 integrated049b, all8products fit,49source tests/8oracles clear. Isolated e983 Collector lossless Floor evidence compression prototype; original bounds/callbacks/hashes/legacy/rawfallback retained, no500k claim/adoption.
+- Mint fixedSlot e618 integrated bb5; 14 actual passes and independent runtime review clear. Review Prepared e474 native/physical evidence, then guardian/rotation clients; no compiler.
+- Six of22 preservation cases pass at original a087; remaining16 await exact successor dependencies. Independently review isolated Collector envelope and gas tradeoffs; no unchanged rerun.
+- All10 owner families21ef integrated965608; root36 pass. Native VIEW file-role semantic successor d9eb built,30 producer tests pass, independent intake pending; actual capture/institutional scope open.
+- 7c MULTIPLE_CONSENTS integrated9a1a3d,112 distinct producer cases reviewed. Build complete MULTIPLE_ATTESTATIONS client from bd4/ABI12; own shared index and coordinate disjoint guardian module.
+- ea4 SetupPlans9 EVM pass with fixture qualification; support29 and remaining60 physical owners complete. Build faithful Owner/Genesis import reductions, preserving all original50/65/18/84 obligations; no identical compiler retry.
+- Final five facades+17workers6f2b integrated22850ba;22 native products fit/32 cases authored. Document worker boundaries and prepare focused successor execution; do not retry or relay denied handoff.
+- Capacity independent reviews and finality/STATIC source-gap mapping complete. Build disjoint original guardian administration/two-sided rotation client ops28–32 with Client lead; no Solidity edits.
+- 07cf/e474 integratedfd403/8c1b; three genuine native hosts compile38.371s and physical serialize, original90 obligations retained. Reduce only faithful Scenario-local imports; coordinate Testing catalogs. Full runtime still pending.
+- Isolated evidence envelope8ccc has9 tests/256fuzz and40 cold component executions. Sparse/dense savings, raw fallback and cold-read tradeoffs retained; Burn review ongoing. No production adoption or complete500k purchase claim.
 
-Global compiler maximum remains 20; Testing plans at most 13. Each other owner
-uses only its assigned bounded capture and releases finished slots. Preserve
-failed captures. Do not repeat inventories or compile unchanged failures.
-Existing current-profile large-test allowance applies only to fixtures; every
-production runtime/init and real constructor arguments retain their limits.
+Compiler maximum remains20. Use only assigned bounded captures, release
+finished slots, preserve failures and avoid unchanged retries. Existing current
+profile large-test allowance applies only to fixtures; production runtime/init
+and constructor arguments retain their limits.
 
-Full actual-current/Safe, fuzz/stateful, gas/size/CI, freeze and testnet remain.
-Held proposals remain held. No new funding or on-chain action is needed now.
+Remaining delivery includes broader Artist recovery combinations, missing
+original client families, museum semantic/source joins, current-stack/all-call
+Safe execution, fuzz/stateful campaigns, deployment and transaction gas, full
+CI, source freeze and matching testnet. Collector cold paid-mint optimization
+remains an isolated prototype with measured component tradeoffs. Held proposals
+remain unapplied. Immutable RC1/main/release/Sepolia `569bf87f` is unchanged.
+No funding or on-chain action is needed for the present coding.
 
 ## Earlier source-specific assignments
 

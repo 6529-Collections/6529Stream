@@ -1,6 +1,6 @@
 # Full-v1 current delivery status
 
-Updated 21 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+Updated 22 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
 records every feature family with separate build, testing and integration status.
 Use it for the common delivery scope and remaining work. This file retains the
 current narrative and historical evidence boundaries.
@@ -16,69 +16,63 @@ owner approval. The separate ERC-20 payable reveal-fee implementation now has re
 approval and is source integrated for runtime validation; it is not deployed.
 Other held proposals remain separate.
 
-## 21 September integrated batch
+## 22 September integrated batch
 
-ABI171 checks all **4,225 Solidity sources** at `0a4739ec` with zero errors
-in 50.594 seconds. Production source last changed at `be7cfe0e`. The broader
-runtime campaign remains on `ea4cf6b0`; it does not accept these later changes.
+ABI172 checks all **4,273 Solidity sources** at `8c1b0d04` with zero errors
+in 50.734 seconds. Production source last changed at `22850ba4`. The broader
+runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
-- **Preservation:** repairs for **24 of 29** newly oversized components are
-  source integrated. The latest seventeen are six Record/Token stages
-  (`ec732321`), seven Description/Interview stages (`06a74e84`), three reference
-  readers (`049b7198`) and one root-authorization reader (`f3d6fb08`). Every
-  affected production product fits its recorded native build. Exact original
-  public ABI, storage and predicates are retained; the new linked frames still
-  need complete runtime/gas acceptance. Forty-four further regression cases are
-  source reviewed and typechecked. Four extra blank EOF lines were removed
-  separately (`be7cfe0e`); original measured source remains preserved.
-- **Final capacity batch:** five scoped V1 facades remain on their builder's
-  branch. The first changed build fits two but leaves three over the runtime
-  cap: Records 26,535, ReferenceSourceReads 31,068 and NativeReads 35,142 bytes.
-  All ten extracted workers fit. The owner is repairing those three before
-  handing over the coherent final batch; this is not a size-complete result.
-- **Artist recovery:** consent multiplicity `51660e02` retains all six consent
-  families and global grants/nonces across supported Artists/collections.
-  All 36 selected products fit; thirteen actual scenarios remain unexecuted.
-  Aggregate attestation fact/row workers are now integrated (`1d5dd75e`):
-  fourteen focused cases pass, including 256 fuzz runs, at producer `199b0c85`.
-  Independent native review passes; all 37 production libraries fit. These are pure-worker tests
-  with typed evidence. Complete op24 recovery, Archive clocks and cross-family
-  grant conservation are separate work. Independent review found a consumer
-  scope mismatch, and the composition also hit a compiler stack failure;
-  both are being repaired before source intake.
-- **Clients/Safe:** all twenty named MULTIPLE_BASE mocked workflows now pass
-  (`a2580872`), including explicit duplicate and failed Safe-event controls.
-  Source profile99e/ABI167, schema-only caching and full value/provider checks
-  remain unchanged. The complete MULTIPLE_CONSENTS client is being built from
-  the frozen c636/ABI11 contract profile. Actual all-call Safe execution remains.
-- **Museum:** semantic export retains its 34 root passes; script/dependency
-  capture and offline reconstruction retain 58. The next owner-family semantic
-  interpreter/export is in progress, preserving old profiles and explicit
-  unknown, historical and unresolved authority evidence. Actual current-chain
-  capture and institutional conformance are still required.
-- **Executable test boundaries:** eleven activation cases and six caller
-  baseline cases retain their recorded passes. The fixed post-recording test
-  worker (`12f9dc4d`, producer `905a5870`) passes four additional focused EVM
-  cases, including actual CREATE, reverted writes and SELFDESTRUCT refusal.
-  Source/oracle review is clear. Its full native exporter capture timed out at
-  the fixed 900-second bound. Compiler diagnosis continues; complete native
-  construction, prestate and export/bootstrap execution remain unproved.
+All **29 original preservation deployment-size repairs** are source integrated.
+The final five facades and seventeen workers (`22850ba4`) fit their selected
+native capture, with 32 regression cases authored. This resolves that specific
+list; a separate Registry Writer deployment helper is still oversized and its
+typed transport extraction is in progress. Latest full-system sizing remains.
 
-The earlier `ea4cf6b0` native campaigns qualified 983 library products and
-authenticated 243 earlier products for reuse. Those are compilation outputs,
-not 1,226 executed tests. Eight contexts were refused for 29 oversized helpers;
-later repairs above do not rewrite those original results. Further original
-support/projection/construction groups are compiling independently. The first
-33-output Genesis host group timed out at its fixed 900-second codegen bound;
-zero dependent cases ran. Testing is splitting actual host contexts while
-preserving all original cases, constructor arguments and production limits.
+Complete supported multiple-Artist consent/attestation recovery is now source
+integrated (`9670c1e3`). Its 32 selected production products fit; ten actual-owner
+and Safe scenarios are authored but unexecuted. The previously found scope
+projection and compiler stack defects are repaired. Multiple accepted binding
+generations are the next implementation batch. Independent review also found
+an inherited replay-point memory alias; its correction is being reviewed.
 
-Remaining delivery includes full feature composition, current-stack/all-call
+The matching MULTIPLE_CONSENTS client (`9a1a3d29`) has 112 distinct producer
+pure/oracle/mocked-workflow passes and independent review. All-call actual Safe
+execution remains separate. Aggregate attestation clients and original guardian
+administration/two-sided rotation callers are being built in parallel.
+
+All ten owner-record Museum families are source integrated (`965608f3`), with
+**36 focused root tests passing**. Historical claims, unresolved authority and
+unknown future records remain explicit. Native VIEW file-role semantics are
+the next reviewed source batch; actual public-chain and institutional acceptance
+remain incomplete.
+
+The original fixed-source campaign now has nine passing SetupPlans EVM tests
+and six passing plain Scoped preservation cases. These use their recorded
+boundaries; the original SetupPlans fixture aliases two appended class entries
+to zero and does not prove distinct class coverage. The Scoped result is six
+of 22 authored cases. Fourteen fixed-slot creation/rollback tests also pass
+at producer `e618da09`, source integrated as `bb5e3ff3`.
+
+The import-light caller interface and retained concrete source root are
+integrated (`fd403c4b`, `8c1b0d04`). Their three native hosts compile in 38.371
+seconds of codegen/metadata after the prior 900-second timeout, retaining all
+90 original concrete artifact obligations. This is a build result; complete
+Scenario preparation and export/bootstrap execution are still pending.
+Owner/Genesis test import reductions continue without dropping original cases.
+
+The earlier `ea4cf6b0` campaign qualified 983 library products plus 243 reusable
+products. Further groups have 29 support and 60 additional native/physical
+outputs. These are build artifacts, not executed tests. Original refused and
+timed-out contexts remain retained, including the oversized Writer wrapper.
+
+Remaining delivery includes broader Artist recovery combinations, missing
+original client families, museum semantic/source joins, current-stack/all-call
 Safe execution, fuzz/stateful campaigns, deployment and transaction gas, full
 CI, source freeze and matching testnet. Collector cold paid-mint optimization
-remains an isolated prototype. Held proposals remain unapplied. Immutable
-RC1/main/release/Sepolia `569bf87f` are unchanged; no funding is needed now.
+remains an isolated prototype with measured component tradeoffs. Held proposals
+remain unapplied. Immutable RC1/main/release/Sepolia `569bf87f` is unchanged.
+No funding or on-chain action is needed for the present coding.
 
 ## Earlier source-specific evidence
 
