@@ -17,13 +17,14 @@ different milestones.
 ## Latest integration checkpoint: 22 September
 
 The expanded full-v1 implementation remains incomplete. The integrated source
-at `b3ed602b` passes ABI189: **4,406 Solidity sources**, zero errors in 52.375
+at `b36f1b8d` passes ABI190: **4,415 Solidity sources**, zero errors in 51.922
 seconds. Two previously missing migration profiles are now source integrated:
 unbound Platform collections and combined dispute/repudiation histories.
 The batch also includes six earlier capacity repairs, the Consent constructor
 repair, generation clients, actual Safe split-wallet tests and the unified Museum
-dossier. The parallel runtime source `e37745a4` contains the six capacity repairs
-and reviewed fixture interfaces, excluding later Artist profile changes.
+dossier. The parallel runtime source `2ba4ff67` adds 37 reviewed test-only fixture paths to `e37745a4`,
+retaining its production bytes and excluding later Artist profile changes.
+Its separate ABI191 check passes all 4,302 sources without errors.
 Every execution result applies only to its recorded source. RC1 is unchanged.
 
 - **Deployment capacity:** all six previously oversized inventory/provider/
@@ -37,8 +38,9 @@ Every execution result applies only to its recorded source. RC1 is unchanged.
 - **Artist migration:** the unbound Platform profile (`66dc4a30`) and aggregate
   signed dispute/repudiation profile (`b001a580`/`b3ed602b`) are independently
   reviewed and source integrated. Their ten and twenty-six cases are authored,
-  not executed. The new Platform CollectionRows library exceeds the runtime
-  limit by 411 bytes; a narrow repair is underway. PRIMARY_ONLY collaborator
+  not executed. The Platform CollectionRows overage is repaired (`b36f1b8d`):
+  23,981 runtime bytes, with a new 2,778-byte fixed replay worker. Both fit;
+  complete profile execution and joined owner capacity remain pending. PRIMARY_ONLY collaborator
   history remains in implementation. Shared extended-feature negotiation has
   22 native passes, including two 256-input fuzz properties, at `4494df9b`;
   this does not execute the later profiles. Generation constants are separated
@@ -61,8 +63,10 @@ Every execution result applies only to its recorded source. RC1 is unchanged.
   custody or institutional acceptance.
 - **Runtime testing:** four actual preparation guards pass with independent
   creation/call review. Large Owner, Scenario, generation and paid-mint hosts
-  retain bounded compiler timeouts without execution. Source-only fixture
-  changes are being combined before the next attempt. The older capacity graph
+  retain bounded compiler timeouts without execution. Three independently reviewed fixture
+  changes are integrated: separate reusable boundary definitions, Registry
+  import deduplication and an isolated immutable sale-facts helper. The original
+  case bodies and production bytes are preserved in the runtime snapshot. The older capacity graph
   timed out at its one-hour bound; its separate 80- and 78-library captures pass.
   A diagnostic without viaIR failed with stack-too-deep and provides no
   acceptance. The production compiler profile remains unchanged. Complete
@@ -102,14 +106,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `b3ed602bcad94f09ee95f7abc1017d88df8178ba`; parallel capacity runtime `e37745a4` excludes later Artist profile changes. |
+| Current integration source | `b36f1b8dfa27e0cd06bfcf0b2aefae5177e7ff10`; runtime `2ba4ff67` has production byte-exact `e37745a4` and excludes later Artist profiles. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | Original `57ac8d04`; composition `65312baa` adds 24 focused root passes, actual RPC pending; MUSEUM-36. |
-| Latest broad cheap compilation evidence | ABI189: 4,406 sources at `b3ed602b`, zero errors in 52.375s; types/interfaces/storage/method IDs only. |
+| Latest broad cheap compilation evidence | ABI190: 4,415 sources at `b36f1b8d`, zero errors in 51.922s; types/interfaces/storage/method IDs only. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 passes all 12 original cases at frozen `eda052c7`, including one 256-run fuzz case, with independent native creation/link/caller review. This does not accept the later complete graph. |
 

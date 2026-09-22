@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI189 `b3ed602b`: 4,406 sources / zero errors; isolated capacity runtime `e37745a4`. |
+| Source checkpoint | ABI190 `b36f1b8d`: 4,415 sources / zero errors; ABI191 runtime `2ba4ff67`: 4,302 / zero errors. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,28 +30,29 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 22 September
 
 The expanded full-v1 implementation remains incomplete. The integrated source
-at `b3ed602b` passes ABI189: **4,406 Solidity sources**, zero errors in 52.375
+at `b36f1b8d` passes ABI190: **4,415 Solidity sources**, zero errors in 51.922
 seconds. Two previously missing migration profiles are now source integrated:
 unbound Platform collections and combined dispute/repudiation histories.
 The batch also includes six earlier capacity repairs, the Consent constructor
 repair, generation clients, actual Safe split-wallet tests and the unified Museum
-dossier. The parallel runtime source `e37745a4` contains the six capacity repairs
-and reviewed fixture interfaces, excluding later Artist profile changes.
+dossier. The parallel runtime source `2ba4ff67` adds 37 reviewed test-only fixture paths to `e37745a4`,
+retaining its production bytes and excluding later Artist profile changes.
+Its separate ABI191 check passes all 4,302 sources without errors.
 Every execution result applies only to its recorded source. RC1 is unchanged.
 
 Root owns architecture, integration and delivery. Current assignments:
 
-- **artist history resume**: Two generation-host codegen trials timed out without execution; exact test-only sale-facts helper relocation in independent review. Combine fixture cuts before next bounded native capture.
+- **artist history resume**: Two generation-host codegen trials timed out without execution; reviewed sale-facts helper relocation integrated with the two other fixture cuts. Plan one bounded generation-host trial on exactb36, coordinating genuine shared owners with Platform.
 - **release evidence review**: Build nonempty PRIMARY_ONLY collaborator history, original repeated primary accepts and partial rows, preparation and actual fixtures. Metric reviews independently; held quorum policy stays separate.
-- **remote delivery review**: Platform source integrated66dc;17of18new workers fit. CollectionRows is411bytes over; narrow pair repair and independent review underway. Other changed owner/worker sizes still required.
+- **remote delivery review**: Platform source and reviewed size repair integratedb36; CollectionRows23981 andReplayRows2778 fit. Plan actual10 acceptance and shared-owner/worker sizing on coherentb36, coordinating with generation host.
 - **Mint / independent review**: Aggregate dispute/repudiation b68 and testfollowup923 independently clear, integratedb001/b3ed;26authored cases unexecuted. Coordinate exact remaining native/size acceptance, heldERC20 capture unchanged.
 - **Burn / preservation ceremony**: All three provider/discovery repairs integrated. Execute61focused cases one377;first15product capture fits but embedded child ownership needs one corrected complete capture before EVM.
 - **Museum**: Physical transfer6 and unifiedV4 root6 checks pass. Review final combined migration seams, then build typed script/dependency/media/render joins into existing dossier slots.
 - **Clients / Safe callers**: Generation58 distinct focused passes; extended guards22native+2x256fuzz pass at4494. Build Platform client/direct/SafeCALL workflows pinned66dc/ABI188.
-- **Testing / native tooling**: Nominalinterface Owner3 timed out; legacy diagnosticstack-too-deep. Independently review one-file Registry import dedup, whole4294-source ABI output exacte377; combine cuts before native retry.
-- **Capacity / Rights**: Original graph51 timed out; separate80/78libraries native and physicalreadbacks pass. Finish reviewed10-boundary/7-helper test-only split for combined runtime anchor; no unchanged retry.
-- **Metric retention**: Three actual2of3Safe Splitversions integrated with independent traces. Review A helper relocation while C builds, then independently review coherent PRIMARY_ONLY collaborator source.
-- **Prepared / successor preservation**: Four genuine preparation guards pass. Reviewed fixturecut57c integrated; changed Scenario28 timed out at900s. Preserve original90 obligations; no active compiler or unchanged retry.
+- **Testing / native tooling**: Nominalinterface Owner3 timed out; legacy diagnosticstack-too-deep. Reviewed Registry import dedup is integrated; whole4294-source producer ABI output exacte377. One changed Owner capture planned on combined2ba4. Investigate separately labeled cheaper test-host compilation without changing production settings.
+- **Capacity / Rights**: Original graph51 timed out; separate80/78libraries native and physicalreadbacks pass. Reviewed10-boundary/7-helper split is integrated; requalify source/owners and run one changed graphcapture on2ba4; no unchanged retry.
+- **Metric retention**: Three actual2of3Safe Splitversions integrated with independent traces. A helper relocation independently clear; review C frozen successor and triage exact remote CI failures while implementation proceeds.
+- **Prepared / successor preservation**: Four genuine preparation guards pass. Reviewed fixturecut57c integrated; changed Scenario28 timed out at900s. Preserve original90 obligations; no active compiler or unchanged retry. Independently review Collector paid-only planner extraction.
 - **Collector gas redesign**: Coherent4494 merged into isolated16-change prototype2774;332of339owners requalify. Two prior paid hosts timed out; review material paid-only planner helper cut. Actual cold paid500000 remains open.
 
 Remaining source work includes collaborator-history migration, broader required
