@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI172 `8c1b0d04`:4,273 sources/zero errors; production `22850ba4`; broad runtime retains `ea4cf6b0`. |
+| Source checkpoint | ABI173 `d61a1246`:4,275 sources/zero errors; production `d61a1246`; broad runtime retains `ea4cf6b0`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-ABI172 checks all **4,273 Solidity sources** at `8c1b0d04` with zero errors
-in 50.734 seconds. Production source last changed at `22850ba4`. The broader
+ABI173 checks all **4,275 Solidity sources** at `d61a1246` with zero errors
+in 51.094 seconds. Production source last changed at `d61a1246`. The broader
 runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
@@ -40,14 +40,14 @@ remain distinct. All29 original preservation repairs are integrated.
 
 - Build MULTIPLE_GENERATIONS complete accepted-generation chronology/consents/op24/global grants; deliver original Point alias correction separately. No WriterExtension overlap.
 - Independently review Artist chronology and alias correction; review bounded SetupPlans9 source/trace qualification. No compiler or duplicate broad inventory.
-- Repair Registry WriterDeployment size with fixed typed entropy/readiness/publication transport preserving original actor/constructor/CREATE; finite selected capture only.
+- Writer repair0d98 integratedd61; all6 selected products fit. Execute13 focused transport/creation tests while preserving original actor/constructor/CREATE; no full history compile.
 
-- Mint fixedSlot e618 integrated bb5; 14 actual passes and independent runtime review clear. Review Prepared e474 native/physical evidence, then guardian/rotation clients; no compiler.
+- Mint fixedSlot e618 integrated bb5; 14 actual passes and independent runtime review clear. Prepared e474 native/physical independent review is clear. Build disjoint generation-consent worker slice under Artist lead exact interface; shared writers remain Artist-owned.
 - Six of22 preservation cases pass at original a087; remaining16 await exact successor dependencies. Independently review isolated Collector envelope and gas tradeoffs; no unchanged rerun.
-- All10 owner families21ef integrated965608; root36 pass. Native VIEW file-role semantic successor d9eb built,30 producer tests pass, independent intake pending; actual capture/institutional scope open.
+- All10 owner families21ef integrated965608; root36 pass. Native VIEW successor d9eb integrated679936f with30root passes and independent source review. Build positive received ZIP/PNG tests, then explicit exhibition/place authority join.
 - 7c MULTIPLE_CONSENTS integrated9a1a3d,112 distinct producer cases reviewed. Build complete MULTIPLE_ATTESTATIONS client from bd4/ABI12; own shared index and coordinate disjoint guardian module.
 - ea4 SetupPlans9 EVM pass with fixture qualification; support29 and remaining60 physical owners complete. Build faithful Owner/Genesis import reductions, preserving all original50/65/18/84 obligations; no identical compiler retry.
-- Final five facades+17workers6f2b integrated22850ba;22 native products fit/32 cases authored. Document worker boundaries and prepare focused successor execution; do not retry or relay denied handoff.
+- Final five facades+17workers6f2b integrated22850ba;22 native products fit/32 cases authored. Worker guidec82a integratede302. Execute independent NativeWorkers8 atd61; remaining24 await shared fixture import join. Do not retry or relay denied handoff.
 - Capacity independent reviews and finality/STATIC source-gap mapping complete. Build disjoint original guardian administration/two-sided rotation client ops28–32 with Client lead; no Solidity edits.
 - 07cf/e474 integratedfd403/8c1b; three genuine native hosts compile38.371s and physical serialize, original90 obligations retained. Reduce only faithful Scenario-local imports; coordinate Testing catalogs. Full runtime still pending.
 - Isolated evidence envelope8ccc has9 tests/256fuzz and40 cold component executions. Sparse/dense savings, raw fallback and cold-read tradeoffs retained; Burn review ongoing. No production adoption or complete500k purchase claim.

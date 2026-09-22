@@ -18,34 +18,39 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-ABI172 checks all **4,273 Solidity sources** at `8c1b0d04` with zero errors
-in 50.734 seconds. Production source last changed at `22850ba4`. The broader
+ABI173 checks all **4,275 Solidity sources** at `d61a1246` with zero errors
+in 51.094 seconds. Production source last changed at `d61a1246`. The broader
 runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
 All **29 original preservation deployment-size repairs** are source integrated.
 The final five facades and seventeen workers (`22850ba4`) fit their selected
 native capture, with 32 regression cases authored. This resolves that specific
-list; a separate Registry Writer deployment helper is still oversized and its
-typed transport extraction is in progress. Latest full-system sizing remains.
+list. The separate Registry Writer deployment helper is also repaired
+(`d61a1246`): all six selected products fit, including its 24,277-byte runtime.
+Thirteen focused transport/creation tests are authored; their execution and
+latest full-system sizing remain.
 
 Complete supported multiple-Artist consent/attestation recovery is now source
 integrated (`9670c1e3`). Its 32 selected production products fit; ten actual-owner
 and Safe scenarios are authored but unexecuted. The previously found scope
 projection and compiler stack defects are repaired. Multiple accepted binding
 generations are the next implementation batch. Independent review also found
-an inherited replay-point memory alias; its correction is being reviewed.
+an inherited replay-point memory alias. Its explicit-copy correction and
+original-producer regression are integrated (`a1db609e`); execution is pending.
 
 The matching MULTIPLE_CONSENTS client (`9a1a3d29`) has 112 distinct producer
-pure/oracle/mocked-workflow passes and independent review. All-call actual Safe
+pure/oracle/mocked-workflow passes and independent review. Root build, strict
+types and all 28 new pure/oracle cases also pass. All-call actual Safe
 execution remains separate. Aggregate attestation clients and original guardian
 administration/two-sided rotation callers are being built in parallel.
 
 All ten owner-record Museum families are source integrated (`965608f3`), with
 **36 focused root tests passing**. Historical claims, unresolved authority and
 unknown future records remain explicit. Native VIEW file-role semantics are
-the next reviewed source batch; actual public-chain and institutional acceptance
-remain incomplete.
+also integrated (`679936f0`), with 30 focused root tests passing. Positive
+same-object ZIP/PNG receipt coverage is a separate successor in progress.
+Actual public-chain and institutional acceptance remain incomplete.
 
 The original fixed-source campaign now has nine passing SetupPlans EVM tests
 and six passing plain Scoped preservation cases. These use their recorded
