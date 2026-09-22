@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentGraphKinds } from "./StreamCurrentGraphKinds.sol";
 
 import "./StreamCurrentFinalityGraph.sol";
 import {
@@ -277,7 +278,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         configs[3] = _gas("SNAPSHOT_INVENTORY_GAS", d.inventoryGas, 50000, 1);
         assemblySnapshots = StreamCollectionSnapshots(
             payable(_authorityPrefixCreate(
-                    StreamCurrentGraphCreation.Kind.StreamCollectionSnapshots,
+                    StreamCurrentGraphKinds.Kind.StreamCollectionSnapshots,
                     abi.encode(d, address(assemblyExecutor), configs)
                 ))
         );
@@ -316,7 +317,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         configs[3] = _gas("REFERENCE_ARCHIVE_GAS", d.archiveGas, 50000, 1);
         assemblyReference = StreamReferenceRenderPublication(
             payable(_authorityPrefixCreate(
-                    StreamCurrentGraphCreation.Kind.StreamReferenceRenderPublication,
+                    StreamCurrentGraphKinds.Kind.StreamReferenceRenderPublication,
                     abi.encode(d, address(assemblyExecutor), configs)
                 ))
         );
@@ -392,7 +393,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
             _deployAuthorityPrefixLate(
                 Late.PROVIDER,
                 _graphCreation(
-                    StreamCurrentGraphCreation.Kind.StreamFinalityNativeEvidenceProvider
+                    StreamCurrentGraphKinds.Kind.StreamFinalityNativeEvidenceProvider
                 ),
                 abi.encode(c)
             )
@@ -400,7 +401,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         assemblyCoreAdapter = StreamCoreFinalityAdapter(
             _deployAuthorityPrefixLate(
                 Late.CORE_ADAPTER,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamCoreFinalityAdapter),
+                _graphCreation(StreamCurrentGraphKinds.Kind.StreamCoreFinalityAdapter),
                 abi.encode(
                     address(assemblyCore), address(assemblyMetadata), address(assemblyProvider)
                 )
@@ -418,7 +419,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
             assemblyRouterAdapters[i] = address(
                 StreamFinalityServingHostAdapter(
                     payable(_authorityPrefixCreate(
-                            StreamCurrentGraphCreation.Kind.StreamFinalityServingHostAdapter,
+                            StreamCurrentGraphKinds.Kind.StreamFinalityServingHostAdapter,
                             abi.encode(
                                 address(assemblyCore),
                                 address(assemblyRouter),
@@ -432,7 +433,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         assemblyMetadataAdapter = address(
             StreamFinalityServingHostAdapter(
                 payable(_authorityPrefixCreate(
-                        StreamCurrentGraphCreation.Kind.StreamFinalityServingHostAdapter,
+                        StreamCurrentGraphKinds.Kind.StreamFinalityServingHostAdapter,
                         abi.encode(
                             address(assemblyCore),
                             address(assemblyMetadata),
@@ -461,7 +462,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         assemblyDiscovery = StreamFinalityCurrentDiscovery(
             _deployAuthorityPrefixLate(
                 Late.DISCOVERY,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityCurrentDiscovery),
+                _graphCreation(StreamCurrentGraphKinds.Kind.StreamFinalityCurrentDiscovery),
                 abi.encode(d)
             )
         );
@@ -475,7 +476,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         assemblyFinality = StreamArtworkFinalityRegistry(
             _deployAuthorityPrefixLate(
                 Late.REGISTRY,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtworkFinalityRegistry),
+                _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtworkFinalityRegistry),
                 abi.encode(
                     address(assemblyCore),
                     address(assemblyMetadata),
@@ -492,7 +493,7 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
             _deploySlot(
                 assemblyCoordinatorSlot,
                 assemblyCoordinatorAddress,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingCoordinator),
+                _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingCoordinator),
                 abi.encode(assemblySuite, address(assemblyFinality)),
                 assemblyCoordinatorRuntime
             )
@@ -508,14 +509,14 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         );
     }
 
-    function _authorityPrefixCreate(StreamCurrentGraphCreation.Kind kind, bytes memory args)
+    function _authorityPrefixCreate(StreamCurrentGraphKinds.Kind kind, bytes memory args)
         private
         returns (address product)
     {
         bytes memory creation = _graphCreation(kind);
         if (!_authorityPrefixVerifiedTemplates[kind]) {
             _linkRuntime(
-                graphVm.readFile(_artifact(StreamCurrentGraphCreation.name(kind))), creation
+                graphVm.readFile(_artifact(StreamCurrentGraphKinds.name(kind))), creation
             );
             _authorityPrefixVerifiedTemplates[kind] = true;
         }
@@ -545,5 +546,5 @@ abstract contract StreamCurrentAuthoritySuccessorCoordinatorGraph is StreamCurre
         );
     }
 
-    mapping(StreamCurrentGraphCreation.Kind => bool) private _authorityPrefixVerifiedTemplates;
+    mapping(StreamCurrentGraphKinds.Kind => bool) private _authorityPrefixVerifiedTemplates;
 }

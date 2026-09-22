@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentGraphKinds } from "./StreamCurrentGraphKinds.sol";
 import {
     StreamStaticSelectionCheckpoint
 } from "../../smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol";
@@ -364,6 +365,11 @@ library StreamCurrentGraphCreation {
         }
 
         revert("unknown original product template");
+    }
+
+    /// @dev Both Kind enums retain the same complete ordinal roster; only the type boundary changes.
+    function creation(StreamCurrentGraphKinds.Kind kind) internal pure returns (bytes memory) {
+        return creation(Kind(uint256(kind)));
     }
 
     function creation(Kind kind) internal pure returns (bytes memory) {

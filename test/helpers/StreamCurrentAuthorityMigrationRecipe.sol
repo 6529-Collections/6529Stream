@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentGraphKinds } from "../../script/current/StreamCurrentGraphKinds.sol";
 import "./StreamCurrentAuthorityNativeAssemblyFixture.sol";
 import {
     IStreamRightsRecordCurrentAuthority as MigrationRightsAuthority
@@ -55,7 +56,7 @@ import {
 contract CurrentAuthoritySuccessorGraph is StreamCurrentAuthoritySuccessorCoordinatorGraph {
     address private immutable caller = msg.sender;
 
-    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+    function _graphCreation(StreamCurrentGraphKinds.Kind kind)
         internal
         view
         override
@@ -87,7 +88,7 @@ contract CurrentAuthoritySuccessorGraph is StreamCurrentAuthoritySuccessorCoordi
             ]
         );
         StreamArtistOnboardingRegistry successor = _deploySplitArtistFacade(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingRegistry),
             address(this),
             address(extensions),
             [s.core, s.mintManager, coordinator, executor_, coverage],
@@ -108,7 +109,7 @@ contract CurrentAuthoritySuccessorGraph is StreamCurrentAuthoritySuccessorCoordi
             )
         );
         s.owners[2] = _deploySplitArtistIdentity(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistIdentityAuthority),
             address(this),
             address(extensions),
             [s.registry, coordinator, s.archive, s.core, s.mintManager]

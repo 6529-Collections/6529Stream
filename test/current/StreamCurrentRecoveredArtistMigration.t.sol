@@ -1,5 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentGraphKinds } from "../../script/current/StreamCurrentGraphKinds.sol";
+import {
+    StreamArtistExtensionFactory
+} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
+import {
+    StreamArtistIdentityCreationPart
+} from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import {
+    StreamArtistEstateCreationPart
+} from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+import {
+    StreamArtistArchiveV2
+} from "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
 
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import "../../script/current/StreamGovernanceCatalogStagePlan.sol";
@@ -354,7 +367,7 @@ abstract contract CurrentRecoveredSourceRecipe is StreamCurrentSafeGovernanceFix
 contract CurrentRecoveredSuccessorGraph is StreamCurrentFinalityGraph {
     address private immutable caller = msg.sender;
 
-    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+    function _graphCreation(StreamCurrentGraphKinds.Kind kind)
         internal
         view
         override
@@ -386,7 +399,7 @@ contract CurrentRecoveredSuccessorGraph is StreamCurrentFinalityGraph {
             ]
         );
         StreamArtistOnboardingRegistry successor = _deploySplitArtistFacade(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingRegistry),
             address(this),
             address(extensions),
             [s.core, s.mintManager, coordinator, executor_, coverage],
@@ -407,7 +420,7 @@ contract CurrentRecoveredSuccessorGraph is StreamCurrentFinalityGraph {
             )
         );
         s.owners[2] = _deploySplitArtistIdentity(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistIdentityAuthority),
             address(this),
             address(extensions),
             [s.registry, coordinator, s.archive, s.core, s.mintManager]

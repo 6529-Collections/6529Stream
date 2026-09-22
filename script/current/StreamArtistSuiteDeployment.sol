@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentGraphKinds } from "./StreamCurrentGraphKinds.sol";
 import { StreamArtistIdentityCreationPart } from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
 import { StreamArtistEstateCreationPart } from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
 
@@ -94,7 +95,7 @@ abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
             address(new StreamArtistEstateCreationPart(1))
         ]);
         artistRegistry = _deploySplitArtistFacade(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingRegistry),
             _artistDeploymentSender(),
             address(artistExtensions),
             [core_, manager_, nextCoordinator, executor_, address(archivalCoverage)],
@@ -115,7 +116,7 @@ abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
             )
         );
         s.owners[2] = _deploySplitArtistIdentity(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistIdentityAuthority),
             _artistDeploymentSender(),
             address(artistExtensions),
             [s.registry, nextCoordinator, s.archive, core_, manager_]
@@ -185,7 +186,7 @@ abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
     function _deploymentModuleRegistry() internal view virtual returns (address);
     function _deploymentSystemManifest() internal view virtual returns (address);
 
-    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+    function _graphCreation(StreamCurrentGraphKinds.Kind kind)
         internal
         view
         override

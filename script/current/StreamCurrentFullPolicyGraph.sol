@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { StreamCurrentFinalityGraph } from "./StreamCurrentFinalityGraph.sol";
-import { StreamCurrentGraphCreation } from "./StreamCurrentGraphCreation.sol";
+import { StreamCurrentGraphKinds } from "./StreamCurrentGraphKinds.sol";
 import {
     StreamStaticSelectionCheckpoint
 } from "../../smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol";
@@ -233,7 +233,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
 
     function _assemblyProviderCreation() internal view virtual override returns (bytes memory) {
         return _graphCreation(
-            StreamCurrentGraphCreation.Kind.StreamFinalityFullPolicyEvidenceProviderV2
+            StreamCurrentGraphKinds.Kind.StreamFinalityFullPolicyEvidenceProviderV2
         );
     }
 
@@ -257,7 +257,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
     }
 
     function _assemblyDiscoveryCreation() internal view virtual override returns (bytes memory) {
-        return _graphCreation(StreamCurrentGraphCreation.Kind.StreamFinalityFullPolicyDiscoveryV2);
+        return _graphCreation(StreamCurrentGraphKinds.Kind.StreamFinalityFullPolicyDiscoveryV2);
     }
 
     function _assemblyDiscoveryArguments(StreamFinalityDiscoveryTypes.Configuration memory d)
@@ -291,25 +291,25 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
             _fullPolicySourceDependencies();
         fullPolicyCollectionSources = StreamFinalityEntropyPolicySourceFactoryV2(
             _assemblyCreate(
-                StreamCurrentGraphCreation.Kind.StreamFinalityEntropyPolicySourceFactoryV2,
+                StreamCurrentGraphKinds.Kind.StreamFinalityEntropyPolicySourceFactoryV2,
                 abi.encode(d)
             )
         );
         fullPolicyScopedSources = StreamFinalityScopedEntropyPolicySourceFactoryV2(
             _assemblyCreate(
-                StreamCurrentGraphCreation.Kind.StreamFinalityScopedEntropyPolicySourceFactoryV2,
+                StreamCurrentGraphKinds.Kind.StreamFinalityScopedEntropyPolicySourceFactoryV2,
                 abi.encode(d)
             )
         );
         fullPolicyCollectionFactory = StreamPolicyPublicationFactoryV2(
             _assemblyCreate(
-                StreamCurrentGraphCreation.Kind.StreamPolicyPublicationFactoryV2,
+                StreamCurrentGraphKinds.Kind.StreamPolicyPublicationFactoryV2,
                 abi.encode(_fullPolicyCollectionRecipe())
             )
         );
         fullPolicyScopedFactory = StreamScopedPolicyPublicationFactoryV2(
             _assemblyCreate(
-                StreamCurrentGraphCreation.Kind.StreamScopedPolicyPublicationFactoryV2,
+                StreamCurrentGraphKinds.Kind.StreamScopedPolicyPublicationFactoryV2,
                 abi.encode(_fullPolicyScopedRecipe())
             )
         );
@@ -322,7 +322,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
     function _fullPolicyStaticCompanions() private {
         fullPolicySelection = StreamStaticSelectionCheckpoint(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamStaticSelectionCheckpoint,
+                    StreamCurrentGraphKinds.Kind.StreamStaticSelectionCheckpoint,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyRouter),
@@ -334,7 +334,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
         );
         fullPolicyContent = StreamStaticContentCheckpoint(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamStaticContentCheckpoint,
+                    StreamCurrentGraphKinds.Kind.StreamStaticContentCheckpoint,
                     abi.encode(
                         address(fullPolicySelection),
                         address(assemblyExecutor),
@@ -345,7 +345,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
         );
         fullPolicyOutput = StreamStaticOutputManifest(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamStaticOutputManifest,
+                    StreamCurrentGraphKinds.Kind.StreamStaticOutputManifest,
                     abi.encode(
                         address(assemblyCore),
                         address(fullPolicyContent),
@@ -385,7 +385,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
         snapshotGas[2] = _gas("SCOPED_SNAPSHOT_INVENTORY_GAS", d.inventoryGas, 50000, 2);
         fullPolicyScopedSnapshots = StreamScopedSnapshotPublication(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamScopedSnapshotPublication,
+                    StreamCurrentGraphKinds.Kind.StreamScopedSnapshotPublication,
                     abi.encode(d, address(assemblyExecutor), snapshotGas)
                 ))
         );
@@ -414,7 +414,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
         referenceGas[3] = _gas("SCOPED_REFERENCE_ARCHIVE_GAS", r.archiveGas, 50000, 1);
         fullPolicyScopedReference = StreamScopedReferencePublication(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamScopedReferencePublication,
+                    StreamCurrentGraphKinds.Kind.StreamScopedReferencePublication,
                     abi.encode(r, address(assemblyExecutor), referenceGas)
                 ))
         );
@@ -438,7 +438,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
     function _fullPolicyScopedPreservation() private {
         fullPolicyScopedInventory = StreamScopedRenderCriticalInventory(
             _assemblyCreate(
-                StreamCurrentGraphCreation.Kind.StreamScopedRenderCriticalInventory,
+                StreamCurrentGraphKinds.Kind.StreamScopedRenderCriticalInventory,
                 abi.encode(_fullPolicyScopedInventoryDependencies())
             )
         );
@@ -459,7 +459,7 @@ abstract contract StreamCurrentFullPolicyGraph is StreamCurrentFinalityGraph {
         b.archiveGas = 2000000;
         fullPolicyScopedBundle = StreamScopedBundleArchiveCoverage(
             _assemblyCreate(
-                StreamCurrentGraphCreation.Kind.StreamScopedBundleArchiveCoverage, abi.encode(b)
+                StreamCurrentGraphKinds.Kind.StreamScopedBundleArchiveCoverage, abi.encode(b)
             )
         );
     }
