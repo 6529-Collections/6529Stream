@@ -24,7 +24,10 @@ def replay_source_bytes(root, inputs, *, source_hash, publication_hash, interpre
     profile = AccountProjectionProfile(root)
     if profile.profile_hash != profile_hash:
         from .typed_authority_profile import TypedAuthorityProfile
-        profile = TypedAuthorityProfile(root, expected_hash=profile_hash)
+        profile = TypedAuthorityProfile(root)
+        if profile.profile_hash != profile_hash:
+            from .declaration_lineage_profile import DeclarationLineageProfile
+            profile = DeclarationLineageProfile(root, expected_hash=profile_hash)
     interpretation = RegisteredInterpretationCapture(publication, profile,
         ReplayTransport(inputs["interpretation-transcript.json"], interpretation_hash))
     return RecordedSemanticSource(interpretation, profile_hash=profile_hash)

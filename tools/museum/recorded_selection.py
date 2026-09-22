@@ -108,7 +108,7 @@ def select_recorded(source, policy_bytes, *, policy_hash):
         tuple(sorted(withheld, key=lambda c: c.selector)), tuple(sorted(diagnostics, key=lambda d: (d.selector, d.reason))))
 
 
-def project_recorded(source, selection_bytes, plan_bytes, *, selection_hash, plan_hash):
+def _project_recorded_base(source, selection_bytes, plan_bytes, *, selection_hash, plan_hash):
     selection = select_recorded(source, selection_bytes, policy_hash=selection_hash)
     require(keccak256(plan_bytes) == plan_hash, "recorded plan hash mismatch")
     plan = loads(plan_bytes, maximum=524288, canonical=True)
@@ -130,3 +130,14 @@ def project_recorded(source, selection_bytes, plan_bytes, *, selection_hash, pla
         "recordAuthority": "historical independent attestor account", "humanIdentityEstablished": False,
         "independentReviewEstablished": False, "declaredLanesOnly": True}
     return replace(result, report=dumps(report))
+
+
+def project_recorded(source, selection_bytes, plan_bytes, *, selection_hash, plan_hash):
+    """Preserve old projection and route concrete V3 through full lineage checks."""
+    from .declaration_lineage_profile import DeclarationLineageProfile
+    if type(getattr(source, "profile", None)) is DeclarationLineageProfile:
+        from .declaration_lineage_projection import project_declaration_lineage
+        return project_declaration_lineage(source, selection_bytes, plan_bytes,
+            selection_hash=selection_hash, plan_hash=plan_hash)
+    return _project_recorded_base(source, selection_bytes, plan_bytes,
+        selection_hash=selection_hash, plan_hash=plan_hash)

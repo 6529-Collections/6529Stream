@@ -45,9 +45,10 @@ class RegisteredInterpretationCapture:
     """Reuse the exact native document/chunk reader at the original source anchor."""
     def __init__(self, publication, profile, transport):
         from .typed_authority_profile import TypedAuthorityProfile
+        from .declaration_lineage_profile import DeclarationLineageProfile
         require(type(publication) is IndependentPublicationAdapter and publication.provenance == "trusted_rpc",
                 "actual publication adapter required")
-        require(type(profile) in (AccountProjectionProfile, TypedAuthorityProfile) and type(transport) in (RpcTransport, ReplayTransport),
+        require(type(profile) in (AccountProjectionProfile, TypedAuthorityProfile, DeclarationLineageProfile) and type(transport) in (RpcTransport, ReplayTransport),
                 "registered interpretation profile/transport required")
         self.publication = publication
         self.publication_bytes = publication.snapshot()
@@ -187,6 +188,10 @@ class RecordedSemanticSource:
         if record.selector.schema_id == schema_id(TYPED_NAMES[1]):
             from .typed_declarations import validate_continuations
             validate_continuations(self, record, payload)
+        from .declaration_lineage_profile import NAMES as LINEAGE_NAMES
+        if record.selector.schema_id == schema_id(LINEAGE_NAMES[1]):
+            from .declaration_lineage import validate_lineage
+            validate_lineage(self, record, payload)
         self._payloads.add(h)
         return payload
 

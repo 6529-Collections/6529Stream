@@ -10,6 +10,15 @@
   pending native capacity and linked execution. See the
   [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
 
+## Authenticated declaration lineage
+
+- Add a versioned account declaration profile for explicit corrections, merges
+  and complete split cohorts. Preserve original declaration selectors, hashes,
+  authority and history while projecting selected resources; old account
+  profiles and exact review targets remain unchanged. See the
+  [lineage guide](docs/museum-declaration-lineage.md). Focused Python validation
+  does not claim new chain registration or archival-format acceptance.
+
 ## Complete Artist history client
 
 - Add separate compiler-backed Complete History carriers and original
