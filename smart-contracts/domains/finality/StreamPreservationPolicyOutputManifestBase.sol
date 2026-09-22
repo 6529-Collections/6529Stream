@@ -13,6 +13,9 @@ import {
 } from "./StreamPreservationPolicyOutputSchemasV1.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
 import {
+    StreamPreservationOutputDocumentsV1 as Documents
+} from "./StreamPreservationOutputDocumentsV1.sol";
+import {
     StreamPreservationPolicyOutputSchemasV2 as FamilyDefinitions
 } from "./StreamPreservationPolicyOutputSchemasV2.sol";
 import {
@@ -438,8 +441,7 @@ abstract contract StreamPreservationPolicyOutputManifestBase is
             bytes memory raw =
                 _dynamic(schemaRegistry, abi.encodeCall(Schema.document, (ids[i])), 8192);
             Schema.DocumentView memory d = abi.decode(raw, (Schema.DocumentView));
-            bytes memory expected =
-                (_familyV2 ? FamilyDefinitions.document(ids[i]) : Definitions.document(ids[i]));
+            bytes memory expected = Documents.document(_familyV2, ids[i]);
             if (
                 keccak256(raw) != keccak256(abi.encode(d)) || !d.exists
                     || d.status != Schema.DocumentStatus.ACTIVE || uint8(d.specification.kind) != i

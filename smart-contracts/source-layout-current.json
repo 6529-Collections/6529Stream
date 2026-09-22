@@ -1549,6 +1549,8 @@
     "smart-contracts/domains/finality/StreamPolicyPublicationRecipeV2.sol",
     "smart-contracts/domains/finality/StreamPolicyPublicationReferenceDeploymentV2.sol",
     "smart-contracts/domains/finality/StreamPolicyPublicationSnapshotDeploymentV2.sol",
+    "smart-contracts/domains/finality/StreamPreservationContentAdmissionV1.sol",
+    "smart-contracts/domains/finality/StreamPreservationOutputDocumentsV1.sol",
     "smart-contracts/domains/finality/StreamPreservationPolicyContentCheckpointBaseV1.sol",
     "smart-contracts/domains/finality/StreamPreservationPolicyContentCheckpointV1.sol",
     "smart-contracts/domains/finality/StreamPreservationPolicyContentCheckpointV2.sol",

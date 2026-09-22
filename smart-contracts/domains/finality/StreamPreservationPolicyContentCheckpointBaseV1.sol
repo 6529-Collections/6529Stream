@@ -9,10 +9,6 @@ import {
 import {
     IStreamStaticSelectionCheckpoint as S
 } from "../../interfaces/stream/finality/IStreamStaticSelectionCheckpoint.sol";
-import {
-    IStreamStaticMetadataRouter as M
-} from "../../interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
-import { IStreamRenderer as R } from "../../interfaces/stream/metadata/IStreamRenderer.sol";
 
 import {
     IStreamFinalityEntropyPolicySourceSet as E
@@ -49,11 +45,8 @@ import {
     StreamPreservationPolicyOutputTypesV1 as P
 } from "../../interfaces/stream/finality/StreamPreservationPolicyOutputTypesV1.sol";
 import {
-    StreamPreservationPolicyOutputBindingV1 as Binding
-} from "./StreamPreservationPolicyOutputBindingV1.sol";
-import {
-    IStreamPreservationRegistryV1 as Registry
-} from "../../interfaces/stream/metadata/IStreamPreservationRegistryV1.sol";
+    StreamPreservationContentAdmissionV1 as Admission
+} from "./StreamPreservationContentAdmissionV1.sol";
 import {
     StreamScopedPreservationPolicySourceBindingV1 as Scoped
 } from "./StreamScopedPreservationPolicySourceBindingV1.sol";
@@ -68,6 +61,11 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
     StreamGasParameterHost,
     IERC165
 {
+    error InvalidPreservationBinding();
+    error PreservationDependencyChanged(address target);
+    error PreservationReadFailed(address target, bytes4 selector);
+    error PreservationParentGas(uint256 available, uint256 required);
+
     address public immutable override core;
     address public immutable override metadataRouter;
     address public immutable override selectionCheckpoint;
@@ -200,33 +198,6 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
 
     /// @dev Fixed by the concrete wrapper; no caller-supplied family selection.
     function _preservationProfile() internal pure virtual returns (bytes32);
-
-    /// @dev The original selected Registry owns the immutable class-1 admission. A producer's
-    /// capability claim or a caller's supplied evidence cannot replace this exact current read.
-    function _admission(S.TokenSelection memory row, P.Binding memory expected)
-        private
-        view
-        returns (P.Admission memory a)
-    {
-        bytes memory raw = _read(
-            row.selection.registry,
-            abi.encodeCall(
-                Registry.requirePreservation,
-                (row.selection.versionKey, expected.producer, expected.profile)
-            ),
-            512,
-            true,
-            false
-        );
-        P.Binding memory b;
-        (b, a) = abi.decode(raw, (P.Binding, P.Admission));
-        if (
-            keccak256(raw) != keccak256(abi.encode(b, a))
-                || Binding.hash(b) != Binding.hash(expected)
-        ) {
-            revert StaticContentPayload(row.tokenId);
-        }
-    }
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == type(C).interfaceId || id == type(IERC165).interfaceId
@@ -448,63 +419,14 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
             string memory imageURI
         )
     {
-        bytes32 producerProfile = _preservationProfile();
-        if (producerProfile == Family.FAMILY_PROFILE) {
-            producerProfile = abi.decode(
-                _read(producer, abi.encodeWithSignature("preservationProfile()"), 32, true, false),
-                (bytes32)
-            );
-            if (!Family.isSupported(producerProfile)) revert P.InvalidPreservationBinding();
-        } else if (producerProfile != Family.ORIGINAL_PROFILE) {
-            revert P.InvalidPreservationBinding();
-        }
-        value.preservation = Binding.current(
-            producer, producerProfile, core, metadataRouter, _gasParameterValue(READ_GAS)
+        (value.preservation, value.preservationAdmission) = Admission.observe(
+            _gasParameters,
+            Admission.Context(core, metadataRouter, _preservationProfile()),
+            row,
+            producer
         );
-        Binding.requireCurrent(value.preservation, row, _gasParameterValue(READ_GAS));
-        value.preservationAdmission = _admission(row, value.preservation);
         P.Admission memory admission = value.preservationAdmission;
-        if (
-            admission.registry != row.selection.registry
-                || admission.registryCodeHash != row.selection.registryCodeHash
-                || admission.versionKey != row.selection.versionKey
-                || admission.registrationHash == 0 || admission.readSetHash == 0
-                || admission.analysisHash == 0 || admission.goldenHash == 0
-        ) {
-            revert StaticContentPayload(row.tokenId);
-        }
-        bytes memory raw = _read(
-            metadataRouter,
-            abi.encodeCall(M.resolvedMetadataConfig, (row.tokenId)),
-            8192,
-            false,
-            false
-        );
-        M.ConfigRecord memory config = abi.decode(raw, (M.ConfigRecord));
-        if (
-            keccak256(raw) != keccak256(abi.encode(config)) || keccak256(raw) != row.configHash
-                || config.recordHash != row.configRecordHash
-                || config.config.mode != R.MetadataMode.ONCHAIN || !config.config.frozen
-                || config.selection.rendererId != keccak256("6529STREAM_RENDERER_V1")
-                || config.selection.rendererVersion != keccak256("6529STREAM_STATIC_RENDERER_V1")
-        ) revert StaticContentPayload(row.tokenId);
-        raw = _read(
-            metadataRouter,
-            abi.encodeCall(
-                M.staticRenderSourceForConfig, (p.scope.collectionId, row.configRecordHash)
-            ),
-            24000,
-            false,
-            false
-        );
-        (M.RawSource memory source, R.MetadataConfig memory selected) =
-            abi.decode(raw, (M.RawSource, R.MetadataConfig));
-        if (
-            keccak256(raw) != keccak256(abi.encode(source, selected))
-                || keccak256(abi.encode(source)) != row.rawSourceHash
-                || keccak256(abi.encode(selected)) != keccak256(abi.encode(config.config))
-        ) revert StaticContentPayload(row.tokenId);
-        imageURI = source.imageURI;
+        imageURI = Admission.sourceImage(_gasParameters, p, row, metadataRouter);
         address entropy = abi.decode(
             _read(core, abi.encodeCall(I.coordinatorAtMint, (row.tokenId)), 32, true, false),
             (address)
@@ -569,7 +491,8 @@ abstract contract StreamPreservationPolicyContentCheckpointBaseV1 is
                     || status != 5 || seed != e.seed
             ) revert StaticContentPayload(row.tokenId);
         }
-        raw = _read(core, abi.encodeCall(D.tokenData, (row.tokenId)), 16448, false, false);
+        bytes memory raw =
+            _read(core, abi.encodeCall(D.tokenData, (row.tokenId)), 16448, false, false);
         data = abi.decode(raw, (bytes));
         if (data.length > 16384 || keccak256(raw) != keccak256(abi.encode(data))) {
             revert StaticContentPayload(row.tokenId);

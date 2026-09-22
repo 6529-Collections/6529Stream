@@ -1,5 +1,15 @@
 # Changelog
 
+## Preservation checkpoint and output-manifest capacity
+
+- Move complete checkpoint admission/source-image validation and unchanged
+  canonical output documents into fixed libraries. Preserve all six wrappers'
+  public interfaces, storage, source commitments and governed read limits.
+  All eight measured products fit original runtime/full-initialization limits;
+  19 focused tests pass with two 256-input fuzz properties. Complete contract
+  flows and gas remain separate. See the
+  [capacity guide](docs/guides/preservation-checkpoint-capacity.md).
+
 ## Scoped preservation publication capacity
 
 - Move complete snapshot source/payload assembly and exact retained-reference
