@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI176 `aa2ca4a2`: 4,279 sources / zero errors; contract source `d61a1246`; latest client/Museum `0a5104e6`. |
+| Source checkpoint | ABI178 `d823d82c`: 4,321 sources / zero errors; client integration `45828ad0`; runtime anchor `aa2ca4a2`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,42 +29,36 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-ABI176 checks all **4,279 Solidity sources** at `aa2ca4a2` with zero errors
-in 50.297 seconds. Contract source last changed at `d61a1246`; client and Museum
-source now includes `0a5104e6`. The new combined runtime campaign uses the fixed
-`aa2ca4a2` snapshot. Earlier `ea4cf6b0` results retain their original scope.
-Expanded full v1 remains incomplete and is not a frozen release candidate.
+The expanded full-v1 implementation is still incomplete. ABI178 checks all
+**4,321 Solidity sources** at `d823d82c` with zero errors in 51.046 seconds.
+The latest client integration is `45828ad0`. These checks cover source types,
+interfaces and storage descriptions; they do not prove complete execution.
+The current broad runtime campaign remains pinned to `aa2ca4a2`, which predates
+the new multiple-generation recovery profile. RC1 remains unchanged.
 
-Root owns architecture, integration and delivery. Builders keep implementing
-while fixed-source tests run; source integration and runtime acceptance remain
-separate. Current assignments:
+Root owns architecture, integration and delivery. Current assignments:
 
-- **artist history resume**: Compose multiple-generation recovery, including original producer/Safe regressions, repeated economics/sale terms and post-import currentness. One finite native production capture; no whole-graph compile.
-- **release evidence review**: Independently review the final multiple-generation dispatch/currentness delta and actual regression cases; preserve the identified earlier routing defect.
-- **remote delivery review**: Implement the specifically missing STATIC transitive-analysis/golden support after checking the existing source gap; separate offchain tooling, no duplicate compiler.
-- **Mint / independent review**: Generation consent source 872491a/c4b9 has 29 reviewed authored cases. Own its focused native/EVM execution; coordinate exact production reuse with Artist.
-- **Burn / preservation ceremony**: Six original cases pass. Execute remaining 16 at aa2ca4a2 with the current guards and exact production closure; Collector component review is complete.
-- **Museum**: Geography 08718085 is integrated and reviewed; build the missing authoritative physical-event source joins without inferring title or custody from NFTs.
-- **Clients / Safe callers**: Aggregate attestation client is integrated. Build original attribution operations 10, 44–50 and 61, including exact governed versus ordinary call paths.
-- **Testing / native tooling**: Run current Owner/Genesis and corrected SetupPlans cases on aa2ca4a2. URI2 passes; retain all 50 original cases and the 65/18/84 concrete obligations.
-- **Capacity / Rights**: NativeWorkers8 passes at d61a1246; finish its existing trace review. Prepare remaining24 on aa2ca4a2 with quiet behavioral output and bounded representative traces.
-- **Metric retention**: Guardian operations28–32 and corrected tests are integrated. Build original PRIMARY_ONLY collaborator operations5–7 in disjoint client files.
-- **Prepared / successor preservation**: Four caller/helper native outputs qualify at aa2ca4a2. Complete Scenario, prestate/export and bootstrap using all90 original concrete obligations.
-- **Collector gas redesign**: Measure actual full cold paid mint on the isolated envelope prototype; current exact necessary production closure and changed host capture remain pending. No production adoption.
+- **artist history resume**: Repair the three new generation worker size failures, then execute original actual-owner/Safe scenarios; keep interface and complete history semantics.
+- **release evidence review**: Independently review frozen capacity repairs and caller seams; attribution and STATIC source reviews are complete.
+- **remote delivery review**: Repair the three exact CurrentAuthority inventory size failures in a separate branch; preserve original semantics and limits.
+- **Mint / independent review**: Reconcile required Merkle sale consumption and source-qualified actual execution; preserve held ERC20 capture restriction unless exact later authorization covers it.
+- **Burn / preservation ceremony**: Remaining16 and trace review complete at aa2. Repair the three exact current provider/discovery size failures.
+- **Museum**: Physical-production source joins integrated and17root tests pass. Build General institutional direct-semantic source/reader boundary.
+- **Clients / Safe callers**: Attribution integrated and root47pass. Build typed recovered multiple-generation client while Artist factors capacity.
+- **Testing / native tooling**: Compose test-side factory/catalog interfaces with Prepared/root; preserve original50cases and full concrete obligations. Keep stateful/Safe queue ready.
+- **Capacity / Rights**: First8 and independent trace review complete at d61. Run remaining24 aa2 with bounded captures and v3 behavioral output.
+- **Metric retention**: Collaborator integrated and root60pass. Build current all-call Safe inventory/reconciler; retain uncovered rows and source-specific actual evidence.
+- **Prepared / successor preservation**: Split nominal catalog dependencies in both old/current graph callers with Testing/root; preserve all90 original obligations and then reattempt changed compilation.
+- **Collector gas redesign**: Actual cold-paid prototype rebased onto aa2. Preserve current six shared size refusals, bounded changed-host capture and unchanged500000 total gas requirement.
 
-Compiler maximum remains 20; use assigned bounded captures and release finished
-slots. Preserve failed captures and avoid unchanged retries. Production runtime,
-full initcode and transaction limits remain unchanged. Do not retry or relay
-the separately denied Capacity handoff.
-
-Remaining delivery includes broader Artist recovery combinations, original
-attribution/collaborator callers, Museum physical/institutional source joins,
-current-stack and all-call Safe execution, fuzz/stateful campaigns, deployment
-and transaction gas, complete CI, source freeze and matching testnet. Collector
-cold paid-mint optimization remains isolated; component savings do not satisfy
-the complete 500,000-gas purchase requirement. Held proposals remain unapplied.
-Immutable RC1/main/release/Sepolia `569bf87f` is unchanged. No funding or on-chain
-action is needed for the present coding.
+Remaining delivery includes broader required Artist combinations, institutional
+Museum source joins, complete current-stack and all-call Safe execution,
+stateful/fuzz campaigns, deployment and transaction gas, full CI, source freeze
+and matching testnet. Collector cold paid-mint optimization remains isolated;
+component savings do not satisfy the complete 500,000-gas purchase requirement.
+Previously held proposals remain unapplied. No new funding or on-chain action
+is needed for current coding. Immutable RC1/main/release/Sepolia
+`569bf87f1fa808787d324f6e1582924b5ccf1d40` is preserved.
 
 ## Earlier source-specific assignments
 
@@ -233,11 +227,11 @@ can inspect any task, while the coordinator manages handoffs and decisions.
 
 | Task | ID | Owned feature group |
 | --- | --- | --- |
-| Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger plus explicit entropy policy, INSTANT provider and direct STATIC source getters |
-| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Artist recovery adjudication, current-notice and six-family rewind batches; completed burn/commerce evidence remains pinned |
-| Stream — museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters and full object-dossier inventory/history/assembly; preserve completed scoped token replay |
-| Stream — developer clients and Safe workflows | `01a0a68e-8f38-7a33-95b6-45d8ac943569` | Client package, typed ceremonies, Safe CALL plans, exact-template and commerce/operator caller recipes |
-| Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | Actual current Safe/version matrix, terminal collection flow recipes and final integration/fuzz orchestration |
+| Stream â€” mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger plus explicit entropy policy, INSTANT provider and direct STATIC source getters |
+| Stream â€” burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Artist recovery adjudication, current-notice and six-family rewind batches; completed burn/commerce evidence remains pinned |
+| Stream â€” museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters and full object-dossier inventory/history/assembly; preserve completed scoped token replay |
+| Stream â€” developer clients and Safe workflows | `01a0a68e-8f38-7a33-95b6-45d8ac943569` | Client package, typed ceremonies, Safe CALL plans, exact-template and commerce/operator caller recipes |
+| Stream â€” integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | Actual current Safe/version matrix, terminal collection flow recipes and final integration/fuzz orchestration |
 
 The local Artist lead retains Artist contracts and the raw STATIC display
 transport. The local revenue lead retains economic/Resolver/escrow contracts.
@@ -311,7 +305,7 @@ pending checks. The immutable RC1 remains the released baseline.
 | Owner | Implementation batch |
 | --- | --- |
 | Integrator | Coordinate the five visible tasks and three local leads; integrate reviewed handoffs. Own shared Core/entropy STATIC interfaces, economic pointer continuity checks and final candidate acceptance. Harness, entropy fixture, mint/gate/counter and burn/distribution work is assigned in the visible roster above. |
-| Artist builder | Disputes44–50 and native4 fixture repairs integrated. STATIC raw reads and ordinary codec repairs integrated; two denied size proposals remain inert. Continue withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
+| Artist builder | Disputes44â€“50 and native4 fixture repairs integrated. STATIC raw reads and ordinary codec repairs integrated; two denied size proposals remain inert. Continue withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
 | Revenue builder | Royalty continuity producer/source integrated with11 scoped passing cases; Core guard integrated. Required future-mint consumer proposal is inert after automatic-review denial; independent review and actual-current tests continue. Primary graph proposal remains unadopted and is not a new launch gate. |
 | Fourth engineer | STATIC Renderer/Registry/routing source integrated. Renderer/Metadata formatting and selection repairs integrated; denied Router cache proposal remains inert. Complete content/output finality and current-graph tests; final combined evidence pending. |
 
@@ -795,7 +789,7 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
-| Artist builder | Disputes44–50 and native4 fixture repairs integrated. Finish measured joined Artist size repairs and STATIC raw reads; then withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
+| Artist builder | Disputes44â€“50 and native4 fixture repairs integrated. Finish measured joined Artist size repairs and STATIC raw reads; then withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
 | Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
