@@ -604,7 +604,11 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
         view
         returns (Profiles.Profile memory)
     {
-        Selection.Context memory context = Selection.Context({
+        return Selection.selected(_selectionContext(), _codeHashes, scope);
+    }
+
+    function _selectionContext() private view returns (Selection.Context memory context) {
+        context = Selection.Context({
             configuration: _configuration,
             profiles: _profiles,
             deferredCapability: _deferredCapability,
@@ -614,7 +618,6 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
             deploymentChainId: deploymentChainId,
             sourceConfigurationHash: sourceConfigurationHash
         });
-        return Selection.selected(context, _codeHashes, scope);
     }
 
     /// @dev Only a genuine per-scope factory graph or the provider's closed one-time policy
@@ -669,84 +672,15 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
         StreamFinalityScope memory scope,
         StreamFinalityDiscoveryTypes.Configuration memory c
     ) private view {
-        Profiles.Profile memory p = _selectedProfile(scope);
-        if (p.profileHash == _profiles[0].profileHash) {
-            IStreamMetadataServingFacts.ServingFacts memory original =
-                StreamFinalityRouterEvidence.serving(
-                    StreamFinalityRouterEvidence.Config(
-                        c.core, c.router, deploymentChainId, c.readGas, c.componentGas
-                    ),
-                    scope.collectionId
-                );
-            if (original.mode != keccak256("ONCHAIN")) revert DiscoveryUnsupportedProfile();
-            return;
-        }
-        bytes memory raw = _read(
-            c.router,
-            abi.encodeCall(
-                IStreamMetadataServingFacts.collectionServingFacts, (scope.collectionId)
-            ),
-            512,
-            c.componentGas
-        );
-        IStreamMetadataServingFacts.ServingFacts memory f =
-            abi.decode(raw, (IStreamMetadataServingFacts.ServingFacts));
-        if (
-            keccak256(raw) != keccak256(abi.encode(f)) || !f.configured
-                || f.mode != keccak256("ONCHAIN")
-                || f.presentationProfile != keccak256("6529STREAM_STATIC_METADATA_SELECTION_V1")
-        ) revert DiscoveryUnsupportedProfile();
-        raw = _read(
-            c.router,
-            abi.encodeCall(StaticRouter.staticMetadataActivation, (scope.collectionId)),
-            96,
-            c.readGas
-        );
-        (bytes32 record, uint64 revision, bytes32 head) =
-            abi.decode(raw, (bytes32, uint64, bytes32));
-        if (
-            keccak256(raw) != keccak256(abi.encode(record, revision, head)) || record == 0
-                || revision == 0
-        ) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        // No frozen=true shortcut: the selected metadata and all six STATIC adapters still
-        // prove their own exact current/locked scope facts, and Registry rechecks each result.
+        Selection.serving(_selectionContext(), _codeHashes, scope, c);
     }
 
     function _authority(uint256 collectionId, StreamFinalityDiscoveryTypes.Configuration memory c)
         private
         view
-        returns (AuthorityTypes.Route memory authority)
+        returns (AuthorityTypes.Route memory)
     {
-        _supports(c.finalityRegistry, type(IStreamFinalityCurrentAuthority).interfaceId);
-        if (
-            abi.decode(
-                    _read(
-                        c.finalityRegistry,
-                        abi.encodeCall(IStreamFinalityCurrentAuthority.currentAuthorityProfile, ()),
-                        32,
-                        c.readGas
-                    ),
-                    (bytes32)
-                ) != AuthorityTypes.PROFILE
-        ) revert DiscoveryConfiguration(c.finalityRegistry);
-        bytes memory raw = _read(
-            c.finalityRegistry,
-            abi.encodeCall(IStreamFinalityCurrentAuthority.currentArtistAuthority, (collectionId)),
-            320,
-            c.componentGas
-        );
-        authority = abi.decode(raw, (AuthorityTypes.Route));
-        if (
-            keccak256(raw) != keccak256(abi.encode(authority))
-                || authority.finalityRegistry != c.finalityRegistry
-                || authority.finalityCodeHash != c.finalityRegistryCodeHash
-                || authority.provider != c.provider
-                || authority.providerCodeHash != _codeHashes[c.provider]
-                || authority.selectionHash == 0 || authority.presentationHash == 0
-        ) revert DiscoveryConfiguration(c.finalityRegistry);
-        _currentPin(authority);
+        return Selection.authority(c, _codeHashes, _configuration.readGas, collectionId);
     }
 
     function _currentPin(AuthorityTypes.Route memory authority) private view {
@@ -805,31 +739,11 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
     function _componentState(address target, bytes32 family, StreamFinalityScope memory scope)
         private
         view
-        returns (StreamFinalityComponentExpectation memory e)
+        returns (StreamFinalityComponentExpectation memory)
     {
-        bytes4 expectedInterface = scope.scopeType == StreamFinalityScopeType.COLLECTION
-            ? type(IStreamArtworkFinalityComponent).interfaceId
-            : type(IStreamArtworkScopedFinalityComponent).interfaceId;
-        _supports(target, expectedInterface);
-        bytes memory input = scope.scopeType == StreamFinalityScopeType.COLLECTION
-            ? abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (scope.collectionId))
-            : abi.encodeCall(IStreamArtworkScopedFinalityComponent.finalityStateForScope, (scope));
-        StreamFinalityComponentState memory s = abi.decode(
-            _read(target, input, 256, _configuration.componentGas), (StreamFinalityComponentState)
+        return Selection.componentState(
+            target, family, scope, _configuration.readGas, _configuration.componentGas
         );
-        if (!s.frozen || s.interfaceId != expectedInterface) {
-            revert DiscoveryComponent(target, family);
-        }
-        e = StreamFinalityComponentExpectation(
-            s.componentType,
-            s.component,
-            s.interfaceId,
-            s.codeHash,
-            s.moduleVersion,
-            s.manifestHash,
-            s.dataHash
-        );
-        _expectation(e, family, target);
     }
 
     function _expectation(

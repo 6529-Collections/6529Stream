@@ -33,11 +33,79 @@ import {
 import {
     StreamFinalityScopeInputs
 } from "../../interfaces/stream/finality/StreamFinalityEvidenceTypes.sol";
+import {
+    StreamFinalityNativeProviderReads as Native
+} from "./StreamFinalityNativeProviderReads.sol";
+import {
+    StreamCurrentAuthorityPolicyProviderOperationsV2 as PolicyOperations
+} from "./StreamCurrentAuthorityPolicyProviderOperationsV2.sol";
+import {
+    StreamFinalityPolicyProviderComponentsV2 as PolicyComponents
+} from "./StreamFinalityPolicyProviderComponentsV2.sol";
 
 /// @notice Fixed storage projections for the deferred provider's existing graph operations.
 /// @dev Host dispatch, pin/scope/component checks and original-Registry admission retain their
 /// original order. Every graph operation still performs its original current selection.
 library StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2 {
+    function selectedSources(Selection.Context storage selection, StreamFinalityScope memory scope)
+        public
+        view
+        returns (Profiles.Sources memory)
+    {
+        return Selection.current(selection, scope);
+    }
+
+    function policySnapshot(Native.Config storage policy, uint256 cid)
+        public
+        view
+        returns (bytes32)
+    {
+        return PolicyComponents.snapshotHash(policy, cid);
+    }
+
+    function policyManifest(Native.Config storage policy, StreamFinalityScope memory scope)
+        public
+        view
+        returns (bytes memory)
+    {
+        return PolicyOperations.manifest(policy, scope);
+    }
+
+    function policyInputs(
+        Native.Config storage policy,
+        StreamFinalityScope memory scope,
+        bytes32 hash
+    ) public view returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
+        return PolicyOperations.inputs(policy, scope, hash);
+    }
+
+    function policyReview(
+        Native.Config storage policy,
+        StreamFinalityScope memory scope,
+        bytes32 hash
+    ) public view returns (IStreamFinalitySanctionReview.ReviewFacts memory) {
+        return PolicyOperations.review(policy, scope, hash);
+    }
+
+    function policyPrepared(
+        Native.Config storage policy,
+        StreamFinalityScope memory scope,
+        bytes32 hash,
+        StreamFinalityComponentExpectation[] calldata components,
+        bool withReview
+    )
+        public
+        view
+        returns (
+            StreamFinalityScopeInputs memory,
+            bytes32,
+            bytes32,
+            IStreamFinalitySanctionReview.ReviewFacts memory
+        )
+    {
+        return PolicyOperations.prepared(policy, scope, hash, components, withReview);
+    }
+
     function isPolicy(Graph.Context storage graph, StreamFinalityScope memory scope)
         public
         view

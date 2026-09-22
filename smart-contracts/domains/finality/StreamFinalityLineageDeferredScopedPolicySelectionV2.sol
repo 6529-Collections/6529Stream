@@ -49,7 +49,7 @@ import {
     StreamCurrentAuthorityScopedPolicyDiscoveryFactoryReadsV2 as PublicationFactoryReads
 } from "./StreamCurrentAuthorityScopedPolicyDiscoveryFactoryReadsV2.sol";
 
-/// @notice Fixed linked selected-profile reader for lineage deferred scoped discovery.
+/// @notice Fixed linked profile, serving, authority and component reads for lineage discovery.
 /// @dev Constructor-only values are copied by the host; the pin map remains its original storage.
 /// DELEGATECALL preserves the discovery address used in reciprocal and receipt commitments.
 library StreamFinalityLineageDeferredScopedPolicySelectionV2 {
@@ -67,6 +67,7 @@ library StreamFinalityLineageDeferredScopedPolicySelectionV2 {
     error DiscoveryConfiguration(address target);
     error DiscoveryDependency(address target);
     error DiscoveryUnsupportedProfile();
+    error DiscoveryComponent(address target, bytes32 family);
 
     function selected(
         Context memory x,
@@ -283,10 +284,26 @@ library StreamFinalityLineageDeferredScopedPolicySelectionV2 {
         _address(x, p.entropyFactory, "core()", core);
         _address(x, p.entropyFactory, "metadataHost()", metadataHost);
         _address(x, p.entropyFactory, "scopeMembershipHost()", x.configuration.membership);
-        _supports(x, p.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
-        _supports(x, p.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
-        _supports(x, p.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
-        _supports(x, p.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
+        _supports(
+            x.configuration.readGas,
+            p.entropyFactory,
+            type(IStreamFinalityEntropySourceFactory).interfaceId
+        );
+        _supports(
+            x.configuration.readGas,
+            p.entropyFactory,
+            type(IStreamFinalityCurrentEntropyRoute).interfaceId
+        );
+        _supports(
+            x.configuration.readGas,
+            p.referenceRender,
+            type(IStreamArtworkScopedFinalityComponent).interfaceId
+        );
+        _supports(
+            x.configuration.readGas,
+            p.referenceRender,
+            type(IStreamArtworkFinalityComponent).interfaceId
+        );
     }
 
     function _boundPin(
@@ -335,24 +352,19 @@ library StreamFinalityLineageDeferredScopedPolicySelectionV2 {
         return x.configuration.componentGas;
     }
 
-    function _supports(Context memory x, address target, bytes4 id) private view {
+    function _supports(uint256 readGas, address target, bytes4 id) private view {
         if (
             abi.decode(
                         _read(
                             target,
                             abi.encodeCall(IERC165.supportsInterface, (type(IERC165).interfaceId)),
                             32,
-                            x.configuration.readGas
+                            readGas
                         ),
                         (uint256)
                     ) != 1
                 || abi.decode(
-                        _read(
-                            target,
-                            abi.encodeCall(IERC165.supportsInterface, (id)),
-                            32,
-                            x.configuration.readGas
-                        ),
+                        _read(target, abi.encodeCall(IERC165.supportsInterface, (id)), 32, readGas),
                         (uint256)
                     ) != 1
                 || abi.decode(
@@ -360,7 +372,7 @@ library StreamFinalityLineageDeferredScopedPolicySelectionV2 {
                             target,
                             abi.encodeCall(IERC165.supportsInterface, (bytes4(0xffffffff))),
                             32,
-                            x.configuration.readGas
+                            readGas
                         ),
                         (uint256)
                     ) != 0
@@ -395,5 +407,144 @@ library StreamFinalityLineageDeferredScopedPolicySelectionV2 {
         returns (bytes memory)
     {
         return StreamFinalityRouterEvidence.read(target, input, size, cap);
+    }
+
+    function serving(
+        Context memory x,
+        mapping(address => bytes32) storage _codeHashes,
+        StreamFinalityScope memory scope,
+        StreamFinalityDiscoveryTypes.Configuration memory c
+    ) public view {
+        Profiles.Profile memory p = selected(x, _codeHashes, scope);
+        if (p.profileHash == x.profiles[0].profileHash) {
+            IStreamMetadataServingFacts.ServingFacts memory original =
+                StreamFinalityRouterEvidence.serving(
+                    StreamFinalityRouterEvidence.Config(
+                        c.core, c.router, x.deploymentChainId, c.readGas, c.componentGas
+                    ),
+                    scope.collectionId
+                );
+            if (original.mode != keccak256("ONCHAIN")) revert DiscoveryUnsupportedProfile();
+            return;
+        }
+        bytes memory raw = _read(
+            c.router,
+            abi.encodeCall(
+                IStreamMetadataServingFacts.collectionServingFacts, (scope.collectionId)
+            ),
+            512,
+            c.componentGas
+        );
+        IStreamMetadataServingFacts.ServingFacts memory f =
+            abi.decode(raw, (IStreamMetadataServingFacts.ServingFacts));
+        if (
+            keccak256(raw) != keccak256(abi.encode(f)) || !f.configured
+                || f.mode != keccak256("ONCHAIN")
+                || f.presentationProfile != keccak256("6529STREAM_STATIC_METADATA_SELECTION_V1")
+        ) revert DiscoveryUnsupportedProfile();
+        raw = _read(
+            c.router,
+            abi.encodeCall(StaticRouter.staticMetadataActivation, (scope.collectionId)),
+            96,
+            c.readGas
+        );
+        (bytes32 record, uint64 revision, bytes32 head) =
+            abi.decode(raw, (bytes32, uint64, bytes32));
+        if (
+            keccak256(raw) != keccak256(abi.encode(record, revision, head)) || record == 0
+                || revision == 0
+        ) {
+            revert DiscoveryUnsupportedProfile();
+        }
+        // No frozen=true shortcut: the selected metadata and all six STATIC adapters still
+        // prove their own exact current/locked scope facts, and Registry rechecks each result.
+    }
+
+    function authority(
+        StreamFinalityDiscoveryTypes.Configuration memory c,
+        mapping(address => bytes32) storage _codeHashes,
+        uint256 readGas,
+        uint256 collectionId
+    ) public view returns (AuthorityTypes.Route memory authority_) {
+        _supports(readGas, c.finalityRegistry, type(IStreamFinalityCurrentAuthority).interfaceId);
+        if (
+            abi.decode(
+                    _read(
+                        c.finalityRegistry,
+                        abi.encodeCall(IStreamFinalityCurrentAuthority.currentAuthorityProfile, ()),
+                        32,
+                        c.readGas
+                    ),
+                    (bytes32)
+                ) != AuthorityTypes.PROFILE
+        ) revert DiscoveryConfiguration(c.finalityRegistry);
+        bytes memory raw = _read(
+            c.finalityRegistry,
+            abi.encodeCall(IStreamFinalityCurrentAuthority.currentArtistAuthority, (collectionId)),
+            320,
+            c.componentGas
+        );
+        authority_ = abi.decode(raw, (AuthorityTypes.Route));
+        if (
+            keccak256(raw) != keccak256(abi.encode(authority_))
+                || authority_.finalityRegistry != c.finalityRegistry
+                || authority_.finalityCodeHash != c.finalityRegistryCodeHash
+                || authority_.provider != c.provider
+                || authority_.providerCodeHash != _codeHashes[c.provider]
+                || authority_.selectionHash == 0 || authority_.presentationHash == 0
+        ) revert DiscoveryConfiguration(c.finalityRegistry);
+        _currentPin(authority_);
+    }
+
+    function _currentPin(AuthorityTypes.Route memory authority) private view {
+        if (
+            authority.registry.code.length == 0 || authority.registryCodeHash == 0
+                || authority.registry.codehash != authority.registryCodeHash
+                || authority.coordinator.code.length == 0 || authority.coordinatorCodeHash == 0
+                || authority.coordinator.codehash != authority.coordinatorCodeHash
+        ) revert DiscoveryDependency(authority.registry);
+    }
+
+    function componentState(
+        address target,
+        bytes32 family,
+        StreamFinalityScope memory scope,
+        uint256 readGas,
+        uint256 componentGas
+    ) public view returns (StreamFinalityComponentExpectation memory e) {
+        bytes4 expectedInterface = scope.scopeType == StreamFinalityScopeType.COLLECTION
+            ? type(IStreamArtworkFinalityComponent).interfaceId
+            : type(IStreamArtworkScopedFinalityComponent).interfaceId;
+        _supports(readGas, target, expectedInterface);
+        bytes memory input = scope.scopeType == StreamFinalityScopeType.COLLECTION
+            ? abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (scope.collectionId))
+            : abi.encodeCall(IStreamArtworkScopedFinalityComponent.finalityStateForScope, (scope));
+        StreamFinalityComponentState memory s =
+            abi.decode(_read(target, input, 256, componentGas), (StreamFinalityComponentState));
+        if (!s.frozen || s.interfaceId != expectedInterface) {
+            revert DiscoveryComponent(target, family);
+        }
+        e = StreamFinalityComponentExpectation(
+            s.componentType,
+            s.component,
+            s.interfaceId,
+            s.codeHash,
+            s.moduleVersion,
+            s.manifestHash,
+            s.dataHash
+        );
+        _expectation(e, family, target);
+    }
+
+    function _expectation(
+        StreamFinalityComponentExpectation memory e,
+        bytes32 family,
+        address target
+    ) private view {
+        if (
+            target.code.length == 0 || e.component != target || e.codeHash != target.codehash
+                || e.componentType != family || e.interfaceId == 0 || e.moduleVersion == 0
+                || e.manifestHash == 0 || e.dataHash == 0
+        ) revert DiscoveryComponent(target, family);
     }
 }

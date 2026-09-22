@@ -84,6 +84,10 @@ import {
     StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2 as GraphWorker
 } from "./StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2.sol";
 
+import {
+    StreamCurrentAuthorityDeferredScopedPolicyNativeWorkerV2 as NativeWorker
+} from "./StreamCurrentAuthorityDeferredScopedPolicyNativeWorkerV2.sol";
+
 /// @notice Original source profiles with one governed collection-policy binding after deployment.
 /// @dev Native, scoped and per-scope full-policy graphs retain their fixed original anchors.
 /// Only this distinct capability may add collection-policy sources, once, after full validation.
@@ -225,7 +229,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         if (GraphWorker.isPolicy(_graph, scope)) {
             return GraphWorker.sources(_graph, scope);
         }
-        return Selection.current(_sourceSelection, scope);
+        return GraphWorker.selectedSources(_sourceSelection, scope);
     }
 
     function policyOutputManifestV2() external view override returns (address) {
@@ -263,7 +267,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             StreamFinalityScope(StreamFinalityScopeType.COLLECTION, cid, 0, 0);
         if (!_policyScope(scope)) return super.latestCollectionSnapshotHash(cid);
         _pins();
-        return PolicyComponents.snapshotHash(_policy, cid);
+        return GraphWorker.policySnapshot(_policy, cid);
     }
 
     function finalityComponentFacts(bytes32 family, StreamFinalityScope calldata scope)
@@ -312,8 +316,13 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         if (GraphWorker.isPolicy(_graph, scope)) {
             return GraphWorker.manifest(_graph, scope);
         }
-        if (!_policyScope(scope)) return super.inputManifestBytes(scope);
-        return PolicyOperations.manifest(_policy, scope);
+        if (!_policyScope(scope)) {
+            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+                return NativeWorker.inputManifestBytes(_graph.original, scope);
+            }
+            return super.inputManifestBytes(scope);
+        }
+        return GraphWorker.policyManifest(_policy, scope);
     }
 
     function requireFinalityScopeInputs(StreamFinalityScope calldata scope, bytes32 manifestHash)
@@ -325,8 +334,13 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         if (GraphWorker.isPolicy(_graph, scope)) {
             return GraphWorker.inputs(_graph, scope, manifestHash);
         }
-        if (!_policyScope(scope)) return super.requireFinalityScopeInputs(scope, manifestHash);
-        return PolicyOperations.inputs(_policy, scope, manifestHash);
+        if (!_policyScope(scope)) {
+            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+                return NativeWorker.requireFinalityScopeInputs(_graph.original, scope, manifestHash);
+            }
+            return super.requireFinalityScopeInputs(scope, manifestHash);
+        }
+        return GraphWorker.policyInputs(_policy, scope, manifestHash);
     }
 
     function requireSanctionReviewFacts(StreamFinalityScope calldata scope, bytes32 manifestHash)
@@ -338,8 +352,13 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         if (GraphWorker.isPolicy(_graph, scope)) {
             return GraphWorker.review(_graph, scope, manifestHash);
         }
-        if (!_policyScope(scope)) return super.requireSanctionReviewFacts(scope, manifestHash);
-        return PolicyOperations.review(_policy, scope, manifestHash);
+        if (!_policyScope(scope)) {
+            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+                return NativeWorker.requireSanctionReviewFacts(_graph.original, scope, manifestHash);
+            }
+            return super.requireSanctionReviewFacts(scope, manifestHash);
+        }
+        return GraphWorker.policyReview(_policy, scope, manifestHash);
     }
 
     function requirePreparedFinalityScopeInputs(
@@ -354,10 +373,15 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return (inputs_, schema_, canon_);
         }
         if (!_policyScope(scope)) {
+            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+                return NativeWorker.requirePreparedFinalityScopeInputs(
+                    _graph.original, scope, manifestHash, components
+                );
+            }
             return super.requirePreparedFinalityScopeInputs(scope, manifestHash, components);
         }
         (StreamFinalityScopeInputs memory v, bytes32 schema, bytes32 canon,) =
-            PolicyOperations.prepared(_policy, scope, manifestHash, components, false);
+            GraphWorker.policyPrepared(_policy, scope, manifestHash, components, false);
         return (v, schema, canon);
     }
 
@@ -381,10 +405,15 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             return GraphWorker.prepared(_graph, scope, manifestHash, components, true);
         }
         if (!_policyScope(scope)) {
+            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+                return NativeWorker.requirePreparedFinalityScopeInputsAndReview(
+                    _graph.original, scope, manifestHash, components
+                );
+            }
             return
                 super.requirePreparedFinalityScopeInputsAndReview(scope, manifestHash, components);
         }
-        return PolicyOperations.prepared(_policy, scope, manifestHash, components, true);
+        return GraphWorker.policyPrepared(_policy, scope, manifestHash, components, true);
     }
 
     function scopedPolicyPublicationBinding()

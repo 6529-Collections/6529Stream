@@ -81,6 +81,40 @@ import {
 import {
     StreamCurrentAuthorityDeferredPolicyValidationV2 as Validation
 } from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityDeferredPolicyValidationV2.sol";
+import {
+    StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2 as FallbackBase
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2.sol";
+import {
+    StreamCurrentAuthorityNativeProviderReads as FallbackReads
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityNativeProviderReads.sol";
+import {
+    StreamCurrentAuthorityNativeSanctionReview as FallbackReview
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityNativeSanctionReview.sol";
+import {
+    StreamFinalityInputManifestReads as FallbackManifest
+} from "../../../smart-contracts/domains/finality/StreamFinalityInputManifestReads.sol";
+import {
+    StreamFinalityInputManifestTypes as FallbackTypes
+} from "../../../smart-contracts/interfaces/stream/finality/StreamFinalityInputManifestTypes.sol";
+import {
+    StreamFinalityInputManifestSchemas as FallbackSchemas
+} from "../../../smart-contracts/domains/finality/StreamFinalityInputManifestSchemas.sol";
+import {
+    StreamMetadataRecoveryRoutes as FallbackRecovery
+} from "../../../smart-contracts/domains/metadata/StreamMetadataRecoveryRoutes.sol";
+import {
+    IStreamCollectionMetadataV1 as FallbackMetadata
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
+import {
+    IStreamArtworkFinalityRegistry as FallbackRegistry
+} from "../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
+import {
+    IStreamFinalitySanctionReview as FallbackReviewInterface
+} from "../../../smart-contracts/interfaces/stream/finality/IStreamFinalitySanctionReview.sol";
+import {
+    IStreamFinalityCurrentComponentRoutes as FallbackRoutes,
+    StreamFinalityCurrentComponentRoute
+} from "../../../smart-contracts/interfaces/stream/finality/IStreamFinalityCurrentComponentRoutes.sol";
 
 interface DeferredScopedBindingVm {
     struct Log {
@@ -92,6 +126,7 @@ interface DeferredScopedBindingVm {
     function mockCallRevert(address target, bytes calldata data, bytes calldata result) external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
+    function prank(address caller) external;
 }
 
 /// @notice Actual deferred host constructor, pending guards and unaffected source dispatch.
@@ -657,5 +692,449 @@ contract StreamCurrentAuthorityDeferredScopedPolicyProviderV2Test {
         (bool ok,) =
             address(host).staticcall(abi.encodeCall(host.scopedPolicySnapshotHost, (scope)));
         require(!ok, "actual graph still required by operative snapshot selection");
+    }
+
+    // Differential COLLECTION extraction boundary: both actual hosts execute their original
+    // mode/anchor/route checks and real manifest encoder. The fixed public reader's pin,
+    // component and statement results, manifest archival admission and capture review are
+    // explicitly synthetic full typed boundaries. Recovery selection is also an exact typed
+    // boundary; the self-call and every subsequent original Registry/Router reciprocal check
+    // execute genuinely. This is not an inventory, archive or full Finality ceremony claim.
+    function _fallbackStatement() private view returns (FallbackTypes.Statement memory s) {
+        s.scope = _collection();
+        s.coreFactsHash = keccak256("differential core facts");
+        s.contentRoot = keccak256("differential content root");
+        s.leafCount = 2;
+        s.contentRootSchemaId = keccak256("differential root schema");
+        s.snapshotManifestHash = keccak256("differential snapshot manifest");
+        s.referenceRenderManifestHash = keccak256("differential reference manifest");
+        s.inputs.rootRecordHash = keccak256("root record");
+        s.inputs.snapshotRecordHash = keccak256("snapshot record");
+        s.inputs.referenceRenderRecordHash = keccak256("reference record");
+        s.inputs.intentWaiverRecordHash = keccak256("explicit intent waiver");
+        s.inputs.interviewEvidenceHash = keccak256("interview evidence");
+        s.inputs.rightsStatementRecordHash = keccak256("rights statement");
+        s.inputs.workDescriptionRecordHash = keccak256("work description");
+        s.inputs.renderCriticalEvidenceHash = keccak256("render critical evidence");
+        s.inputs.bundleCoverageHash = keccak256("bundle coverage");
+        s.entropyPolicy = 1;
+        s.postFreezePolicy = 1;
+        s.sanctionPolicy = 1;
+        bytes32[9] memory families = [
+            keccak256("METADATA_ROUTER"),
+            keccak256("RENDERER"),
+            keccak256("RENDER_CONTEXT"),
+            keccak256("MEDIA_MANIFEST"),
+            keccak256("SCRIPT_SOURCE"),
+            keccak256("DEPENDENCY_SOURCE"),
+            keccak256("COLLECTION_METADATA"),
+            keccak256("ENTROPY_COORDINATOR"),
+            keccak256("REFERENCE_RENDER")
+        ];
+        for (uint256 i; i < 9; ++i) {
+            for (uint256 j = i + 1; j < 9; ++j) {
+                if (families[j] < families[i]) {
+                    (families[i], families[j]) = (families[j], families[i]);
+                }
+            }
+        }
+        s.nonSanctionComponents = new StreamFinalityComponentExpectation[](9);
+        for (uint256 i; i < 9; ++i) {
+            s.nonSanctionComponents[i] = StreamFinalityComponentExpectation(
+                families[i],
+                original.targets[i],
+                bytes4(0x11223344),
+                original.codeHashes[i],
+                keccak256(abi.encode("module", i)),
+                keccak256(abi.encode("manifest", i)),
+                keccak256(abi.encode("data", i))
+            );
+        }
+    }
+
+    function _fallbackPayload(FallbackTypes.Statement memory s)
+        private
+        view
+        returns (bytes memory)
+    {
+        // Independent literal encoding, compared with the unchanged production encoder on
+        // both paths. No worker encoder is used to construct the expected return value.
+        return abi.encode(
+            FallbackSchemas.SCHEMA_ID,
+            FallbackSchemas.CANON_ID,
+            original.chainId,
+            original.targets[0],
+            original.targets[1],
+            original.targets[12],
+            s
+        );
+    }
+
+    function _fallbackReview() private pure returns (FallbackReviewInterface.ReviewFacts memory r) {
+        r.schemaVersion = 1;
+        r.profile = 2;
+        r.contentRoot = keccak256("differential content root");
+        r.mediaContentHashes = new bytes32[](0);
+        r.referenceRenderContentHashes = new bytes32[](2);
+        r.referenceRenderContentHashes[0] = keccak256("first actual-boundary capture");
+        r.referenceRenderContentHashes[1] = keccak256("last actual-boundary capture");
+    }
+
+    function _fallbackStatementInput(FallbackTypes.Statement memory s)
+        private
+        view
+        returns (bytes memory)
+    {
+        return abi.encodeWithSelector(
+            FallbackReads.statement.selector, original, s.scope, s.nonSanctionComponents
+        );
+    }
+
+    function _fallbackAdmissionInput(FallbackTypes.Statement memory s)
+        private
+        view
+        returns (bytes memory)
+    {
+        return abi.encodeWithSelector(
+            FallbackManifest.requireCurrent.selector,
+            FallbackReads.manifestDependencies(original),
+            s,
+            keccak256(_fallbackPayload(s))
+        );
+    }
+
+    function _fallbackMode(bool onchain) private {
+        Serving.ServingFacts memory f;
+        f.configured = true;
+        f.mode = onchain ? keccak256("ONCHAIN") : keccak256("OFFCHAIN");
+        Table(original.targets[2])
+            .set(abi.encodeCall(Serving.collectionServingFacts, (uint256(1))), abi.encode(f));
+    }
+
+    function _fallbackAnchor(address provider) private {
+        _set(original.targets[12], "scopeEvidenceProvider()", abi.encode(provider));
+        _set(original.targets[12], "scopeEvidenceProviderCodeHash()", abi.encode(provider.codehash));
+    }
+
+    function _fallbackRoutes(FallbackTypes.Statement memory s, bool corrupt) private {
+        StreamFinalityCurrentComponentRoute[] memory routes =
+            new StreamFinalityCurrentComponentRoute[](9);
+        for (uint256 i; i < 9; ++i) {
+            StreamFinalityComponentExpectation memory row = s.nonSanctionComponents[i];
+            routes[i] = StreamFinalityCurrentComponentRoute(
+                row.componentType, row.component, row.interfaceId, row.codeHash
+            );
+        }
+        if (corrupt) routes[0].codeHash = keccak256("different current route");
+        Table(original.targets[13])
+            .set(
+                abi.encodeCall(FallbackRoutes.requireCurrentRoutes, (s.scope, false)),
+                abi.encode(routes)
+            );
+    }
+
+    function _fallbackFixture()
+        private
+        returns (FallbackBase baseline, FallbackTypes.Statement memory s)
+    {
+        baseline = new FallbackBase(original, scoped);
+        s = _fallbackStatement();
+        _fallbackMode(true);
+        _workerVm()
+            .mockCall(
+                address(FallbackReads),
+                abi.encodeWithSelector(FallbackReads.requirePins.selector, original),
+                bytes("")
+            );
+        _workerVm()
+            .mockCall(
+                address(FallbackReads),
+                abi.encodeWithSelector(FallbackReads.currentComponents.selector, original, s.scope),
+                abi.encode(s.nonSanctionComponents)
+            );
+        _workerVm().mockCall(address(FallbackReads), _fallbackStatementInput(s), abi.encode(s));
+        _workerVm()
+            .mockCall(
+                address(FallbackManifest),
+                _fallbackAdmissionInput(s),
+                abi.encode(FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID)
+            );
+        _workerVm()
+            .mockCall(
+                address(FallbackReview),
+                abi.encodeWithSelector(FallbackReview.review.selector, original, s),
+                abi.encode(_fallbackReview())
+            );
+        address[3] memory targets = [original.targets[2], original.targets[1], original.targets[12]];
+        bytes32[3] memory kinds = [
+            keccak256("METADATA_ROUTER"),
+            keccak256("COLLECTION_METADATA"),
+            keccak256("ARTWORK_FINALITY_REGISTRY")
+        ];
+        bytes4[3] memory ids = [
+            type(Router).interfaceId,
+            type(FallbackMetadata).interfaceId,
+            type(FallbackRegistry).interfaceId
+        ];
+        for (uint256 i; i < 3; ++i) {
+            _workerVm()
+                .mockCall(
+                    address(FallbackRecovery),
+                    abi.encodeWithSelector(
+                        FallbackRecovery.requireCurrentHost.selector,
+                        original.targets[0],
+                        kinds[i],
+                        targets[i],
+                        kinds[i],
+                        ids[i]
+                    ),
+                    bytes("")
+                );
+        }
+        _set(original.targets[12], "coreReads()", abi.encode(original.targets[0]));
+        _set(original.targets[12], "metadataReads()", abi.encode(original.targets[1]));
+        _set(original.targets[12], "sanctionReads()", abi.encode(original.targets[11]));
+        _set(original.targets[2], "artistRegistry()", abi.encode(original.targets[11]));
+        Table(original.targets[2])
+            .set(
+                abi.encodeWithSignature("originalFinalityAnchor(uint256)", uint256(1)),
+                abi.encode(original.targets[12], original.codeHashes[12])
+            );
+        Serving.ArtistPresentation memory presentation;
+        presentation.locked = true;
+        presentation.snapshotHash = keccak256("original locked Artist presentation");
+        presentation.registry = original.targets[11];
+        Table(original.targets[2])
+            .set(abi.encodeCall(Serving.artistPresentation, (uint256(1))), abi.encode(presentation));
+        _support(original.targets[13], type(FallbackRoutes).interfaceId);
+        _fallbackRoutes(s, false);
+    }
+
+    function _fallbackPair(
+        FallbackBase baseline,
+        bytes memory input,
+        bool success,
+        bytes memory expected,
+        bool registryCaller
+    ) private {
+        address[2] memory providers = [address(baseline), address(host)];
+        for (uint256 i; i < 2; ++i) {
+            _fallbackAnchor(providers[i]);
+            // Install reciprocal facts before prank: no argument evaluation consumes it.
+            if (registryCaller) _workerVm().prank(original.targets[12]);
+            (bool ok, bytes memory raw) = providers[i].staticcall(input);
+            require(
+                ok == success && raw.length == expected.length
+                    && keccak256(raw) == keccak256(expected),
+                "whole original return/revert parity"
+            );
+        }
+        require(
+            keccak256(abi.encode(host.nativeConfiguration())) == keccak256(abi.encode(original)),
+            "native constructor configuration unchanged"
+        );
+        require(
+            keccak256(abi.encode(baseline.nativeConfiguration()))
+                == keccak256(abi.encode(original)),
+            "baseline configuration unchanged"
+        );
+        require(host.policyBindingHash() == 0, "native fallback never binds deferred policy");
+    }
+
+    function testNativeFallbackMatchesUnchangedBaseManifestInputsReviewAndPreparedReturns() public {
+        (FallbackBase baseline, FallbackTypes.Statement memory s) = _fallbackFixture();
+        bytes memory payload = _fallbackPayload(s);
+        bytes32 hash = keccak256(payload);
+        bytes memory inputs =
+            abi.encode(s.inputs, FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID);
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(host.inputManifestBytes, (s.scope)),
+            true,
+            abi.encode(payload),
+            false
+        );
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(host.requireFinalityScopeInputs, (s.scope, hash)),
+            true,
+            inputs,
+            false
+        );
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(host.requireSanctionReviewFacts, (s.scope, hash)),
+            true,
+            abi.encode(_fallbackReview()),
+            false
+        );
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(
+                host.requirePreparedFinalityScopeInputs, (s.scope, hash, s.nonSanctionComponents)
+            ),
+            true,
+            inputs,
+            true
+        );
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(
+                host.requirePreparedFinalityScopeInputsAndReview,
+                (s.scope, hash, s.nonSanctionComponents)
+            ),
+            true,
+            abi.encode(
+                s.inputs, FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID, _fallbackReview()
+            ),
+            true
+        );
+    }
+
+    function testNativeFallbackPinsModeOriginalAnchorAndStatementKeepOriginalFailureOrder() public {
+        (FallbackBase baseline, FallbackTypes.Statement memory s) = _fallbackFixture();
+        bytes memory input = abi.encodeCall(host.inputManifestBytes, (s.scope));
+        bytes memory pinsFailure = abi.encodeWithSelector(
+            FallbackReads.NativeProviderDependency.selector, original.targets[18]
+        );
+        bytes memory statementFailure =
+            abi.encodeWithSelector(FallbackReads.NativeProviderSource.selector);
+        _workerVm()
+            .mockCallRevert(
+                address(FallbackReads),
+                abi.encodeWithSelector(FallbackReads.requirePins.selector, original),
+                pinsFailure
+            );
+        _workerVm()
+            .mockCallRevert(address(FallbackReads), _fallbackStatementInput(s), statementFailure);
+        _fallbackMode(false);
+        Table(original.targets[2])
+            .set(
+                abi.encodeWithSignature("originalFinalityAnchor(uint256)", uint256(1)),
+                abi.encode(original.targets[0], original.codeHashes[0])
+            );
+        _fallbackPair(baseline, input, false, pinsFailure, false);
+        _workerVm()
+            .mockCall(
+                address(FallbackReads),
+                abi.encodeWithSelector(FallbackReads.requirePins.selector, original),
+                bytes("")
+            );
+        _fallbackPair(
+            baseline, input, false, abi.encodeWithSignature("RouterProviderScope()"), false
+        );
+        _fallbackMode(true);
+        _fallbackPair(
+            baseline,
+            input,
+            false,
+            abi.encodeWithSignature("RouterProviderAnchor(address)", original.targets[12]),
+            false
+        );
+        Table(original.targets[2])
+            .set(
+                abi.encodeWithSignature("originalFinalityAnchor(uint256)", uint256(1)),
+                abi.encode(original.targets[12], original.codeHashes[12])
+            );
+        _fallbackPair(baseline, input, false, statementFailure, false);
+        _workerVm().mockCall(address(FallbackReads), _fallbackStatementInput(s), abi.encode(s));
+        _fallbackPair(baseline, input, true, abi.encode(_fallbackPayload(s)), false);
+    }
+
+    function testNativeFallbackManifestAdmissionPrecedesReviewAndRestoresExactly() public {
+        (FallbackBase baseline, FallbackTypes.Statement memory s) = _fallbackFixture();
+        bytes32 hash = keccak256(_fallbackPayload(s));
+        bytes memory admissionFailure =
+            abi.encodeWithSelector(FallbackManifest.InputManifestBytes.selector, hash);
+        bytes memory reviewFailure =
+            abi.encodeWithSignature("DifferentialReviewRejected(bytes32)", hash);
+        _workerVm()
+            .mockCallRevert(address(FallbackManifest), _fallbackAdmissionInput(s), admissionFailure);
+        _workerVm()
+            .mockCallRevert(
+                address(FallbackReview),
+                abi.encodeWithSelector(FallbackReview.review.selector, original, s),
+                reviewFailure
+            );
+        bytes memory input = abi.encodeCall(host.requireSanctionReviewFacts, (s.scope, hash));
+        _fallbackPair(baseline, input, false, admissionFailure, false);
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(
+                host.requirePreparedFinalityScopeInputsAndReview,
+                (s.scope, hash, s.nonSanctionComponents)
+            ),
+            false,
+            admissionFailure,
+            true
+        );
+        _workerVm()
+            .mockCall(
+                address(FallbackManifest),
+                _fallbackAdmissionInput(s),
+                abi.encode(FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID)
+            );
+        _fallbackPair(baseline, input, false, reviewFailure, false);
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(host.requireFinalityScopeInputs, (s.scope, hash)),
+            true,
+            abi.encode(s.inputs, FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID),
+            false
+        );
+        _workerVm()
+            .mockCall(
+                address(FallbackReview),
+                abi.encodeWithSelector(FallbackReview.review.selector, original, s),
+                abi.encode(_fallbackReview())
+            );
+        _fallbackPair(baseline, input, true, abi.encode(_fallbackReview()), false);
+    }
+
+    function testNativeFallbackPreparedOriginalRegistryAndCurrentRoutesPrecedeStatement() public {
+        (FallbackBase baseline, FallbackTypes.Statement memory s) = _fallbackFixture();
+        bytes32 hash = keccak256(_fallbackPayload(s));
+        bytes memory input = abi.encodeCall(
+            host.requirePreparedFinalityScopeInputs, (s.scope, hash, s.nonSanctionComponents)
+        );
+        bytes memory statementFailure =
+            abi.encodeWithSelector(FallbackReads.NativeProviderSource.selector);
+        _workerVm()
+            .mockCallRevert(address(FallbackReads), _fallbackStatementInput(s), statementFailure);
+        _fallbackRoutes(s, true);
+        _fallbackPair(
+            baseline,
+            input,
+            false,
+            abi.encodeWithSignature("NativeProviderOriginalRegistryOnly()"),
+            false
+        );
+        _fallbackPair(
+            baseline,
+            abi.encodeCall(
+                host.requirePreparedFinalityScopeInputsAndReview,
+                (s.scope, hash, s.nonSanctionComponents)
+            ),
+            false,
+            abi.encodeWithSignature("NativeProviderOriginalRegistryOnly()"),
+            false
+        );
+        _fallbackPair(
+            baseline,
+            input,
+            false,
+            abi.encodeWithSignature("FinalityRoutesMismatch(uint256)", uint256(0)),
+            true
+        );
+        _fallbackRoutes(s, false);
+        _fallbackPair(baseline, input, false, statementFailure, true);
+        _workerVm().mockCall(address(FallbackReads), _fallbackStatementInput(s), abi.encode(s));
+        _fallbackPair(
+            baseline,
+            input,
+            true,
+            abi.encode(s.inputs, FallbackSchemas.SCHEMA_ID, FallbackSchemas.CANON_ID),
+            true
+        );
     }
 }

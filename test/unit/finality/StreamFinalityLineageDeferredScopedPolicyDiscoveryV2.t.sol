@@ -911,6 +911,70 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2Test is LineageDisc
         require(_configurationDigest() == beforeState);
     }
 
+    function testLinkedServingFailurePrecedesMalformedLiveAuthorityAndRestores() public {
+        require(scoped.finalityComponentCount(1) == 10);
+        bytes memory servingCall =
+            abi.encodeCall(IStreamMetadataServingFacts.collectionServingFacts, (uint256(1)));
+        bytes memory originalServing =
+            abi.encode(IStreamMetadataServingFacts(c.router).collectionServingFacts(1));
+        bytes memory authorityCall =
+            abi.encodeCall(IStreamFinalityCurrentAuthority.currentArtistAuthority, (uint256(1)));
+        bytes32 beforeState = _configurationDigest();
+        _put(c.router, servingCall, hex"01");
+        _put(c.finalityRegistry, authorityCall, hex"01");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamFinalityRouterEvidence.RouterEvidenceRead.selector,
+                c.router,
+                IStreamMetadataServingFacts.collectionServingFacts.selector
+            )
+        );
+        scoped.finalityComponentCount(1);
+        _put(c.router, servingCall, originalServing);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamFinalityRouterEvidence.RouterEvidenceRead.selector,
+                c.finalityRegistry,
+                IStreamFinalityCurrentAuthority.currentArtistAuthority.selector
+            )
+        );
+        scoped.finalityComponentCount(1);
+        _routeValue(authority);
+        require(scoped.finalityComponentCount(1) == 10);
+        require(_configurationDigest() == beforeState);
+    }
+
+    function testLinkedComponentReadKeepsFrozenAndExactDataChecksThenRestoresHash() public {
+        _sign();
+        bytes32 originalHash = scoped.finalityDiscoveryHash(1);
+        bytes32 beforeState = _configurationDigest();
+        StreamFinalityCurrentComponentRoute[] memory routes =
+            scoped.requireCurrentRoutes(scope, true);
+        uint256 index = type(uint256).max;
+        bytes32 family = keccak256("REFERENCE_RENDER");
+        for (uint256 i; i < routes.length; ++i) {
+            if (routes[i].componentType == family) index = i;
+        }
+        require(index != type(uint256).max);
+        bytes memory input =
+            abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (uint256(1)));
+        StreamFinalityComponentState memory state = _state(c.referenceRender, family, false);
+        _put(c.referenceRender, input, abi.encode(state));
+        bytes memory reason = abi.encodeWithSelector(
+            ScopedDiscovery.DiscoveryComponent.selector, c.referenceRender, family
+        );
+        vm.expectRevert(reason);
+        scoped.finalityComponentAt(1, index);
+        state.frozen = true;
+        state.dataHash = 0;
+        _put(c.referenceRender, input, abi.encode(state));
+        vm.expectRevert(reason);
+        scoped.finalityComponentAt(1, index);
+        _record(c.referenceRender, family, true);
+        require(scoped.finalityDiscoveryHash(1) == originalHash);
+        require(_configurationDigest() == beforeState);
+    }
+
     function _configurationDigest() private view returns (bytes32) {
         bytes32 pins;
         address[12] memory targets = [
