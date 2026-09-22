@@ -248,15 +248,20 @@ abstract contract ScopedPolicyContentFixtureV2 is
         private
         returns (StreamEntropyCoordinator n)
     {
-        n = new StreamEntropyCoordinator(
-            StreamEntropyCoordinator.DeploymentConfig(
-                address(core),
-                address(this),
-                address(roles),
-                EntropyTimeTestConfigs.parameters(),
-                keccak256("deployment"),
-                "ipfs://scoped-native-policy",
-                keccak256("native policy manifest")
+        n = StreamEntropyCoordinator(
+            _artistArtifactCreate(
+                "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator",
+                abi.encode(
+                    StreamEntropyCoordinator.DeploymentConfig(
+                        address(core),
+                        address(this),
+                        address(roles),
+                        EntropyTimeTestConfigs.parameters(),
+                        keccak256("deployment"),
+                        "ipfs://scoped-native-policy",
+                        keccak256("native policy manifest")
+                    )
+                )
             )
         );
         MockStreamEntropyProvider provider = new MockStreamEntropyProvider(address(n));
@@ -276,7 +281,12 @@ abstract contract ScopedPolicyContentFixtureV2 is
         d.manifest = renderer.rendererManifest();
         d.readGas = _scopedGas("METADATA_DEPENDENCY_READ_GAS", 2000000, 2);
         d.attributionGas = _scopedGas("STATIC_ATTRIBUTION_GAS", 8000000, 1);
-        r = new StreamRendererV1(d);
+        r = StreamRendererV1(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamRendererV1.sol:StreamRendererV1",
+                abi.encode(d)
+            )
+        );
         v = new ScopedPolicyOutputVersionsBoundary(address(executor), address(schemas), address(r));
         v.setAdmitted(true);
         scopedModules.admit(address(v));

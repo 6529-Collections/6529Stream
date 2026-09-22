@@ -266,7 +266,12 @@ abstract contract ScopedPreservationSnapshotFixtureV1 is PreservationPolicyConte
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        snapshotHost = new Snapshot(d, address(executor), _snapshotGas());
+        snapshotHost = Snapshot(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamScopedPreservationPolicySnapshotPublicationV1.sol:StreamScopedPreservationPolicySnapshotPublicationV1",
+                abi.encode(d, address(executor), _snapshotGas())
+            )
+        );
         publication = Snap.Publication(
             scope,
             keccak256(abi.encode("scoped preservation snapshot", kind)),

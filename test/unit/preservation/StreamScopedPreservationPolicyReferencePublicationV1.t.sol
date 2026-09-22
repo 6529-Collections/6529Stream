@@ -267,7 +267,12 @@ abstract contract ScopedPreservationReferenceFixtureV1 is ScopedPreservationSnap
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        referenceHost = new Ref(d, address(executor), _referenceGas());
+        referenceHost = Ref(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamScopedPreservationPolicyReferencePublicationV1.sol:StreamScopedPreservationPolicyReferencePublicationV1",
+                abi.encode(d, address(executor), _referenceGas())
+            )
+        );
         _upload(
             bytes(
                 StreamReferenceEnvironmentJson.files(

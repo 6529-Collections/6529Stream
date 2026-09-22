@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
+import { ArtistArtifactCreate } from "./ArtistArtifactCreate.sol";
 import { StreamRendererV1 } from "../../smart-contracts/domains/metadata/StreamRendererV1.sol";
 import {
     IStreamCurrentCitationRegistry as TypedCitationRegistry
@@ -269,7 +271,11 @@ contract StaticRouteModules {
 /// @notice Actual Router/Renderer/Metadata/Schema/SSTORE2 and threshold Safe; typed source boundaries named above.
 /// @dev Authored only until executed. These cases are not current-Core mint, true Artist, registry static-analysis,
 /// finality, or transitive source conformance acceptance. The actual registry mechanics have a separate suite.
-abstract contract StaticMetadataRoutingFixture is CharacterizationTestBase, OfficialSafeFixture {
+abstract contract StaticMetadataRoutingFixture is
+    CharacterizationTestBase,
+    OfficialSafeFixture,
+    ArtistArtifactCreate
+{
     StaticRouteCore internal core;
     StaticRouteEntropy internal entropy;
     ManifestArtistBoundary internal artist;
@@ -290,13 +296,18 @@ abstract contract StaticMetadataRoutingFixture is CharacterizationTestBase, Offi
         executor = new MetadataExecutorBoundary();
         artist = new ManifestArtistBoundary(address(core));
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(artist));
-        router = new StreamMetadataRouter(
-            address(core),
-            address(executor),
-            keccak256("deployment"),
-            "ipfs://router",
-            keccak256("manifest"),
-            IStreamArtistAttribution(address(artist))
+        router = StreamMetadataRouter(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter",
+                abi.encode(
+                    address(core),
+                    address(executor),
+                    keccak256("deployment"),
+                    "ipfs://router",
+                    keccak256("manifest"),
+                    IStreamArtistAttribution(address(artist))
+                )
+            )
         );
         artist.setRouter(address(router));
         core.setPointer(keccak256("METADATA_ROUTER"), address(router));
@@ -315,7 +326,12 @@ abstract contract StaticMetadataRoutingFixture is CharacterizationTestBase, Offi
         mc.artistReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_ARTIST_READ_GAS", 2000000, 1000000, 2
         );
-        metadata = new StreamCollectionMetadataV1(mc);
+        metadata = StreamCollectionMetadataV1(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol:StreamCollectionMetadataV1",
+                abi.encode(mc)
+            )
+        );
         core.setPointer(keccak256("COLLECTION_METADATA"), address(metadata));
         _admin(
             abi.encodeCall(
@@ -353,7 +369,12 @@ abstract contract StaticMetadataRoutingFixture is CharacterizationTestBase, Offi
             16777216,
             false
         );
-        renderer = new StreamRendererV1(d);
+        renderer = StreamRendererV1(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamRendererV1.sol:StreamRendererV1",
+                abi.encode(d)
+            )
+        );
         versions = new StaticRouteVersions(address(executor), address(schemas), address(renderer));
         modules = new StaticRouteModules(address(metadata), address(versions));
         core.setPointer(keccak256("MODULE_REGISTRY"), address(modules));
