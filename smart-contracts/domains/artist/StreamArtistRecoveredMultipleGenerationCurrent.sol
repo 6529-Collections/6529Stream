@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredMultipleGenerationAttributionProof as Proof
+} from "./StreamArtistRecoveredMultipleGenerationAttributionProof.sol";
+import {
     StreamArtistRecoveredMultipleGenerationTypes as G
 } from "./StreamArtistRecoveredMultipleGenerationTypes.sol";
 import {
@@ -48,16 +51,7 @@ library StreamArtistRecoveredMultipleGenerationCurrent {
         (, bytes memory raw) = Codec.decodeAuxiliary(4, p.semanticState, p.provenance);
         G.Inventory memory inventory = abi.decode(raw, (G.Inventory));
         if (keccak256(raw) != keccak256(abi.encode(inventory))) _invalid();
-        A.AttributionBundle[] memory history = new A.AttributionBundle[](scope.rows.length);
-        for (uint256 k; k < history.length; ++k) {
-            G.Attribution memory row = abi.decode(scope.rows[k], (G.Attribution));
-            if (keccak256(scope.rows[k]) != keccak256(abi.encode(row))) _invalid();
-            history[k] = row.history;
-            scope.rows[k] = abi.encode(row.records);
-        }
-        Clocks.Result memory clocks = Clocks.validateLocal(scope, p.provenance, inventory);
-        Revocations.validate(history, scope, p.provenance, inventory, clocks);
-        Attestations.validate(scope, p.provenance, inventory, clocks);
+        Proof.requireValid(scope, p.provenance, inventory);
         Catalogue.requireCurrent(full, inventory.catalogues, inventory.operations);
     }
 

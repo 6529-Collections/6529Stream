@@ -99,10 +99,21 @@ scoped governance contexts and archival coverage remain explicit unit boundaries
 The late rollback scenario uses a destination Archive block-number overflow;
 it does not simulate source-currentness drift during the transaction.
 
-All 1,562 baseline production ABIs, 11,355 ABI entries, method maps and recursive
-storage layouts remain unchanged in the recorded type proof. The first selected
-native capture failed with a Binding-import Yul stack error and produced no
-bytecode; its evidence is retained. A narrow typed-context repair preserves the
-same check/write order and is independently source-reviewed. Native sizes,
-actual execution, gas and joined-current acceptance remain separate evidence.
-This profile does not establish full-v1, audit or release readiness.
+All 1,562 pre-profile production ABIs and 11,355 ABI entries remain unchanged;
+the capacity repair also preserves all 1,600 already-committed production
+products, their 11,438 ABI entries, method maps and recursive storage layouts.
+Fixed typed libraries separate full binding decoding, owner4 proof and record
+installation, consent/family collection and final encoding. Original validation,
+target checks, revocation/record writes, global conservation and final currentness
+remain ordered. The record writer receives only the exact binding hashes selected
+from the fully authenticated inventory; the complete original inventory proof
+is retained before any target write.
+
+Selected source-specific native captures now provide fitting outputs for every
+requested product. The family worker has 66 bytes of runtime margin; the earlier
+Coordinator capture is exactly 24,576 bytes. Each output retains its actual
+compiler input and source/metadata hashes. These captures span repair revisions
+and do not substitute for one compatible final-source dependency context.
+Earlier Yul and oversized outputs remain diagnostic evidence. The eleven actual
+scenarios are unchanged; execution, gas and joined-current acceptance remain
+separate evidence. This profile does not establish full-v1, audit or release readiness.

@@ -71,6 +71,9 @@
   Archive clocks, historical consent/attestation rows, global grants/nonces and
   one atomic import per owner. Preserve repeated economics/sale terms and
   interleaved governed-resolution coordinates.
+- Preserve the same profile and ordering through fixed typed decoding, proof,
+  record-write and encoding workers. Retain source-specific fitting native
+  captures with final-context and runtime qualifications.
 - Author eleven actual-owner/Safe scenarios and 29 focused worker cases. Source
   and type checks are retained; native size diagnostics, runtime and joined
   acceptance remain qualified in the [integration guide](docs/integrations/artist-recovered-multiple-generations.md).

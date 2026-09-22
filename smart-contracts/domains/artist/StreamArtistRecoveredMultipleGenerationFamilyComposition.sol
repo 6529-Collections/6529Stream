@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredMultipleGenerationFamilyComposition as Families
-} from "./StreamArtistRecoveredMultipleGenerationFamilyComposition.sol";
-import {
     StreamArtistRecoveredMultipleGenerationConsentCollection as ConsentCollection
 } from "./StreamArtistRecoveredMultipleGenerationConsentCollection.sol";
 import {
@@ -64,41 +61,65 @@ import {
     StreamArtistRecoveredMultipleGenerationConservation as Conservation
 } from "./StreamArtistRecoveredMultipleGenerationConservation.sol";
 
-/// @notice Complete authenticated generation graph followed by original rows and global conservation.
-library StreamArtistRecoveredMultipleGenerationComposition {
+import {
+    StreamArtistRecoveredMultipleGenerationComposition as Composition
+} from "./StreamArtistRecoveredMultipleGenerationComposition.sol";
+
+/// @notice Original consent/attestation families, identity and global conservation followed by encoding.
+/// @dev Complete original graph and chronology are supplied after the unchanged source prelude.
+library StreamArtistRecoveredMultipleGenerationFamilyComposition {
     struct Context {
-        T.SuiteConfiguration source;
-        RH.Provenance provenance;
-        M.State scope;
-        bytes[] identities;
-        T.EconomicsConsent[][] economics;
-        T.RoyaltyFreeze[][] freezes;
-        uint256 features;
-        ReadinessH.AttestationInput[][] attestations;
+        Composition.Context source;
+        G.Inventory inventory;
+        Clocks.Result clocks;
+        A.AcceptanceBundle[] accepted;
+        A.AttributionBundle[] history;
     }
 
-    struct Result {
-        bytes[] bindings;
-        bytes[] accepted;
-        bytes[] consents;
-        bytes[] attribution;
-        bytes inventory;
-        bytes generations;
-        uint256 features;
-    }
-
-    function collect(Context memory x) public view returns (Result memory result) {
-        Bindings.Collected memory binding =
-            Bindings.collect(x.source.owners[0], x.scope, RH.ownerProvenance(x.provenance, 0));
-        (G.Inventory memory inventory, Clocks.Result memory clocks) =
-            Clocks.collect(x.provenance, x.scope, binding.bindings, binding.generations);
-        BindingProof.validate(x.scope, RH.ownerProvenance(x.provenance, 0), inventory);
-        A.AcceptanceBundle[] memory accepted = Acceptance.collect(
-            x.source.owners[3], x.scope, RH.ownerProvenance(x.provenance, 3), inventory
+    function collect(Context memory c) public view returns (Composition.Result memory result) {
+        G.Consents[] memory consents = ConsentCollection.collect(
+            ConsentCollection.Context(
+                c.source.source.owners[6],
+                c.source.provenance,
+                c.source.scope,
+                c.source.economics,
+                c.source.freezes
+            ),
+            c.inventory.bindings
         );
-        A.AttributionBundle[] memory history = Revocations.collect(
-            x.source.owners[4], x.scope, RH.ownerProvenance(x.provenance, 4), inventory, clocks
+        bytes[] memory attestations = Attestations.collect(
+            c.source.source.owners[4],
+            Queries.project(c.source.scope, RH.ownerProvenance(c.source.provenance, 4)),
+            RH.ownerProvenance(c.source.provenance, 4),
+            c.source.attestations,
+            c.inventory,
+            c.clocks
         );
-        return Families.collect(Families.Context(x, inventory, clocks, accepted, history));
+        IdentityFacts.validate(
+            IdentityFacts.Context(
+                c.source.identities, c.source.scope, c.inventory, c.accepted, c.source.provenance
+            )
+        );
+        Conservation.validate(
+            Conservation.Context(
+                c.source.identities,
+                c.source.scope,
+                consents,
+                attestations,
+                c.inventory,
+                c.source.provenance
+            )
+        );
+        return Encoding.encode(
+            Encoding.Context(
+                c.source.scope.collections.length,
+                c.source.features,
+                c.inventory,
+                c.accepted,
+                consents,
+                attestations,
+                c.history
+            )
+        );
     }
 }
