@@ -18,72 +18,57 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-Expanded full v1 remains incomplete. ABI194 checks **4,529 Solidity sources
-with zero errors** at `c30f4f16`. The dispute client and package exports are
-integrated through `f8c8c0a`. Type checks establish interfaces, not complete
-deployed behavior. Immutable RC1 and its Sepolia evidence remain unchanged.
+Expanded full v1 remains incomplete. The complete-history routes are source
+integrated at `f54c2791`; ABI197 checks **4,615 Solidity sources with zero errors**.
+Client test sharding is integrated through `992b9e03`. These checks establish
+source and interfaces; full current-stack acceptance is still pending. RC1 and
+its Sepolia evidence remain unchanged.
 
-The latest source batch adds original ratification52 across generation, dispute
-and collaborator profiles, with the guarded two-map Consent import. Independent
-source review is clear; all26 new regression cases still await execution. The
-first CompleteHistory source phase is also integrated, including the independently
-corrected historical-principal regression. It collects binding and Platform
-chronology; complete combined import and profile activation remain unimplemented.
-Twenty actual-producer cases remain unexecuted; six small membership checks
-retain their producer-source pass. The next combined-history phase is under review.
-
-The dispute client has187 distinct producer-side passes and independent review;
-root build and strict consumer checks pass after the two package exports. Its
-recorded `b3ed602b` profile excludes later ratification52 and broader combinations.
-Provider and Safe-envelope tests do not establish actual Safe contract execution.
-
-- **Artist migration:** generation, unbound Platform, aggregate dispute and
-  PRIMARY_ONLY collaborator profiles are source integrated. Twelve collaborator
-  leaf/nonce tests, including 256 fuzz inputs, pass on `e5174d6f`. Twelve dispute
-  worker tests retain their narrower `b3ed602b` result. Actual combined-owner and
-  Safe acceptance remains open. Separate builders now own complete chronology
-  and mixed histories, combined Consent migration, sanction/confirmation12/13,
-  and migration of existing class4 authority and capability59 records.
-- **Deployment size:** the reviewed fixed Binding storage worker is integrated
-  as `9671a10a`. Its original ABI, selectors and storage are preserved; Binding
-  now measures 24,052 runtime bytes. All seventeen products in the producer's
-  canonical `971c1c0f` capture fit, and seven focused tests plus 256 fuzz inputs
-  pass. The Coordinator still sits exactly at its runtime limit; later added
-  routes need fresh measurement. Complete flow gas remains unproved.
-- **Execution testing:** all 61 corrected preservation component cases pass on
-  `e7286fa1`, with independent review of the retained execution. Typed surrounding
-  mocks limit that result; it is not the full current stack. Generation and
-  preservation fixtures now use genuine artifact CREATE at reviewed sites, and
-  the current-stack fixture isolates typed authority planners. Original
-  assertions/callers/arguments remain intact. Smaller canonical captures are
-  underway; old compiler timeouts remain failed evidence. A collaborator codec
-  Yul failure has been isolated and is being repaired.
-- **Museum:** five document-slot evidence joins are integrated with 38 root
-  checks. The source-bound authoring workflow is also integrated: all 52 focused
-  root cases pass at `63d18fae`, covering capture, explicit confirmation/review,
-  later edits and complete retained-source replay. Outputs remain drafts.
-  Additional source-family adapters, field mappings, real publication/capture,
-  schema activation and institutional acceptance remain open.
-- **Clients and repository:** Platform client build/types and 55 focused checks
-  retain their recorded pass; dispute callers are now source integrated. Actual Safe
-  contract execution remains separate from client envelope/provider tests.
-  Dedicated interfaces and the checksum-parser repair are integrated. The
-  canonical source inventory now contains 3,039 production paths.
-
-Remote `ff6973db` CI passes repository/orchestration and the Windows builder.
-The TypeScript job reached its ten-minute timeout; its full-suite throughput
-work is assigned. Release checksums and Slither prerequisites still fail on
-stale generated evidence; other long jobs have not established a full green run.
-No failed check is waived.
+- **Artist history:** the complete chronology, historical principals, combined
+  Consent, original sanctions/confirmations12/13, ratification52, all seven owner
+  imports and complete post-import source recheck are now connected. Independent
+  source reviews are clear. Four new routing/Safe rollback regressions are
+  authored and type-checked, but not executed. Existing class4/capability59
+  migration is separately built and source-reviewed; its shared activation is
+  still missing. Mixed histories and actual Safe execution remain open.
+- **Museum:** exact source-field/format correspondence and native authoring
+  passed **42 root checks** at `269dd02d`. Native WORK-to-LIDO and General/V4
+  authoring history passed **41 root checks** at `7e5209e5`. Both batches have
+  independent source/oracle review. Further native format/family coverage,
+  actual publication/capture and institutional acceptance remain open; draft
+  confirmation does not establish publication authority.
+- **Testing speed:** reviewed fixture changes preserve existing test bodies
+  while moving expensive deployment setup behind fixed test helpers. All five
+  selected products for the current Owner fixture compiled on `52de8dd2`;
+  physical linking and execution remain pending. The generation host still
+  failed after a single one-hour compiler trial. A material inherited-fixture
+  split is underway; no unchanged timeout retry is planned.
+- **Client CI:** the complete original 238 files/3,240 test registrations are
+  retained, with 14 new runner cases. CI distributes 1,417 units across 16
+  required shards. Root runner14, workflow-policy41 and policy checks pass;
+  full Ubuntu Node24 matrix execution remains pending. Existing time bounds
+  and the required aggregate check are preserved.
+- **Capacity:** SnapshotPublicationV1 measured 28,088 runtime bytes and
+  ReferencePublicationV1 25,585 on the recorded `a0f677cf` source; both exceed
+  24,576 and require repair. Consent full initialization measured exactly
+  49,152 bytes at `7f0e6fe6`; later complete-history routes need fresh measurement.
+  The older Coordinator measurement also has no headroom. These are open
+  deployment checks, not waived limits.
+- **Scoped execution evidence:** original ratification workers pass 18 cases
+  on `c30f4f16`; preservation components retain their 61-case `e7286fa1` pass.
+  Earlier generation/collaborator/dispute results remain limited to their
+  recorded sources. None establishes the latest combined system. The canonical
+  source inventory now contains **3,092 production paths**.
 
 Remaining delivery work is the missing feature combinations and Museum software,
-actual current-stack and all-call Safe integration, stateful/fuzz campaigns,
-deployment/transaction gas, full CI, a frozen candidate and matching testnet
-demonstration. Collector changes stay isolated until actual paid execution meets
-the original 500,000-gas ceiling. No new funding is required. External audit,
-production ceremonies and Lean remain separate. Held proposals remain unapplied.
-Automatic approval review has also blocked the dispute task's result handoff;
-the task's explicit permission request is pending, and the payload remains held.
+current deployment-size/gas repairs, actual current-stack and all-call Safe
+integration, full fuzz/stateful campaigns, full CI and matching release evidence,
+then a frozen candidate and new testnet demonstration. Collector optimization
+remains isolated until actual paid execution meets the original 500,000-gas
+ceiling. No new funding is required. Audit, production ceremonies and Lean remain
+separate. Earlier failed runs remain recorded; newer source does not inherit
+their acceptance. Automatic approval review has blocked several task handoffs
+pending destination-specific permission; those payloads remain held.
 
 ## Earlier source-specific evidence
 

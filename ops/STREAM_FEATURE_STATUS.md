@@ -16,72 +16,57 @@ different milestones.
 
 ## Latest integration checkpoint: 22 September
 
-Expanded full v1 remains incomplete. ABI194 checks **4,529 Solidity sources
-with zero errors** at `c30f4f16`. The dispute client and package exports are
-integrated through `f8c8c0a`. Type checks establish interfaces, not complete
-deployed behavior. Immutable RC1 and its Sepolia evidence remain unchanged.
+Expanded full v1 remains incomplete. The complete-history routes are source
+integrated at `f54c2791`; ABI197 checks **4,615 Solidity sources with zero errors**.
+Client test sharding is integrated through `992b9e03`. These checks establish
+source and interfaces; full current-stack acceptance is still pending. RC1 and
+its Sepolia evidence remain unchanged.
 
-The latest source batch adds original ratification52 across generation, dispute
-and collaborator profiles, with the guarded two-map Consent import. Independent
-source review is clear; all26 new regression cases still await execution. The
-first CompleteHistory source phase is also integrated, including the independently
-corrected historical-principal regression. It collects binding and Platform
-chronology; complete combined import and profile activation remain unimplemented.
-Twenty actual-producer cases remain unexecuted; six small membership checks
-retain their producer-source pass. The next combined-history phase is under review.
-
-The dispute client has187 distinct producer-side passes and independent review;
-root build and strict consumer checks pass after the two package exports. Its
-recorded `b3ed602b` profile excludes later ratification52 and broader combinations.
-Provider and Safe-envelope tests do not establish actual Safe contract execution.
-
-- **Artist migration:** generation, unbound Platform, aggregate dispute and
-  PRIMARY_ONLY collaborator profiles are source integrated. Twelve collaborator
-  leaf/nonce tests, including 256 fuzz inputs, pass on `e5174d6f`. Twelve dispute
-  worker tests retain their narrower `b3ed602b` result. Actual combined-owner and
-  Safe acceptance remains open. Separate builders now own complete chronology
-  and mixed histories, combined Consent migration, sanction/confirmation12/13,
-  and migration of existing class4 authority and capability59 records.
-- **Deployment size:** the reviewed fixed Binding storage worker is integrated
-  as `9671a10a`. Its original ABI, selectors and storage are preserved; Binding
-  now measures 24,052 runtime bytes. All seventeen products in the producer's
-  canonical `971c1c0f` capture fit, and seven focused tests plus 256 fuzz inputs
-  pass. The Coordinator still sits exactly at its runtime limit; later added
-  routes need fresh measurement. Complete flow gas remains unproved.
-- **Execution testing:** all 61 corrected preservation component cases pass on
-  `e7286fa1`, with independent review of the retained execution. Typed surrounding
-  mocks limit that result; it is not the full current stack. Generation and
-  preservation fixtures now use genuine artifact CREATE at reviewed sites, and
-  the current-stack fixture isolates typed authority planners. Original
-  assertions/callers/arguments remain intact. Smaller canonical captures are
-  underway; old compiler timeouts remain failed evidence. A collaborator codec
-  Yul failure has been isolated and is being repaired.
-- **Museum:** five document-slot evidence joins are integrated with 38 root
-  checks. The source-bound authoring workflow is also integrated: all 52 focused
-  root cases pass at `63d18fae`, covering capture, explicit confirmation/review,
-  later edits and complete retained-source replay. Outputs remain drafts.
-  Additional source-family adapters, field mappings, real publication/capture,
-  schema activation and institutional acceptance remain open.
-- **Clients and repository:** Platform client build/types and 55 focused checks
-  retain their recorded pass; dispute callers are now source integrated. Actual Safe
-  contract execution remains separate from client envelope/provider tests.
-  Dedicated interfaces and the checksum-parser repair are integrated. The
-  canonical source inventory now contains 3,039 production paths.
-
-Remote `ff6973db` CI passes repository/orchestration and the Windows builder.
-The TypeScript job reached its ten-minute timeout; its full-suite throughput
-work is assigned. Release checksums and Slither prerequisites still fail on
-stale generated evidence; other long jobs have not established a full green run.
-No failed check is waived.
+- **Artist history:** the complete chronology, historical principals, combined
+  Consent, original sanctions/confirmations12/13, ratification52, all seven owner
+  imports and complete post-import source recheck are now connected. Independent
+  source reviews are clear. Four new routing/Safe rollback regressions are
+  authored and type-checked, but not executed. Existing class4/capability59
+  migration is separately built and source-reviewed; its shared activation is
+  still missing. Mixed histories and actual Safe execution remain open.
+- **Museum:** exact source-field/format correspondence and native authoring
+  passed **42 root checks** at `269dd02d`. Native WORK-to-LIDO and General/V4
+  authoring history passed **41 root checks** at `7e5209e5`. Both batches have
+  independent source/oracle review. Further native format/family coverage,
+  actual publication/capture and institutional acceptance remain open; draft
+  confirmation does not establish publication authority.
+- **Testing speed:** reviewed fixture changes preserve existing test bodies
+  while moving expensive deployment setup behind fixed test helpers. All five
+  selected products for the current Owner fixture compiled on `52de8dd2`;
+  physical linking and execution remain pending. The generation host still
+  failed after a single one-hour compiler trial. A material inherited-fixture
+  split is underway; no unchanged timeout retry is planned.
+- **Client CI:** the complete original 238 files/3,240 test registrations are
+  retained, with 14 new runner cases. CI distributes 1,417 units across 16
+  required shards. Root runner14, workflow-policy41 and policy checks pass;
+  full Ubuntu Node24 matrix execution remains pending. Existing time bounds
+  and the required aggregate check are preserved.
+- **Capacity:** SnapshotPublicationV1 measured 28,088 runtime bytes and
+  ReferencePublicationV1 25,585 on the recorded `a0f677cf` source; both exceed
+  24,576 and require repair. Consent full initialization measured exactly
+  49,152 bytes at `7f0e6fe6`; later complete-history routes need fresh measurement.
+  The older Coordinator measurement also has no headroom. These are open
+  deployment checks, not waived limits.
+- **Scoped execution evidence:** original ratification workers pass 18 cases
+  on `c30f4f16`; preservation components retain their 61-case `e7286fa1` pass.
+  Earlier generation/collaborator/dispute results remain limited to their
+  recorded sources. None establishes the latest combined system. The canonical
+  source inventory now contains **3,092 production paths**.
 
 Remaining delivery work is the missing feature combinations and Museum software,
-actual current-stack and all-call Safe integration, stateful/fuzz campaigns,
-deployment/transaction gas, full CI, a frozen candidate and matching testnet
-demonstration. Collector changes stay isolated until actual paid execution meets
-the original 500,000-gas ceiling. No new funding is required. External audit,
-production ceremonies and Lean remain separate. Held proposals remain unapplied.
-Automatic approval review has also blocked the dispute task's result handoff;
-the task's explicit permission request is pending, and the payload remains held.
+current deployment-size/gas repairs, actual current-stack and all-call Safe
+integration, full fuzz/stateful campaigns, full CI and matching release evidence,
+then a frozen candidate and new testnet demonstration. Collector optimization
+remains isolated until actual paid execution meets the original 500,000-gas
+ceiling. No new funding is required. Audit, production ceremonies and Lean remain
+separate. Earlier failed runs remain recorded; newer source does not inherit
+their acceptance. Automatic approval review has blocked several task handoffs
+pending destination-specific permission; those payloads remain held.
 
 ## How to read this document
 
@@ -115,7 +100,7 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `e5174d6f062c5822f99262f6713b3a526240f14b`; separate runtime `2ba4ff67` and corrected preservation `e7286fa1` exclude later Artist profiles. |
+| Current integration source | Complete-history routes `f54c2791`; client CI `992b9e03`. Runtime acceptance remains scoped to each recorded source. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
@@ -335,7 +320,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | --- | --- | --- | --- | --- |
 | [MUSEUM-18](#museum-18-evidence) Pinned standards/profile schemas and bounded dependency closure | In progress | Partly tested | Partial | Three exact semantic schema candidates, finite interpreted subset and complete local context/schema/vocabulary dependencies; immutable profile versions and acyclic bounded document preparation exist. Bounded account profile was actually registered in captures. **Remaining:** Register and validate the complete adopted mapping/authority/place/schema closure; current finite account/format profiles do not establish every required full-v1 schema. Optional live Linked Art API is neither required nor claimed. |
 | [MUSEUM-19](#museum-19-evidence) Stable entity identity, references and declaration selection | In progress | Partly tested | Partial | Stable explicit IRIs, work/token/file/physical/person distinctions, package resolution and incompatible selected declaration rejection; exact same-kind repeated exhibition/loan/valuation declarations preserve multiple provenance sources. **Remaining:** General authenticated declaration continuation/correction/merge/split lineage and all source-family token/work bindings remain. Same text, wallet or namespace cannot provide continuity. |
-| [MUSEUM-20](#museum-20-evidence) Field-level crosswalk, semantic validation and full coverage accounting | In progress | Partly tested | Partial | Closed schema inventory, exact scalar/array/null/absence accounting, pinned class/domain/range, v2 abstract/visual/linguistic/E73 distinctions and explicit unsupported sidecars. Full requirements are larger than this implemented subset. **Remaining:** All named source families, physical realizations, complete dimensions/media and geographic patterns, exact reverse mapping and named vectors for every required crosswalk entry remain. |
+| [MUSEUM-20](#museum-20-evidence) Field-level crosswalk, semantic validation and full coverage accounting | In progress | Partly tested | Partial | Closed schema inventory, exact scalar/array/null/absence accounting, pinned class/domain/range, v2 abstract/visual/linguistic/E73 distinctions and explicit unsupported sidecars. Full requirements are larger than this implemented subset. Exact-source field inventory, four-format ledger and native correspondence `269dd02d` add 42 focused root passes; native WORK-to-LIDO `7e5209e5` adds 41 broader batch passes. **Remaining:** All named source families, physical realizations, complete dimensions/media and geographic patterns, exact reverse mapping and named vectors for every required crosswalk entry remain. |
 | [MUSEUM-21](#museum-21-evidence) Attributed assertions, review and conflict selection | In progress | Partly tested | Integrated* | Immutable assertion/revision/profile/field selectors, exact earlier review targets, source-selected conflict withholding, provenance indexes and explicit same-account SELF review. Actual independent-account recorded profile works. **Remaining:** General independent institutional reviewer eligibility and cross-authority actual source policy, not just SELF/account lanes, remain. No arbitrary reviewer label/list grants authority. |
 | [MUSEUM-22](#museum-22-evidence) External authority matching and archived reconciliation | In progress | Partly tested | Partial | fef4b2f6 adds retained authority snapshots/reconciliation; 8ba023dc adds versioned Type/declaration/continuation support, preserves original schema hashes, and replays an actual local Safe declaration/alignment/later SELF review. Root 131 authority/profile/regression tests pass. **Remaining:** Qualified external/artist/curator/institution lanes, full conformance and public/latest-graph acceptance. The positive RDF/JSON remains explicitly synthetic; separately retained Getty SPARQL bytes do not prove publisher-backed equivalence. |
 | [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | In progress | Partly tested | Not integrated | Nine-role draft projection retains historic/uncertainty/precision controls. Recorded exhibition binding (`0a5104e6`) replays the exact original owner location commitment and earlier Place declaration, retaining separate TGN review authority; 18 distinct producer and three root regressions pass on synthetic originals. **Remaining:** Other recorded place-role joins, actual source/reviewer capture and complete conformance. Unverified draft matches cannot emit equivalence. |
@@ -352,7 +337,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-34](#museum-34-evidence) Typed valuation and ordered loan-insurance evidence join | Built | Tested* | Not integrated | Exact insurance/appraisal/book basis, amount/currency/date/instrument/confidentiality/countersignatures; complete bounded valuation lane and canonical receipt/transaction/log order support explicit referenced-unsuperseded status. **Remaining:** Actual current owner capture pending; legal operativeness, professional assent and hidden instrument contents are not inferred. Unsupported old schema/order gives precise unavailable status. |
 | [MUSEUM-35](#museum-35-evidence) BagIt, OCFL and offline fetch hydration | Built | Tested* | Partial | Exact public payload/tag fixity, immutable OCFL version lineage and versioned local-byte fulfillment of complete fetch set. Original nested package and supplied descriptor provenance retained. Scoped collection dossier a0d71d2 adds authenticated source/media reconstruction and every-version verification, with 44 new/legacy tests passing. Actual-token 1db47ad9 rebuilds BagIt/OCFL from 27 exact originals within its 62 passing tests. Explicit-version repository export/import (`bee91ae5`) adds eleven root passes with full-history semantic replay and atomic exact-byte restore. **Remaining:** Full token render inventory, all authoritative dossier inputs, genesis profile registration, actual distribution/availability and institutional ingest remain separate. No automated untrusted network fetching. Retained complete VIEW BagIt/OCFL transport `a8562dc5` now passes 31 root new/shared offline cases; actual capture and full conformance remain separate. |
 | [MUSEUM-36](#museum-36-evidence) Actual-current OwnerRecords museum publication/capture recipe | Built | Partly tested | Not integrated | Actual-current OwnerRecords publication/capture recipe and offline loan/valuation composition are merged as a0f6535a. Ten Python tests and deterministic fixtures pass on integration; three Solidity cases are ABI-checked and source-reviewed. **Remaining:** Native execution and actual positive OwnerRecords RPC capture. Synthetic-owner offline composition is not genuine on-chain capture. |
-| [MUSEUM-37](#museum-37-evidence) Semantic authoring, draft confirmation and later-edit workflow | In progress | Tested* | Partial | Source-bound CLI/package workflow63d18fae preserves exact original statements, nullable unsupplied prompts, durable IDs, explicit versioned confirmation/review and append-only later edits. All52 root cases pass; reopening reconstructs every revision from retained OwnerRecordSource or supported recorded-account originals. **Remaining:** NativeAttribution/General/V4 adapters and complete adopted source-family coverage. Draft declarations do not establish authenticated identity or publication authority. |
+| [MUSEUM-37](#museum-37-evidence) Semantic authoring, draft confirmation and later-edit workflow | In progress | Tested* | Partial | Source-bound CLI/package workflow63d18fae preserves exact original statements, nullable unsupplied prompts, durable IDs, explicit versioned confirmation/review and append-only later edits. All52 root cases pass; reopening reconstructs every revision from retained OwnerRecordSource or supported recorded-account originals. NativeAttribution adapter `269dd02d` and General/V4 history `7e5209e5` are integrated with 42 and 41 focused root passes respectively (broader batch counts). **Remaining:** Complete adopted source-family coverage and actual authority/publication acceptance. Draft declarations do not establish authenticated identity or publication authority. |
 | [MUSEUM-38](#museum-38-evidence) Complete media/history corpus and institutional conformance | In progress | Partly tested | Not integrated | Named eight-scenario fixture ledger and numerous finite positive/negative exporter tests exist. Complete adopted gate closure, current-source whole corpus and named institutional/practitioner acceptance are not present. **Remaining:** Complete photograph/two prints, written+AV interview, interactive, historical geography, conflicting records, independent participants and offline revision with exact source/profile hashes; obtain required repository/practitioner evidence. Synthetic passes do not count as institutional integration. |
 | [MUSEUM-39](#museum-39-evidence) Additional preservation/render/finality profiles and dossier state | In progress | Partly tested | Partial | Mode producers/consumers 2351111e plus correction 5e6c6140 are integrated: signed condition references, enum-complete additive ABI_V2 and fixed codecs independently reviewed. Root passes 81 preservation controls and an actual restored metric runtime after 2b333b74; synthetic context/PNG remain explicit. Solidity 12 authored. Original V1/BYTE_EXACT unchanged. **Remaining:** Native execution after the exact final-source compiler failure, joined browser/metric supplement publication and finality acceptance, full curated composition, institution-signer profile, other required scopes and fixity/recovery-linked dossier state. DYNAMIC renderer implementation is excluded from genesis/v1. |
 | [MUSEUM-40](#museum-40-evidence) Complete genesis museum schema catalog and worked examples | Built; source catalog | Tested* | Partial | All29 exact canonical names and examples are source-integrated (`8b3f01f8`); original19 schema bytes unchanged. Root89 tests, six profile checks and complete catalog regeneration/check pass. Independent review verifies51 documents/78 ordered chunks. **Remaining:** Actual complete genesis registration, authoritative inputs, full family semantics and institutional conformance; the plan is prospective. The complete51-document current-registry consumer `6be384af` is integrated with23 independently passing synthetic tests; actual capture/registration remains pending. |
