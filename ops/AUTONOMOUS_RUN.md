@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI182 `326cc3bc`: 4,333 sources / zero errors; current source `97381cde`; parallel runtime source `18837f62`. |
+| Source checkpoint | ABI189 `b3ed602b`: 4,406 sources / zero errors; isolated capacity runtime `e37745a4`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,38 +29,40 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-The expanded full-v1 implementation is still incomplete. ABI182 checks all
-**4,333 Solidity sources** at `326cc3bc` with zero errors in 51.265 seconds.
-The current integration adds the Safe inventory and corrected General Museum
-semantics at `97381cde`. These checks and offline tests do not prove complete
-contract execution. The parallel runtime source `18837f62` contains the reviewed
-caller/dependency repairs with production byte-exact to `aa2ca4a2`; later Artist
-generation and inventory production changes require their own acceptance.
-RC1 remains unchanged.
+The expanded full-v1 implementation remains incomplete. The integrated source
+at `b3ed602b` passes ABI189: **4,406 Solidity sources**, zero errors in 52.375
+seconds. Two previously missing migration profiles are now source integrated:
+unbound Platform collections and combined dispute/repudiation histories.
+The batch also includes six earlier capacity repairs, the Consent constructor
+repair, generation clients, actual Safe split-wallet tests and the unified Museum
+dossier. The parallel runtime source `e37745a4` contains the six capacity repairs
+and reviewed fixture interfaces, excluding later Artist profile changes.
+Every execution result applies only to its recorded source. RC1 is unchanged.
 
 Root owns architecture, integration and delivery. Current assignments:
 
-- **artist history resume**: Repair ConsentFinalityLifecycle complete creation size, then original eleven actual-owner/Safe scenarios on generation plus exact Registry writer source.
-- **release evidence review**: Build nonempty original collaborator history hydration under PRIMARY_ONLY, bit8388608; independent review supplied separately.
-- **remote delivery review**: Inventory source/size fit; eight-case native timeout preserved. Build wholly unbound Platform-only and mixed-scope hydration, bit4194304.
-- **Mint / independent review**: Native claim188 timed out without execution; Museum review complete. Build complete aggregate signed dispute/repudiation hydration, bit16777216; held ERC20 capture unchanged.
-- **Burn / preservation ceremony**: Remaining16 and trace review complete ataa2. Continue the two remaining provider/discovery overages; Full Discovery fits in the current separate batch.
-- **Museum**: General source/dossier and corrected oracle integrated with20 root passes. Build original-statement physical Acquisition and TransferOfCustody mapping.
-- **Clients / Safe callers**: Build and validate recovered multiple-generation callers; original collaborator/attribution and aggregate callers retain scoped passes.
-- **Testing / native tooling**: Slots native capture succeeds; Owner3 changed trial and preserved full50/65/18/84/124 obligations continue. Then actual Safe/stateful execution.
-- **Capacity / Rights**: First8 and independent trace review complete atd61. Remaining24 aa2 campaign active; bounded v3 execution and representative traces.
-- **Metric retention**: Compact Safe inventory integrated with54 root tool passes. Execute real threshold-Safe SplitFactory/Wallet cohort and reviewed per-call claims.
-- **Prepared / successor preservation**: Scenario28 timed out at188; preserve original90 obligations and four admitted earlier caller owners. Diagnose material compiler reduction and independently executable callers.
-- **Collector gas redesign**: Isolated caller-seam prototypefa6838 preserves its16 production changes. Required actor artifacts fit; changed paid hosts run bounded captures. Actual cold paid500000 remains open.
+- **artist history resume**: Two generation-host codegen trials timed out without execution; exact test-only sale-facts helper relocation in independent review. Combine fixture cuts before next bounded native capture.
+- **release evidence review**: Build nonempty PRIMARY_ONLY collaborator history, original repeated primary accepts and partial rows, preparation and actual fixtures. Metric reviews independently; held quorum policy stays separate.
+- **remote delivery review**: Platform source integrated66dc;17of18new workers fit. CollectionRows is411bytes over; narrow pair repair and independent review underway. Other changed owner/worker sizes still required.
+- **Mint / independent review**: Aggregate dispute/repudiation b68 and testfollowup923 independently clear, integratedb001/b3ed;26authored cases unexecuted. Coordinate exact remaining native/size acceptance, heldERC20 capture unchanged.
+- **Burn / preservation ceremony**: All three provider/discovery repairs integrated. Execute61focused cases one377;first15product capture fits but embedded child ownership needs one corrected complete capture before EVM.
+- **Museum**: Physical transfer6 and unifiedV4 root6 checks pass. Review final combined migration seams, then build typed script/dependency/media/render joins into existing dossier slots.
+- **Clients / Safe callers**: Generation58 distinct focused passes; extended guards22native+2x256fuzz pass at4494. Build Platform client/direct/SafeCALL workflows pinned66dc/ABI188.
+- **Testing / native tooling**: Nominalinterface Owner3 timed out; legacy diagnosticstack-too-deep. Independently review one-file Registry import dedup, whole4294-source ABI output exacte377; combine cuts before native retry.
+- **Capacity / Rights**: Original graph51 timed out; separate80/78libraries native and physicalreadbacks pass. Finish reviewed10-boundary/7-helper test-only split for combined runtime anchor; no unchanged retry.
+- **Metric retention**: Three actual2of3Safe Splitversions integrated with independent traces. Review A helper relocation while C builds, then independently review coherent PRIMARY_ONLY collaborator source.
+- **Prepared / successor preservation**: Four genuine preparation guards pass. Reviewed fixturecut57c integrated; changed Scenario28 timed out at900s. Preserve original90 obligations; no active compiler or unchanged retry.
+- **Collector gas redesign**: Coherent4494 merged into isolated16-change prototype2774;332of339owners requalify. Two prior paid hosts timed out; review material paid-only planner helper cut. Actual cold paid500000 remains open.
 
-Remaining delivery includes broader required Artist combinations, physical
-and institutional Museum conformance, complete current-stack and all-call Safe
-execution, stateful/fuzz campaigns, deployment and transaction gas, full CI,
-source freeze and matching testnet. Required Merkle-price consumers are source
-built; actual current-stack execution remains. Collector cold paid-mint
-optimization remains isolated, with the original 500,000-gas purchase limit.
+Remaining source work includes collaborator-history migration, broader required
+Artist combinations and adopted Museum software/conformance. Release acceptance
+requires complete current-stack and
+all-call Safe execution, stateful/fuzz campaigns, deployment and transaction
+gas, full CI, source freeze and matching testnet. Collector cold paid-mint
+optimization stays isolated under the original 500,000-gas limit. Required
+Merkle-price consumers are source built; their actual current execution remains.
 Previously held proposals remain unapplied. No new funding or on-chain action
-is needed for current coding. Immutable RC1/main/release/Sepolia
+is needed for coding. Immutable RC1/main/release/Sepolia
 `569bf87f1fa808787d324f6e1582924b5ccf1d40` is preserved.
 
 ## Earlier source-specific assignments

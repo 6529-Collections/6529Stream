@@ -18,62 +18,67 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-The expanded full-v1 implementation is still incomplete. ABI182 checks all
-**4,333 Solidity sources** at `326cc3bc` with zero errors in 51.265 seconds.
-The current integration adds the Safe inventory and corrected General Museum
-semantics at `97381cde`. These checks and offline tests do not prove complete
-contract execution. The parallel runtime source `18837f62` contains the reviewed
-caller/dependency repairs with production byte-exact to `aa2ca4a2`; later Artist
-generation and inventory production changes require their own acceptance.
-RC1 remains unchanged.
+The expanded full-v1 implementation remains incomplete. The integrated source
+at `b3ed602b` passes ABI189: **4,406 Solidity sources**, zero errors in 52.375
+seconds. Two previously missing migration profiles are now source integrated:
+unbound Platform collections and combined dispute/repudiation histories.
+The batch also includes six earlier capacity repairs, the Consent constructor
+repair, generation clients, actual Safe split-wallet tests and the unified Museum
+dossier. The parallel runtime source `e37745a4` contains the six capacity repairs
+and reviewed fixture interfaces, excluding later Artist profile changes.
+Every execution result applies only to its recorded source. RC1 is unchanged.
 
-- **Artist recovery:** the reviewed multiple-generation capacity repairs are
-  integrated (`326cc3bc`). Their recorded runtime measurements fit. A fresh
-  constructor-complete capture of 18 products finds ConsentFinalityLifecycle
-  creation exceeds the limit by 123 bytes including its arguments; that repair
-  is underway. The original eleven actual-owner/Safe scenarios remain unexecuted.
-  Original generation-worker coverage remains 29 passing cases on its source.
-- **Inventory capacity:** three oversized CurrentAuthority inventory contracts
-  are repaired and integrated (`d3f32bd8`). Their three hosts and four fixed
-  workers fit the production limits. The eight-case native campaign timed out
-  at 900 seconds without execution; its earlier size results remain separate.
-  In the separate provider/discovery batch, Full
-  Preservation Discovery now fits; two other products remain oversized at
-  30,468 and 26,747 runtime bytes and are still being repaired.
-- **Developer clients and Safe:** original collaborator and attribution callers
-  retain their recorded root passes. The independently reviewed Safe call
-  inventory/reconciler is integrated (`6e5f0cd9`), with all 54 tool tests passing
-  and its pinned report reproduced. Its currently uncovered rows are a backlog,
-  not an execution result. Actual split-factory/wallet Safe tests are assigned;
-  multiple-generation client implementation continues in parallel.
-- **Museum and rendering:** General institutional/estate/curatorial direct
-  statements and offline dossiers are integrated (`17ff958e`/`97381cde`). All
-  20 corrected integrated tests pass; review corrected an authority-negative
-  oracle that previously stopped at schema validation. Source accounts are
-  distinct from institutional standing, physical ownership and custody.
-  Explicit physical-production and bounded STATIC analysis retain their 17 and
-  31 integrated passes. Physical acquisition/custody mapping is being built.
-- **Runtime acceptance:** the exact caller interfaces and dependency-free
-  catalog types are composed and pass all-root checks. The changed Slots native
-  capture succeeds in 5.313 seconds and its two physical outputs are admitted.
-  Owner remains a bounded trial; Scenario and native claim captures timed out
-  with no execution. Earlier Setup9, URI2, preservation16 and
-  capacity8 results retain their recorded sources. Complete graph, Safe, gas
-  and stateful acceptance remain open.
-- **Remaining source work:** independent review confirms three migration gaps:
-  nonempty collaborator history under PRIMARY_ONLY, complete aggregate signed
-  dispute/repudiation histories, and wholly unbound Platform Works collections.
-  Three parallel builders own these batches; held quorum/freeze proposals are
-  separate. This is a bounded gap review, not a completeness claim.
+- **Deployment capacity:** all six previously oversized inventory/provider/
+  discovery contracts have source-integrated repairs. The final three measured
+  runtimes are 24,460 / 11,396 / 24,420 bytes; complete creation inputs also fit.
+  The first and third have only 116 / 156 runtime bytes spare. New library
+  linking, actual combined execution and callback gas remain to validate.
+  Consent's earlier 123-byte constructor overage is repaired (`b56932e6`);
+  its recorded full input is 48,895 bytes, with five regression passes including
+  256 fuzz inputs. Later source changes still need matching native acceptance.
+- **Artist migration:** the unbound Platform profile (`66dc4a30`) and aggregate
+  signed dispute/repudiation profile (`b001a580`/`b3ed602b`) are independently
+  reviewed and source integrated. Their ten and twenty-six cases are authored,
+  not executed. The new Platform CollectionRows library exceeds the runtime
+  limit by 411 bytes; a narrow repair is underway. PRIMARY_ONLY collaborator
+  history remains in implementation. Shared extended-feature negotiation has
+  22 native passes, including two 256-input fuzz properties, at `4494df9b`;
+  this does not execute the later profiles. Generation constants are separated
+  from stable transport types without changing numerical masks or old profiles.
+- **Clients and Safe:** recovered multiple-generation callers are integrated
+  (`d2b9c72c` plus exports `33912f72`). Build and strict types pass. All 58 named
+  focused cases pass across retained oracle and fresh pure/workflow runs; the
+  first combined attempt exceeded its insufficient 300-second bound and is
+  preserved as failed. Actual 2-of-3 Safe split-factory/wallet tests now pass
+  on 1.3.0, 1.4.1 and 1.5.0, with independent signature/call/creation review.
+  Their constructor authority is a named mock; this is not whole-graph Safe
+  acceptance. The full call inventory still tracks uncovered operations.
+- **Museum:** acquisition/custody mapping (`697bda0c`) has six focused root
+  passes. The unified V4 dossier (`4494df9b`) adds verified physical-production,
+  General and transfer packages to the existing canonical record, retaining
+  every original nineteen-group/forty-nine-assessment byte. Six root integration
+  checks pass. Producer evidence contains 27 unique passing checks across a
+  corrected run, not one clean 27-case cohort. Fixtures remain synthetic;
+  differing source states stay explicitly unjoined and prove no physical title,
+  custody or institutional acceptance.
+- **Runtime testing:** four actual preparation guards pass with independent
+  creation/call review. Large Owner, Scenario, generation and paid-mint hosts
+  retain bounded compiler timeouts without execution. Source-only fixture
+  changes are being combined before the next attempt. The older capacity graph
+  timed out at its one-hour bound; its separate 80- and 78-library captures pass.
+  A diagnostic without viaIR failed with stack-too-deep and provides no
+  acceptance. The production compiler profile remains unchanged. Complete
+  current-stack, Safe, gas and stateful acceptance remain open.
 
-Remaining delivery includes broader required Artist combinations, physical
-and institutional Museum conformance, complete current-stack and all-call Safe
-execution, stateful/fuzz campaigns, deployment and transaction gas, full CI,
-source freeze and matching testnet. Required Merkle-price consumers are source
-built; actual current-stack execution remains. Collector cold paid-mint
-optimization remains isolated, with the original 500,000-gas purchase limit.
+Remaining source work includes collaborator-history migration, broader required
+Artist combinations and adopted Museum software/conformance. Release acceptance
+requires complete current-stack and
+all-call Safe execution, stateful/fuzz campaigns, deployment and transaction
+gas, full CI, source freeze and matching testnet. Collector cold paid-mint
+optimization stays isolated under the original 500,000-gas limit. Required
+Merkle-price consumers are source built; their actual current execution remains.
 Previously held proposals remain unapplied. No new funding or on-chain action
-is needed for current coding. Immutable RC1/main/release/Sepolia
+is needed for coding. Immutable RC1/main/release/Sepolia
 `569bf87f1fa808787d324f6e1582924b5ccf1d40` is preserved.
 
 ## Earlier source-specific evidence
