@@ -141,8 +141,11 @@ contract StreamArtistConsentFinalityLifecycle is
         view
         returns (bytes32, S.Record memory)
     {
-        bytes32 hash = _sanctions.latest[associationKey];
-        return (hash, _sanctions.records[hash]);
+        _returnSanction(
+            StreamArtistConsentReadEncoding.staticSanction(
+                _sanctions.latest, _sanctions.records, associationKey
+            )
+        );
     }
 
     function sanctionRecord(bytes32 recordHash) external view returns (S.Record calldata) {

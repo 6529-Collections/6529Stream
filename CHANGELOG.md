@@ -1,5 +1,13 @@
 # Changelog
 
+## Consent owner constructor capacity
+
+- Extract the existing static sanction return encoding into the fixed read library,
+  preserving the owner ABI, storage and constructor. Full creation input now fits
+  at 48,895 bytes, including its five address arguments. Five native getter parity
+  tests pass, including 256 fuzz cases; actual owner/Safe acceptance remains separate.
+  See the [capacity guide](docs/guides/artist-consent-constructor-capacity.md).
+
 ## Registry writer deployment capacity
 
 - Move seven existing authority-hydration encodings to one fixed typed writer,

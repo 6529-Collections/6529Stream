@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
 import {
+    StreamArtistSanctionTypes as S
+} from "../../interfaces/stream/artist/StreamArtistSanctionTypes.sol";
+import {
     StreamArtistSaleTypes as Sale
 } from "../../interfaces/stream/artist/StreamArtistSaleTypes.sol";
 import "./StreamArtistEconomicsAssociation.sol";
@@ -11,6 +14,16 @@ import "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 /// @notice Exact historical record encodings for the existing Consent owner getters.
 /// @dev Storage lookup keys and returned tuples are unchanged; this performs no operative selection.
 library StreamArtistConsentReadEncoding {
+    /// @dev Exact original static getter tuple; no current-binding or record-presence admission.
+    function staticSanction(
+        mapping(bytes32 => bytes32) storage latest,
+        mapping(bytes32 => S.Record) storage records,
+        bytes32 associationKey
+    ) public view returns (bytes memory) {
+        bytes32 hash = latest[associationKey];
+        return abi.encode(hash, records[hash]);
+    }
+
     function economicsForBinding(
         mapping(bytes32 => bytes32) storage associated,
         mapping(bytes32 => IStreamArtistEconomicsEvidence.Association) storage associations,
