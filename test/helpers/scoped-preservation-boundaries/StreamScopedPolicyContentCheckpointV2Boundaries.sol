@@ -7,6 +7,9 @@ import {
 import {
     IStreamRendererRegistry as V
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamRendererRegistry.sol";
+import {
+    IStreamModuleRegistry as ScopedPolicyModuleInterface
+} from "../../../smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol";
 import { TerminalRouteVersions } from "./StreamTerminalEntropyRoutingBoundaries.sol";
 import {
     IStreamCurrentCitationRenderer as CurrentRenderer
@@ -26,6 +29,10 @@ contract ScopedPolicyOutputModulesBoundary {
     constructor(address m) {
         metadata = m;
         governanceExecutor = msg.sender;
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(ScopedPolicyModuleInterface).interfaceId || id == 0x01ffc9a7;
     }
 
     function admit(address registry) external {

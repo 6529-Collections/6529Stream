@@ -96,6 +96,7 @@ abstract contract ScopedPolicyContentFixtureV2 is
     StaticMetadataRoutingFixture,
     EntropyTimeAuthorityFixture
 {
+    MockEntropyRoleRegistry public roleRegistry;
     StreamEntropyCoordinator internal terminalCoordinator;
     StreamEntropyCoordinator internal randomCoordinator;
     ScopedPolicyOutputVersionsBoundary internal terminalVersions;
@@ -121,13 +122,13 @@ abstract contract ScopedPolicyContentFixtureV2 is
             )
         );
         core.setPointer(keccak256("MODULE_REGISTRY"), address(scopedModules));
-        MockEntropyRoleRegistry roles = MockEntropyRoleRegistry(
+        roleRegistry = MockEntropyRoleRegistry(
             _artistArtifactCreate(
                 "test/mocks/MockEntropyRoleRegistry.sol:MockEntropyRoleRegistry",
                 abi.encode(address(this))
             )
         );
-        terminalCoordinator = _scopedNative(roles);
+        terminalCoordinator = _scopedNative(roleRegistry);
         EntropyCollectionPolicyArtistFixture policyArtist = EntropyCollectionPolicyArtistFixture(
             _artistArtifactCreate(
                 "test/unit/entropy/EntropyCollectionPolicyFixtures.sol:EntropyCollectionPolicyArtistFixture",
@@ -162,7 +163,7 @@ abstract contract ScopedPolicyContentFixtureV2 is
         EP(address(terminalCoordinator)).configureCollectionEntropyPolicy(1, policy);
         this.setCurrentAction(false, 0, 0, 0, 0, 0);
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(artist));
-        randomCoordinator = _scopedNative(roles);
+        randomCoordinator = _scopedNative(roleRegistry);
         core.setEntropy(address(terminalCoordinator));
         (renderer, terminalVersions) = _scopedRenderer(address(terminalCoordinator));
         versions = terminalVersions;

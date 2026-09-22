@@ -58,13 +58,13 @@ abstract contract PreservationPolicyContentFixtureV1 is ScopedPolicyContentFixtu
             )
         );
         core.setPointer(keccak256("MODULE_REGISTRY"), address(scopedModules));
-        MockEntropyRoleRegistry roles = MockEntropyRoleRegistry(
+        roleRegistry = MockEntropyRoleRegistry(
             _artistArtifactCreate(
                 "test/mocks/MockEntropyRoleRegistry.sol:MockEntropyRoleRegistry",
                 abi.encode(address(this))
             )
         );
-        terminalCoordinator = _preservationNative(roles);
+        terminalCoordinator = _preservationNative(roleRegistry);
         EntropyCollectionPolicyArtistFixture policyArtist = EntropyCollectionPolicyArtistFixture(
             _artistArtifactCreate(
                 "test/unit/entropy/EntropyCollectionPolicyFixtures.sol:EntropyCollectionPolicyArtistFixture",
