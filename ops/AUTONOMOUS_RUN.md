@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI192 `e5174d6f`: 4,498 sources / zero errors; runtime evidence remains tied to its separate source. |
+| Source checkpoint | ABI193 `9ac7c52f`: 4,502 sources / zero errors; Museum authoring `63d18fae`; runtime remains source-specific. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,72 +29,74 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-Expanded full v1 remains incomplete. The combined source at `e5174d6f`
-passes ABI192: **4,498 Solidity sources, zero errors** in 53.047 seconds.
-This checks types, interfaces, storage declarations and selectors; it does not
-establish deployed behavior. Immutable RC1 and its Sepolia evidence are unchanged.
+Expanded full v1 remains incomplete. ABI193 checks **4,502 Solidity sources
+with zero errors** at `9ac7c52f`; the subsequent Museum-only commit is `63d18fae`.
+These checks establish types and interfaces, not complete deployed behavior.
+Immutable RC1 and its Sepolia evidence remain unchanged.
 
-- **Artist migration:** unbound Platform, aggregate dispute/repudiation and
-  PRIMARY_ONLY collaborator histories are source integrated. The collaborator
-  batch includes partial/repeated acceptance and original replay accounting;
-  independent review cleared its corrected source and five repaired worker sizes.
-  Twelve dispute worker tests pass on `b3ed602b`; fourteen actual-owner/Safe
-  cases remain unexecuted and further dispute capacity repairs are underway.
-  Platform and generation actual-host compilation still times out. These are
-  bounded profiles: broader required combinations remain to build and validate.
-- **Developer repository:** 39 inline interfaces now have dedicated domain
-  interface files, with original named imports preserved. Independent source
-  inverses and ABI/selector/storage comparisons pass. The canonical layout
-  checker accepted the refreshed inventory of 3,017 production-source paths.
-  The raw Museum-response checksum policy bug is repaired; eighteen focused
-  checks and independent review pass. Final generated release evidence is pending.
-- **Clients and Safe:** unbound Platform callers are integrated, including the
-  package exports. Root build, strict types and all 55 focused client checks pass
-  at `cf8a1717`; producer review also covers 100 older-profile regressions.
-  These are encoding/provider-mock/Safe-envelope checks, not actual contract
-  execution. Earlier generation clients and three actual Safe split-wallet
-  versions retain their recorded, narrower evidence.
-- **Museum:** the canonical dossier now joins retained script and dependency
-  packages into their existing document slots while preserving the original
-  nineteen groups and forty-nine assessments. Twenty-one root checks pass at
-  `3e7fc352`; seven native-manifest checks also pass after the added wrong-source
-  negative control. Fixtures remain synthetic. Media/render/preservation joins
-  and institutional conformance remain separate work.
-- **Execution testing:** the preservation run reached real execution: its first
-  attempt exposed an obsolete test-name prefix, one missing copied JSON asset
-  and one missing typed mock response. The two source corrections are integrated
-  as `51052f45`; corrected acceptance is running on the separate `e7286fa1`
-  snapshot. Its 38 earlier diagnostic passes do not mean the 61-case cohort passed.
-  Owner, generation, Platform and remaining-capacity host timeouts are preserved
-  as failures. Material test-fixture changes are being built to reduce embedded
-  constructor compilation while retaining actual CREATE behavior and assertions.
+- **Artist migration:** generation, unbound Platform, aggregate dispute and
+  PRIMARY_ONLY collaborator profiles are source integrated. Twelve collaborator
+  leaf/nonce tests, including 256 fuzz inputs, pass on `e5174d6f`. Twelve dispute
+  worker tests retain their narrower `b3ed602b` result. Actual combined-owner and
+  Safe acceptance remains open. Separate builders now own complete chronology
+  and mixed histories, original ratification52, sanction/confirmation12/13,
+  and migration of existing class4 authority and capability59 records.
+- **Deployment size:** the reviewed fixed Binding storage worker is integrated
+  as `9671a10a`. Its original ABI, selectors and storage are preserved; Binding
+  now measures 24,052 runtime bytes. All seventeen products in the producer's
+  canonical `971c1c0f` capture fit, and seven focused tests plus 256 fuzz inputs
+  pass. The Coordinator still sits exactly at its runtime limit; later added
+  routes need fresh measurement. Complete flow gas remains unproved.
+- **Execution testing:** all 61 corrected preservation component cases pass on
+  `e7286fa1`, with independent review of the retained execution. Typed surrounding
+  mocks limit that result; it is not the full current stack. Generation and
+  preservation fixtures now use genuine artifact CREATE at reviewed sites, and
+  the current-stack fixture isolates typed authority planners. Original
+  assertions/callers/arguments remain intact. Smaller canonical captures are
+  underway; old compiler timeouts remain failed evidence. A collaborator codec
+  Yul failure has been isolated and is being repaired.
+- **Museum:** five document-slot evidence joins are integrated with 38 root
+  checks. The source-bound authoring workflow is also integrated: all 52 focused
+  root cases pass at `63d18fae`, covering capture, explicit confirmation/review,
+  later edits and complete retained-source replay. Outputs remain drafts.
+  Additional source-family adapters, field mappings, real publication/capture,
+  schema activation and institutional acceptance remain open.
+- **Clients and repository:** Platform client build/types and 55 focused checks
+  retain their recorded pass; dispute callers are being completed. Actual Safe
+  contract execution remains separate from client envelope/provider tests.
+  Dedicated interfaces and the checksum-parser repair are integrated. The
+  canonical source inventory now contains 3,018 production paths.
 
-Remaining delivery work is the missing legal Artist compositions and Museum
-software scope, complete current-stack and all-call Safe execution, stateful/fuzz
-campaigns, deployment and transaction gas, full CI, source freeze and matching
-testnet demonstration. Collector optimization stays isolated until actual paid
-execution satisfies its original 500,000-gas requirement. No new funding or
-on-chain action is needed for coding. External audit, production ceremonies and
-Lean remain separate. Previously held proposals remain unapplied.
+Remote `ff6973db` CI passes repository/orchestration and the Windows builder.
+The TypeScript job reached its ten-minute timeout; its full-suite throughput
+work is assigned. Release checksums and Slither prerequisites still fail on
+stale generated evidence; other long jobs have not established a full green run.
+No failed check is waived.
 
-Remote CI is not green. Source-layout and checksum-parser defects have local
-repairs; stale generated artifacts, Slither prerequisites and final formatting
-still need the stable-source validation pass. No failed check is waived.
+Remaining delivery work is the missing feature combinations and Museum software,
+actual current-stack and all-call Safe integration, stateful/fuzz campaigns,
+deployment/transaction gas, full CI, a frozen candidate and matching testnet
+demonstration. Collector changes stay isolated until actual paid execution meets
+the original 500,000-gas ceiling. No new funding is required. External audit,
+production ceremonies and Lean remain separate. Held proposals remain unapplied.
+Automatic approval review has also blocked the dispute task's result handoff;
+the task's explicit permission request is pending, and the payload remains held.
 
 Root owns architecture, integration and delivery. Current assignments:
 
-- **Artist history:** Implement the reviewed artifact-CREATE fixture reduction, then use a materially smaller frozen actual-generation capture. No unchanged timeout retry.
-- **Revenue / Platform:** Measure the shared owners and routing libraries on joined e517 source; repair any concrete capacity regression. Platform actual execution remains open.
-- **Onchain metadata / collaborator:** Run focused collaborator leaf/nonce cases and remaining worker capacity on e517. Actual-owner cases wait for the coherent smaller fixture.
-- **Mint:** Repair remaining dispute worker capacity and finish fourteen actual-owner/Safe cases; preserve the twelve scoped worker passes.
-- **Burn:** Complete corrected 61-case preservation execution on e728, retaining the original e377 failure and exact source assets.
-- **Museum:** Build fixed-slot media/render/significant-property and preservation evidence joins; preserve original dossier assessments.
-- **Clients:** Build multiple-dispute/repudiation callers with explicit ABI189 source evidence; Platform client is integrated.
-- **Testing:** Test a narrow Owner schema-registration fixture extraction and diagnose the remaining host compiler cost; canonical production settings stay unchanged.
-- **Capacity:** Replace remaining embedded test constructors using genuine artifact CREATE, then independently review the reduced graph before new execution.
-- **Metric:** Review the final shared collaborator-profile integration and source-qualified evidence; unchanged source audits are not repeated.
-- **Prepared:** Map required Artist state combinations against actual bounded-profile admission to identify the next coherent source batches.
-- **Collector:** Keep the paid-gas prototype isolated; complete actual paid execution with canonical source/owner evidence before adoption.
+- **Artist history:** Execute the smaller 9/4/7 generation capture on immutable9671; own agreed missing concrete products and avoid duplicate shared builds.
+- **Revenue / Platform:** Binding repair is integrated and tested. Finish the original ten Platform actual cases from a materially reduced frozen graph.
+- **Onchain metadata / collaborator:** Repair the isolated collaborator codec Yul failure, complete capacity and actual cases, and build migration of existing class4/op59 authority.
+- **Mint:** Complete dispute capacity repairs and fourteen actual-owner/Safe cases. Its rejected result handoff remains held pending the task permission request.
+- **Burn:** Corrected preservation61 is complete on e728. Build aggregate original12/13 sanction and confirmation, sharing one consent carrier with Prepared.
+- **Museum:** Source-bound authoring and five-slot evidence joins are integrated and tested. Build remaining exact-source authoring adapters and cross-format field mappings.
+- **Clients:** Finish the dispute client batch, then improve full TypeScript test throughput with coverage-preserving parallel execution.
+- **Testing:** One canonical Owner four-product capture runs on be943 after typed planner isolation; retain exact tests and configuration.
+- **Capacity:** Execute the original remaining24 cases using reviewed a0 artifact-CREATE fixtures and a fresh complete constructor graph.
+- **Metric:** Independently review the CompleteHistory first source phase while builders continue later phases.
+- **Prepared:** Build aggregate original52 ratification with the agreed additive consent supplement and explicit root-owned hooks/masks.
+- **Collector:** Complete changed documentary/paid captures on the isolated prototype; reuse agreed fixture boundaries and preserve the original gas ceiling.
+- **Complete Artist migration composition:** Build complete chronology, legal mixed Platform/collaborator/dispute histories, per-generation principals and complete seven-owner import; coordinate class4 and52/12/13.
 
 ## Earlier source-specific assignments
 

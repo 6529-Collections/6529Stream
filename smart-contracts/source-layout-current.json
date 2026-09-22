@@ -296,6 +296,7 @@
     "smart-contracts/domains/artist/StreamArtistBindingCorrectionState.sol",
     "smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol",
     "smart-contracts/domains/artist/StreamArtistBindingOperations.sol",
+    "smart-contracts/domains/artist/StreamArtistBindingTermsStorage.sol",
     "smart-contracts/domains/artist/StreamArtistC2PACredentials.sol",
     "smart-contracts/domains/artist/StreamArtistC2PAHydration.sol",
     "smart-contracts/domains/artist/StreamArtistCancelledDormancyBoundary.sol",
