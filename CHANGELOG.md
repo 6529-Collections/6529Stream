@@ -1398,6 +1398,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add canonical Museum evidence links for five fixed script, dependency, media,
+  prospective-render and significant-properties slots. Reuse retained V4
+  captures, compare optional source observations together and preserve original
+  assessments, unavailable outcomes and declaration/byte-availability limits.
+
 - Link verified collection script and dependency observations to two existing
   Museum dossier requirement slots. Retain both complete packages, original
   occurrence order and unavailable outcomes; preserve all nineteen packet

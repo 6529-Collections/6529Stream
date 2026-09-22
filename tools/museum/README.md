@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Canonical evidence links V2](../../docs/museum-canonical-evidence-links-v2.md)
+connect five script, dependency, media, prospective-render and significant-properties
+slots to exact verified sources while preserving all original assessments.
+
 [Script and dependency requirement links](../../docs/museum-dossier-script-links-v1.md)
 retain a verified V4 dossier and collection-script package with original
 occurrence references, source comparisons and unchanged nineteen/forty-nine
