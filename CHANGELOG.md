@@ -1,5 +1,13 @@
 # Changelog
 
+## Qualified-account review local originals
+
+- Add an isolated local capture and retained offline replay for a mapping by
+  account A, exact later approval/rejection statements by account B and a SELF
+  control. Keep registered profile bytes, source evidence, publication order
+  and historical native product qualifications explicit. See the
+  [qualified review fixture guide](docs/museum-qualified-review-fixture.md).
+
 ## Current collaborator transport integration
 
 - Preserve current sanction and ratification behavior through the fixed
