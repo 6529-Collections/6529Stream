@@ -289,18 +289,18 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
             );
         }
         if (!_policyScope(scope)) return super.finalityComponentFacts(family, scope);
-        _pins();
-        _scope(scope);
-        if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
-            (f.frozen, f.dataHash) = PolicyComponents.facts(_policy, scope, family);
-            f.moduleVersion = metadataModuleVersion;
-            f.manifestHash = metadataModuleManifestHash;
-        } else {
-            componentHost(family);
-            (f.frozen, f.dataHash) = PolicyComponents.facts(_policy, scope, family);
-            f.moduleVersion = routerModuleVersion;
-            f.manifestHash = routerModuleManifestHash;
-        }
+        return GraphWorker.collectionComponentFacts(
+            _graph.original,
+            _policy,
+            GraphWorker.ModuleIdentity(
+                metadataModuleVersion,
+                metadataModuleManifestHash,
+                routerModuleVersion,
+                routerModuleManifestHash
+            ),
+            family,
+            scope
+        );
     }
 
     function inputManifestBytes(StreamFinalityScope calldata scope)

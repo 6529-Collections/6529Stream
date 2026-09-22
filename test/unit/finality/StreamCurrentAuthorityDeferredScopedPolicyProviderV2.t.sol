@@ -142,6 +142,12 @@ import {
 import {
     StreamMetadataSubjects as ComponentSubjects
 } from "../../../smart-contracts/domains/metadata/StreamMetadataSubjects.sol";
+import {
+    StreamFinalityDeferredProfileSourceReadsV2 as BoundComponentSelection
+} from "../../../smart-contracts/domains/finality/StreamFinalityDeferredProfileSourceReadsV2.sol";
+import {
+    StreamFinalityPolicyProviderComponentsV2 as BoundPolicyComponents
+} from "../../../smart-contracts/domains/finality/StreamFinalityPolicyProviderComponentsV2.sol";
 
 interface DeferredScopedBindingVm {
     struct Log {
@@ -1585,5 +1591,119 @@ contract StreamCurrentAuthorityDeferredScopedPolicyProviderV2Test {
         require(
             host.policyBindingHash() == 0, "graph facts never consume deferred collection binding"
         );
+    }
+
+    function _boundComponentSelection(T.Receipt memory r) private {
+        BoundComponentSelection.Context memory c;
+        c.core = original.targets[0];
+        c.router = original.targets[2];
+        c.routerCodeHash = original.codeHashes[2];
+        c.chainId = original.chainId;
+        c.readGas = original.readGas;
+        c.policyOutput = r.output;
+        c.policyOutputCodeHash = r.outputCodeHash;
+        c.profiles[0] = host.finalitySourceProfile(0);
+        c.profiles[1] = host.finalitySourceProfile(1);
+        c.profiles[2] = r.profile;
+        c.policyBound = true;
+        _workerVm()
+            .mockCall(
+                address(BoundComponentSelection),
+                abi.encodeWithSelector(BoundComponentSelection.current.selector, c, r.scope),
+                abi.encode(Profiles.Sources(r.scope, r.profile))
+            );
+    }
+
+    function _boundComponentExpected(bool metadata) private pure returns (bytes memory) {
+        StreamFinalityHostComponentFacts memory f;
+        f.frozen = metadata;
+        f.dataHash = metadata
+            ? keccak256("typed bound policy metadata facts")
+            : keccak256("typed bound policy static facts");
+        f.moduleVersion = metadata
+            ? keccak256("distinct metadata version")
+            : keccak256("distinct router version");
+        f.manifestHash = metadata
+            ? keccak256("distinct metadata manifest")
+            : keccak256("distinct router manifest");
+        return abi.encode(f);
+    }
+
+    /// @dev The genuine bind write-frame consumes an explicitly mocked complete Validation
+    /// result. Selection.current and PolicyComponents.facts are exact typed producer boundaries;
+    /// no policy publication or governance validity is claimed. Original pins/membership/family
+    /// admission and all four original module-identity projections remain real host/worker code.
+    function testBoundPolicyFactsPreserveOriginalAdmissionIdentityAndCompleteBindingReceipt()
+        public
+    {
+        _componentGraphFixture(); // Distinct original metadata/router identities; no collection membership installed.
+        T.Receipt memory r = _workerReceipt();
+        bytes32 fixedHash = host.finalitySourceConfigurationHash();
+        _workerVm().mockCall(address(Validation), _workerBindInput(r), abi.encode(r));
+        host.bindCollectionPolicy(r.policy, r.output, r.outputCodeHash);
+        _assertWorkerReceipt(r, fixedHash);
+        _boundComponentSelection(r);
+        bytes32 metadata = keccak256("COLLECTION_METADATA");
+        bytes32 renderer = keccak256("RENDERER");
+        bytes32 unsupported = keccak256("unsupported bound policy component");
+        _workerVm()
+            .mockCall(
+                address(BoundPolicyComponents),
+                abi.encodeWithSelector(
+                    BoundPolicyComponents.facts.selector, r.policy, r.scope, metadata
+                ),
+                abi.encode(true, keccak256("typed bound policy metadata facts"))
+            );
+        _workerVm()
+            .mockCall(
+                address(BoundPolicyComponents),
+                abi.encodeWithSelector(
+                    BoundPolicyComponents.facts.selector, r.policy, r.scope, renderer
+                ),
+                abi.encode(false, keccak256("typed bound policy static facts"))
+            );
+        // A successful invalid-family producer result must not waive the host family guard.
+        _workerVm()
+            .mockCall(
+                address(BoundPolicyComponents),
+                abi.encodeWithSelector(
+                    BoundPolicyComponents.facts.selector, r.policy, r.scope, unsupported
+                ),
+                abi.encode(true, keccak256("unreachable unsupported family facts"))
+            );
+        _componentFactsCall(
+            unsupported,
+            r.scope,
+            false,
+            abi.encodeWithSignature(
+                "RouterEvidenceRead(address,bytes4)",
+                original.targets[3],
+                bytes4(keccak256("requireScopeMembership((uint8,uint256,uint256,bytes32))"))
+            )
+        );
+        _componentMembership(r.scope, false);
+        _componentFactsCall(
+            unsupported, r.scope, false, abi.encodeWithSignature("RouterProviderScope()")
+        );
+        _componentMembership(r.scope, true);
+        _componentFactsCall(
+            unsupported,
+            r.scope,
+            false,
+            abi.encodeWithSignature("RouterEvidenceFamily(bytes32)", unsupported)
+        );
+        _assertWorkerReceipt(r, fixedHash);
+        bytes memory runtime = original.targets[1].code;
+        _workerVm().etch(original.targets[1], hex"60006000fd");
+        _componentFactsCall(
+            metadata,
+            r.scope,
+            false,
+            abi.encodeWithSignature("RouterProviderDependency(address)", original.targets[1])
+        );
+        _workerVm().etch(original.targets[1], runtime);
+        _componentFactsCall(metadata, r.scope, true, _boundComponentExpected(true));
+        _componentFactsCall(renderer, r.scope, true, _boundComponentExpected(false));
+        _assertWorkerReceipt(r, fixedHash);
     }
 }

@@ -110,6 +110,29 @@ library StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2 {
         }
     }
 
+    /// @dev The host selects the bound collection profile before entering these original
+    /// pin/scope/family checks. The policy sources never replace the original scope anchor.
+    function collectionComponentFacts(
+        Native.Config storage original,
+        Native.Config storage policy,
+        ModuleIdentity memory modules,
+        bytes32 family,
+        StreamFinalityScope memory scope
+    ) public view returns (StreamFinalityHostComponentFacts memory f) {
+        _pins(original);
+        _scope(original, scope);
+        if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
+            (f.frozen, f.dataHash) = PolicyComponents.facts(policy, scope, family);
+            f.moduleVersion = modules.metadataVersion;
+            f.manifestHash = modules.metadataManifest;
+        } else {
+            if (!Router.supported(family)) revert Router.RouterEvidenceFamily(family);
+            (f.frozen, f.dataHash) = PolicyComponents.facts(policy, scope, family);
+            f.moduleVersion = modules.routerVersion;
+            f.manifestHash = modules.routerManifest;
+        }
+    }
+
     function _scope(Native.Config storage original, StreamFinalityScope memory scope) private view {
         if (
             scope.collectionId == 0
