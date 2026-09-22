@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../helpers/ArtistArtifactCreate.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 import "../../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
 import "../../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
@@ -17,7 +18,7 @@ interface EstateArchivalVm {
 
 /// @dev Actual preservation/RoleRegistry products with synthetic quorum data and an explicit
 /// governance/Core unit boundary. This does not claim a network rehearsal or actual Executor delay.
-abstract contract ArtistEstateArchivalFixture is OfficialSafeFixture {
+abstract contract ArtistEstateArchivalFixture is ArtistArtifactCreate, OfficialSafeFixture {
     bool internal estateNetworkVector;
     StreamArchivalCoverage internal estateCoverageProvider;
     StreamArweaveCheckpointVerifier internal estateCheckpointVerifier;
@@ -31,7 +32,10 @@ abstract contract ArtistEstateArchivalFixture is OfficialSafeFixture {
 
     function _deployEstateArchival(address core, address governance) internal {
         estateGovernance = EstateGovernanceFixture(governance);
-        estateFixityRoles = new StreamRoleRegistry(governance);
+        estateFixityRoles = StreamRoleRegistry(_artistArtifactCreate(
+            "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+            abi.encode(governance)
+        ));
         estateGovernance.configureContestReads(
             address(estateFixityRoles),
             address(this),
@@ -49,17 +53,23 @@ abstract contract ArtistEstateArchivalFixture is OfficialSafeFixture {
                 "ARCHIVAL_ERC1271_VERIFY_GAS", 400000, 90000, 2
             );
         estateCheckpointVerifier =
-            new StreamArweaveCheckpointVerifier(governance, observers, 2, sig);
-        estateCoverageProvider = new StreamArchivalCoverage(
-            core,
-            governance,
-            address(estateFixityRoles),
-            address(estateCheckpointVerifier),
-            sig,
-            IStreamGasParameterHost.GasParameterConfig(
-                "ARCHIVAL_DEPENDENCY_READ_GAS", 150000, 50000, 2
+            StreamArweaveCheckpointVerifier(_artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol:StreamArweaveCheckpointVerifier",
+                abi.encode(governance, observers, uint8(2), sig)
+            ));
+        estateCoverageProvider = StreamArchivalCoverage(_artistArtifactCreate(
+            "smart-contracts/domains/preservation/StreamArchivalCoverage.sol:StreamArchivalCoverage",
+            abi.encode(
+                core,
+                governance,
+                address(estateFixityRoles),
+                address(estateCheckpointVerifier),
+                sig,
+                IStreamGasParameterHost.GasParameterConfig(
+                    "ARCHIVAL_DEPENDENCY_READ_GAS", 150000, 50000, 2
+                )
             )
-        );
+        ));
     }
 
     function _estateArchiveEvidence(bytes32 artistId)
