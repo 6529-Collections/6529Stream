@@ -82,18 +82,26 @@ class GeneralSemanticV1Tests(unittest.TestCase):
             build_case(mutate=mutate).source().snapshot()
 
     def test_declaring_account_cannot_become_an_entity_or_use_other_account(self):
+        def declare(value):
+            value["entities"] = [{"id": "urn:fixture:declared-object", "kind": "physical_object",
+                "names": [{"value": "Declared only", "language": "en", "kind": "preferred"}],
+                "declaringAgent": value["assertions"][0]["assertingAgent"],
+                "sourceRecords": deepcopy(value["sourceRecords"]), "predecessors": []}]
+
+        fixture, _, snapshot = self._snapshot(mutate=declare)
+        self.assertEqual(self._supported(snapshot)["value"]["entities"],
+                         fixture.semantic_value["entities"])
         for change in ("account_entity", "other_declarer"):
             def mutate(value, change=change):
-                entity = {"id": "urn:fixture:declared-object", "type": "HumanMadeObject",
-                    "label": "Declared only", "declaringAgent": value["assertions"][0]["assertingAgent"],
-                    "sourceRecords": deepcopy(value["sourceRecords"])}
+                declare(value)
+                entity = value["entities"][0]
                 if change == "account_entity":
                     entity["id"] = value["assertions"][0]["assertingAgent"]
                 else:
                     entity["declaringAgent"] = account_iri("31337",
                         "0x0000000000000000000000000000000000000099")
-                value["entities"] = [entity]
-            with self.subTest(change=change), self.assertRaises(MuseumError):
+            with self.subTest(change=change), self.assertRaisesRegex(
+                    MuseumError, "general semantic declaring account impersonation"):
                 build_case(mutate=mutate).source().snapshot()
 
     def test_documentary_hash_and_pointer_are_exact_prior_metadata_bytes(self):
