@@ -161,21 +161,21 @@ contract StreamCurrentAuthorityBundleArchiveCoverageTest is CurrentAuthorityCons
         );
     }
 
+    function deployScopedForTest(B.Dependencies memory depend) external returns (address) {
+        return address(new StreamCurrentAuthorityScopedBundleArchiveCoverage(
+            depend, od, ad, D.SCOPED_POLICY_INVENTORY_PROFILE
+        ));
+    }
+
     function testScopedConstructorRejectsEachMissingDependencyIncludingLast() public {
         for (uint256 i; i < 6; ++i) {
             address originalTarget = bd.targets[i];
             bytes32 originalHash = bd.codeHashes[i];
             bd.targets[i] = address(0);
-            vm.expectRevert(abi.encodeWithSelector(T.InventorySourceChanged.selector));
-            new StreamCurrentAuthorityScopedBundleArchiveCoverage(
-                bd, od, ad, D.SCOPED_POLICY_INVENTORY_PROFILE
-            );
+            _fails(address(this), abi.encodeCall(this.deployScopedForTest, (bd)));
             bd.targets[i] = originalTarget;
             bd.codeHashes[i] = 0;
-            vm.expectRevert(abi.encodeWithSelector(T.InventorySourceChanged.selector));
-            new StreamCurrentAuthorityScopedBundleArchiveCoverage(
-                bd, od, ad, D.SCOPED_POLICY_INVENTORY_PROFILE
-            );
+            _fails(address(this), abi.encodeCall(this.deployScopedForTest, (bd)));
             bd.codeHashes[i] = originalHash;
         }
         StreamCurrentAuthorityScopedBundleArchiveCoverage scoped =
