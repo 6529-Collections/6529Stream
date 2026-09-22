@@ -6,8 +6,8 @@
   preserving the Registry writer constructor, same-host CREATE path, guards,
   actor, original Coordinator selectors and complete request types.
 - All six selected production products fit the original runtime/initcode limits.
-  Thirteen focused cases are type-checked and independently source-reviewed;
-  EVM execution remains pending. See the
+  Thirteen independently source-reviewed cases pass with 256 fuzz runs.
+  Full Artist-history and transaction-gas acceptance remain separate. See the
   [capacity guide](docs/guides/artist-registry-writer-capacity.md).
 
 ## Owner and Genesis Registry capture composition

@@ -33,9 +33,9 @@ literal Coordinator selectors for every extracted method, actor/caller separatio
 foreign-host rejection, late Coordinator revert rollback and identical retry,
 and malformed input restoration. The Coordinator is an explicit recording
 double: these cases do not establish actual recovered-history admission or a
-full Artist ceremony. All thirteen tests are authored and type-checked; their EVM execution remains
-separately scoped. Independent review cleared the production seam and all
-thirteen test bodies at the exact frozen source.
+full Artist ceremony. All thirteen tests passed with 256 bounded fuzz runs at the immutable source
+`0d98d04bccba5d508079834c7de324a97bbb8518`. Independent review cleared the
+production seam and all thirteen test bodies before execution.
 
 The final native capture uses Solidity 0.8.19, via IR, optimizer 200, Paris,
 with metadata hash and CBOR disabled. It selected all six required production
@@ -65,3 +65,27 @@ and their failed boundaries are retained. The final seven-method seam removes
 the shared encoder completely. Exact source, ABI and native capacity evidence
 is retained with the isolated handoff. Whole-registry deployment, full transaction gas and current-stack
 acceptance remain separate from this bounded repair.
+
+## Focused execution addendum
+
+The bounded native test capture selected the same six production products and
+three test/helper products from 731 exact source files. All original six
+creation and runtime templates are byte-identical to the selected size capture.
+The two CREATE targets used by the test fixture and the test class itself also
+fit the original size limits; no test allowance was needed to excuse an
+oversized deployed product.
+
+The existing canonical owner/export/execution-view tools authenticated the
+physical artifacts and cached execution. The exact thirteen-case roster passed
+in 1.846 seconds with compilation disabled, no source/artifact drift and 256
+fuzz runs. Saved traces independently match 125 recorded CREATE occurrences,
+121 successful returned runtimes and 488 fixed-link address comparisons to the
+complete native templates. Four failed constructor frames are refusal evidence,
+not deployed state. Representative fuzz traces do not stand for 256 separately
+retained deployment traces.
+
+The recording Coordinator is deliberately a transport double. These tests prove
+original actor/caller and complete request/selector transport, constructor
+identity, guard failures and rollback/retry. Actual history admission, a full
+Registry deployment ceremony and the new frame's transaction gas remain subject
+to current-stack acceptance.
