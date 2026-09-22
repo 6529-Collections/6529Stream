@@ -75,6 +75,11 @@ authorship or the selected original review disposition.
 
 ## General attestations and notarization
 
+The additive [General semantic reader](museum-general-semantic-v1.md) interprets
+explicitly profiled generic statements and joins exact earlier Metadata evidence.
+It preserves General authority separately from Artist and Metadata classes;
+physical/legal events and institutional identity are not inferred.
+
 `GeneralAttestationSource` independently enumerates all four fixed producer lanes,
 including empty lanes, per-recorder heads, signature bundles, native Artist proof,
 payload pointers and original definition documents. It preserves these distinct

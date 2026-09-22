@@ -1348,6 +1348,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add a General institutional and curatorial assertion reader with exact native
+  account authority, registered interpretation definitions, prior Metadata
+  documentary evidence and offline reconstruction. Preserve unsupported records,
+  same-timestamp ordering limits and separate physical/legal claim boundaries.
+
 - Add an offline physical-production export from exact historical Artist
   statements, with original declaration and evidence bindings, explicit event
   status, conflict withholding and full source reconstruction. Keep physical

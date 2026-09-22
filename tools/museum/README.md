@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[General institutional and curatorial assertion reader](../../docs/museum-general-semantic-v1.md)
+joins exact General receipt authority to registered semantic definitions and
+earlier Metadata documentary evidence, with qualified offline reconstruction.
+
 [Recorded physical-production statements](../../docs/museum-recorded-physical-production-v1.md)
 join explicit completed Artist statements to distinct physical objects and
 Production events, retaining original evidence, status and historical authority.
