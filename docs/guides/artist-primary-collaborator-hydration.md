@@ -129,3 +129,14 @@ The current-source integration preserves all twenty-nine existing ABI entries,
 twenty-three selectors and storage layouts of the ten modified original
 products. Current integrated bytecode capacity and execution still require fresh
 evidence; no earlier capture is relabelled as covering this source.
+
+## Dispute validation deployment boundary
+
+The current native dependency graph exposed an oversized existing dispute-chain
+validator (28,084 runtime bytes). Its final generation-head validation now uses
+the fixed compiler-linked `StreamArtistRecoveredDisputeHistoryHeads` library.
+The three original chain entry points, flags, original-record checks and current
+state predicates remain unchanged. This is a pure code boundary with no storage
+or caller-selected implementation. Focused synthetic chain/head regressions are
+separate from original-producer and complete hydration/Safe acceptance.
+Native size and linked execution evidence must match the repaired source.

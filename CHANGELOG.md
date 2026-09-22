@@ -1,5 +1,12 @@
 # Changelog
 
+## Dispute history library deployment size
+
+- Separate unchanged generation-head validation into a fixed linked library,
+  preserving all three original chain-validation entry points and rules. Add
+  focused restoration, withdrawal, reopening, chronology and head-integrity
+  regressions. See the [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
+
 ## General-attestation semantic reviews
 
 - Add a separate General-to-General review profile, original receipt/grant and

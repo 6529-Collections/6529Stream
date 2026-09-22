@@ -16,6 +16,10 @@ import {
     StreamArtistRecoveredHydrationChronology as Clock
 } from "./StreamArtistRecoveredHydrationChronology.sol";
 
+import {
+    StreamArtistRecoveredDisputeHistoryHeads as Heads
+} from "./StreamArtistRecoveredDisputeHistoryHeads.sol";
+
 /// @notice Immutable opening/counter/resolution/withdrawal chains and their actual latest heads.
 /// @dev These predicates join the already authenticated complete source maps. Historical
 /// records are never authorized again against the current principal or current grant head.
@@ -110,95 +114,7 @@ library StreamArtistRecoveredDisputeHistoryChains {
             }
             if (r.record.previousResolutionActionId != previous) _invalid();
         }
-        for (uint256 g; g < b.generations.length; ++g) {
-            _head(b, uint64(g + 1), p, sanctioned, checkCurrent);
-        }
-    }
-
-    function _head(
-        D.Bundle memory b,
-        uint64 generation,
-        RH.OwnerProvenance memory p,
-        bool sanctioned,
-        bool checkCurrent
-    ) private pure {
-        AD.Head memory h = b.heads[generation - 1];
-        uint256 latest = type(uint256).max;
-        bytes32 resolution;
-        for (uint256 i; i < b.disputes.length; ++i) {
-            if (
-                b.disputes[i].record.terms.bindingGeneration == generation
-                    && b.disputes[i].record.terms.disputeAction == 1
-            ) latest = i;
-        }
-        for (uint256 i; i < b.resolutions.length; ++i) {
-            if (b.resolutions[i].record.terms.bindingGeneration == generation) {
-                resolution = b.resolutions[i].record.actionId;
-            }
-        }
-        if (latest == type(uint256).max) {
-            AD.Head memory expected;
-            expected.revocationReason = h.revocationReason;
-            if (
-                (h.revocationReason != 0 && h.revocationReason != 3)
-                    || keccak256(abi.encode(h)) != keccak256(abi.encode(expected))
-            ) _invalid();
-        } else {
-            D.DisputeRow memory o = b.disputes[latest];
-            bytes32 counter;
-            bool resolved;
-            bool open = o.withdrawal.recordHash == 0;
-            for (uint256 i; i < b.disputes.length; ++i) {
-                if (
-                    b.disputes[i].record.terms.disputeAction == 3
-                        && b.disputes[i].record.disputeRecordHash == o.record.recordHash
-                ) counter = b.disputes[i].record.recordHash;
-            }
-            for (uint256 i; i < b.resolutions.length; ++i) {
-                if (b.resolutions[i].record.terms.disputeRecordHash == o.record.recordHash) {
-                    resolved = true;
-                    open = false;
-                    if (
-                        h.revocationReason != 3
-                            && h.revocationReason
-                                != (b.resolutions[i].record.terms.resolution == 2 ? 4 : 0)
-                    ) _invalid();
-                    if (
-                        b.resolutions[i].record.terms.resolution == 1
-                            && h.restoreState != b.resolutions[i].record.restoredState
-                    ) _invalid();
-                }
-            }
-            if (
-                h.disputeRecordHash != o.record.recordHash
-                    || h.counterStatementRecordHash != counter || h.resolutionActionId != resolution
-                    || h.open != open || h.reopened != _reopened(b, o, p) || h.restoreState < 1
-                    || h.restoreState > (sanctioned ? 3 : 2)
-                    || (o.withdrawal.recordHash != 0
-                        && (h.restoreState != o.withdrawal.restoredState
-                            || (h.revocationReason != 0 && h.revocationReason != 3)))
-                    || (open && h.revocationReason != (h.reopened ? 4 : 0))
-                    || (!open && !resolved && o.withdrawal.recordHash == 0)
-            ) _invalid();
-        }
-        if (h.revocationReason == 3) {
-            bool executed;
-            for (uint256 i; i < b.repudiations.length; ++i) {
-                if (
-                    b.repudiations[i].record.terms.bindingGeneration == generation
-                        && b.repudiations[i].terminal.phase == 4
-                ) executed = true;
-            }
-            if (!executed || h.open) _invalid();
-        }
-        if (checkCurrent && generation == b.current.generation) {
-            if (
-                (b.current.state == 4) != h.open
-                    || (b.current.state == 5 && h.revocationReason != 3 && h.revocationReason != 4)
-                    || ((b.current.state == 2 || (sanctioned && b.current.state == 3))
-                        && h.revocationReason != 0)
-            ) _invalid();
-        }
+        Heads.validate(b, p, sanctioned, checkCurrent);
     }
 
     function _outcome(
