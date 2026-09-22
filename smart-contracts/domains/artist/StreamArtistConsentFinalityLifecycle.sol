@@ -599,7 +599,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM | XF.MULTIPLE_DISPUTE_HISTORY | XF.PRIMARY_COLLABORATORS;
+        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM | XF.MULTIPLE_DISPUTE_HISTORY | XF.PRIMARY_COLLABORATORS | XF.COMPLETE_HISTORY;
     }
 
     function recoveredAuthorityHydrationState(

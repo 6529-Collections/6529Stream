@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistoryCodec as CompleteCodec } from "./StreamArtistCompleteHistoryCodec.sol";
+import { StreamArtistCompleteHistoryIdentityImport as CompleteImport } from "./StreamArtistCompleteHistoryIdentityImport.sol";
 import { StreamArtistUnboundPlatformCodec as UnboundCodec } from "./StreamArtistUnboundPlatformCodec.sol";
 import { StreamArtistUnboundPlatformIdentityImport as UnboundImport } from "./StreamArtistUnboundPlatformIdentityImport.sol";
 import { StreamArtistRecoveredMultipleDisputeIdentityImport as DisputeImport } from "./StreamArtistRecoveredMultipleDisputeIdentityImport.sol";
@@ -40,6 +42,10 @@ library StreamArtistRecoveredIdentityTransportImport {
     function importEncoded(uint256[17] memory roots, bytes calldata encoded) public {
         (, AH.Query memory query, AH.OwnerData memory data, bytes32 value) =
             abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (CompleteCodec.selected(data.typedState, 2)) {
+            CompleteImport.importState(roots, query, data.typedState, value);
+            return;
+        }
         if (UnboundCodec.selected(data.typedState, 2)) {
             UnboundImport.importState(roots, query, data.typedState, value);
             return;

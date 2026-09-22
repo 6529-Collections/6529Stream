@@ -5,15 +5,16 @@
 - Add separate full-source composition, historical-principal storage and
   seven-owner preparation workers for pending, terminal, collaborator, dispute
   and mixed unbound histories. Preserve original Archive clocks and one global
-  nonce/grant proof. Shared activation, Class Four integration, runtime and
-  seven-owner acceptance remain pending. See the
+  nonce/grant proof. Connect the observed-history selector, seven existing owner
+  routes and complete source recheck, with four new Safe routing regressions.
+  Class Four integration, runtime and seven-owner acceptance remain pending. See the
   [composition guide](docs/integrations/artist-complete-history.md).
 
 ## Complete-history Consent adapters
 
 - Add separate historical-principal source, journal and grant-use adapters for
   complete Consent/content/ratification/sanction histories, preserving strict
-  existing profile gates. Route activation and native acceptance remain pending.
+  existing profile gates. The source routes are connected; native acceptance remains pending.
   See the [adapter guide](docs/integrations/artist-complete-history-consents.md).
 
 ## Aggregate original sanction history

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistoryBindingImport as Complete } from "./StreamArtistCompleteHistoryBindingImport.sol";
 import {
     StreamArtistPrimaryCollaboratorDecode as Decode
 } from "./StreamArtistPrimaryCollaboratorDecode.sol";
@@ -66,6 +67,7 @@ library StreamArtistPrimaryCollaboratorBindingImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
+        if (Complete.applyState(bindings, history, terms, terminals, corrections, collaborators, anchor, outer)) return true;
         if (!Codec.selected(outer, 0)) return false;
         Context memory c;
         (M.State memory scope,, PC.Proof memory proof) = Decode.collect(0, anchor, outer);

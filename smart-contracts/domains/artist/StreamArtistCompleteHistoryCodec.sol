@@ -36,9 +36,9 @@ import {
 } from "./StreamArtistRecoveredHydrationProvenance.sol";
 
 /// @notice Canonical stage envelope for the separate complete-history representation.
-/// @dev Inventory is presently a partial source phase. This codec proves canonical bytes,
-/// membership and provenance joins, not the opaque owner row semantics or missing family
-/// proofs. It must never authorize import by itself. Existing codecs and features are unchanged.
+/// @dev This codec proves canonical bytes, membership and provenance joins. The fixed
+/// composition and family proofs establish opaque row semantics; this codec must never
+/// authorize import by itself.
 library StreamArtistCompleteHistoryCodec {
     function encode(
         uint8 owner,
@@ -92,8 +92,8 @@ library StreamArtistCompleteHistoryCodec {
         Provenance.validate(proof.provenance);
     }
 
-    /// @dev The existing outer decoder intentionally rejects the reserved bit until the
-    /// integrator activates its known-feature/capability contract with a complete importer.
+    /// @dev Selection uses the shared known-feature gate; full admission remains in outer
+    /// and the fixed complete-history source and family proofs.
     function selected(bytes memory raw, uint8 owner) public pure returns (bool) {
         (RH.ExportHeader memory h,) = Payload.decode(raw, owner);
         return (h.requiredFeatures & C.FEATURE) != 0;

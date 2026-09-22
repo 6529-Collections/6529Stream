@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistorySelection as CompleteSelection } from "./StreamArtistCompleteHistorySelection.sol";
+import { StreamArtistCompleteHistoryPreparation as CompletePreparation } from "./StreamArtistCompleteHistoryPreparation.sol";
 import { StreamArtistUnboundPlatformPreparation as Unbound } from "./StreamArtistUnboundPlatformPreparation.sol";
 import { StreamArtistUnboundPlatformSelectors as UnboundSelectors } from "./StreamArtistUnboundPlatformSelectors.sol";
 import { StreamArtistPrimaryCollaboratorSelection as PrimarySelection } from "./StreamArtistPrimaryCollaboratorSelection.sol";
@@ -97,6 +99,9 @@ library StreamArtistRecoveredHydrationPrepared {
         T.RoyaltyFreeze[] memory royalties,
         bool requireInventory
     ) private view returns (bytes memory) {
+        if (CompleteSelection.required(destination, request)) {
+            return CompletePreparation.encode(destination, request, royalties, requireInventory);
+        }
         if (UnboundSelectors.selected(request.records.authority)) return Unbound.encode(destination, request, royalties, requireInventory);
         if (PrimarySelection.required(destination, request)) {
             return PrimaryPreparation.encode(destination, request, royalties, requireInventory);

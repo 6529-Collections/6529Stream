@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistoryConsentSupplementImport as CompleteSupplement } from "./StreamArtistCompleteHistoryConsentSupplementImport.sol";
 
 import {
     StreamArtistRecoveredAggregateConsentEnvelope as Aggregate
@@ -52,6 +53,8 @@ library StreamArtistRecoveredAggregateConsentSupplementImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
+        // Complete History also validates empty original heads when both family bits are absent.
+        if (CompleteSupplement.applyState(sanctions, current, records, anchor, outer)) return true;
         RH.Envelope memory e = Envelope.decode(outer, 6);
         if ((e.header.requiredFeatures & (RH.SANCTION_HISTORY | RH.RATIFICATIONS)) == 0) {
             return false;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistoryAttributionImport as CompleteAttribution } from "./StreamArtistCompleteHistoryAttributionImport.sol";
 import { StreamArtistUnboundPlatformCollectionImport as Unbound } from "./StreamArtistUnboundPlatformCollectionImport.sol";
 import { StreamArtistRecoveredMultipleDisputeCollectionImport as DisputeCollections } from "./StreamArtistRecoveredMultipleDisputeCollectionImport.sol";
 import { StreamArtistRecoveredMultipleDisputeAttributionImport as DisputeAttribution } from "./StreamArtistRecoveredMultipleDisputeAttributionImport.sol";
@@ -127,6 +128,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
         public
         returns (bool)
     {
+        if (CompleteAttribution.applyState(state, anchor, raw)) return true;
         if (Unbound.attribution(state, anchor, raw)) return true;
         if (DisputeAttribution.applyState(state, anchor, raw)) return true;
         if (PrimaryAttribution.applyState(state, anchor, raw)) return true;

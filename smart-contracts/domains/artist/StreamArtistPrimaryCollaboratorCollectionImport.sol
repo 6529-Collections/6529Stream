@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistoryCollectionImport as Complete } from "./StreamArtistCompleteHistoryCollectionImport.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -41,6 +42,7 @@ library StreamArtistPrimaryCollaboratorCollectionImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
+        if (Complete.collaborators(proposals, joins, counts, links, anchor, outer)) return true;
         if (!Codec.selected(outer, 1)) return false;
         (,, PC.Proof memory proof) = Decode.collect(1, anchor, outer);
         C.IdentityProposalState memory emptyProposal;
@@ -102,6 +104,7 @@ library StreamArtistPrimaryCollaboratorCollectionImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
+        if (Complete.acceptances(primary, times, collaborators_, anchor, outer)) return true;
         if (!Codec.selected(outer, 3)) return false;
         (M.State memory scope,, PC.Proof memory proof) = Decode.collect(3, anchor, outer);
         if (scope.rows.length != proof.accepted.length) _invalid();

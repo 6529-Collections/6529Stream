@@ -3,10 +3,10 @@
 Complete History is a separate, developing operation-60 transport for the full
 original Artist and collection graph. Its source, preparation and import workers
 are implemented separately from the existing generation, dispute, collaborator
-and unbound profiles. The shared dispatcher and owner capability activation,
-Class Four supplement integration, runtime qualification and seven-owner
-acceptance are still pending. This guide describes the worker contract, not a
-deployed or release-ready profile.
+and unbound profiles. Source integration now connects its observed-history
+selector, all seven owner routes and the full post-write source recheck. Class
+Four supplement integration, native capacity and seven-owner execution remain
+pending. These source changes do not establish a deployed or release-ready profile.
 
 ## Scope and original records
 
@@ -62,15 +62,23 @@ still run over the full provenance.
 ## Integration and evidence boundaries
 
 The distinct tag is `6529STREAM_ARTIST_COMPLETE_HISTORY_V1`, version 1. Its reserved
-feature is `33554432`. The local allowed mask includes semantic feature flags and
-this tag, excluding narrower aggregate transport tags. Reserving an encoding does
-not advertise source or destination capability.
+feature is `33554432`. The known-feature registry and all seven owners explicitly
+advertise this implemented source route. Its allowed mask includes semantic
+feature flags and this tag, excluding narrower aggregate transport tags.
 
-The shared integrator must connect preparation, all seven owner routes, both
-Consent hooks and the complete source recheck together. The original commit must
-continue to check all seven source checkpoints, source configuration, timing,
-publications and destination commit/revision invariants. The immutable original
-request, provenance and operation-60 evidence formats remain unchanged.
+Preparation selects observed exceptional histories before narrower profiles.
+The existing fixed library calls dispatch all seven imports, including both
+Consent hooks; no additional owner import call or storage root is introduced.
+The complete source recheck runs after the seven writes. The original commit
+still checks all source checkpoints, configuration, timing, publications and
+destination commit/revision invariants. Original request, provenance and
+operation-60 evidence formats remain unchanged.
+
+Four new actual-producer routing regressions cover an undeclared all-unbound
+allegation, repeated imports, late Archive rollback with the same Safe payload
+retry, and continued selection of the original declared-unbound profile. Their
+Core, coverage and scheduled-governance fixture boundaries remain explicit.
+These new cases are authored; execution has not yet been established.
 
 Focused tests distinguish pure vectors, map installation and actual producer
 fixtures. Actual producer fixtures retain their stated Core/governance admission

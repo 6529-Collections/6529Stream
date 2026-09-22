@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCompleteHistoryConsentImport as CompleteConsent } from "./StreamArtistCompleteHistoryConsentImport.sol";
 import { StreamArtistRecoveredMultipleDisputeConsentImport as Disputes } from "./StreamArtistRecoveredMultipleDisputeConsentImport.sol";
 import { StreamArtistPrimaryCollaboratorConsentImport as PrimaryConsentImport } from "./StreamArtistPrimaryCollaboratorConsentImport.sol";
 import { StreamArtistRecoveredMultipleGenerationConsentImport as Generations } from "./StreamArtistRecoveredMultipleGenerationConsentImport.sol";
@@ -64,6 +65,7 @@ library StreamArtistRecoveredMultipleConsentImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
+        if (CompleteConsent.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;
         if (Disputes.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;
         if (PrimaryConsentImport.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;
         if (Generations.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;

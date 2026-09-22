@@ -2,8 +2,9 @@
 
 The developing CompleteHistory profile has separate source, validation and grant-use
 adapters for collections whose original binding history names different Artists.
-These adapters do not activate a hydration route or advertise a new owner capability.
-Their integration, native execution, size and seven-owner acceptance remain pending.
+The shared source integration now connects these adapters to both guarded Consent
+imports and complete source revalidation. Native execution, size and seven-owner
+acceptance remain pending; the adapters alone are not an import authorization.
 
 The existing generation, dispute and PRIMARY_ONLY collaborator profiles keep their
 current selectors, admission rules and byte encodings. The complete-history caller
