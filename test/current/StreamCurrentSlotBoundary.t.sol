@@ -3,6 +3,12 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentTestSlots.sol";
 import {
+    StreamArtistExtensionFactory
+} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
+import {
+    StreamArtistOnboardingRegistry
+} from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
+import {
     StreamCurrentFinalityArtifacts
 } from "../../script/current/StreamCurrentFinalityArtifacts.sol";
 
@@ -786,7 +792,9 @@ contract SlotBoundaryHarness is StreamCurrentFinalityArtifacts {
             );
         StreamCurrentTestSlots.SplitPlan memory plan = StreamCurrentTestSlots.prepareFacade(c);
         bytes memory runtime = _productRuntime(plan.name, plan.parents, creation, plan.values);
-        return StreamCurrentTestSlots.finishFacade(c, plan, creation, runtime);
+        return StreamArtistOnboardingRegistry(
+            payable(StreamCurrentTestSlots.finishFacade(c, plan, creation, runtime))
+        );
     }
 
     function _deploySplitArtistIdentity(

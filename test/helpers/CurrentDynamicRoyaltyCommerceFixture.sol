@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "./CurrentCommerceConservationFixture.sol";
 import {
+    StreamArtistArchiveV2
+} from "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
+import {
     StreamDynamicPrimaryBeneficiaries as DB
 } from "../../smart-contracts/domains/revenue/StreamDynamicPrimaryBeneficiaries.sol";
 import {

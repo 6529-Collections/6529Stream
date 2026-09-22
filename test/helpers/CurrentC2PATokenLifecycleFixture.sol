@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./CurrentStaticTokenRenderingFixture.sol";
+import {
+    StreamArtistArchiveV2
+} from "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
 import { StreamFullV1C2PAProducts } from "../../script/current/StreamFullV1C2PAProducts.sol";
 import {
     IStreamC2PAReconciliation as CR

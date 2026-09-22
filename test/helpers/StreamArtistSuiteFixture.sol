@@ -1,33 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamTestArtistExtensionFactory,
+    IStreamTestArtistArtifactAddress
+} from "./StreamCurrentTestArtistInterfaces.sol";
 import { StreamCurrentTestSlots } from "./StreamCurrentTestSlots.sol";
 import { StreamDeploymentSlot } from "../../script/current/StreamDeploymentSlot.sol";
 import { StreamCurrentTestRuntime } from "./StreamCurrentTestRuntime.sol";
-import {
-    StreamArtistIdentityCreationPart
-} from "../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
-import {
-    StreamArtistEstateCreationPart
-} from "../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
-
-import {
-    StreamArtistExtensionFactory
-} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import "../regression/legacy/helpers/CharacterizationTestBase.sol";
 import { StreamCurrentFinalityGraph } from "../../script/current/StreamCurrentFinalityGraph.sol";
-import { StreamCurrentGraphCreation } from "../../script/current/StreamCurrentGraphCreation.sol";
+import { StreamCurrentGraphKinds } from "../../script/current/StreamCurrentGraphKinds.sol";
 import { StreamNativeAssemblyCreation } from "./StreamNativeAssemblyCreation.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol";
-import "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
-import "../../smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol";
-import "../../smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol";
-import "../../smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol";
-import "../../smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol";
-import "../../smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol";
-import "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
-import "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import {
@@ -83,13 +69,13 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
         s.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
         _deployArtistArchival(core_, executor_, roles_);
         address nextCoordinator = _reserveCurrentCoordinator(address(this));
-        StreamArtistExtensionFactory artistExtensions = StreamArtistExtensionFactory(
+        IStreamTestArtistExtensionFactory artistExtensions = IStreamTestArtistExtensionFactory(
             payable(_artistSuiteArtifactCreate(
                     "smart-contracts/domains/artist/StreamArtistExtensionFactory.sol:StreamArtistExtensionFactory",
                     abi.encode(
                         [
                             address(
-                                StreamArtistIdentityCreationPart(
+                                IStreamTestArtistArtifactAddress(
                                     payable(_artistSuiteArtifactCreate(
                                             "smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart",
                                             abi.encode(0)
@@ -97,7 +83,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                                 )
                             ),
                             address(
-                                StreamArtistIdentityCreationPart(
+                                IStreamTestArtistArtifactAddress(
                                     payable(_artistSuiteArtifactCreate(
                                             "smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart",
                                             abi.encode(1)
@@ -105,7 +91,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                                 )
                             ),
                             address(
-                                StreamArtistEstateCreationPart(
+                                IStreamTestArtistArtifactAddress(
                                     payable(_artistSuiteArtifactCreate(
                                             "smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart",
                                             abi.encode(0)
@@ -113,7 +99,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                                 )
                             ),
                             address(
-                                StreamArtistEstateCreationPart(
+                                IStreamTestArtistArtifactAddress(
                                     payable(_artistSuiteArtifactCreate(
                                             "smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart",
                                             abi.encode(1)
@@ -125,7 +111,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                 ))
         );
         artists = _deploySplitArtistFacade(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingRegistry),
             address(this),
             address(artistExtensions),
             [core_, manager_, nextCoordinator, executor_, address(artistArchivalCoverage)],
@@ -135,7 +121,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
         );
         s.registry = address(artists);
         s.archive = address(
-            StreamArtistArchiveV2(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2",
                         abi.encode(s.registry, nextCoordinator)
@@ -143,7 +129,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             )
         );
         s.owners[0] = address(
-            StreamArtistBindingLifecycle(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol:StreamArtistBindingLifecycle",
                         abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
@@ -151,7 +137,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             )
         );
         s.owners[1] = address(
-            StreamArtistCollaboratorLifecycle(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol:StreamArtistCollaboratorLifecycle",
                         abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
@@ -159,13 +145,13 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             )
         );
         s.owners[2] = _deploySplitArtistIdentity(
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistIdentityAuthority),
             address(this),
             address(artistExtensions),
             [s.registry, nextCoordinator, s.archive, core_, manager_]
         );
         s.owners[3] = address(
-            StreamArtistAcceptanceLifecycle(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol:StreamArtistAcceptanceLifecycle",
                         abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
@@ -173,7 +159,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             )
         );
         s.owners[4] = address(
-            StreamArtistAttributionLifecycle(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol:StreamArtistAttributionLifecycle",
                         abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
@@ -181,7 +167,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             )
         );
         s.owners[5] = address(
-            StreamArtistPayoutLifecycle(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol:StreamArtistPayoutLifecycle",
                         abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
@@ -189,7 +175,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             )
         );
         s.owners[6] = address(
-            StreamArtistConsentFinalityLifecycle(
+            IStreamTestArtistArtifactAddress(
                 payable(_artistSuiteArtifactCreate(
                         "smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol:StreamArtistConsentFinalityLifecycle",
                         abi.encode(s.registry, nextCoordinator, s.archive, core_, manager_)
@@ -303,7 +289,9 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
             );
         StreamCurrentTestSlots.SplitPlan memory plan = StreamCurrentTestSlots.prepareFacade(c);
         bytes memory runtime = _productRuntime(plan.name, plan.parents, creation, plan.values);
-        return StreamCurrentTestSlots.finishFacade(c, plan, creation, runtime);
+        return StreamArtistOnboardingRegistry(
+            payable(StreamCurrentTestSlots.finishFacade(c, plan, creation, runtime))
+        );
     }
 
     function _deploySplitArtistIdentity(
@@ -343,7 +331,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
     function _fixtureModuleRegistry() internal view virtual returns (address);
     function _fixtureSystemManifest() internal view virtual returns (address);
 
-    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+    function _graphCreation(StreamCurrentGraphKinds.Kind kind)
         internal
         view
         override

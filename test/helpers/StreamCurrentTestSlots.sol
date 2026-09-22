@@ -1,23 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { IStreamTestArtistExtensionFactory } from "./StreamCurrentTestArtistInterfaces.sol";
 import { StreamDeploymentSlot } from "../../script/current/StreamDeploymentSlot.sol";
 import {
     StreamCurrentFinalityArtifacts,
     CurrentGraphArtifactVm
 } from "../../script/current/StreamCurrentFinalityArtifacts.sol";
 import {
-    StreamArtistExtensionFactory
-} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
-import {
     StreamArtistEstateCoverage
 } from "../../smart-contracts/domains/artist/StreamArtistEstateCoverage.sol";
 import {
     StreamArtistTimingState
 } from "../../smart-contracts/domains/artist/StreamArtistTimingState.sol";
-import {
-    StreamArtistOnboardingRegistry
-} from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 
 /// @notice Fixed slot and split-Artist operations for current test fixtures.
 /// @dev DELEGATECALL retains the fixture's CREATE identity and outward caller.
@@ -91,7 +86,7 @@ library StreamCurrentTestSlots {
         StreamDeploymentSlot slot = new StreamDeploymentSlot(c.operator_);
         address[3] memory children;
         for (uint8 i; i < 3; ++i) {
-            children[i] = StreamArtistExtensionFactory(c.factory_)
+            children[i] = IStreamTestArtistExtensionFactory(c.factory_)
                 .deployRegistry(i + 4, slot.product(), c.p[2]);
         }
         StreamCurrentFinalityArtifacts.RuntimeValue[] memory v =
@@ -138,7 +133,7 @@ library StreamCurrentTestSlots {
         SplitPlan calldata plan,
         bytes calldata creation,
         bytes calldata runtime
-    ) public returns (StreamArtistOnboardingRegistry) {
+    ) public returns (address) {
         address host = plan.slot
             .deploy(
                 bytes.concat(
@@ -162,7 +157,7 @@ library StreamCurrentTestSlots {
             host == plan.slot.product() && keccak256(host.code) == keccak256(runtime),
             "complete split facade runtime"
         );
-        return StreamArtistOnboardingRegistry(payable(host));
+        return host;
     }
 
     function prepareIdentity(IdentityContext calldata c) public returns (SplitPlan memory) {
@@ -170,7 +165,7 @@ library StreamCurrentTestSlots {
         address[3] memory children;
         address[6] memory pins = [slot.product(), c.p[0], c.p[1], c.p[2], c.p[3], c.p[4]];
         for (uint8 i; i < 3; ++i) {
-            children[i] = StreamArtistExtensionFactory(c.factory_).deployIdentity(i + 1, pins);
+            children[i] = IStreamTestArtistExtensionFactory(c.factory_).deployIdentity(i + 1, pins);
         }
         StreamCurrentFinalityArtifacts.RuntimeValue[] memory v =
             new StreamCurrentFinalityArtifacts.RuntimeValue[](13);

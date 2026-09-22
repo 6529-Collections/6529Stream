@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./CurrentDynamicRoyaltyCommerceFixture.sol";
+import {
+    StreamArtistArchiveV2
+} from "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
 import "../../script/current/StreamGovernanceCatalogStagePlan.sol";
 import "../../smart-contracts/domains/revenue/StreamCustodyRightsValidation.sol";
 import "../../smart-contracts/interfaces/stream/revenue/StreamTokenProfileCustodyTypes.sol";

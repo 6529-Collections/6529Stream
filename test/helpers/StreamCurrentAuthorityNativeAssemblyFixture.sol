@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 import {
     StreamCurrentAuthorityFinalityGraph
 } from "../../script/current/StreamCurrentAuthorityFinalityGraph.sol";
-import { StreamCurrentGraphCreation } from "../../script/current/StreamCurrentGraphCreation.sol";
+import { StreamCurrentGraphKinds } from "../../script/current/StreamCurrentGraphKinds.sol";
 import {
     StreamCurrentAuthorityGraphCreation
 } from "../../script/current/StreamCurrentAuthorityGraphCreation.sol";
@@ -3996,7 +3996,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
 
     // Each factory call is a separate broadcast transaction; only the original slot creates the host.
 
-    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+    function _graphCreation(StreamCurrentGraphKinds.Kind kind)
         internal
         view
         override
