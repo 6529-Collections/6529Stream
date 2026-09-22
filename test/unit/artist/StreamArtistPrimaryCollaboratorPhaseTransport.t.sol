@@ -134,11 +134,6 @@ contract PrimaryPhaseFinishBoundary {
 contract PrimaryFamilyValidationBoundary {
     fallback(bytes calldata raw) external returns (bytes memory) {
         require(msg.sig == FamilyValidation.validate.selector, "exact family validator selector");
-        (
-            FamilyValidation.Context memory c,
-            H.Inventory memory sanctions,
-            T.RatificationRecord[][] memory ratifications
-        ) = abi.decode(raw[4:], (FamilyValidation.Context, H.Inventory, T.RatificationRecord[][]));
         (Family.Context memory family, Collection.Result memory rows) = PrimaryPhaseValues.family();
         FamilyValidation.Context memory expected = FamilyValidation.Context(
             family.source.identities,
@@ -151,17 +146,10 @@ contract PrimaryFamilyValidationBoundary {
             rows.consents,
             rows.attestations
         );
+        H.Inventory memory empty;
         require(
-            keccak256(abi.encode(c)) == keccak256(abi.encode(expected)),
-            "all nine original validation fields"
-        );
-        require(
-            keccak256(abi.encode(sanctions)) == keccak256(PrimaryPhaseValues.emptySanctions()),
-            "complete empty sanction argument"
-        );
-        require(
-            keccak256(abi.encode(ratifications)) == keccak256(abi.encode(rows.ratifications)),
-            "complete collected ratification matrix"
+            keccak256(raw[4:]) == keccak256(abi.encode(expected, empty, rows.ratifications)),
+            "all nine fields, empty sanctions and complete ratification matrix"
         );
         return bytes("");
     }
