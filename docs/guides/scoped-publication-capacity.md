@@ -22,21 +22,24 @@ is substituted for this historical comparison.
 
 ## Focused evidence
 
-The first exact-source Solidity 0.8.19/via-IR/optimizer-200/Paris capture preserves
+The final committed-source Solidity 0.8.19/via-IR/optimizer-200/Paris capture preserves
 the original no-CBOR/no-bytecode-hash settings and measures:
 
-| Product | Runtime bytes | Bare initialization bytes |
+| Product | Runtime bytes | Full initialization bytes |
 | --- | ---: | ---: |
-| Snapshot V1 | 23,258 | 27,075 |
-| Snapshot V2 | 23,101 | 26,918 |
+| Snapshot V1 | 23,258 | 28,707 |
+| Snapshot V2 | 23,101 | 28,550 |
 | Snapshot assembly library | 15,945 | 15,977 |
-| Reference V1 | 23,521 | 28,050 |
-| Reference V2 | 23,521 | 28,050 |
+| Reference V1 | 23,521 | 29,714 |
+| Reference V2 | 23,521 | 29,714 |
 | Reference history library | 5,707 | 5,739 |
 
-All six fit the 24,576-byte runtime limit. The first capture input SHA-256 is
-`12107504aeb76262753cfaff0b7d1fece461421ecc1e43d473efa203f0c1f6dd`;
-subsequent formatting preserves executable tokens. Public wrapper ABIs,
+All six fit the 24,576-byte runtime and 49,152-byte full initialization limits.
+The exact `5104c901` capture input SHA-256 is
+`680ab0d9a673c7ce221d1e028f019194c9ecc5413bca23db4a1f8bcad18c8a85`.
+Snapshot constructor arguments add 1,632 bytes; Reference arguments add 1,664,
+using the original fixed gas-parameter names. Other fields are static-width;
+encoding their length does not establish valid deployment arguments or CREATE. Public wrapper ABIs,
 selectors and recursive storage layouts match the baseline. The History
 library adds its typed exact-scope method without changing prior methods.
 

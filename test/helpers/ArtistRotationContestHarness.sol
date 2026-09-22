@@ -30,4 +30,3 @@ contract ArtistRotationContestHarness is StreamArtistIdentityAuthority {
         );
     }
 }
-

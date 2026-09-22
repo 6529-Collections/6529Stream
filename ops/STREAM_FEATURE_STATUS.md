@@ -17,7 +17,8 @@ different milestones.
 ## Latest integration checkpoint: 22 September
 
 Expanded full v1 remains incomplete. The complete-history routes are source
-integrated at `f54c2791`; ABI197 checks **4,615 Solidity sources with zero errors**.
+integrated at `f54c2791`; ABI198 checks **4,620 Solidity sources with zero errors**
+after the publication repair at `5104c901`.
 Client test sharding is integrated through `992b9e03`. These checks establish
 source and interfaces; full current-stack acceptance is still pending. RC1 and
 its Sepolia evidence remain unchanged.
@@ -26,7 +27,9 @@ its Sepolia evidence remain unchanged.
   Consent, original sanctions/confirmations12/13, ratification52, all seven owner
   imports and complete post-import source recheck are now connected. Independent
   source reviews are clear. Four new routing/Safe rollback regressions are
-  authored and type-checked, but not executed. Existing class4/capability59
+  authored and type-checked, but not executed. Six additional mixed-history and
+  repeated-composition cases are integrated as `d32087b0`, also unexecuted.
+  Existing class4/capability59
   migration is separately built and source-reviewed; its shared activation is
   still missing. Mixed histories and actual Safe execution remain open.
 - **Museum:** exact source-field/format correspondence and native authoring
@@ -46,17 +49,20 @@ its Sepolia evidence remain unchanged.
   required shards. Root runner14, workflow-policy41 and policy checks pass;
   full Ubuntu Node24 matrix execution remains pending. Existing time bounds
   and the required aggregate check are preserved.
-- **Capacity:** SnapshotPublicationV1 measured 28,088 runtime bytes and
-  ReferencePublicationV1 25,585 on the recorded `a0f677cf` source; both exceed
-  24,576 and require repair. Consent full initialization measured exactly
-  49,152 bytes at `7f0e6fe6`; later complete-history routes need fresh measurement.
-  The older Coordinator measurement also has no headroom. These are open
-  deployment checks, not waived limits.
+- **Capacity:** both measured preservation publication overruns are repaired
+  at `5104c901`. Snapshot V1/V2 measure 23,258/23,101 runtime bytes; Reference
+  V1/V2 measure 23,521. All four and both workers fit the original runtime and
+  full-initcode limits. Public wrapper ABI/selectors/storage remain identical.
+  Six focused Reference-history tests pass, including 256 fuzz inputs. Full
+  Snapshot/current-stack execution and gas remain pending. Consent measured
+  exactly 49,152 full-initcode bytes on earlier `7f0e6fe6`; latest Artist routes
+  and Coordinator require fresh capacity evidence. Their planned 20-product
+  native run is held by automatic approval review.
 - **Scoped execution evidence:** original ratification workers pass 18 cases
   on `c30f4f16`; preservation components retain their 61-case `e7286fa1` pass.
   Earlier generation/collaborator/dispute results remain limited to their
   recorded sources. None establishes the latest combined system. The canonical
-  source inventory now contains **3,092 production paths**.
+  source inventory now contains **3,093 production paths**.
 
 Remaining delivery work is the missing feature combinations and Museum software,
 current deployment-size/gas repairs, actual current-stack and all-call Safe
@@ -66,7 +72,9 @@ remains isolated until actual paid execution meets the original 500,000-gas
 ceiling. No new funding is required. Audit, production ceremonies and Lean remain
 separate. Earlier failed runs remain recorded; newer source does not inherit
 their acceptance. Automatic approval review has blocked several task handoffs
-pending destination-specific permission; those payloads remain held.
+pending destination-specific permission; those payloads remain held. A new
+Class4 handoff read and the separate Artist native run were also rejected; exact
+local-step permission has been requested. Unaffected work continues.
 
 ## How to read this document
 
@@ -100,7 +108,7 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | Complete-history routes `f54c2791`; client CI `992b9e03`. Runtime acceptance remains scoped to each recorded source. |
+| Current integration source | Publication repair `5104c901`; mixed-history tests `d32087b0`; full source ABI198. Runtime acceptance remains scoped to each recorded source. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |

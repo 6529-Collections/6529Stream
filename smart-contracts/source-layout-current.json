@@ -2414,6 +2414,7 @@
     "smart-contracts/domains/records/StreamScopedPreservationPolicySnapshotDefinitionsV2.sol",
     "smart-contracts/domains/records/StreamScopedPreservationPolicySnapshotSourceBindingsV1.sol",
     "smart-contracts/domains/records/StreamScopedPreservationPolicySnapshotSourceReadsV1.sol",
+    "smart-contracts/domains/records/StreamScopedPreservationSnapshotAssemblyV1.sol",
     "smart-contracts/domains/records/StreamScopedReferenceDefinitions.sol",
     "smart-contracts/domains/records/StreamScopedSnapshotDefinitions.sol",
     "smart-contracts/domains/records/StreamScopedSnapshotSourceReads.sol",

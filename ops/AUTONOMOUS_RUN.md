@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI197 `f54c2791`: 4,615 sources / zero errors; client CI `992b9e03`; runtime remains source-specific. |
+| Source checkpoint | ABI198 `5104c901`: 4,620 sources / zero errors; preservation repair passes selected capacity and six/fuzz256 worker tests; current Artist runtime remains pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,7 +30,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 22 September
 
 Expanded full v1 remains incomplete. The complete-history routes are source
-integrated at `f54c2791`; ABI197 checks **4,615 Solidity sources with zero errors**.
+integrated at `f54c2791`; ABI198 checks **4,620 Solidity sources with zero errors**
+after the publication repair at `5104c901`.
 Client test sharding is integrated through `992b9e03`. These checks establish
 source and interfaces; full current-stack acceptance is still pending. RC1 and
 its Sepolia evidence remain unchanged.
@@ -39,7 +40,9 @@ its Sepolia evidence remain unchanged.
   Consent, original sanctions/confirmations12/13, ratification52, all seven owner
   imports and complete post-import source recheck are now connected. Independent
   source reviews are clear. Four new routing/Safe rollback regressions are
-  authored and type-checked, but not executed. Existing class4/capability59
+  authored and type-checked, but not executed. Six additional mixed-history and
+  repeated-composition cases are integrated as `d32087b0`, also unexecuted.
+  Existing class4/capability59
   migration is separately built and source-reviewed; its shared activation is
   still missing. Mixed histories and actual Safe execution remain open.
 - **Museum:** exact source-field/format correspondence and native authoring
@@ -59,17 +62,20 @@ its Sepolia evidence remain unchanged.
   required shards. Root runner14, workflow-policy41 and policy checks pass;
   full Ubuntu Node24 matrix execution remains pending. Existing time bounds
   and the required aggregate check are preserved.
-- **Capacity:** SnapshotPublicationV1 measured 28,088 runtime bytes and
-  ReferencePublicationV1 25,585 on the recorded `a0f677cf` source; both exceed
-  24,576 and require repair. Consent full initialization measured exactly
-  49,152 bytes at `7f0e6fe6`; later complete-history routes need fresh measurement.
-  The older Coordinator measurement also has no headroom. These are open
-  deployment checks, not waived limits.
+- **Capacity:** both measured preservation publication overruns are repaired
+  at `5104c901`. Snapshot V1/V2 measure 23,258/23,101 runtime bytes; Reference
+  V1/V2 measure 23,521. All four and both workers fit the original runtime and
+  full-initcode limits. Public wrapper ABI/selectors/storage remain identical.
+  Six focused Reference-history tests pass, including 256 fuzz inputs. Full
+  Snapshot/current-stack execution and gas remain pending. Consent measured
+  exactly 49,152 full-initcode bytes on earlier `7f0e6fe6`; latest Artist routes
+  and Coordinator require fresh capacity evidence. Their planned 20-product
+  native run is held by automatic approval review.
 - **Scoped execution evidence:** original ratification workers pass 18 cases
   on `c30f4f16`; preservation components retain their 61-case `e7286fa1` pass.
   Earlier generation/collaborator/dispute results remain limited to their
   recorded sources. None establishes the latest combined system. The canonical
-  source inventory now contains **3,092 production paths**.
+  source inventory now contains **3,093 production paths**.
 
 Remaining delivery work is the missing feature combinations and Museum software,
 current deployment-size/gas repairs, actual current-stack and all-call Safe
@@ -79,11 +85,13 @@ remains isolated until actual paid execution meets the original 500,000-gas
 ceiling. No new funding is required. Audit, production ceremonies and Lean remain
 separate. Earlier failed runs remain recorded; newer source does not inherit
 their acceptance. Automatic approval review has blocked several task handoffs
-pending destination-specific permission; those payloads remain held.
+pending destination-specific permission; those payloads remain held. A new
+Class4 handoff read and the separate Artist native run were also rejected; exact
+local-step permission has been requested. Unaffected work continues.
 
 Current work ownership:
 
-- **Root:** integrate reviewed source; repair preservation publication sizes;
+- **Root:** integrate reviewed source; preservation publication size repair is complete;
   measure complete-history routes and close the combined candidate.
 - **Artist lead:** isolate inherited test setup, preserve original cohorts and
   finish missing generation products. Class4 source review is complete.
