@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamCurrentAuthorityPolicyInventoryLifecycleV2 as Lifecycle } from "./StreamCurrentAuthorityPolicyInventoryLifecycleV2.sol";
+
+import { StreamCurrentAuthorityPolicyInventoryRootStagesV2 as RootStages } from "./StreamCurrentAuthorityPolicyInventoryRootStagesV2.sol";
+
 import {
     StreamMultiOriginPolicyRenderCriticalSourceReadsV2 as OriginSources
 } from "./StreamMultiOriginPolicyRenderCriticalSourceReadsV2.sol";
@@ -211,37 +215,16 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
     }
 
     function beginInventory(uint256 collectionId) external returns (bytes32 id) {
-        D.Capture memory captured = Authority.resolve(_config);
-        (
-            C.Context memory c,
-            O.Origin memory current,
-            O.Origin memory presented,
-            bytes32 lineageHash
-        ) = OriginSources.current(captured.dependencies, _origins.dependencies, collectionId);
-        id = Guard.planId(_dependencyHash, captured, c, lineageHash);
-        if (_states[id].records.plans[id].collectionId != 0) return id;
-        Authority.remember(_authorities[id], _config, captured);
-        _states[id].records.dependencies = captured.dependencies;
-        _states[id].records.dependencyHash = _dependencyHash;
-        Origins.initialize(_origins, id, current, presented, lineageHash);
-        _states[id].contexts[id] = c;
-        _states[id].records.contexts[id] = c.records;
-        T.Plan storage p = _states[id].records.plans[id];
-        p.collectionId = collectionId;
-        p.subject = c.records.subject;
-        p.artistId = c.records.artistId;
-        p.sourceContextHash = D.contextHash(captured, keccak256(abi.encode(c)), lineageHash);
-        p.tokenCount = c.records.tokenCount;
-        emit InventoryStarted(id, collectionId, p.sourceContextHash);
+        return Lifecycle.beginInventory(_states, _origins, _authorities, _config, _dependencyHash, collectionId);
     }
 
     function appendNative(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         OriginalsV2.appendNative(_states[id], id);
     }
 
     function appendReference(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         OriginalsV2.appendReference(_states[id], id);
     }
 
@@ -251,12 +234,12 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Common.appendWork(_states[id], _origins, msg.data);
     }
 
     function appendRights(bytes32 id, StreamRightsRecordTypes.Statement calldata) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Common.appendRights(_states[id], msg.data);
     }
 
@@ -266,7 +249,7 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Common.appendIntent(_states[id], _origins, msg.data);
     }
 
@@ -276,7 +259,7 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Common.appendIntentWaiver(_states[id], _origins, msg.data);
     }
 
@@ -286,12 +269,12 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Common.appendInterview(_states[id], _origins, msg.data);
     }
 
     function appendInterviewWaiver(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Common.appendInterviewWaiver(_states[id], id);
     }
 
@@ -302,61 +285,36 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
         Aggregate.Aggregate calldata originalAggregate,
         O.ReceiptWitness calldata receipt
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        State.stage(_states[id], id, 6);
-        T.Item[] memory rows = new T.Item[](1);
-        O.RecordOrigin memory original;
-        (rows[0], original) = RootCalls.policyContentItem(
-            _states[id].records.dependencies,
-            _origins.dependencies,
-            _states[id].contexts[id],
-            actor,
-            observedAt,
-            originalAggregate,
-            _states[id].records.plans[id].sourceContextHash,
-            receipt
-        );
-        Origins.remember(
-            _origins,
-            id,
-            _states[id].records.plans[id].sourceContextHash,
-            rows[0],
-            original,
-            bytes32(0),
-            actor,
-            keccak256("ORIGINAL_POLICY_CONTENT_ROOT_AUTHORIZATION_V2")
-        );
-        State.append(_states[id], id, rows, _states[id].contexts[id].records.rootRecordHash);
-        _states[id].records.plans[id].completedStages = 7;
+        RootStages.appendRootAuthorization(_states, _origins, _authorities, id, actor, observedAt, originalAggregate, receipt);
     }
 
     function appendDefinition(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         StreamPolicyRenderCriticalDefinitionStagesV2.appendDefinition(_states[id], id);
     }
 
     function appendToken(bytes32 id, Content.Payload calldata payload) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Tokens.appendOutput(_states[id], id, payload);
     }
 
     function appendScript(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Tokens.appendScript(_states[id], id, false);
     }
 
     function appendLibrary(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Tokens.appendScript(_states[id], id, true);
     }
 
     function appendRenderer(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Tokens.appendRenderer(_states[id], id);
     }
 
     function appendCurrentProfile(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Lifecycle.requirePlanCurrent(_states, _origins, _authorities, id);
         Tokens.appendProfile(_states[id], id);
     }
 
@@ -405,24 +363,12 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
         override
         returns (T.Evidence memory result)
     {
-        D.Capture memory captured = Authority.resolve(_config);
-        (C.Context memory c,,, bytes32 lineageHash) =
-            OriginSources.current(captured.dependencies, _origins.dependencies, collectionId);
-        bytes32 id = Guard.planId(_dependencyHash, captured, c, lineageHash);
-        result = _states[id].records.completed[id];
-        if (result.renderCriticalEvidenceHash == 0) revert T.InventoryIncomplete();
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        Origins.requirePins(_origins, id);
-        StreamPolicyRenderCriticalDefinitionStagesV2.requireDefinitions(_states[id], id, false);
+        return Lifecycle.requireCurrent(_states, _origins, _authorities, _config, _dependencyHash, collectionId);
     }
 
     /// @notice Stronger diagnostic reconstructing all full bytes, including artificial code edits.
     function requireFullDefinitionBytes(bytes32 id) external view {
-        if (_states[id].records.completed[id].renderCriticalEvidenceHash == 0) {
-            revert T.InventoryIncomplete();
-        }
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        StreamPolicyRenderCriticalDefinitionStagesV2.requireDefinitions(_states[id], id, true);
+        Lifecycle.requireFullDefinitionBytes(_states, _origins, _authorities, id);
     }
 
     function originDependencies() external view returns (O.Dependencies memory) {
@@ -460,15 +406,7 @@ contract StreamCurrentAuthorityPolicyRenderCriticalInventoryV2 is
     }
 
     function appendOriginRuntime(bytes32 id) external {
-        State.stage(_states[id], id, 8);
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        T.Plan storage p = _states[id].records.plans[id];
-        State.Progress storage token = _states[id].progress[id];
-        if (p.nextToken != p.tokenCount || token.phase != 0 || token.row != 0 || token.count != 0) {
-            revert T.InventoryIncomplete();
-        }
-        (T.Item[] memory rows, bytes32 witness) = Origins.runtimeItems(_origins, id);
-        State.append(_states[id], id, rows, witness);
+        RootStages.appendOriginRuntime(_states, _origins, _authorities, id);
     }
 
     function originalAnchor() external view returns (S.Dependencies memory) {
