@@ -91,29 +91,6 @@ library StreamArtistRecoveredDisputeHistoryChains {
                 ) _invalid();
             }
         }
-        for (uint256 i; i < b.resolutions.length; ++i) {
-            D.ResolutionRow memory r = b.resolutions[i];
-            uint256 opening = _opening(b, r.record.terms.disputeRecordHash);
-            D.DisputeRow memory o = b.disputes[opening];
-            if (
-                o.record.terms.bindingGeneration != r.record.terms.bindingGeneration
-                    || !Clock.beforeOwner(p, 4, o.point, r.point)
-                    || r.record.resolvedAt < o.record.recordedAt || o.withdrawal.recordHash != 0
-                    || r.record.terms.counterStatementRecordHash
-                        != _counterBefore(b, o.record.recordHash, r.point, p)
-                    || (_reopened(b, o, p) && r.record.actionClass != 2)
-            ) _invalid();
-            bytes32 previous;
-            for (uint256 j; j < i; ++j) {
-                if (
-                    b.resolutions[j].record.terms.bindingGeneration
-                        == r.record.terms.bindingGeneration
-                ) {
-                    previous = b.resolutions[j].record.actionId;
-                }
-            }
-            if (r.record.previousResolutionActionId != previous) _invalid();
-        }
         Heads.validate(b, p, sanctioned, checkCurrent);
     }
 

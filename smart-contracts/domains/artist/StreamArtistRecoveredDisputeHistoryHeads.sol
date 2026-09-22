@@ -13,9 +13,9 @@ import {
     StreamArtistRecoveredHydrationChronology as Clock
 } from "./StreamArtistRecoveredHydrationChronology.sol";
 
-/// @notice Fixed validation of the latest heads for complete original dispute chains.
-/// @dev Called only after the chain predicates. This pure boundary retains the original
-/// head/current-state rules; it does not authenticate source records or confer authority.
+/// @notice Fixed resolution-chain and latest-head validation for original disputes.
+/// @dev Called after opening/counter/withdrawal checks. This pure boundary retains the
+/// original resolution and head/current-state order; it does not authenticate source records or confer authority.
 library StreamArtistRecoveredDisputeHistoryHeads {
     function validate(
         D.Bundle memory b,
@@ -23,6 +23,29 @@ library StreamArtistRecoveredDisputeHistoryHeads {
         bool sanctioned,
         bool checkCurrent
     ) public pure {
+        for (uint256 i; i < b.resolutions.length; ++i) {
+            D.ResolutionRow memory r = b.resolutions[i];
+            uint256 opening = _opening(b, r.record.terms.disputeRecordHash);
+            D.DisputeRow memory o = b.disputes[opening];
+            if (
+                o.record.terms.bindingGeneration != r.record.terms.bindingGeneration
+                    || !Clock.beforeOwner(p, 4, o.point, r.point)
+                    || r.record.resolvedAt < o.record.recordedAt || o.withdrawal.recordHash != 0
+                    || r.record.terms.counterStatementRecordHash
+                        != _counterBefore(b, o.record.recordHash, r.point, p)
+                    || (_reopened(b, o, p) && r.record.actionClass != 2)
+            ) _invalid();
+            bytes32 previous;
+            for (uint256 j; j < i; ++j) {
+                if (
+                    b.resolutions[j].record.terms.bindingGeneration
+                        == r.record.terms.bindingGeneration
+                ) {
+                    previous = b.resolutions[j].record.actionId;
+                }
+            }
+            if (r.record.previousResolutionActionId != previous) _invalid();
+        }
         for (uint256 g; g < b.generations.length; ++g) {
             _head(b, uint64(g + 1), p, sanctioned, checkCurrent);
         }
@@ -111,6 +134,31 @@ library StreamArtistRecoveredDisputeHistoryHeads {
                     || ((b.current.state == 2 || (sanctioned && b.current.state == 3))
                         && h.revocationReason != 0)
             ) _invalid();
+        }
+    }
+
+    function _opening(D.Bundle memory b, bytes32 key) private pure returns (uint256) {
+        for (uint256 i; i < b.disputes.length; ++i) {
+            if (
+                b.disputes[i].record.recordHash == key
+                    && b.disputes[i].record.terms.disputeAction == 1
+            ) return i;
+        }
+        _invalid();
+    }
+
+    function _counterBefore(
+        D.Bundle memory b,
+        bytes32 opening,
+        RH.Point memory point,
+        RH.OwnerProvenance memory p
+    ) private pure returns (bytes32 key) {
+        for (uint256 i; i < b.disputes.length; ++i) {
+            D.DisputeRow memory r = b.disputes[i];
+            if (
+                r.record.terms.disputeAction == 3 && r.record.disputeRecordHash == opening
+                    && Clock.beforeOwner(p, 4, r.point, point)
+            ) key = r.record.recordHash;
         }
     }
 
