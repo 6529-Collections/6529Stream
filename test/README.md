@@ -1,12 +1,16 @@
 # Test map
 
-Run the current product first:
+After the current build, prepare its generated graph fixtures and run the
+current product tests first:
 
 ```text
+python scripts/dev.py build
+python scripts/dev.py prepare-graph
 python scripts/dev.py test
 ```
 
-This selects the `current` profile and integration suites under `test/current`.
+See [graph fixture preparation](../docs/tooling.md#current-graph-fixture-preparation)
+for cached-input ownership and regeneration. The test command selects the `current` profile and integration suites under `test/current`.
 They wire actual permanent Core, governance, canonical registry, sale/auction,
 artist attribution, entropy, metadata, ERC-20 payments, state exports and split wallets. Start here to understand
 a complete transaction.

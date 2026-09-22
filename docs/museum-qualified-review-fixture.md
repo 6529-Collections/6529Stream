@@ -63,6 +63,9 @@ evidence cannot be replaced with an independent-account profile hash.
 
 ## Commands
 
+Use the [Museum Python environment setup](../tools/museum/README.md#environment)
+before these PowerShell commands.
+
 The [retained fixture manifest](../schemas/museum/qualified-account-review-profile/local-fixture/manifest.json)
 from 22 September 2026 has external commitment
 `0x618ade1b0c337fef6f4cfb5d85d4a6fb0191f6e323db30087d4b57f57202f88a`.
@@ -72,7 +75,7 @@ The successful local run registered all 49 profile documents and published the
 five original records. Replay checks all three captures exactly.
 
 ```powershell
-.\.venv-museum\Scripts\python.exe -m tools.museum.qualified_review_fixture_v1 verify schemas/museum/qualified-account-review-profile/local-fixture --manifest-hash 0x618ade1b0c337fef6f4cfb5d85d4a6fb0191f6e323db30087d4b57f57202f88a
+.\.venv-tools\museum\Scripts\python.exe -m tools.museum.qualified_review_fixture_v1 verify schemas/museum/qualified-account-review-profile/local-fixture --manifest-hash 0x618ade1b0c337fef6f4cfb5d85d4a6fb0191f6e323db30087d4b57f57202f88a
 ```
 
 The capture requires a sealed profile hash, a verified native product manifest
@@ -80,10 +83,10 @@ and an externally pinned reuse audit. It starts only its own fresh loopback
 node and terminates that process when finished. It never uses a remote chain.
 
 ```powershell
-.\.venv-museum\Scripts\python.exe -m tools.museum.qualified_review_capture_v1 --native-manifest NATIVE_MANIFEST --native-manifest-sha256 SHA256 --native-reuse-audit AUDIT --native-reuse-audit-sha256 AUDIT_SHA256 --profile-hash PROFILE_HASH --output NEW_CAPTURE --disclosure public
-.\.venv-museum\Scripts\python.exe -m tools.museum.qualified_review_fixture_v1 retain NEW_CAPTURE NEW_RETAINED --capture-pins-hash CAPTURE_PINS_HASH
-.\.venv-museum\Scripts\python.exe -m tools.museum.qualified_review_fixture_v1 verify NEW_RETAINED --manifest-hash MANIFEST_HASH
-.\.venv-museum\Scripts\python.exe -m unittest tools.museum.test_qualified_review_fixture_v1
+.\.venv-tools\museum\Scripts\python.exe -m tools.museum.qualified_review_capture_v1 --native-manifest NATIVE_MANIFEST --native-manifest-sha256 SHA256 --native-reuse-audit AUDIT --native-reuse-audit-sha256 AUDIT_SHA256 --profile-hash PROFILE_HASH --output NEW_CAPTURE --disclosure public
+.\.venv-tools\museum\Scripts\python.exe -m tools.museum.qualified_review_fixture_v1 retain NEW_CAPTURE NEW_RETAINED --capture-pins-hash CAPTURE_PINS_HASH
+.\.venv-tools\museum\Scripts\python.exe -m tools.museum.qualified_review_fixture_v1 verify NEW_RETAINED --manifest-hash MANIFEST_HASH
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_qualified_review_fixture_v1
 ```
 
 The focused tests cover offline native replay, exact registered documents and

@@ -1,5 +1,11 @@
 # Changelog
 
+## First-run preparation
+
+- Include required graph-fixture preparation between the current native build
+  and tests in the quickstart guides. Use the canonical Museum Python
+  environment consistently for retained review capture and replay commands.
+
 ## Recorded account review selection
 
 - Execute qualified source/reviewer policies against retained actual local

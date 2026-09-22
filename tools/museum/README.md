@@ -382,6 +382,8 @@ original steward designations and recovery responses, registered interpretation
 bytes, native notice claims and executed-companion evidence in a separate
 offline-replayable dossier. Delivery claims remain distinct from recipient receipt.
 
+## Environment
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full

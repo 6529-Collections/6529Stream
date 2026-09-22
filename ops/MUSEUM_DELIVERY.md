@@ -12,7 +12,7 @@ Checkpoint: **22 September 2026**, integration `9312a0cf2`. The
 [canonical feature checklist](STREAM_FEATURE_STATUS.md) owns granular build,
 test and integration status. This delivery checkpoint includes the later
 retained qualified-account fixture and selection evidence at `8967a96e1` and
-`9312a0cf2`; the checklist's `19f0ed0b` checkpoint predates that intake.
+`9312a0cf2`. The checklist retains separate source and runtime boundaries.
 
 Integrated outputs now include the [unified evidence dossier
 V4](../docs/museum-unified-dossier-v4.md), [native Linked Art, PREMIS, IIIF and
