@@ -290,11 +290,29 @@ abstract contract StaticMetadataRoutingFixture is
     bytes32 internal constant FAMILY = keccak256("RENDERER_CONFIG");
 
     function setUp() public virtual {
-        core = new StaticRouteCore();
-        entropy = new StaticRouteEntropy();
+        core = StaticRouteCore(
+            _artistArtifactCreate(
+                "test/helpers/StaticMetadataRoutingFixture.sol:StaticRouteCore", abi.encode()
+            )
+        );
+        entropy = StaticRouteEntropy(
+            _artistArtifactCreate(
+                "test/helpers/StaticMetadataRoutingFixture.sol:StaticRouteEntropy", abi.encode()
+            )
+        );
         core.setEntropy(address(entropy));
-        executor = new MetadataExecutorBoundary();
-        artist = new ManifestArtistBoundary(address(core));
+        executor = MetadataExecutorBoundary(
+            _artistArtifactCreate(
+                "test/helpers/scoped-preservation-boundaries/StreamCollectionMetadataV1Boundaries.sol:MetadataExecutorBoundary",
+                abi.encode()
+            )
+        );
+        artist = ManifestArtistBoundary(
+            _artistArtifactCreate(
+                "test/helpers/scoped-preservation-boundaries/StreamCollectionManifestsBoundaries.sol:ManifestArtistBoundary",
+                abi.encode(address(core))
+            )
+        );
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(artist));
         router = StreamMetadataRouter(
             _artistArtifactCreate(
@@ -311,7 +329,12 @@ abstract contract StaticMetadataRoutingFixture is
         );
         artist.setRouter(address(router));
         core.setPointer(keccak256("METADATA_ROUTER"), address(router));
-        schemas = new StreamSchemaRegistry(address(executor));
+        schemas = StreamSchemaRegistry(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamSchemaRegistry.sol:StreamSchemaRegistry",
+                abi.encode(address(executor))
+            )
+        );
         StreamCollectionMetadataV1.Configuration memory mc;
         mc.core = address(core);
         mc.executor = address(executor);
@@ -341,7 +364,12 @@ abstract contract StaticMetadataRoutingFixture is
         _admin(
             abi.encodeCall(router.setCollectionScript, (1, "document.body.textContent = tokenId;"))
         );
-        attribution = new StaticRouteAttribution(address(core), address(router));
+        attribution = StaticRouteAttribution(
+            _artistArtifactCreate(
+                "test/helpers/StaticMetadataRoutingFixture.sol:StaticRouteAttribution",
+                abi.encode(address(core), address(router))
+            )
+        );
         StreamRendererV1.Deployment memory d;
         d.executor = address(executor);
         d.sources = StreamRendererV1.Sources(
@@ -375,8 +403,18 @@ abstract contract StaticMetadataRoutingFixture is
                 abi.encode(d)
             )
         );
-        versions = new StaticRouteVersions(address(executor), address(schemas), address(renderer));
-        modules = new StaticRouteModules(address(metadata), address(versions));
+        versions = StaticRouteVersions(
+            _artistArtifactCreate(
+                "test/helpers/StaticMetadataRoutingFixture.sol:StaticRouteVersions",
+                abi.encode(address(executor), address(schemas), address(renderer))
+            )
+        );
+        modules = StaticRouteModules(
+            _artistArtifactCreate(
+                "test/helpers/StaticMetadataRoutingFixture.sol:StaticRouteModules",
+                abi.encode(address(metadata), address(versions))
+            )
+        );
         core.setPointer(keccak256("MODULE_REGISTRY"), address(modules));
         _grant(address(this), 8);
     }

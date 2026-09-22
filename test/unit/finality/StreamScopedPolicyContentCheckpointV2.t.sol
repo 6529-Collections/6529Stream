@@ -111,12 +111,26 @@ abstract contract ScopedPolicyContentFixtureV2 is
 
     function _scopedFixture(uint8 terminalStatus, bool finalize) internal {
         require(terminalStatus == 1 || terminalStatus == 2);
-        scopedModules = new ScopedPolicyOutputModulesBoundary(address(metadata));
+        scopedModules = ScopedPolicyOutputModulesBoundary(
+            _artistArtifactCreate(
+                "test/helpers/scoped-preservation-boundaries/StreamScopedPolicyContentCheckpointV2Boundaries.sol:ScopedPolicyOutputModulesBoundary",
+                abi.encode(address(metadata))
+            )
+        );
         core.setPointer(keccak256("MODULE_REGISTRY"), address(scopedModules));
-        MockEntropyRoleRegistry roles = new MockEntropyRoleRegistry(address(this));
+        MockEntropyRoleRegistry roles = MockEntropyRoleRegistry(
+            _artistArtifactCreate(
+                "test/mocks/MockEntropyRoleRegistry.sol:MockEntropyRoleRegistry",
+                abi.encode(address(this))
+            )
+        );
         terminalCoordinator = _scopedNative(roles);
-        EntropyCollectionPolicyArtistFixture policyArtist =
-            new EntropyCollectionPolicyArtistFixture(address(core));
+        EntropyCollectionPolicyArtistFixture policyArtist = EntropyCollectionPolicyArtistFixture(
+            _artistArtifactCreate(
+                "test/unit/entropy/EntropyCollectionPolicyFixtures.sol:EntropyCollectionPolicyArtistFixture",
+                abi.encode(address(core))
+            )
+        );
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(policyArtist));
         core.setPointer(keccak256("ENTROPY_COORDINATOR"), address(terminalCoordinator));
         EP.PolicyInput memory policy;
@@ -189,8 +203,15 @@ abstract contract ScopedPolicyContentFixtureV2 is
         input.config.renderer = address(randomRenderer);
         _approve(92, input, keccak256("original scoped random token config consent"));
         router.setTokenMetadataConfig(92, input);
-        StreamCollectionTokenInventory indexedTokens = new StreamCollectionTokenInventory(
-            address(core), address(executor), _scopedGas("TOKEN_INVENTORY_CORE_READ_GAS", 100000, 1)
+        StreamCollectionTokenInventory indexedTokens = StreamCollectionTokenInventory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamCollectionTokenInventory.sol:StreamCollectionTokenInventory",
+                abi.encode(
+                    address(core),
+                    address(executor),
+                    _scopedGas("TOKEN_INVENTORY_CORE_READ_GAS", 100000, 1)
+                )
+            )
         );
         uint256[] memory ids = _scopedIds();
         indexedTokens.appendCollectionTokens(1, ids);
@@ -224,24 +245,42 @@ abstract contract ScopedPolicyContentFixtureV2 is
             old,
             next
         );
-        scopedMembership = new StreamFinalityScopeMembership(
-            address(core),
-            address(metadata),
-            address(indexedTokens),
-            address(executor),
-            _scopedGas("SCOPE_MEMBERSHIP_READ_GAS", 500000, 1)
+        scopedMembership = StreamFinalityScopeMembership(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamFinalityScopeMembership.sol:StreamFinalityScopeMembership",
+                abi.encode(
+                    address(core),
+                    address(metadata),
+                    address(indexedTokens),
+                    address(executor),
+                    _scopedGas("SCOPE_MEMBERSHIP_READ_GAS", 500000, 1)
+                )
+            )
         );
-        scopedSelections = new StreamStaticSelectionCheckpoint(
-            address(core),
-            address(router),
-            address(scopedMembership),
-            address(executor),
-            _scopedGas("STATIC_CHECKPOINT_READ_GAS", 2000000, 1)
+        scopedSelections = StreamStaticSelectionCheckpoint(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol:StreamStaticSelectionCheckpoint",
+                abi.encode(
+                    address(core),
+                    address(router),
+                    address(scopedMembership),
+                    address(executor),
+                    _scopedGas("STATIC_CHECKPOINT_READ_GAS", 2000000, 1)
+                )
+            )
         );
-        scopedSources = new StreamFinalityCoordinatorInventory(
-            address(core), address(scopedMembership), 100000, 2000000
+        scopedSources = StreamFinalityCoordinatorInventory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamFinalityCoordinatorInventory.sol:StreamFinalityCoordinatorInventory",
+                abi.encode(address(core), address(scopedMembership), 100000, 2000000)
+            )
         );
-        scopedFactory = new Factory(_scopedDependencies());
+        scopedFactory = Factory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamFinalityScopedEntropyPolicySourceFactoryV2.sol:StreamFinalityScopedEntropyPolicySourceFactoryV2",
+                abi.encode(_scopedDependencies())
+            )
+        );
     }
 
     function _scopedNative(MockEntropyRoleRegistry roles)
@@ -264,7 +303,12 @@ abstract contract ScopedPolicyContentFixtureV2 is
                 )
             )
         );
-        MockStreamEntropyProvider provider = new MockStreamEntropyProvider(address(n));
+        MockStreamEntropyProvider provider = MockStreamEntropyProvider(
+            _artistArtifactCreate(
+                "test/mocks/MockStreamEntropyProvider.sol:MockStreamEntropyProvider",
+                abi.encode(address(n))
+            )
+        );
         _admitEntropyProvider(address(n), address(provider));
         n.configureCollection(1, address(provider), keccak256("scoped native salt"), true, 10);
         n.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
@@ -287,7 +331,12 @@ abstract contract ScopedPolicyContentFixtureV2 is
                 abi.encode(d)
             )
         );
-        v = new ScopedPolicyOutputVersionsBoundary(address(executor), address(schemas), address(r));
+        v = ScopedPolicyOutputVersionsBoundary(
+            _artistArtifactCreate(
+                "test/helpers/scoped-preservation-boundaries/StreamScopedPolicyContentCheckpointV2Boundaries.sol:ScopedPolicyOutputVersionsBoundary",
+                abi.encode(address(executor), address(schemas), address(r))
+            )
+        );
         v.setAdmitted(true);
         scopedModules.admit(address(v));
     }
@@ -391,8 +440,11 @@ abstract contract ScopedPolicyContentFixtureV2 is
         address set = scopedFactory.prepareSourceSet(scope);
         selection = scopedSelections.begin(scope);
         scopedSelections.append(selection, 16);
-        StreamTerminalEntropyReadiness readiness = new StreamTerminalEntropyReadiness(
-            address(core), address(router), set, 2000000, 6000000
+        StreamTerminalEntropyReadiness readiness = StreamTerminalEntropyReadiness(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamTerminalEntropyReadiness.sol:StreamTerminalEntropyReadiness",
+                abi.encode(address(core), address(router), set, 2000000, 6000000)
+            )
         );
         host = _scopedCheckpoint(set, address(readiness));
     }

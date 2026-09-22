@@ -211,7 +211,12 @@ abstract contract ScopedPreservationReferenceFixtureV1 is ScopedPreservationSnap
         _configureJoinedRootBoundary();
         adoptedSnapshot = _publish();
         adoptedRoot = _adopt(adoptedSnapshot, 1);
-        externalArchive = new ScopedPreservationReferenceExternalBoundary(address(core));
+        externalArchive = ScopedPreservationReferenceExternalBoundary(
+            _artistArtifactCreate(
+                "test/helpers/scoped-preservation-boundaries/StreamScopedPreservationPolicyReferencePublicationV1Boundaries.sol:ScopedPreservationReferenceExternalBoundary",
+                abi.encode(address(core))
+            )
+        );
         referenceInput.scope = publication.scope;
         referenceInput.observation.collectionId = publication.scope.collectionId;
         referenceInput.observation.referenceId = keccak256("scoped policy exact reference");
@@ -571,8 +576,11 @@ abstract contract ScopedPreservationReferenceFixtureV1 is ScopedPreservationSnap
             Schema.DocumentKind.CANONICALIZATION,
             RootDocuments.document(RootDocuments.ROOT_CANON)
         );
-        PreservationSnapshotRootProviderBoundary provider = new PreservationSnapshotRootProviderBoundary(
-            address(snapshotHost), publication.scope
+        PreservationSnapshotRootProviderBoundary provider = PreservationSnapshotRootProviderBoundary(
+            _artistArtifactCreate(
+                "test/helpers/scoped-preservation-boundaries/StreamScopedPreservationPolicyReferencePublicationV1Boundaries.sol:PreservationSnapshotRootProviderBoundary",
+                abi.encode(address(snapshotHost), publication.scope)
+            )
         );
         // Keep the coverage constructor's original selected Finality and runtime pin. Only these
         // missing deployment/read capabilities of that explicitly named boundary are supplied.
