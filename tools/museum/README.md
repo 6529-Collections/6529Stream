@@ -1,5 +1,12 @@
 # Museum offline tooling
 
+[Native token authoring binding](../../docs/museum-native-authoring-binding.md)
+retains an unchanged draft with a separate exact NativeAttribution source envelope.
+
+[Source-field and format correspondence](../../docs/museum-field-correspondence.md)
+counts original fields before selection and checks format-local targets from
+the same exact source, retaining unsupported mappings explicitly.
+
 [Portable authoring workflow](../../docs/museum-source-bound-authoring.md)
 captures plain-language drafts, retains confirmed text and review history, and
 replays original source evidence when reopening later documentation.

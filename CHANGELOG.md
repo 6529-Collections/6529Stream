@@ -9,6 +9,21 @@
   and real-owner/Safe regression cases; native capacity and execution remain
   pending. See the [integration guide](docs/integrations/artist-aggregate-ratifications.md).
 
+## Museum source-field and format correspondence
+
+- Add a replayable schema-derived native field inventory and an exact-source
+  Linked Art/PREMIS/IIIF/LIDO correspondence ledger. Preserve unselected source
+  occurrences and distinguish format-local target evidence from inherited
+  coverage labels. Native families without a four-format adapter remain
+  explicitly retained and unsupported. See the
+  [correspondence guide](docs/museum-field-correspondence.md).
+
+- Add an exact token-scoped NativeAttribution envelope around an unchanged
+  later-documentation draft. Replay complete original evidence and preserve
+  historical authority/current qualification without inferring artist
+  confirmation, token existence or publication permission. See the
+  [native authoring guide](docs/museum-native-authoring-binding.md).
+
 ## Retained Museum response checksum policy
 
 - Support the repository's explicit raw-response directory suffix patterns and
