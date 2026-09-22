@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI178 `d823d82c`: 4,321 sources / zero errors; client integration `45828ad0`; runtime anchor `aa2ca4a2`. |
+| Source checkpoint | ABI182 `326cc3bc`: 4,333 sources / zero errors; current source `97381cde`; parallel runtime source `18837f62`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,33 +29,36 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-The expanded full-v1 implementation is still incomplete. ABI178 checks all
-**4,321 Solidity sources** at `d823d82c` with zero errors in 51.046 seconds.
-The latest client integration is `45828ad0`. These checks cover source types,
-interfaces and storage descriptions; they do not prove complete execution.
-The current broad runtime campaign remains pinned to `aa2ca4a2`, which predates
-the new multiple-generation recovery profile. RC1 remains unchanged.
+The expanded full-v1 implementation is still incomplete. ABI182 checks all
+**4,333 Solidity sources** at `326cc3bc` with zero errors in 51.265 seconds.
+The current integration adds the Safe inventory and corrected General Museum
+semantics at `97381cde`. These checks and offline tests do not prove complete
+contract execution. The parallel runtime source `18837f62` contains the reviewed
+caller/dependency repairs with production byte-exact to `aa2ca4a2`; later Artist
+generation and inventory production changes require their own acceptance.
+RC1 remains unchanged.
 
 Root owns architecture, integration and delivery. Current assignments:
 
-- **artist history resume**: Repair the three new generation worker size failures, then execute original actual-owner/Safe scenarios; keep interface and complete history semantics.
-- **release evidence review**: Independently review frozen capacity repairs and caller seams; attribution and STATIC source reviews are complete.
-- **remote delivery review**: Repair the three exact CurrentAuthority inventory size failures in a separate branch; preserve original semantics and limits.
-- **Mint / independent review**: Reconcile required Merkle sale consumption and source-qualified actual execution; preserve held ERC20 capture restriction unless exact later authorization covers it.
-- **Burn / preservation ceremony**: Remaining16 and trace review complete at aa2. Repair the three exact current provider/discovery size failures.
-- **Museum**: Physical-production source joins integrated and17root tests pass. Build General institutional direct-semantic source/reader boundary.
-- **Clients / Safe callers**: Attribution integrated and root47pass. Build typed recovered multiple-generation client while Artist factors capacity.
-- **Testing / native tooling**: Compose test-side factory/catalog interfaces with Prepared/root; preserve original50cases and full concrete obligations. Keep stateful/Safe queue ready.
-- **Capacity / Rights**: First8 and independent trace review complete at d61. Run remaining24 aa2 with bounded captures and v3 behavioral output.
-- **Metric retention**: Collaborator integrated and root60pass. Build current all-call Safe inventory/reconciler; retain uncovered rows and source-specific actual evidence.
-- **Prepared / successor preservation**: Split nominal catalog dependencies in both old/current graph callers with Testing/root; preserve all90 original obligations and then reattempt changed compilation.
-- **Collector gas redesign**: Actual cold-paid prototype rebased onto aa2. Preserve current six shared size refusals, bounded changed-host capture and unchanged500000 total gas requirement.
+- **artist history resume**: Repair ConsentFinalityLifecycle complete creation size, then original eleven actual-owner/Safe scenarios on generation plus exact Registry writer source.
+- **release evidence review**: Build nonempty original collaborator history hydration under PRIMARY_ONLY, bit8388608; independent review supplied separately.
+- **remote delivery review**: Inventory source/size fit; eight-case native timeout preserved. Build wholly unbound Platform-only and mixed-scope hydration, bit4194304.
+- **Mint / independent review**: Native claim188 timed out without execution; Museum review complete. Build complete aggregate signed dispute/repudiation hydration, bit16777216; held ERC20 capture unchanged.
+- **Burn / preservation ceremony**: Remaining16 and trace review complete ataa2. Continue the two remaining provider/discovery overages; Full Discovery fits in the current separate batch.
+- **Museum**: General source/dossier and corrected oracle integrated with20 root passes. Build original-statement physical Acquisition and TransferOfCustody mapping.
+- **Clients / Safe callers**: Build and validate recovered multiple-generation callers; original collaborator/attribution and aggregate callers retain scoped passes.
+- **Testing / native tooling**: Slots native capture succeeds; Owner3 changed trial and preserved full50/65/18/84/124 obligations continue. Then actual Safe/stateful execution.
+- **Capacity / Rights**: First8 and independent trace review complete atd61. Remaining24 aa2 campaign active; bounded v3 execution and representative traces.
+- **Metric retention**: Compact Safe inventory integrated with54 root tool passes. Execute real threshold-Safe SplitFactory/Wallet cohort and reviewed per-call claims.
+- **Prepared / successor preservation**: Scenario28 timed out at188; preserve original90 obligations and four admitted earlier caller owners. Diagnose material compiler reduction and independently executable callers.
+- **Collector gas redesign**: Isolated caller-seam prototypefa6838 preserves its16 production changes. Required actor artifacts fit; changed paid hosts run bounded captures. Actual cold paid500000 remains open.
 
-Remaining delivery includes broader required Artist combinations, institutional
-Museum source joins, complete current-stack and all-call Safe execution,
-stateful/fuzz campaigns, deployment and transaction gas, full CI, source freeze
-and matching testnet. Collector cold paid-mint optimization remains isolated;
-component savings do not satisfy the complete 500,000-gas purchase requirement.
+Remaining delivery includes broader required Artist combinations, physical
+and institutional Museum conformance, complete current-stack and all-call Safe
+execution, stateful/fuzz campaigns, deployment and transaction gas, full CI,
+source freeze and matching testnet. Required Merkle-price consumers are source
+built; actual current-stack execution remains. Collector cold paid-mint
+optimization remains isolated, with the original 500,000-gas purchase limit.
 Previously held proposals remain unapplied. No new funding or on-chain action
 is needed for current coding. Immutable RC1/main/release/Sepolia
 `569bf87f1fa808787d324f6e1582924b5ccf1d40` is preserved.
