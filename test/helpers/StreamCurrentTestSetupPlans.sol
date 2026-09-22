@@ -2,47 +2,25 @@
 pragma solidity ^0.8.19;
 
 import { StreamGovernanceGenesisPlan } from "../../script/current/StreamGovernanceGenesisPlan.sol";
-import { StreamMintManager } from "../../smart-contracts/domains/mint/StreamMintManager.sol";
-import { StreamMintLedger } from "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import {
-    StreamFixedPriceSaleAdapter
-} from "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
-import {
-    StreamEnglishAuctionHouse
-} from "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
-import {
-    StreamEntropyCoordinator
-} from "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
-import {
-    StreamMetadataRouter
-} from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
-import {
-    StreamAssetPolicyRegistry
-} from "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
-import { StreamCore } from "../../smart-contracts/core/StreamCore.sol";
-import {
-    StreamRoyaltyResolver
-} from "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
-import {
-    StreamGovernanceExecutor
-} from "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
-import {
-    StreamRoleRegistry
-} from "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
-import {
-    StreamModuleRegistry
-} from "../../smart-contracts/domains/modules/StreamModuleRegistry.sol";
-import {
-    StreamSystemManifest
-} from "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
-import { StreamSplitFactory } from "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
-import {
-    StreamArtistOnboardingRegistry
-} from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
-import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
-import {
-    StreamRevenueResolver
-} from "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
+    IStreamSetupPlansMintManager,
+    IStreamSetupPlansMintLedger,
+    IStreamSetupPlansFixedPriceSaleAdapter,
+    IStreamSetupPlansEnglishAuctionHouse,
+    IStreamSetupPlansEntropyCoordinator,
+    IStreamSetupPlansMetadataRouter,
+    IStreamSetupPlansAssetPolicyRegistry,
+    IStreamSetupPlansCore,
+    IStreamSetupPlansRoyaltyResolver,
+    IStreamSetupPlansGovernanceExecutor,
+    IStreamSetupPlansRoleRegistry,
+    IStreamSetupPlansModuleRegistry,
+    IStreamSetupPlansSystemManifest,
+    IStreamSetupPlansSplitFactory,
+    IStreamSetupPlansArtistOnboardingRegistry,
+    IStreamSetupPlansRevenueEscrow,
+    IStreamSetupPlansRevenueResolver
+} from "./StreamCurrentTestSetupPlanTargets.sol";
 import {
     IStreamArtistIdentityContest
 } from "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityContest.sol";
@@ -58,23 +36,23 @@ import "../../smart-contracts/interfaces/stream/governance/IStreamGenesisInitial
 /// policy order and governance planner; the library call does not establish gas equivalence.
 library StreamCurrentTestSetupPlans {
     struct Targets {
-        StreamMintManager manager;
-        StreamMintLedger ledger;
-        StreamFixedPriceSaleAdapter sale;
-        StreamEnglishAuctionHouse auction;
-        StreamEntropyCoordinator entropy;
-        StreamMetadataRouter router;
-        StreamAssetPolicyRegistry assetPolicy;
-        StreamCore core;
-        StreamRoyaltyResolver royalties;
-        StreamGovernanceExecutor executor;
-        StreamRoleRegistry roles;
-        StreamModuleRegistry registry;
-        StreamSystemManifest manifest;
-        StreamSplitFactory factory;
-        StreamArtistOnboardingRegistry artists;
-        StreamRevenueEscrow revenueEscrow;
-        StreamRevenueResolver primaryResolver;
+        IStreamSetupPlansMintManager manager;
+        IStreamSetupPlansMintLedger ledger;
+        IStreamSetupPlansFixedPriceSaleAdapter sale;
+        IStreamSetupPlansEnglishAuctionHouse auction;
+        IStreamSetupPlansEntropyCoordinator entropy;
+        IStreamSetupPlansMetadataRouter router;
+        IStreamSetupPlansAssetPolicyRegistry assetPolicy;
+        IStreamSetupPlansCore core;
+        IStreamSetupPlansRoyaltyResolver royalties;
+        IStreamSetupPlansGovernanceExecutor executor;
+        IStreamSetupPlansRoleRegistry roles;
+        IStreamSetupPlansModuleRegistry registry;
+        IStreamSetupPlansSystemManifest manifest;
+        IStreamSetupPlansSplitFactory factory;
+        IStreamSetupPlansArtistOnboardingRegistry artists;
+        IStreamSetupPlansRevenueEscrow revenueEscrow;
+        IStreamSetupPlansRevenueResolver primaryResolver;
     }
 
     function foundationPlan(

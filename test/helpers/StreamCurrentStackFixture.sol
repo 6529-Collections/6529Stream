@@ -6,6 +6,25 @@ import "./ArtistArtifactCreate.sol";
 import { StreamCurrentTestProductActivation } from "./StreamCurrentTestProductActivation.sol";
 import { StreamCurrentTestSetupPlans } from "./StreamCurrentTestSetupPlans.sol";
 import {
+    IStreamSetupPlansMintManager,
+    IStreamSetupPlansMintLedger,
+    IStreamSetupPlansFixedPriceSaleAdapter,
+    IStreamSetupPlansEnglishAuctionHouse,
+    IStreamSetupPlansEntropyCoordinator,
+    IStreamSetupPlansMetadataRouter,
+    IStreamSetupPlansAssetPolicyRegistry,
+    IStreamSetupPlansCore,
+    IStreamSetupPlansRoyaltyResolver,
+    IStreamSetupPlansGovernanceExecutor,
+    IStreamSetupPlansRoleRegistry,
+    IStreamSetupPlansModuleRegistry,
+    IStreamSetupPlansSystemManifest,
+    IStreamSetupPlansSplitFactory,
+    IStreamSetupPlansArtistOnboardingRegistry,
+    IStreamSetupPlansRevenueEscrow,
+    IStreamSetupPlansRevenueResolver
+} from "./StreamCurrentTestSetupPlanTargets.sol";
+import {
     IStreamCollectionMetadataV1
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import {
@@ -788,23 +807,23 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
         StreamCurrentTestSetupPlans.Targets memory targets;
-        targets.manager = manager;
-        targets.ledger = ledger;
-        targets.sale = sale;
-        targets.auction = auction;
-        targets.entropy = entropy;
-        targets.router = router;
-        targets.assetPolicy = assetPolicy;
-        targets.core = core;
-        targets.royalties = royalties;
-        targets.executor = executor;
-        targets.roles = roles;
-        targets.registry = registry;
-        targets.manifest = manifest;
-        targets.factory = factory;
-        targets.artists = artists;
-        targets.revenueEscrow = revenueEscrow;
-        targets.primaryResolver = primaryResolver;
+        targets.manager = IStreamSetupPlansMintManager(address(manager));
+        targets.ledger = IStreamSetupPlansMintLedger(address(ledger));
+        targets.sale = IStreamSetupPlansFixedPriceSaleAdapter(address(sale));
+        targets.auction = IStreamSetupPlansEnglishAuctionHouse(address(auction));
+        targets.entropy = IStreamSetupPlansEntropyCoordinator(address(entropy));
+        targets.router = IStreamSetupPlansMetadataRouter(address(router));
+        targets.assetPolicy = IStreamSetupPlansAssetPolicyRegistry(address(assetPolicy));
+        targets.core = IStreamSetupPlansCore(address(core));
+        targets.royalties = IStreamSetupPlansRoyaltyResolver(address(royalties));
+        targets.executor = IStreamSetupPlansGovernanceExecutor(address(executor));
+        targets.roles = IStreamSetupPlansRoleRegistry(address(roles));
+        targets.registry = IStreamSetupPlansModuleRegistry(address(registry));
+        targets.manifest = IStreamSetupPlansSystemManifest(address(manifest));
+        targets.factory = IStreamSetupPlansSplitFactory(address(factory));
+        targets.artists = IStreamSetupPlansArtistOnboardingRegistry(address(artists));
+        targets.revenueEscrow = IStreamSetupPlansRevenueEscrow(address(revenueEscrow));
+        targets.primaryResolver = IStreamSetupPlansRevenueResolver(address(primaryResolver));
         return StreamCurrentTestSetupPlans.operatingPolicies(targets, DEPLOYMENT_HASH, additional);
     }
 }

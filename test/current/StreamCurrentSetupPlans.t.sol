@@ -1,8 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../helpers/StreamCurrentTestSetupPlans.sol";
+import {
+    IStreamSetupPlansMintManager,
+    IStreamSetupPlansMintLedger,
+    IStreamSetupPlansFixedPriceSaleAdapter,
+    IStreamSetupPlansEnglishAuctionHouse,
+    IStreamSetupPlansEntropyCoordinator,
+    IStreamSetupPlansMetadataRouter,
+    IStreamSetupPlansAssetPolicyRegistry,
+    IStreamSetupPlansCore,
+    IStreamSetupPlansRoyaltyResolver,
+    IStreamSetupPlansGovernanceExecutor,
+    IStreamSetupPlansRoleRegistry,
+    IStreamSetupPlansModuleRegistry,
+    IStreamSetupPlansSystemManifest,
+    IStreamSetupPlansSplitFactory,
+    IStreamSetupPlansArtistOnboardingRegistry,
+    IStreamSetupPlansRevenueEscrow,
+    IStreamSetupPlansRevenueResolver
+} from "../helpers/StreamCurrentTestSetupPlanTargets.sol";
 import { StreamGovernanceGenesisPlan } from "../../script/current/StreamGovernanceGenesisPlan.sol";
-import { StreamCorePointerState } from "../../smart-contracts/core/StreamCore.sol";
+import { StreamCore } from "../../smart-contracts/core/StreamCore.sol";
+import { StreamCorePointerState } from "../../smart-contracts/core/StreamCoreExternalReads.sol";
+import {
+    StreamGovernanceExecutor
+} from "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
+import { StreamRoleRegistry } from "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
+import { StreamModuleRegistry } from "../../smart-contracts/domains/modules/StreamModuleRegistry.sol";
+import { StreamSystemManifest } from "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
 
 /// @dev Real, distinct immutable bytecode for policy code-hash inputs only.
 contract SetupPlansCodeAnchor {
@@ -78,23 +104,23 @@ contract StreamCurrentSetupPlansTest {
             a[i] = address(new SetupPlansCodeAnchor(i));
         }
         targets = StreamCurrentTestSetupPlans.Targets(
-            StreamMintManager(a[0]),
-            StreamMintLedger(a[1]),
-            StreamFixedPriceSaleAdapter(a[2]),
-            StreamEnglishAuctionHouse(payable(a[3])),
-            StreamEntropyCoordinator(payable(a[4])),
-            StreamMetadataRouter(a[5]),
-            StreamAssetPolicyRegistry(a[6]),
-            StreamCore(a[7]),
-            StreamRoyaltyResolver(a[8]),
-            StreamGovernanceExecutor(payable(a[9])),
-            StreamRoleRegistry(a[10]),
-            StreamModuleRegistry(a[11]),
-            StreamSystemManifest(a[12]),
-            StreamSplitFactory(a[13]),
-            StreamArtistOnboardingRegistry(a[14]),
-            StreamRevenueEscrow(payable(a[15])),
-            StreamRevenueResolver(a[16])
+            IStreamSetupPlansMintManager(a[0]),
+            IStreamSetupPlansMintLedger(a[1]),
+            IStreamSetupPlansFixedPriceSaleAdapter(a[2]),
+            IStreamSetupPlansEnglishAuctionHouse(payable(a[3])),
+            IStreamSetupPlansEntropyCoordinator(payable(a[4])),
+            IStreamSetupPlansMetadataRouter(a[5]),
+            IStreamSetupPlansAssetPolicyRegistry(a[6]),
+            IStreamSetupPlansCore(a[7]),
+            IStreamSetupPlansRoyaltyResolver(a[8]),
+            IStreamSetupPlansGovernanceExecutor(payable(a[9])),
+            IStreamSetupPlansRoleRegistry(a[10]),
+            IStreamSetupPlansModuleRegistry(a[11]),
+            IStreamSetupPlansSystemManifest(a[12]),
+            IStreamSetupPlansSplitFactory(a[13]),
+            IStreamSetupPlansArtistOnboardingRegistry(a[14]),
+            IStreamSetupPlansRevenueEscrow(payable(a[15])),
+            IStreamSetupPlansRevenueResolver(a[16])
         );
         coreReads = new SetupPlansCoreReads(address(this));
         registryReads = new SetupPlansRegistryReads(address(this));
@@ -132,7 +158,7 @@ contract StreamCurrentSetupPlansTest {
         GovernanceActionPolicyEntry[] memory beforeRows =
             StreamCurrentTestSetupPlans.operatingPolicies(t, PROFILE, extra);
         address oldTarget = address(t.manager);
-        t.manager = StreamMintManager(address(new SetupPlansCodeAnchor(999)));
+        t.manager = IStreamSetupPlansMintManager(address(new SetupPlansCodeAnchor(999)));
         GovernanceActionPolicyEntry[] memory afterRows =
             StreamCurrentTestSetupPlans.operatingPolicies(t, PROFILE, extra);
         SetupPlansOriginalPolicies original = new SetupPlansOriginalPolicies(t, PROFILE, extra);
@@ -302,11 +328,11 @@ contract StreamCurrentSetupPlansTest {
             StreamSystemManifestUpdate memory u
         )
     {
-        c.executor = targets.executor;
-        c.roles = targets.roles;
+        c.executor = StreamGovernanceExecutor(payable(address(targets.executor)));
+        c.roles = StreamRoleRegistry(address(targets.roles));
         c.core = StreamCore(address(coreReads));
         c.registry = StreamModuleRegistry(address(registryReads));
-        c.manifest = targets.manifest;
+        c.manifest = StreamSystemManifest(address(targets.manifest));
         c.bootstrapAuthority = address(this);
         c.governanceRoot = address(targets.artists);
         c.guardians = new address[](2);
@@ -353,23 +379,23 @@ contract StreamCurrentSetupPlansTest {
 /// StreamCurrentStackFixture at 64891089052ddfba393458359a34aaf5073ee1ea.
 /// Keep the original bodies independent of the new library implementation.
 contract SetupPlansOriginalPolicies {
-    StreamMintManager private manager;
-    StreamMintLedger private ledger;
-    StreamFixedPriceSaleAdapter private sale;
-    StreamEnglishAuctionHouse private auction;
-    StreamEntropyCoordinator private entropy;
-    StreamMetadataRouter private router;
-    StreamAssetPolicyRegistry private assetPolicy;
-    StreamCore private core;
-    StreamRoyaltyResolver private royalties;
-    StreamGovernanceExecutor private executor;
-    StreamRoleRegistry private roles;
-    StreamModuleRegistry private registry;
-    StreamSystemManifest private manifest;
-    StreamSplitFactory private factory;
-    StreamArtistOnboardingRegistry private artists;
-    StreamRevenueEscrow private revenueEscrow;
-    StreamRevenueResolver private primaryResolver;
+    IStreamSetupPlansMintManager private manager;
+    IStreamSetupPlansMintLedger private ledger;
+    IStreamSetupPlansFixedPriceSaleAdapter private sale;
+    IStreamSetupPlansEnglishAuctionHouse private auction;
+    IStreamSetupPlansEntropyCoordinator private entropy;
+    IStreamSetupPlansMetadataRouter private router;
+    IStreamSetupPlansAssetPolicyRegistry private assetPolicy;
+    IStreamSetupPlansCore private core;
+    IStreamSetupPlansRoyaltyResolver private royalties;
+    IStreamSetupPlansGovernanceExecutor private executor;
+    IStreamSetupPlansRoleRegistry private roles;
+    IStreamSetupPlansModuleRegistry private registry;
+    IStreamSetupPlansSystemManifest private manifest;
+    IStreamSetupPlansSplitFactory private factory;
+    IStreamSetupPlansArtistOnboardingRegistry private artists;
+    IStreamSetupPlansRevenueEscrow private revenueEscrow;
+    IStreamSetupPlansRevenueResolver private primaryResolver;
     bytes32 private DEPLOYMENT_HASH;
     GovernanceActionPolicyEntry[] private extra;
 
