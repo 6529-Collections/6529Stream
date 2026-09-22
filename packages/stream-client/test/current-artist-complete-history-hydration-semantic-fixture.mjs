@@ -16,7 +16,8 @@ export const T={state:findType('StreamArtistRecoveredMultipleTypes.State'),inven
  consents:findType('StreamArtistRecoveredMultipleGenerationTypes.Consents'),supplement:findType('StreamArtistAggregateConsentSupplementTypes.Bundle'),envelope:findType('StreamArtistRecoveredSanctionHistoryTypes.Envelope')};
 const clone=structuredClone, domain=i=>m.artistCompleteHistoryHydrationOwnerDomain(i), flat=(t,v)=>coder.encode(t.components,t.components.map(p=>v[p.name]));
 export function semanticFixture(args={}) {
- const options=args.options??{}, historical=options.historical===true, repeated=options.repeated===true;
+ const options=args.options??{}, historical=options.historical===true, repeated=options.repeated===true, platform=options.platform===true;
+ if(platform&&(historical||repeated))throw Error('Platform timeline fixture is a separate single-era zero-Artist case');
  const source=args.source??{owners:seven(i=>A(10+i)),registry:A(1),archive:A(3),core:A(4),mintManager:A(5),roleRegistry:A(6),metadata:A(7),primaryResolver:A(8),royaltyResolver:A(9),validator:A(17),primaryRevenueClass:H('primary')};
  const origin=args.origin??{chainId:1n,registry:source.registry,coordinator:A(2),archive:source.archive,owners:source.owners,ownerCodeHashes:seven(i=>H(`runtime${i}`)),core:source.core,manager:source.mintManager,suiteConfigurationHash:hash([ARTIST_HYDRATION_SUITE_TUPLE],[source])};
  const origins=repeated?[{...origin,registry:A(4100),coordinator:A(4101),archive:A(4102),owners:seven(i=>A(4110+i))},clone(origin)]:[clone(origin)];
@@ -56,17 +57,88 @@ export function semanticFixture(args={}) {
    const economics=zero(child(child(child(T.supplement,'original'),'rows'),'original').components.find(c=>c.name==='economics').arrayChildren);Object.assign(economics.item.terms,{collectionId:cid,resolver:source.primaryResolver,revenueClass:source.primaryRevenueClass,scope:1n,scopeId:cid,assignmentHash:H('economics assignment')});Object.assign(economics.item.association,{artistId:old,bindingGeneration:1n,bindingHash:b.bindings.rows[0].item.bindingHash,payloadHash:hash([tuples['StreamArtistOnboardingTypes.EconomicsConsent']],[economics.item.terms]),originalRecord:H('first economics')});economics.item.recordHash=economics.item.association.originalRecord;original.economics.push(economics);commit(6,15n,old,cid,economics.item.recordHash);
    if(options.royalties!==false){const royalty=zero(child(child(child(T.supplement,'original'),'rows'),'royalties').arrayChildren);Object.assign(royalty.terms,{resolver:source.royaltyResolver,collectionId:cid,revenueClass:id('ROYALTY_ERC2981'),expectedAssignmentHash:H('royalty assignment')});Object.assign(royalty.item,{recordHash:H('historical royalty'),artistId:old,bindingGeneration:1n});consent.rows.royalties.push(royalty);commit(6,20n,old,cid,royalty.item.recordHash);}
   }
-  if(!historical) {
+  if(!historical&&!platform) {
    const before=clone(clock),p=platforms[0],at=100n+BigInt(era),prior=p.latestAllegation;
    const record={recordHash:Z,collectionId:cid,claimant:A(80),evidenceHash:H(`evidence${era}`),reasonHash:H(`reason${era}`),reasonURI:'urn:complete:allegation',filedAt:at,proposedArtist:A(82),previousRecordHash:prior,index:BigInt(p.allegations.length+1)};
    record.recordHash=hash(['bytes32','uint256','address','address','uint256','address','bytes32','bytes32','uint64'],[id('6529STREAM_ARTIST_ATTRIBUTION_CLAIM_RECORD_V1'),o.chainId,o.registry,o.core,cid,A(80),record.evidenceHash,record.reasonHash,at]);
    const j=commit(4,10n,Z,cid,record.recordHash);p.allegations.push({point:clone(j.position.point),record});p.allegationCount++;p.latestAllegation=p.latestDisplayClaim=record.recordHash;
    archive(10n,record.recordHash,before,coder.encode(['uint256','bytes32','bytes32','string'],[cid,record.evidenceHash,record.reasonHash,record.reasonURI]));
   }
+  if(platform) {
+   // Original 8 -> 9 -> 11(open) -> 11(sustain) -> 53. Governance/coverage
+   // admission remains mocked; record, replay and owner/Archive preimages do not.
+   const p=platforms[0],stateType=findType('StreamArtistPlatformTypes.State');
+   const contestType=findType('StreamArtistPlatformTypes.Contest'),contextType=findType('StreamArtistPlatformTypes.Context');
+   const governanceType=findType('StreamArtistIdentityContestTypes.GovernanceWitness');
+   const evidenceType=ParamType.from('tuple(uint16 schemaVersion,uint256 collectionId,address proposedArtist,bytes32 claimRecordHash,bytes32 narrativeHash)');
+   const cellType=ParamType.from('tuple(bytes32 commitment,uint64 touchedRevision,uint8 kind,uint8 status)');
+   const proposer=A(82),governor=A(83);let sequence=0n,replayRoot=Z;
+   f.platformStages=[];
+   const documents=(label,claim)=>['evidence','reason'].map(kind=>({schemaVersion:1n,collectionId:cid,proposedArtist:proposer,claimRecordHash:claim,narrativeHash:H(`${label}/${kind}`)}));
+   function platformCommit(operation,actor,record,scope,priorState,payload,body) {
+    const before=clone(clock),surface=hash(['string','uint16'],['PLATFORM_WORKS',operation]);
+    const originalKey=m.artistCompleteHistoryHydrationReplayKey(o,4,{surface,scope}),old=before[4],next=old.revision+1n,primary=operation===11n?Z:record;
+    clock[4].revision=next;
+    clock[4].stateRoot=hash(['bytes32','uint256','address','address','address','address','bytes32','uint64','uint64','bytes32','bytes32','bytes32','bytes32','bytes32'],[
+     id('6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2'),o.chainId,o.registry,o.coordinator,o.archive,o.owners[4],domain(4),old.revision,next,old.stateRoot,
+     hash(['uint16','address','bytes32'],[operation,actor,record]),hash(['uint256',stateType],[cid,p.state]),originalKey,hash(['bytes32'],[primary])]);
+    if(primary!==Z){clock[4].recordChainTip=hash(['bytes32','uint256','address','address','address','address','bytes32','uint64','uint64','bytes32','bytes32'],[
+     id('6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2'),o.chainId,o.registry,o.coordinator,o.archive,o.owners[4],domain(4),sequence,sequence+1n,old.recordChainTip,primary]);sequence++;}
+    const at=point(4),cell={commitment:record,touchedRevision:next,kind:1n,status:2n};
+    journals[4].push({position:{point:clone(at),nativeIndex:BigInt(journals[4].length-start[4])},receipt:{operation,artistId:Z,collectionId:cid,recordHash:record}});
+    aliases[4].push({originHash:oh,ownerIndex:4n,surface,scope,originalKey,cell,admittedAt:clone(at)});
+    replayRoot=hash(['bytes32','bytes32','bytes32',cellType],[m.ARTIST_COMPLETE_HISTORY_HYDRATION_CHECKPOINT_SCHEMA,replayRoot,originalKey,cell]);
+    const mask=operation===8n?[0,4,6]:[4],snap=child(T.envelope,'before_').arrayChildren;
+    const envelope={version:1n,configurationHash:config,operation,actor,value:record,before_:seven(i=>mask.includes(i)?before[i]:zero(snap)),after_:seven(i=>mask.includes(i)?clone(clock[i]):zero(snap)),payload};
+    const raw=flat(T.envelope,envelope),pointer=A(2100+archiveRows.length),payloadHash=keccak256(raw);
+    const evidenceId=hash(['bytes32','uint256','address','address','uint16','address','bytes32'],[id('6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1'),o.chainId,o.registry,o.coordinator,operation,actor,record]);
+    const catalogueIndex=BigInt(archiveRows.length),evidence={catalogueIndex,pointer,payloadHash,evidenceId};
+    archiveRows.push({originHash:oh,catalogueIndex,pointer,kind:id('ARTIST_OPERATION_EVIDENCE'),hash:payloadHash,raw,evidenceId,atBlock:5n});
+    operations.push({originHash:oh,operation,evidence});args.codes?.set(pointer,'0x00'+raw.slice(2));
+    f.platformStages.push({operation,actor,record,scope,point:clone(at),before:priorState,after:clone(p.state),envelope,body});return at;
+   }
+   {
+    const before=clone(p.state),statement=H('Platform declaration'),declaredAt=90n;
+    const record=hash(['bytes32','uint256','address','address','uint256','bytes32','uint64'],[id('6529STREAM_PLATFORM_WORKS_DECLARATION_V1'),o.chainId,o.registry,o.core,cid,statement,declaredAt]);
+    p.state.declaration={recordHash:record,statementHash:statement,actor:A(80),declaredAt};
+    const body={id:cid,statement,roleHash:H('original declaration admin role'),roleRevision:1n};
+    p.declarationPoint=platformCommit(8n,A(80),record,'0x'+cid.toString(16).padStart(64,'0'),before,coder.encode(['uint256','bytes32','bytes32','uint64'],Object.values(body)),body);
+   }
+   {
+    const before=clone(p.state),[e,r]=documents('claim',Z),evidence=hash([evidenceType],[e]),reason=hash([evidenceType],[r]),filedAt=91n;
+    const record={collectionId:cid,claimant:A(80),proposedArtist:proposer,evidenceHash:evidence,reasonHash:reason,filedAt,recordHash:hash(['bytes32','uint256','address','address','uint256','address','bytes32','bytes32','uint64'],[id('6529STREAM_PLATFORM_WORKS_CLAIM_RECORD_V1'),o.chainId,o.registry,o.core,cid,A(80),evidence,reason,filedAt])};
+    p.state.claimCount=1n;p.state.latestClaim=p.latestDisplayClaim=record.recordHash;
+    const body={id:cid,evidence,reason,uri:'urn:complete:platform-claim',e,r,ep:H('claim evidence admission'),rp:H('claim reason admission')};
+    const scope=hash(['uint256','address','bytes32','bytes32'],[cid,A(80),evidence,reason]);
+    const at=platformCommit(9n,A(80),record.recordHash,scope,before,coder.encode(['uint256','bytes32','bytes32','string',evidenceType,evidenceType,'bytes32','bytes32'],Object.values(body)),body);
+    p.claims.push({point:at,record});
+   }
+   for(const [position,state,correction] of [[0,1n,false],[1,3n,false],[2,3n,true]]) {
+    const before=clone(p.state),claim=p.state.latestClaim,[e,r]=documents(`resolution${position}`,claim),evidence=hash([evidenceType],[e]),reason=hash([evidenceType],[r]);
+    const c={scopeHash:hash(['bytes32','uint256','address','address','uint256','bool'],[id('6529STREAM_PLATFORM_WORKS_GOVERNANCE_SCOPE_V1'),o.chainId,o.registry,o.core,cid,correction]),oldValueHash:hash([child(stateType,'declaration'),'uint8','bytes32','bytes32',child(stateType,'correction')],[before.declaration,before.contestState,before.contestClaim,before.contestRecord,before.correction]),newValueHash:Z};
+    c.newValueHash=hash(['bytes32','bytes32','uint8','bytes32','bytes32','bytes32'],[c.scopeHash,c.oldValueHash,state,claim,evidence,reason]);
+    const g={actionId:H(`Platform original action${position}`),proposer:A(84),actionClass:correction?2n:1n,roleMutationHash:H(`Platform original proposer role${position}`),roleRevision:BigInt(position+1),...c};
+    let record;
+    if(correction){
+     record={collectionId:cid,proposedArtist:proposer,claimRecordHash:claim,sustainedContestRecordHash:before.contestRecord,evidenceHash:evidence,reasonHash:reason,approvalActionId:g.actionId,approvedAt:94n,correctiveGeneration:0n,accepted:false,recordHash:Z};
+     record.recordHash=hash(['bytes32','uint256','address','address','uint256','bytes32','bytes32','bytes32','bytes32','bytes32','uint64'],[id('6529STREAM_PLATFORM_WORKS_CORRECTION_RECORD_V1'),o.chainId,o.registry,o.core,cid,before.contestRecord,claim,evidence,reason,g.actionId,record.approvedAt]);
+     p.state.correction=record;p.status.originalCorrectionRecord=record.recordHash;
+    }else{
+     record={collectionId:cid,adjudicatedArtist:proposer,state,claimRecordHash:claim,evidenceHash:evidence,reasonHash:reason,actionId:g.actionId,previousRecordHash:before.contestRecord,changedAt:92n+BigInt(position),recordHash:Z};
+     record.recordHash=hash(['bytes32','uint256','address',contestType],[id('6529STREAM_PLATFORM_WORKS_CONTEST_TRANSITION_V1'),o.chainId,o.owners[4],record]);
+     p.state.contestState=state;p.state.contestClaim=claim;p.state.contestRecord=record.recordHash;
+    }
+    const body={id:cid,state,claim,evidence,reason,correction,c,g,e,r,ep:H(`resolution${position} evidence admission`),rp:H(`resolution${position} reason admission`)};
+    const at=platformCommit(correction?53n:11n,governor,record.recordHash,hash(['uint256','bytes32'],[cid,g.actionId]),before,coder.encode(['uint256','uint8','bytes32','bytes32','bytes32','bool',contextType,governanceType,evidenceType,evidenceType,'bytes32','bytes32'],Object.values(body)),body);
+    if(correction)p.correctionPoint=at;else p.contests.push({point:at,record});
+   }
+   f.platformReplayRoot=replayRoot;
+  }
   // The original cutover is explicit documentary input; no fabricated native row.
   clock[2].revision++;
   const entry={surface:id('identity_authority.replay.one_way_cutover_latch'),scope:Z};aliases[2].push({originHash:oh,ownerIndex:2n,...entry,originalKey:m.artistCompleteHistoryHydrationReplayKey(o,2,entry),cell:{kind:1n,status:2n,commitment:H(`cutover${era}`),touchedRevision:clock[2].revision},admittedAt:point(2)});
   const checkpoints=seven(i=>({schema:m.ARTIST_COMPLETE_HISTORY_HYDRATION_CHECKPOINT_SCHEMA,ownerState:clone(clock[i]),replayRoot:aliases[i].some(a=>a.originHash===oh)?H(`replay${era}/${i}`):Z,replayCount:BigInt(aliases[i].filter(a=>a.originHash===oh).length),nonceRoot:Z,nonceIndexCount:0n}));
+  if(platform)checkpoints[4].replayRoot=f.platformReplayRoot;
   eras.push({originHash:oh,priorImportCommitment:era?H(`import${era}`):Z,checkpoints,nativeCounts:journals.map((r,i)=>BigInt(r.length-start[i])),lowerRevisions:lower});
  }
  f.provenance={origins,eras,journals,aliases};f.before=args.before??seven(i=>({domainId:domain(i),revision:i===2?1n+BigInt(artists.length+collections.length):0n,stateRoot:H(`before${i}`),recordChainTip:H(`beforetip${i}`)}));

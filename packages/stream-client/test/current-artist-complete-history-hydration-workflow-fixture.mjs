@@ -28,7 +28,7 @@ export const safeHash=(chainId,address,values)=>TypedDataEncoder.hash({chainId,v
 const zeroCell=()=>({commitment:ZeroHash,touchedRevision:0n,kind:0n,status:0n});
 export function zeroValue(value){const p=typeof value==='string'?ParamType.from(value):value;if(p.baseType==='tuple')return Object.fromEntries(p.components.map(f=>[f.name,zeroValue(f)]));if(p.baseType==='array')return Array.from({length:Math.max(0,p.arrayLength)},()=>zeroValue(p.arrayChildren));if(p.type==='address')return ZeroAddress;if(p.type==='bool')return false;if(p.type==='string')return '';if(p.type==='bytes')return '0x';if(p.type.startsWith('bytes'))return `0x${'00'.repeat(Number(p.type.slice(5)))}`;return 0n;}
 
-import { semanticFixture } from './current-artist-complete-history-hydration-semantic-fixture.mjs';
+import { semanticFixture, refresh } from './current-artist-complete-history-hydration-semantic-fixture.mjs';
 
 function attestationRead(material,method,args) {
   if(method==='c2paCredentialHead') {const value=material.credentialHeads.get(args[0]);if(value)return value;if(material.certificate.admission.artists.some(q=>q.artistId===args[0]))return zeroValue(rh.ARTIST_COMPLETE_HISTORY_HYDRATION_CREDENTIAL_HEAD_TUPLE);}
@@ -326,7 +326,7 @@ export function setup(options={}) {
     },
     async getTransaction(hash){if(state.transactionHook)state.transactionHook(hash);return state.tx;},async getTransactionReceipt(){return state.receipt;}
   };
-  return{...material,provider,deployment,input,request,certificate,state,source,destination,origin,before,caller,safePin};
+  return{...material,material,provider,deployment,input,request,certificate,state,source,destination,origin,before,caller,safePin};
 }
 export async function capture(s){const c=await workflow.captureArtistCompleteHistoryHydration(s.provider,s.deployment,s.caller,s.input,{blockTag:10,gasLimit:10000000n});s.state.captured=c;return c;}
 export function install(s,c,mode='direct'){
@@ -349,3 +349,20 @@ export function install(s,c,mode='direct'){
 }
 export const run=(s,c,mined)=>workflow.reconcileArtistCompleteHistoryHydrationReceipt(s.provider,c,H('tx'),mined.options);
 export const renumber=logs=>logs.forEach((log,index)=>{log.index=index;});
+
+// Negative tests replace only the mocked Prepared response and matching request.
+// The original source getter DTOs, native journals, Archive rows and STOP carriers
+// remain independent. No expected source value is derived from the replacement.
+export function replacePrepared(s, mutate) {
+  const changed=structuredClone(s.material);
+  mutate(changed);refresh(changed);
+  s.state.certificate=structuredClone(changed.certificate);
+  s.certificate=structuredClone(changed.certificate);
+  s.request=structuredClone(changed.request);s.input=structuredClone(changed.input);
+  return changed;
+}
+export function restorePrepared(s) {
+  s.state.certificate=structuredClone(s.material.certificate);
+  s.certificate=structuredClone(s.material.certificate);
+  s.request=structuredClone(s.material.request);s.input=structuredClone(s.material.input);
+}

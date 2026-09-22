@@ -99,7 +99,10 @@ those acceptance checks. No held recovery handoff supplies client evidence.
 
 Positive provider fixtures cover an undeclared all-unbound allegation, repeated
 migration, and an Artist A history beneath a pending Artist B head with retained
-economics and royalty records. They are compiler-shaped consistency mocks.
+economics and royalty records. Separate Platform fixtures join original-shaped
+contest-11 and correction-53 records to their source getters, Archive envelopes,
+native receipt coordinates and retained destination records. These are
+compiler-shaped consistency mocks.
 Complex combined sanctions, collaborator adjudication and dispute histories
 remain outside this batch's positive provider-fixture evidence.
 
