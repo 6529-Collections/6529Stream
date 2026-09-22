@@ -155,3 +155,5 @@ export * from "./current-artist-unbound-platform-hydration.js";
 export * from "./current-artist-unbound-platform-hydration-workflow.js";
 export * from "./current-artist-recovered-multiple-dispute-hydration.js";
 export * from "./current-artist-recovered-multiple-dispute-hydration-workflow.js";
+export * from "./current-artist-complete-history-hydration.js";
+export * from "./current-artist-complete-history-hydration-workflow.js";

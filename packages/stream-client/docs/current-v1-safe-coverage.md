@@ -169,6 +169,13 @@ item-to-witness associations, immutable history, cached coverage and full
 per-item currentness retain their separate checks. Source and client checks
 do not establish actual Safe execution or linked runtime provenance.
 
+The separate [Complete Artist history client](current-artist-complete-history-hydration.md)
+uses ABI198 to retain the original two Registry hydration calls with full
+historical-principal carriers and the existing direct/Safe receipt paths.
+Its provider fixtures and signed-envelope checks do not establish native
+seven-owner composition or actual Safe execution, and do not widen older
+profile clients or this frozen ABI102 inventory.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

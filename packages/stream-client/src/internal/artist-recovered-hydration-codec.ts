@@ -569,14 +569,15 @@ export interface ArtistRecoveredHydrationFeatureFacts {
 }
 
 /** Private closed profile engine. Public adapters permanently select their frozen feature ceiling. */
-export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n | 1049087n | 2276351n | 4194335n | 16956415n) {
-  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n && knownFeatures !== 1049087n && knownFeatures !== 2276351n && knownFeatures !== 4194335n && knownFeatures !== 16956415n) throw Error("Unsupported internal recovered profile");
+export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n | 1049087n | 2276351n | 4194335n | 16956415n | 33816575n) {
+  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n && knownFeatures !== 1049087n && knownFeatures !== 2276351n && knownFeatures !== 4194335n && knownFeatures !== 16956415n && knownFeatures !== 33816575n) throw Error("Unsupported internal recovered profile");
+  const completeHistory = knownFeatures === 33816575n;
   const multipleDisputes = knownFeatures === 16956415n;
   const unboundPlatform = knownFeatures === 4194335n;
   const multipleGenerations = knownFeatures === 2276351n;
   const multipleAttestations = knownFeatures === 1049087n;
   const multipleConsents = knownFeatures === 524671n;
-  const multipleExtended = multipleConsents || multipleAttestations || multipleGenerations || multipleDisputes;
+  const multipleExtended = multipleConsents || multipleAttestations || multipleGenerations || multipleDisputes || completeHistory;
   const multiple = knownFeatures === 262175n || multipleExtended || unboundPlatform;
   const coder = AbiCoder.defaultAbiCoder();
   const schemaTypes = new Map<string, ParamType>();
@@ -788,20 +789,20 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     const a = r.records.authority;
     if (multiple) {
       list(a.artistIds, 128); list(a.collections, 128);
-      if (a.bindingIndex !== 0n || !unboundPlatform && !a.artistIds.length || !a.collections.length
-        || !unboundPlatform && a.artistIds.length === 1 && a.collections.length === 1 || !multipleExtended && r.records.witnesses.length) {
+      if (a.bindingIndex !== 0n || !unboundPlatform && !completeHistory && !a.artistIds.length || !a.collections.length
+        || !unboundPlatform && !completeHistory && a.artistIds.length === 1 && a.collections.length === 1 || !multipleExtended && r.records.witnesses.length) {
         throw Error("MULTIPLE_BASE requires a complete plural graph without witness extensions");
       }
       for (let i = 0; i < a.artistIds.length; i++) {
         const artist = a.artistIds[i]!;
         if (artist === ZERO || i > 0 && BigInt(artist) <= BigInt(a.artistIds[i - 1]!)
-          || !a.collections.some(c => c.artistId === artist)) throw Error("Invalid multiple Artist selectors");
+          || !completeHistory && !a.collections.some(c => c.artistId === artist)) throw Error("Invalid multiple Artist selectors");
       }
       let total = 0;
       for (let i = 0; i < a.collections.length; i++) {
         const c = a.collections[i]!;
         if (!c.collectionId || i > 0 && c.collectionId <= a.collections[i - 1]!.collectionId
-          || (unboundPlatform && c.artistId === ZERO ? c.policies.length !== 0 : !a.artistIds.includes(c.artistId))) throw Error("Invalid multiple collection selectors");
+          || ((unboundPlatform || completeHistory) && c.artistId === ZERO ? c.policies.length !== 0 : !a.artistIds.includes(c.artistId))) throw Error("Invalid multiple collection selectors");
         list(c.policies, 128); total += c.policies.length;
         const seen = new Set<string>();
         for (const policy of c.policies) {
@@ -855,7 +856,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       let previous = -1, totalEconomics = 0, totalAttestations = 0;
       for (const witness of r.records.witnesses) {
         const at = a.collections.findIndex(c => c.collectionId === witness.collectionId);
-        list(witness.economics, 128); list(witness.attestations, multipleAttestations || multipleGenerations || multipleDisputes ? 128 : 0);
+        list(witness.economics, 128); list(witness.attestations, multipleAttestations || multipleGenerations || multipleDisputes || completeHistory ? 128 : 0);
         if (at <= previous || !(witness.economics.length + witness.attestations.length)
           || witness.economics.some(row => row.collectionId !== witness.collectionId)
           || witness.attestations.some(row => row.terms.collectionId !== witness.collectionId)) {
@@ -1223,7 +1224,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       || h.replayAliasesCommitment !== artistRecoveredHydrationAliasesHash(p.provenance.aliases, index)
       || h.semanticRecordCount !== BigInt(p.provenance.journal.length)
       || h.replayAliasCount !== BigInt(p.provenance.aliases.length) || h.eraCount !== BigInt(p.provenance.eras.length)
-      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (multipleDisputes ? 16777216n : unboundPlatform ? 4194304n : multipleGenerations ? 2097152n : multipleAttestations ? 1048576n : multipleConsents ? 524288n : 262144n)) === 0n
+      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (completeHistory ? 33554432n : multipleDisputes ? 16777216n : unboundPlatform ? 4194304n : multipleGenerations ? 2097152n : multipleAttestations ? 1048576n : multipleConsents ? 524288n : 262144n)) === 0n
       || multipleGenerations && (h.requiredFeatures & 512n) === 0n
       || multipleDisputes && (h.requiredFeatures & 8192n) === 0n
       || multipleAttestations && (h.requiredFeatures & 128n) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
@@ -1289,7 +1290,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     value: ArtistRecoveredHydrationExternalGuards,
   ): ArtistRecoveredHydrationExternalGuards {
     const s = normalize(ARTIST_RECOVERED_HYDRATION_EXTERNAL_GUARDS_TUPLE, value);
-    if (unboundPlatform && s.schema === id("6529STREAM_ARTIST_UNBOUND_PLATFORM_HYDRATION_V1")) {
+    if ((unboundPlatform || completeHistory) && s.schema === id("6529STREAM_ARTIST_UNBOUND_PLATFORM_HYDRATION_V1")) {
       if (s.artistId !== ZERO || s.provenanceCommitment === ZERO || s.actions.length || s.finality.length || s.entropy.length) throw Error("Invalid empty-principal external guards");
       return s;
     }
@@ -1327,7 +1328,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     const artist = c.artists[0]!;
     if (multiple) {
       list(c.artists, 128); list(c.collections, 128);
-      if (!unboundPlatform && !c.artists.length || !c.collections.length || !unboundPlatform && c.artists.length === 1 && c.collections.length === 1) {
+      if (!unboundPlatform && !completeHistory && !c.artists.length || !c.collections.length || !unboundPlatform && !completeHistory && c.artists.length === 1 && c.collections.length === 1) {
         throw Error("Incomplete plural recovered graph");
       }
       const registrations = c.artists.map(() => 0);
@@ -1337,13 +1338,13 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
         const q = c.artists[i]!;
         if (q.artistId === ZERO || q.collectionId !== 0n || q.bindingHash !== ZERO || q.policies.length
           || i > 0 && BigInt(q.artistId) <= BigInt(c.artists[i - 1]!.artistId)
-          || !c.collections.some(row => row.artistId === q.artistId)) throw Error("Invalid complete Artist partition");
+          || !completeHistory && !c.collections.some(row => row.artistId === q.artistId)) throw Error("Invalid complete Artist partition");
       }
       let policies = 0;
       for (let i = 0; i < c.collections.length; i++) {
         const q = c.collections[i]!;
         if (!q.collectionId || i > 0 && q.collectionId <= c.collections[i - 1]!.collectionId
-          || (unboundPlatform && q.artistId === ZERO ? q.bindingHash !== ZERO || q.policies.length !== 0 : q.bindingHash === ZERO || !c.artists.some(row => row.artistId === q.artistId))) throw Error("Invalid complete collection partition");
+          || ((unboundPlatform || completeHistory) && q.artistId === ZERO ? q.bindingHash !== ZERO || q.policies.length !== 0 : q.bindingHash === ZERO || !c.artists.some(row => row.artistId === q.artistId))) throw Error("Invalid complete collection partition");
         list(q.policies, 128); policies += q.policies.length;
         const seen = new Set<string>();
         for (const policy of q.policies) {
@@ -1356,19 +1357,19 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       if (policies > 128 || unboundPlatform && !c.collections.some(q => q.artistId === ZERO)) throw Error("Multiple policy capacity or unbound selection mismatch");
       const first = c.collections[0]!;
       const anchorArtist = c.artists.find(row => row.artistId === first.artistId)!;
-      if (!same(ARTIST_HYDRATION_QUERY_TUPLE, p.query, { ...first, records: unboundPlatform && first.artistId === ZERO ? first.records : anchorArtist.records })) throw Error("Multiple anchor differs from original first collection");
+      if (!same(ARTIST_HYDRATION_QUERY_TUPLE, p.query, { ...first, records: (unboundPlatform || completeHistory) && first.artistId === ZERO ? first.records : anchorArtist.records })) throw Error("Multiple anchor differs from original first collection");
       for (let ownerIndex = 0; ownerIndex < 7; ownerIndex++) {
         for (const entry of provenance.journals[ownerIndex]!) {
           const r = entry.receipt;
           const at = c.artists.findIndex(row => row.artistId === r.artistId);
           const ci = r.collectionId ? c.collections.findIndex(row => row.collectionId === r.collectionId) : -1;
-          if (unboundPlatform && r.artistId === ZERO) {
-            if (ownerIndex !== 4 || ci < 0 || c.collections[ci]!.artistId !== ZERO || ![8n, 9n, 10n, 11n, 53n].includes(r.operation)) throw Error("Invalid unbound Platform occurrence");
+          if ((unboundPlatform || completeHistory) && r.artistId === ZERO) {
+            if (ownerIndex !== 4 || ci < 0 || !completeHistory && c.collections[ci]!.artistId !== ZERO || ![8n, 9n, 10n, 11n, 53n].includes(r.operation)) throw Error("Invalid unbound Platform occurrence");
             collectionRecords[ci]!.push(r.recordHash);
             continue;
           }
-          if (at < 0 || r.collectionId && (ci < 0 || c.collections[ci]!.artistId !== r.artistId)) throw Error("Native occurrence outside multiple graph");
-          if (ownerIndex === 2 && r.operation === 1n) {
+          if (at < 0 || r.collectionId && (ci < 0 || !completeHistory && c.collections[ci]!.artistId !== r.artistId)) throw Error("Native occurrence outside multiple graph");
+          if (ownerIndex === 2 && (r.operation === 1n || completeHistory && r.operation === 6n)) {
             if (r.recordHash !== r.artistId || r.collectionId) throw Error("Invalid original registration occurrence");
             registrations[at] = registrations[at]! + 1;
           }
@@ -1417,8 +1418,8 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     }
     normalizeArtistRecoveredHydrationTimingCheckpoint(p.timing);
     normalizeArtistRecoveredHydrationExternalGuards(p.externalGuards);
-    if (p.externalGuards.artistId !== (unboundPlatform && !c.artists.length ? ZERO : artist.artistId)
-      || unboundPlatform && !c.artists.length && p.externalGuards.schema !== id("6529STREAM_ARTIST_UNBOUND_PLATFORM_HYDRATION_V1")
+    if (p.externalGuards.artistId !== ((unboundPlatform || completeHistory) && !c.artists.length ? ZERO : artist.artistId)
+      || (unboundPlatform || completeHistory) && !c.artists.length && p.externalGuards.schema !== id("6529STREAM_ARTIST_UNBOUND_PLATFORM_HYDRATION_V1")
       || p.externalGuards.provenanceCommitment !== artistRecoveredHydrationProvenanceHash(provenance)) {
       throw Error("External guards belong to another inventory");
     }
@@ -1500,14 +1501,14 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     const economicsCount = c.provenance.journals[6].filter(entry => entry.receipt.operation === 15n).length;
     const attestationCount = c.provenance.journals[4].filter(entry => entry.receipt.operation === 24n).length;
     if (multipleExtended) {
-      if (multipleGenerations || multipleDisputes ? attestationCount > 128 : multipleAttestations ? attestationCount === 0 || attestationCount > 128 : attestationCount !== 0) throw Error("Multiple attestation profile mismatch");
+      if (multipleGenerations || multipleDisputes || completeHistory ? attestationCount > 128 : multipleAttestations ? attestationCount === 0 || attestationCount > 128 : attestationCount !== 0) throw Error("Multiple attestation profile mismatch");
       const selected = c.collections.filter(q => c.provenance.journals[6].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n)
-        || (multipleAttestations || multipleGenerations || multipleDisputes) && c.provenance.journals[4].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n));
+        || (multipleAttestations || multipleGenerations || multipleDisputes || completeHistory) && c.provenance.journals[4].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n));
       if (selected.length !== request.records.witnesses.length) throw Error("Missing or extra multiple economics witnesses");
       for (let i = 0; i < selected.length; i++) {
         const q = selected[i]!, witness = request.records.witnesses[i]!;
         const count = c.provenance.journals[6].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n).length;
-        const attestations = multipleAttestations || multipleGenerations || multipleDisputes ? c.provenance.journals[4].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n).length : 0;
+        const attestations = multipleAttestations || multipleGenerations || multipleDisputes || completeHistory ? c.provenance.journals[4].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n).length : 0;
         if (witness.collectionId !== q.collectionId || witness.attestations.length !== attestations || witness.economics.length !== count
           || witness.economics.some(row => row.collectionId !== q.collectionId
             || row.resolver !== c.source.primaryResolver && row.resolver !== c.source.royaltyResolver)) {

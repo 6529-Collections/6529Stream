@@ -471,6 +471,9 @@ contract profiles and outstanding larger-script work.
   accounting across complete recovered graphs through operation 60 and its
   original direct/Safe CALL routes.
 
+- [Complete Artist history](docs/current-artist-complete-history-hydration.md)
+  adds separate typed carriers and original direct/Safe call workflows for
+  historical principals, collaborator accounts and mixed collection heads.
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain

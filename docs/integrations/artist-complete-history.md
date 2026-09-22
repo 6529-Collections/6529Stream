@@ -61,6 +61,11 @@ still run over the full provenance.
 
 ## Integration and evidence boundaries
 
+The separate [TypeScript client](../../packages/stream-client/docs/current-artist-complete-history-hydration.md)
+provides compiler-backed carriers and original direct/Safe call workflows.
+Its supplied-provider and envelope checks remain separate from native
+composition and actual seven-owner execution.
+
 The distinct tag is `6529STREAM_ARTIST_COMPLETE_HISTORY_V1`, version 1. Its reserved
 feature is `33554432`. The known-feature registry and all seven owners explicitly
 advertise this implemented source route. Its allowed mask includes semantic

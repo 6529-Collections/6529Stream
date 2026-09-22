@@ -1,5 +1,15 @@
 # Changelog
 
+## Complete Artist history client
+
+- Add separate compiler-backed Complete History carriers and original
+  operation-60 direct/Safe workflows, preserving older profile encodings and
+  strict refusals. Historical principal and collection associations, shared
+  Archive cutoffs and collaborator account lanes retain their original scope.
+  See the [client guide](packages/stream-client/docs/current-artist-complete-history-hydration.md).
+  Provider and envelope checks remain separate from actual seven-owner/Safe
+  execution and release acceptance.
+
 ## Native four-format export and family coverage
 
 - Add native V4 Linked Art, PREMIS and IIIF adapters alongside the unchanged
