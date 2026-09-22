@@ -5,6 +5,9 @@ This additive TOKEN, RELEASE and SEASON path follows the
 Every producer has a distinct V2 capability and profile. Original COLLECTION and
 scoped V1 bytes retain their original interpretation.
 
+The [source-worker guide](scoped-policy-source-workers.md) maps the shared
+reference and render-critical facades, fixed workers and preserved call semantics.
+
 ## Publication and preservation order
 
 1. Complete the authoritative membership and original coordinator inventory;
