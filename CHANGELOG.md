@@ -136,6 +136,16 @@
   separate owners and rejection boundaries; compiler and runtime acceptance are
   separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
 
+## Multiple recovered consent client profile
+
+- Add the separately pinned MULTIPLE_CONSENTS client for complete original
+  policy, economics, sale, content and freeze histories across recovered Artists
+  and collections. Retain global grant usage, nonce insertion order, original
+  domains, signatures and ordered witnesses in the original operation-60 calls.
+  Existing BASE/255/511 clients keep their closed profiles. Compiler and mock
+  client checks remain separate from contract/Safe execution and deployment
+  acceptance. See the [client guide](packages/stream-client/docs/current-artist-recovered-multiple-consent-hydration.md).
+
 ## Multiple recovered Artist client profile
 
 - Add the explicit MULTIPLE_BASE client for class-1/class-3 recovered Artists

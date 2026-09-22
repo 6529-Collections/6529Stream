@@ -444,6 +444,10 @@ contract profiles and outstanding larger-script work.
   adds the explicit MULTIPLE_BASE profile with complete owner partitions, original
   global nonce order and one operation-60 import across all selected lanes.
 
+- [Multiple recovered consent histories](docs/current-artist-recovered-multiple-consent-hydration.md)
+  adds the separate MULTIPLE_CONSENTS profile for complete direct/delegated consent
+  histories, global grant and nonce partitions, and ordered economics/royalty witnesses.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain

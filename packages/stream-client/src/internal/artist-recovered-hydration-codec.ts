@@ -569,9 +569,10 @@ export interface ArtistRecoveredHydrationFeatureFacts {
 }
 
 /** Private closed profile engine. Public adapters permanently select their frozen feature ceiling. */
-export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n) {
-  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n) throw Error("Unsupported internal recovered profile");
-  const multiple = knownFeatures === 262175n;
+export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n) {
+  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n) throw Error("Unsupported internal recovered profile");
+  const multipleConsents = knownFeatures === 524671n;
+  const multiple = knownFeatures === 262175n || multipleConsents;
   const coder = AbiCoder.defaultAbiCoder();
   const schemaTypes = new Map<string, ParamType>();
 
@@ -783,7 +784,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     if (multiple) {
       list(a.artistIds, 128); list(a.collections, 128);
       if (a.bindingIndex !== 0n || !a.artistIds.length || !a.collections.length
-        || a.artistIds.length === 1 && a.collections.length === 1 || r.records.witnesses.length) {
+        || a.artistIds.length === 1 && a.collections.length === 1 || !multipleConsents && r.records.witnesses.length) {
         throw Error("MULTIPLE_BASE requires a complete plural graph without witness extensions");
       }
       for (let i = 0; i < a.artistIds.length; i++) {
@@ -844,16 +845,31 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       }
     }
     if (replayTotal > 8192) throw Error("Replay inventory exceeds capacity");
-    list(r.records.witnesses, 1);
-    for (const witness of r.records.witnesses) {
-      if (witness.collectionId !== collection.collectionId || !(witness.economics.length + witness.attestations.length)) {
-        throw Error("Invalid or empty witness wrapper");
+    if (multipleConsents) {
+      list(r.records.witnesses, 128);
+      let previous = -1, totalEconomics = 0;
+      for (const witness of r.records.witnesses) {
+        const at = a.collections.findIndex(c => c.collectionId === witness.collectionId);
+        list(witness.economics, 128); list(witness.attestations, 0);
+        if (at <= previous || !witness.economics.length
+          || witness.economics.some(row => row.collectionId !== witness.collectionId)) {
+          throw Error("Invalid complete multiple economics witness order");
+        }
+        previous = at; totalEconomics += witness.economics.length;
       }
-      list(witness.economics, 128);
-      list(witness.attestations, 128);
-      if (witness.economics.some(item => item.collectionId !== collection.collectionId)
-        || witness.attestations.some(item => item.terms.collectionId !== collection.collectionId)) {
-        throw Error("Witness collection mismatch");
+      if (totalEconomics > 128) throw Error("Multiple economics witness capacity");
+    } else {
+      list(r.records.witnesses, 1);
+      for (const witness of r.records.witnesses) {
+        if (witness.collectionId !== collection.collectionId || !(witness.economics.length + witness.attestations.length)) {
+          throw Error("Invalid or empty witness wrapper");
+        }
+        list(witness.economics, 128);
+        list(witness.attestations, 128);
+        if (witness.economics.some(item => item.collectionId !== collection.collectionId)
+          || witness.attestations.some(item => item.terms.collectionId !== collection.collectionId)) {
+          throw Error("Witness collection mismatch");
+        }
       }
     }
     return r;
@@ -1201,7 +1217,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       || h.replayAliasesCommitment !== artistRecoveredHydrationAliasesHash(p.provenance.aliases, index)
       || h.semanticRecordCount !== BigInt(p.provenance.journal.length)
       || h.replayAliasCount !== BigInt(p.provenance.aliases.length) || h.eraCount !== BigInt(p.provenance.eras.length)
-      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & 262144n) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
+      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (multipleConsents ? 524288n : 262144n)) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
       throw Error("Owner header differs from complete payload");
     }
   }
@@ -1463,13 +1479,28 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     }
     const economicsCount = c.provenance.journals[6].filter(entry => entry.receipt.operation === 15n).length;
     const attestationCount = c.provenance.journals[4].filter(entry => entry.receipt.operation === 24n).length;
-    const witness = request.records.witnesses[0];
-    if (economicsCount + attestationCount === 0 ? request.records.witnesses.length !== 0
-      : !witness || witness.economics.length !== economicsCount || witness.attestations.length !== attestationCount) {
-      throw Error("Missing or partial original witness family");
-    }
-    if (witness?.economics.some(item => item.resolver !== c.source.primaryResolver && item.resolver !== c.source.royaltyResolver)) {
-      throw Error("Economics witness references another resolver");
+    if (multipleConsents) {
+      if (attestationCount) throw Error("Multiple consent profile excludes attestations");
+      const selected = c.collections.filter(q => c.provenance.journals[6].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n));
+      if (selected.length !== request.records.witnesses.length) throw Error("Missing or extra multiple economics witnesses");
+      for (let i = 0; i < selected.length; i++) {
+        const q = selected[i]!, witness = request.records.witnesses[i]!;
+        const count = c.provenance.journals[6].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n).length;
+        if (witness.collectionId !== q.collectionId || witness.attestations.length || witness.economics.length !== count
+          || witness.economics.some(row => row.collectionId !== q.collectionId
+            || row.resolver !== c.source.primaryResolver && row.resolver !== c.source.royaltyResolver)) {
+          throw Error("Incomplete original multiple economics witness partition");
+        }
+      }
+    } else {
+      const witness = request.records.witnesses[0];
+      if (economicsCount + attestationCount === 0 ? request.records.witnesses.length !== 0
+        : !witness || witness.economics.length !== economicsCount || witness.attestations.length !== attestationCount) {
+        throw Error("Missing or partial original witness family");
+      }
+      if (witness?.economics.some(item => item.resolver !== c.source.primaryResolver && item.resolver !== c.source.royaltyResolver)) {
+        throw Error("Economics witness references another resolver");
+      }
     }
     for (let i = 0; i < 7; i++) {
       const index = i as ArtistHydrationOwnerIndex;
