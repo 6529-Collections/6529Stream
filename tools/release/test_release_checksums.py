@@ -3495,6 +3495,80 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("tools/protocol/test_artist_owner_record_continuity_extension.py"),
         })
 
+    def test_retained_response_patterns_agree_with_git_and_preserve_bytes(self) -> None:
+        policy = (
+            b".gitattributes text eol=lf\n"
+            b"*.nt text eol=lf\n*.retrieval.json text eol=lf\n*.bin text eol=lf\n"
+            b"evidence/input/**/*.nt -text\n"
+            b"evidence/input/**/*.retrieval.json -text "
+            b"whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol\n"
+            b"evidence/input/discovery/*.bin -text\n"
+            b"evidence/input/restored.nt text\n"
+        )
+        paths = {
+            "evidence/input/root.nt": True,
+            "evidence/input/restored.nt": False,
+            "evidence/input/nested/deeper/value.nt": True,
+            "evidence/input/root.retrieval.json": True,
+            "evidence/input/nested/value.retrieval.json": True,
+            "evidence/input/discovery/root.bin": True,
+            "evidence/input/discovery/nested/value.bin": False,
+            "evidence/input/discovery-neighbor/root.bin": False,
+            "evidence/input-neighbor/value.nt": False,
+            "evidence/value.retrieval.json": False,
+            "other/evidence/input/value.nt": False,
+            "evidence/input/value.nt.bin": False,
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            subprocess.run(["git", "-C", str(root), "init", "--quiet"], check=True)
+            attributes = root / ".gitattributes"
+            attributes.write_bytes(policy)
+            originals = {}
+            for name, binary in paths.items():
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                originals[name] = b"retained\r\nbytes\r\n" if binary else b"text\n"
+                path.write_bytes(originals[name])
+            facts = generator.validate_covered_file_line_endings(
+                root, [attributes, *(root / name for name in paths)]
+            )
+            for name, binary in paths.items():
+                with self.subTest(path=name):
+                    native = subprocess.check_output([
+                        "git", "-C", str(root), "check-attr", "-z", "text", "--", name,
+                    ]).split(b"\0")
+                    self.assertEqual(native[2], b"unset" if binary else b"set")
+                    self.assertEqual(facts[name].classification, "binary" if binary else "lf")
+                    self.assertEqual((root / name).read_bytes(), originals[name])
+            (root / "evidence/input-neighbor/value.nt").write_bytes(b"outside\r\n")
+            with self.assertRaisesRegex(generator.ChecksumError, "eol=lf"):
+                generator.validate_covered_file_line_endings(
+                    root, [attributes, root / "evidence/input-neighbor/value.nt"]
+                )
+
+    def test_retained_response_patterns_keep_unsupported_policy_closed(self) -> None:
+        for rule in (
+            b"evidence/*/nested/*.nt -text",
+            b"evidence/**/specific.nt -text",
+            b"evidence/***/value.nt -text",
+            b"evidence/**/*.nt filter=external -text",
+            b"evidence/**/*.nt -text working-tree-encoding=UTF-16",
+            b"evidence/**/*.nt -text whitespace=unknown",
+            b"evidence/**/*.nt -text eol=lf",
+        ):
+            with self.subTest(rule=rule):
+                with self.assertRaises(generator.ChecksumError):
+                    generator._parse_root_gitattributes(rule + b"\n")
+
+    def test_current_retained_response_policy_is_parseable(self) -> None:
+        rules = generator._parse_root_gitattributes(
+            (SCRIPT_PATH.parents[2] / ".gitattributes").read_bytes()
+        )
+        self.assertIn((
+            "schemas/museum/premis-authority-coverage/example/input/**/*.nt", "binary", None,
+        ), rules)
+
     def test_work_lido_subtree_retains_exact_lf_xml_policy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

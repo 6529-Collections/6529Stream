@@ -55,6 +55,12 @@ Release checksum validation accepts the exact Git diagnostic override
 change its inherited text/LF policy or remove trailing spaces from the upstream
 bytes. The complete `.gitattributes` file remains part of the checksum inputs;
 other unsupported attributes still fail validation.
+It also accepts the exact CRLF whitespace diagnostic setting used by retained
+Museum responses, and literal-directory `*.extension` / `**/*.extension`
+patterns. A single star matches only that directory; the recursive form also
+matches files immediately beneath it. The raw-response `-text` policy preserves
+original bytes. These additions do not enable filters, working-tree encodings
+or unrestricted Git pattern syntax.
 
 CI schedules each job independently. Draft pull requests retain their running
 current/default native jobs so their completed compiler caches survive integration

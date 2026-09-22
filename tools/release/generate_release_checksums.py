@@ -864,6 +864,14 @@ def read_text(path: Path) -> str:
         return handle.read()
 
 
+def _directory_suffix_rule(pattern: str) -> tuple[str, str, bool] | None:
+    """Recognize literal directory prefixes with one optional recursive segment."""
+    match = re.fullmatch(r"([^*]+)/(\*\*/)?\*(\.[A-Za-z0-9_.-]+)", pattern)
+    if match is None:
+        return None
+    return match[1] + "/", match[3], match[2] is not None
+
+
 def _parse_root_gitattributes(
     attributes_data: bytes,
 ) -> list[tuple[str, str, str | None]]:
@@ -918,6 +926,7 @@ def _parse_root_gitattributes(
                 and pattern.count("*") == 2
                 and "*" not in pattern[:-2]
             )
+            or _directory_suffix_rule(pattern) is not None
         ):
             raise ChecksumError(
                 f"unsupported .gitattributes wildcard at line {line_number}: "
@@ -939,7 +948,10 @@ def _parse_root_gitattributes(
             for token in attributes
             if token not in {"text", "text=auto", "-text", "binary"}
             and not token.startswith("eol=")
-            and token != "whitespace=-blank-at-eol"
+            and token not in {
+                "whitespace=-blank-at-eol",
+                "whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",
+            }
         ]
         if unknown:
             raise ChecksumError(
@@ -988,6 +1000,17 @@ def _gitattributes_pattern_matches(pattern: str, relative_path: str) -> bool:
         return Path(relative_path).name.endswith(pattern[1:])
     if pattern.endswith("/**"):
         return relative_path.startswith(pattern[:-2])
+    suffix_rule = _directory_suffix_rule(pattern)
+    if suffix_rule is not None:
+        prefix, suffix, recursive = suffix_rule
+        if not relative_path.startswith(prefix):
+            return False
+        remainder = relative_path[len(prefix):]
+        return (
+            bool(remainder)
+            and remainder.rsplit("/", 1)[-1].endswith(suffix)
+            and (recursive or "/" not in remainder)
+        )
     return relative_path == pattern
 
 
@@ -997,9 +1020,11 @@ def _validate_declared_line_endings(
     mode: str,
     eol: str | None,
 ) -> str:
-    if mode == "binary" or (
-        mode == "auto" and b"\x00" in data[:GIT_BINARY_SNIFF_BYTES]
-    ):
+    if mode == "binary":
+        # Git keeps an inherited eol attribute, but -text disables conversion.
+        # An explicitly contradictory -text/eol rule is rejected by the parser.
+        return "binary"
+    if mode == "auto" and b"\x00" in data[:GIT_BINARY_SNIFF_BYTES]:
         if eol is not None:
             raise ChecksumError(
                 f"binary covered path must not declare eol: {relative_path}"

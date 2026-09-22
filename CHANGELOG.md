@@ -1,5 +1,12 @@
 # Changelog
 
+## Retained Museum response checksum policy
+
+- Support the repository's explicit raw-response directory suffix patterns and
+  CRLF whitespace diagnostic setting in release checksum validation. Preserve
+  original response bytes and reject unsupported filters or encodings; verify
+  pattern matching against Git. Release bundle regeneration remains separate.
+
 ## Consent owner constructor capacity
 
 - Extract the existing static sanction return encoding into the fixed read library,
