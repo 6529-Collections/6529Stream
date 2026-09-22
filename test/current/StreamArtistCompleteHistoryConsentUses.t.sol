@@ -288,14 +288,40 @@ contract StreamArtistCompleteHistoryConsentUsesTest {
 
     function testRekeyedSaleAliasesMustKeepOneOriginalAdmission() public view {
         Uses.Context memory x = _fixture();
+        // A later synthetic import era changes the alias origin, not its original admission.
+        // Complete provenance authentication remains the enclosing profile's prerequisite.
+        RH.OriginEnvironment[] memory origins = new RH.OriginEnvironment[](3);
+        RH.Era[] memory eras = new RH.Era[](3);
+        for (uint256 e; e < 2; ++e) {
+            origins[e] = x.provenance.origins[e];
+            eras[e] = x.provenance.eras[e];
+        }
+        origins[2] = abi.decode(abi.encode(origins[1]), (RH.OriginEnvironment));
+        origins[2].registry = address(102);
+        for (uint8 o; o < 7; ++o) {
+            origins[2].owners[o] = address(uint160(220 + uint256(o)));
+            origins[2].ownerCodeHashes[o] = bytes32(uint256(320) + o);
+        }
+        eras[2] = abi.decode(abi.encode(eras[1]), (RH.Era));
+        eras[2].originHash = RH.originHash(origins[2]);
+        x.provenance.origins = origins;
+        x.provenance.eras = eras;
         RH.ReplayAlias[] memory aliases = new RH.ReplayAlias[](2);
         aliases[0] = x.provenance.aliases[2][0];
         aliases[1] = abi.decode(abi.encode(x.provenance.aliases[2][0]), (RH.ReplayAlias));
-        aliases[1].originHash = x.provenance.eras[1].originHash;
+        aliases[1].originHash = eras[2].originHash;
+        bytes32 originalAdmission = keccak256(abi.encode(aliases[0].admittedAt));
+        require(aliases[0].originHash != aliases[1].originHash);
+        require(aliases[1].admittedAt.environmentHash == eras[1].originHash);
+        require(keccak256(abi.encode(aliases[1].admittedAt)) == originalAdmission);
         x.provenance.aliases[2] = aliases;
         _counts(x, 2, 2);
         x.provenance.aliases[2][1].admittedAt.ownerRevision = 6;
         _reject(x);
+        x.provenance.aliases[2][1].admittedAt =
+            abi.decode(abi.encode(x.provenance.aliases[2][0].admittedAt), (RH.Point));
+        require(keccak256(abi.encode(x.provenance.aliases[2][1].admittedAt)) == originalAdmission);
+        _counts(x, 2, 2);
     }
 
     function testNativeSanctionHasNoUseButNativeConfirmationIsRejected() public view {
