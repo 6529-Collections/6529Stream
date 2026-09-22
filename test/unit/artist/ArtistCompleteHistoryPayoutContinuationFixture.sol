@@ -178,8 +178,10 @@ abstract contract ArtistCompleteHistoryPayoutContinuationFixture is
         for (uint256 i; i < 2; ++i) {
             HT.Receipt memory row = Native(suite.owners[2]).artistNativeReceiptAt(identityCount + i);
             require(
-                row.operation == 35 && row.recordHash == record && row.artistId == artistId,
-                "original35 paired native occurrences"
+                row.operation == 35
+                    && row.recordHash == (i == 0 ? record : saved.fields.supersededRecordsHash)
+                    && row.artistId == artistId,
+                "original35 primary recovery then secondary supersession occurrence"
             );
         }
         _chRewindRemember(p, context, saved);

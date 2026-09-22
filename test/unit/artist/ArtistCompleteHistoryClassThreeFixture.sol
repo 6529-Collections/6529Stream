@@ -291,10 +291,10 @@ abstract contract ArtistCompleteHistoryClassThreeFixture is ArtistCompleteHistor
                 abi.encodeCall(CHC3Activation.requestEstateActivation, (request, authorization)),
                 0
             ),
-            "original39 requested by the fresh estate Safe"
+            "original38 requested by the fresh estate Safe"
         );
         (,, bytes32 activation) = ingress.estateActivationState(artistId);
-        require(activation != 0, "real original39 request record");
+        require(activation != 0, "real original38 request record");
         digest = ingress.estateActivationDigest(request, authorization);
         _rhCandidate(
             2,
