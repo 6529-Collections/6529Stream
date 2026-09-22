@@ -13,8 +13,11 @@ import {
     StreamCurrentAuthorityPreservationCallerBaseline
 } from "./StreamCurrentAuthorityPreservationCallerBaseline.sol";
 import {
-    StreamCurrentAuthorityPreservationCallerScenario as Scenario
-} from "./StreamCurrentAuthorityPreservationCallerScenario.sol";
+    IStreamCurrentAuthorityPreservationCallerScenario as Scenario
+} from "./IStreamCurrentAuthorityPreservationCallerScenario.sol";
+import {
+    StreamCurrentAuthorityPreservationCallerArtifacts as Artifacts
+} from "./StreamCurrentAuthorityPreservationCallerArtifacts.sol";
 
 /// @notice Source-authored local VM preparation and final account export, not an RPC deployment.
 /// @dev The runner must authenticate this native source/creation/link closure and a complete fresh
@@ -29,8 +32,9 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
     StreamCurrentAuthorityPreservationCallerBaseline
 {
     bytes32 private constant CUT_PROFILE = keccak256("6529STREAM_CALLER_BOOTSTRAP_FOUNDRY_171_V1");
-    string private constant SCENARIO_ARTIFACT =
-        "test/helpers/StreamCurrentAuthorityPreservationCallerScenario.sol:StreamCurrentAuthorityPreservationCallerScenario";
+    string private constant SCENARIO_ARTIFACT = Artifacts.SCENARIO;
+    // Exact genuine Scenario preparation() selector; retain its full raw return bytes below.
+    bytes4 private constant SCENARIO_PREPARATION_SELECTOR = 0xb8319ba5;
 
     struct WriterState {
         address writer;
@@ -136,7 +140,7 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
             instance := create(0, add(creation, 32), mload(creation))
         }
         if (instance == address(0) || instance.code.length == 0) revert ScenarioCreationFailed();
-        Scenario scenario = Scenario(payable(instance));
+        Scenario scenario = Scenario(instance);
         scenario.prepare();
         if (!scenario.preparationComplete()) revert ScenarioPreparationFailed();
         packet.preparation = _preparation(scenario);
@@ -305,7 +309,8 @@ contract StreamCurrentAuthorityPreservationCallerBootstrap is
 
     function _preparation(Scenario scenario) private view returns (bytes memory raw) {
         bool ok;
-        (ok, raw) = address(scenario).staticcall(abi.encodeCall(Scenario.preparation, ()));
+        (ok, raw) =
+            address(scenario).staticcall(abi.encodeWithSelector(SCENARIO_PREPARATION_SELECTOR));
         if (!ok || raw.length == 0) revert ScenarioPreparationFailed();
     }
 
