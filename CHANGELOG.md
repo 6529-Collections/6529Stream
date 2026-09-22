@@ -1,5 +1,14 @@
 # Changelog
 
+## Native Artist review selection
+
+- Add explicit native Artist review interpretation and selection with exact
+  original op24 authority, publication scope and revision binding. Preserve
+  the producer-required assertion wire and earlier profile meanings; distinguish
+  selected account review and opted-in SELF review without claiming human or
+  institutional authority. See the
+  [native Artist review guide](docs/museum-native-artist-review.md).
+
 ## Dispute history library deployment size
 
 - Separate unchanged generation-head validation into a fixed linked library,
