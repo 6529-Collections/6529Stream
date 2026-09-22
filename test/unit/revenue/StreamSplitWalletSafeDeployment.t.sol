@@ -56,6 +56,7 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
     OfficialSafe private account;
     uint256[] private signerKeys;
     bool private indexedExecutionHash;
+    bool private bubblesTargetRevert;
 
     struct Attempt {
         uint256 nonceBefore;
@@ -104,19 +105,19 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
     );
 
     function testSafe130FactoryDeploymentAndInitializationBoundaries() public {
-        _exercise("1.3.0", false);
+        _exercise("1.3.0", false, false);
     }
 
     function testSafe141FactoryDeploymentAndInitializationBoundaries() public {
-        _exercise("1.4.1", true);
+        _exercise("1.4.1", true, false);
     }
 
     function testSafe150FactoryDeploymentAndInitializationBoundaries() public {
-        _exercise("1.5.0", true);
+        _exercise("1.5.0", true, true);
     }
 
-    function _exercise(string memory version, bool indexedHash) private {
-        _setup(version, indexedHash);
+    function _exercise(string memory version, bool indexedHash, bool bubblesRevert) private {
+        _setup(version, indexedHash, bubblesRevert);
         IStreamSplitWallet.SplitEntry[] memory entries = _entries();
         (bytes32 profile, address predicted) = factory.registerProfile(entries, META);
         require(factory.profileCount() == 1 && factory.profileExists(profile), "registered profile");
@@ -130,9 +131,13 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
         bytes memory deployData = abi.encodeCall(IStreamSplitFactory.deployWallet, (profile));
         // Register the aggregate once; each signed attempt retains its own trace identity.
         vm.expectCall(address(factory), deployData, 2);
-        _deploymentEvent(_safeCall(address(factory), deployData, 0, true), profile, predicted, 1);
+        _deploymentEvent(
+            _safeCall(address(factory), deployData, 0, true, bytes("")), profile, predicted, 1
+        );
         _walletState(profile, predicted, META);
-        _deploymentEvent(_safeCall(address(factory), deployData, 0, true), profile, predicted, 0);
+        _deploymentEvent(
+            _safeCall(address(factory), deployData, 0, true, bytes("")), profile, predicted, 0
+        );
         _walletState(profile, predicted, META);
         require(factory.profileCount() == 1, "idempotent deployment preserves profile count");
 
@@ -149,13 +154,14 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
         require(factory.profileCount() == 3, "three independently deployed profiles");
     }
 
-    function _setup(string memory version, bool indexedHash) private {
+    function _setup(string memory version, bool indexedHash, bool bubblesRevert) private {
         MockGovernedParameterAuthority authority = new MockGovernedParameterAuthority(true);
         policy = new StreamAssetPolicyRegistry(address(authority));
         factory = new StreamSplitFactory(policy, address(authority), _walletGasConfigs());
         require(factory.revenueRuntimeRegistry() == address(0), "explicit unbound runtime seam");
         require(factory.WALLET_VERSION() == 4 && factory.SCHEMA_VERSION() == 1, "wallet version");
         indexedExecutionHash = indexedHash;
+        bubblesTargetRevert = bubblesRevert;
         uint256[] memory ownerKeys = new uint256[](3);
         ownerKeys[0] = 0xA1101;
         ownerKeys[1] = 0xA1102;
@@ -214,6 +220,8 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
     function _unknownProfile() private {
         bytes32 absent = keccak256("unregistered Safe profile");
         bytes memory data = abi.encodeCall(IStreamSplitFactory.deployWallet, (absent));
+        bytes memory expectedRevert =
+            abi.encodeWithSelector(IStreamSplitFactory.UnknownProfile.selector, absent);
         (bool ok, bytes memory result) = address(factory).call(data);
         require(
             !ok
@@ -225,9 +233,9 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
         );
         // Count only the two Safe attempts; the direct error control above is already complete.
         vm.expectCall(address(factory), data, 2);
-        _safeCall(address(factory), data, 0, false);
+        _safeCall(address(factory), data, 0, false, expectedRevert);
         // A nonzero safeTxGas returns false and emits ExecutionFailure, consuming the nonce.
-        _safeCall(address(factory), data, FAILURE_CALL_GAS, false);
+        _safeCall(address(factory), data, FAILURE_CALL_GAS, false, expectedRevert);
         require(
             !factory.profileExists(absent) && factory.walletFor(absent).code.length == 0,
             "unknown profile remains absent"
@@ -245,14 +253,17 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
             IStreamSplitWallet.initialize,
             (profile, keccak256(abi.encode(entries)), META, entries, accounts, shares)
         );
+        bytes memory expectedRevert = abi.encodeWithSelector(
+            IStreamSplitWallet.UnauthorizedInitializer.selector, address(account)
+        );
         uint256 nonce = account.nonce();
         // One aggregate expectation covers two Safe attempts and the owner EOA refusal.
         vm.expectCall(wallet, data, 3);
-        _safeCall(wallet, data, 0, false);
+        _safeCall(wallet, data, 0, false, expectedRevert);
         _walletState(profile, wallet, META);
         // The failed outer calls preserve the Safe nonce; identical target/data therefore also
         // produce the identical transaction hash and deterministic signed envelope on this retry.
-        _safeCall(wallet, data, 0, false);
+        _safeCall(wallet, data, 0, false, expectedRevert);
         require(account.nonce() == nonce, "repeated initializer preserves Safe nonce");
         _walletState(profile, wallet, META);
         address owner = safeVm.addr(0xA1101);
@@ -290,10 +301,13 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
         _walletState(profile, predicted, metadata);
     }
 
-    function _safeCall(address target, bytes memory data, uint256 safeTxGas, bool expectedSuccess)
-        private
-        returns (SplitSafeDeploymentVm.Log[] memory logs)
-    {
+    function _safeCall(
+        address target,
+        bytes memory data,
+        uint256 safeTxGas,
+        bool expectedSuccess,
+        bytes memory expectedInnerRevert
+    ) private returns (SplitSafeDeploymentVm.Log[] memory logs) {
         Attempt memory a;
         a.nonceBefore = account.nonce();
         a.transactionHash = account.getTransactionHash(
@@ -309,13 +323,17 @@ contract StreamSplitWalletSafeDeploymentTest is OfficialSafeFixture {
         (a.outerSuccess, a.result) = address(account).call(a.envelope);
         logs = vm.getRecordedLogs();
         if (!expectedSuccess && safeTxGas == 0) {
+            // Safe 1.3.0/1.4.1 wrap a failed zero-gas-price estimation call in GS013;
+            // Safe 1.5.0 instead bubbles the exact target revert bytes. Both roll back the nonce.
+            require(expectedInnerRevert.length >= 4, "explicit target refusal oracle");
+            bytes memory expectedOuterRevert = bubblesTargetRevert
+                ? expectedInnerRevert
+                : abi.encodeWithSignature("Error(string)", "GS013");
             require(
-                !a.outerSuccess
-                    && keccak256(a.result)
-                        == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
-                "exact GS013 outer rollback"
+                !a.outerSuccess && keccak256(a.result) == keccak256(expectedOuterRevert),
+                "exact version-specific outer rollback"
             );
-            require(account.nonce() == a.nonceBefore, "GS013 nonce rollback");
+            require(account.nonce() == a.nonceBefore, "failed outer call nonce rollback");
             _executionEvent(logs, a.transactionHash, false, 0);
         } else {
             require(a.outerSuccess && a.result.length == 32, "Safe outer returned bool");
