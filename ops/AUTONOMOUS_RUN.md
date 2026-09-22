@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI202 `904f1bc3`: 4,634 sources / zero errors; corrected Class3/recovery tests integrated, 62 new client cases pass; full current runtime pending. |
+| Source checkpoint | `19f0ed0b`; ABI206 4,686 sources / zero errors; Museum 89 combined root passes; current collaborator native and full CI pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,76 +29,58 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-Expanded full v1 remains incomplete. The integrated source is `904f1bc3`;
-ABI202 checks **4,634 Solidity sources with zero errors**. The latest contract
-repair remains `402bad28`; corrected Artist test composition is `50bd67116`,
-Complete History clients are `904f1bc3`, and native Museum formats are `fdb36e3f`.
-Source checks and scoped tests do not establish full current-stack acceptance.
-RC1 and its Sepolia evidence remain unchanged.
+Expanded full v1 remains incomplete. Integrated source `19f0ed0b` includes
+the current collaborator repair, client scheduling repairs and new Museum
+profiles. ABI206 checks **4,686 Solidity sources with zero errors** at
+`60025e9a`; later changes are Museum software only. The canonical inventory
+contains **3,136 production paths**. Source integration and scoped tests do not
+establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
 
-- **Artist history:** complete chronology, historical principals, combined
-  Consent, original sanctions/confirmations12/13, ratification52, all seven
-  imports and the post-import source recheck are connected. The latest reviewed
-  test batch combines real payout, policy, C2PA, sanction, ratification and
-  revoked-grant histories with collaborator/unbound histories. It adds a genuine
-  second op60 import after a fresh successor payout and compares/reuses the full
-  signed Safe retry envelope. Four strengthened cases and one new case are
-  authored and ABI-checked, not executed. Three further independently reviewed
-  cases now compose rich Class3 credentials, original payout recovery and its
-  continuation across two imports, plus exact signed-Safe rollback/retry.
-  Review caught and corrected the secondary recovery receipt hash before
-  integration. These three cases are also unexecuted. Class4 activation and
-  full current-contract execution remain open.
-- **Museum:** native Linked Art, PREMIS and IIIF adapters now join unchanged
-  native LIDO in one portable package. Complete field/family inventories and
-  exact provenance remain visible. All **49 new focused root tests pass** on
-  `fdb36e3f`, with independent source/oracle reviews clear. Earlier 42/41-case
-  batches remain source-specific evidence. Native media painting joins, broader
-  events/agents/rights, other required mappings, actual capture/publication and
-  institutional acceptance remain open. Retained synthetic records are explicit.
-- **Testing speed:** helper-only Guardian/Recovered/Unbound/Dispute and
-  Chronology/Identity/Composition fixtures are integrated. Existing named test
-  bodies and storage order are preserved while accidental inherited cases are
-  removed from unrelated hosts. The earlier one-hour generation compiler
-  failure remains recorded; the reduced host is not yet executed. Owner testing
-  has 14 fresh native/physical products and a 24-product named-library join on
-  its separate `52de8dd2` source; actual Owner execution remains pending.
-- **Complete History clients:** separate typed carriers and original operation60
-  direct/Safe workflows are integrated in `904f1bc3`. Root passes the generated
-  ABI checks, both TypeScript builds and all **62 new focused cases** across two
-  retained runs on unchanged client inputs. Independent source review is clear.
-  These checks cover source/codec/provider and synthetic Safe receipts, not
-  actual Safe execution. The current plan retains 244 files, 3,322 registrations
-  and 1,447 units. Platform11/53 provider-path regression coverage is being added.
-- **Client CI:** measured scheduling `6de635eae` retains all tests and limits.
-  The fresh remote run on `43fb3e010` (merge checkout `a042f42a`) passed the slow
-  Bundle unit in 351 seconds, but the Inventory unit still exceeded its original
-  420-second child limit even when started first. This is an individual test
-  capacity failure, not just scheduling. Its 51 independent lifecycles are being
-  partitioned while preserving every assertion and limit. The earlier timing
-  model is an estimate only; full CI remains incomplete.
-- **Capacity:** the five preservation overruns reported by the frozen capacity
-  campaign are repaired in source. Snapshot/Reference at `5104c901` fit their
-  runtime/full-initcode limits and retain six focused passes including fuzz256.
-  At `402bad28`, all four content checkpoints measure **22,475 runtime bytes**;
-  output manifests V1/V2 measure **14,293**. These six wrappers and both new
-  libraries fit original runtime/full-initcode limits; wrapper ABIs, selectors
-  and storage remain identical. The admission/source-image worker passes
-  **19 tests, including two 256-input fuzz properties**. Full preservation flows
-  and gas are assigned to Burn. Current Artist/Coordinator capacity remains
-  pending; the separate proposed 20-product Artist run remains held.
-- **Remaining runtime:** collaborator repair `089270ed6` has independent source
-  clearance and source-qualified fitting products. Root integration exposed six
-  conflicts with later sanction/ratification features; its owner is adapting the
-  repair onto `904f1bc3` before intake. No later feature was discarded. Collector
-  optimization remains isolated until actual paid flows
-  meet the original 500,000-gas ceiling. Earlier ratification18, preservation61
-  and other passes apply only to their recorded sources. The canonical source
-  inventory now contains **3,095 production paths**.
+- **Artist contracts:** `07265d875` integrates the current collaborator repair
+  while preserving the later sanction12/13 and ratification52 features. Both
+  independent and root source reviews are clear. Twenty-seven regression cases
+  are authored; one bounded native campaign is running. Complete History and
+  repeated-import/Safe test composition remain source-integrated, not accepted
+  through the full current graph. Class4 activation is still open.
+- **Museum exports:** `a35a05d34` adds authenticated native IIIF painting and
+  PREMIS events, agents and rights in the portable package. All **46 focused
+  root tests pass** on that exact source. Retained synthetic inputs remain
+  identified; this does not establish institutional acceptance or a current
+  public-chain capture.
+- **Museum declarations and review:** `b7cd578e` adds explicit correction,
+  merge and complete split lineage. `1a899e47` and `19f0ed0b` add a separately
+  registered profile and exact source/reviewer admission policies. Old profile
+  bytes and authority boundaries remain intact. Independent review is clear;
+  all **89 combined root tests pass**. These are software/replay controls.
+  The builder has also retained an actual local registered account-review
+  capture using explicitly historical contract products; root intake and
+  selection tests follow. General and Artist review adapters remain separate
+  implementation work; account qualification does not prove human independence.
+- **Clients and CI:** the original 51 Inventory lifecycles now run in 17
+  independent stages, with all assertions retained. Platform11/53 provider
+  regression coverage and measured timing inputs are integrated. The timing
+  tools pass 14 root checks; the eight new provider tests pass on the producer.
+  The current client plan has **246 files and 1,472 execution units** across
+  the same 16 shards and original time limits. The last remote matrix on the
+  older `bf0e803e` source passed 15 shards; its unpartitioned Inventory unit
+  timed out. A new remote run must validate the repairs. Full CI is not green.
+- **Preservation execution:** the frozen `39ed249c` campaign passes all
+  **31 manifest cases**, including two 256-input fuzz properties. The complete
+  44-case campaign has prepared 163 products across 25 verified native contexts;
+  checkpoint execution and full-constructor/gas checks remain pending. Two
+  compiler-side lint failures are retained separately. The new genuine
+  checkpoint-to-manifest three-case batch is source-integrated as `158ba55c`
+  and remains unexecuted.
+- **Capacity and remaining integration:** current preservation size repairs
+  remain measured at `5104c901`/`402bad28`; checkpoints are 22,475 runtime bytes
+  and manifests 14,293. Older isolated Collector captures still contain the
+  original overruns and cannot reuse these newer results. Owner test artifact
+  assembly and isolated paid-flow optimization continue. Neither is actual
+  full current-stack acceptance, and the 500,000-gas paid-flow ceiling remains.
 
 Remaining delivery work includes missing feature combinations and Museum
-software, latest deployment-size/gas checks, actual current-stack and all-call
-Safe integration, full fuzz/stateful campaigns, full CI and matching release
+adapters, current deployment-size/gas checks, actual current-stack and all-call
+Safe integration, complete fuzz/stateful campaigns, full CI and matching release
 evidence, then a frozen candidate and new testnet demonstration. No new funding
 is required. Audit, production ceremonies and Lean remain separate.
 
@@ -107,28 +89,6 @@ handoffs, a Class4 handoff read and the separate Artist native run. The exact
 permission questions remain pending; held payloads and operations have not
 been routed through alternative executors. Unaffected work continues.
 
-
-Current work ownership:
-
-- **Root:** integrate reviewed feature batches and close the combined candidate.
-- **Artist lead:** prior helper extraction and frozen 211-product evidence are
-  retained; remaining current runtime is separate.
-- **Revenue lead:** independent collaborator/source review; its denied Artist
-  native request remains held.
-- **Metadata lead:** adapt reviewed collaborator repair to current sanction/ratification source; Class4 stays sealed.
-- **Complete Artist migration:** corrected Class3/recovery composition source integrated; runtime acceptance remains separate.
-- **Mint:** dispute acceptance and held outbound handoff remain separately owned.
-- **Burn:** current repaired checkpoint/manifest full-flow tests on `fdb36e3f`,
-  one bounded native worker, preserving every original case and limit.
-- **Prepared:** original ratification18 evidence and independent Collector tooling review.
-- **Testing:** exact `52de8dd2` Owner physical/linking/execution work; no replacement
-  for the held current Artist capacity request.
-- **Capacity:** frozen `027e7c70` campaign sealed, including failures; root repairs
-  have their own later evidence and do not rewrite its outputs.
-- **Clients:** partition the timed-out Inventory test and add Platform11/53 provider regressions.
-- **Museum:** authenticated media painting and broader PREMIS event/agent/rights joins.
-- **Collector:** original paid-flow compiler closure, export/replay and gas acceptance.
-- **Metric:** independent incoming Complete History source/oracle review.
 
 ## Earlier source-specific assignments
 
