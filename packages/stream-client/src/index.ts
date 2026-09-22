@@ -113,6 +113,8 @@ export * from "./current-artist-personhood.js";
 export * from "./current-artist-personhood-workflow.js";
 export * from "./current-artist-guardian-rotation.js";
 export * from "./current-artist-guardian-rotation-workflow.js";
+export * from "./current-artist-collaborator.js";
+export * from "./current-artist-collaborator-workflow.js";
 export * from "./current-artist-recovered-hydration.js";
 export * from "./current-artist-recovered-hydration-workflow.js";
 export * from "./current-artist-recovered-consent-hydration.js";
