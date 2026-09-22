@@ -4,6 +4,8 @@ import { StreamArtistUnboundPlatformCodec as UnboundCodec } from "./StreamArtist
 import { StreamArtistUnboundPlatformPayoutImport as UnboundImport } from "./StreamArtistUnboundPlatformPayoutImport.sol";
 import { StreamArtistRecoveredMultipleDisputePayoutImport as DisputeImport } from "./StreamArtistRecoveredMultipleDisputePayoutImport.sol";
 import { StreamArtistRecoveredMultipleDisputeCodec as DisputeAggregate } from "./StreamArtistRecoveredMultipleDisputeCodec.sol";
+import { StreamArtistPrimaryCollaboratorCodec as PrimaryCodec } from "./StreamArtistPrimaryCollaboratorCodec.sol";
+import { StreamArtistPrimaryCollaboratorPayoutImport as PrimaryPayoutImport } from "./StreamArtistPrimaryCollaboratorPayoutImport.sol";
 import { StreamArtistRecoveredMultipleGenerationPayoutImport as GenerationImport } from "./StreamArtistRecoveredMultipleGenerationPayoutImport.sol";
 import { StreamArtistRecoveredMultipleGenerationCodec as GenerationAggregate } from "./StreamArtistRecoveredMultipleGenerationCodec.sol";
 import { StreamArtistRecoveredMultipleAttestationCodec as AttestationAggregate } from "./StreamArtistRecoveredMultipleAttestationCodec.sol";
@@ -75,6 +77,10 @@ library StreamArtistRecoveredPayoutTransport {
         }
         if (DisputeAggregate.selected(ownerData.typedState, 5)) {
             DisputeImport.importState(roots, query, ownerData.typedState);
+            return;
+        }
+        if (PrimaryCodec.selected(ownerData.typedState, 5)) {
+            PrimaryPayoutImport.importState(roots, query, ownerData.typedState);
             return;
         }
         if (GenerationAggregate.selected(ownerData.typedState, 5)) {

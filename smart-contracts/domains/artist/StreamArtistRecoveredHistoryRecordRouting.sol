@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPrimaryCollaboratorCurrent as PrimaryCurrent } from "./StreamArtistPrimaryCollaboratorCurrent.sol";
 import {
     StreamArtistRecoveredMultipleDisputeCurrent as Disputes
 } from "./StreamArtistRecoveredMultipleDisputeCurrent.sol";
@@ -98,6 +99,10 @@ library StreamArtistRecoveredHistoryRecordRouting {
         (RH.ExportHeader memory h, Payload.Payload memory payload) = Payload.decode(outer, 4);
         if ((h.requiredFeatures & XF.MULTIPLE_DISPUTE_HISTORY) != 0) {
             Disputes.requireCurrent(p, q, outer);
+            return;
+        }
+        if ((h.requiredFeatures & XF.PRIMARY_COLLABORATORS) != 0) {
+            PrimaryCurrent.requireCurrent(p,q,outer);
             return;
         }
         if ((h.requiredFeatures & XF.MULTIPLE_GENERATIONS) != 0) {

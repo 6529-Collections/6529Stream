@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import { StreamArtistUnboundPlatformCollectionImport as Unbound } from "./StreamArtistUnboundPlatformCollectionImport.sol";
 import { StreamArtistRecoveredMultipleDisputeCollectionImport as DisputeCollections } from "./StreamArtistRecoveredMultipleDisputeCollectionImport.sol";
 import { StreamArtistRecoveredMultipleDisputeAttributionImport as DisputeAttribution } from "./StreamArtistRecoveredMultipleDisputeAttributionImport.sol";
+import { StreamArtistPrimaryCollaboratorAttributionImport as PrimaryAttribution } from "./StreamArtistPrimaryCollaboratorAttributionImport.sol";
 import { StreamArtistRecoveredMultipleGenerationAttributionImport as GenerationAttribution } from "./StreamArtistRecoveredMultipleGenerationAttributionImport.sol";
 import { StreamArtistRecoveredMultipleGenerationCollectionImport as Generations } from "./StreamArtistRecoveredMultipleGenerationCollectionImport.sol";
 import { StreamArtistRecoveredMultipleAttestationCollectionImport as Attestations } from "./StreamArtistRecoveredMultipleAttestationCollectionImport.sol";
@@ -128,6 +129,7 @@ library StreamArtistRecoveredMultipleCollectionImport {
     {
         if (Unbound.attribution(state, anchor, raw)) return true;
         if (DisputeAttribution.applyState(state, anchor, raw)) return true;
+        if (PrimaryAttribution.applyState(state, anchor, raw)) return true;
         if (GenerationAttribution.applyState(state, anchor, raw)) return true;
         if (Attestations.attribution(state, anchor, raw)) return true;
         if (Next.attribution(state, anchor, raw)) return true;

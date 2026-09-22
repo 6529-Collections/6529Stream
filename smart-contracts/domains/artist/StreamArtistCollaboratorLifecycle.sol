@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPrimaryCollaboratorCollectionImport as PrimaryCollectionImport } from "./StreamArtistPrimaryCollaboratorCollectionImport.sol";
 import {
     StreamArtistExtendedHydrationFeatures as XF
 } from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
@@ -178,7 +179,7 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM | XF.MULTIPLE_DISPUTE_HISTORY;
+        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM | XF.MULTIPLE_DISPUTE_HISTORY | XF.PRIMARY_COLLABORATORS;
     }
 
     function recoveredAuthorityHydrationState(
@@ -192,6 +193,7 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
         if (RecoveredCodec.isState(p.typedState, 1)) {
             // All collaborator writes advance this counter even when they create no native row.
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (PrimaryCollectionImport.collaborators(_identityProposals, _joins, _acceptedCounts, _identityLinks, q, p.typedState)) return;
             if (MultipleImport.collaborator(q, p.typedState)) return;
             RecoveredSimple.importCollaborator(q, p.typedState);
             return;

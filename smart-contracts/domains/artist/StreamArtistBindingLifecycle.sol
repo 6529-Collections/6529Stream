@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPrimaryCollaboratorBindingImport as PrimaryBindingImport } from "./StreamArtistPrimaryCollaboratorBindingImport.sol";
 import {
     StreamArtistExtendedHydrationFeatures as XF
 } from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
@@ -444,7 +445,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM | XF.MULTIPLE_DISPUTE_HISTORY;
+        return XF.MULTIPLE_GENERATIONS_GRAPH_FEATURES | XF.UNBOUND_PLATFORM | XF.MULTIPLE_DISPUTE_HISTORY | XF.PRIMARY_COLLABORATORS;
     }
 
     function recoveredAuthorityHydrationState(
@@ -457,6 +458,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         if (RecoveredCodec.isState(p.typedState, 0)) {
             if (_revision != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+            if (PrimaryBindingImport.applyState(_bindings, _history, _terms, _terminals, _corrections, _collaborators, q, p.typedState)) return;
             if (RecoveredAccepted.importIfSelected(_bindings, _history, _terms, _terminals, _corrections, q, p.typedState)) return;
             if (RecoveredGenerations.selected(p.typedState)) {
                 RecoveredGenerations.importState(

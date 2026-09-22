@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 import { StreamArtistUnboundPlatformPreparation as Unbound } from "./StreamArtistUnboundPlatformPreparation.sol";
 import { StreamArtistUnboundPlatformSelectors as UnboundSelectors } from "./StreamArtistUnboundPlatformSelectors.sol";
+import { StreamArtistPrimaryCollaboratorSelection as PrimarySelection } from "./StreamArtistPrimaryCollaboratorSelection.sol";
+import { StreamArtistPrimaryCollaboratorPreparation as PrimaryPreparation } from "./StreamArtistPrimaryCollaboratorPreparation.sol";
 import { StreamArtistRecoveredMultiplePreparation as Multiple } from "./StreamArtistRecoveredMultiplePreparation.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
@@ -96,6 +98,9 @@ library StreamArtistRecoveredHydrationPrepared {
         bool requireInventory
     ) private view returns (bytes memory) {
         if (UnboundSelectors.selected(request.records.authority)) return Unbound.encode(destination, request, royalties, requireInventory);
+        if (PrimarySelection.required(destination, request)) {
+            return PrimaryPreparation.encode(destination, request, royalties, requireInventory);
+        }
         if (
             request.records.authority.artistIds.length > 1
                 || request.records.authority.collections.length > 1

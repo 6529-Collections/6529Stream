@@ -35,6 +35,17 @@
   Archive rollback and identical retry. Native execution, gas and joined capacity
   remain pending; see the
   [integration guide](docs/integrations/artist-recovered-multiple-disputes.md).
+## PRIMARY_ONLY collaborator hydration
+
+- Add complete original collaborator proposal, identity, acceptance and nonce
+  transport through the existing seven-owner recovered-authority operation60.
+- Retain partial and repeated primary acceptance history, original binding terms,
+  payout/attribution joins and exact source/currentness validation. Held quorum
+  policy consumption and every old profile remain unchanged.
+- Add focused leaf/nonce and actual-owner/Safe scenarios. Source/type checks do
+  not establish native execution, production capacity or transaction gas; see
+  the [profile guide](docs/guides/artist-primary-collaborator-hydration.md).
+
 
 ## Registry writer deployment capacity
 
