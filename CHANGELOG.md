@@ -1,5 +1,13 @@
 # Changelog
 
+## Recorded account review selection
+
+- Execute qualified source/reviewer policies against retained actual local
+  publications. Cover approval, rejection, explicit SELF, authenticated order
+  and original-preserving projection in eight focused tests. Keep historical
+  product sources, immutable capture facts and account-only qualification
+  explicit in the [review guide](docs/museum-qualified-account-review.md).
+
 ## Qualified-account review local originals
 
 - Add an isolated local capture and retained offline replay for a mapping by

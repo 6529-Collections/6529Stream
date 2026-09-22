@@ -95,10 +95,23 @@ python -m tools.museum.qualified_review_profile --check
 python -m unittest tools.museum.test_qualified_review_profile tools.museum.test_qualified_recorded_selection
 ```
 
-Current focused controls cover exact admissions, forged revisions/profiles/
+Focused synthetic controls cover exact admissions, forged revisions/profiles/
 families/scopes, publication order, SELF, withdrawal, conflicts, unselected
-records, old-profile refusal and projection evidence. The new selection fixtures
-are explicitly synthetic semantic-admission controls. A new actual registered
-local-EVM capture is being built separately; no live-chain, institution or full
-Museum acceptance is claimed here. General and Artist review adapters require
-their own versioned source/authority joins and remain separate work.
+records, old-profile refusal and projection evidence. Separately, the
+[retained local capture](museum-qualified-review-fixture.md) supplies actual
+registered originals from the attestation host and Safe-governed registry.
+Eight selection/projection tests replay those originals: approval, missing
+approval, opposing reviews, unselected rejection, explicit SELF, authenticated
+publication order, altered admission refusal and exact sidecar preservation.
+The capture's original `selectionPolicyExecuted: false` remains unchanged;
+these later tests execute a separate export policy against it.
+
+```console
+python -m unittest tools.museum.test_qualified_review_fixture_v1 tools.museum.test_actual_qualified_selection
+```
+
+The retained foundation has explicitly historical product sources. This is
+local publication and offline selection evidence, not latest full-stack,
+public-testnet, human-independence or institutional acceptance. General and
+Artist review adapters require their own versioned source/authority joins and
+remain separate work.

@@ -1,5 +1,12 @@
 # Museum offline tooling
 
+[Authenticated account review policies](../../docs/museum-qualified-account-review.md)
+select exact recorded approvals, rejections and SELF reviews while preserving
+original statements. [The retained local fixture](../../docs/museum-qualified-review-fixture.md)
+and its selection tests distinguish account evidence from institutional identity.
+[Declaration lineage](../../docs/museum-declaration-lineage.md) handles explicit
+corrections, merges and complete splits without changing old assertion targets.
+
 [Native media and preservation exports](../../docs/museum-native-media-preservation.md)
 add qualified VIEW painting, publication events and documentary rights to a
 portable four-format package with separate source-field coverage.
