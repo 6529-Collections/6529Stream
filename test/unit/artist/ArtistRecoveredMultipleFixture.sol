@@ -22,7 +22,7 @@ import {
     IStreamArtistRecoveryPayoutOwnerV3 as PayoutInventory
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistRecoveryPayoutOwnerV3.sol";
 
-import "./StreamArtistRecoveredAuthorityActual.t.sol";
+import "./ArtistRecoveredAuthorityFixture.sol";
 import { OfficialSafe } from "../../helpers/OfficialSafeFixture.sol";
 import {
     StreamArtistEstateTypes as Estate
@@ -54,7 +54,7 @@ import {
 
 /// @notice Actual seven-owner aggregate flows. Core and scheduled governance remain explicit unit boundaries.
 /// @dev No owner state, capability, checkpoint, nonce or history receipt is mocked. Native execution pending.
-abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthorityActualTest {
+abstract contract ArtistRecoveredMultipleFixture is ArtistRecoveredAuthorityFixture {
     bytes32[] internal multiArtists;
     bytes32[2] internal multiCollectionArtists;
     bytes32[2] internal multiPolicies;
