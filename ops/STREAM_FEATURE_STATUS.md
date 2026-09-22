@@ -16,17 +16,18 @@ different milestones.
 
 ## Latest integration checkpoint: 22 September
 
-Expanded full v1 remains incomplete. Integrated source `19f0ed0b` includes
+Expanded full v1 remains incomplete. Integrated source `736bdadd8` includes
 the current collaborator repair, client scheduling repairs and new Museum
-profiles. ABI206 checks **4,686 Solidity sources with zero errors** at
-`60025e9a`; later changes are Museum software only. The canonical inventory
+profiles and the checkpoint test-fixture repair. ABI208 checks **4,686 Solidity
+sources with zero errors** at `736bdadd8`. The canonical inventory
 contains **3,136 production paths**. Source integration and scoped tests do not
 establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
 
 - **Artist contracts:** `07265d875` integrates the current collaborator repair
   while preserving the later sanction12/13 and ratification52 features. Both
   independent and root source reviews are clear. Twenty-seven regression cases
-  are authored; one bounded native campaign is running. Complete History and
+  are authored. All 49 owned libraries now fit their runtime/full-init limits
+  on exact `07265d875`; native test-helper preparation and execution continue. Complete History and
   repeated-import/Safe test composition remain source-integrated, not accepted
   through the full current graph. Class4 activation is still open.
 - **Museum exports:** `a35a05d34` adds authenticated native IIIF painting and
@@ -39,10 +40,11 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   registered profile and exact source/reviewer admission policies. Old profile
   bytes and authority boundaries remain intact. Independent review is clear;
   all **89 combined root tests pass**. These are software/replay controls.
-  The builder has also retained an actual local registered account-review
-  capture using explicitly historical contract products; root intake and
-  selection tests follow. General and Artist review adapters remain separate
-  implementation work; account qualification does not prove human independence.
+  Actual local registered account-review capture `8967a96e1` and selection
+  `9312a0cf2` now pass **21 root fixture/selection tests**, independently reviewed.
+  They use explicitly historical contract products. General and Artist review
+  adapters are being built separately; account qualification does not prove
+  human independence.
 - **Clients and CI:** the original 51 Inventory lifecycles now run in 17
   independent stages, with all assertions retained. Platform11/53 provider
   regression coverage and measured timing inputs are integrated. The timing
@@ -50,12 +52,19 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   The current client plan has **246 files and 1,472 execution units** across
   the same 16 shards and original time limits. The last remote matrix on the
   older `bf0e803e` source passed 15 shards; its unpartitioned Inventory unit
-  timed out. A new remote run must validate the repairs. Full CI is not green.
+  timed out. The new `eb840cfb` remote preparation passes and its exact
+  246-file/3,354-registration/1,472-unit plan is authenticated; shards are running.
+  Follow-up source work stays local while this client run finishes, avoiding
+  cancellation of its evidence. Full CI is not green.
 - **Preservation execution:** the frozen `39ed249c` campaign passes all
   **31 manifest cases**, including two 256-input fuzz properties. The complete
-  44-case campaign has prepared 163 products across 25 verified native contexts;
-  checkpoint execution and full-constructor/gas checks remain pending. Two
-  compiler-side lint failures are retained separately. The new genuine
+  44-case campaign prepared 163 products across 25 verified native contexts,
+  then all 13 checkpoint cases failed in shared setup; the 31 manifest cases
+  were not redispatched in that failed attempt. The cause was missing fixture
+  module-interface and role-registry methods. Test-only repair `736bdadd8`
+  preserves production and all original test bodies; five changed native products
+  are being rebuilt before rerun. Two compiler-side lint failures remain recorded.
+  The new genuine
   checkpoint-to-manifest three-case batch is source-integrated as `158ba55c`
   and remains unexecuted.
 - **Capacity and remaining integration:** current preservation size repairs
@@ -330,7 +339,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-18](#museum-18-evidence) Pinned standards/profile schemas and bounded dependency closure | In progress | Partly tested | Partial | Three exact semantic schema candidates, finite interpreted subset and complete local context/schema/vocabulary dependencies; immutable profile versions and acyclic bounded document preparation exist. Bounded account profile was actually registered in captures. **Remaining:** Register and validate the complete adopted mapping/authority/place/schema closure; current finite account/format profiles do not establish every required full-v1 schema. Optional live Linked Art API is neither required nor claimed. |
 | [MUSEUM-19](#museum-19-evidence) Stable entity identity, references and declaration selection | In progress | Partly tested | Partial | Stable explicit IRIs, work/token/file/physical/person distinctions, package resolution and incompatible selected declaration rejection; exact same-kind repeated exhibition/loan/valuation declarations preserve multiple provenance sources. **Remaining:** General authenticated declaration continuation/correction/merge/split lineage and all source-family token/work bindings remain. Same text, wallet or namespace cannot provide continuity. |
 | [MUSEUM-20](#museum-20-evidence) Field-level crosswalk, semantic validation and full coverage accounting | In progress | Partly tested | Partial | Closed schema inventory, exact scalar/array/null/absence accounting, pinned class/domain/range, v2 abstract/visual/linguistic/E73 distinctions and explicit unsupported sidecars. Full requirements are larger than this implemented subset. Exact-source field inventory, four-format ledger and native correspondence `269dd02d` add 42 focused root passes; native WORK-to-LIDO `7e5209e5` adds 41 broader batch passes. **Remaining:** All named source families, physical realizations, complete dimensions/media and geographic patterns, exact reverse mapping and named vectors for every required crosswalk entry remain. Native four-format package `fdb36e3f` adds 49 focused root passes across Linked Art/PREMIS/IIIF/LIDO correspondence, preserving the complete original field/family denominator and unselected records. Native media/PREMIS package `a35a05d34` adds 46 focused root passes, including authenticated painting and events/agents/rights. These retained controls are not institutional acceptance. |
-| [MUSEUM-21](#museum-21-evidence) Attributed assertions, review and conflict selection | In progress | Partly tested | Integrated* | Immutable assertion/revision/profile/field selectors, exact earlier review targets, source-selected conflict withholding, provenance indexes and explicit same-account SELF review. Actual independent-account recorded profile works. **Remaining:** General independent institutional reviewer eligibility and cross-authority actual source policy, not just SELF/account lanes, remain. No arbitrary reviewer label/list grants authority. Qualified account profile and exact per-source/per-review policy are now integrated `1a899e47`/`19f0ed0b`; same-account review requires explicit SELF admission, rejects and conflicts withhold selected claims. The 89-case combined root suite passes. General/Artist adapters and actual registered selection acceptance remain open. |
+| [MUSEUM-21](#museum-21-evidence) Attributed assertions, review and conflict selection | In progress | Partly tested | Integrated* | Immutable assertion/revision/profile/field selectors, exact earlier review targets, source-selected conflict withholding, provenance indexes and explicit same-account SELF review. Actual independent-account recorded profile works. **Remaining:** General independent institutional reviewer eligibility and cross-authority actual source policy, not just SELF/account lanes, remain. No arbitrary reviewer label/list grants authority. Qualified account profile and exact per-source/per-review policy are now integrated `1a899e47`/`19f0ed0b`; same-account review requires explicit SELF admission, rejects and conflicts withhold selected claims. The 89-case combined root suite passes. Actual local registered selection `8967a96e1`/`9312a0cf2` now passes 21 fixture/selection tests on explicitly historical products. General/Artist adapters and latest full-stack acceptance remain open. |
 | [MUSEUM-22](#museum-22-evidence) External authority matching and archived reconciliation | In progress | Partly tested | Partial | fef4b2f6 adds retained authority snapshots/reconciliation; 8ba023dc adds versioned Type/declaration/continuation support, preserves original schema hashes, and replays an actual local Safe declaration/alignment/later SELF review. Root 131 authority/profile/regression tests pass. **Remaining:** Qualified external/artist/curator/institution lanes, full conformance and public/latest-graph acceptance. The positive RDF/JSON remains explicitly synthetic; separately retained Getty SPARQL bytes do not prove publisher-backed equivalence. |
 | [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | In progress | Partly tested | Not integrated | Nine-role draft projection retains historic/uncertainty/precision controls. Recorded exhibition binding (`0a5104e6`) replays the exact original owner location commitment and earlier Place declaration, retaining separate TGN review authority; 18 distinct producer and three root regressions pass on synthetic originals. **Remaining:** Other recorded place-role joins, actual source/reviewer capture and complete conformance. Unverified draft matches cannot emit equivalence. |
 | [MUSEUM-24](#museum-24-evidence) File roles, observed ingest and physical-event relationships | In progress | Partly tested | Partial | Distinct carriers, original/derived resources and named activities; explicit local preservation observations and evidence links. Planned/cancelled/unknown activities are withheld from performed graph output. Native VIEW reference/file-role semantics `679936f0` add ten occurrence-specific roles, original-history/authority retention and complete source-based package replay;30 root tests pass. Eight integrated positive same-object ZIP/PNG receipt cases also pass (`f26e0d43`). Explicit recorded physical-production statements (`6b75f19a`) add17 integrated passes, complete original source replay and embedded Production output for supported completed statements. Acquisition/custody mapping (`697bda0c`) adds six root passes for supported recorded statements. **Remaining:** Complete physical custody/accession/title coverage, institutional source joins, described/received/verified relations and actual website safety-scan parity. Positive fixtures remain synthetic. |

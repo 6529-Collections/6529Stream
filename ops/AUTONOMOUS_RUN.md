@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `19f0ed0b`; ABI206 4,686 sources / zero errors; Museum 89 combined root passes; current collaborator native and full CI pending. |
+| Source checkpoint | `736bdadd8`; ABI208 4,686 sources / zero errors; Museum 89 combined and separate 21 actual-fixture/selection passes; current contract runtime and full CI pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,17 +29,18 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-Expanded full v1 remains incomplete. Integrated source `19f0ed0b` includes
+Expanded full v1 remains incomplete. Integrated source `736bdadd8` includes
 the current collaborator repair, client scheduling repairs and new Museum
-profiles. ABI206 checks **4,686 Solidity sources with zero errors** at
-`60025e9a`; later changes are Museum software only. The canonical inventory
+profiles and the checkpoint test-fixture repair. ABI208 checks **4,686 Solidity
+sources with zero errors** at `736bdadd8`. The canonical inventory
 contains **3,136 production paths**. Source integration and scoped tests do not
 establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
 
 - **Artist contracts:** `07265d875` integrates the current collaborator repair
   while preserving the later sanction12/13 and ratification52 features. Both
   independent and root source reviews are clear. Twenty-seven regression cases
-  are authored; one bounded native campaign is running. Complete History and
+  are authored. All 49 owned libraries now fit their runtime/full-init limits
+  on exact `07265d875`; native test-helper preparation and execution continue. Complete History and
   repeated-import/Safe test composition remain source-integrated, not accepted
   through the full current graph. Class4 activation is still open.
 - **Museum exports:** `a35a05d34` adds authenticated native IIIF painting and
@@ -52,10 +53,11 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   registered profile and exact source/reviewer admission policies. Old profile
   bytes and authority boundaries remain intact. Independent review is clear;
   all **89 combined root tests pass**. These are software/replay controls.
-  The builder has also retained an actual local registered account-review
-  capture using explicitly historical contract products; root intake and
-  selection tests follow. General and Artist review adapters remain separate
-  implementation work; account qualification does not prove human independence.
+  Actual local registered account-review capture `8967a96e1` and selection
+  `9312a0cf2` now pass **21 root fixture/selection tests**, independently reviewed.
+  They use explicitly historical contract products. General and Artist review
+  adapters are being built separately; account qualification does not prove
+  human independence.
 - **Clients and CI:** the original 51 Inventory lifecycles now run in 17
   independent stages, with all assertions retained. Platform11/53 provider
   regression coverage and measured timing inputs are integrated. The timing
@@ -63,12 +65,19 @@ establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
   The current client plan has **246 files and 1,472 execution units** across
   the same 16 shards and original time limits. The last remote matrix on the
   older `bf0e803e` source passed 15 shards; its unpartitioned Inventory unit
-  timed out. A new remote run must validate the repairs. Full CI is not green.
+  timed out. The new `eb840cfb` remote preparation passes and its exact
+  246-file/3,354-registration/1,472-unit plan is authenticated; shards are running.
+  Follow-up source work stays local while this client run finishes, avoiding
+  cancellation of its evidence. Full CI is not green.
 - **Preservation execution:** the frozen `39ed249c` campaign passes all
   **31 manifest cases**, including two 256-input fuzz properties. The complete
-  44-case campaign has prepared 163 products across 25 verified native contexts;
-  checkpoint execution and full-constructor/gas checks remain pending. Two
-  compiler-side lint failures are retained separately. The new genuine
+  44-case campaign prepared 163 products across 25 verified native contexts,
+  then all 13 checkpoint cases failed in shared setup; the 31 manifest cases
+  were not redispatched in that failed attempt. The cause was missing fixture
+  module-interface and role-registry methods. Test-only repair `736bdadd8`
+  preserves production and all original test bodies; five changed native products
+  are being rebuilt before rerun. Two compiler-side lint failures remain recorded.
+  The new genuine
   checkpoint-to-manifest three-case batch is source-integrated as `158ba55c`
   and remains unexecuted.
 - **Capacity and remaining integration:** current preservation size repairs
