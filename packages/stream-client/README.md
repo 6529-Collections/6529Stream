@@ -13,6 +13,10 @@ npm ci --ignore-scripts
 npm test
 ```
 
+The complete `npm test` command is unchanged. CI can distribute the same suite
+using the [bounded test sharding runner](docs/test-sharding.md), with complete
+file and registered-case coverage checked by the `TypeScript client` aggregate.
+
 `npm run build` emits JavaScript and declarations into `dist/`. Import
 `dist/index.js` from a local app, or use this directory as a local package
 dependency. The only runtime dependency is ethers 6.17.0; TypeScript 5.9.3 is a

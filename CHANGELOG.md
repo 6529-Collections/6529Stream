@@ -1,5 +1,14 @@
 # Changelog
 
+## Complete client test sharding
+
+- Add bounded client test planning, native execution and coverage verification
+  while preserving the complete `npm test` command and every source-oracle test.
+  CI prepares once, distributes the full inventory, retains failure logs and
+  requires every shard under the existing `TypeScript client` check. See the
+  [runner guide](packages/stream-client/docs/test-sharding.md). Full remote matrix
+  timing validation remains pending integration; no release evidence is renewed.
+
 ## Complete Artist history composition workers
 
 - Add separate full-source composition, historical-principal storage and

@@ -24,9 +24,16 @@ for the full aggregate wrapper.
 
 Application integrations have an optional [TypeScript client](integrations/typescript-client.md).
 With Node.js 22 or newer, run `npm --prefix packages/stream-client ci --ignore-scripts`
-once, then `npm --prefix packages/stream-client test`. Its independent CI job
+once, then `npm --prefix packages/stream-client test`. Its independent CI lane
 checks retained ABI freshness, TypeScript types, signing payloads and snapshots
 without recompiling Solidity. Solidity development does not require Node.js.
+The unchanged local test command runs the complete suite. CI prepares once,
+distributes that same inventory across 16 bounded shards (at most eight jobs
+and two children per job), and requires every result under the existing
+`TypeScript client` aggregate. Source-oracle files remain complete-file units;
+flat workflow tests can be split by registered name. See the
+[test runner guide](../packages/stream-client/docs/test-sharding.md) for commands,
+coverage checks, timing estimates and failure logs.
 
 The [museum tooling](../tools/museum/README.md) has its own pinned Python
 dependencies and independent Windows/Linux CI workflow. Its tests and
