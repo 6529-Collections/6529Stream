@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI190 `b36f1b8d`: 4,415 sources / zero errors; ABI191 runtime `2ba4ff67`: 4,302 / zero errors. |
+| Source checkpoint | ABI192 `e5174d6f`: 4,498 sources / zero errors; runtime evidence remains tied to its separate source. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,42 +29,72 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-The expanded full-v1 implementation remains incomplete. The integrated source
-at `b36f1b8d` passes ABI190: **4,415 Solidity sources**, zero errors in 51.922
-seconds. Two previously missing migration profiles are now source integrated:
-unbound Platform collections and combined dispute/repudiation histories.
-The batch also includes six earlier capacity repairs, the Consent constructor
-repair, generation clients, actual Safe split-wallet tests and the unified Museum
-dossier. The parallel runtime source `2ba4ff67` adds 37 reviewed test-only fixture paths to `e37745a4`,
-retaining its production bytes and excluding later Artist profile changes.
-Its separate ABI191 check passes all 4,302 sources without errors.
-Every execution result applies only to its recorded source. RC1 is unchanged.
+Expanded full v1 remains incomplete. The combined source at `e5174d6f`
+passes ABI192: **4,498 Solidity sources, zero errors** in 53.047 seconds.
+This checks types, interfaces, storage declarations and selectors; it does not
+establish deployed behavior. Immutable RC1 and its Sepolia evidence are unchanged.
+
+- **Artist migration:** unbound Platform, aggregate dispute/repudiation and
+  PRIMARY_ONLY collaborator histories are source integrated. The collaborator
+  batch includes partial/repeated acceptance and original replay accounting;
+  independent review cleared its corrected source and five repaired worker sizes.
+  Twelve dispute worker tests pass on `b3ed602b`; fourteen actual-owner/Safe
+  cases remain unexecuted and further dispute capacity repairs are underway.
+  Platform and generation actual-host compilation still times out. These are
+  bounded profiles: broader required combinations remain to build and validate.
+- **Developer repository:** 39 inline interfaces now have dedicated domain
+  interface files, with original named imports preserved. Independent source
+  inverses and ABI/selector/storage comparisons pass. The canonical layout
+  checker accepted the refreshed inventory of 3,017 production-source paths.
+  The raw Museum-response checksum policy bug is repaired; eighteen focused
+  checks and independent review pass. Final generated release evidence is pending.
+- **Clients and Safe:** unbound Platform callers are integrated, including the
+  package exports. Root build, strict types and all 55 focused client checks pass
+  at `cf8a1717`; producer review also covers 100 older-profile regressions.
+  These are encoding/provider-mock/Safe-envelope checks, not actual contract
+  execution. Earlier generation clients and three actual Safe split-wallet
+  versions retain their recorded, narrower evidence.
+- **Museum:** the canonical dossier now joins retained script and dependency
+  packages into their existing document slots while preserving the original
+  nineteen groups and forty-nine assessments. Twenty-one root checks pass at
+  `3e7fc352`; seven native-manifest checks also pass after the added wrong-source
+  negative control. Fixtures remain synthetic. Media/render/preservation joins
+  and institutional conformance remain separate work.
+- **Execution testing:** the preservation run reached real execution: its first
+  attempt exposed an obsolete test-name prefix, one missing copied JSON asset
+  and one missing typed mock response. The two source corrections are integrated
+  as `51052f45`; corrected acceptance is running on the separate `e7286fa1`
+  snapshot. Its 38 earlier diagnostic passes do not mean the 61-case cohort passed.
+  Owner, generation, Platform and remaining-capacity host timeouts are preserved
+  as failures. Material test-fixture changes are being built to reduce embedded
+  constructor compilation while retaining actual CREATE behavior and assertions.
+
+Remaining delivery work is the missing legal Artist compositions and Museum
+software scope, complete current-stack and all-call Safe execution, stateful/fuzz
+campaigns, deployment and transaction gas, full CI, source freeze and matching
+testnet demonstration. Collector optimization stays isolated until actual paid
+execution satisfies its original 500,000-gas requirement. No new funding or
+on-chain action is needed for coding. External audit, production ceremonies and
+Lean remain separate. Previously held proposals remain unapplied.
+
+Remote CI is not green. Source-layout and checksum-parser defects have local
+repairs; stale generated artifacts, Slither prerequisites and final formatting
+still need the stable-source validation pass. No failed check is waived.
 
 Root owns architecture, integration and delivery. Current assignments:
 
-- **artist history resume**: Two generation-host codegen trials timed out without execution; reviewed sale-facts helper relocation integrated with the two other fixture cuts. Plan one bounded generation-host trial on exactb36, coordinating genuine shared owners with Platform.
-- **release evidence review**: Build nonempty PRIMARY_ONLY collaborator history, original repeated primary accepts and partial rows, preparation and actual fixtures. Metric reviews independently; held quorum policy stays separate.
-- **remote delivery review**: Platform source and reviewed size repair integratedb36; CollectionRows23981 andReplayRows2778 fit. Plan actual10 acceptance and shared-owner/worker sizing on coherentb36, coordinating with generation host.
-- **Mint / independent review**: Aggregate dispute/repudiation b68 and testfollowup923 independently clear, integratedb001/b3ed;26authored cases unexecuted. Coordinate exact remaining native/size acceptance, heldERC20 capture unchanged.
-- **Burn / preservation ceremony**: All three provider/discovery repairs integrated. Execute61focused cases one377;first15product capture fits but embedded child ownership needs one corrected complete capture before EVM.
-- **Museum**: Physical transfer6 and unifiedV4 root6 checks pass. Review final combined migration seams, then build typed script/dependency/media/render joins into existing dossier slots.
-- **Clients / Safe callers**: Generation58 distinct focused passes; extended guards22native+2x256fuzz pass at4494. Build Platform client/direct/SafeCALL workflows pinned66dc/ABI188.
-- **Testing / native tooling**: Nominalinterface Owner3 timed out; legacy diagnosticstack-too-deep. Reviewed Registry import dedup is integrated; whole4294-source producer ABI output exacte377. One changed Owner capture planned on combined2ba4. Investigate separately labeled cheaper test-host compilation without changing production settings.
-- **Capacity / Rights**: Original graph51 timed out; separate80/78libraries native and physicalreadbacks pass. Reviewed10-boundary/7-helper split is integrated; requalify source/owners and run one changed graphcapture on2ba4; no unchanged retry.
-- **Metric retention**: Three actual2of3Safe Splitversions integrated with independent traces. A helper relocation independently clear; review C frozen successor and triage exact remote CI failures while implementation proceeds.
-- **Prepared / successor preservation**: Four genuine preparation guards pass. Reviewed fixturecut57c integrated; changed Scenario28 timed out at900s. Preserve original90 obligations; no active compiler or unchanged retry. Independently review Collector paid-only planner extraction.
-- **Collector gas redesign**: Coherent4494 merged into isolated16-change prototype2774;332of339owners requalify. Two prior paid hosts timed out; review material paid-only planner helper cut. Actual cold paid500000 remains open.
-
-Remaining source work includes collaborator-history migration, broader required
-Artist combinations and adopted Museum software/conformance. Release acceptance
-requires complete current-stack and
-all-call Safe execution, stateful/fuzz campaigns, deployment and transaction
-gas, full CI, source freeze and matching testnet. Collector cold paid-mint
-optimization stays isolated under the original 500,000-gas limit. Required
-Merkle-price consumers are source built; their actual current execution remains.
-Previously held proposals remain unapplied. No new funding or on-chain action
-is needed for coding. Immutable RC1/main/release/Sepolia
-`569bf87f1fa808787d324f6e1582924b5ccf1d40` is preserved.
+- **Artist history:** Implement the reviewed artifact-CREATE fixture reduction, then use a materially smaller frozen actual-generation capture. No unchanged timeout retry.
+- **Revenue / Platform:** Measure the shared owners and routing libraries on joined e517 source; repair any concrete capacity regression. Platform actual execution remains open.
+- **Onchain metadata / collaborator:** Run focused collaborator leaf/nonce cases and remaining worker capacity on e517. Actual-owner cases wait for the coherent smaller fixture.
+- **Mint:** Repair remaining dispute worker capacity and finish fourteen actual-owner/Safe cases; preserve the twelve scoped worker passes.
+- **Burn:** Complete corrected 61-case preservation execution on e728, retaining the original e377 failure and exact source assets.
+- **Museum:** Build fixed-slot media/render/significant-property and preservation evidence joins; preserve original dossier assessments.
+- **Clients:** Build multiple-dispute/repudiation callers with explicit ABI189 source evidence; Platform client is integrated.
+- **Testing:** Test a narrow Owner schema-registration fixture extraction and diagnose the remaining host compiler cost; canonical production settings stay unchanged.
+- **Capacity:** Replace remaining embedded test constructors using genuine artifact CREATE, then independently review the reduced graph before new execution.
+- **Metric:** Review the final shared collaborator-profile integration and source-qualified evidence; unchanged source audits are not repeated.
+- **Prepared:** Map required Artist state combinations against actual bounded-profile admission to identify the next coherent source batches.
+- **Collector:** Keep the paid-gas prototype isolated; complete actual paid execution with canonical source/owner evidence before adoption.
 
 ## Earlier source-specific assignments
 

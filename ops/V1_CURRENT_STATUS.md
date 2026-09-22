@@ -18,77 +18,57 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-The expanded full-v1 implementation remains incomplete. The integrated source
-at `b36f1b8d` passes ABI190: **4,415 Solidity sources**, zero errors in 51.922
-seconds. Two previously missing migration profiles are now source integrated:
-unbound Platform collections and combined dispute/repudiation histories.
-The batch also includes six earlier capacity repairs, the Consent constructor
-repair, generation clients, actual Safe split-wallet tests and the unified Museum
-dossier. The parallel runtime source `2ba4ff67` adds 37 reviewed test-only fixture paths to `e37745a4`,
-retaining its production bytes and excluding later Artist profile changes.
-Its separate ABI191 check passes all 4,302 sources without errors.
-Every execution result applies only to its recorded source. RC1 is unchanged.
+Expanded full v1 remains incomplete. The combined source at `e5174d6f`
+passes ABI192: **4,498 Solidity sources, zero errors** in 53.047 seconds.
+This checks types, interfaces, storage declarations and selectors; it does not
+establish deployed behavior. Immutable RC1 and its Sepolia evidence are unchanged.
 
-- **Deployment capacity:** all six previously oversized inventory/provider/
-  discovery contracts have source-integrated repairs. The final three measured
-  runtimes are 24,460 / 11,396 / 24,420 bytes; complete creation inputs also fit.
-  The first and third have only 116 / 156 runtime bytes spare. New library
-  linking, actual combined execution and callback gas remain to validate.
-  Consent's earlier 123-byte constructor overage is repaired (`b56932e6`);
-  its recorded full input is 48,895 bytes, with five regression passes including
-  256 fuzz inputs. Later source changes still need matching native acceptance.
-- **Artist migration:** the unbound Platform profile (`66dc4a30`) and aggregate
-  signed dispute/repudiation profile (`b001a580`/`b3ed602b`) are independently
-  reviewed and source integrated. Their ten and twenty-six cases are authored,
-  not executed. The Platform CollectionRows overage is repaired (`b36f1b8d`):
-  23,981 runtime bytes, with a new 2,778-byte fixed replay worker. Both fit;
-  complete profile execution and joined owner capacity remain pending. PRIMARY_ONLY collaborator
-  history remains in implementation. Shared extended-feature negotiation has
-  22 native passes, including two 256-input fuzz properties, at `4494df9b`;
-  this does not execute the later profiles. Generation constants are separated
-  from stable transport types without changing numerical masks or old profiles.
-- **Clients and Safe:** recovered multiple-generation callers are integrated
-  (`d2b9c72c` plus exports `33912f72`). Build and strict types pass. All 58 named
-  focused cases pass across retained oracle and fresh pure/workflow runs; the
-  first combined attempt exceeded its insufficient 300-second bound and is
-  preserved as failed. Actual 2-of-3 Safe split-factory/wallet tests now pass
-  on 1.3.0, 1.4.1 and 1.5.0, with independent signature/call/creation review.
-  Their constructor authority is a named mock; this is not whole-graph Safe
-  acceptance. The full call inventory still tracks uncovered operations.
-- **Museum:** acquisition/custody mapping (`697bda0c`) has six focused root
-  passes. The unified V4 dossier (`4494df9b`) adds verified physical-production,
-  General and transfer packages to the existing canonical record, retaining
-  every original nineteen-group/forty-nine-assessment byte. Six root integration
-  checks pass. Producer evidence contains 27 unique passing checks across a
-  corrected run, not one clean 27-case cohort. Fixtures remain synthetic;
-  differing source states stay explicitly unjoined and prove no physical title,
-  custody or institutional acceptance.
-- **Runtime testing:** four actual preparation guards pass with independent
-  creation/call review. Large Owner, Scenario, generation and paid-mint hosts
-  retain bounded compiler timeouts without execution. Three independently reviewed fixture
-  changes are integrated: separate reusable boundary definitions, Registry
-  import deduplication and an isolated immutable sale-facts helper. The original
-  case bodies and production bytes are preserved in the runtime snapshot. The older capacity graph
-  timed out at its one-hour bound; its separate 80- and 78-library captures pass.
-  A diagnostic without viaIR failed with stack-too-deep and provides no
-  acceptance. The production compiler profile remains unchanged. Complete
-  current-stack, Safe, gas and stateful acceptance remain open.
+- **Artist migration:** unbound Platform, aggregate dispute/repudiation and
+  PRIMARY_ONLY collaborator histories are source integrated. The collaborator
+  batch includes partial/repeated acceptance and original replay accounting;
+  independent review cleared its corrected source and five repaired worker sizes.
+  Twelve dispute worker tests pass on `b3ed602b`; fourteen actual-owner/Safe
+  cases remain unexecuted and further dispute capacity repairs are underway.
+  Platform and generation actual-host compilation still times out. These are
+  bounded profiles: broader required combinations remain to build and validate.
+- **Developer repository:** 39 inline interfaces now have dedicated domain
+  interface files, with original named imports preserved. Independent source
+  inverses and ABI/selector/storage comparisons pass. The canonical layout
+  checker accepted the refreshed inventory of 3,017 production-source paths.
+  The raw Museum-response checksum policy bug is repaired; eighteen focused
+  checks and independent review pass. Final generated release evidence is pending.
+- **Clients and Safe:** unbound Platform callers are integrated, including the
+  package exports. Root build, strict types and all 55 focused client checks pass
+  at `cf8a1717`; producer review also covers 100 older-profile regressions.
+  These are encoding/provider-mock/Safe-envelope checks, not actual contract
+  execution. Earlier generation clients and three actual Safe split-wallet
+  versions retain their recorded, narrower evidence.
+- **Museum:** the canonical dossier now joins retained script and dependency
+  packages into their existing document slots while preserving the original
+  nineteen groups and forty-nine assessments. Twenty-one root checks pass at
+  `3e7fc352`; seven native-manifest checks also pass after the added wrong-source
+  negative control. Fixtures remain synthetic. Media/render/preservation joins
+  and institutional conformance remain separate work.
+- **Execution testing:** the preservation run reached real execution: its first
+  attempt exposed an obsolete test-name prefix, one missing copied JSON asset
+  and one missing typed mock response. The two source corrections are integrated
+  as `51052f45`; corrected acceptance is running on the separate `e7286fa1`
+  snapshot. Its 38 earlier diagnostic passes do not mean the 61-case cohort passed.
+  Owner, generation, Platform and remaining-capacity host timeouts are preserved
+  as failures. Material test-fixture changes are being built to reduce embedded
+  constructor compilation while retaining actual CREATE behavior and assertions.
 
-Remaining source work includes collaborator-history migration, broader required
-Artist combinations and adopted Museum software/conformance. Release acceptance
-requires complete current-stack and
-all-call Safe execution, stateful/fuzz campaigns, deployment and transaction
-gas, full CI, source freeze and matching testnet. Collector cold paid-mint
-optimization stays isolated under the original 500,000-gas limit. Required
-Merkle-price consumers are source built; their actual current execution remains.
-Previously held proposals remain unapplied. No new funding or on-chain action
-is needed for coding. Immutable RC1/main/release/Sepolia
-`569bf87f1fa808787d324f6e1582924b5ccf1d40` is preserved.
+Remaining delivery work is the missing legal Artist compositions and Museum
+software scope, complete current-stack and all-call Safe execution, stateful/fuzz
+campaigns, deployment and transaction gas, full CI, source freeze and matching
+testnet demonstration. Collector optimization stays isolated until actual paid
+execution satisfies its original 500,000-gas requirement. No new funding or
+on-chain action is needed for coding. External audit, production ceremonies and
+Lean remain separate. Previously held proposals remain unapplied.
 
-Current remote CI is not green: repository/orchestration, release artifact and
-Slither checks failed on the published batch; Windows wrapper passed. Exact
-failures are being triaged. Formatting and generated evidence still need the
-final stable-source pass; none is silently waived.
+Remote CI is not green. Source-layout and checksum-parser defects have local
+repairs; stale generated artifacts, Slither prerequisites and final formatting
+still need the stable-source validation pass. No failed check is waived.
 
 ## Earlier source-specific evidence
 
