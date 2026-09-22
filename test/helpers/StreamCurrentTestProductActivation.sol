@@ -12,7 +12,7 @@ import { StreamMintLedger } from "../../smart-contracts/domains/mint/StreamMintL
 import { StreamEntropyCoordinator } from "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import { StreamRoyaltyResolver } from "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
-import { StreamArtistOnboardingRegistry } from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
+import { IStreamArtistMintConsent } from "../../smart-contracts/interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import { StreamRevenueResolver } from "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import { StreamFixedPriceSaleAdapter } from "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
@@ -56,7 +56,7 @@ library StreamCurrentTestProductActivation {
         address provider;
         StreamMetadataRouter router;
         StreamRoyaltyResolver royalties;
-        StreamArtistOnboardingRegistry artists;
+        IStreamArtistMintConsent artists;
         address finality;
         StreamRevenueResolver primaryResolver;
         StreamRevenueEscrow revenueEscrow;

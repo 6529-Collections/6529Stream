@@ -672,7 +672,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         c.provider = address(provider);
         c.router = router;
         c.royalties = royalties;
-        c.artists = artists;
+        c.artists = IStreamArtistMintConsent(address(artists));
         c.finality = address(assemblyFinality);
         c.primaryResolver = primaryResolver;
         c.revenueEscrow = revenueEscrow;

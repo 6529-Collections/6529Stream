@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentTestProductActivation.sol";
+import {
+    StreamArtistOnboardingRegistry
+} from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../script/current/StreamCurrentStackPlan.sol";
 import "../../script/current/StreamGenesisManifestPlan.sol";
 import {
@@ -301,7 +304,7 @@ contract ProductActivationBoundaryHarness {
         provider = c.provider;
         router = c.router;
         royalties = c.royalties;
-        artists = c.artists;
+        artists = StreamArtistOnboardingRegistry(payable(address(c.artists)));
         assemblyFinality = c.finality;
         primaryResolver = c.primaryResolver;
         revenueEscrow = c.revenueEscrow;
@@ -809,7 +812,7 @@ contract ProductActivationBoundaryHarness {
         c.provider = address(provider);
         c.router = router;
         c.royalties = royalties;
-        c.artists = artists;
+        c.artists = IStreamArtistMintConsent(address(artists));
         c.finality = address(assemblyFinality);
         c.primaryResolver = primaryResolver;
         c.revenueEscrow = revenueEscrow;
@@ -865,7 +868,7 @@ contract StreamCurrentProductActivationBoundaryTest {
         context.provider = address(reads[6]);
         context.router = StreamMetadataRouter(payable(address(reads[7])));
         context.royalties = StreamRoyaltyResolver(payable(address(reads[8])));
-        context.artists = StreamArtistOnboardingRegistry(payable(address(reads[9])));
+        context.artists = IStreamArtistMintConsent(address(reads[9]));
         context.finality = address(reads[10]);
         context.primaryResolver = StreamRevenueResolver(payable(address(reads[11])));
         context.revenueEscrow = StreamRevenueEscrow(payable(address(reads[12])));
