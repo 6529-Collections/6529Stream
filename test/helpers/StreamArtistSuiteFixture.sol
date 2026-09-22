@@ -9,10 +9,12 @@ import { StreamDeploymentSlot } from "../../script/current/StreamDeploymentSlot.
 import { StreamCurrentTestRuntime } from "./StreamCurrentTestRuntime.sol";
 
 import "../regression/legacy/helpers/CharacterizationTestBase.sol";
-import { StreamCurrentFinalityGraph } from "../../script/current/StreamCurrentFinalityGraph.sol";
+import {
+    StreamCurrentFinalityGraph,
+    StreamArtistOnboardingRegistry
+} from "../../script/current/StreamCurrentFinalityGraph.sol";
 import { StreamCurrentGraphKinds } from "../../script/current/StreamCurrentGraphKinds.sol";
 import { StreamNativeAssemblyCreation } from "./StreamNativeAssemblyCreation.sol";
-import "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
