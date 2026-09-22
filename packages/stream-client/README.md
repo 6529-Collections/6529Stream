@@ -461,6 +461,11 @@ contract profiles and outstanding larger-script work.
   canonical documentary reference through original principal operation 24,
   reads retained proof/currentness and reconciles original and Safe receipts.
 
+- [Artist attribution lifecycle](docs/current-artist-attribution.md) covers
+  original claims, disputes, counterstatements, governed resolution, staged
+  repudiation and the exact-opener withdrawal extension, preserving their
+  original signatures, records and authority rules.
+
 - [Original DIRECT sales and conservation history](docs/current-direct-conservation.md)
   preserves native and ERC20 purchases, English auctions, original signing domains,
   paid receipts and immutable floor evidence with exact Safe calls. Its

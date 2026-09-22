@@ -162,6 +162,15 @@
   separate owners and rejection boundaries; compiler and runtime acceptance are
   separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
 
+## Original Artist attribution lifecycle client
+
+- Add typed original attribution claims, dispute and counterstatement calls,
+  governed resolution, staged repudiation and operation-61 withdrawal. Preserve
+  the original Registry signature domain, evidence documents, record preimages
+  and current authority rules. Client checks remain separate from contract,
+  Safe and deployment acceptance. See the
+  [client guide](packages/stream-client/docs/current-artist-attribution.md).
+
 ## Multiple recovered attestation client profile
 
 - Add the separately pinned MULTIPLE_ATTESTATIONS client for original attestation
