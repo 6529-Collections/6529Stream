@@ -347,6 +347,7 @@ contract StreamArtistRecoveredMultipleDisputeActualTest is ArtistRecoveredMultip
         (RH.Request memory firstRequest, Commit.Prepared memory first) = _mdPrepare(middle);
         _mdImport(middle, firstRequest, first);
         bytes32 firstValue = HydrationOwner(middle.identity).authorityHydrationCommitment();
+        _assertOriginalSourceRemainsSealed();
         _rhAdopt(middle);
         _mdSelect(1);
         bytes32 withdrawal = _mdSigned(1, 2, keccak256("successor original61"), true);
@@ -376,5 +377,44 @@ contract StreamArtistRecoveredMultipleDisputeActualTest is ArtistRecoveredMultip
             "fresh successor receipt keeps its own original domain and index"
         );
         _mdImport(last, secondRequest, second);
+    }
+
+    function _assertOriginalSourceRemainsSealed() private {
+        // Prepare a real counterstatement against A's still-open original episode.
+        // Do not clear its observed cutover or impersonate its fixed Coordinator.
+        T.Binding memory b = Binding(suite.owners[0]).binding(2);
+        AD.Head memory head = ingress.attributionDispute(2, b.generation);
+        require(head.open, "original A episode remains open after B hydration");
+        bytes32 evidence = _mdEvidence(2, head.disputeRecordHash, keccak256("sealed A counter"));
+        AD.Filing memory filing = AD.Filing(2, b.generation, 3, evidence, evidence);
+        AD.Standing memory standing = AD.Standing(artistId, b.generation, 0, 0);
+        T.Authorization memory authorization =
+            T.Authorization(Identity(suite.owners[2]).identity(artistId).nonceHint, 0, "");
+        bytes memory data =
+            abi.encodeCall(Disputes.recordCounterStatement, (filing, standing, authorization));
+        T.Snapshot[7] memory before_;
+        uint256[7] memory nativeCounts;
+        for (uint8 i; i < 7; ++i) {
+            before_[i] = OriginalOwner(suite.owners[i]).ownerStateSnapshotV2();
+            nativeCounts[i] = Native(suite.owners[i]).artistNativeReceiptCount();
+        }
+        uint256 archived = archive.storedPayloadCount();
+        uint256 safeNonce = rotationSafe.nonce();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidBinding.selector));
+        Disputes(address(ingress)).recordCounterStatement(filing, standing, authorization);
+        vm.expectRevert(bytes("GS013"));
+        this.rhExecuteNewSafe(address(ingress), data);
+        require(
+            archive.storedPayloadCount() == archived && rotationSafe.nonce() == safeNonce,
+            "sealed source rejects before Archive append and Safe nonce consumption"
+        );
+        for (uint8 i; i < 7; ++i) {
+            require(
+                keccak256(abi.encode(OriginalOwner(suite.owners[i]).ownerStateSnapshotV2()))
+                        == keccak256(abi.encode(before_[i]))
+                    && Native(suite.owners[i]).artistNativeReceiptCount() == nativeCounts[i],
+                "all original source snapshots and native receipts unchanged"
+            );
+        }
     }
 }
