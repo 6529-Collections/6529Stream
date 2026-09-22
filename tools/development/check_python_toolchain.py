@@ -183,7 +183,7 @@ WORKFLOW_SOLC_SELECT_COUNTS = {
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_EXPECTED_JOB_NAMES = {
-    CI_WORKFLOW_PATH: {"current-stack", "windows-wrapper", "slither-baseline", "foundry", "stream-client", "release-verification", "repository-checks", "foundry-result"},
+    CI_WORKFLOW_PATH: {"current-stack", "windows-wrapper", "slither-baseline", "foundry", "stream-client-prepare", "stream-client-shards", "stream-client", "release-verification", "repository-checks", "foundry-result"},
     RELEASE_WORKFLOW_PATH: {"release-mode"},
 }
 WORKFLOW_TOOLCHAIN_JOB_PROFILES = {

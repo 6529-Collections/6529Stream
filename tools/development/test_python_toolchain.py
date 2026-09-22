@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -130,14 +131,22 @@ jobs:
     steps:
       - run: |
           echo required-status aggregate
-  stream-client:
+  stream-client-prepare:
     steps:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: "24.16.0"
       - run: |
           npm --prefix packages/stream-client ci --ignore-scripts
-          npm --prefix packages/stream-client test
+          npm --prefix packages/stream-client run test:prepare
+  stream-client-shards:
+    steps:
+      - run: |
+          npm --prefix packages/stream-client run test:shard
+  stream-client:
+    steps:
+      - run: |
+          npm --prefix packages/stream-client run test:verify
 """
 
 
@@ -546,7 +555,13 @@ class PythonToolchainTests(unittest.TestCase):
                 continue
             with self.subTest(job=name):
                 header = block.split("    steps:\n", 1)[0]
-                self.assertNotIn("needs:", header)
+                if name == "stream-client-shards":
+                    self.assertIn("needs: stream-client-prepare", header)
+                    self.assertIn("${{ matrix.shard }}", header)
+                elif name == "stream-client":
+                    self.assertIn("needs: [stream-client-prepare, stream-client-shards]", header)
+                else:
+                    self.assertNotIn("needs:", header)
                 group = next(line.strip() for line in header.splitlines() if "group:" in line)
                 self.assertNotIn(group, groups)
                 groups.add(group)
@@ -555,8 +570,41 @@ class PythonToolchainTests(unittest.TestCase):
                 if name in {"current-stack", "foundry"}:
                     condition += " && !github.event.pull_request.draft"
                 self.assertIn("cancel-in-progress: ${{ " + condition + " }}", header)
-                if name != "current-stack":
+                if name == "stream-client":
+                    self.assertIn("if: ${{ always() && (github.event_name == 'pull_request' || github.event_name == 'push') }}", header)
+                elif name != "current-stack":
                     self.assertIn("if: github.event_name == 'pull_request' || github.event_name == 'push'", header)
+
+    def test_client_shards_preserve_required_status_and_fail_closed(self) -> None:
+        workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")
+        jobs = checker.workflow_job_blocks(workflow)
+        prepare, shards, gate = (jobs[name] for name in ("stream-client-prepare", "stream-client-shards", "stream-client"))
+        self.assertEqual(workflow.count("    name: TypeScript client\n"), 1)
+        self.assertIn("node scripts/test_current_stack_collector.mjs", prepare)
+        self.assertIn("run test:prepare", prepare)
+        self.assertIn("run test:plan -- --shards 16", prepare)
+        self.assertIn("shard: [" + ", ".join(str(i) for i in range(1, 17)) + "]", shards)
+        self.assertIn("fail-fast: false", shards)
+        self.assertIn("max-parallel: 8", shards)
+        self.assertIn("--concurrency 2 --timeout-ms 420000", shards)
+        self.assertIn("if: always()", shards)
+        self.assertIn("run test:verify -- --plan .test-runs/plan.json --results .test-runs/results", gate)
+        for block in (prepare, shards, gate):
+            self.assertIn("timeout-minutes: 10", block)
+            self.assertNotIn("continue-on-error", block)
+        package = json.loads((SCRIPT_PATH.parents[2] / "packages/stream-client/package.json").read_text(encoding="utf-8"))
+        self.assertEqual(package["scripts"]["test"], "npm run generate:check && npm run build && tsc -p tsconfig.test.json && node --test test/*.test.mjs")
+        bash_path = Path("C:/Program Files/Git/bin/bash.exe")
+        bash = str(bash_path) if bash_path.is_file() else shutil.which("bash")
+        if not bash:
+            self.skipTest("Bash is required to execute the required-status gate")
+        commands = gate.split("        run: |\n", 1)[1].split("      - name:", 1)[0]
+        commands = "\n".join(line[10:] for line in commands.splitlines())
+        for preparation in ("success", "failure", "cancelled", "skipped", ""):
+            for shard in ("success", "failure", "cancelled", "skipped", ""):
+                with self.subTest(preparation=preparation, shard=shard):
+                    result = subprocess.run([bash, "-c", commands], env=dict(os.environ, PREPARE_RESULT=preparation, SHARDS_RESULT=shard), capture_output=True)
+                    self.assertEqual(result.returncode == 0, preparation == shard == "success")
 
     def test_independent_checks_and_current_export_remain_fail_closed(self) -> None:
         workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")

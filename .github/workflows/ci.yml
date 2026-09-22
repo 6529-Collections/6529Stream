@@ -308,12 +308,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  stream-client:
+  stream-client-prepare:
     concurrency:
-      group: ${{ github.workflow }}-stream-client-${{ github.event_name }}-${{ github.ref }}
+      group: ${{ github.workflow }}-stream-client-prepare-${{ github.event_name }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    name: TypeScript client
+    name: TypeScript client preparation
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -329,12 +329,124 @@ jobs:
           cache: npm
           cache-dependency-path: packages/stream-client/package-lock.json
 
-      - name: Test generated ABIs, signing payloads and snapshots
+      - name: Check ABIs and types, test collector, and plan complete suite
         shell: bash
         run: |
           npm --prefix packages/stream-client ci --ignore-scripts
-          npm --prefix packages/stream-client test
+          npm --prefix packages/stream-client run test:prepare
           node scripts/test_current_stack_collector.mjs
+          npm --prefix packages/stream-client run test:plan -- --shards 16
+
+      - name: Upload prepared client and complete test plan
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stream-client-plan
+          path: |
+            packages/stream-client/dist/
+            packages/stream-client/.test-runs/plan.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  stream-client-shards:
+    needs: stream-client-prepare
+    concurrency:
+      group: ${{ github.workflow }}-stream-client-shard-${{ matrix.shard }}-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    name: TypeScript client shard ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+          cache: npm
+          cache-dependency-path: packages/stream-client/package-lock.json
+
+      - name: Install pinned dependencies
+        run: |
+          npm --prefix packages/stream-client ci --ignore-scripts
+
+      - name: Download prepared client and plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: stream-client-plan
+          path: packages/stream-client
+
+      - name: Run bounded shard with native Node reporters
+        run: |
+          npm --prefix packages/stream-client run test:shard -- --plan .test-runs/plan.json --shard ${{ matrix.shard }} --concurrency 2 --timeout-ms 420000
+
+      - name: Upload shard results and test logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stream-client-results-${{ matrix.shard }}
+          path: |
+            packages/stream-client/.test-runs/shard-${{ matrix.shard }}.json
+            packages/stream-client/.test-runs/shard-${{ matrix.shard }}/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  stream-client:
+    needs: [stream-client-prepare, stream-client-shards]
+    concurrency:
+      group: ${{ github.workflow }}-stream-client-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    if: ${{ always() && (github.event_name == 'pull_request' || github.event_name == 'push') }}
+    name: TypeScript client
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+
+      - name: Require successful preparation and every shard
+        env:
+          PREPARE_RESULT: ${{ needs.stream-client-prepare.result }}
+          SHARDS_RESULT: ${{ needs.stream-client-shards.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PREPARE_RESULT" = success
+          test "$SHARDS_RESULT" = success
+
+      - name: Download complete test plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: stream-client-plan
+          path: packages/stream-client
+
+      - name: Download every shard result
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: ${{ 'stream-client-results-*' }}
+          merge-multiple: true
+          path: packages/stream-client/.test-runs/results
+
+      - name: Verify full file and case coverage against prepared inputs
+        run: |
+          npm --prefix packages/stream-client run test:verify -- --plan .test-runs/plan.json --results .test-runs/results
 
   slither-baseline:
     concurrency:
