@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredMultipleGenerationBindingDecode as Decode
+} from "./StreamArtistRecoveredMultipleGenerationBindingDecode.sol";
+import {
     StreamArtistRecoveredMultipleGenerationTypes as G
 } from "./StreamArtistRecoveredMultipleGenerationTypes.sol";
 import {
@@ -41,9 +44,7 @@ import {
 /// @notice One original Binding owner apply; every original map is checked before any selected collection is written.
 library StreamArtistRecoveredMultipleGenerationBindingImport {
     struct Context {
-        M.State scope;
-        Payload.Payload payload;
-        G.Inventory inventory;
+        CB.Bundle[] rows;
         T.Binding emptyBinding;
         C.BindingTerms emptyTerms;
         L.Terminal emptyTerminal;
@@ -61,23 +62,10 @@ library StreamArtistRecoveredMultipleGenerationBindingImport {
     ) public returns (bool) {
         if (!Codec.selected(outer, 0)) return false;
         Context memory c;
-        (c.scope, c.payload) = Codec.outer(0, anchor, outer);
-        (, bytes memory raw) =
-            Codec.decodeAuxiliary(0, c.payload.semanticState, c.payload.provenance);
-        c.inventory = abi.decode(raw, (G.Inventory));
-        if (
-            keccak256(raw) != keccak256(abi.encode(c.inventory))
-                || c.scope.rows.length != c.inventory.bindings.length
-        ) _invalid();
-        for (uint256 k; k < c.scope.rows.length; ++k) {
-            if (keccak256(c.scope.rows[k]) != keccak256(abi.encode(c.inventory.bindings[k]))) {
-                _invalid();
-            }
-        }
-        Proof.validate(c.scope, c.payload.provenance, c.inventory);
-        for (uint256 k; k < c.scope.rows.length; ++k) {
-            uint256 id = c.scope.collections[k].collectionId;
-            CB.Bundle memory b = c.inventory.bindings[k];
+        c.rows = Decode.collect(anchor, outer);
+        for (uint256 k; k < c.rows.length; ++k) {
+            uint256 id = c.rows[k].bindings.collectionId;
+            CB.Bundle memory b = c.rows[k];
             if (keccak256(abi.encode(bindings[id])) != keccak256(abi.encode(c.emptyBinding))) {
                 _invalid();
             }
@@ -95,9 +83,9 @@ library StreamArtistRecoveredMultipleGenerationBindingImport {
                 ) _invalid();
             }
         }
-        for (uint256 k; k < c.scope.rows.length; ++k) {
-            uint256 id = c.scope.collections[k].collectionId;
-            CB.Bundle memory b = c.inventory.bindings[k];
+        for (uint256 k; k < c.rows.length; ++k) {
+            uint256 id = c.rows[k].bindings.collectionId;
+            CB.Bundle memory b = c.rows[k];
             bindings[id] = b.bindings.current;
             for (uint256 i; i < b.bindings.rows.length; ++i) {
                 uint64 g = uint64(i + 1);
