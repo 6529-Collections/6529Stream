@@ -1,7 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./StreamCurrentTestSetupPlans.sol";
+import { StreamGovernanceExecutor } from "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
+import { StreamCore } from "../../smart-contracts/core/StreamCore.sol";
+import { StreamModuleRegistry } from "../../smart-contracts/domains/modules/StreamModuleRegistry.sol";
+import { StreamSystemManifest } from "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
+import { StreamMintManager } from "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import { StreamMintLedger } from "../../smart-contracts/domains/mint/StreamMintLedger.sol";
+import { StreamEntropyCoordinator } from "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
+import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import { StreamRoyaltyResolver } from "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
+import { StreamArtistOnboardingRegistry } from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
+import { StreamRevenueResolver } from "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
+import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
+import { StreamFixedPriceSaleAdapter } from "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
+import { StreamEnglishAuctionHouse } from "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
 import {
     StreamGovernanceActor
 } from "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
