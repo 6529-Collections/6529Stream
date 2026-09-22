@@ -11,8 +11,11 @@ import {
     StreamCurrentAuthorityScopedPreservationPolicyPublicationFixture
 } from "./StreamCurrentAuthorityScopedPreservationPolicyPublicationFixture.sol";
 import {
-    StreamScopedPreservationPolicyReferencePublicationV2 as ScopedReferenceHost
-} from "../../smart-contracts/domains/preservation/StreamScopedPreservationPolicyReferencePublicationV2.sol";
+    IStreamScopedPreservationPolicyReferencePublicationV1 as ScopedReferenceHost
+} from "../../smart-contracts/interfaces/stream/preservation/IStreamScopedPreservationPolicyReferencePublicationV1.sol";
+import {
+    IStreamReferenceEnvironmentPreparation as ScopedReferenceEnvironmentPreparation
+} from "../../smart-contracts/interfaces/stream/preservation/IStreamReferenceEnvironmentPreparation.sol";
 import {
     StreamScopedPreservationPolicyReferenceTypesV1 as ScopedReference
 } from "../../smart-contracts/interfaces/stream/preservation/StreamScopedPreservationPolicyReferenceTypesV1.sol";
@@ -330,7 +333,7 @@ abstract contract StreamCurrentAuthorityScopedPreservationPolicyReferenceFixture
             "complete original platform inventory"
         );
         _assemblyUpload(manifest);
-        id = host.prepareEnvironment(env);
+        id = ScopedReferenceEnvironmentPreparation(address(host)).prepareEnvironment(env);
         require(
             keccak256(host.preparedFileInventory(id)) == keccak256(manifest),
             "complete exact environment retention"

@@ -54,15 +54,6 @@ import {
     StreamMintArtistConsent
 } from "../../smart-contracts/domains/mint/StreamMintArtistConsent.sol";
 import {
-    IStreamArtistContentRatification
-} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistContentRatification.sol";
-import {
-    StreamArtistEstateCoverage
-} from "../../smart-contracts/domains/artist/StreamArtistEstateCoverage.sol";
-import {
-    StreamArtistTimingState
-} from "../../smart-contracts/domains/artist/StreamArtistTimingState.sol";
-import {
     StreamArtistExtensionFactory
 } from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 import "../../script/current/StreamDeploymentSlot.sol";
@@ -133,12 +124,6 @@ import "../../smart-contracts/domains/metadata/StreamWorkRecordSelection.sol";
 import "../../smart-contracts/domains/metadata/StreamRightsRecordSelection.sol";
 import "../../smart-contracts/domains/metadata/StreamConservationRecordSelection.sol";
 import "../../smart-contracts/domains/preservation/StreamReferenceRenderPublication.sol";
-import {
-    StreamRenderCriticalInventory
-} from "../../smart-contracts/domains/preservation/StreamRenderCriticalInventory.sol";
-import {
-    StreamBundleArchiveCoverage
-} from "../../smart-contracts/domains/preservation/StreamBundleArchiveCoverage.sol";
 import "../../smart-contracts/interfaces/stream/preservation/StreamBundleArchiveTypes.sol";
 import {
     StreamPreservationDocumentReads

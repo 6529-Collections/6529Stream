@@ -6,9 +6,6 @@ import {
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamRightsRecordCurrentAuthority.sol";
 import { StreamCurrentAuthorityRecoveryRecipe } from "./StreamCurrentAuthorityRecoveryRecipe.sol";
 import {
-    StreamCurrentAuthoritySuccessorCoordinatorGraph
-} from "../../script/current/StreamCurrentAuthoritySuccessorCoordinatorGraph.sol";
-import {
     StreamArtistCurrentAuthorityTypes as CA
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistCurrentAuthorityTypes.sol";
 import {

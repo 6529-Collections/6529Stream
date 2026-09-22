@@ -24,15 +24,6 @@ import {
 import "./StreamCurrentFinalityArtifacts.sol";
 import "./StreamDeploymentSlot.sol";
 import "./StreamCurrentStackPlan.sol";
-import {
-    StreamArtistFinalityAdmission
-} from "../../smart-contracts/domains/artist/StreamArtistFinalityAdmission.sol";
-import {
-    IStreamArtistHistory
-} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistHistory.sol";
-import {
-    IStreamArtistAuthorityHydrationOwner
-} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol";
 import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";

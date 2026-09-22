@@ -11,8 +11,8 @@ import {
     StreamCurrentAuthorityScopedPreservationRecordsFixture
 } from "./StreamCurrentAuthorityScopedPreservationRecordsFixture.sol";
 import {
-    StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1 as SPFactory
-} from "../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1.sol";
+    IStreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1 as SPFactory
+} from "../../smart-contracts/interfaces/stream/finality/IStreamCurrentAuthorityScopedPreservationPolicyPublicationFactoryV1.sol";
 import {
     StreamScopedPreservationPolicyPublicationGraphTypesV1 as SPGraph
 } from "../../smart-contracts/interfaces/stream/finality/StreamScopedPreservationPolicyPublicationGraphTypesV1.sol";

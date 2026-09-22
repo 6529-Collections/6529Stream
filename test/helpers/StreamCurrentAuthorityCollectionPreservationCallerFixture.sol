@@ -7,9 +7,6 @@ import {
 import { OfficialSafe } from "./OfficialSafeFixture.sol";
 import { IERC165 as CPIERC165 } from "../../smart-contracts/vendor/openzeppelin/IERC165.sol";
 import {
-    StreamCurrentAuthorityPreservationPolicyPublicationFactoryV1 as CPFactory
-} from "../../smart-contracts/domains/finality/StreamCurrentAuthorityPreservationPolicyPublicationFactoryV1.sol";
-import {
     IStreamCurrentAuthorityPreservationPolicyPublicationFactoryV1 as CPFactoryInterface
 } from "../../smart-contracts/interfaces/stream/finality/IStreamCurrentAuthorityPreservationPolicyPublicationFactoryV1.sol";
 import {
@@ -214,7 +211,7 @@ abstract contract StreamCurrentAuthorityCollectionPreservationCallerFixture is
                     == keccak256(abi.encode(p.membership)),
             "current collection source set, exact scope and membership"
         );
-        CPFactory factory = CPFactory(collectionGraphFactory);
+        CPFactoryInterface factory = CPFactoryInterface(collectionGraphFactory);
         _cpInterface(collectionGraphFactory, type(CPFactoryInterface).interfaceId);
         require(
             collectionGraphFactory == collectionGraphBinding.factory
@@ -421,8 +418,9 @@ abstract contract StreamCurrentAuthorityCollectionPreservationCallerFixture is
     ) internal view returns (CPRoot.Record memory root) {
         require(rootRecord != 0 && outputRecord != 0, "genuine V2 collection root still required");
         require(
-            keccak256(abi.encode(CPFactory(collectionGraphFactory).requireCurrentGraph(p.scope)))
-                == keccak256(abi.encode(p.graph))
+            keccak256(
+                abi.encode(CPFactoryInterface(collectionGraphFactory).requireCurrentGraph(p.scope))
+            ) == keccak256(abi.encode(p.graph))
         );
         CPSourceSet sources = CPSourceSet(p.graph.sourceSet);
         sources.requireCurrentSourceSet();
