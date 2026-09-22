@@ -97,6 +97,7 @@ python -m tools.museum.view_reference_semantic_package_v1 profiles
 python -m tools.museum.view_reference_semantic_package_v1 build envelope.json export --source-hash <external-envelope-hash> --disclosure public
 python -m tools.museum.view_reference_semantic_package_v1 verify export --manifest-hash <external-package-hash>
 python -m unittest tools.museum.test_view_reference_semantic_sources_v1 tools.museum.test_view_reference_semantic_graph_v1 tools.museum.test_view_reference_semantic_package_v1 -v
+python -m unittest tools.museum.test_view_reference_semantic_receipts_v1 -v
 ```
 
 Use a new output directory. The tools require explicit public disclosure and
