@@ -457,6 +457,11 @@ contract profiles and outstanding larger-script work.
   governed revocation histories, original consent associations and global replay
   accounting across collections and generations.
 
+- [Unbound Platform Works hydration](docs/current-artist-unbound-platform-hydration.md)
+  adds the separate UNBOUND_PLATFORM profile for complete zero-Artist or limited
+  mixed registries, preserving original Platform bodies, Archive transitions and
+  repeated-import provenance through the original operation-60 CALL.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain
