@@ -7,8 +7,8 @@ import {
     StreamArtistTimingState
 } from "../../smart-contracts/domains/artist/StreamArtistTimingState.sol";
 import {
-    StreamArtistExtensionFactory
-} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
+    StreamCurrentArtistFactoryCalls
+} from "./StreamCurrentArtistFactoryCalls.sol";
 
 import "./StreamCurrentGraphCreation.sol";
 import "./StreamCurrentAuthorityGraphCreation.sol";
@@ -1462,7 +1462,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         address[3] memory children;
         for (uint8 i; i < 3; ++i) {
             children[i] =
-                StreamArtistExtensionFactory(factory_).deployRegistry(i + 4, slot.product(), p[2]);
+                StreamCurrentArtistFactoryCalls(factory_).deployRegistry(i + 4, slot.product(), p[2]);
         }
         RuntimeValue[] memory v = new RuntimeValue[](14);
         string memory name = "StreamArtistOnboardingRegistry";
@@ -1534,7 +1534,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         address[3] memory children;
         address[6] memory pins = [slot.product(), p[0], p[1], p[2], p[3], p[4]];
         for (uint8 i; i < 3; ++i) {
-            children[i] = StreamArtistExtensionFactory(factory_).deployIdentity(i + 1, pins);
+            children[i] = StreamCurrentArtistFactoryCalls(factory_).deployIdentity(i + 1, pins);
         }
         RuntimeValue[] memory v = new RuntimeValue[](13);
         string memory name = "StreamArtistIdentityAuthority";
