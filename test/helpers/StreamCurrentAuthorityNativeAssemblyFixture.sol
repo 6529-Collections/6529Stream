@@ -88,12 +88,13 @@ import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
-import "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
+import {
+    IStreamArtistSanction
+} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistSanction.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol";
 import "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
 import "../../smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol";
 import "../../smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol";
-import "../../smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol";
 import "../../smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol";
 import "../../smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol";
 import "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
@@ -4069,8 +4070,8 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         );
         address originalArtist = address(assemblyFinality.sanctionReads());
         require(originalArtist == anchorsBefore.targets[3], "original Finality Artist anchor");
-        StreamArtistOnboardingRegistry current =
-            StreamArtistOnboardingRegistry(payable(selected.origin.environment.registry));
+        IStreamArtistSanction current =
+            IStreamArtistSanction(selected.origin.environment.registry);
         AssemblySanction.Record memory sanctionBefore =
             current.sanctionRecord(assemblySanctionRecord);
         require(

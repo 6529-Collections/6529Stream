@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
+import {
+    StreamArtistOnboardingRegistry
+} from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import { StreamCurrentGraphKinds } from "../../script/current/StreamCurrentGraphKinds.sol";
 import "./StreamCurrentAuthorityNativeAssemblyFixture.sol";
 import {
