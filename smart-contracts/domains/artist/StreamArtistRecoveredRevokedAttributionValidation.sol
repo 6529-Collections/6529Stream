@@ -121,7 +121,12 @@ library StreamArtistRecoveredRevokedAttributionValidation {
                 } else {
                     continue;
                 }
-                RH.Point memory point = p.journal[j].position.point;
+                // Both resolution aliases refer to opening + 1. Copy its original point:
+                // a memory reference would advance the journal again for the next alias.
+                RH.Point memory recorded = p.journal[j].position.point;
+                RH.Point memory point = RH.Point(
+                    recorded.environmentHash, recorded.ownerIndex, recorded.ownerRevision
+                );
                 if (resolution) ++point.ownerRevision;
                 if (
                     a.cell.kind != 1 || a.cell.status != 2 || a.cell.commitment != expected

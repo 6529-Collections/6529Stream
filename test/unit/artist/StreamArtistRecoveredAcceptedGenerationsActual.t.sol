@@ -124,6 +124,59 @@ contract StreamArtistRecoveredAcceptedGenerationsActualTest is
     bytes[] private acceptanceSignatures;
     A.Revocation[] private revocations;
 
+    function testAcceptedResolutionAliasesKeepTheOriginalOpeningPoint() external {
+        _baseline();
+        _correctAccepted();
+        Successor memory next = _rhCutover();
+        (RH.Request memory request, Commit.Prepared memory prepared) = _prepare(next);
+        (, Payload.Payload memory payload) = Payload.decode(prepared.data[4].typedState, 4);
+        A.AttributionBundle memory bundle =
+            AttributionCodec.decode(prepared.query, payload.provenance, payload.semanticState);
+        require(bundle.revocations.length == 1, "one authentic governed revocation");
+        bytes32 before_ = keccak256(abi.encode(payload.provenance));
+        RH.Point memory opening = payload.provenance.journal[0].position.point;
+        bytes32 resolution = keccak256("attribution_lifecycle.replay.dispute_resolution_key");
+        bytes32 governance = keccak256("attribution_lifecycle.replay.governance_action");
+        uint256 resolutionAliases;
+        uint256 selected;
+        for (uint256 i; i < payload.provenance.aliases.length; ++i) {
+            RH.ReplayAlias memory a = payload.provenance.aliases[i];
+            bool matches =
+                (a.surface == resolution && a.scope == bundle.revocations[0].opening.recordHash)
+                    || (a.surface == governance
+                        && a.scope == bundle.revocations[0].resolution.actionId);
+            if (!matches) continue;
+            require(
+                a.admittedAt.environmentHash == opening.environmentHash
+                    && a.admittedAt.ownerIndex == opening.ownerIndex
+                    && a.admittedAt.ownerRevision == opening.ownerRevision + 1,
+                "both original resolution aliases retain the same native opening plus one"
+            );
+            ++resolutionAliases;
+            selected = i;
+        }
+        require(resolutionAliases == 2, "original resolve and governance aliases are both present");
+        this.decodeAttribution(prepared.query, payload.provenance, payload.semanticState);
+        this.decodeAttribution(prepared.query, payload.provenance, payload.semanticState);
+        require(
+            keccak256(abi.encode(payload.provenance)) == before_,
+            "validation retains every original point"
+        );
+        ++payload.provenance.aliases[selected].admittedAt.ownerRevision;
+        bundle.provenance = RH.ownerProvenanceHash(payload.provenance, 4);
+        tv.expectRevert();
+        this.decodeAttribution(
+            prepared.query, payload.provenance, abi.encode(A.ATTRIBUTION, uint16(1), bundle)
+        );
+        --payload.provenance.aliases[selected].admittedAt.ownerRevision;
+        require(
+            keccak256(abi.encode(payload.provenance)) == before_, "restore exact original alias"
+        );
+        this.decodeAttribution(prepared.query, payload.provenance, payload.semanticState);
+        _import(next, request, prepared);
+        _assert(next.coordinator.suiteConfiguration());
+    }
+
     function testAcceptedRevocationCorrectionRetainsEveryOriginalMapAndSignature() external {
         _baseline();
         _correctAccepted();

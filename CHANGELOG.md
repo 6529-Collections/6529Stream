@@ -55,6 +55,12 @@
   Cases are type-checked; full current execution and added-frame gas remain pending.
   See the [frame note](docs/integrations/policy-inventory-current-frames.md).
 
+## Recovered revocation alias coordinates
+
+- Preserve the original opening journal coordinate while checking both resolution
+  replay aliases. Add a real-owner correction, repeated-decode and Safe-import
+  regression; source/type evidence is retained and execution remains pending.
+
 ## Complete recovered attestation multiplicity
 
 - Add the explicit recovered multiple-Artist attestation profile, complete original
