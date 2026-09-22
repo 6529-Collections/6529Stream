@@ -69,6 +69,9 @@ import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import {
     StreamArtistRecoveredAttestationHydration as Original
 } from "./StreamArtistRecoveredAttestationHydration.sol";
+import {
+    StreamArtistRecoveredMultipleGenerationAttestationValidation as Validation
+} from "./StreamArtistRecoveredMultipleGenerationAttestationValidation.sol";
 
 import {
     StreamArtistRecoveredMultipleTypes as M
@@ -77,34 +80,25 @@ import {
     StreamArtistRecoveredMultipleCodec as Scope
 } from "./StreamArtistRecoveredMultipleCodec.sol";
 import {
+    StreamArtistRecoveredMultipleGenerationAttestationHeads as Heads
+} from "./StreamArtistRecoveredMultipleGenerationAttestationHeads.sol";
+import {
     StreamArtistRecoveredHistoryRecordRows as Semantic
 } from "./StreamArtistRecoveredHistoryRecordRows.sol";
 
-import { StreamArtistRecoveredMultipleGenerationAttestationInventory as InventoryValidation } from "./StreamArtistRecoveredMultipleGenerationAttestationInventory.sol";
-import { StreamArtistRecoveredMultipleGenerationAttestationJournal as Journal } from "./StreamArtistRecoveredMultipleGenerationAttestationJournal.sol";
-
-/// @notice One complete original owner4 semantic inventory; source clocks are checked separately.
-library StreamArtistRecoveredMultipleGenerationAttestationValidation {
-    function validate(
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks
-    ) public pure returns (Original.Bundle[] memory all) {
-        return validate(scope, p, inventory, clocks, false);
-    }
-
-    /// @dev The selected aggregate profile separately proves each original confirmation and
-    /// its collection/generation timeline; this flag does not establish sanctioned authority.
-    function validate(
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks,
-        bool sanctioned
-    ) public pure returns (Original.Bundle[] memory all) {
-        uint256 total;
-        (all, total) = InventoryValidation.validate(scope, p, inventory, clocks, sanctioned);
-        Journal.validate(scope, p, inventory, clocks, all, total);
+/// @notice Fixed source reads for one complete original attestation record.
+library StreamArtistRecoveredMultipleGenerationAttestationSourceRead {
+    function row(address source, ReadinessH.AttestationInput memory input, bytes32 hash)
+        public view returns (PubH.Row memory r)
+    {
+        r.attestation.input = input;
+        r.attestation.record = IStreamArtistAttributionOwner(source).attestationRecord(hash);
+        r.attestation.authorityClass =
+            IStreamArtistReadinessAttributionOwner(source).attestationAuthorityClass(hash);
+        r.attestation.association =
+            IStreamArtistAuthenticatedAttestationOwner(source).attestationAssociation(hash);
+        r.attestation.statement = IStreamArtistAttributionOwner(source)
+            .statementBytes(r.attestation.record.statementHash);
+        r.publication = PublicationOwner(source).publicationAttestation(hash);
     }
 }

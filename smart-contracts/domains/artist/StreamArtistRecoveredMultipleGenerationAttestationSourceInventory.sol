@@ -87,112 +87,44 @@ import {
 } from "./StreamArtistRecoveredHistoryRecordRows.sol";
 
 import { StreamArtistRecoveredMultipleGenerationAttestationSourceRead as SourceRead } from "./StreamArtistRecoveredMultipleGenerationAttestationSourceRead.sol";
-import { StreamArtistRecoveredMultipleGenerationAttestationSourceInventory as SourceInventory } from "./StreamArtistRecoveredMultipleGenerationAttestationSourceInventory.sol";
 
-/// @notice Exact original source maps collected once in full owner4 native order.
-library StreamArtistRecoveredMultipleGenerationAttestationSource {
+/// @notice Fixed source inventory and native count for complete owner4 rows.
+library StreamArtistRecoveredMultipleGenerationAttestationSourceInventory {
     function collect(
         address source,
         M.State memory scope,
         RH.OwnerProvenance memory p,
-        ReadinessH.AttestationInput[][] memory inputs,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks
-    ) public view returns (bytes[] memory rows) {
-        return collect(source, scope, p, inputs, inventory, clocks, false);
-    }
-
-    /// @dev The selected aggregate profile separately proves each original confirmation and
-    /// its collection/generation timeline; this flag does not establish sanctioned authority.
-    function collect(
-        address source,
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        ReadinessH.AttestationInput[][] memory inputs,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks,
-        bool sanctioned
-    ) public view returns (bytes[] memory rows) {
-        Original.Bundle[] memory all = SourceInventory.collect(source, scope, p, inputs);
-        uint256[] memory cursors = new uint256[](all.length);
-        uint256[] memory summaries = new uint256[](all.length);
-        Personhood.Summary memory empty;
-        for (uint256 i; i < p.journal.length; ++i) {
-            RH.JournalEntry memory entry = p.journal[i];
-            if (entry.receipt.operation == 44) continue;
-            uint256 k = Scope.collection(scope, entry.receipt.collectionId);
-            if (
-                entry.receipt.operation != 24
-                    || entry.receipt.artistId != scope.collections[k].artistId
-                    || cursors[k] >= inputs[k].length
-            ) _invalid();
-            uint256 cursor = cursors[k]++;
-            bytes32 hash = entry.receipt.recordHash;
-            PubH.Row memory r = SourceRead.row(source, inputs[k][cursor], hash);
-            all[k].records[cursor] = r;
-            Personhood.Summary memory summary =
-                IStreamArtistPersonhoodEvidence(source).personhoodProofSummary(hash);
-            bytes32 summaryHash =
-                IStreamArtistPersonhoodEvidence(source).personhoodProofSummaryHash(hash);
-            if (_personhood(inputs[k][cursor].terms)) {
-                all[k].personhood[summaries[k]++] = Original.PersonhoodRow(
-                    hash,
-                    _origin(p, entry.position.point.environmentHash).registry,
-                    summary,
-                    summaryHash
-                );
-            } else if (
-                summaryHash != 0 || keccak256(abi.encode(summary)) != keccak256(abi.encode(empty))
-            ) {
-                _invalid();
-            }
-        }
-        rows = new bytes[](all.length);
+        ReadinessH.AttestationInput[][] memory inputs
+    ) public view returns (Original.Bundle[] memory all) {
+        Provenance.validateOwnerSource(p, 4, source);
+        if (inputs.length != scope.collections.length || p.journal.length > RH.MAX_JOURNAL_ENTRIES) _invalid();
+        all = new Original.Bundle[](inputs.length);
+        uint256 total;
         for (uint256 k; k < all.length; ++k) {
-            rows[k] = abi.encode(all[k]);
+            AH.Query memory q = scope.collections[k];
+            Original.Bundle memory b;
+            b.provenance = RH.ownerProvenanceHash(p, 4);
+            b.artistId = q.artistId;
+            b.collectionId = q.collectionId;
+            b.bindingHash = q.bindingHash;
+            (b.item.state, b.item.generation) =
+                IStreamArtistAttributionOwner(source).attributionState(q.collectionId);
+            if (inputs[k].length > 128) _invalid();
+            b.records = new PubH.Row[](inputs[k].length);
+            uint256 count;
+            for (uint256 i; i < inputs[k].length; ++i) {
+                if (_personhood(inputs[k][i].terms)) ++count;
+            }
+            b.personhood = new Original.PersonhoodRow[](count);
+            all[k] = b;
+            total += inputs[k].length;
         }
-        scope.rows = rows;
-        Validation.validate(scope, p, inventory, clocks, sanctioned);
-        Heads.requireMatches(source, scope, p, all, inventory);
-    }
-
-    function _nextHead(
-        C2PA.Head memory previous,
-        Original.Bundle memory b,
-        ReadinessH.AttestationRow memory r,
-        address registry
-    ) private pure returns (C2PA.Head memory) {
-        C2PA.Payload memory p = Credentials.decode(
-            r.statement, b.artistId, r.input.terms.subjectStateHash
-        );
-        if (p.previousRecordHash != previous.recordHash) _invalid();
-        return C2PA.Head(
-            previous.revision + 1,
-            r.record.recordHash,
-            previous.recordHash,
-            b.artistId,
-            b.collectionId,
-            b.bindingHash,
-            b.item.generation,
-            r.record.subjectStateHash,
-            r.record.statementHash,
-            registry
-        );
-    }
-
-    function _origin(RH.OwnerProvenance memory p, bytes32 hash)
-        private
-        pure
-        returns (RH.OriginEnvironment memory)
-    {
-        for (uint256 i; i < p.eras.length; ++i) {
-            if (p.eras[i].originHash == hash) return p.origins[i];
+        uint256 nativeRecords;
+        for (uint256 i; i < p.journal.length; ++i) {
+            if (p.journal[i].receipt.operation == 24) ++nativeRecords;
+            else if (p.journal[i].receipt.operation != 44) _invalid();
         }
-        _invalid();
-    }
-
-    function _key(T.Attestation memory p) private pure returns (bytes32) {
-        return keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId));
+        if (total != nativeRecords) _invalid();
     }
 
     function _personhood(T.Attestation memory p) private pure returns (bool) {

@@ -49,6 +49,8 @@ import {
     StreamArtistRecoveredContentConsentHydration as ContentH
 } from "./StreamArtistRecoveredContentConsentHydration.sol";
 
+import { StreamArtistRecoveredMultipleGenerationConsentBaseSource as BaseSource } from "./StreamArtistRecoveredMultipleGenerationConsentBaseSource.sol";
+
 /// @notice Fixed-source rows for one collection over the complete original owner provenance.
 /// @dev Selection never rebuilds, renumbers or filters the provenance certificate itself.
 /// @dev Only the facade authenticates the returned rows with the full pure validator, then
@@ -126,7 +128,7 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         if (cc > MAX_ROWS || rc > MAX_ROWS || fc > MAX_ROWS || royalties.length != rc) {
             revert T.UnsupportedProfile();
         }
-        b.original = _base(source, q, p, economics, allowRatifications, allowSanctions);
+        b.original = BaseSource.collect(source, q, p, economics, allowRatifications, allowSanctions);
         b.consents = new ContentOwner.ConsentRecord[](cc);
         b.royalties = new ContentH.Royalty[](rc);
         b.freezes = new Content.FreezeRecord[](fc);
@@ -213,94 +215,6 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         }
     }
 
-    function _base(
-        address source,
-        AH.Query memory q,
-        RH.OwnerProvenance memory p,
-        T.EconomicsConsent[] memory terms,
-        bool allowRatifications,
-        bool allowSanctions
-    ) private view returns (Base.Bundle memory b) {
-        if (q.policies.length > MAX_ROWS || terms.length > MAX_ROWS) {
-            revert T.UnsupportedProfile();
-        }
-        b.provenance = RH.ownerProvenanceHash(p, 6);
-        b.artistId = q.artistId;
-        b.collectionId = q.collectionId;
-        b.bindingHash = q.bindingHash;
-        b.keys = q.policies;
-        b.policies = new DH.Policy[](q.policies.length);
-        for (uint256 i; i < b.policies.length; ++i) {
-            bytes32 record = Consent(source)
-                .policyRecord(q.collectionId, q.policies[i].phaseId, q.policies[i].policyHash);
-            b.policies[i] = DH.Policy(record, Delegated(source).recordDelegation(record));
-        }
-        b.economics = new Base.Economics[](terms.length);
-        uint256 economic;
-        for (uint256 i; i < p.journal.length; ++i) {
-            RH.JournalEntry memory n = p.journal[i];
-            if (
-                n.receipt.artistId != q.artistId || n.receipt.collectionId != q.collectionId
-                    || n.receipt.operation != 15
-            ) continue;
-            if (economic == terms.length) _invalid();
-            T.EconomicsConsent memory t = terms[economic];
-            bytes32 record = n.receipt.recordHash;
-            Evidence.Association memory association =
-                Evidence(source).economicsRecordAssociation(record);
-            if (
-                Consent(source).economicsRecord(t) != association.originalRecord
-                    || association.originalRecord == 0
-                    || Evidence(source)
-                            .economicsRecordForBinding(
-                                t,
-                                q.artistId,
-                                association.bindingGeneration,
-                                association.bindingHash
-                            ) != record
-            ) _invalid();
-            b.economics[economic++] = Base.Economics(
-                EH.Row(record, t, association), Delegated(source).recordDelegation(record)
-            );
-        }
-        if (economic != terms.length) _invalid();
-        uint256 count;
-        for (uint256 i; i < p.journal.length; ++i) {
-            if (
-                p.journal[i].receipt.artistId != q.artistId
-                    || p.journal[i].receipt.collectionId != q.collectionId
-            ) continue;
-            uint16 op = p.journal[i].receipt.operation;
-            if (op == 16) {
-                ++count;
-            } else if (
-                op != 14 && op != 15 && op != 17 && op != 20 && op != 21
-                    && (!allowRatifications || op != 52) && (!allowSanctions || op != 12)
-            ) {
-                revert T.UnsupportedProfile();
-            }
-        }
-        if (count > MAX_ROWS) revert T.UnsupportedProfile();
-        b.sales = new DH.Sale[](count);
-        count = 0;
-        for (uint256 i; i < p.journal.length; ++i) {
-            if (
-                p.journal[i].receipt.artistId != q.artistId
-                    || p.journal[i].receipt.collectionId != q.collectionId
-            ) continue;
-            if (p.journal[i].receipt.operation != 16) continue;
-            bytes32 record = p.journal[i].receipt.recordHash;
-            Sale.Record memory item = Sales(source).saleConsentRecord(record);
-            b.sales[count++] = DH.Sale(
-                item,
-                Delegated(source).recordDelegation(record),
-                Sales(source)
-                    .saleConsentAt(
-                        item.terms.collectionId, item.terms.saleId, item.terms.saleConfigHash
-                    )
-            );
-        }
-    }
 
     function _contentScope(Content.Consent memory terms, uint64 generation)
         private

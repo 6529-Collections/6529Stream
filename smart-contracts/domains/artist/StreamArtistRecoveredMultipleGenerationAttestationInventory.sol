@@ -80,31 +80,39 @@ import {
     StreamArtistRecoveredHistoryRecordRows as Semantic
 } from "./StreamArtistRecoveredHistoryRecordRows.sol";
 
-import { StreamArtistRecoveredMultipleGenerationAttestationInventory as InventoryValidation } from "./StreamArtistRecoveredMultipleGenerationAttestationInventory.sol";
-import { StreamArtistRecoveredMultipleGenerationAttestationJournal as Journal } from "./StreamArtistRecoveredMultipleGenerationAttestationJournal.sol";
-
-/// @notice One complete original owner4 semantic inventory; source clocks are checked separately.
-library StreamArtistRecoveredMultipleGenerationAttestationValidation {
-    function validate(
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks
-    ) public pure returns (Original.Bundle[] memory all) {
-        return validate(scope, p, inventory, clocks, false);
+/// @notice Complete canonical inventory validation before the original journal walk.
+library StreamArtistRecoveredMultipleGenerationAttestationInventory {
+    function validate(M.State memory scope, RH.OwnerProvenance memory p, G.Inventory memory inventory, Clocks.Result memory clocks, bool sanctioned) public pure returns (Original.Bundle[] memory all, uint256 total) {
+        Provenance.validateOwner(p, 4);
+        Scope.validate(4, scope, p);
+        if (
+            p.journal.length > RH.MAX_JOURNAL_ENTRIES
+                || inventory.bindings.length != scope.collections.length
+                || clocks.collections.length != scope.collections.length
+        ) _invalid();
+        all = new Original.Bundle[](scope.collections.length);
+        bytes32 whole = RH.ownerProvenanceHash(p, 4);
+        for (uint256 k; k < all.length; ++k) {
+            AH.Query memory q = scope.collections[k];
+            Original.Bundle memory b = abi.decode(scope.rows[k], (Original.Bundle));
+            if (
+                keccak256(scope.rows[k]) != keccak256(abi.encode(b)) || b.provenance != whole
+                    || b.artistId != q.artistId || b.collectionId != q.collectionId
+                    || b.bindingHash != q.bindingHash
+                    || (b.item.state != 2 && (!sanctioned || b.item.state != 3))
+                    || b.item.generation != inventory.bindings[k].bindings.rows.length
+                    || b.records.length > 128 || b.personhood.length > 128
+                    || b.records.length != q.records.length
+            ) _invalid();
+            for (uint256 i; i < b.records.length; ++i) {
+                if (q.records[i] != b.records[i].attestation.record.recordHash) _invalid();
+            }
+            all[k] = b;
+            total += b.records.length;
+        }
     }
 
-    /// @dev The selected aggregate profile separately proves each original confirmation and
-    /// its collection/generation timeline; this flag does not establish sanctioned authority.
-    function validate(
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks,
-        bool sanctioned
-    ) public pure returns (Original.Bundle[] memory all) {
-        uint256 total;
-        (all, total) = InventoryValidation.validate(scope, p, inventory, clocks, sanctioned);
-        Journal.validate(scope, p, inventory, clocks, all, total);
+    function _invalid() private pure {
+        revert RH.InvalidRecoveredHydrationProfile();
     }
 }

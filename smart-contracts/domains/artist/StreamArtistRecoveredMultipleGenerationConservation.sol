@@ -25,6 +25,8 @@ import {
     StreamArtistRecoveredMultipleGenerationAttestationQueries as Queries
 } from "./StreamArtistRecoveredMultipleGenerationAttestationQueries.sol";
 
+import { StreamArtistRecoveredMultipleGenerationAttestationCensus as Census } from "./StreamArtistRecoveredMultipleGenerationAttestationCensus.sol";
+
 /// @notice One equality over every original grant version after all collections and generations.
 library StreamArtistRecoveredMultipleGenerationConservation {
     struct Context {
@@ -65,14 +67,8 @@ library StreamArtistRecoveredMultipleGenerationConservation {
                 : Consents.validate(
                     Consents.Context(x.identities, x.scope, x.consents, x.provenance)
                 );
-        uint256[][] memory attested = Attestations.validate(
-            Attestations.Context(
-                x.identities,
-                Queries.project(x.scope, RH.ownerProvenance(x.provenance, 4)),
-                x.attestations,
-                x.inventory,
-                x.provenance
-            )
+        uint256[][] memory attested = Census.validate(
+            Census.Context(x.identities, x.scope, x.attestations, x.inventory, x.provenance)
         );
         if (consent.length != x.identities.length || attested.length != x.identities.length) {
             _invalid();

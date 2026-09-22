@@ -69,9 +69,6 @@ import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import {
     StreamArtistRecoveredAttestationHydration as Original
 } from "./StreamArtistRecoveredAttestationHydration.sol";
-import {
-    StreamArtistRecoveredMultipleGenerationAttestationValidation as Validation
-} from "./StreamArtistRecoveredMultipleGenerationAttestationValidation.sol";
 
 import {
     StreamArtistRecoveredMultipleTypes as M
@@ -80,87 +77,100 @@ import {
     StreamArtistRecoveredMultipleCodec as Scope
 } from "./StreamArtistRecoveredMultipleCodec.sol";
 import {
-    StreamArtistRecoveredMultipleGenerationAttestationHeads as Heads
-} from "./StreamArtistRecoveredMultipleGenerationAttestationHeads.sol";
-import {
     StreamArtistRecoveredHistoryRecordRows as Semantic
 } from "./StreamArtistRecoveredHistoryRecordRows.sol";
 
-import { StreamArtistRecoveredMultipleGenerationAttestationSourceRead as SourceRead } from "./StreamArtistRecoveredMultipleGenerationAttestationSourceRead.sol";
-import { StreamArtistRecoveredMultipleGenerationAttestationSourceInventory as SourceInventory } from "./StreamArtistRecoveredMultipleGenerationAttestationSourceInventory.sol";
+import { StreamArtistRecoveredMultipleGenerationAttestationInventory as InventoryValidation } from "./StreamArtistRecoveredMultipleGenerationAttestationInventory.sol";
 
-/// @notice Exact original source maps collected once in full owner4 native order.
-library StreamArtistRecoveredMultipleGenerationAttestationSource {
-    function collect(
-        address source,
+/// @notice Validate the complete original owner4 journal in receipt order.
+library StreamArtistRecoveredMultipleGenerationAttestationJournal {
+    function validate(
         M.State memory scope,
         RH.OwnerProvenance memory p,
-        ReadinessH.AttestationInput[][] memory inputs,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks
-    ) public view returns (bytes[] memory rows) {
-        return collect(source, scope, p, inputs, inventory, clocks, false);
-    }
-
-    /// @dev The selected aggregate profile separately proves each original confirmation and
-    /// its collection/generation timeline; this flag does not establish sanctioned authority.
-    function collect(
-        address source,
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        ReadinessH.AttestationInput[][] memory inputs,
         G.Inventory memory inventory,
         Clocks.Result memory clocks,
-        bool sanctioned
-    ) public view returns (bytes[] memory rows) {
-        Original.Bundle[] memory all = SourceInventory.collect(source, scope, p, inputs);
+        Original.Bundle[] memory all,
+        uint256 total
+    ) public pure {
+        uint256 nativeRecords;
+        for (uint256 i; i < p.journal.length; ++i) {
+            if (p.journal[i].receipt.operation == 24) ++nativeRecords;
+            else if (p.journal[i].receipt.operation != 44) _invalid();
+        }
+        if (total != nativeRecords) _invalid();
         uint256[] memory cursors = new uint256[](all.length);
         uint256[] memory summaries = new uint256[](all.length);
-        Personhood.Summary memory empty;
+        C2PA.Head[] memory heads = new C2PA.Head[](scope.artists.length);
         for (uint256 i; i < p.journal.length; ++i) {
             RH.JournalEntry memory entry = p.journal[i];
             if (entry.receipt.operation == 44) continue;
             uint256 k = Scope.collection(scope, entry.receipt.collectionId);
+            uint256 a = Scope.artist(scope, entry.receipt.artistId);
             if (
                 entry.receipt.operation != 24
-                    || entry.receipt.artistId != scope.collections[k].artistId
-                    || cursors[k] >= inputs[k].length
+                    || scope.collections[k].artistId != entry.receipt.artistId
+                    || cursors[k] >= all[k].records.length
             ) _invalid();
-            uint256 cursor = cursors[k]++;
-            bytes32 hash = entry.receipt.recordHash;
-            PubH.Row memory r = SourceRead.row(source, inputs[k][cursor], hash);
-            all[k].records[cursor] = r;
-            Personhood.Summary memory summary =
-                IStreamArtistPersonhoodEvidence(source).personhoodProofSummary(hash);
-            bytes32 summaryHash =
-                IStreamArtistPersonhoodEvidence(source).personhoodProofSummaryHash(hash);
-            if (_personhood(inputs[k][cursor].terms)) {
-                all[k].personhood[summaries[k]++] = Original.PersonhoodRow(
-                    hash,
-                    _origin(p, entry.position.point.environmentHash).registry,
-                    summary,
-                    summaryHash
+            PubH.Row memory row = all[k].records[cursors[k]++];
+            if (entry.receipt.recordHash != row.attestation.record.recordHash) _invalid();
+            for (uint256 j; j < i; ++j) {
+                if (p.journal[j].receipt.recordHash == entry.receipt.recordHash) _invalid();
+            }
+            RH.OriginEnvironment memory o = _origin(p, entry.position.point.environmentHash);
+            uint64 generation = row.attestation.record.generation;
+            if (generation == 0 || generation > inventory.bindings[k].bindings.rows.length) {
+                _invalid();
+            }
+            T.Binding memory binding_ = inventory.bindings[k].bindings.rows[generation - 1].item;
+            if (
+                !binding_.accepted || binding_.generation != generation
+                    || binding_.artistId != entry.receipt.artistId
+                    || !Clock.beforeOwner(
+                        p,
+                        4,
+                        clocks.collections[k].attributionCompletions[generation - 1],
+                        entry.position.point
+                    )
+                    || (generation < inventory.bindings[k].bindings.rows.length
+                        && !Clock.beforeOwner(
+                            p,
+                            4,
+                            entry.position.point,
+                            clocks.collections[k].attributionProposals[generation]
+                        ))
+            ) _invalid();
+            AH.Query memory historical = AH.Query(
+                scope.collections[k].artistId,
+                scope.collections[k].collectionId,
+                binding_.bindingHash,
+                scope.collections[k].policies,
+                scope.collections[k].records
+            );
+            Semantic.validateRow(historical, o, row, generation);
+            if (_personhood(row.attestation.input.terms)) {
+                if (summaries[k] >= all[k].personhood.length) _invalid();
+                Semantic.validateSummary(
+                    historical, o, row.attestation, all[k].personhood[summaries[k]++], generation
                 );
-            } else if (
-                summaryHash != 0 || keccak256(abi.encode(summary)) != keccak256(abi.encode(empty))
-            ) {
+            }
+            if (_credential(row.attestation.input.terms)) {
+                heads[a] =
+                    _nextHead(heads[a], all[k], row.attestation, o.registry, binding_.bindingHash);
+            }
+        }
+        for (uint256 k; k < all.length; ++k) {
+            if (cursors[k] != all[k].records.length || summaries[k] != all[k].personhood.length) {
                 _invalid();
             }
         }
-        rows = new bytes[](all.length);
-        for (uint256 k; k < all.length; ++k) {
-            rows[k] = abi.encode(all[k]);
-        }
-        scope.rows = rows;
-        Validation.validate(scope, p, inventory, clocks, sanctioned);
-        Heads.requireMatches(source, scope, p, all, inventory);
     }
 
     function _nextHead(
         C2PA.Head memory previous,
         Original.Bundle memory b,
         ReadinessH.AttestationRow memory r,
-        address registry
+        address registry,
+        bytes32 bindingHash
     ) private pure returns (C2PA.Head memory) {
         C2PA.Payload memory p = Credentials.decode(
             r.statement, b.artistId, r.input.terms.subjectStateHash
@@ -172,8 +182,8 @@ library StreamArtistRecoveredMultipleGenerationAttestationSource {
             previous.recordHash,
             b.artistId,
             b.collectionId,
-            b.bindingHash,
-            b.item.generation,
+            bindingHash,
+            r.record.generation,
             r.record.subjectStateHash,
             r.record.statementHash,
             registry
