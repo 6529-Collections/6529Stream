@@ -6,6 +6,11 @@ original source, inventories its fields before selection, and resolves actual
 output values back to exact native fields. It also compares representations
 when two or more formats map the same original field.
 
+The additive [native media and preservation package V2](museum-native-media-preservation.md)
+adds qualified VIEW image painting, record-publication events and documentary
+rights notices with separate original source-field coverage. This V1 profile
+and its scope remain unchanged.
+
 ## Supported source and format scope
 
 | Format | Native source scope | Meaning of the output |

@@ -10,6 +10,17 @@
   Provider and envelope checks remain separate from actual seven-owner/Safe
   execution and release acceptance.
 
+## Native media and preservation correspondence
+
+- Add native IIIF VIEW painting with exact retained token/file correspondence
+  and separately attributed operator designation. Add PREMIS native publication
+  events, distinct agents for native receipt accounts and declared licensors,
+  and documentary rights notices.
+- Preserve earlier profiles and field denominators; independently resolve the
+  complete additional original source fields and actual format targets during
+  portable offline reopening. See the
+  [native media and preservation guide](docs/museum-native-media-preservation.md).
+
 ## Native four-format export and family coverage
 
 - Add native V4 Linked Art, PREMIS and IIIF adapters alongside the unchanged

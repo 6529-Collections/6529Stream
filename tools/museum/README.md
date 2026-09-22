@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Native media and preservation exports](../../docs/museum-native-media-preservation.md)
+add qualified VIEW painting, publication events and documentary rights to a
+portable four-format package with separate source-field coverage.
+
 [Native four-format exports](../../docs/museum-native-multiformat.md) replay
 one V4 source into qualified Linked Art, PREMIS, IIIF and LIDO, with exact
 field comparisons and source-family coverage.
