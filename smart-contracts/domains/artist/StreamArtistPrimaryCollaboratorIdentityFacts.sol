@@ -75,6 +75,14 @@ library StreamArtistPrimaryCollaboratorIdentityFacts {
                 );
             }
         }
+        validateAuthorizations(x);
+    }
+
+    /// @notice Shared original op2/3/6/7 signature and nonce facts after profile-specific joins.
+    /// @dev The original validate entry still applies its same-principal document boundary.
+    /// Callers of this phase first authenticate canonical Identity bundles and the complete
+    /// source catalogue; no current authority or recovery-count predicate is substituted.
+    function validateAuthorizations(Context calldata x) public view {
         RH.OwnerProvenance memory p = RH.ownerProvenance(x.provenance, 2);
         for (uint256 i; i < x.inventory.operations.length; ++i) {
             H.OperationEvidence calldata item = x.inventory.operations[i];

@@ -21,15 +21,26 @@ import {
 /// records are never authorized again against the current principal or current grant head.
 library StreamArtistRecoveredDisputeHistoryChains {
     function validate(D.Bundle memory b, RH.OwnerProvenance memory p) public pure {
-        _validate(b, p, false);
+        _validate(b, p, false, true);
     }
 
     /// @dev The new profile separately proves every original confirmed-state restoration.
     function validateSanctioned(D.Bundle memory b, RH.OwnerProvenance memory p) public pure {
-        _validate(b, p, true);
+        _validate(b, p, true, true);
     }
 
-    function _validate(D.Bundle memory b, RH.OwnerProvenance memory p, bool sanctioned) private pure {
+    /// @notice Original generation chains without interpreting the latest binding lifecycle.
+    /// @dev The complete profile separately joins pending/terminal heads and sanctions.
+    function validateGenerationChains(D.Bundle memory b, RH.OwnerProvenance memory p) public pure {
+        _validate(b, p, true, false);
+    }
+
+    function _validate(
+        D.Bundle memory b,
+        RH.OwnerProvenance memory p,
+        bool sanctioned,
+        bool checkCurrent
+    ) private pure {
         for (uint256 i; i < b.disputes.length; ++i) {
             D.DisputeRow memory r = b.disputes[i];
             AD.Record memory a = r.record;
@@ -100,7 +111,7 @@ library StreamArtistRecoveredDisputeHistoryChains {
             if (r.record.previousResolutionActionId != previous) _invalid();
         }
         for (uint256 g; g < b.generations.length; ++g) {
-            _head(b, uint64(g + 1), p, sanctioned);
+            _head(b, uint64(g + 1), p, sanctioned, checkCurrent);
         }
     }
 
@@ -108,7 +119,8 @@ library StreamArtistRecoveredDisputeHistoryChains {
         D.Bundle memory b,
         uint64 generation,
         RH.OwnerProvenance memory p,
-        bool sanctioned
+        bool sanctioned,
+        bool checkCurrent
     ) private pure {
         AD.Head memory h = b.heads[generation - 1];
         uint256 latest = type(uint256).max;
@@ -179,7 +191,7 @@ library StreamArtistRecoveredDisputeHistoryChains {
             }
             if (!executed || h.open) _invalid();
         }
-        if (generation == b.current.generation) {
+        if (checkCurrent && generation == b.current.generation) {
             if (
                 (b.current.state == 4) != h.open
                     || (b.current.state == 5 && h.revocationReason != 3 && h.revocationReason != 4)

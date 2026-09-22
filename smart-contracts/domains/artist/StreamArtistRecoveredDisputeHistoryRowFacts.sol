@@ -32,11 +32,37 @@ library StreamArtistRecoveredDisputeHistoryRowFacts {
         public
         pure
     {
+        disputeRecordForBinding(b, r, p, b.artistId);
+        AD.Record memory a = r.record;
+        uint64 g = a.terms.bindingGeneration;
+        if (a.governanceActionId == 0) {
+            if (
+                a.authorityClass == 0 || a.standing.artistId != b.artistId
+                    || a.standing.bindingGeneration == 0 || a.standing.bindingGeneration > g
+                    || a.standing.collaboratorIndex != 0
+                    || !b.generations[a.standing.bindingGeneration - 1].accepted
+                    || (a.standing.delegation != 0
+                        && (a.authorityClass != 2 || a.standing.bindingGeneration != g))
+                    || (a.standing.delegation == 0 && a.authorityClass == 2)
+                    || (a.terms.disputeAction == 3 && a.standing.bindingGeneration != g)
+            ) _invalid();
+        }
+    }
+
+    /// @notice Original immutable record facts for an explicitly authenticated binding Artist.
+    /// @dev The caller must separately prove the signed author's original standing, authority,
+    /// nonce and grant. The record Artist is the binding Artist, not necessarily that author.
+    function disputeRecordForBinding(
+        D.Bundle memory b,
+        D.DisputeRow memory r,
+        RH.OwnerProvenance memory p,
+        bytes32 bindingArtist
+    ) public pure {
         AD.Record memory a = r.record;
         uint64 g = a.terms.bindingGeneration;
         if (
             g == 0 || g > b.generations.length || a.recordHash == 0 || a.recordedAt == 0
-                || a.artistId != b.artistId || a.bindingHash != b.generations[g - 1].bindingHash
+                || a.artistId != bindingArtist || a.bindingHash != b.generations[g - 1].bindingHash
                 || a.terms.collectionId != b.collectionId || a.terms.evidenceHash == 0
                 || a.terms.reasonHash == 0 || a.signer == address(0) || a.authorityClass > 4
         ) _invalid();
@@ -58,17 +84,11 @@ library StreamArtistRecoveredDisputeHistoryRowFacts {
                 a.terms.disputeAction != 1 || a.authorityClass != 0 || a.nonce != 0
                     || keccak256(abi.encode(a.standing)) != keccak256(abi.encode(empty))
             ) _invalid();
-        } else {
-            if (
-                a.authorityClass == 0 || a.standing.artistId != b.artistId
-                    || a.standing.bindingGeneration == 0 || a.standing.bindingGeneration > g
-                    || a.standing.collaboratorIndex != 0
-                    || !b.generations[a.standing.bindingGeneration - 1].accepted
-                    || (a.standing.delegation != 0
-                        && (a.authorityClass != 2 || a.standing.bindingGeneration != g))
-                    || (a.standing.delegation == 0 && a.authorityClass == 2)
-                    || (a.terms.disputeAction == 3 && a.standing.bindingGeneration != g)
-            ) _invalid();
+        } else if (
+            a.authorityClass == 0 || (a.standing.delegation != 0 && a.authorityClass != 2)
+                || (a.standing.delegation == 0 && a.authorityClass == 2)
+        ) {
+            _invalid();
         }
         if (a.terms.disputeAction == 1) {
             if (a.disputeRecordHash != a.recordHash) _invalid();
@@ -97,12 +117,22 @@ library StreamArtistRecoveredDisputeHistoryRowFacts {
         D.RepudiationRow memory row,
         RH.OwnerProvenance memory p
     ) public pure {
+        repudiationForBinding(b, row, p, b.artistId);
+    }
+
+    /// @notice Original repudiation predicates for an explicitly authenticated generation Artist.
+    function repudiationForBinding(
+        D.Bundle memory b,
+        D.RepudiationRow memory row,
+        RH.OwnerProvenance memory p,
+        bytes32 bindingArtist
+    ) public pure {
         RP.Record memory r = row.record;
         RP.Terminal memory t = row.terminal;
         uint64 g = r.terms.bindingGeneration;
         if (
             g == 0 || g > b.generations.length || !b.generations[g - 1].accepted
-                || r.recordHash == 0 || r.artistId != b.artistId
+                || r.recordHash == 0 || r.artistId != bindingArtist
                 || r.bindingHash != b.generations[g - 1].bindingHash
                 || r.terms.collectionId != b.collectionId || r.terms.disputeAction != 4
                 || r.terms.reasonHash == 0 || r.signer == address(0)
