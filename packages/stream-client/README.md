@@ -448,6 +448,10 @@ contract profiles and outstanding larger-script work.
   adds the separate MULTIPLE_CONSENTS profile for complete direct/delegated consent
   histories, global grant and nonce partitions, and ordered economics/royalty witnesses.
 
+- [Multiple recovered attestation histories](docs/current-artist-recovered-multiple-attestation-hydration.md)
+  adds the separate MULTIPLE_ATTESTATIONS profile with original Archive completion
+  clocks, per-Artist credential chains and combined consent/attestation grant totals.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain

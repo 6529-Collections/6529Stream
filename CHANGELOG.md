@@ -152,6 +152,16 @@
   separate owners and rejection boundaries; compiler and runtime acceptance are
   separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
 
+## Multiple recovered attestation client profile
+
+- Add the separately pinned MULTIPLE_ATTESTATIONS client for original attestation
+  and complete consent histories across recovered Artists and collections. Keep
+  full admission queries, owner4 record projection, original Archive completion
+  clocks, per-Artist C2PA chains and cross-family grant totals in the existing
+  operation-60 direct/Safe workflows. Earlier profiles remain strict. Client
+  checks remain separate from contract execution and deployment acceptance. See
+  the [client guide](packages/stream-client/docs/current-artist-recovered-multiple-attestation-hydration.md).
+
 ## Multiple recovered consent client profile
 
 - Add the separately pinned MULTIPLE_CONSENTS client for complete original

@@ -569,10 +569,12 @@ export interface ArtistRecoveredHydrationFeatureFacts {
 }
 
 /** Private closed profile engine. Public adapters permanently select their frozen feature ceiling. */
-export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n) {
-  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n) throw Error("Unsupported internal recovered profile");
+export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n | 262175n | 524671n | 1049087n) {
+  if (knownFeatures !== 255n && knownFeatures !== 511n && knownFeatures !== 262175n && knownFeatures !== 524671n && knownFeatures !== 1049087n) throw Error("Unsupported internal recovered profile");
+  const multipleAttestations = knownFeatures === 1049087n;
   const multipleConsents = knownFeatures === 524671n;
-  const multiple = knownFeatures === 262175n || multipleConsents;
+  const multipleExtended = multipleConsents || multipleAttestations;
+  const multiple = knownFeatures === 262175n || multipleExtended;
   const coder = AbiCoder.defaultAbiCoder();
   const schemaTypes = new Map<string, ParamType>();
 
@@ -784,7 +786,7 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     if (multiple) {
       list(a.artistIds, 128); list(a.collections, 128);
       if (a.bindingIndex !== 0n || !a.artistIds.length || !a.collections.length
-        || a.artistIds.length === 1 && a.collections.length === 1 || !multipleConsents && r.records.witnesses.length) {
+        || a.artistIds.length === 1 && a.collections.length === 1 || !multipleExtended && r.records.witnesses.length) {
         throw Error("MULTIPLE_BASE requires a complete plural graph without witness extensions");
       }
       for (let i = 0; i < a.artistIds.length; i++) {
@@ -845,19 +847,20 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       }
     }
     if (replayTotal > 8192) throw Error("Replay inventory exceeds capacity");
-    if (multipleConsents) {
+    if (multipleExtended) {
       list(r.records.witnesses, 128);
-      let previous = -1, totalEconomics = 0;
+      let previous = -1, totalEconomics = 0, totalAttestations = 0;
       for (const witness of r.records.witnesses) {
         const at = a.collections.findIndex(c => c.collectionId === witness.collectionId);
-        list(witness.economics, 128); list(witness.attestations, 0);
-        if (at <= previous || !witness.economics.length
-          || witness.economics.some(row => row.collectionId !== witness.collectionId)) {
+        list(witness.economics, 128); list(witness.attestations, multipleAttestations ? 128 : 0);
+        if (at <= previous || !(witness.economics.length + witness.attestations.length)
+          || witness.economics.some(row => row.collectionId !== witness.collectionId)
+          || witness.attestations.some(row => row.terms.collectionId !== witness.collectionId)) {
           throw Error("Invalid complete multiple economics witness order");
         }
-        previous = at; totalEconomics += witness.economics.length;
+        previous = at; totalEconomics += witness.economics.length; totalAttestations += witness.attestations.length;
       }
-      if (totalEconomics > 128) throw Error("Multiple economics witness capacity");
+      if (totalEconomics > 128 || totalAttestations > 128 || multipleAttestations && totalAttestations === 0) throw Error("Multiple witness capacity");
     } else {
       list(r.records.witnesses, 1);
       for (const witness of r.records.witnesses) {
@@ -1217,7 +1220,8 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
       || h.replayAliasesCommitment !== artistRecoveredHydrationAliasesHash(p.provenance.aliases, index)
       || h.semanticRecordCount !== BigInt(p.provenance.journal.length)
       || h.replayAliasCount !== BigInt(p.provenance.aliases.length) || h.eraCount !== BigInt(p.provenance.eras.length)
-      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (multipleConsents ? 524288n : 262144n)) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
+      || (h.requiredFeatures & ~knownFeatures) !== 0n || multiple && (h.requiredFeatures & (multipleAttestations ? 1048576n : multipleConsents ? 524288n : 262144n)) === 0n
+      || multipleAttestations && (h.requiredFeatures & 128n) === 0n || h.eraCount > 1n && (h.requiredFeatures & 16n) === 0n) {
       throw Error("Owner header differs from complete payload");
     }
   }
@@ -1479,14 +1483,16 @@ export function createArtistRecoveredHydrationCodec(knownFeatures: 255n | 511n |
     }
     const economicsCount = c.provenance.journals[6].filter(entry => entry.receipt.operation === 15n).length;
     const attestationCount = c.provenance.journals[4].filter(entry => entry.receipt.operation === 24n).length;
-    if (multipleConsents) {
-      if (attestationCount) throw Error("Multiple consent profile excludes attestations");
-      const selected = c.collections.filter(q => c.provenance.journals[6].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n));
+    if (multipleExtended) {
+      if (multipleAttestations ? attestationCount === 0 || attestationCount > 128 : attestationCount !== 0) throw Error("Multiple attestation profile mismatch");
+      const selected = c.collections.filter(q => c.provenance.journals[6].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n)
+        || multipleAttestations && c.provenance.journals[4].some(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n));
       if (selected.length !== request.records.witnesses.length) throw Error("Missing or extra multiple economics witnesses");
       for (let i = 0; i < selected.length; i++) {
         const q = selected[i]!, witness = request.records.witnesses[i]!;
         const count = c.provenance.journals[6].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 15n).length;
-        if (witness.collectionId !== q.collectionId || witness.attestations.length || witness.economics.length !== count
+        const attestations = multipleAttestations ? c.provenance.journals[4].filter(j => j.receipt.collectionId === q.collectionId && j.receipt.operation === 24n).length : 0;
+        if (witness.collectionId !== q.collectionId || witness.attestations.length !== attestations || witness.economics.length !== count
           || witness.economics.some(row => row.collectionId !== q.collectionId
             || row.resolver !== c.source.primaryResolver && row.resolver !== c.source.royaltyResolver)) {
           throw Error("Incomplete original multiple economics witness partition");

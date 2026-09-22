@@ -119,6 +119,8 @@ export * from "./current-artist-recovered-multiple-hydration.js";
 export * from "./current-artist-recovered-multiple-hydration-workflow.js";
 export * from "./current-artist-recovered-multiple-consent-hydration.js";
 export * from "./current-artist-recovered-multiple-consent-hydration-workflow.js";
+export * from "./current-artist-recovered-multiple-attestation-hydration.js";
+export * from "./current-artist-recovered-multiple-attestation-hydration-workflow.js";
 export * from "./current-view-complete-binding.js";
 export * from "./current-view-complete-binding-workflow.js";
 export * from "./current-token-preservation-output-v2.js";
