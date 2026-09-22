@@ -4,6 +4,9 @@ pragma solidity ^0.8.19;
 import { ArtistArtifactCreate } from "./ArtistArtifactCreate.sol";
 import { StreamRendererV1 } from "../../smart-contracts/domains/metadata/StreamRendererV1.sol";
 import {
+    IStreamMetadataRouter
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol";
+import {
     IStreamCurrentCitationRegistry as TypedCitationRegistry
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRegistry.sol";
 import {
