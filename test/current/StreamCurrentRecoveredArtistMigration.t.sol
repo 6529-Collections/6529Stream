@@ -13,6 +13,24 @@ import {
 import {
     StreamArtistArchiveV2
 } from "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
+import {
+    StreamArtistBindingLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol";
+import {
+    StreamArtistCollaboratorLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol";
+import {
+    StreamArtistAcceptanceLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol";
+import {
+    StreamArtistAttributionLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol";
+import {
+    StreamArtistPayoutLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
+import {
+    StreamArtistConsentFinalityLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol";
 
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import "../../script/current/StreamGovernanceCatalogStagePlan.sol";
