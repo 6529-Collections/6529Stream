@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "./StreamArtistRecoveredAuthorityActual.t.sol";
+import "./ArtistRecoveredAuthorityFixture.sol";
 import {
     StreamArtistPlatformTypes as PW
 } from "../../../smart-contracts/interfaces/stream/artist/StreamArtistPlatformTypes.sol";
@@ -72,7 +72,7 @@ interface UnboundAttributionDisplay {
 
 /// @notice Actual original Platform/Archive/seven-owner/Safe recipe; Core, coverage and scheduled
 /// governance are explicit inherited typed unit boundaries. No deployment/gas acceptance claim.
-abstract contract ArtistUnboundPlatformFixture is StreamArtistRecoveredAuthorityActualTest {
+abstract contract ArtistUnboundPlatformFixture is ArtistRecoveredAuthorityFixture {
     uint256 internal upCollection = 1;
     bool internal upMixed;
     uint256 internal upAction;

@@ -48,6 +48,15 @@ legacy regressions while that implementation remains supported; do not present
 them as current API proof. Interface refactors preserve public ABI and advertised
 ERC-165 IDs, including aggregate interfaces.
 
+Reusable setup belongs in an abstract fixture with no `test*` entrypoints.
+New profile suites should inherit that fixture, rather than another concrete
+test suite: otherwise every inherited case becomes another expensive compile
+and execution target. The Artist Guardian and RecoveredAuthority fixtures keep
+their original test bodies in their named suites; generation, dispute,
+collaborator and unbound profiles reuse only setup/state/helpers. When extracting
+a fixture, preserve storage order, constructor/override dispatch and every
+original test body; retain separate named cohorts for the moved entrypoints.
+
 Fixture files are inputs, not credentials. The [full validation command](../docs/tooling.md)
 adds Python policy tests, reproducible artifacts and release checks. Run it at the
 integration/release boundary rather than for every edit. Passing tests does not
