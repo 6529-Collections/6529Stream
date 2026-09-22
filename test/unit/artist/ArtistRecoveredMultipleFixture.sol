@@ -785,7 +785,7 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
         );
     }
 
-    function _multiNext() private returns (Successor memory next) {
+    function _multiNext() internal returns (Successor memory next) {
         T.SuiteConfiguration memory s = suite;
         address governance = manager.governanceAuthority();
         ArtistSanctionFinalityFixture finalityFixture = ArtistSanctionFinalityFixture(_artistArtifactCreate(
@@ -897,7 +897,7 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
     }
 
     function _multiProof(address predecessor, HT.Leaf[] memory leaves, uint256 index)
-        private
+        internal
         view
         returns (bytes32 root, bytes32[] memory proof)
     {

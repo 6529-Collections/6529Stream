@@ -779,7 +779,7 @@ contract StreamArtistRecoveredAuthorityActualTest is StreamArtistGuardianSuperse
         RH.OwnerProvenance memory prefix,
         T.SuiteConfiguration memory destination,
         address destinationCoordinator
-    ) private view {
+    ) internal view {
         RH.OriginEnvironment memory env;
         env.chainId = block.chainid;
         env.registry = destination.registry;

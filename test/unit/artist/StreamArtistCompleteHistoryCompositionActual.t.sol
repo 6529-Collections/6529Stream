@@ -101,7 +101,7 @@ contract StreamArtistCompleteHistoryCompositionActualTest is
     }
 
     function _compositionSource()
-        private
+        internal
         returns (CHAdmissionType.Certificate memory c, bytes32 latest)
     {
         latest = _historyWithPartial(false, true);
