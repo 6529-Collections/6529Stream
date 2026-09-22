@@ -8,6 +8,10 @@ import {
     StreamCurrentAuthorityGraphCreation
 } from "../../script/current/StreamCurrentAuthorityGraphCreation.sol";
 import {
+    StreamCurrentGraphCreation as NativeGraphCatalog,
+    StreamCurrentAuthorityGraphCreation as NativeAuthorityCatalog
+} from "./StreamCurrentCreationCatalogTypes.sol";
+import {
     StreamArtistArchiveOriginTypes as FixtureOrigin
 } from "../../smart-contracts/interfaces/stream/preservation/StreamArtistArchiveOriginTypes.sol";
 import {
@@ -4013,7 +4017,7 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         override
         returns (bytes memory)
     {
-        return StreamNativeAssemblyCreation.graphCreation(kind);
+        return StreamNativeAssemblyCreation.graphCreation(NativeGraphCatalog.Kind(uint256(kind)));
     }
 
     function _authorityCreation(StreamCurrentAuthorityGraphCreation.Kind kind)
@@ -4022,7 +4026,9 @@ abstract contract StreamCurrentAuthorityNativeAssemblyFixture is
         override
         returns (bytes memory)
     {
-        return StreamNativeAssemblyCreation.authorityCreation(kind);
+        return StreamNativeAssemblyCreation.authorityCreation(
+            NativeAuthorityCatalog.Kind(uint256(kind))
+        );
     }
 
     function _afterCurrentAuthorityCoordinatorDeployment() internal virtual override {

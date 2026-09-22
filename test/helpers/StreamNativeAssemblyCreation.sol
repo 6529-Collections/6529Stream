@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { StreamCurrentGraphCreation } from "../../script/current/StreamCurrentGraphCreation.sol";
 import {
+    StreamCurrentGraphCreation,
     StreamCurrentAuthorityGraphCreation
-} from "../../script/current/StreamCurrentAuthorityGraphCreation.sol";
+} from "./StreamCurrentCreationCatalogTypes.sol";
 
 interface NativeAssemblyArtifactVm {
     function getCode(string calldata artifact) external view returns (bytes memory);

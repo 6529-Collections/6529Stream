@@ -6,10 +6,10 @@ import {
 } from "../helpers/StreamNativeAssemblyCreation.sol";
 import {
     StreamCurrentGraphCreation as Graph
-} from "../../script/current/StreamCurrentGraphCreation.sol";
+} from "../helpers/StreamCurrentCreationCatalogTypes.sol";
 import {
     StreamCurrentAuthorityGraphCreation as Authority
-} from "../../script/current/StreamCurrentAuthorityGraphCreation.sol";
+} from "../helpers/StreamCurrentCreationCatalogTypes.sol";
 
 /// @dev Mapping-only regression oracles frozen from the original f407acea dispatchers/imports.
 /// No production creation code, constructor execution, artifact lookup or current-graph proof
