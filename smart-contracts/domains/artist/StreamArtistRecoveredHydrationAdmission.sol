@@ -62,6 +62,32 @@ library StreamArtistRecoveredHydrationAdmission {
     {
         MH.Request memory selectors = request.records.authority;
         StreamArtistMultipleHydrationOperations._selectors(selectors);
+        c = admit(destination, request);
+        IStreamArtistHistory history = IStreamArtistHistory(destination.owners[2]);
+        _partition(c, selectors);
+        for (uint256 i; i < c.artists.length; ++i) {
+            Original._lane(history, c.prior, 1, c.artists[i].artistId);
+            (, uint64 count) =
+                IStreamArtistHistory(c.prior).artistHistoryLane(1, c.artists[i].artistId);
+            if (count != c.artists[i].records.length) revert T.InvalidRecord();
+        }
+        for (uint256 i; i < c.collections.length; ++i) {
+            Original._lane(history, c.prior, 2, bytes32(c.collections[i].collectionId));
+            (, uint64 count) = IStreamArtistHistory(c.prior)
+                .artistHistoryLane(2, bytes32(c.collections[i].collectionId));
+            if (count != c.collections[i].records.length) revert T.InvalidRecord();
+        }
+    }
+
+    /// @notice Shared fixed predecessor/cutover/checkpoint admission, before profile membership.
+    /// @dev The enclosing profile must validate selectors and prove the complete lane partition.
+    /// This function grants no semantic authority and performs no destination write.
+    function admit(T.SuiteConfiguration memory destination, RH.Request memory request)
+        public
+        view
+        returns (Certificate memory c)
+    {
+        MH.Request memory selectors = request.records.authority;
         IStreamArtistHistory history = IStreamArtistHistory(destination.owners[2]);
         if (history.importedHistoryBindingCount() != 1) revert T.InvalidBinding();
         (c.prior,,,) = history.importedHistoryBinding(0);
@@ -106,19 +132,6 @@ library StreamArtistRecoveredHydrationAdmission {
                     || keccak256(abi.encode(actual.ownerState))
                         != keccak256(abi.encode(c.before_[i]))
             ) revert RH.InvalidRecoveredHydrationProvenance();
-        }
-        _partition(c, selectors);
-        for (uint256 i; i < c.artists.length; ++i) {
-            Original._lane(history, c.prior, 1, c.artists[i].artistId);
-            (, uint64 count) =
-                IStreamArtistHistory(c.prior).artistHistoryLane(1, c.artists[i].artistId);
-            if (count != c.artists[i].records.length) revert T.InvalidRecord();
-        }
-        for (uint256 i; i < c.collections.length; ++i) {
-            Original._lane(history, c.prior, 2, bytes32(c.collections[i].collectionId));
-            (, uint64 count) = IStreamArtistHistory(c.prior)
-                .artistHistoryLane(2, bytes32(c.collections[i].collectionId));
-            if (count != c.collections[i].records.length) revert T.InvalidRecord();
         }
     }
 
@@ -190,7 +203,8 @@ library StreamArtistRecoveredHydrationAdmission {
                     uint256 collection = StreamArtistMultipleHydrationOperations._collection(
                         selected.collections, row.collectionId
                     );
-                    c.collections[collection].records[collectionCounts[collection]++] = row.recordHash;
+                    c.collections[collection].records[collectionCounts[collection]++] =
+                    row.recordHash;
                     continue;
                 }
                 uint256 artist = StreamArtistMultipleHydrationOperations._artist(
@@ -207,10 +221,17 @@ library StreamArtistRecoveredHydrationAdmission {
             }
         }
     }
-    function _platformCollectionOnly(uint8 owner, H.Receipt memory row) private pure returns (bool) {
-        return owner == 4 && row.artistId == 0 && row.collectionId != 0
-            && (row.operation == 8 || row.operation == 9 || row.operation == 10
-                || row.operation == 11 || row.operation == 53);
-    }
 
+    function _platformCollectionOnly(uint8 owner, H.Receipt memory row)
+        private
+        pure
+        returns (bool)
+    {
+        return owner == 4 && row.artistId == 0 && row.collectionId != 0
+            && (row.operation == 8
+                || row.operation == 9
+                || row.operation == 10
+                || row.operation == 11
+                || row.operation == 53);
+    }
 }
