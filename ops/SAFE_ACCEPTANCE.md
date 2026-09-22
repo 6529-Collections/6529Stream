@@ -1,5 +1,7 @@
 # Safe compatibility acceptance
 
+The executable [current inventory and reconciler](../packages/stream-client/docs/safe-acceptance.md) records source, deployment, caller and per-call evidence gaps. Its frozen ABI176 report is not runtime acceptance.
+
 The owner explicitly requires Safe compatibility throughout Stream v1. This is
 an implementation and delivery requirement, owned by the integrator across all
 feature lanes. The normative wallet-class and material-action requirements in

@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "capture": {
+    "sourceCommit": "aa2ca4a2764ca981630c668966a665637692842d",
+    "inputSha256": "26559f3d1692afc1ffd92966bc3792848e55c6d5ab6f2bf5708f53a653b027d5",
+    "outputSha256": "9438e09e7d9c8fb6520c9ea299e1df3769c6a91434037a2ca1bf2965c8f5558e",
+    "settingsSha256": "315a88e73d23986ea2c3aafc5a1d0a07a40fe10198fdd411f806a1727d646389"
+  },
+  "qualification": "Two bounded source classifications and authored test candidates only. Testing supplied no certified current actual Safe execution. The rest of the inventory remains unclassified/uncovered.",
+  "deploymentBindings": [],
+  "classifications": [
+    {
+      "entryId": "f4cd988a28f616eddc3cf7017619818ac0e07b3114d5b6e6ca50e6ba658e773c",
+      "callerClass": "permissionless",
+      "route": "safe-call",
+      "callerSensitive": false,
+      "rationale": "Any caller may request deployment of an existing registered profile. Unknown profiles reject; wallet identity/runtime checks remain mandatory. The caller need not own a Stream role or be an individual Safe owner.",
+      "sourceRefs": [
+        {
+          "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
+          "sha256": "111a3f69c7b783db8c8715350a9e1a4930bc3e051123c94b03bacb962a4cd457",
+          "startLine": 251,
+          "endLine": 257
+        },
+        {
+          "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
+          "sha256": "111a3f69c7b783db8c8715350a9e1a4930bc3e051123c94b03bacb962a4cd457",
+          "startLine": 341,
+          "endLine": 389
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "authorized-safe",
+          "caller": "any threshold Safe with an existing registered split profile",
+          "outcome": "success",
+          "assertions": [
+            "wallet-profile-and-runtime",
+            "initialization-once",
+            "deployed-event"
+          ]
+        },
+        {
+          "id": "unknown-profile",
+          "caller": "threshold Safe with an unregistered split profile",
+          "outcome": "rejection",
+          "assertions": [
+            "unknown-profile-error",
+            "state-and-safe-nonce-atomicity"
+          ]
+        }
+      ]
+    },
+    {
+      "entryId": "8cebee619a7accc61a589180bdd9e489b73826012a5844bd458f160d11ae4d20",
+      "callerClass": "protocol-only",
+      "route": "safe-initiated-protocol",
+      "callerSensitive": true,
+      "author": "primary implementation agent",
+      "rationale": "Initialization requires the immutable initializing factory. The implementation is locked, and initialized clones reject repeats. A Safe may request factory.deployWallet, which creates and initializes the clone; it cannot initialize the clone directly. Factory/clone instance identity must be supplied before runtime evidence can cover either route.",
+      "sourceRefs": [
+        {
+          "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
+          "sha256": "4eef4bd003e8ad25014fdbef7433e139b2eeaae8ba185855ee85be6264030041",
+          "startLine": 66,
+          "endLine": 93
+        },
+        {
+          "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
+          "sha256": "111a3f69c7b783db8c8715350a9e1a4930bc3e051123c94b03bacb962a4cd457",
+          "startLine": 370,
+          "endLine": 390
+        }
+      ],
+      "independentReview": {
+        "reviewer": "independent inventory implementation agent",
+        "sourceRefs": [
+          {
+            "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
+            "sha256": "4eef4bd003e8ad25014fdbef7433e139b2eeaae8ba185855ee85be6264030041",
+            "startLine": 49,
+            "endLine": 59
+          },
+          {
+            "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
+            "sha256": "4eef4bd003e8ad25014fdbef7433e139b2eeaae8ba185855ee85be6264030041",
+            "startLine": 66,
+            "endLine": 93
+          },
+          {
+            "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
+            "sha256": "111a3f69c7b783db8c8715350a9e1a4930bc3e051123c94b03bacb962a4cd457",
+            "startLine": 370,
+            "endLine": 390
+          }
+        ],
+        "qualification": "Independent source review confirmed factory-only initializer, locked implementation, and factory-mediated clone initialization; no runtime acceptance."
+      },
+      "scenarios": [
+        {
+          "id": "enclosing-safe-workflow",
+          "caller": "threshold Safe initiates factory deployment; immutable factory initializes its predicted clone",
+          "outcome": "success",
+          "assertions": [
+            "clone-factory-profile-binding",
+            "initialization-once"
+          ]
+        },
+        {
+          "id": "direct-safe-rejection",
+          "caller": "threshold Safe calls wallet initializer directly",
+          "outcome": "rejection",
+          "assertions": [
+            "unauthorized-initializer-error",
+            "state-and-safe-nonce-atomicity"
+          ]
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "current-safe-template-wallet-deployment-source",
+      "kind": "source-reviewed",
+      "capture": {
+        "sourceCommit": "aa2ca4a2764ca981630c668966a665637692842d",
+        "inputSha256": "26559f3d1692afc1ffd92966bc3792848e55c6d5ab6f2bf5708f53a653b027d5",
+        "outputSha256": "9438e09e7d9c8fb6520c9ea299e1df3769c6a91434037a2ca1bf2965c8f5558e",
+        "settingsSha256": "315a88e73d23986ea2c3aafc5a1d0a07a40fe10198fdd411f806a1727d646389"
+      },
+      "entryId": "f4cd988a28f616eddc3cf7017619818ac0e07b3114d5b6e6ca50e6ba658e773c",
+      "testReference": {
+        "host": "test/current/StreamCurrentSafe.t.sol:StreamCurrentSafeTest",
+        "test": "testSafeArtistTemplateConsentAndPaidMintEscrowFlushAndClaim()",
+        "safeVersion": "1.4.1",
+        "threshold": 2,
+        "ownerCount": 2
+      },
+      "sourceRefs": [
+        {
+          "path": "test/current/StreamCurrentSafe.t.sol",
+          "sha256": "e6a76fc0c6026ea5eb973ad160d4a3b52b2f758e692e0a5a6b700c1e32e53141",
+          "startLine": 16,
+          "endLine": 25
+        },
+        {
+          "path": "test/current/StreamCurrentSafe.t.sol",
+          "sha256": "e6a76fc0c6026ea5eb973ad160d4a3b52b2f758e692e0a5a6b700c1e32e53141",
+          "startLine": 101,
+          "endLine": 138
+        }
+      ],
+      "qualification": "Real source calls the factory through an official 1.4.1 Safe and later checks exact escrow/wallet balances. It configures two owners with threshold two, not the baseline two-of-three. No retained current execution receipt was certified by Testing; the complete required initialization/event scenarios are not inferred."
+    },
+    {
+      "id": "wallet-initializer-restriction-authored-candidate",
+      "kind": "authored-only",
+      "capture": {
+        "sourceCommit": "aa2ca4a2764ca981630c668966a665637692842d",
+        "inputSha256": "26559f3d1692afc1ffd92966bc3792848e55c6d5ab6f2bf5708f53a653b027d5",
+        "outputSha256": "9438e09e7d9c8fb6520c9ea299e1df3769c6a91434037a2ca1bf2965c8f5558e",
+        "settingsSha256": "315a88e73d23986ea2c3aafc5a1d0a07a40fe10198fdd411f806a1727d646389"
+      },
+      "entryId": "8cebee619a7accc61a589180bdd9e489b73826012a5844bd458f160d11ae4d20",
+      "testReference": {
+        "host": "test/unit/revenue/StreamSplitWallet.t.sol:StreamSplitWalletTest",
+        "test": "testDeployWalletIsDeterministicIdempotentAndInitializesOnce()"
+      },
+      "sourceRefs": [
+        {
+          "path": "test/unit/revenue/StreamSplitWallet.t.sol",
+          "sha256": "63a53e00d0dedc24a69507b90dd8aa709045a086fabcd6c63fb4a1402fd88fa4",
+          "startLine": 423,
+          "endLine": 451
+        }
+      ],
+      "qualification": "Real source asserts UnauthorizedInitializer and AlreadyInitialized with an ordinary caller and a pranked factory. This is not an actual Safe rejection test and has no authenticated runtime record joined here."
+    }
+  ]
+}
