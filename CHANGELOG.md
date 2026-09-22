@@ -1,5 +1,15 @@
 # Changelog
 
+## Scoped preservation publication capacity
+
+- Move complete snapshot source/payload assembly and exact retained-reference
+  scope checks into fixed linked workers. Preserve V1/V2 public interfaces,
+  storage, full source/record hashes, authorization and failure order. Both
+  formerly oversized publication families now fit the original runtime limit
+  in the focused capture; full-flow gas and current-stack acceptance remain
+  separate. Add six retained-history regression tests, including 256 fuzz
+  inputs. See the [capacity guide](docs/guides/scoped-publication-capacity.md).
+
 ## Complete client test sharding
 
 - Add bounded client test planning, native execution and coverage verification

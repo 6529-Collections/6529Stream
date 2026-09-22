@@ -28,16 +28,15 @@ import {
     IStreamCollectionMetadataV1 as Metadata
 } from "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import {
-    IStreamSchemaRegistry as Schema
-} from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
-import {
     StreamScopedPreservationPolicySnapshotSourceReadsV1 as Sources
 } from "../records/StreamScopedPreservationPolicySnapshotSourceReadsV1.sol";
 import {
     StreamScopedPreservationPolicySnapshotDefinitionsV1 as Definitions
 } from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV1.sol";
+import {
+    StreamScopedPreservationSnapshotAssemblyV1 as Assembly
+} from "../records/StreamScopedPreservationSnapshotAssemblyV1.sol";
 import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
-import { StreamWorkRecordContext as Documents } from "../records/StreamWorkRecordContext.sol";
 import { StreamRecordFamilies as Families } from "../records/StreamRecordFamilies.sol";
 import {
     StreamFinalityRouterEvidence as Reads
@@ -408,48 +407,7 @@ abstract contract StreamScopedPreservationPolicySnapshotPublicationKernel is
         returns (bytes32 hash, bytes memory canonical)
     {
         S.Dependencies memory d = dependencies();
-        _definitions(d);
-        S.Source memory f = Sources.current(d, p, _family);
-        hash = Sources.sourceHash(d, f, _family);
-        r.sourceHash = hash;
-        p.expectedSourceHash = 0; // The actual hash is present in receipt/source; no preview circularity.
-        canonical = abi.encode(
-            SnapshotFamilies.payloadDomain(_family, true),
-            d.chainId,
-            address(this),
-            d.targets,
-            d.codeHashes,
-            p,
-            r,
-            f
-        );
-        if (canonical.length > 524288) revert S.InvalidScopedPolicySnapshot();
-    }
-
-    function _definitions(S.Dependencies memory d) private view {
-        Documents.Dependencies memory known;
-        for (uint256 i; i < 4; ++i) {
-            known.targets[i] = d.targets[i];
-            known.codeHashes[i] = d.codeHashes[i];
-        }
-        known.chainId = d.chainId;
-        known.readGas = d.readGas;
-        bytes32[3] memory ids = SnapshotFamilies.ids(_family, true);
-        bytes32[3] memory hashes = SnapshotFamilies.hashes(_family, true);
-        uint256[3] memory sizes = SnapshotFamilies.lengths(_family, true);
-        for (uint256 i; i < 3; ++i) {
-            Documents.definition(
-                known,
-                ids[i],
-                i == 0
-                    ? Schema.DocumentKind.SCHEMA
-                    : i == 1 ? Schema.DocumentKind.CATALOG : Schema.DocumentKind.CANONICALIZATION,
-                hashes[i],
-                sizes[i],
-                keccak256("RAW_BYTES"),
-                true
-            );
-        }
+        return Assembly.assemble(d, p, r, _family);
     }
 
     function _head(bytes32 subject) private view returns (bytes32) {

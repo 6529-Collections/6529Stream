@@ -13,6 +13,9 @@ import {
     StreamScopedPreservationPolicyReferenceTypesV1 as T
 } from "../../interfaces/stream/preservation/StreamScopedPreservationPolicyReferenceTypesV1.sol";
 import {
+    StreamScopedPreservationReferenceRecordsHistoryV1 as History
+} from "./StreamScopedPreservationReferenceRecordsHistoryV1.sol";
+import {
     StreamReferenceRenderTypes as R
 } from "../../interfaces/stream/preservation/StreamReferenceRenderTypes.sol";
 import {
@@ -584,10 +587,7 @@ abstract contract StreamScopedPreservationPolicyReferencePublicationBase is
 
     function _requireExactScope(bytes32 hash, StreamFinalityScope memory scope) private view {
         if (hash == 0) return;
-        T.Publication memory p = Records.publication(_publications[hash]);
-        if (keccak256(abi.encode(p.scope)) != keccak256(abi.encode(scope))) {
-            revert T.InvalidScopedPolicyReference();
-        }
+        History.requireExactScope(_publications[hash], scope);
     }
 
     function _subject(StreamFinalityScope memory scope) private view returns (bytes32) {
