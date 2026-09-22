@@ -7,8 +7,10 @@ collections described below. It does not create an Artist, binding, acceptance,
 corrective generation, or native receipt for an unbound collection.
 
 The implementation is source/type-checked. Ten actual-producer/Safe scenarios are
-authored but have not run. Bytecode capacity, linked-call gas, current-stack
-execution and deployment acceptance remain pending.
+authored but have not run. Native templates for the nineteen new libraries fit
+across the two bounded captures described below. Capacity of the seven owners and five changed existing
+workers, linked-call gas, current-stack execution and deployment acceptance remain
+pending.
 
 ## Transport and selection
 
@@ -25,7 +27,7 @@ The semantic tag is
 `keccak256("6529STREAM_ARTIST_UNBOUND_PLATFORM_HYDRATION_V1")`, version 1.
 `UNBOUND_PLATFORM` is bit 4194304 in the shared extended-feature vocabulary.
 This profile accepts that bit together with the original recovered base bits
-0â€“4 only; its maximum mask is 4194335. It does not set `MULTIPLE_BASE` and does
+0-4 only; its maximum mask is 4194335. It does not set `MULTIPLE_BASE` and does
 not extend any old profile's allowed mask. Each of the seven guarded owners
 explicitly advertises the new implemented bit. Original RH structures, public
 selectors, operation matrices and stored owner roots remain unchanged.
@@ -102,7 +104,7 @@ complete Platform migration for every full-v1 history.
 ## Authored regression scope
 
 The ten new cases cover declaration-only zero-principal import; both original
-claim families and governed dismissal; unused correction approval; Aâ†’Bâ†’C with
+claim families and governed dismissal; unused correction approval; A -> B -> C with
 fresh claims and preserved replay; mixed recovered-Artist import; omission of
 an ordinary subject; Archive-only field tampering; missing native/replay rows;
 invented timing/nonces; and late Archive rollback with identical Safe retry.
@@ -119,3 +121,30 @@ the exact predecessor plus shared feature-recognition dependency, all twelve
 modified original products retain their 824 ABI entries, method maps and
 recursive storage layouts. These checks are source compatibility evidence,
 not native execution, gas, capacity or release acceptance.
+
+## Initial native capacity evidence
+
+The first native Solidity 0.8.19 capture used exact integrated source
+`66dc4a308f6a1c1b93187d7295554062d900b5fa`, including the retained Consent
+constructor-size repair. It selected only the eighteen new libraries from 508
+source inputs, with viaIR, optimizer 200, Paris, and no CBOR metadata. Compilation
+completed in 228.557 seconds. Seventeen libraries fit; CollectionRows was 24,987
+runtime bytes, exceeding the unchanged 24,576-byte limit by 411 bytes. That
+original result is retained.
+
+The capacity successor moves only CollectionRows' replay-alias validator to the
+fixed linked `StreamArtistUnboundPlatformReplayRows` library. Its era lookup and
+error body are copied exactly. All three call positions, arguments, checks and
+error order remain unchanged; there are no caller-memory writes to return. A
+whole-file inverse proves the host change, and the host ABI, method identifiers
+and recursive storage output remain exact. The original ten test bodies are
+unchanged.
+
+The pair-only native successor completed in 29.756 seconds from 509 source
+inputs. CollectionRows is 23,981 runtime / 24,014 creation bytes; ReplayRows is
+2,778 / 2,810. Both are libraries without constructor arguments. The genuine
+outputs retain their own source ASTs, full bytecode fields, source metadata joins
+and declared links. These are native template sizes, not independently observed
+deployments, measured linked-call gas, or execution of the ten actual scenarios.
+The remaining seven owners and five changed existing workers have a separate
+finite sizing plan; their capacity has not been inferred from these libraries.

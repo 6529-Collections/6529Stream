@@ -53,6 +53,10 @@ import {
     StreamArtistUnboundPlatformAccounting as Accounting
 } from "./StreamArtistUnboundPlatformAccounting.sol";
 
+import {
+    StreamArtistUnboundPlatformReplayRows as ReplayRows
+} from "./StreamArtistUnboundPlatformReplayRows.sol";
+
 /// @notice Complete accepted-generation-one collection rows with global owner clocks and guards.
 library StreamArtistUnboundPlatformCollectionRows {
     struct AttributionRow {
@@ -125,7 +129,7 @@ library StreamArtistUnboundPlatformCollectionRows {
                             new T.CollaboratorRecord[](0)
                         ) != q.bindingHash
                 ) _invalid();
-                guards(
+                ReplayRows.validate(
                     p,
                     j,
                     keccak256("binding_lifecycle.replay.proposal_key"),
@@ -143,7 +147,7 @@ library StreamArtistUnboundPlatformCollectionRows {
                 RH.JournalEntry memory j = occurrence(p, q, 2, b.record);
                 ++counts[era(p, j.position.point.environmentHash)];
                 ++records;
-                guards(
+                ReplayRows.validate(
                     p, j, keccak256("acceptance_lifecycle.replay.record_uniqueness"), 0, b.record
                 );
             } else if (owner == 4) {
@@ -173,7 +177,7 @@ library StreamArtistUnboundPlatformCollectionRows {
                     RH.JournalEntry memory j = occurrence(p, q, 14, b.records[k]);
                     ++counts[era(p, j.position.point.environmentHash)];
                     ++records;
-                    guards(
+                    ReplayRows.validate(
                         p,
                         j,
                         keccak256("consent_finality.replay.policy_consent_key"),
@@ -253,35 +257,6 @@ library StreamArtistUnboundPlatformCollectionRows {
         }
         _invalid();
         return 0;
-    }
-
-    function guards(
-        RH.OwnerProvenance memory p,
-        RH.JournalEntry memory j,
-        bytes32 surface,
-        bytes32 scope,
-        bytes32 record
-    ) private pure {
-        uint256 start = era(p, j.position.point.environmentHash);
-        bytes32 actualScope = scope;
-        for (uint256 e = start; e < p.eras.length; ++e) {
-            uint256 matches;
-            for (uint256 i; i < p.aliases.length; ++i) {
-                RH.ReplayAlias memory a = p.aliases[i];
-                if (
-                    a.originHash != p.eras[e].originHash || a.surface != surface
-                        || a.cell.commitment != record
-                ) continue;
-                if (actualScope == 0) actualScope = a.scope;
-                if (
-                    a.scope == 0 || a.scope != actualScope || a.cell.kind != 1 || a.cell.status != 2
-                        || keccak256(abi.encode(a.admittedAt))
-                            != keccak256(abi.encode(j.position.point))
-                ) _invalid();
-                ++matches;
-            }
-            if (matches != 1) _invalid();
-        }
     }
 
     function _invalid() private pure {
