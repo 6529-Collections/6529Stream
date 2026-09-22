@@ -11,6 +11,10 @@
 - Use the adopted semantic-review relation and datatype. Keep semantic
   eligibility local to each exact assertion selector so an unselected malformed
   sibling cannot suppress a valid assertion from the same native original.
+- Add a portable public Artist review dossier that retains full original native
+  source transcripts, selected reviews and attributed statements. Offline
+  verification replays the concrete readers and compares every package byte.
+  See the [Artist review dossier guide](docs/museum-native-artist-review-dossier.md).
 
 ## Dispute history library deployment size
 
