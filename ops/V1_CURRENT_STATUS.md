@@ -18,66 +18,57 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-ABI173 checks all **4,275 Solidity sources** at `d61a1246` with zero errors
-in 51.094 seconds. Production source last changed at `d61a1246`. The broader
-runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
+ABI176 checks all **4,279 Solidity sources** at `aa2ca4a2` with zero errors
+in 50.297 seconds. Contract source last changed at `d61a1246`; client and Museum
+source now includes `0a5104e6`. The new combined runtime campaign uses the fixed
+`aa2ca4a2` snapshot. Earlier `ea4cf6b0` results retain their original scope.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
 All **29 original preservation deployment-size repairs** are source integrated.
-The final five facades and seventeen workers (`22850ba4`) fit their selected
-native capture, with 32 regression cases authored. This resolves that specific
-list. The separate Registry Writer deployment helper is also repaired
-(`d61a1246`): all six selected products fit, including its 24,277-byte runtime.
-Thirteen focused transport/creation tests are authored; their execution and
-latest full-system sizing remain.
+The separate Registry Writer repair also fits its selected native build and now
+passes 13 focused tests, including 256 fuzz inputs. These use a recording
+Coordinator and do not establish complete Artist-history or launch acceptance.
+Eight scoped preservation worker tests pass at `d61a1246`; their independent
+creation-trace review is finishing. The remaining 24 run on the new snapshot.
 
-Complete supported multiple-Artist consent/attestation recovery is now source
-integrated (`9670c1e3`). Its 32 selected production products fit; ten actual-owner
-and Safe scenarios are authored but unexecuted. The previously found scope
-projection and compiler stack defects are repaired. Multiple accepted binding
-generations are the next implementation batch. Independent review also found
-an inherited replay-point memory alias. Its explicit-copy correction and
-original-producer regression are integrated (`a1db609e`); execution is pending.
+Complete supported multiple-Artist consent/attestation recovery is source
+integrated (`9670c1e3`), with ten actual-owner/Safe cases still awaiting execution.
+Its replay-point alias correction is integrated (`a1db609e`). Multiple accepted
+binding generations are being built. Review found and corrected repeated
+economics and sale terms across generations; the composed post-import dispatch
+is being reviewed before integration. This new profile is not yet accepted.
 
-The matching MULTIPLE_CONSENTS client (`9a1a3d29`) has 112 distinct producer
-pure/oracle/mocked-workflow passes and independent review. Root build, strict
-types and all 28 new pure/oracle cases also pass. All-call actual Safe
-execution remains separate. Aggregate attestation clients and original guardian
-administration/two-sided rotation callers are being built in parallel.
+The aggregate attestation client is integrated (`4fd80175`): build, strict types
+and 30 focused root tests pass; 151 distinct producer pure/oracle/mocked-workflow
+cases retain their recorded source. Guardian administration and two-sided wallet
+rotation are integrated (`708a97ae`), with 57 independently passing client tests.
+Two masked negative tests were corrected; root build, strict types and those
+two targeted cases pass. Actual all-call Safe execution remains separate.
 
-All ten owner-record Museum families are source integrated (`965608f3`), with
-**36 focused root tests passing**. Historical claims, unresolved authority and
-unknown future records remain explicit. Native VIEW file-role semantics are
-also integrated (`679936f0`), with 30 focused root tests passing. Positive
-same-object ZIP/PNG receipt coverage is a separate successor in progress.
-Actual public-chain and institutional acceptance remain incomplete.
+All ten owner-record Museum families and native VIEW file roles retain their
+36- and 30-test root results. Eight positive ZIP/PNG receipt tests now pass.
+Explicit exhibition-to-Place/TGN source binding is integrated (`0a5104e6`): 18
+distinct producer cases and three focused integrated regressions pass. The
+original declaration, its publication order and the account's review remain
+separate from the owner's reference. These are synthetic/offline tests, not
+public-chain or institutional acceptance.
 
-The original fixed-source campaign now has nine passing SetupPlans EVM tests
-and six passing plain Scoped preservation cases. These use their recorded
-boundaries; the original SetupPlans fixture aliases two appended class entries
-to zero and does not prove distinct class coverage. The Scoped result is six
-of 22 authored cases. Fourteen fixed-slot creation/rollback tests also pass
-at producer `e618da09`, source integrated as `bb5e3ff3`.
+The test import refactor is integrated without dropping the original 50
+Owner/Genesis cases or their concrete artifact obligations. Two exposed import
+dependencies were repaired before ABI176 passed. The new snapshot has two
+passing URI regression cases. Prepared caller hosts compile with all 90 original
+concrete obligations retained; complete Scenario/export/bootstrap runtime is
+still pending. Earlier nine SetupPlans and six plain Scoped passes remain tied
+to their original sources; corrected distinct action-class coverage is pending.
 
-The import-light caller interface and retained concrete source root are
-integrated (`fd403c4b`, `8c1b0d04`). Their three native hosts compile in 38.371
-seconds of codegen/metadata after the prior 900-second timeout, retaining all
-90 original concrete artifact obligations. This is a build result; complete
-Scenario preparation and export/bootstrap execution are still pending.
-Owner/Genesis test import reductions continue without dropping original cases.
-
-The earlier `ea4cf6b0` campaign qualified 983 library products plus 243 reusable
-products. Further groups have 29 support and 60 additional native/physical
-outputs. These are build artifacts, not executed tests. Original refused and
-timed-out contexts remain retained, including the oversized Writer wrapper.
-
-Remaining delivery includes broader Artist recovery combinations, missing
-original client families, museum semantic/source joins, current-stack/all-call
-Safe execution, fuzz/stateful campaigns, deployment and transaction gas, full
-CI, source freeze and matching testnet. Collector cold paid-mint optimization
-remains an isolated prototype with measured component tradeoffs. Held proposals
-remain unapplied. Immutable RC1/main/release/Sepolia `569bf87f` is unchanged.
-No funding or on-chain action is needed for the present coding.
+Remaining delivery includes broader Artist recovery combinations, original
+attribution/collaborator callers, Museum physical/institutional source joins,
+current-stack and all-call Safe execution, fuzz/stateful campaigns, deployment
+and transaction gas, complete CI, source freeze and matching testnet. Collector
+cold paid-mint optimization remains isolated; component savings do not satisfy
+the complete 500,000-gas purchase requirement. Held proposals remain unapplied.
+Immutable RC1/main/release/Sepolia `569bf87f` is unchanged. No funding or on-chain
+action is needed for the present coding.
 
 ## Earlier source-specific evidence
 

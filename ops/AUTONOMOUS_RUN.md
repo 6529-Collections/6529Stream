@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | ABI173 `d61a1246`:4,275 sources/zero errors; production `d61a1246`; broad runtime retains `ea4cf6b0`. |
+| Source checkpoint | ABI176 `aa2ca4a2`: 4,279 sources / zero errors; contract source `d61a1246`; latest client/Museum `0a5104e6`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,41 +29,42 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 22 September
 
-ABI173 checks all **4,275 Solidity sources** at `d61a1246` with zero errors
-in 51.094 seconds. Production source last changed at `d61a1246`. The broader
-runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
+ABI176 checks all **4,279 Solidity sources** at `aa2ca4a2` with zero errors
+in 50.297 seconds. Contract source last changed at `d61a1246`; client and Museum
+source now includes `0a5104e6`. The new combined runtime campaign uses the fixed
+`aa2ca4a2` snapshot. Earlier `ea4cf6b0` results retain their original scope.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
-Root owns architecture, integration and delivery. Coherent source batches are
-integrated while fixed-source tests run; implementation and runtime acceptance
-remain distinct. All29 original preservation repairs are integrated.
+Root owns architecture, integration and delivery. Builders keep implementing
+while fixed-source tests run; source integration and runtime acceptance remain
+separate. Current assignments:
 
-- Build MULTIPLE_GENERATIONS complete accepted-generation chronology/consents/op24/global grants; deliver original Point alias correction separately. No WriterExtension overlap.
-- Independently review Artist chronology and alias correction; review bounded SetupPlans9 source/trace qualification. No compiler or duplicate broad inventory.
-- Writer repair0d98 integratedd61; all6 selected products fit. Execute13 focused transport/creation tests while preserving original actor/constructor/CREATE; no full history compile.
+- **artist history resume**: Compose multiple-generation recovery, including original producer/Safe regressions, repeated economics/sale terms and post-import currentness. One finite native production capture; no whole-graph compile.
+- **release evidence review**: Independently review the final multiple-generation dispatch/currentness delta and actual regression cases; preserve the identified earlier routing defect.
+- **remote delivery review**: Implement the specifically missing STATIC transitive-analysis/golden support after checking the existing source gap; separate offchain tooling, no duplicate compiler.
+- **Mint / independent review**: Generation consent source 872491a/c4b9 has 29 reviewed authored cases. Own its focused native/EVM execution; coordinate exact production reuse with Artist.
+- **Burn / preservation ceremony**: Six original cases pass. Execute remaining 16 at aa2ca4a2 with the current guards and exact production closure; Collector component review is complete.
+- **Museum**: Geography 08718085 is integrated and reviewed; build the missing authoritative physical-event source joins without inferring title or custody from NFTs.
+- **Clients / Safe callers**: Aggregate attestation client is integrated. Build original attribution operations 10, 44–50 and 61, including exact governed versus ordinary call paths.
+- **Testing / native tooling**: Run current Owner/Genesis and corrected SetupPlans cases on aa2ca4a2. URI2 passes; retain all 50 original cases and the 65/18/84 concrete obligations.
+- **Capacity / Rights**: NativeWorkers8 passes at d61a1246; finish its existing trace review. Prepare remaining24 on aa2ca4a2 with quiet behavioral output and bounded representative traces.
+- **Metric retention**: Guardian operations28–32 and corrected tests are integrated. Build original PRIMARY_ONLY collaborator operations5–7 in disjoint client files.
+- **Prepared / successor preservation**: Four caller/helper native outputs qualify at aa2ca4a2. Complete Scenario, prestate/export and bootstrap using all90 original concrete obligations.
+- **Collector gas redesign**: Measure actual full cold paid mint on the isolated envelope prototype; current exact necessary production closure and changed host capture remain pending. No production adoption.
 
-- Mint fixedSlot e618 integrated bb5; 14 actual passes and independent runtime review clear. Prepared e474 native/physical independent review is clear. Build disjoint generation-consent worker slice under Artist lead exact interface; shared writers remain Artist-owned.
-- Six of22 preservation cases pass at original a087; remaining16 await exact successor dependencies. Independently review isolated Collector envelope and gas tradeoffs; no unchanged rerun.
-- All10 owner families21ef integrated965608; root36 pass. Native VIEW successor d9eb integrated679936f with30root passes and independent source review. Build positive received ZIP/PNG tests, then explicit exhibition/place authority join.
-- 7c MULTIPLE_CONSENTS integrated9a1a3d,112 distinct producer cases reviewed. Build complete MULTIPLE_ATTESTATIONS client from bd4/ABI12; own shared index and coordinate disjoint guardian module.
-- ea4 SetupPlans9 EVM pass with fixture qualification; support29 and remaining60 physical owners complete. Build faithful Owner/Genesis import reductions, preserving all original50/65/18/84 obligations; no identical compiler retry.
-- Final five facades+17workers6f2b integrated22850ba;22 native products fit/32 cases authored. Worker guidec82a integratede302. Execute independent NativeWorkers8 atd61; remaining24 await shared fixture import join. Do not retry or relay denied handoff.
-- Capacity independent reviews and finality/STATIC source-gap mapping complete. Build disjoint original guardian administration/two-sided rotation client ops28–32 with Client lead; no Solidity edits.
-- 07cf/e474 integratedfd403/8c1b; three genuine native hosts compile38.371s and physical serialize, original90 obligations retained. Reduce only faithful Scenario-local imports; coordinate Testing catalogs. Full runtime still pending.
-- Isolated evidence envelope8ccc has9 tests/256fuzz and40 cold component executions. Sparse/dense savings, raw fallback and cold-read tradeoffs retained; Burn review ongoing. No production adoption or complete500k purchase claim.
+Compiler maximum remains 20; use assigned bounded captures and release finished
+slots. Preserve failed captures and avoid unchanged retries. Production runtime,
+full initcode and transaction limits remain unchanged. Do not retry or relay
+the separately denied Capacity handoff.
 
-Compiler maximum remains20. Use only assigned bounded captures, release
-finished slots, preserve failures and avoid unchanged retries. Existing current
-profile large-test allowance applies only to fixtures; production runtime/init
-and constructor arguments retain their limits.
-
-Remaining delivery includes broader Artist recovery combinations, missing
-original client families, museum semantic/source joins, current-stack/all-call
-Safe execution, fuzz/stateful campaigns, deployment and transaction gas, full
-CI, source freeze and matching testnet. Collector cold paid-mint optimization
-remains an isolated prototype with measured component tradeoffs. Held proposals
-remain unapplied. Immutable RC1/main/release/Sepolia `569bf87f` is unchanged.
-No funding or on-chain action is needed for the present coding.
+Remaining delivery includes broader Artist recovery combinations, original
+attribution/collaborator callers, Museum physical/institutional source joins,
+current-stack and all-call Safe execution, fuzz/stateful campaigns, deployment
+and transaction gas, complete CI, source freeze and matching testnet. Collector
+cold paid-mint optimization remains isolated; component savings do not satisfy
+the complete 500,000-gas purchase requirement. Held proposals remain unapplied.
+Immutable RC1/main/release/Sepolia `569bf87f` is unchanged. No funding or on-chain
+action is needed for the present coding.
 
 ## Earlier source-specific assignments
 

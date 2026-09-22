@@ -16,42 +16,51 @@ different milestones.
 
 ## Latest integration checkpoint: 22 September
 
-ABI173 checks all **4,275 Solidity sources** at `d61a1246` with zero errors
-in 51.094 seconds. Production source last changed at `d61a1246`. The broader
-runtime campaign remains on `ea4cf6b0`; its passes do not accept later changes.
+ABI176 checks all **4,279 Solidity sources** at `aa2ca4a2` with zero errors
+in 50.297 seconds. Contract source last changed at `d61a1246`; client and Museum
+source now includes `0a5104e6`. The new combined runtime campaign uses the fixed
+`aa2ca4a2` snapshot. Earlier `ea4cf6b0` results retain their original scope.
 Expanded full v1 remains incomplete and is not a frozen release candidate.
 
 All **29 original preservation deployment-size repairs** are source integrated.
-The final five facades and seventeen workers (`22850ba4`) fit their selected
-native capture, with 32 regression cases authored. This resolves that specific
-list. The separate Registry Writer deployment helper is also repaired
-(`d61a1246`): all six selected products fit, including its 24,277-byte runtime.
-Thirteen focused transport/creation tests are authored; their execution and
-latest full-system sizing remain.
+The separate Registry Writer repair also fits its selected native build and now
+passes 13 focused tests, including 256 fuzz inputs. These use a recording
+Coordinator and do not establish complete Artist-history or launch acceptance.
+Eight scoped preservation worker tests pass at `d61a1246`; their independent
+creation-trace review is finishing. The remaining 24 run on the new snapshot.
 
-Complete supported multiple-Artist consent/attestation recovery is now source
-integrated (`9670c1e3`). Its 32 selected production products fit; ten actual-owner
-and Safe scenarios are authored but unexecuted. The previously found scope
-projection and compiler stack defects are repaired. Multiple accepted binding
-generations are the next implementation batch. Independent review also found
-an inherited replay-point memory alias. Its explicit-copy correction and
-original-producer regression are integrated (`a1db609e`); execution is pending.
+Complete supported multiple-Artist consent/attestation recovery is source
+integrated (`9670c1e3`), with ten actual-owner/Safe cases still awaiting execution.
+Its replay-point alias correction is integrated (`a1db609e`). Multiple accepted
+binding generations are being built. Review found and corrected repeated
+economics and sale terms across generations; the composed post-import dispatch
+is being reviewed before integration. This new profile is not yet accepted.
 
-The matching MULTIPLE_CONSENTS client (`9a1a3d29`) has 112 distinct producer
-pure/oracle/mocked-workflow passes and independent review. Root build, strict
-types and all 28 new pure/oracle cases also pass. All-call actual Safe
-execution remains separate. Aggregate attestation clients and original guardian
-administration/two-sided rotation callers are being built in parallel.
+The aggregate attestation client is integrated (`4fd80175`): build, strict types
+and 30 focused root tests pass; 151 distinct producer pure/oracle/mocked-workflow
+cases retain their recorded source. Guardian administration and two-sided wallet
+rotation are integrated (`708a97ae`), with 57 independently passing client tests.
+Two masked negative tests were corrected; root build, strict types and those
+two targeted cases pass. Actual all-call Safe execution remains separate.
 
-All ten owner-record Museum families are source integrated (`965608f3`), with
-**36 focused root tests passing**. Historical claims, unresolved authority and
-unknown future records remain explicit. Native VIEW file-role semantics are
-also integrated (`679936f0`), with 30 focused root tests passing. Positive
-same-object ZIP/PNG receipt coverage is a separate successor in progress.
-Actual public-chain and institutional acceptance remain incomplete.
+All ten owner-record Museum families and native VIEW file roles retain their
+36- and 30-test root results. Eight positive ZIP/PNG receipt tests now pass.
+Explicit exhibition-to-Place/TGN source binding is integrated (`0a5104e6`): 18
+distinct producer cases and three focused integrated regressions pass. The
+original declaration, its publication order and the account's review remain
+separate from the owner's reference. These are synthetic/offline tests, not
+public-chain or institutional acceptance.
 
-[Current delivery status](V1_CURRENT_STATUS.md) records the exact source and
-execution boundaries. Build outputs are not test or completion counts.
+The test import refactor is integrated without dropping the original 50
+Owner/Genesis cases or their concrete artifact obligations. Two exposed import
+dependencies were repaired before ABI176 passed. The new snapshot has two
+passing URI regression cases. Prepared caller hosts compile with all 90 original
+concrete obligations retained; complete Scenario/export/bootstrap runtime is
+still pending. Earlier nine SetupPlans and six plain Scoped passes remain tied
+to their original sources; corrected distinct action-class coverage is pending.
+
+[Current delivery status](V1_CURRENT_STATUS.md) records remaining work and exact
+source boundaries. Build outputs are not test or completion counts.
 
 ## How to read this document
 
@@ -85,14 +94,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `d61a124697764e9a736285d447d324a3fd8b0368`; production `d61a1246`. Broader runtime remains fixed at `ea4cf6b0`. |
+| Current integration source | `0a5104e6e4c3442e5298c33404ddbc6ea5e0951f`; contract source `d61a1246`. Active combined runtime snapshot `aa2ca4a2`; earlier evidence remains source-specific. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | Original `57ac8d04`; composition `65312baa` adds 24 focused root passes, actual RPC pending; MUSEUM-36. |
-| Latest broad cheap compilation evidence | ABI173:4,275 sources at `d61a1246`, zero errors in51.094s; type/ABI/storage/method IDs only. |
+| Latest broad cheap compilation evidence | ABI176: 4,279 sources at `aa2ca4a2`, zero errors in 50.297s; type/ABI/storage/method IDs only. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 passes all 12 original cases at frozen `eda052c7`, including one 256-run fuzz case, with independent native creation/link/caller review. This does not accept the later complete graph. |
 
@@ -308,8 +317,8 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-20](#museum-20-evidence) Field-level crosswalk, semantic validation and full coverage accounting | In progress | Partly tested | Partial | Closed schema inventory, exact scalar/array/null/absence accounting, pinned class/domain/range, v2 abstract/visual/linguistic/E73 distinctions and explicit unsupported sidecars. Full requirements are larger than this implemented subset. **Remaining:** All named source families, physical realizations, complete dimensions/media and geographic patterns, exact reverse mapping and named vectors for every required crosswalk entry remain. |
 | [MUSEUM-21](#museum-21-evidence) Attributed assertions, review and conflict selection | In progress | Partly tested | Integrated* | Immutable assertion/revision/profile/field selectors, exact earlier review targets, source-selected conflict withholding, provenance indexes and explicit same-account SELF review. Actual independent-account recorded profile works. **Remaining:** General independent institutional reviewer eligibility and cross-authority actual source policy, not just SELF/account lanes, remain. No arbitrary reviewer label/list grants authority. |
 | [MUSEUM-22](#museum-22-evidence) External authority matching and archived reconciliation | In progress | Partly tested | Partial | fef4b2f6 adds retained authority snapshots/reconciliation; 8ba023dc adds versioned Type/declaration/continuation support, preserves original schema hashes, and replays an actual local Safe declaration/alignment/later SELF review. Root 131 authority/profile/regression tests pass. **Remaining:** Qualified external/artist/curator/institution lanes, full conformance and public/latest-graph acceptance. The positive RDF/JSON remains explicitly synthetic; separately retained Getty SPARQL bytes do not prove publisher-backed equivalence. |
-| [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | In progress | Partly tested | Not integrated | Nine-role qualified geography draft projection integrated87f844eb, with historic/uncertainty/precision controls. **Remaining:** Authenticated authority/reviewer and recorded-source joins. Unverified draft matches cannot emit equivalence. |
-| [MUSEUM-24](#museum-24-evidence) File roles, observed ingest and physical-event relationships | In progress | Partly tested | Partial | Distinct carriers, original/derived resources and named activities; explicit local preservation observations and evidence links. Planned/cancelled/unknown activities are withheld from performed graph output. Native VIEW reference/file-role semantics `679936f0` add ten occurrence-specific roles, original-history/authority retention and complete source-based package replay;30 root tests pass. **Remaining:** Positive same-object ZIP/PNG receipt coverage, complete physical production/custody/accession/title relations, all described/received/verified source joins and actual website safety-scan parity. The current positive fixtures are synthetic. |
+| [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | In progress | Partly tested | Not integrated | Nine-role draft projection retains historic/uncertainty/precision controls. Recorded exhibition binding (`0a5104e6`) replays the exact original owner location commitment and earlier Place declaration, retaining separate TGN review authority; 18 distinct producer and three root regressions pass on synthetic originals. **Remaining:** Other recorded place-role joins, actual source/reviewer capture and complete conformance. Unverified draft matches cannot emit equivalence. |
+| [MUSEUM-24](#museum-24-evidence) File roles, observed ingest and physical-event relationships | In progress | Partly tested | Partial | Distinct carriers, original/derived resources and named activities; explicit local preservation observations and evidence links. Planned/cancelled/unknown activities are withheld from performed graph output. Native VIEW reference/file-role semantics `679936f0` add ten occurrence-specific roles, original-history/authority retention and complete source-based package replay;30 root tests pass. Eight integrated positive same-object ZIP/PNG receipt cases also pass (`f26e0d43`). **Remaining:** Complete physical production/custody/accession/title relations, other described/received/verified source joins and actual website safety-scan parity. Positive fixtures remain synthetic. |
 | [MUSEUM-25](#museum-25-evidence) Deterministic recorded export and database-free offline replay | In progress | Tested* | Integrated* | Bounded deterministic package partitions, exact original source/transcript/schema bytes, pinned block/read scope, hashes, dependency resolution, whole-package recomputation, public-disclosure refusal and immutable derivatives work for named finite profiles. Compact immutable V3 export 23477832 now has actual class-6 Safe ARCHIVE publication and offline replay; all 27 root tests and independent artifact review pass. Scoped collection dossier a0d71d2 adds selected-media and offline package integration, with 44 tests passing. Actual-token capture/replay 1db47ad9 adds 62 passing tests and a fresh paid-token/15 Safe-record/source-block PNG join. Object tooling 2503b218 adds a concrete native-inventory reader and honest partial assembly, with 60 root tests passing; its complete inventory vector is synthetic. Catalog/history readers 61b87646 add complete owner/independent lanes and Core ownership history, with 111 root compatibility tests passing; genuine captures and assembler joins remain separate. **Remaining:** Complete source-family coverage, canonical token object-dossier/full media inventory, subsequent-export lineage, latest graph and full institutional conformance; original V1/V2 stay immutable. Retained complete VIEW BagIt/OCFL transport `a8562dc5` now passes 31 root new/shared offline cases; actual capture and full conformance remain separate. Canonical semantic export `a5d23fb8`/`ec5b9b8a` preserves original subjects and alternatives, with34 root tests. Script/dependency source and offline replay `f9123670`/`3b8bf3c0` add58 root cases. Actual chain/institutional acceptance remains separate. |
 | [MUSEUM-26](#museum-26-evidence) Linked Art and CRM projection | Built | Tested* | Integrated* | Pinned offline JSON-LD expansion and finite Linked Art/CRM entity projection with extension sidecars, complete input/output correspondence for supported profiles. **Remaining:** Complete adopted crosswalk and all real record-family source adapters remain. Archival URNs and data-model validity do not claim optional HTTP API conformance. |
 | [MUSEUM-27](#museum-27-evidence) PREMIS file/fixity facts and recorded source adapter | Built | Tested* | Integrated* | Original pinned PREMIS3 schema, exact file IDs/size/digest/format and correspondence from selected registered source facts. Missing fields yield explicit unsupported diagnostics. Direct native-catalog retained-file projection (`a69c377e`) adds exact supplied-byte measurements and complete replay; 53 root cases pass. Complete authority-field accounting (`53aae1b0`) adds 62 root new/compatibility/docs passes, retaining 17 bound/eight local/ten unresolved example fields. **Remaining:** General source/authority coverage and actual institutional capture; local measurements do not invent historical fixity events. |
@@ -344,7 +353,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built; bounded profiles | Tested* | Partial | DIRECT29, personhood, 37-role inventory and recovered 255/511 workflows are source integrated. Revenue17 callers `4fa32ae1` are integrated; canonical native, Merkle and Dutch callers `411f7b0e`/`611be306`/`95cc0e0e` are integrated and root passes1,739 tests. Historical ABI identities remain explicit. VIEW Inventory/Bundle clients `791cb767` add 22 typed writes and direct/Safe workflows, with 73 independently passing mock/oracle tests and root build/type checks. Tagged VIEW callers are integrated as `896899f7` with46 root focused passes; closed consent/root transport `cfcbc4ea` and strict repaired-source companion `34d27678` add64 root pure/mock passes. Executor9/RoleRegistry2 `e6a00086` now pass78 root focused pure/mock tests, build and strict types. **Remaining:** Actual all-call current/Safe execution. |
+| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built; bounded profiles | Tested* | Partial | DIRECT29, personhood, 37-role inventory and recovered 255/511 workflows are source integrated. Revenue17 callers `4fa32ae1` are integrated; canonical native, Merkle and Dutch callers `411f7b0e`/`611be306`/`95cc0e0e` are integrated and root passes1,739 tests. Historical ABI identities remain explicit. VIEW Inventory/Bundle clients `791cb767` add 22 typed writes and direct/Safe workflows, with 73 independently passing mock/oracle tests and root build/type checks. Tagged VIEW callers are integrated as `896899f7` with46 root focused passes; closed consent/root transport `cfcbc4ea` and strict repaired-source companion `34d27678` add64 root pure/mock passes. Executor9/RoleRegistry2 `e6a00086` pass78 root focused pure/mock tests. Aggregate attestation recovery `4fd80175` adds 151 distinct producer cases and 30 root focused passes. Guardian administration/rotation `708a97ae` adds 57 independently passing client cases; two corrected negative fixtures, root build and strict types pass. **Remaining:** Original attribution/collaborator callers and actual all-call current/Safe execution. Mocked client workflows do not establish actual Safe execution. |
 | [client.entropy-authority](#cliententropy-authority-evidence) Explicit entropy finding and op60 hydration Safe client | Built | Tested* | Not integrated | Complete original entropy finding/target/intent context and typed operation60 hydration with seven owner commitments. Source 642d017d is merged as 50c553c9; independent source review is clear. **Remaining:** All 175 package tests and generation/build/type checks pass on the integration checkout; real deployed Safe/provider composition remains pending. |
 | [operator.commerce](#operatorcommerce-evidence) Saved governance, mint setup and native surplus plans | Built | Partly tested | Partial | Current deployment/catalog activation primitives and saved phase/surplus/lifecycle plans with exact current call/state checks. **Remaining:** Final full product graph deployment/activation and all caller-compatible saved workflows. Earlier deployment productsActivated=false is not a launch. c9d0353d six new surplus-plan tests are authored/source reviewed; root owns native acceptance. |
 | [conformance.commerce-gas](#conformancecommerce-gas-evidence) Collector gas, capacity and complete cross-mode conservation | In progress | Partly tested | Not integrated | Required conformance across public paid/current Safe paths and complete liabilities; this is not a new sale feature. **Remaining:** Do not waive500,000 paid single-step ceiling. Retained partial-cold/warm clearing measurements exceed it;8,755,856 historical trace is not current/all-cold. Final all-cold collector, worst-case capacity/stateful fuzz, six-host financial conservation and final-source native campaigns remain integrator-owned. |
