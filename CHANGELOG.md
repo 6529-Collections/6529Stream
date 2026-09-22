@@ -1,5 +1,13 @@
 # Changelog
 
+## Unified Artist and General review evidence
+
+- Add a V5 wrapper around the unchanged unified V4 dossier. Replay exact native
+  Artist and General review packets, retain their separate selections and
+  diagnostics, and classify original subject and source-state links without
+  changing the original 19/49 assessments. See the
+  [V5 review dossier guide](docs/museum-unified-review-dossier-v5.md).
+
 ## Generation validation deployment size
 
 - Split four existing generation dependencies through fixed typed workers, preserving
