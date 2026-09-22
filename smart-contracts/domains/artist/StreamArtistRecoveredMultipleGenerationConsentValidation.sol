@@ -68,8 +68,27 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
         AH.Query[] memory queries,
         RH.OwnerProvenance memory p
     ) public pure {
+        T.RatificationRecord[][] memory ratifications = new T.RatificationRecord[][](all.length);
+        for (uint256 i; i < all.length; ++i) {
+            ratifications[i] = new T.RatificationRecord[](0);
+        }
+        validate(all, ratifications, queries, p);
+    }
+
+    /// @notice Complete Consent validation with original52 rows supplied by the fixed aggregate profile.
+    /// @dev The original entry supplies no52 rows and remains strict. These records carry no
+    /// generation, signer, nonce or time preimage; the enclosing profile authenticates Identity.
+    function validate(
+        G.Consents[] memory all,
+        T.RatificationRecord[][] memory ratifications,
+        AH.Query[] memory queries,
+        RH.OwnerProvenance memory p
+    ) public pure {
         Provenance.validateOwner(p, 6);
-        if (all.length == 0 || all.length != queries.length || all.length > 128) _invalid();
+        if (
+            all.length == 0 || all.length != queries.length || all.length > 128
+                || ratifications.length != all.length
+        ) _invalid();
         uint256 rows;
         for (uint256 i; i < all.length; ++i) {
             ContentH.Bundle memory b = all[i].rows;
@@ -79,6 +98,7 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
                 old.keys.length > MAX_ROWS || old.economics.length > MAX_ROWS
                     || old.sales.length > MAX_ROWS || b.consents.length > MAX_ROWS
                     || b.royalties.length > MAX_ROWS || b.freezes.length > MAX_ROWS
+                    || ratifications[i].length > MAX_ROWS
             ) revert T.UnsupportedProfile();
             if (
                 old.provenance != RH.ownerProvenanceHash(p, 6) || q.artistId == 0
@@ -91,13 +111,13 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
                 if (queries[j].collectionId == q.collectionId) _invalid();
             }
             rows += old.policies.length + old.economics.length + old.sales.length
-            + b.consents.length + b.royalties.length + b.freezes.length;
+            + b.consents.length + b.royalties.length + b.freezes.length + ratifications[i].length;
             _bindings(all[i].bindings, q);
             _baseRows(old, all[i].bindings);
             _contentRows(b, all[i].bindings);
         }
         if (p.journal.length != rows) _invalid();
-        (bytes32[] memory surfaces, bytes32[] memory scopes) = _journal(all, p);
+        (bytes32[] memory surfaces, bytes32[] memory scopes) = _journal(all, ratifications, p);
         _eras(p);
         _aliases(p, surfaces, scopes);
     }
@@ -151,14 +171,14 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
         }
     }
 
-    function _journal(G.Consents[] memory all, RH.OwnerProvenance memory p)
-        private
-        pure
-        returns (bytes32[] memory surfaces, bytes32[] memory scopes)
-    {
+    function _journal(
+        G.Consents[] memory all,
+        T.RatificationRecord[][] memory ratifications,
+        RH.OwnerProvenance memory p
+    ) private pure returns (bytes32[] memory surfaces, bytes32[] memory scopes) {
         surfaces = new bytes32[](p.journal.length);
         scopes = new bytes32[](p.journal.length);
-        uint256[5][] memory counts = new uint256[5][](all.length);
+        uint256[6][] memory counts = new uint256[6][](all.length);
         for (uint256 i; i < p.journal.length; ++i) {
             RH.JournalEntry memory row = p.journal[i];
             uint256 selected = type(uint256).max;
@@ -245,6 +265,15 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
                         r.recordHash
                     )
                 );
+            } else if (row.receipt.operation == 52) {
+                if (counts[selected][5] >= ratifications[selected].length) _invalid();
+                T.RatificationRecord memory r = ratifications[selected][counts[selected][5]++];
+                if (
+                    r.recordHash != row.receipt.recordHash || r.recordHash == 0
+                        || r.contentStateHash == 0 || r.metadataContract == address(0)
+                ) _invalid();
+                surfaces[i] = keccak256("consent_finality.replay.ratification_key");
+                scopes[i] = keccak256(abi.encode(b.original.collectionId, r.recordHash));
             } else {
                 revert T.UnsupportedProfile();
             }
@@ -257,6 +286,7 @@ library StreamArtistRecoveredMultipleGenerationConsentValidation {
                     || counts[selected][2] != b.consents.length
                     || counts[selected][3] != b.royalties.length
                     || counts[selected][4] != b.freezes.length
+                    || counts[selected][5] != ratifications[selected].length
             ) _invalid();
         }
     }

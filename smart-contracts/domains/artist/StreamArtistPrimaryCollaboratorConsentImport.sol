@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateRatificationRows as Ratifications
+} from "./StreamArtistRecoveredAggregateRatificationRows.sol";
+import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import {
@@ -73,14 +76,9 @@ library StreamArtistPrimaryCollaboratorConsentImport {
     ) public returns (bool) {
         if (!Codec.selected(outer, 6)) return false;
         (M.State memory s, Payload.Payload memory p,) = Decode.collect(6, anchor, outer);
-        G.Consents[] memory all = new G.Consents[](s.rows.length);
-        for (uint256 i; i < all.length; ++i) {
-            all[i] = abi.decode(s.rows[i], (G.Consents));
-            if (keccak256(s.rows[i]) != keccak256(abi.encode(all[i]))) {
-                revert RH.InvalidRecoveredHydrationProfile();
-            }
-        }
-        Validation.validate(all, s.collections, p.provenance);
+        (G.Consents[] memory all, T.RatificationRecord[][] memory ratifications) =
+            Ratifications.decodeOwnerRows(s.rows, outer);
+        Validation.validate(all, ratifications, s.collections, p.provenance);
         for (uint256 i; i < all.length; ++i) {
             Base.install(
                 policies,

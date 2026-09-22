@@ -39,6 +39,28 @@ library StreamArtistRecoveredMultipleDisputeWitnesses {
         MR.CollectionWitness[] memory witnesses,
         T.RoyaltyFreeze[] memory royalties
     ) public pure returns (Plan memory plan) {
+        return _collect(source, p, scope, witnesses, royalties, false);
+    }
+
+    /// @dev Original52 has no caller-supplied term witness. Its complete rows are proved separately.
+    function collectRatified(
+        T.SuiteConfiguration memory source,
+        RH.Provenance memory p,
+        M.State memory scope,
+        MR.CollectionWitness[] memory witnesses,
+        T.RoyaltyFreeze[] memory royalties
+    ) public pure returns (Plan memory plan) {
+        return _collect(source, p, scope, witnesses, royalties, true);
+    }
+
+    function _collect(
+        T.SuiteConfiguration memory source,
+        RH.Provenance memory p,
+        M.State memory scope,
+        MR.CollectionWitness[] memory witnesses,
+        T.RoyaltyFreeze[] memory royalties,
+        bool allowRatifications
+    ) private pure returns (Plan memory plan) {
         uint256 n = scope.collections.length;
         plan.economics = new T.EconomicsConsent[][](n);
         plan.freezes = new T.RoyaltyFreeze[][](n);
@@ -59,6 +81,7 @@ library StreamArtistRecoveredMultipleDisputeWitnesses {
             } else if (
                 j.receipt.operation != 14 && j.receipt.operation != 16 && j.receipt.operation != 17
                     && j.receipt.operation != 21
+                    && (!allowRatifications || j.receipt.operation != 52)
             ) {
                 _invalid();
             }

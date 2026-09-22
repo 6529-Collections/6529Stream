@@ -46,8 +46,20 @@ library StreamArtistRecoveredMultipleDisputeConservation {
     }
 
     function validate(Context calldata x) public pure {
-        uint256[][] memory consent =
-            Consents.validate(Consents.Context(x.identities, x.scope, x.consents, x.provenance));
+        _validate(x, false);
+    }
+
+    /// @dev The complete original52 journal and facts must be validated before this entry.
+    function validateRatified(Context calldata x) public pure {
+        _validate(x, true);
+    }
+
+    function _validate(Context calldata x, bool allowRatifications) private pure {
+        uint256[][] memory consent = allowRatifications
+            ? Consents.validateRatified(
+                Consents.Context(x.identities, x.scope, x.consents, x.provenance)
+            )
+            : Consents.validate(Consents.Context(x.identities, x.scope, x.consents, x.provenance));
         uint256[][] memory attested = Attestations.validate(
             Attestations.Context(
                 x.identities,

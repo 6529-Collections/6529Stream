@@ -64,6 +64,29 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         T.RoyaltyFreeze[] memory royalties,
         T.Binding[] memory bindings
     ) public view returns (ContentH.Bundle memory b) {
+        return _collectRows(source, q, p, economics, royalties, bindings, false);
+    }
+
+    function collectRatifiedRows(
+        address source,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        T.Binding[] memory bindings
+    ) public view returns (ContentH.Bundle memory b) {
+        return _collectRows(source, q, p, economics, royalties, bindings, true);
+    }
+
+    function _collectRows(
+        address source,
+        AH.Query memory q,
+        RH.OwnerProvenance memory p,
+        T.EconomicsConsent[] memory economics,
+        T.RoyaltyFreeze[] memory royalties,
+        T.Binding[] memory bindings,
+        bool allowRatifications
+    ) private view returns (ContentH.Bundle memory b) {
         Provenance.validateOwnerSource(p, 6, source);
         uint256 cc;
         uint256 rc;
@@ -74,15 +97,20 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
                     || p.journal[i].receipt.collectionId != q.collectionId
             ) continue;
             uint16 op = p.journal[i].receipt.operation;
-            if (op == 17) ++cc;
-            else if (op == 20) ++rc;
-            else if (op == 21) ++fc;
-            else if (op != 14 && op != 15 && op != 16) revert T.UnsupportedProfile();
+            if (op == 17) {
+                ++cc;
+            } else if (op == 20) {
+                ++rc;
+            } else if (op == 21) {
+                ++fc;
+            } else if (op != 14 && op != 15 && op != 16 && (!allowRatifications || op != 52)) {
+                revert T.UnsupportedProfile();
+            }
         }
         if (cc > MAX_ROWS || rc > MAX_ROWS || fc > MAX_ROWS || royalties.length != rc) {
             revert T.UnsupportedProfile();
         }
-        b.original = _base(source, q, p, economics);
+        b.original = _base(source, q, p, economics, allowRatifications);
         b.consents = new ContentOwner.ConsentRecord[](cc);
         b.royalties = new ContentH.Royalty[](rc);
         b.freezes = new Content.FreezeRecord[](fc);
@@ -173,7 +201,8 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
         address source,
         AH.Query memory q,
         RH.OwnerProvenance memory p,
-        T.EconomicsConsent[] memory terms
+        T.EconomicsConsent[] memory terms,
+        bool allowRatifications
     ) private view returns (Base.Bundle memory b) {
         if (q.policies.length > MAX_ROWS || terms.length > MAX_ROWS) {
             revert T.UnsupportedProfile();
@@ -227,7 +256,10 @@ library StreamArtistRecoveredMultipleGenerationConsentSource {
             uint16 op = p.journal[i].receipt.operation;
             if (op == 16) {
                 ++count;
-            } else if (op != 14 && op != 15 && op != 17 && op != 20 && op != 21) {
+            } else if (
+                op != 14 && op != 15 && op != 17 && op != 20 && op != 21
+                    && (!allowRatifications || op != 52)
+            ) {
                 revert T.UnsupportedProfile();
             }
         }

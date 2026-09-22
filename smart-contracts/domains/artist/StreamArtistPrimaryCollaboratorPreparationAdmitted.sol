@@ -139,7 +139,7 @@ library StreamArtistPrimaryCollaboratorPreparationAdmitted {
             frame.c.source.owners[2], frame.scope, RH.ownerProvenance(frame.c.provenance, 2)
         );
         frame.context.prepared.query = Codec.anchorQuery(frame.scope);
-        frame.witnesses = Witnesses.collect(
+        frame.witnesses = Witnesses.collectRatified(
             frame.c.source,
             frame.c.provenance,
             frame.scope,

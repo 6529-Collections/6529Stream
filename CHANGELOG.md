@@ -1,5 +1,14 @@
 # Changelog
 
+## Aggregate original ratification history
+
+- Carry original operation-52 records through applicable recovered generation,
+  dispute and PRIMARY_ONLY collaborator hydration, preserving complete original
+  signatures, nonce/replay guards, current heads and atomic seven-owner import.
+- Keep prior consent-row bytes and strict legacy entrypoints. Add focused worker
+  and real-owner/Safe regression cases; native capacity and execution remain
+  pending. See the [integration guide](docs/integrations/artist-aggregate-ratifications.md).
+
 ## Retained Museum response checksum policy
 
 - Support the repository's explicit raw-response directory suffix patterns and

@@ -42,6 +42,19 @@ library StreamArtistRecoveredMultipleGenerationConsentUses {
     }
 
     function validate(Context calldata x) public pure returns (uint256[][] memory totals) {
+        return _validate(x, false);
+    }
+
+    /// @dev Original52 facts must already be authenticated by the enclosing aggregate.
+    function validateRatified(Context calldata x) public pure returns (uint256[][] memory totals) {
+        return _validate(x, true);
+    }
+
+    function _validate(Context calldata x, bool allowRatifications)
+        private
+        pure
+        returns (uint256[][] memory totals)
+    {
         if (
             x.identities.length == 0 || x.identities.length > 128
                 || x.identities.length != x.scope.artists.length || x.consents.length == 0
@@ -77,20 +90,24 @@ library StreamArtistRecoveredMultipleGenerationConsentUses {
             if (selected == type(uint256).max) _invalid();
             IH.Bundle calldata identity = Frame.bundle(x.identities[selected]);
             uint8 historicalMode = _bindings(row.bindings, q);
-            uint256[] memory uses = Content.validateRows(
-                Content.IdentityRows(identity.artistId, identity.signatures, identity.delegations),
-                Content.ConsentRows(
-                    row.rows.original.artistId,
-                    row.rows.original.collectionId,
-                    row.rows.original.bindingHash,
-                    row.rows.consents,
-                    row.rows.royalties,
-                    row.rows.freezes,
-                    row.bindings
-                ),
-                Content.Scope(q.artistId, q.collectionId, q.bindingHash),
-                x.provenance
+            Content.IdentityRows memory contentIdentity =
+                Content.IdentityRows(identity.artistId, identity.signatures, identity.delegations);
+            Content.ConsentRows memory contentRows = Content.ConsentRows(
+                row.rows.original.artistId,
+                row.rows.original.collectionId,
+                row.rows.original.bindingHash,
+                row.rows.consents,
+                row.rows.royalties,
+                row.rows.freezes,
+                row.bindings
             );
+            Content.Scope memory contentScope =
+                Content.Scope(q.artistId, q.collectionId, q.bindingHash);
+            uint256[] memory uses = allowRatifications
+                ? Content.validateRatifiedRows(
+                    contentIdentity, contentRows, contentScope, x.provenance
+                )
+                : Content.validateRows(contentIdentity, contentRows, contentScope, x.provenance);
             // Original14 has no saved generation. An accepted historical mode2 binding is
             // necessary for retained delegated14, without assigning it to that generation.
             // Each original16 instead carries its own exact accepted mode2 binding, checked

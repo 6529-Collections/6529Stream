@@ -62,6 +62,27 @@ library StreamArtistRecoveredMultipleGenerationConsentRows {
         Scope memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
+        return _validateRows(identity, consent, q, p, false);
+    }
+
+    /// @dev The enclosing aggregate must first authenticate all original52 rows and signatures.
+    /// Ratification never consumes a delegation; all other rows retain the original checks.
+    function validateRatifiedRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p
+    ) public pure returns (uint256[] memory uses) {
+        return _validateRows(identity, consent, q, p, true);
+    }
+
+    function _validateRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        bool allowRatifications
+    ) private pure returns (uint256[] memory uses) {
         if (
             q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0
                 || identity.artistId != q.artistId || consent.artistId != q.artistId
@@ -79,7 +100,7 @@ library StreamArtistRecoveredMultipleGenerationConsentRows {
                     || native_.receipt.collectionId != q.collectionId
             ) continue;
             uint16 op = native_.receipt.operation;
-            if (op == 14 || op == 15 || op == 16) continue;
+            if (op == 14 || op == 15 || op == 16 || (allowRatifications && op == 52)) continue;
             if (op != 17 && op != 20 && op != 21) _invalid();
             if (
                 native_.receipt.artistId != q.artistId

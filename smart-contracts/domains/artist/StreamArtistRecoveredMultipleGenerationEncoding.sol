@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistOnboardingTypes as T
+} from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
+import {
+    StreamArtistRecoveredAggregateRatificationRows as Ratifications
+} from "./StreamArtistRecoveredAggregateRatificationRows.sol";
+import {
     StreamArtistRecoveredMultipleGenerationComposition as Composition
 } from "./StreamArtistRecoveredMultipleGenerationComposition.sol";
 import {
@@ -31,6 +37,21 @@ library StreamArtistRecoveredMultipleGenerationEncoding {
     }
 
     function encode(Context memory c) public pure returns (Composition.Result memory result) {
+        T.RatificationRecord[][] memory empty = new T.RatificationRecord[][](c.collectionCount);
+        for (uint256 i; i < empty.length; ++i) {
+            empty[i] = new T.RatificationRecord[](0);
+        }
+        return encodeRatified(c, empty);
+    }
+
+    function encodeRatified(Context memory c, T.RatificationRecord[][] memory ratifications)
+        public
+        pure
+        returns (Composition.Result memory result)
+    {
+        if (ratifications.length != c.collectionCount) {
+            revert RH.InvalidRecoveredHydrationProfile();
+        }
         uint256 n = c.collectionCount;
         result.bindings = new bytes[](n);
         result.accepted = new bytes[](n);
@@ -40,7 +61,8 @@ library StreamArtistRecoveredMultipleGenerationEncoding {
         for (uint256 k; k < n; ++k) {
             result.bindings[k] = abi.encode(c.inventory.bindings[k]);
             result.accepted[k] = abi.encode(c.accepted[k]);
-            result.consents[k] = abi.encode(c.consents[k]);
+            result.consents[k] = Ratifications.encode(c.consents[k], ratifications[k]);
+            if (ratifications[k].length != 0) result.features |= RH.RATIFICATIONS;
             Records.Bundle memory records = abi.decode(c.attestations[k], (Records.Bundle));
             result.attribution[k] = abi.encode(G.Attribution(c.history[k], records));
             if (records.records.length != 0) {

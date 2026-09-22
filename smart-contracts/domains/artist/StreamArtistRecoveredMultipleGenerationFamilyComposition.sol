@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateRatificationFacts as RatificationFacts
+} from "./StreamArtistRecoveredAggregateRatificationFacts.sol";
+import {
     StreamArtistRecoveredMultipleGenerationConsentCollection as ConsentCollection
 } from "./StreamArtistRecoveredMultipleGenerationConsentCollection.sol";
 import {
@@ -77,7 +80,7 @@ library StreamArtistRecoveredMultipleGenerationFamilyComposition {
     }
 
     function collect(Context memory c) public view returns (Composition.Result memory result) {
-        G.Consents[] memory consents = ConsentCollection.collect(
+        (G.Consents[] memory consents, T.RatificationRecord[][] memory ratifications) = ConsentCollection.collectRatified(
             ConsentCollection.Context(
                 c.source.source.owners[6],
                 c.source.provenance,
@@ -100,17 +103,29 @@ library StreamArtistRecoveredMultipleGenerationFamilyComposition {
                 c.source.identities, c.source.scope, c.inventory, c.accepted, c.source.provenance
             )
         );
-        Conservation.validate(
-            Conservation.Context(
-                c.source.identities,
-                c.source.scope,
-                consents,
-                attestations,
-                c.inventory,
-                c.source.provenance
-            )
+        bool hasRatifications;
+        for (uint256 i; i < ratifications.length; ++i) {
+            if (ratifications[i].length != 0) hasRatifications = true;
+        }
+        if (hasRatifications) {
+            RatificationFacts.validate(
+                c.source.identities, c.source.scope, c.source.provenance, ratifications
+            );
+        }
+        Conservation.Context memory conservation = Conservation.Context(
+            c.source.identities,
+            c.source.scope,
+            consents,
+            attestations,
+            c.inventory,
+            c.source.provenance
         );
-        return Encoding.encode(
+        if (hasRatifications) {
+            Conservation.validateRatified(conservation);
+        } else {
+            Conservation.validate(conservation);
+        }
+        return Encoding.encodeRatified(
             Encoding.Context(
                 c.source.scope.collections.length,
                 c.source.features,
@@ -119,7 +134,8 @@ library StreamArtistRecoveredMultipleGenerationFamilyComposition {
                 consents,
                 attestations,
                 c.history
-            )
+            ),
+            ratifications
         );
     }
 }

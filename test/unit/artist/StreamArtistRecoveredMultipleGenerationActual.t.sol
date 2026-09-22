@@ -1108,4 +1108,296 @@ contract StreamArtistRecoveredMultipleGenerationActualTest is
         );
         _mgImport(next, r, prepared, true);
     }
+
+    /// @dev Actual original52/owner/Archive/Safe writes; the inherited Core/governance and
+    /// Metadata boundaries remain explicit. This is not a full current-Core integration case.
+    function testGenerationAggregateRatificationRetainsOriginalHeadsSignaturesAndArchive()
+        external
+    {
+        _mgSource(true);
+        bytes[] memory saved = new bytes[](3);
+        saved[0] = _mgRatificationWrite(1, 5201, false);
+        saved[1] = _mgRatificationWrite(2, 5202, true);
+        saved[2] = _mgRatificationWrite(1, 5203, false);
+        require(
+            ingress.delegationRecord(mcGrants[0]).uses == 7
+                && ingress.delegationRecord(mcGrants[1]).uses == 4,
+            "original52 never consumes a delegation grant"
+        );
+        Successor memory next = _multiCutover();
+        (RH.Request memory r, Commit.Prepared memory p) = _mgPrepare(next);
+        _mgRatificationHeaders(p);
+        bytes32 source = _mgRatificationSourceCut(saved);
+        _mgImport(next, r, p, true);
+        _mgRatificationAssert(next.coordinator.suiteConfiguration(), saved);
+        require(_mgRatificationSourceCut(saved) == source, "original source and Archive unchanged");
+    }
+
+    function testGenerationAggregateRatificationLateArchiveRollsBackThenSameSafeRetries() external {
+        _mgSource(false);
+        bytes[] memory saved = new bytes[](2);
+        saved[0] = _mgRatificationWrite(1, 5211, true);
+        saved[1] = _mgRatificationWrite(2, 5212, false);
+        Successor memory next = _multiCutover();
+        (RH.Request memory r, Commit.Prepared memory p) = _mgPrepare(next);
+        _mgRatificationHeaders(p);
+        bytes32 source = _mgRatificationSourceCut(saved);
+        bytes32 before_ = keccak256(
+            abi.encode(
+                _mgHash(next), _mgRatificationState(next.coordinator.suiteConfiguration(), saved)
+            )
+        );
+        uint256 nonce = rotationSafe.nonce();
+        uint256 height = block.number;
+        bytes memory data = abi.encodeCall(
+            ConsentHydration.hydrateRecoveredArtistAuthorityWithConsents, (r, mgRoyalties)
+        );
+        vm.roll(uint256(type(uint64).max) + 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtistArchiveV2.ArtistArchiveBlockNumberOverflow.selector,
+                uint256(type(uint64).max) + 1
+            )
+        );
+        ConsentHydration(address(next.registry))
+            .hydrateRecoveredArtistAuthorityWithConsents(r, mgRoyalties);
+        require(
+            keccak256(
+                abi.encode(
+                    _mgHash(next),
+                    _mgRatificationState(next.coordinator.suiteConfiguration(), saved)
+                )
+            ) == before_,
+            "direct late Archive failure rolls back every52 map and original nonce"
+        );
+        vm.expectRevert(bytes("GS013"));
+        this.rhExecuteNewSafe(address(next.registry), data);
+        require(
+            rotationSafe.nonce() == nonce
+                && keccak256(
+                    abi.encode(
+                        _mgHash(next),
+                        _mgRatificationState(next.coordinator.suiteConfiguration(), saved)
+                    )
+                ) == before_,
+            "same Safe nonce and complete seven-owner rollback"
+        );
+        vm.roll(height);
+        require(
+            keccak256(data)
+                == keccak256(
+                    abi.encodeCall(
+                        ConsentHydration.hydrateRecoveredArtistAuthorityWithConsents,
+                        (r, mgRoyalties)
+                    )
+                ),
+            "identical restored operation60 input"
+        );
+        _mgImport(next, r, p, true);
+        require(rotationSafe.nonce() == nonce + 1, "only successful retry consumes Safe nonce");
+        _mgRatificationAssert(next.coordinator.suiteConfiguration(), saved);
+        require(
+            _mgRatificationSourceCut(saved) == source,
+            "failed and successful imports preserve source"
+        );
+    }
+
+    function _mgRatificationWrite(uint256 collection, uint256 salt, bool direct)
+        private
+        returns (bytes memory saved)
+    {
+        bytes32 content = keccak256(abi.encode("actual G original52 content", collection, salt));
+        metadata.setContent(content);
+        T.Ratification memory terms = T.Ratification(collection, address(metadata), content);
+        T.Identity memory identity = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            identity.authorityAddress == address(artist) && identity.authorityClass == 1,
+            "actual recovered living authority for original52"
+        );
+        nextNonce = identity.nonceHint;
+        T.Authorization memory a = _authorization(false);
+        bytes32 digest = ingress.contentRatificationDigest(terms, a);
+        _rhAuthorization(digest, a.nonce);
+        uint256 identityCount = Native(suite.owners[2]).artistNativeReceiptCount();
+        uint256 count = Native(suite.owners[6]).artistNativeReceiptCount();
+        bytes32 record;
+        if (direct) {
+            require(
+                this.rhExecuteNewSafe(
+                    address(ingress),
+                    abi.encodeCall(IStreamArtistOnboarding.recordContentRatification, (terms, a))
+                ),
+                "actual original G Safe52"
+            );
+            record = Consent(suite.owners[6]).firstReleaseRatification(collection).recordHash;
+        } else {
+            a.signature = _signature(digest);
+            record = ingress.recordContentRatification(terms, a);
+        }
+        require(
+            record
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_CONTENT_RATIFICATION_RECORD_V1"),
+                        block.chainid,
+                        address(ingress),
+                        address(metadata),
+                        address(core),
+                        collection,
+                        content,
+                        artistId,
+                        address(artist),
+                        uint8(1),
+                        a.nonce,
+                        uint64(block.timestamp)
+                    )
+                ),
+            "literal original52 authority and nonce record domain"
+        );
+        require(
+            Native(suite.owners[2]).artistNativeReceiptCount() == identityCount
+                && Native(suite.owners[6]).artistNativeReceiptCount() == count + 1
+                && Native(suite.owners[6]).artistNativeReceiptAt(count).operation == 52
+                && Native(suite.owners[6]).artistNativeReceiptAt(count).artistId == artistId
+                && Native(suite.owners[6]).artistNativeReceiptAt(count).collectionId == collection
+                && Native(suite.owners[6]).artistNativeReceiptAt(count).recordHash == record,
+            "one original Consent52 and no fabricated Identity52 receipt"
+        );
+        _rhCandidate(
+            6, "consent_finality.replay.ratification_key", keccak256(abi.encode(collection, record))
+        );
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && keccak256(IStreamArtistIdentityOwner(suite.owners[2]).signatureBundle(record))
+                    == keccak256(a.signature),
+            "genuine nonce and exact signed or empty direct evidence"
+        );
+        bytes32 evidenceId = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(52),
+                direct ? address(artist) : address(this),
+                record
+            )
+        );
+        saved = abi.encode(
+            collection,
+            Consent(suite.owners[6]).ratificationRecord(record),
+            a.signature,
+            a.nonce,
+            evidenceId,
+            _mgRatificationArchiveCut(evidenceId)
+        );
+    }
+
+    function _mgRatificationHeaders(Commit.Prepared memory p) private pure {
+        for (uint8 i; i < 7; ++i) {
+            (RH.ExportHeader memory h,) = Payload.decode(p.data[i].typedState, i);
+            require(
+                (h.requiredFeatures & (XF.MULTIPLE_GENERATIONS | RH.RATIFICATIONS))
+                    == (XF.MULTIPLE_GENERATIONS | RH.RATIFICATIONS),
+                "all seven original G headers explicitly carry52"
+            );
+        }
+    }
+
+    function _mgRatificationAssert(T.SuiteConfiguration memory target, bytes[] memory saved)
+        private
+        view
+    {
+        for (uint256 i; i < saved.length; ++i) {
+            (
+                uint256 collection,
+                T.RatificationRecord memory row,
+                bytes memory signature,
+                uint256 nonce,
+                bytes32 evidenceId,
+                bytes32 archiveCut
+            ) = abi.decode(
+                saved[i], (uint256, T.RatificationRecord, bytes, uint256, bytes32, bytes32)
+            );
+            require(
+                keccak256(abi.encode(Consent(target.owners[6]).ratificationRecord(row.recordHash)))
+                        == keccak256(abi.encode(row))
+                    && keccak256(
+                        IStreamArtistIdentityOwner(target.owners[2]).signatureBundle(row.recordHash)
+                    ) == keccak256(signature)
+                    && IStreamArtistIdentityOwner(target.owners[2]).nonceUsed(artistId, nonce)
+                    && DelegatedRecordOwner(target.owners[6]).recordDelegation(row.recordHash) == 0,
+                "exact original G52 record signature nonce and nondelegated provenance"
+            );
+            bool latest = true;
+            for (uint256 j = i + 1; j < saved.length; ++j) {
+                if (abi.decode(saved[j], (uint256)) == collection) latest = false;
+            }
+            if (latest) {
+                require(
+                    keccak256(
+                        abi.encode(Consent(target.owners[6]).firstReleaseRatification(collection))
+                    ) == keccak256(abi.encode(row)),
+                    "latest original52 head per collection"
+                );
+            }
+            require(
+                _mgRatificationArchiveCut(evidenceId) == archiveCut,
+                "retained exact original Archive pointer metadata and bytes"
+            );
+        }
+    }
+
+    function _mgRatificationState(T.SuiteConfiguration memory target, bytes[] memory saved)
+        private
+        view
+        returns (bytes32 value)
+    {
+        for (uint256 i; i < saved.length; ++i) {
+            (uint256 collection, T.RatificationRecord memory row,, uint256 nonce,,) = abi.decode(
+                saved[i], (uint256, T.RatificationRecord, bytes, uint256, bytes32, bytes32)
+            );
+            value = keccak256(
+                abi.encode(
+                    value,
+                    Consent(target.owners[6]).ratificationRecord(row.recordHash),
+                    Consent(target.owners[6]).firstReleaseRatification(collection),
+                    IStreamArtistIdentityOwner(target.owners[2]).signatureBundle(row.recordHash),
+                    IStreamArtistIdentityOwner(target.owners[2]).nonceUsed(artistId, nonce),
+                    DelegatedRecordOwner(target.owners[6]).recordDelegation(row.recordHash)
+                )
+            );
+        }
+    }
+
+    function _mgRatificationSourceCut(bytes[] memory saved) private view returns (bytes32 value) {
+        value = _mgRatificationState(suite, saved);
+        for (uint8 i; i < 7; ++i) {
+            value = keccak256(
+                abi.encode(
+                    value,
+                    CP(suite.owners[i]).authorityCheckpoint(),
+                    Publications.collect(suite.owners[i], i)
+                )
+            );
+        }
+        for (uint256 i; i < saved.length; ++i) {
+            (,,,, bytes32 evidenceId,) = abi.decode(
+                saved[i], (uint256, T.RatificationRecord, bytes, uint256, bytes32, bytes32)
+            );
+            value = keccak256(abi.encode(value, _mgRatificationArchiveCut(evidenceId)));
+        }
+    }
+
+    function _mgRatificationArchiveCut(bytes32 evidenceId) private view returns (bytes32) {
+        (bytes32 hash, address pointer, uint32 size, uint64 at) =
+            IStreamArtistArchiveV2(suite.archive).artistEvidenceMetadataV2(evidenceId, 1);
+        bytes memory raw =
+            IStreamArtistArchiveV2(suite.archive).artistEvidenceBytesV2(evidenceId, 1);
+        require(
+            hash == keccak256(raw) && raw.length == size && pointer.code.length == size + 1,
+            "actual original52 immutable Archive evidence"
+        );
+        return keccak256(abi.encode(hash, pointer, size, at, raw));
+    }
 }
