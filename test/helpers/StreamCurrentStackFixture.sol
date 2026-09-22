@@ -6,6 +6,9 @@ import "./ArtistArtifactCreate.sol";
 import { StreamCurrentTestProductActivation } from "./StreamCurrentTestProductActivation.sol";
 import { StreamCurrentTestSetupPlans } from "./StreamCurrentTestSetupPlans.sol";
 import {
+    StreamCurrentTestAuthorityPlans as CurrentAuthorityPlans
+} from "./StreamCurrentTestAuthorityPlans.sol";
+import {
     IStreamSetupPlansMintManager,
     IStreamSetupPlansMintLedger,
     IStreamSetupPlansFixedPriceSaleAdapter,
@@ -405,7 +408,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
 
     function _expandArtistReadBudget() private {
         StreamArtistActivationPlan.Plan memory plan =
-            StreamArtistActivationPlan.buildReadBudgetExpansion(manager);
+            CurrentAuthorityPlans.buildReadBudgetExpansion(manager);
         _executeInitialBatch(GenesisBatch(1, plan.calls, plan.callDatas));
         (uint256 value,,, uint64 revision) =
             manager.gasParameterInfo(manager.GGP_ARTIST_AUTHORITY_GAS_LIMIT());
@@ -467,12 +470,12 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     function _activateRevealAuthority() internal virtual {
         StreamRevealActivationPlan.Principals memory principals = _revealPrincipals();
         StreamArtistActivationPlan.Plan memory plan =
-            StreamRevealActivationPlan.build(roles, principals);
+            CurrentAuthorityPlans.buildReveal(roles, principals);
         executor.publishGovernanceCallData(plan.callDatas);
         uint64 notBefore = uint64(block.timestamp + 49 hours);
         bytes32 actionId = _scheduleFixtureActivation(plan, notBefore);
         vm.warp(notBefore);
-        StreamRevealActivationPlan.execute(
+        CurrentAuthorityPlans.executeReveal(
             executor,
             roles,
             IStreamGasParameterHost(address(0)),
@@ -481,7 +484,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
             actionId,
             plan
         );
-        StreamRevealActivationPlan.execute(
+        CurrentAuthorityPlans.executeReveal(
             executor,
             roles,
             IStreamGasParameterHost(address(0)),
@@ -497,7 +500,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     ///      The deployment planner returns these same calls for persistent operator resumption.
     function _activateArtistAuthority() internal virtual {
         StreamArtistActivationPlan.Plan memory plan =
-            StreamArtistActivationPlan.build(roles, manager, address(this));
+            CurrentAuthorityPlans.buildArtist(roles, manager, address(this));
         uint64 notBefore = uint64(block.timestamp + 49 hours);
         // Queued broadcast reaches a later block; the retained time still meets the delay floor.
         vm.warp(block.timestamp + 10 minutes);
@@ -542,9 +545,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
             "read budget unchanged"
         );
         vm.warp(notBefore);
-        StreamArtistActivationPlan.execute(executor, roles, manager, address(this), actionId, plan);
+        CurrentAuthorityPlans.executeArtist(executor, roles, manager, address(this), actionId, plan);
         // A resumed completed action reuses the saved identity without creating another action.
-        StreamArtistActivationPlan.execute(executor, roles, manager, address(this), actionId, plan);
+        CurrentAuthorityPlans.executeArtist(executor, roles, manager, address(this), actionId, plan);
         require(executor.governanceNonce() == nonceBefore + 1, "activation rescheduled on retry");
         vm.expectRevert(
             abi.encodeWithSelector(StreamArtistActivationPlan.InvalidActivationPlan.selector)
@@ -608,7 +611,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         bytes32 actionId,
         address administrator
     ) external {
-        StreamArtistActivationPlan.execute(executor, roles, manager, administrator, actionId, plan);
+        CurrentAuthorityPlans.executeArtist(executor, roles, manager, administrator, actionId, plan);
     }
 
     /// @dev Check the base topology's production instances despite Foundry's test-harness
