@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { GenesisBatch } from "../../smart-contracts/interfaces/stream/governance/IStreamGenesisInitializer.sol";
+
 import { StreamGovernanceExecutor } from "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import { StreamCore } from "../../smart-contracts/core/StreamCore.sol";
 import { StreamModuleRegistry } from "../../smart-contracts/domains/modules/StreamModuleRegistry.sol";
