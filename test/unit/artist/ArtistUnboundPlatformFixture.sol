@@ -612,7 +612,10 @@ abstract contract ArtistUnboundPlatformFixture is StreamArtistRecoveredAuthority
     function _upNext() private returns (Successor memory next) {
         T.SuiteConfiguration memory s = suite;
         address governance = manager.governanceAuthority();
-        ArtistSanctionFinalityFixture finalityFixture = new ArtistSanctionFinalityFixture();
+        ArtistSanctionFinalityFixture finalityFixture = ArtistSanctionFinalityFixture(_artistArtifactCreate(
+            "test/unit/artist/ArtistSanctionFinalityFixture.sol:ArtistSanctionFinalityFixture",
+            abi.encode()
+        ));
         uint256 nonce = avm.getNonce(address(this));
         address registry_ = avm.computeCreateAddress(address(this), nonce);
         address archive_ = avm.computeCreateAddress(address(this), nonce + 1);
