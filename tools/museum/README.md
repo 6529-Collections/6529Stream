@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Unified Museum dossier V4](../../docs/museum-unified-dossier-v4.md) combines the
+existing canonical semantic export with original physical-production, General
+and physical-transfer packages, retaining all nineteen packet groups and
+forty-nine assessments with explicit source joins and missing evidence.
+
 [Recorded physical acquisition and custody](../../docs/museum-recorded-physical-transfer-v1.md)
 maps explicit original General event and instrument statements to qualified
 Acquisition or TransferOfCustody components with exact offline reconstruction.

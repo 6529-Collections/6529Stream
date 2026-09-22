@@ -1366,6 +1366,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add unified Museum dossier V4 with exact canonical, physical-production,
+  General and physical-transfer package replay. Preserve original selections,
+  nineteen packet groups and forty-nine assessments; expose source conflicts,
+  unjoined states and missing evidence without promoting institutional acceptance.
+
 - Add qualified physical Acquisition and TransferOfCustody exports from exact
   original General statements, declaration and instrument evidence bindings.
   Preserve planned versus completed status, original authority, source selection
