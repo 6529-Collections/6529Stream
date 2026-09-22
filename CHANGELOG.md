@@ -1,5 +1,12 @@
 # Changelog
 
+## Complete-history Consent adapters
+
+- Add separate historical-principal source, journal and grant-use adapters for
+  complete Consent/content/ratification/sanction histories, preserving strict
+  existing profile gates. Route activation and native acceptance remain pending.
+  See the [adapter guide](docs/integrations/artist-complete-history-consents.md).
+
 ## Aggregate original sanction history
 
 - Compose original sanction and confirmation history across the supported G,
