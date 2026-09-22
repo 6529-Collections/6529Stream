@@ -85,6 +85,9 @@ import { StreamArtistRecoveredMultipleGenerationAttestationJournal as Journal } 
 
 /// @notice One complete original owner4 semantic inventory; source clocks are checked separately.
 library StreamArtistRecoveredMultipleGenerationAttestationValidation {
+    /// @dev Keep the original error in this library's ABI; journal validation bubbles it.
+    error InvalidRecoveredHydrationProfile();
+
     function validate(
         M.State memory scope,
         RH.OwnerProvenance memory p,
