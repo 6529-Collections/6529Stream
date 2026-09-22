@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Portable authoring workflow](../../docs/museum-source-bound-authoring.md)
+captures plain-language drafts, retains confirmed text and review history, and
+replays original source evidence when reopening later documentation.
+
 [Canonical evidence links V2](../../docs/museum-canonical-evidence-links-v2.md)
 connect five script, dependency, media, prospective-render and significant-properties
 slots to exact verified sources while preserving all original assessments.

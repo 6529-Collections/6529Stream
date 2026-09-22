@@ -1392,6 +1392,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add a portable Museum draft workflow for plain-language capture, scoped text
+  confirmation, attributed review and later revisions. Reopening later
+  documentation replays original recorded-account or selected OwnerRecords
+  evidence; all outputs remain draft previews without publication authority.
+
 - Add a separate repaired-source consent/root transport profile with reviewed
   ABI164 correspondence, preserving the original version and its evidence.
 
