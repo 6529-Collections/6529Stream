@@ -43,6 +43,10 @@ import {
     StreamCurrentAuthorityDeferredPolicyBindingTypesV2 as Deferred
 } from "../../../smart-contracts/interfaces/stream/finality/StreamCurrentAuthorityDeferredPolicyBindingTypesV2.sol";
 
+import {
+    StreamFinalityLineageDeferredScopedPolicySelectionV2 as LineageSelection
+} from "../../../smart-contracts/domains/finality/StreamFinalityLineageDeferredScopedPolicySelectionV2.sol";
+
 interface DeferredScopedLineageVm {
     function mockCall(address target, bytes calldata input, bytes calldata output) external;
     function mockCallRevert(address target, bytes calldata input, bytes calldata output) external;
@@ -826,5 +830,124 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2Test is LineageDisc
             abi.encodeWithSelector(ScopedDiscovery.DiscoveryDependency.selector, c.provider)
         );
         scoped.finalityComponentCount(1);
+    }
+
+    /// @dev The linked reader must retain the discovery host, not the library, in the exact
+    /// provider receipt. Every current read remains static against constructor-only state.
+    function testLinkedSelectionKeepsHostReceiptIdentityAndOriginalConfiguration() public {
+        _bindPolicyBoundary();
+        bytes32 beforeState = _configurationDigest();
+        Deferred.Receipt memory original = receipt;
+        require(original.policy.targets[13] == address(scoped));
+        require(scoped.finalityComponentCount(1) == 10);
+        _assertCurrent();
+        (uint256 count, bytes32 hash) = scoped.nonSanctionDiscoveryFacts(scope);
+        require(count == 9 && hash != 0);
+        require(_configurationDigest() == beforeState);
+
+        receipt.policy.targets[13] = address(LineageSelection);
+        _refreshReceipt();
+        vm.expectRevert(
+            abi.encodeWithSelector(ScopedDiscovery.DiscoveryConfiguration.selector, c.provider)
+        );
+        scoped.finalityComponentCount(1);
+        require(_configurationDigest() == beforeState);
+
+        receipt = original;
+        selected = original.profile;
+        _source();
+        _receiptValue();
+        require(scoped.finalityComponentCount(1) == 10);
+        _assertCurrent();
+        require(_configurationDigest() == beforeState);
+    }
+
+    function testLinkedSelectionChecksOriginalSourceHashBeforePendingRead() public {
+        bytes memory input = abi.encodeCall(Profiles.finalitySourcesForScope, (scope));
+        scopedVm.mockCallRevert(
+            c.provider, input, abi.encodeWithSelector(Deferred.CollectionPolicyPending.selector)
+        );
+        _put(
+            c.provider,
+            abi.encodeCall(Profiles.finalitySourceConfigurationHash, ()),
+            abi.encode(keccak256("wrong source configuration before pending"))
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(ScopedDiscovery.DiscoveryDependency.selector, c.provider)
+        );
+        scoped.finalityComponentCount(1);
+        _put(
+            c.provider,
+            abi.encodeCall(Profiles.finalitySourceConfigurationHash, ()),
+            abi.encode(SOURCES)
+        );
+        vm.expectRevert(abi.encodeWithSelector(Deferred.CollectionPolicyPending.selector));
+        scoped.finalityComponentCount(1);
+        scopedVm.mockCall(c.provider, input, abi.encode(Profiles.Sources(scope, selected)));
+        require(scoped.finalityComponentCount(1) == 10);
+    }
+
+    function testLinkedDeferredReceiptRejectsPendingSelectorWithTrailingBytesAndRetries() public {
+        _bindPolicyBoundary();
+        bytes memory input = abi.encodeCall(DeferredBinding.requirePolicyBinding, ());
+        bytes32 beforeState = _configurationDigest();
+        scopedVm.mockCallRevert(
+            c.provider,
+            input,
+            abi.encodePacked(Deferred.CollectionPolicyPending.selector, bytes32(uint256(1)))
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamFinalityRouterEvidence.RouterEvidenceRead.selector,
+                c.provider,
+                DeferredBinding.requirePolicyBinding.selector
+            )
+        );
+        scoped.finalityComponentCount(1);
+        require(_configurationDigest() == beforeState);
+        scopedVm.mockCall(c.provider, input, abi.encode(receipt));
+        require(scoped.finalityComponentCount(1) == 10);
+        _assertCurrent();
+        require(_configurationDigest() == beforeState);
+    }
+
+    function _configurationDigest() private view returns (bytes32) {
+        bytes32 pins;
+        address[12] memory targets = [
+            c.core,
+            c.metadata,
+            c.router,
+            c.provider,
+            c.membership,
+            c.entropyFactory,
+            c.referenceRender,
+            c.artist,
+            selected.snapshots,
+            selected.referenceRender,
+            selected.entropyFactory,
+            binding.factory
+        ];
+        for (uint256 i; i < targets.length; ++i) {
+            pins = keccak256(abi.encode(pins, targets[i], scoped.dependencyCodeHash(targets[i])));
+        }
+        for (uint256 i; i < 6; ++i) {
+            pins = keccak256(
+                abi.encode(
+                    pins, c.routerAdapters[i], scoped.dependencyCodeHash(c.routerAdapters[i])
+                )
+            );
+        }
+        return keccak256(
+            abi.encode(
+                scoped.core(),
+                scoped.metadataHost(),
+                scoped.scopeEvidenceProvider(),
+                scoped.deploymentChainId(),
+                scoped.sourceConfigurationHash(),
+                scoped.configuration(),
+                pins,
+                scoped.dependencyCodeHash(c.metadataAdapter)
+            )
+        );
     }
 }

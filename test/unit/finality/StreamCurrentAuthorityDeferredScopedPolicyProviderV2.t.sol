@@ -78,6 +78,22 @@ import {
     FinalityMultiOriginReadTable as Table
 } from "./StreamFinalityMultiOriginConfiguration.t.sol";
 
+import {
+    StreamCurrentAuthorityDeferredPolicyValidationV2 as Validation
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityDeferredPolicyValidationV2.sol";
+
+interface DeferredScopedBindingVm {
+    struct Log {
+        bytes32[] topics;
+        bytes data;
+        address emitter;
+    }
+    function mockCall(address target, bytes calldata data, bytes calldata result) external;
+    function mockCallRevert(address target, bytes calldata data, bytes calldata result) external;
+    function recordLogs() external;
+    function getRecordedLogs() external returns (Log[] memory);
+}
+
 /// @notice Actual deferred host constructor, pending guards and unaffected source dispatch.
 /// @dev Typed source tables deliberately supply topology facts only. These cases do not claim
 /// authentic publication, a successful governed binding, or full Finality/currentness execution.
@@ -457,5 +473,189 @@ contract StreamCurrentAuthorityDeferredScopedPolicyProviderV2Test {
         _reject(abi.encodeCall(host.policyConfiguration, ()), T.CollectionPolicyPending.selector);
         Profiles.Sources memory n = host.finalitySourcesForScope(_collection());
         require(n.profile.profileHash == ProfileReads.profileHash(0));
+    }
+
+    // The fixed Validation library is an explicit typed boundary for these write-frame
+    // regressions. These synthetic receipts do not establish genuine governed admission.
+    function _workerVm() private pure returns (DeferredScopedBindingVm) {
+        return DeferredScopedBindingVm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    }
+
+    function _workerContext() private view returns (Validation.Context memory) {
+        return Validation.Context(original, host.policyBindingCapability(), origin, authority);
+    }
+
+    function _workerReceipt() private view returns (T.Receipt memory r) {
+        r.capabilityHash = host.policyBindingCapability().capabilityHash;
+        r.policy = original;
+        for (uint256 i; i < 22; ++i) {
+            r.policy.targets[i] = address(uint160(0xB000 + i));
+            r.policy.codeHashes[i] = keccak256(abi.encode("bound role", i));
+        }
+        r.policy.readGas = 123456;
+        r.policy.sourceGas = 87654321;
+        r.policy.componentSourceGas = 7654321;
+        r.policy.inventoryDependencyHash = keccak256("bound inventory");
+        r.output = address(0xC001);
+        r.outputCodeHash = keccak256("bound output");
+        r.profile = T.boundProfile(
+            block.chainid, address(host), r.capabilityHash, r.policy, r.output, r.outputCodeHash
+        );
+        r.sourceSet = address(0xC002);
+        r.sourceSetCodeHash = keccak256("bound source set");
+        r.scope = _collection();
+        r.inventoryPlan = keccak256("bound plan");
+        r.sourceFactoryDependenciesHash = keccak256("bound factory dependencies");
+        r.sourceSetDataHash = keccak256("bound source data");
+        r.actionId = keccak256("executed binding action");
+        r.bindingHash = T.receiptHash(r);
+    }
+
+    function _workerBindInput(T.Receipt memory r) private view returns (bytes memory) {
+        return abi.encodeWithSelector(
+            Validation.bind.selector, _workerContext(), r.policy, r.output, r.outputCodeHash
+        );
+    }
+
+    function _assertWorkerReceipt(T.Receipt memory r, bytes32 fixedHash) private view {
+        require(
+            keccak256(abi.encode(host.requirePolicyBinding())) == keccak256(abi.encode(r)),
+            "complete receipt at original storage"
+        );
+        require(
+            keccak256(abi.encode(host.policyConfiguration())) == keccak256(abi.encode(r.policy)),
+            "all policy words retained"
+        );
+        require(
+            keccak256(abi.encode(host.finalitySourceProfile(2)))
+                == keccak256(abi.encode(r.profile)),
+            "complete published profile"
+        );
+        require(host.policyBindingHash() == r.bindingHash);
+        require(host.policyOutputManifestV2() == r.output);
+        require(host.policyOutputManifestV2CodeHash() == r.outputCodeHash);
+        require(host.policySnapshotPublicationV2() == r.policy.targets[8]);
+        require(host.policySnapshotPublicationV2CodeHash() == r.policy.codeHashes[8]);
+        require(host.policyReferencePublicationV2() == r.policy.targets[9]);
+        require(host.policyReferencePublicationV2CodeHash() == r.policy.codeHashes[9]);
+        require(
+            host.finalitySourceConfigurationHash() == fixedHash,
+            "constructor source commitment unchanged"
+        );
+        require(host.policyBindingCapability().capabilityHash == r.capabilityHash);
+        require(
+            keccak256(abi.encode(host.nativeConfiguration())) == keccak256(abi.encode(original))
+        );
+        require(keccak256(abi.encode(host.scopedConfiguration())) == keccak256(abi.encode(scoped)));
+    }
+
+    function testWorkerPublishesWholeReceiptAndExactOriginalEvent() public {
+        T.Receipt memory r = _workerReceipt();
+        bytes32 fixedHash = host.finalitySourceConfigurationHash();
+        _workerVm().mockCall(address(Validation), _workerBindInput(r), abi.encode(r));
+        _workerVm().recordLogs();
+        host.bindCollectionPolicy(r.policy, r.output, r.outputCodeHash);
+        DeferredScopedBindingVm.Log[] memory logs = _workerVm().getRecordedLogs();
+        _assertWorkerReceipt(r, fixedHash);
+        require(logs.length == 1 && logs[0].emitter == address(host));
+        require(logs[0].topics.length == 4);
+        require(
+            logs[0].topics[0] == keccak256("CollectionPolicyBound(bytes32,bytes32,bytes32,bytes32)")
+        );
+        require(logs[0].topics[1] == r.capabilityHash && logs[0].topics[2] == r.bindingHash);
+        require(logs[0].topics[3] == r.actionId);
+        require(keccak256(logs[0].data) == keccak256(abi.encode(T.proposalHash(r))));
+    }
+
+    function testWorkerExactValidatorFailureRollsBackThenIdenticalInputSucceeds() public {
+        T.Receipt memory r = _workerReceipt();
+        bytes32 fixedHash = host.finalitySourceConfigurationHash();
+        bytes memory boundary = _workerBindInput(r);
+        bytes memory rejected =
+            abi.encodeWithSelector(T.CollectionPolicyBindingDependency.selector, address(0xD00D));
+        _workerVm().mockCallRevert(address(Validation), boundary, rejected);
+        bytes memory input =
+            abi.encodeCall(host.bindCollectionPolicy, (r.policy, r.output, r.outputCodeHash));
+        (bool first, bytes memory reason) = address(host).call(input);
+        require(!first && keccak256(reason) == keccak256(rejected));
+        testEveryCollectionPolicyGetterIsExplicitlyPending();
+        require(
+            host.policyBindingHash() == 0 && host.finalitySourceConfigurationHash() == fixedHash
+        );
+        _workerVm().mockCall(address(Validation), boundary, abi.encode(r));
+        (bool second, bytes memory out) = address(host).call(input);
+        require(second && out.length == 0, "identical input retry after full rollback");
+        _assertWorkerReceipt(r, fixedHash);
+    }
+
+    function testBoundWorkerRefusesMutationAndTransitionBeforeValidator() public {
+        T.Receipt memory r = _workerReceipt();
+        bytes32 fixedHash = host.finalitySourceConfigurationHash();
+        _workerVm().mockCall(address(Validation), _workerBindInput(r), abi.encode(r));
+        host.bindCollectionPolicy(r.policy, r.output, r.outputCodeHash);
+        _workerVm().mockCallRevert(address(Validation), _workerBindInput(r), hex"decafbad");
+        (bool ok, bytes memory out) = address(host)
+            .call(abi.encodeCall(host.bindCollectionPolicy, (r.policy, r.output, r.outputCodeHash)));
+        require(
+            !ok
+                && keccak256(out)
+                    == keccak256(abi.encodeWithSelector(T.CollectionPolicyAlreadyBound.selector))
+        );
+        _reject(
+            abi.encodeCall(host.bindingTransition, (r.policy, r.output, r.outputCodeHash)),
+            T.CollectionPolicyAlreadyBound.selector
+        );
+        _assertWorkerReceipt(r, fixedHash);
+    }
+
+    function testWorkerTransitionUsesOriginalTypedContextWithoutWriting() public {
+        T.Receipt memory r = _workerReceipt();
+        T.Transition memory expected = T.transition(block.chainid, address(host), r);
+        _workerVm()
+            .mockCall(
+                address(Validation),
+                abi.encodeWithSelector(
+                    Validation.transition.selector,
+                    _workerContext(),
+                    r.policy,
+                    r.output,
+                    r.outputCodeHash
+                ),
+                abi.encode(expected)
+            );
+        T.Transition memory result = host.bindingTransition(r.policy, r.output, r.outputCodeHash);
+        require(keccak256(abi.encode(result)) == keccak256(abi.encode(expected)));
+        testEveryCollectionPolicyGetterIsExplicitlyPending();
+        require(host.policyBindingHash() == 0);
+    }
+
+    function testOriginalRegistryGuardPrecedesInvalidGraphScopeInBothPreparedCalls() public view {
+        StreamFinalityScope memory malformed =
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, 0, 0, 0);
+        StreamFinalityComponentExpectation[] memory entries =
+            new StreamFinalityComponentExpectation[](0);
+        bytes4 rejected = bytes4(keccak256("NativeProviderOriginalRegistryOnly()"));
+        _reject(
+            abi.encodeCall(
+                host.requirePreparedFinalityScopeInputs, (malformed, bytes32(0), entries)
+            ),
+            rejected
+        );
+        _reject(
+            abi.encodeCall(
+                host.requirePreparedFinalityScopeInputsAndReview, (malformed, bytes32(0), entries)
+            ),
+            rejected
+        );
+    }
+
+    function testValidationGasGetterDoesNotResolveCurrentScopedGraph() public view {
+        StreamFinalityScope memory scope =
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 7, 0);
+        // No current graph response is installed in this fresh constructor fixture.
+        require(host.scopedPolicySnapshotValidationGas(scope) == original.componentSourceGas);
+        (bool ok,) =
+            address(host).staticcall(abi.encodeCall(host.scopedPolicySnapshotHost, (scope)));
+        require(!ok, "actual graph still required by operative snapshot selection");
     }
 }

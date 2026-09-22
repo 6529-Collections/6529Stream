@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamCurrentAuthorityFullPreservationPolicyDiscoveryReadsV1 as CurrentReads
+} from "./StreamCurrentAuthorityFullPreservationPolicyDiscoveryReadsV1.sol";
+import {
     StreamFinalityViewPreservationDiscoveryV1 as ViewDiscovery
 } from "./StreamFinalityViewPreservationDiscoveryV1.sol";
 import {
@@ -95,6 +98,8 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
     error DiscoveryUnsupportedProfile();
     error DiscoveryComponent(address target, bytes32 family);
     error DiscoveryIndex(uint256 index);
+    // Retain the original ABI error emitted by the extracted scope-subject validation.
+    error InvalidMetadataScope();
 
     constructor(
         StreamFinalityDiscoveryTypes.Configuration memory c,
@@ -428,68 +433,8 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
     function _current(
         StreamFinalityScope memory scope,
         StreamFinalityDiscoveryTypes.Configuration memory c
-    ) private view returns (AuthorityTypes.Route memory authority) {
-        if (block.chainid != deploymentChainId) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        StreamMetadataSubjects.scopeSubject(deploymentChainId, core, scope);
-        c = _scopeConfiguration(scope);
-        _pin(c.core);
-        _pin(c.metadata);
-        _pin(c.router);
-        _pin(c.provider);
-        _pin(c.membership);
-        _pin(c.entropyFactory);
-        _pin(c.metadataAdapter);
-        _pinReference(scope, c.referenceRender);
-        _pin(c.artist);
-        for (uint256 i; i < 6; ++i) {
-            _pin(c.routerAdapters[i]);
-        }
-        if (
-            c.finalityRegistry.code.length == 0
-                || c.finalityRegistry.codehash != c.finalityRegistryCodeHash
-        ) {
-            revert DiscoveryDependency(c.finalityRegistry);
-        }
-        _address(c.finalityRegistry, "scopeEvidenceProvider()", c.provider);
-        _address(c.finalityRegistry, "finalityDiscovery()", address(this));
-        _address(c.finalityRegistry, "coreReads()", c.core);
-        _address(c.finalityRegistry, "metadataReads()", c.metadata);
-        _address(c.finalityRegistry, "sanctionReads()", c.artist);
-        _read(
-            c.provider,
-            abi.encodeCall(
-                IStreamFinalityRouterEvidenceBinding.requireCurrentRouterCandidate,
-                (scope.collectionId, c.finalityRegistry)
-            ),
-            0,
-            c.componentGas
-        );
-        StreamScopeMembershipFacts memory membership = abi.decode(
-            _read(
-                c.membership,
-                abi.encodeCall(IStreamFinalityScopeMembership.requireScopeMembership, (scope)),
-                256,
-                c.componentGas
-            ),
-            (StreamScopeMembershipFacts)
-        );
-        if (
-            membership.scopeSubject
-                    != StreamMetadataSubjects.scopeSubject(deploymentChainId, core, scope)
-                || membership.membershipHash == 0 || membership.tokenCount == 0
-        ) revert DiscoveryUnsupportedProfile();
-        _serving(scope, c);
-        // Keep c.artist as the historical Finality/Router anchor. Current authority is separate.
-        authority = _authority(scope.collectionId, c);
-        StreamMetadataRecoveryRoutes.requireCurrentHost(
-            c.core,
-            keccak256("ARTIST_REGISTRY"),
-            authority.registry,
-            keccak256("ARTIST_REGISTRY"),
-            type(IStreamArtistMintConsent).interfaceId
-        );
+    ) private view returns (AuthorityTypes.Route memory) {
+        return CurrentReads.current(_configuration, _codeHashes, _readContext(), scope, c);
     }
 
     function _initializeProfiles(bytes32 expected) private {
@@ -559,33 +504,6 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
 
     /// @dev Repeat the original full reciprocal and interface checks for each dynamically selected
     /// graph. Constructor catalogue declarations are never treated as operative admission.
-    function _profileBindings(Profiles.Profile memory p, bool collection) private view {
-        StreamFinalityDiscoveryTypes.Configuration memory c = _configuration;
-        _exact(p.referenceRender, p.referenceRenderCodeHash);
-        _exact(p.snapshots, p.snapshotsCodeHash);
-        _exact(p.entropyFactory, p.entropyFactoryCodeHash);
-        _address(p.snapshots, "core()", c.core);
-        _address(p.snapshots, "metadataHost()", c.metadata);
-        _address(p.referenceRender, "core()", c.core);
-        _address(p.referenceRender, "metadataHost()", c.metadata);
-        _address(p.referenceRender, "metadataRouter()", c.router);
-        _address(p.referenceRender, "snapshots()", p.snapshots);
-        _address(p.entropyFactory, "core()", c.core);
-        _address(p.entropyFactory, "metadataHost()", c.metadata);
-        _address(p.entropyFactory, "scopeMembershipHost()", c.membership);
-        _supports(p.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
-        _supports(p.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
-        _supports(p.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
-        if (collection) {
-            _supports(p.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
-        }
-    }
-
-    function _exact(address target, bytes32 expected) private view {
-        if (expected == 0 || target.code.length == 0 || target.codehash != expected) {
-            revert DiscoveryDependency(target);
-        }
-    }
 
     function _admitExact(address target, bytes32 expected) private {
         if (
@@ -595,186 +513,19 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
         _codeHashes[target] = expected;
     }
 
-    function _selectedProfile(StreamFinalityScope memory scope)
-        private
-        view
-        returns (Profiles.Profile memory p)
-    {
-        StreamMetadataSubjects.scopeSubject(deploymentChainId, core, scope);
-        _pin(scopeEvidenceProvider);
-        if (
-            abi.decode(
-                    _read(
-                        scopeEvidenceProvider,
-                        abi.encodeCall(Catalogue.finalitySourceConfigurationHash, ()),
-                        32,
-                        _configuration.readGas
-                    ),
-                    (bytes32)
-                ) != sourceConfigurationHash
-        ) revert DiscoveryDependency(scopeEvidenceProvider);
-        // VIEW authenticates its fixed complete binding directly. The token catalogue path
-        // has a larger nested reservation and is not a VIEW discovery dependency.
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            return ViewDiscovery.profile(_configuration, scope);
-        }
-        bytes memory raw = _read(
-            scopeEvidenceProvider,
-            abi.encodeCall(Catalogue.finalitySourcesForScope, (scope)),
-            384,
-            _sourceSelectionGas()
-        );
-        Profiles.Sources memory selected = abi.decode(raw, (Profiles.Sources));
-        if (
-            keccak256(raw) != keccak256(abi.encode(selected))
-                || keccak256(abi.encode(selected.scope)) != keccak256(abi.encode(scope))
-        ) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        if (selected.profile.profileHash == CollectionPolicyDefinitions.PROFILE_HASH) {
-            Profiles.Profile memory actual = CollectionFactoryReads.current(
-                _collectionBinding, _collectionEntropyFactory, _collectionEntropyCodeHash, scope
-            );
-            if (keccak256(abi.encode(selected.profile)) != keccak256(abi.encode(actual))) {
-                revert DiscoveryUnsupportedProfile();
-            }
-            _profileBindings(actual, true);
-            return actual;
-        }
-        if (selected.profile.profileHash == ScopedPolicyDefinitions.PROFILE_HASH) {
-            Profiles.Profile memory actual = PublicationFactoryReads.current(
-                _publicationBinding,
-                _scopedPolicyEntropyFactory,
-                _scopedPolicyEntropyCodeHash,
-                scope
-            );
-            if (keccak256(abi.encode(selected.profile)) != keccak256(abi.encode(actual))) {
-                revert DiscoveryUnsupportedProfile();
-            }
-            _profileBindings(actual, false);
-            return actual;
-        }
-        uint8 index = 3;
-        for (uint8 i; i < 2; ++i) {
-            if (selected.profile.profileHash == _profiles[i].profileHash) index = i;
-        }
-        if (
-            index == 3
-                || keccak256(abi.encode(selected.profile))
-                    != keccak256(abi.encode(_profiles[index]))
-        ) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-            if (index == 1) revert DiscoveryUnsupportedProfile();
-        } else if (
-            scope.scopeType == StreamFinalityScopeType.TOKEN
-                || scope.scopeType == StreamFinalityScopeType.RELEASE
-                || scope.scopeType == StreamFinalityScopeType.SEASON
-        ) {
-            if (index != 1) revert DiscoveryUnsupportedProfile();
-        } else {
-            revert DiscoveryUnsupportedProfile();
-        }
-        p = selected.profile;
-        _pin(p.referenceRender);
-        _pin(p.snapshots);
-        _pin(p.entropyFactory);
-    }
-
     /// @dev Existing reference hosts use precisely their original constructor pin. Only the
     /// selected new-profile reference may instead use its actual per-scope factory record;
     /// this is not a generic dynamically admitted component address.
     function _pinReference(StreamFinalityScope memory scope, address target) private view {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            Profiles.Profile memory selected = _selectedProfile(scope);
-            if (target != selected.referenceRender) revert DiscoveryDependency(target);
-            _exact(target, selected.referenceRenderCodeHash);
-            return;
-        }
-        if (_codeHashes[target] != 0) {
-            _pin(target);
-            return;
-        }
-        Profiles.Profile memory p = _selectedProfile(scope);
-        if (
-            (p.profileHash != ScopedPolicyDefinitions.PROFILE_HASH
-                    && p.profileHash != CollectionPolicyDefinitions.PROFILE_HASH)
-                || target != p.referenceRender || p.referenceRenderCodeHash == 0
-                || target.code.length == 0 || target.codehash != p.referenceRenderCodeHash
-        ) {
-            revert DiscoveryDependency(target);
-        }
-    }
-
-    function _sourceSelectionGas() private view returns (uint256 cap) {
-        // Configured outer budget covers the provider's cold constructor-state projection as
-        // well as its nested graph read. A fixed small slack is not an execution-cost bound.
-        return _configuration.componentGas;
+        CurrentReads.pinReference(_configuration, _codeHashes, _readContext(), scope, target);
     }
 
     function _scopeConfiguration(StreamFinalityScope memory scope)
         private
         view
-        returns (StreamFinalityDiscoveryTypes.Configuration memory c)
+        returns (StreamFinalityDiscoveryTypes.Configuration memory)
     {
-        Profiles.Profile memory p = _selectedProfile(scope);
-        c = _configuration;
-        c.referenceRender = p.referenceRender;
-        c.entropyFactory = p.entropyFactory;
-    }
-
-    function _serving(
-        StreamFinalityScope memory scope,
-        StreamFinalityDiscoveryTypes.Configuration memory c
-    ) private view {
-        if (scope.scopeType == StreamFinalityScopeType.VIEW) {
-            ViewDiscovery.requireServing(c, scope);
-            return;
-        }
-        Profiles.Profile memory p = _selectedProfile(scope);
-        if (p.profileHash == _profiles[0].profileHash) {
-            IStreamMetadataServingFacts.ServingFacts memory original =
-                StreamFinalityRouterEvidence.serving(
-                    StreamFinalityRouterEvidence.Config(
-                        c.core, c.router, deploymentChainId, c.readGas, c.componentGas
-                    ),
-                    scope.collectionId
-                );
-            if (original.mode != keccak256("ONCHAIN")) revert DiscoveryUnsupportedProfile();
-            return;
-        }
-        bytes memory raw = _read(
-            c.router,
-            abi.encodeCall(
-                IStreamMetadataServingFacts.collectionServingFacts, (scope.collectionId)
-            ),
-            512,
-            c.componentGas
-        );
-        IStreamMetadataServingFacts.ServingFacts memory f =
-            abi.decode(raw, (IStreamMetadataServingFacts.ServingFacts));
-        if (
-            keccak256(raw) != keccak256(abi.encode(f)) || !f.configured
-                || f.mode != keccak256("ONCHAIN")
-                || f.presentationProfile != keccak256("6529STREAM_STATIC_METADATA_SELECTION_V1")
-        ) revert DiscoveryUnsupportedProfile();
-        raw = _read(
-            c.router,
-            abi.encodeCall(StaticRouter.staticMetadataActivation, (scope.collectionId)),
-            96,
-            c.readGas
-        );
-        (bytes32 record, uint64 revision, bytes32 head) =
-            abi.decode(raw, (bytes32, uint64, bytes32));
-        if (
-            keccak256(raw) != keccak256(abi.encode(record, revision, head)) || record == 0
-                || revision == 0
-        ) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        // No frozen=true shortcut: the selected metadata and all six STATIC adapters still
-        // prove their own exact current/locked scope facts, and Registry rechecks each result.
+        return CurrentReads.scopeConfiguration(_configuration, _codeHashes, _readContext(), scope);
     }
 
     function _adapter(address target, address host, bytes32 family) private view {
@@ -960,41 +711,6 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
         _expectation(e, family, target);
     }
 
-    function _authority(uint256 collectionId, StreamFinalityDiscoveryTypes.Configuration memory c)
-        private
-        view
-        returns (AuthorityTypes.Route memory authority)
-    {
-        _supports(c.finalityRegistry, type(IStreamFinalityCurrentAuthority).interfaceId);
-        if (
-            abi.decode(
-                    _read(
-                        c.finalityRegistry,
-                        abi.encodeCall(IStreamFinalityCurrentAuthority.currentAuthorityProfile, ()),
-                        32,
-                        c.readGas
-                    ),
-                    (bytes32)
-                ) != AuthorityTypes.PROFILE
-        ) revert DiscoveryConfiguration(c.finalityRegistry);
-        bytes memory raw = _read(
-            c.finalityRegistry,
-            abi.encodeCall(IStreamFinalityCurrentAuthority.currentArtistAuthority, (collectionId)),
-            320,
-            c.componentGas
-        );
-        authority = abi.decode(raw, (AuthorityTypes.Route));
-        if (
-            keccak256(raw) != keccak256(abi.encode(authority))
-                || authority.finalityRegistry != c.finalityRegistry
-                || authority.finalityCodeHash != c.finalityRegistryCodeHash
-                || authority.provider != c.provider
-                || authority.providerCodeHash != _codeHashes[c.provider]
-                || authority.selectionHash == 0 || authority.presentationHash == 0
-        ) revert DiscoveryConfiguration(c.finalityRegistry);
-        _currentPin(authority);
-    }
-
     function _currentPin(AuthorityTypes.Route memory authority) private view {
         if (
             authority.registry.code.length == 0 || authority.registryCodeHash == 0
@@ -1002,5 +718,21 @@ contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
                 || authority.coordinator.code.length == 0 || authority.coordinatorCodeHash == 0
                 || authority.coordinator.codehash != authority.coordinatorCodeHash
         ) revert DiscoveryDependency(authority.registry);
+    }
+
+    /// @dev Values are copied from the original constructor-only fields. Configuration stays
+    /// a typed storage argument so selected-scope memory copies cannot alias this context.
+    function _readContext() private view returns (CurrentReads.Context memory x) {
+        x.core = core;
+        x.scopeEvidenceProvider = scopeEvidenceProvider;
+        x.deploymentChainId = deploymentChainId;
+        x.sourceConfigurationHash = sourceConfigurationHash;
+        x.profiles = _profiles;
+        x.collectionBinding = _collectionBinding;
+        x.collectionEntropyFactory = _collectionEntropyFactory;
+        x.collectionEntropyCodeHash = _collectionEntropyCodeHash;
+        x.publicationBinding = _publicationBinding;
+        x.scopedPolicyEntropyFactory = _scopedPolicyEntropyFactory;
+        x.scopedPolicyEntropyCodeHash = _scopedPolicyEntropyCodeHash;
     }
 }

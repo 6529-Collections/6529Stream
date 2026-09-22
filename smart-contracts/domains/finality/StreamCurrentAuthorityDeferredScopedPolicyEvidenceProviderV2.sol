@@ -77,6 +77,13 @@ import {
     StreamFinalityScopedPolicySnapshotReadsV2 as ScopedPolicySnapshots
 } from "./StreamFinalityScopedPolicySnapshotReadsV2.sol";
 
+import {
+    StreamCurrentAuthorityDeferredScopedPolicyBindingWorkerV2 as BindingWorker
+} from "./StreamCurrentAuthorityDeferredScopedPolicyBindingWorkerV2.sol";
+import {
+    StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2 as GraphWorker
+} from "./StreamCurrentAuthorityDeferredScopedPolicyGraphWorkerV2.sol";
+
 /// @notice Original source profiles with one governed collection-policy binding after deployment.
 /// @dev Native, scoped and per-scope full-policy graphs retain their fixed original anchors.
 /// Only this distinct capability may add collection-policy sources, once, after full validation.
@@ -102,41 +109,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         StreamFinalityScopedProviderReads.Config memory scoped,
         GraphBinding.FactoryBinding memory publicationFactory
     ) StreamCurrentAuthorityScopedPolicyBaseEvidenceProviderV2(original, scoped) {
-        Selection.Context memory c;
-        c.core = original.targets[0];
-        c.router = original.targets[2];
-        c.routerCodeHash = original.codeHashes[2];
-        c.chainId = original.chainId;
-        c.readGas = original.readGas;
-        c.profiles[0] = _profile(original, 0, keccak256(abi.encode(original)));
-        c.profiles[1] = Profiles.Profile(
-            Selection.profileHash(1),
-            scoped.targets[9],
-            scoped.codeHashes[9],
-            scoped.targets[8],
-            scoped.codeHashes[8],
-            scoped.targets[10],
-            scoped.codeHashes[10],
-            keccak256(abi.encode(scoped))
-        );
-        Selection.validate(c);
-        _sourceSelection = c;
-        _graph = GraphSelection.initialize(original, publicationFactory);
-        _policyCapability = DeferredGovernance.initialize(
-            original, keccak256(abi.encode(scoped)), _graph.binding.configurationHash
-        );
-        _sourceConfigurationHash = keccak256(
-            abi.encode(
-                keccak256(
-                    "6529STREAM_CURRENT_AUTHORITY_DEFERRED_FINALITY_SOURCE_CONFIGURATION_SCOPED_POLICY_V2"
-                ),
-                original.chainId,
-                address(this),
-                _policyCapability,
-                c.profiles[0],
-                c.profiles[1],
-                _graph.binding
-            )
+        _sourceConfigurationHash = BindingWorker.initialize(
+            _sourceSelection, _graph, _policyCapability, original, scoped, publicationFactory
         );
     }
 
@@ -182,7 +156,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         bytes32 outputHash
     ) external view override returns (DeferredTypes.Transition memory) {
         _requireUnbound();
-        return DeferredValidation.transition(_bindingContext(), policy, output, outputHash);
+        return BindingWorker.transition(_graph, _policyCapability, policy, output, outputHash);
     }
 
     function bindCollectionPolicy(
@@ -192,29 +166,18 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
     ) external override {
         _requireUnbound();
         _bindingInProgress = true;
-        DeferredTypes.Receipt memory receipt =
-            DeferredValidation.bind(_bindingContext(), policy, output, outputHash);
-        // The validator performs only reads. Publish every catalogue field together, once.
-        _policy = receipt.policy;
-        _sourceSelection.profiles[2] = receipt.profile;
-        _sourceSelection.policyOutput = receipt.output;
-        _sourceSelection.policyOutputCodeHash = receipt.outputCodeHash;
-        _sourceSelection.policyBound = true;
-        _policyReceipt = receipt;
-        _bindingInProgress = false;
-        emit CollectionPolicyBound(
-            receipt.capabilityHash,
-            receipt.bindingHash,
-            receipt.actionId,
-            DeferredTypes.proposalHash(receipt)
+        (bytes32 capabilityHash, bytes32 bindingHash, bytes32 actionId, bytes32 proposalHash) = BindingWorker.bind(
+            _policy,
+            _sourceSelection,
+            _graph,
+            _policyCapability,
+            _policyReceipt,
+            policy,
+            output,
+            outputHash
         );
-    }
-
-    function _bindingContext() private view returns (DeferredValidation.Context memory c) {
-        c.original = _graph.original;
-        c.capability = _policyCapability;
-        c.origin = _graph.origin;
-        c.authority = _graph.authority;
+        _bindingInProgress = false;
+        emit CollectionPolicyBound(capabilityHash, bindingHash, actionId, proposalHash);
     }
 
     function _requireUnbound() private view {
@@ -259,8 +222,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (Profiles.Sources memory)
     {
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return GraphSelection.sources(_graph, scope);
+        if (GraphWorker.isPolicy(_graph, scope)) {
+            return GraphWorker.sources(_graph, scope);
         }
         return Selection.current(_sourceSelection, scope);
     }
@@ -309,7 +272,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (StreamFinalityHostComponentFacts memory f)
     {
-        if (GraphSelection.isPolicy(_graph, scope)) {
+        if (GraphWorker.isPolicy(_graph, scope)) {
             ScopedPolicyReads.Config memory configured = _scopedPolicyConfig(scope);
             _pins();
             _scope(scope);
@@ -346,8 +309,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (bytes memory)
     {
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.manifest(_scopedPolicyConfig(scope), scope);
+        if (GraphWorker.isPolicy(_graph, scope)) {
+            return GraphWorker.manifest(_graph, scope);
         }
         if (!_policyScope(scope)) return super.inputManifestBytes(scope);
         return PolicyOperations.manifest(_policy, scope);
@@ -359,8 +322,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (StreamFinalityScopeInputs memory, bytes32, bytes32)
     {
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.inputs(_scopedPolicyConfig(scope), scope, manifestHash);
+        if (GraphWorker.isPolicy(_graph, scope)) {
+            return GraphWorker.inputs(_graph, scope, manifestHash);
         }
         if (!_policyScope(scope)) return super.requireFinalityScopeInputs(scope, manifestHash);
         return PolicyOperations.inputs(_policy, scope, manifestHash);
@@ -372,8 +335,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (IStreamFinalitySanctionReview.ReviewFacts memory)
     {
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.review(_scopedPolicyConfig(scope), scope, manifestHash);
+        if (GraphWorker.isPolicy(_graph, scope)) {
+            return GraphWorker.review(_graph, scope, manifestHash);
         }
         if (!_policyScope(scope)) return super.requireSanctionReviewFacts(scope, manifestHash);
         return PolicyOperations.review(_policy, scope, manifestHash);
@@ -385,10 +348,9 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         StreamFinalityComponentExpectation[] calldata components
     ) public view override returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
         _originalRegistry();
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            (StreamFinalityScopeInputs memory inputs_, bytes32 schema_, bytes32 canon_,) = ScopedPolicyOperations.prepared(
-                _scopedPolicyConfig(scope), scope, manifestHash, components, false
-            );
+        if (GraphWorker.isPolicy(_graph, scope)) {
+            (StreamFinalityScopeInputs memory inputs_, bytes32 schema_, bytes32 canon_,) =
+                GraphWorker.prepared(_graph, scope, manifestHash, components, false);
             return (inputs_, schema_, canon_);
         }
         if (!_policyScope(scope)) {
@@ -415,10 +377,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         )
     {
         _originalRegistry();
-        if (GraphSelection.isPolicy(_graph, scope)) {
-            return ScopedPolicyOperations.prepared(
-                _scopedPolicyConfig(scope), scope, manifestHash, components, true
-            );
+        if (GraphWorker.isPolicy(_graph, scope)) {
+            return GraphWorker.prepared(_graph, scope, manifestHash, components, true);
         }
         if (!_policyScope(scope)) {
             return
@@ -446,7 +406,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (address)
     {
-        return _scopedPolicyConfig(scope).targets[8];
+        return GraphWorker.snapshotHost(_graph, scope);
     }
 
     function scopedPolicySnapshotCodeHash(StreamFinalityScope calldata scope)
@@ -455,7 +415,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (bytes32)
     {
-        return _scopedPolicyConfig(scope).codeHashes[8];
+        return GraphWorker.snapshotCodeHash(_graph, scope);
     }
 
     function scopedPolicySnapshotValidationGas(StreamFinalityScope calldata scope)
@@ -479,8 +439,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (bytes32, uint64, bytes32)
     {
-        if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedContentRoot(scope);
-        return ScopedPolicyMetadata.root(_metadataConfigV2(scope), scope);
+        if (!GraphWorker.isPolicy(_graph, scope)) return super.scopedContentRoot(scope);
+        return GraphWorker.root(_graph, scope);
     }
 
     function scopedSnapshotHash(StreamFinalityScope calldata scope)
@@ -489,10 +449,10 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (bytes32)
     {
-        if (!GraphSelection.isPolicy(_graph, scope)) {
+        if (!GraphWorker.isPolicy(_graph, scope)) {
             return super.scopedSnapshotHash(scope);
         }
-        return ScopedPolicyMetadata.snapshot(_metadataConfigV2(scope), scope);
+        return GraphWorker.snapshot(_graph, scope);
     }
 
     function scopedManifest(StreamFinalityScope calldata scope)
@@ -501,8 +461,8 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         override
         returns (bool, bytes32)
     {
-        if (!GraphSelection.isPolicy(_graph, scope)) return super.scopedManifest(scope);
-        return ScopedPolicyMetadata.manifest(_metadataConfigV2(scope), scope);
+        if (!GraphWorker.isPolicy(_graph, scope)) return super.scopedManifest(scope);
+        return GraphWorker.scopeManifest(_graph, scope);
     }
 
     function _scopedPolicyConfig(StreamFinalityScope memory scope)
@@ -510,30 +470,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
         view
         returns (ScopedPolicyReads.Config memory c)
     {
-        (c,) = GraphSelection.current(_graph, scope);
-    }
-
-    function _metadataConfigV2(StreamFinalityScope memory scope)
-        private
-        view
-        returns (ScopedPolicyMetadata.Config memory c)
-    {
-        ScopedPolicyReads.Config memory s = _scopedPolicyConfig(scope);
-        c.snapshots = ScopedPolicySnapshots.Dependencies(
-            s.targets[0],
-            s.targets[1],
-            s.targets[2],
-            s.targets[8],
-            s.codeHashes[0],
-            s.codeHashes[1],
-            s.codeHashes[2],
-            s.codeHashes[8],
-            s.chainId,
-            s.readGas,
-            s.componentSourceGas
-        );
-        c.membership = s.targets[3];
-        c.membershipCodeHash = s.codeHashes[3];
+        return GraphWorker.configuration(_graph, scope);
     }
 
     function _originalRegistry() private view {
@@ -546,25 +483,6 @@ contract StreamCurrentAuthorityDeferredScopedPolicyEvidenceProviderV2 is
     }
 
     function _policyScope(StreamFinalityScope memory scope) private view returns (bool) {
-        if (scope.scopeType != StreamFinalityScopeType.COLLECTION) return false;
-        Profiles.Sources memory s = Selection.current(_sourceSelection, scope);
-        return s.profile.profileHash == Selection.profileHash(2);
-    }
-
-    function _profile(StreamFinalityNativeProviderReads.Config memory c, uint8 index, bytes32 hash)
-        private
-        pure
-        returns (Profiles.Profile memory)
-    {
-        return Profiles.Profile(
-            Selection.profileHash(index),
-            c.targets[9],
-            c.codeHashes[9],
-            c.targets[8],
-            c.codeHashes[8],
-            c.targets[10],
-            c.codeHashes[10],
-            hash
-        );
+        return GraphWorker.isCollectionPolicy(_sourceSelection, scope);
     }
 }

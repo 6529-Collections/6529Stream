@@ -49,6 +49,10 @@ import {
     StreamCurrentAuthorityScopedPolicyDiscoveryFactoryReadsV2 as PublicationFactoryReads
 } from "./StreamCurrentAuthorityScopedPolicyDiscoveryFactoryReadsV2.sol";
 
+import {
+    StreamFinalityLineageDeferredScopedPolicySelectionV2 as Selection
+} from "./StreamFinalityLineageDeferredScopedPolicySelectionV2.sol";
+
 /// @notice Additive deferred collection-policy discovery with strict native/scoped catalogue admission.
 /// @dev Profile2 has no zero catalogue entry or setter: a fixed provider's one-time governed receipt
 /// authenticates it on use. Constructor-only capability storage avoids reciprocal runtime cycles.
@@ -87,6 +91,7 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
     error DiscoveryUnsupportedProfile();
     error DiscoveryComponent(address target, bytes32 family);
     error DiscoveryIndex(uint256 index);
+    error CollectionPolicyPending();
 
     constructor(
         StreamFinalityDiscoveryTypes.Configuration memory c,
@@ -586,172 +591,6 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
         _deferredCapability = cap;
     }
 
-    function _boundPolicyProfile(StreamFinalityScope memory scope)
-        private
-        view
-        returns (Profiles.Profile memory p)
-    {
-        if (
-            scope.scopeType != StreamFinalityScopeType.COLLECTION || scope.collectionId == 0
-                || scope.tokenId != 0 || scope.scopeId != 0
-        ) revert DiscoveryUnsupportedProfile();
-        bytes memory raw = _read(
-            scopeEvidenceProvider,
-            abi.encodeCall(DeferredBinding.policyBindingCapability, ()),
-            192,
-            _configuration.readGas
-        );
-        if (keccak256(raw) != keccak256(abi.encode(_deferredCapability))) {
-            revert DiscoveryDependency(scopeEvidenceProvider);
-        }
-        raw = _readPendingAware(
-            abi.encodeCall(DeferredBinding.requirePolicyBinding, ()),
-            2272,
-            _configuration.componentGas
-        );
-        Deferred.Receipt memory r = abi.decode(raw, (Deferred.Receipt));
-        if (
-            keccak256(raw) != keccak256(abi.encode(r))
-                || r.capabilityHash != _deferredCapability.capabilityHash || r.bindingHash == 0
-                || r.actionId == 0 || r.bindingHash != Deferred.receiptHash(r)
-                || r.bindingHash
-                    != abi.decode(
-                        _read(
-                            scopeEvidenceProvider,
-                            abi.encodeCall(DeferredBinding.policyBindingHash, ()),
-                            32,
-                            _configuration.readGas
-                        ),
-                        (bytes32)
-                    ) || keccak256(abi.encode(r.scope)) != keccak256(abi.encode(scope))
-                || r.inventoryPlan == 0 || r.sourceFactoryDependenciesHash == 0
-                || r.sourceSetDataHash == 0 || r.policy.chainId != deploymentChainId
-                || r.policy.inventoryDependencyHash == 0 || r.policy.targets[0] != core
-                || r.policy.targets[1] != metadataHost
-                || r.policy.targets[2] != _configuration.router
-                || r.policy.targets[3] != _configuration.membership
-                || r.policy.targets[11] != _configuration.artist
-                || r.policy.targets[12] != _configuration.finalityRegistry
-                || r.policy.targets[13] != address(this)
-        ) revert DiscoveryConfiguration(scopeEvidenceProvider);
-        p = Deferred.boundProfile(
-            deploymentChainId,
-            scopeEvidenceProvider,
-            r.capabilityHash,
-            r.policy,
-            r.output,
-            r.outputCodeHash
-        );
-        if (keccak256(abi.encode(p)) != keccak256(abi.encode(r.profile))) {
-            revert DiscoveryConfiguration(scopeEvidenceProvider);
-        }
-        for (uint256 i; i < 22; ++i) {
-            _boundPin(r.policy.targets[i], r.policy.codeHashes[i]);
-        }
-        _boundPin(r.output, r.outputCodeHash);
-        _boundPin(r.sourceSet, r.sourceSetCodeHash);
-        _address(r.output, "core()", core);
-        _address(r.sourceSet, "core()", core);
-        _address(r.sourceSet, "factory()", p.entropyFactory);
-        if (
-            abi.decode(
-                        _read(
-                            r.sourceSet,
-                            abi.encodeWithSignature("inventoryPlan()"),
-                            32,
-                            _configuration.readGas
-                        ),
-                        (bytes32)
-                    ) != r.inventoryPlan
-                || abi.decode(
-                        _read(
-                            r.sourceSet,
-                            abi.encodeWithSignature("sourceSetDataHash()"),
-                            32,
-                            _configuration.readGas
-                        ),
-                        (bytes32)
-                    ) != r.sourceSetDataHash
-                || keccak256(
-                        _read(
-                            r.sourceSet,
-                            abi.encodeWithSignature("sourceScope()"),
-                            128,
-                            _configuration.readGas
-                        )
-                    ) != keccak256(abi.encode(scope))
-        ) revert DiscoveryDependency(r.sourceSet);
-        address checkpoint = abi.decode(
-            _read(
-                r.output, abi.encodeWithSignature("contentCheckpoint()"), 32, _configuration.readGas
-            ),
-            (address)
-        );
-        if (checkpoint.code.length == 0) revert DiscoveryDependency(checkpoint);
-        _address(checkpoint, "entropySourceSet()", r.sourceSet);
-        _boundProfileBindings(p);
-    }
-
-    /// @dev The original profile2 constructor joins are repeated before every deferred admission.
-    function _boundProfileBindings(Profiles.Profile memory p) private view {
-        if (p.profileHash != ProfileReads.profileHash(2) || p.configurationHash == 0) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        _boundPin(p.referenceRender, p.referenceRenderCodeHash);
-        _boundPin(p.snapshots, p.snapshotsCodeHash);
-        _boundPin(p.entropyFactory, p.entropyFactoryCodeHash);
-        _address(p.snapshots, "core()", core);
-        _address(p.snapshots, "metadataHost()", metadataHost);
-        _address(p.referenceRender, "core()", core);
-        _address(p.referenceRender, "metadataHost()", metadataHost);
-        _address(p.referenceRender, "metadataRouter()", _configuration.router);
-        _address(p.referenceRender, "snapshots()", p.snapshots);
-        _address(p.entropyFactory, "core()", core);
-        _address(p.entropyFactory, "metadataHost()", metadataHost);
-        _address(p.entropyFactory, "scopeMembershipHost()", _configuration.membership);
-        _supports(p.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
-        _supports(p.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
-        _supports(p.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
-        _supports(p.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
-    }
-
-    function _boundPin(address target, bytes32 expected) private view {
-        if (
-            expected == 0 || target.code.length == 0 || target.codehash != expected
-                || (_codeHashes[target] != 0 && _codeHashes[target] != expected)
-        ) revert DiscoveryDependency(target);
-    }
-
-    /// @dev Only the shared four-byte pending error crosses this fixed-provider read boundary.
-    /// All other failures retain the original bounded-read error and exact returned length.
-    function _readPendingAware(bytes memory input, uint256 size, uint256 cap)
-        private
-        view
-        returns (bytes memory raw)
-    {
-        uint256 required = cap + cap / 63 + 100000;
-        if (gasleft() <= required) {
-            revert StreamFinalityRouterEvidence.RouterEvidenceGas(gasleft(), required);
-        }
-        raw = new bytes(size);
-        address target = scopeEvidenceProvider;
-        bool ok;
-        uint256 returned;
-        assembly ("memory-safe") {
-            ok := staticcall(cap, target, add(input, 32), mload(input), add(raw, 32), size)
-            returned := returndatasize()
-        }
-        if (!ok) {
-            if (returned == 4 && bytes4(raw) == Deferred.CollectionPolicyPending.selector) {
-                revert Deferred.CollectionPolicyPending();
-            }
-            revert StreamFinalityRouterEvidence.RouterEvidenceRead(target, bytes4(input));
-        }
-        if (returned != size) {
-            revert StreamFinalityRouterEvidence.RouterEvidenceRead(target, bytes4(input));
-        }
-    }
-
     function _admitExact(address target, bytes32 expected) private {
         if (
             expected == 0 || target.code.length == 0 || target.codehash != expected
@@ -763,76 +602,19 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
     function _selectedProfile(StreamFinalityScope memory scope)
         private
         view
-        returns (Profiles.Profile memory p)
+        returns (Profiles.Profile memory)
     {
-        StreamMetadataSubjects.scopeSubject(deploymentChainId, core, scope);
-        _pin(scopeEvidenceProvider);
-        if (
-            abi.decode(
-                    _read(
-                        scopeEvidenceProvider,
-                        abi.encodeCall(Profiles.finalitySourceConfigurationHash, ()),
-                        32,
-                        _configuration.readGas
-                    ),
-                    (bytes32)
-                ) != sourceConfigurationHash
-        ) revert DiscoveryDependency(scopeEvidenceProvider);
-        bytes memory raw = _readPendingAware(
-            abi.encodeCall(Profiles.finalitySourcesForScope, (scope)), 384, _sourceSelectionGas()
-        );
-        Profiles.Sources memory selected = abi.decode(raw, (Profiles.Sources));
-        if (
-            keccak256(raw) != keccak256(abi.encode(selected))
-                || keccak256(abi.encode(selected.scope)) != keccak256(abi.encode(scope))
-        ) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        if (selected.profile.profileHash == ProfileReads.profileHash(2)) {
-            Profiles.Profile memory bound = _boundPolicyProfile(scope);
-            if (keccak256(abi.encode(selected.profile)) != keccak256(abi.encode(bound))) {
-                revert DiscoveryUnsupportedProfile();
-            }
-            return bound;
-        }
-        if (selected.profile.profileHash == ScopedPolicyDefinitions.PROFILE_HASH) {
-            Profiles.Profile memory actual = PublicationFactoryReads.current(
-                _publicationBinding,
-                _scopedPolicyEntropyFactory,
-                _scopedPolicyEntropyCodeHash,
-                scope
-            );
-            if (keccak256(abi.encode(selected.profile)) != keccak256(abi.encode(actual))) {
-                revert DiscoveryUnsupportedProfile();
-            }
-            return actual;
-        }
-        uint8 index = 3;
-        for (uint8 i; i < 2; ++i) {
-            if (selected.profile.profileHash == _profiles[i].profileHash) index = i;
-        }
-        if (
-            index == 3
-                || keccak256(abi.encode(selected.profile))
-                    != keccak256(abi.encode(_profiles[index]))
-        ) {
-            revert DiscoveryUnsupportedProfile();
-        }
-        if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-            if (index == 1) revert DiscoveryUnsupportedProfile();
-        } else if (
-            scope.scopeType == StreamFinalityScopeType.TOKEN
-                || scope.scopeType == StreamFinalityScopeType.RELEASE
-                || scope.scopeType == StreamFinalityScopeType.SEASON
-        ) {
-            if (index != 1) revert DiscoveryUnsupportedProfile();
-        } else {
-            revert DiscoveryUnsupportedProfile();
-        }
-        p = selected.profile;
-        _pin(p.referenceRender);
-        _pin(p.snapshots);
-        _pin(p.entropyFactory);
+        Selection.Context memory context = Selection.Context({
+            configuration: _configuration,
+            profiles: _profiles,
+            deferredCapability: _deferredCapability,
+            publicationBinding: _publicationBinding,
+            scopedPolicyEntropyFactory: _scopedPolicyEntropyFactory,
+            scopedPolicyEntropyCodeHash: _scopedPolicyEntropyCodeHash,
+            deploymentChainId: deploymentChainId,
+            sourceConfigurationHash: sourceConfigurationHash
+        });
+        return Selection.selected(context, _codeHashes, scope);
     }
 
     /// @dev Only a genuine per-scope factory graph or the provider's closed one-time policy
@@ -853,6 +635,13 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
         }
     }
 
+    function _boundPin(address target, bytes32 expected) private view {
+        if (
+            expected == 0 || target.code.length == 0 || target.codehash != expected
+                || (_codeHashes[target] != 0 && _codeHashes[target] != expected)
+        ) revert DiscoveryDependency(target);
+    }
+
     function _pinEntropy(StreamFinalityScope memory scope, address target) private view {
         if (_codeHashes[target] != 0) {
             _pin(target);
@@ -863,12 +652,6 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2 is
             revert DiscoveryDependency(target);
         }
         _boundPin(target, p.entropyFactoryCodeHash);
-    }
-
-    function _sourceSelectionGas() private view returns (uint256 cap) {
-        // Configured outer budget covers the provider's cold constructor-state projection as
-        // well as its nested graph read. A fixed small slack is not an execution-cost bound.
-        return _configuration.componentGas;
     }
 
     function _scopeConfiguration(StreamFinalityScope memory scope)
