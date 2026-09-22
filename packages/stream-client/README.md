@@ -462,6 +462,11 @@ contract profiles and outstanding larger-script work.
   mixed registries, preserving original Platform bodies, Archive transitions and
   repeated-import provenance through the original operation-60 CALL.
 
+- [Recovered dispute and repudiation histories](docs/current-artist-recovered-multiple-dispute-hydration.md)
+  carries original signed disputes, repudiation terminals and shared nonce/grant
+  accounting across complete recovered graphs through operation 60 and its
+  original direct/Safe CALL routes.
+
 - [Whole-v1 Safe coverage](docs/current-v1-safe-coverage.md) inventories the
   canonical genesis roles, current Artist operations and source-level caller
   restrictions. ABI encoding, reviewed workflows and runtime acceptance remain
