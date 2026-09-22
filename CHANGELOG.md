@@ -1,5 +1,14 @@
 # Changelog
 
+## Complete Artist history composition workers
+
+- Add separate full-source composition, historical-principal storage and
+  seven-owner preparation workers for pending, terminal, collaborator, dispute
+  and mixed unbound histories. Preserve original Archive clocks and one global
+  nonce/grant proof. Shared activation, Class Four integration, runtime and
+  seven-owner acceptance remain pending. See the
+  [composition guide](docs/integrations/artist-complete-history.md).
+
 ## Complete-history Consent adapters
 
 - Add separate historical-principal source, journal and grant-use adapters for

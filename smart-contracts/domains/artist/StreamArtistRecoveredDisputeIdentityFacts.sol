@@ -110,6 +110,48 @@ library StreamArtistRecoveredDisputeIdentityFacts {
         }
     }
 
+    /// @notice Original signature, nonce and grant predicates for an explicit standing principal.
+    /// @dev Identity signatures are a global record-hash map. Native partitioning can carry
+    /// these bytes in the bound Artist's bundle while nonce/grant authority belongs to a
+    /// former Artist or collaborator. Both inputs must come from canonical actual source rows.
+    function disputeUse(
+        IdentityRows memory identity,
+        IH.SignatureRow[] memory sourceSignatures,
+        D.DisputeRow memory row,
+        RH.Provenance memory p
+    ) public pure returns (uint256 grantIndexPlusOne) {
+        AD.Record memory record = row.record;
+        if (record.governanceActionId != 0 || identity.artistId != record.standing.artistId) {
+            _invalid();
+        }
+        _signatureRows(sourceSignatures, record.recordHash);
+        bytes32 lane = record.standing.delegation == 0
+            ? identity.artistId
+            : Delegation.lane(identity.artistId, record.signer);
+        RH.Point memory admitted = _nonce(
+            identity,
+            p,
+            record.standing.delegation == 0 ? uint8(1) : uint8(2),
+            lane,
+            record.nonce,
+            row.point.environmentHash
+        );
+        if (record.standing.delegation != 0) return _grant(identity, p, record, admitted) + 1;
+    }
+
+    /// @notice Original repudiation nonce/signature and paired-veto predicates for its Artist.
+    /// @dev Aggregate callers perform the native48 census once over the full owner2 journal.
+    function repudiationUse(
+        IdentityRows memory identity,
+        D.RepudiationRow memory row,
+        RH.Provenance memory p
+    ) public pure {
+        if (identity.artistId != row.record.artistId) _invalid();
+        _signature(identity, row.record.recordHash);
+        _nonce(identity, p, 1, identity.artistId, row.record.nonce, row.point.environmentHash);
+        if (row.terminal.phase == 2) _veto(identity, p, row);
+    }
+
     function _nonce(
         IdentityRows memory identity,
         RH.Provenance memory p,
@@ -277,10 +319,14 @@ library StreamArtistRecoveredDisputeIdentityFacts {
     }
 
     function _signature(IdentityRows memory identity, bytes32 hash) private pure {
+        _signatureRows(identity.signatures, hash);
+    }
+
+    function _signatureRows(IH.SignatureRow[] memory signatures, bytes32 hash) private pure {
         uint256 found;
-        for (uint256 i; i < identity.signatures.length; ++i) {
-            if (identity.signatures[i].recordHash != hash) continue;
-            if (identity.signatures[i].signature.length > 4096) _invalid();
+        for (uint256 i; i < signatures.length; ++i) {
+            if (signatures[i].recordHash != hash) continue;
+            if (signatures[i].signature.length > 4096) _invalid();
             ++found;
         }
         if (found != 1) _invalid();

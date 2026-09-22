@@ -21,6 +21,8 @@ library StreamArtistCompleteHistoryTypes {
     bytes32 internal constant SCHEMA = keccak256("6529STREAM_ARTIST_COMPLETE_HISTORY_V1");
     uint16 internal constant VERSION = 1;
     uint256 internal constant FEATURE = 33554432;
+    // Semantic features only: narrower aggregate transport tags never select this carrier.
+    uint256 internal constant ALLOWED = RH.RECORDS_GRAPH_FEATURES | FEATURE;
 
     struct Inventory {
         RH.Provenance provenance;

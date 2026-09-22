@@ -106,7 +106,9 @@ library StreamArtistCompleteHistoryCodec {
     {
         RH.ExportHeader memory h;
         (h, payload) = Payload.decode(raw, owner);
-        if ((h.requiredFeatures & C.FEATURE) == 0) _invalid();
+        if ((h.requiredFeatures & C.FEATURE) == 0 || (h.requiredFeatures & ~C.ALLOWED) != 0) {
+            _invalid();
+        }
         s = decode(owner, payload.semanticState, payload.provenance);
         if (keccak256(abi.encode(anchor)) != keccak256(abi.encode(anchorQuery(s)))) _invalid();
         if (owner != 2 && payload.nonces.length != 0) _invalid();

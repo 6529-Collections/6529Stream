@@ -256,7 +256,7 @@ contract StreamArtistCompleteHistoryIdentityActualTest is ArtistPrimaryCollabora
     }
 
     function _historyWithPartial(bool reuse, bool collaboratorPartial)
-        private
+        internal
         returns (bytes32 latest)
     {
         _rhCandidate(
