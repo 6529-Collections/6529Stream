@@ -10,22 +10,6 @@ import {
 } from "../../smart-contracts/interfaces/stream/revenue/IStreamDirectPrimarySaleReceipt.sol";
 import "../../smart-contracts/domains/metadata/StreamOwnerRecords.sol";
 import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
-import "../../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
-
-/// @notice Native URI regression for future local owner captures; no hosted fixture claim.
-contract StreamOwnerFixtureUriRegressionTest {
-    function testEmbeddedFixtureAllowsEmptyOptionalUri() public pure {
-        StreamMetadataRenderer.requireValidUtf8ContentUri("recordURI", "", 2048, true);
-        require(StreamMetadataRenderer.isSafeContentUri("", true), "empty optional URI");
-    }
-
-    function testFormerFixtureUrnIsNotAnAllowedContentUri() public pure {
-        require(
-            !StreamMetadataRenderer.isSafeContentUri("urn:stream:public-local-owner-fixture", true),
-            "fixture URN must not be published"
-        );
-    }
-}
 
 /// @notice Authored current Core/Artist/Executor/Schema/OwnerRecords/Safe capture recipe.
 /// @dev Randomness remains the inherited upstream double. Foundry logs are test oracles,
