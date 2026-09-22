@@ -1384,6 +1384,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Link verified collection script and dependency observations to two existing
+  Museum dossier requirement slots. Retain both complete packages, original
+  occurrence order and unavailable outcomes; preserve all nineteen packet
+  groups and forty-nine assessments without promoting completion.
+
 - Add unified Museum dossier V4 with exact canonical, physical-production,
   General and physical-transfer package replay. Preserve original selections,
   nineteen packet groups and forty-nine assessments; expose source conflicts,

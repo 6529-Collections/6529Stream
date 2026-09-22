@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Script and dependency requirement links](../../docs/museum-dossier-script-links-v1.md)
+retain a verified V4 dossier and collection-script package with original
+occurrence references, source comparisons and unchanged nineteen/forty-nine
+assessments.
+
 [Unified Museum dossier V4](../../docs/museum-unified-dossier-v4.md) combines the
 existing canonical semantic export with original physical-production, General
 and physical-transfer packages, retaining all nineteen packet groups and
