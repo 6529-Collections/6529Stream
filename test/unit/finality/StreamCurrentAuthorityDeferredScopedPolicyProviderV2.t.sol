@@ -512,7 +512,7 @@ contract StreamCurrentAuthorityDeferredScopedPolicyProviderV2Test {
         );
     }
 
-    function testFailedRoleBindingKeepsAllPendingAndFixedConfigurationRetryable() public {
+    function testRoleBindingFailureKeepsAllPendingAndFixedConfigurationRetryable() public {
         bytes32 fixedHash = host.finalitySourceConfigurationHash();
         Native.Config memory wrong = original;
         wrong.targets[0] = original.targets[1];

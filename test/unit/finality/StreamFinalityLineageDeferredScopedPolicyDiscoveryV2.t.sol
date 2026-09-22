@@ -581,6 +581,13 @@ contract StreamFinalityLineageDeferredScopedPolicyDiscoveryV2Test is LineageDisc
                 )
             )
         );
+        _put(
+            selected.entropyFactory,
+            abi.encodeCall(IStreamFinalityEntropySourceFactory.requireCurrentComponent, (scope)),
+            abi.encode(
+                _expectation(_state(address(entropy), keccak256("ENTROPY_COORDINATOR"), true))
+            )
+        );
         _record(selected.referenceRender, keccak256("REFERENCE_RENDER"), true);
         _staticServing(true);
         _sign();
