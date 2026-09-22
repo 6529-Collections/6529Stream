@@ -1,5 +1,15 @@
 # Changelog
 
+## Registry writer deployment capacity
+
+- Move seven existing authority-hydration encodings to one fixed typed writer,
+  preserving the Registry writer constructor, same-host CREATE path, guards,
+  actor, original Coordinator selectors and complete request types.
+- All six selected production products fit the original runtime/initcode limits.
+  Thirteen focused cases are type-checked and independently source-reviewed;
+  EVM execution remains pending. See the
+  [capacity guide](docs/guides/artist-registry-writer-capacity.md).
+
 ## Owner and Genesis Registry capture composition
 
 - Add optional read-only coverage of all 51 Genesis Registry names at the existing

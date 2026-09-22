@@ -89,6 +89,7 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
+import { StreamArtistRegistryAuthorityHydrationWriter } from "./StreamArtistRegistryAuthorityHydrationWriter.sol";
 import {
     IStreamArtistContentAuthority
 } from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
@@ -817,13 +818,15 @@ contract StreamArtistRegistryWriterExtension {
         onlyHost
         returns (bytes32)
     {
-        return IStreamArtistDelegationHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthorityWithDelegations(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.delegations(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthority(AH.Request calldata p) external onlyHost returns (bytes32) {
-        return IStreamArtistAuthorityHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthority(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.authority(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthorityWithPayout(AH.Request calldata p)
@@ -831,36 +834,41 @@ contract StreamArtistRegistryWriterExtension {
         onlyHost
         returns (bytes32)
     {
-        return IStreamArtistPayoutAuthorityHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthorityWithPayout(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.payout(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthorityWithEconomics(
         StreamArtistEconomicsHydrationTypes.Request calldata p
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistEconomicsAuthorityHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthorityWithEconomics(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.economics(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthorityWithReadiness(
         StreamArtistReadinessHydrationTypes.Request calldata p
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistReadinessAuthorityHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthorityWithReadiness(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.readiness(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthorityWithPublications(
         StreamArtistReadinessHydrationTypes.Request calldata p
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistPublicationAuthorityHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthorityWithPublications(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.publications(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthorityWithEntropyFindings(
         StreamArtistEntropyFindingHydrationTypes.Request calldata p
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistEntropyFindingHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateArtistAuthorityWithEntropyFindings(msg.sender, p);
+        return StreamArtistRegistryAuthorityHydrationWriter.hydrate(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function withdrawAttributionDispute(
