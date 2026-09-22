@@ -15,6 +15,9 @@ from .semantic_selection import SelectedClaim, SelectionDiagnostic, SemanticSele
 
 def select_recorded(source, policy_bytes, *, policy_hash):
     require(type(source) is RecordedSemanticSource, "concrete recorded semantic source required")
+    from .qualified_review_profile import QualifiedAccountReviewProfile
+    require(type(source.profile) is not QualifiedAccountReviewProfile,
+            "qualified profile requires its own exact-admission selection entrypoint")
     require(len(source.records) <= 512, "recorded selection record limit")
     require(keccak256(policy_bytes) == policy_hash, "recorded selection policy hash mismatch")
     policy = loads(policy_bytes, maximum=524288, canonical=True)

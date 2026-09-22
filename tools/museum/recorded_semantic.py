@@ -46,9 +46,10 @@ class RegisteredInterpretationCapture:
     def __init__(self, publication, profile, transport):
         from .typed_authority_profile import TypedAuthorityProfile
         from .declaration_lineage_profile import DeclarationLineageProfile
+        from .qualified_review_profile import QualifiedAccountReviewProfile
         require(type(publication) is IndependentPublicationAdapter and publication.provenance == "trusted_rpc",
                 "actual publication adapter required")
-        require(type(profile) in (AccountProjectionProfile, TypedAuthorityProfile, DeclarationLineageProfile) and type(transport) in (RpcTransport, ReplayTransport),
+        require(type(profile) in (AccountProjectionProfile, TypedAuthorityProfile, DeclarationLineageProfile, QualifiedAccountReviewProfile) and type(transport) in (RpcTransport, ReplayTransport),
                 "registered interpretation profile/transport required")
         self.publication = publication
         self.publication_bytes = publication.snapshot()
@@ -185,7 +186,8 @@ class RecordedSemanticSource:
                 if evidence["basis"] == "own_signed_statement":
                     require(all(p.selector.recorder == record.selector.recorder for p in matches), "own statement has another attestor")
         from .typed_authority_profile import NAMES as TYPED_NAMES
-        if record.selector.schema_id == schema_id(TYPED_NAMES[1]):
+        from .qualified_review_profile import NAMES as QUALIFIED_NAMES
+        if record.selector.schema_id in (schema_id(TYPED_NAMES[1]), schema_id(QUALIFIED_NAMES[1])):
             from .typed_declarations import validate_continuations
             validate_continuations(self, record, payload)
         from .declaration_lineage_profile import NAMES as LINEAGE_NAMES
