@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleAttestationCodec as AttestationAggregate } from "./StreamArtistRecoveredMultipleAttestationCodec.sol";
+import { StreamArtistRecoveredMultipleAttestationIdentityImport as AttestationImport } from "./StreamArtistRecoveredMultipleAttestationIdentityImport.sol";
 import { StreamArtistRecoveredMultipleConsentCodec as ConsentAggregate } from "./StreamArtistRecoveredMultipleConsentCodec.sol";
 import { StreamArtistRecoveredMultipleConsentIdentityImport as ConsentImport } from "./StreamArtistRecoveredMultipleConsentIdentityImport.sol";
 import { StreamArtistRecoveredMultipleCodec as Aggregate } from "./StreamArtistRecoveredMultipleCodec.sol";
@@ -30,6 +32,10 @@ library StreamArtistRecoveredIdentityTransportImport {
     function importEncoded(uint256[17] memory roots, bytes calldata encoded) public {
         (, AH.Query memory query, AH.OwnerData memory data, bytes32 value) =
             abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (AttestationAggregate.selected(data.typedState, 2)) {
+            AttestationImport.importState(roots, query, data.typedState, value);
+            return;
+        }
         if (ConsentAggregate.selected(data.typedState, 2)) {
             ConsentImport.importState(roots, query, data.typedState, value);
             return;

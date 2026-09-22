@@ -55,6 +55,13 @@
   Cases are type-checked; full current execution and added-frame gas remain pending.
   See the [frame note](docs/integrations/policy-inventory-current-frames.md).
 
+## Complete recovered attestation multiplicity
+
+- Add the explicit recovered multiple-Artist attestation profile, complete original
+  Archive acceptance clocks, global credential/grant conservation and atomic
+  whole-owner transport. Ten actual composition scenarios are authored and
+  type-checked; runtime and joined-capacity acceptance remain pending.
+
 ## Complete recovered consent multiplicity
 
 - Add a distinct typed operation60 profile for complete direct/delegated consent

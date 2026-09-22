@@ -311,3 +311,22 @@ writes and final Archive composition remain atomic. The
 defines exact witnesses, original-source boundaries and excluded later families.
 Thirteen focused scenarios are authored/type-checked; runtime, gas, joined
 capacity and deployment acceptance remain separate.
+
+## Recovered attestation multiplicity
+
+The additive `MULTIPLE_ATTESTATIONS` bit1048576 and version1 tag
+`6529STREAM_ARTIST_RECOVERED_MULTIPLE_ATTESTATIONS_V1` join complete original24
+with the preceding consent/delegation aggregate. The allowed mask is1049087;
+combined owner advertisement is2097151. Request, operation60, old tags, original
+host selectors and storage remain unchanged. Each owner carries complete rows;
+owner4 additionally carries one canonical complete original Archive inventory.
+Its collection queries contain only original op24 occurrences, projected from the
+complete authenticated owner4 journal into independent typed arrays. Complete
+admission queries, Artist anchors and other owner envelopes remain unchanged.
+Actual original owner4 proposal/acceptance clocks establish each op24 boundary,
+without ordering another owner's revisions. Global per-Artist C2PA chains and
+Consent+24 grant-use conservation complete before one atomic whole-owner apply.
+The [composition guide](../integrations/artist-recovered-multiple-attestations.md)
+defines the exact carrier, supported generation-one class1/class3 scope,
+original-source boundaries and authored regressions. Actual composition runtime,
+gas, joined capacity and release acceptance remain pending.

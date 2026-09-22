@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveredMultipleAttestationConsentImport as Attestations } from "./StreamArtistRecoveredMultipleAttestationConsentImport.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -17,8 +16,8 @@ import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
 import {
-    StreamArtistRecoveredMultipleConsentCodec as Codec
-} from "./StreamArtistRecoveredMultipleConsentCodec.sol";
+    StreamArtistRecoveredMultipleAttestationCodec as Codec
+} from "./StreamArtistRecoveredMultipleAttestationCodec.sol";
 import {
     StreamArtistRecoveredMultipleConsentValidation as Validation
 } from "./StreamArtistRecoveredMultipleConsentValidation.sol";
@@ -42,7 +41,7 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistContentTypes.sol";
 
 /// @notice One whole-owner validation and original empty-key installation of all Consent collections.
-library StreamArtistRecoveredMultipleConsentImport {
+library StreamArtistRecoveredMultipleAttestationConsentImport {
     function applyState(
         mapping(bytes32 => bytes32) storage policies,
         mapping(bytes32 => bytes32) storage economics,
@@ -61,7 +60,6 @@ library StreamArtistRecoveredMultipleConsentImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
-        if (Attestations.applyState(policies,economics,associated,associations,delegations,sales,latest,content,latestContent,royalties,freezes,latestFreezes,anchor,outer)) return true;
         if (!Codec.selected(outer, 6)) return false;
         (M.State memory s, Payload.Payload memory p) = Codec.outer(6, anchor, outer);
         ContentH.Bundle[] memory all = new ContentH.Bundle[](s.rows.length);

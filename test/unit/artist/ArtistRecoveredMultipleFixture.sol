@@ -572,6 +572,8 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
         multiRecovery[1] = recoveryHash;
     }
 
+    function _multiEstateCapabilities() internal pure virtual returns(uint32) { return 2304; }
+
     function _multiEstateRecovery() private {
         // This existing Safe is a guardian, not the first Artist's recovered authority.
         // Reuse it as the original estate successor; do not repeat its CREATE2 deployment.
@@ -590,7 +592,7 @@ abstract contract ArtistRecoveredMultipleFixture is StreamArtistRecoveredAuthori
             "identity_authority.replay.guardian_set_chain",
             keccak256(abi.encode(artistId, guardian.nonce))
         );
-        Estate.Execution memory activation = _estatePendingFixture(2304);
+        Estate.Execution memory activation = _estatePendingFixture(_multiEstateCapabilities());
         bytes32 estateHash = activation.expectedActivationRecordHash;
         (Estate.RequestRecord memory item,,) = ingress.estateActivationRecord(estateHash);
         Succ.DesignationRecord memory designation =

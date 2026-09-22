@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveredMultipleAttestationPreparation as AttestationAggregate } from "./StreamArtistRecoveredMultipleAttestationPreparation.sol";
 import {
     StreamArtistRecoveredMultipleConsentPreparation as ConsentAggregate
 } from "./StreamArtistRecoveredMultipleConsentPreparation.sol";
@@ -88,6 +89,12 @@ library StreamArtistRecoveredMultiplePreparation {
         Commit.Prepared memory prepared;
         prepared.admission = Admission.collect(destination, request);
         Admission.Certificate memory c = prepared.admission;
+        if (c.provenance.journals[4].length != 0) {
+            AttestationAggregate.Context memory context;
+            context.destination=destination;context.request=request;context.royalties=royalties;
+            context.requireInventory=requireInventory;context.admission=c;
+            return AttestationAggregate.encodeAdmitted(context);
+        }
         if (
             request.records.witnesses.length != 0 || royalties.length != 0
                 || Selection.required(
