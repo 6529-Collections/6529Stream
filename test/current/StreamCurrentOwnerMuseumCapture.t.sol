@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/CurrentCommerceConservationFixture.sol";
+import "../helpers/StreamCurrentOwnerCaptureFixture.sol";
+import {
+    IStreamCurrentTestOwnerStackDeployment
+} from "../helpers/StreamCurrentTestOwnerStackDeployment.sol";
 import {
     StreamDirectPrimarySaleTypes as OwnerDirect
 } from "../../smart-contracts/interfaces/stream/revenue/StreamDirectPrimarySaleTypes.sol";
@@ -15,9 +18,7 @@ import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
 /// @dev Randomness remains the inherited upstream double. Foundry logs are test oracles,
 /// not canonical RPC receipts; Python capture needs a separately coordinated local chain.
 /// The paid setup uses an explicit WAIVED DIRECT floor, not documentary MUSEUM/LITE evidence.
-contract StreamCurrentOwnerMuseumCaptureTest is CurrentCommerceConservationFixture {
-    StreamSchemaRegistry private ownerSchemas;
-    StreamOwnerRecords private ownerRecords;
+contract StreamCurrentOwnerMuseumCaptureTest is StreamCurrentOwnerCaptureFixture {
     OfficialSafe private ownerSafe;
     OfficialSafe private nextOwner;
     uint256[] private ownerKeys;
@@ -116,58 +117,6 @@ contract StreamCurrentOwnerMuseumCaptureTest is CurrentCommerceConservationFixtu
             "actual Safe admits the original DIRECT paid product"
         );
         _enableWaivedCommerceFloor();
-    }
-
-    function _deployAdditionalProducts() internal override {
-        ownerSchemas = StreamSchemaRegistry(
-            _artistArtifactCreate(
-                "smart-contracts/domains/metadata/StreamSchemaRegistry.sol:StreamSchemaRegistry",
-                abi.encode(address(executor))
-            )
-        );
-        StreamOwnerRecords.Configuration memory c;
-        c.core = address(core);
-        c.schemas = address(ownerSchemas);
-        c.executor = address(executor);
-        c.deploymentManifestHash = DEPLOYMENT_HASH;
-        // Raw CID of the exact manifest bytes below; publication/availability is not asserted.
-        c.manifestURI = "ipfs://bafkreihrgxci5bintrod4j2fsvklcrs2pibs6h6detr2jgseg3f4emrdpq";
-        c.manifestHash = keccak256("public local owner dossier recipe");
-        c.signatureGas = IStreamGasParameterHost.GasParameterConfig(
-            "METADATA_ERC1271_VERIFY_GAS", 400000, 90000, 2
-        );
-        c.dependencyReadGas = IStreamGasParameterHost.GasParameterConfig(
-            "METADATA_DEPENDENCY_READ_GAS", 300000, 50000, 2
-        );
-        ownerRecords = StreamOwnerRecords(
-            payable(_artistArtifactCreate(
-                    "smart-contracts/domains/metadata/StreamOwnerRecords.sol:StreamOwnerRecords",
-                    abi.encode(c)
-                ))
-        );
-        _assertDeployableProductionInstance(address(ownerSchemas));
-        _assertDeployableProductionInstance(address(ownerRecords));
-    }
-
-    function _additionalOperatingPolicies()
-        internal
-        view
-        override
-        returns (GovernanceActionPolicyEntry[] memory rows)
-    {
-        rows = new GovernanceActionPolicyEntry[](1);
-        rows[0] = GovernanceActionPolicyEntry(
-            1,
-            address(ownerSchemas),
-            ownerSchemas.registerDocument.selector,
-            address(ownerSchemas).codehash,
-            keccak256(abi.encode(DEPLOYMENT_HASH, address(ownerSchemas))),
-            1,
-            0,
-            0,
-            0
-        );
-        rows = _commerceFloorPolicies(rows);
     }
 
     function _register(
@@ -776,5 +725,24 @@ contract StreamCurrentOwnerMuseumCaptureTest is CurrentCommerceConservationFixtu
                 == second,
             "burn and failed appends preserve exact receipts carriers nonces and author histories"
         );
+    }
+
+    /// @dev The genuine helper CREATE consumes one host nonce before the original stack sequence.
+    /// Original product CREATEs retain their order and host context; addresses are freshly derived.
+    function _deployCurrentStack(address artist_, address platform) internal override {
+        address deployment = _artistArtifactCreate(
+            "test/helpers/StreamCurrentTestOwnerStackDeployment.sol:StreamCurrentTestOwnerStackDeployment",
+            abi.encode()
+        );
+        (bool ok, bytes memory result) = deployment.delegatecall(
+            abi.encodeCall(
+                IStreamCurrentTestOwnerStackDeployment.deployCurrentStack, (artist_, platform)
+            )
+        );
+        if (!ok) {
+            assembly ("memory-safe") {
+                revert(add(result, 32), mload(result))
+            }
+        }
     }
 }

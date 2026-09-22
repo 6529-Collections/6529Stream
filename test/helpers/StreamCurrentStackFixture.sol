@@ -105,7 +105,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         return _foundationPolicies;
     }
 
-    function _deployCurrentStack(address artist_, address platform) internal {
+    function _deployCurrentStack(address artist_, address platform) internal virtual {
         artist = artist_;
         executor = StreamGovernanceExecutor(
             payable(_artistArtifactCreate(
