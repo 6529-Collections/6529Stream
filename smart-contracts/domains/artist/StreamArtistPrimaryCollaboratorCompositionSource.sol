@@ -1,14 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredSanctionStage as SanctionSelection
+} from "./StreamArtistRecoveredSanctionStage.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionRows as SanctionRows
+} from "./StreamArtistRecoveredAggregateSanctionRows.sol";
+import {
     StreamArtistRecoveredSanctionHistoryTypes as H
 } from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+import {
+    StreamArtistPrimaryCollaboratorFamilyComposition as Families
+} from "./StreamArtistPrimaryCollaboratorFamilyComposition.sol";
 import {
     StreamArtistRecoveredMultipleGenerationConsentCollection as ConsentCollection
 } from "./StreamArtistRecoveredMultipleGenerationConsentCollection.sol";
 import {
-    StreamArtistPrimaryCollaboratorEncoding as Encoding
-} from "./StreamArtistPrimaryCollaboratorEncoding.sol";
+    StreamArtistRecoveredMultipleGenerationEncoding as Encoding
+} from "./StreamArtistRecoveredMultipleGenerationEncoding.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -58,15 +67,11 @@ import {
     StreamArtistRecoveredMultipleGenerationAttestationSource as Attestations
 } from "./StreamArtistRecoveredMultipleGenerationAttestationSource.sol";
 import {
-    StreamArtistPrimaryCollaboratorIdentityFacts as IdentityFacts
-} from "./StreamArtistPrimaryCollaboratorIdentityFacts.sol";
+    StreamArtistRecoveredMultipleGenerationIdentityFacts as IdentityFacts
+} from "./StreamArtistRecoveredMultipleGenerationIdentityFacts.sol";
 import {
     StreamArtistRecoveredMultipleGenerationConservation as Conservation
 } from "./StreamArtistRecoveredMultipleGenerationConservation.sol";
-
-import {
-    StreamArtistPrimaryCollaboratorComposition as Composition
-} from "./StreamArtistPrimaryCollaboratorComposition.sol";
 
 import {
     StreamArtistPrimaryCollaboratorTypes as PC
@@ -74,63 +79,48 @@ import {
 import {
     StreamArtistPrimaryCollaboratorSourceProof as Source
 } from "./StreamArtistPrimaryCollaboratorSourceProof.sol";
+import {
+    StreamArtistRecoveredIdentityHydrationTypes as IH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredIdentityHydrationTypes.sol";
 
 import {
-    StreamArtistPrimaryCollaboratorFamilyValidation as FamilyValidation
-} from "./StreamArtistPrimaryCollaboratorFamilyValidation.sol";
-
+    StreamArtistPrimaryCollaboratorCallFrames as FrameArgs
+} from "./StreamArtistPrimaryCollaboratorCallFrames.sol";
 import {
-    StreamArtistPrimaryCollaboratorFamilyCollection as FamilyCollection
-} from "./StreamArtistPrimaryCollaboratorFamilyCollection.sol";
+    StreamArtistPrimaryCollaboratorSourceCollection as Collection
+} from "./StreamArtistPrimaryCollaboratorSourceCollection.sol";
 import {
-    StreamArtistPrimaryCollaboratorFamilyFinish as FamilyFinish
-} from "./StreamArtistPrimaryCollaboratorFamilyFinish.sol";
+    StreamArtistPrimaryCollaboratorComposition as Composition
+} from "./StreamArtistPrimaryCollaboratorComposition.sol";
 
-import {
-    StreamArtistPrimaryCollaboratorPipelineCanonical as Canonical
-} from "./StreamArtistPrimaryCollaboratorPipelineCanonical.sol";
-
-/// @notice Original consent/attestation families, identity and global conservation followed by encoding.
-/// @dev Complete original graph and chronology are supplied after the unchanged source prelude.
-library StreamArtistPrimaryCollaboratorFamilyComposition {
-    error InvalidRecoveredHydrationProfile();
-
-    struct Context {
-        Composition.Context source;
-        PC.Proof proof;
-        Source.Result observed;
-        A.AttributionBundle[] history;
-    }
-
-    /// @dev External library entry only; all original phases precede terminal return.
-    function collect(Context calldata c) public view returns (Composition.Result memory result) {
-        H.Inventory memory empty;
-        bytes memory raw = _run(Canonical.family(msg.data[4:]), abi.encode(empty));
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function collect(Context calldata c, H.Inventory calldata sanctions)
-        public
-        view
-        returns (Composition.Result memory result)
-    {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(msg.data[4:]);
-        bytes memory raw = _run(context, history);
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function encoded(bytes calldata raw) public view returns (bytes memory) {
-        H.Inventory memory empty;
-        return _run(Canonical.family(raw), abi.encode(empty));
-    }
-
-    function encodedSupplemented(bytes calldata raw) public view returns (bytes memory) {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(raw);
-        return _run(context, history);
-    }
-
-    function _run(bytes memory context, bytes memory history) private view returns (bytes memory) {
-        bytes memory prepared = FamilyCollection.collect(context, history);
-        return FamilyFinish.finish(context, prepared, history);
+/// @notice Complete original source collection and revocation history before all family phases.
+library StreamArtistPrimaryCollaboratorCompositionSource {
+    function prepare(bytes calldata raw) public view returns (bytes memory) {
+        Composition.Context calldata x = FrameArgs.composition(raw);
+        (bytes memory proof, bytes memory source) = Collection.encoded(x.scope, x.provenance);
+        Source.Result memory observed = abi.decode(source, (Source.Result));
+        H.Inventory memory sanctions;
+        if (SanctionSelection.selected(x.provenance)) {
+            sanctions = SanctionRows.collect(
+                x.source.owners[6], x.scope.collections, x.provenance, observed.generations.bindings
+            );
+        }
+        A.AttributionBundle[] memory history = Revocations.collect(
+            x.source.owners[4],
+            x.scope,
+            RH.ownerProvenance(x.provenance, 4),
+            observed.generations,
+            observed.clocks.clocks,
+            sanctions.confirmations
+        );
+        bytes[] memory fields = new bytes[](4);
+        fields[0] = raw;
+        fields[1] = proof;
+        fields[2] = source;
+        fields[3] = abi.encode(history);
+        bytes[] memory args = new bytes[](2);
+        args[0] = FrameArgs.join(fields, true);
+        args[1] = abi.encode(sanctions);
+        return FrameArgs.join(args, false);
     }
 }

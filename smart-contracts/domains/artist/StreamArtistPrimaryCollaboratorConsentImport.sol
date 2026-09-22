@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredAggregateConsentProof as SupplementProof
-} from "./StreamArtistRecoveredAggregateConsentProof.sol";
-import {
-    StreamArtistRecoveredAggregateRatificationRows as Ratifications
-} from "./StreamArtistRecoveredAggregateRatificationRows.sol";
-import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import {
@@ -57,8 +51,14 @@ import {
     StreamArtistPrimaryCollaboratorDecode as Decode
 } from "./StreamArtistPrimaryCollaboratorDecode.sol";
 
+import {
+    StreamArtistPrimaryCollaboratorConsentDecode as ConsentDecode
+} from "./StreamArtistPrimaryCollaboratorConsentDecode.sol";
+
 /// @notice One whole-owner validation and original empty-key installation of all Consent collections.
 library StreamArtistPrimaryCollaboratorConsentImport {
+    error InvalidRecoveredHydrationProfile();
+
     function applyState(
         mapping(bytes32 => bytes32) storage policies,
         mapping(bytes32 => bytes32) storage economics,
@@ -78,9 +78,8 @@ library StreamArtistPrimaryCollaboratorConsentImport {
         bytes memory outer
     ) public returns (bool) {
         if (!Codec.selected(outer, 6)) return false;
-        (M.State memory s, Payload.Payload memory p,) = Decode.collect(6, anchor, outer);
-        G.Consents[] memory all =
-            SupplementProof.validate(s.rows, s.collections, p.provenance, outer);
+        ConsentDecode.Result memory decoded = ConsentDecode.collect(anchor, outer);
+        G.Consents[] memory all = decoded.rows;
         for (uint256 i; i < all.length; ++i) {
             Base.install(
                 policies,
@@ -90,7 +89,7 @@ library StreamArtistPrimaryCollaboratorConsentImport {
                 delegations,
                 sales,
                 latest,
-                s.collections[i],
+                decoded.collections[i],
                 all[i].rows.original
             );
             ContentImport.importContent(

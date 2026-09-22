@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
-} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
-import {
     StreamArtistRecoveredMultipleGenerationAttributionRecords as Storage
 } from "./StreamArtistRecoveredMultipleGenerationAttributionRecords.sol";
 import {
@@ -109,12 +106,18 @@ import {
     StreamArtistPrimaryCollaboratorTypes as PC
 } from "./StreamArtistPrimaryCollaboratorTypes.sol";
 
+import {
+    StreamArtistPrimaryCollaboratorAttributionDecode as AttributionDecode
+} from "./StreamArtistPrimaryCollaboratorAttributionDecode.sol";
+
 /// @notice One guarded owner4 apply; all collections and credential heads are checked before writes.
 library StreamArtistPrimaryCollaboratorAttributionImport {
+    error InvalidRecoveredHydrationProfile();
+
     struct Context {
         M.State scope;
-        OwnerPayload.Payload payload;
-        PC.Proof inventory;
+        RH.OwnerProvenance provenance;
+        bytes inventory;
         Proof.Result proof;
         bytes32[][] bindingHashes;
     }
@@ -125,28 +128,16 @@ library StreamArtistPrimaryCollaboratorAttributionImport {
     {
         if (!Codec.selected(outer, 4)) return false;
         Context memory c;
-        (c.scope, c.payload) = Codec.outer(4, anchor, outer);
-        SanctionTransport.requireFeature(c.scope.rows, outer);
-        (, bytes memory auxiliary) =
-            Codec.decodeAuxiliary(4, c.payload.semanticState, c.payload.provenance);
-        c.inventory = Codec.proof(4, auxiliary, c.payload.provenance);
-        if (keccak256(auxiliary) != keccak256(abi.encode(c.inventory))) _invalid();
-        c.proof = Proof.validate(c.scope, c.payload.provenance, c.inventory);
+        AttributionDecode.Result memory decoded = AttributionDecode.collect(anchor, outer);
+        c.scope = decoded.scope;
+        c.provenance = decoded.provenance;
+        c.inventory = decoded.inventory;
+        c.proof = decoded.proof;
         RevocationImport.check(c.proof.histories);
         Storage.check(s, c.proof.all);
         RevocationImport.install(c.proof.histories);
-        c.bindingHashes = new bytes32[][](c.inventory.bindings.bindings.length);
-        for (uint256 k; k < c.bindingHashes.length; ++k) {
-            c.bindingHashes[k] =
-                new bytes32[](c.inventory.bindings.bindings[k].bindings.rows.length);
-            for (uint256 g; g < c.bindingHashes[k].length; ++g) {
-                c.bindingHashes[k][g] =
-                c.inventory.bindings.bindings[k].bindings.rows[g].item.bindingHash;
-            }
-        }
-        Storage.install(
-            s, Storage.Context(c.scope, c.payload.provenance, c.bindingHashes, c.proof.all)
-        );
+        c.bindingHashes = AttributionDecode.bindingHashes(c.inventory);
+        Storage.install(s, Storage.Context(c.scope, c.provenance, c.bindingHashes, c.proof.all));
         return true;
     }
 

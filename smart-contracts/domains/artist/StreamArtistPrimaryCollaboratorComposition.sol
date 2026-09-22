@@ -1,15 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredSanctionHistoryTypes as H
-} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
-import {
-    StreamArtistRecoveredAggregateSanctionRows as SanctionRows
-} from "./StreamArtistRecoveredAggregateSanctionRows.sol";
-import {
-    StreamArtistRecoveredSanctionStage as SanctionSelection
-} from "./StreamArtistRecoveredSanctionStage.sol";
-import {
     StreamArtistPrimaryCollaboratorFamilyComposition as Families
 } from "./StreamArtistPrimaryCollaboratorFamilyComposition.sol";
 import {
@@ -83,8 +74,18 @@ import {
     StreamArtistRecoveredIdentityHydrationTypes as IH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredIdentityHydrationTypes.sol";
 
+import {
+    StreamArtistPrimaryCollaboratorCompositionSource as SourcePhase
+} from "./StreamArtistPrimaryCollaboratorCompositionSource.sol";
+
+import {
+    StreamArtistPrimaryCollaboratorCompositionContext as Canonical
+} from "./StreamArtistPrimaryCollaboratorCompositionContext.sol";
+
 /// @notice Complete authenticated generation graph followed by original rows and global conservation.
 library StreamArtistPrimaryCollaboratorComposition {
+    error InvalidRecoveredHydrationProfile();
+
     struct Context {
         T.SuiteConfiguration source;
         RH.Provenance provenance;
@@ -107,23 +108,10 @@ library StreamArtistPrimaryCollaboratorComposition {
         uint256 features;
     }
 
-    function collect(Context memory x) public view returns (Result memory result) {
-        (PC.Proof memory proof, Source.Result memory observed) =
-            Source.collect(x.scope, x.provenance);
-        H.Inventory memory sanctions;
-        if (SanctionSelection.selected(x.provenance)) {
-            sanctions = SanctionRows.collect(
-                x.source.owners[6], x.scope.collections, x.provenance, observed.generations.bindings
-            );
-        }
-        A.AttributionBundle[] memory history = Revocations.collect(
-            x.source.owners[4],
-            x.scope,
-            RH.ownerProvenance(x.provenance, 4),
-            observed.generations,
-            observed.clocks.clocks,
-            sanctions.confirmations
-        );
-        return Families.collect(Families.Context(x, proof, observed, history), sanctions);
+    /// @dev External library entry only; complete original Result ABI from the fixed phases.
+    function collect(Context calldata x) public view returns (Result memory result) {
+        bytes memory context = SourcePhase.prepare(Canonical.canonical(msg.data[4:]));
+        bytes memory output = Families.encodedSupplemented(context);
+        assembly ("memory-safe") { return(add(output, 32), mload(output)) }
     }
 }

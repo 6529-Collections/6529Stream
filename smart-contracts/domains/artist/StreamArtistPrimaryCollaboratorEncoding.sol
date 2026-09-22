@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistPrimaryCollaboratorEncodingContext as Domain
+} from "./StreamArtistPrimaryCollaboratorEncodingContext.sol";
+import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import {
@@ -40,16 +43,58 @@ library StreamArtistPrimaryCollaboratorEncoding {
         A.AttributionBundle[] history;
     }
 
-    function encode(Context memory c) public pure returns (Composition.Result memory result) {
+    /// @dev Complete canonical Context encoding from the fixed Family worker. This
+    /// returns the same full Result bytes without caller-side nested tuple decoding.
+    function encoded(bytes calldata raw) public pure returns (bytes memory) {
+        if (raw.length < 256 || raw.length % 32 != 0) assembly ("memory-safe") { revert(0, 0) }
+        uint256 at;
+        assembly ("memory-safe") { at := calldataload(raw.offset) }
+        if (at != 32) assembly ("memory-safe") { revert(0, 0) }
+        Context calldata c;
+        assembly ("memory-safe") { c := add(raw.offset, 32) }
+        return abi.encode(_plain(c));
+    }
+
+    function encodedRatified(bytes calldata raw, T.RatificationRecord[][] memory ratifications)
+        public
+        pure
+        returns (bytes memory)
+    {
+        if (raw.length < 256 || raw.length % 32 != 0) assembly ("memory-safe") { revert(0, 0) }
+        uint256 at;
+        assembly ("memory-safe") { at := calldataload(raw.offset) }
+        if (at != 32) assembly ("memory-safe") { revert(0, 0) }
+        Context calldata c;
+        assembly ("memory-safe") { c := add(raw.offset, 32) }
+        return abi.encode(_encode(c, ratifications));
+    }
+
+    /// @dev External entry only: validate the complete original eager tuple before any phase.
+    function encode(Context calldata c) public pure returns (Composition.Result memory result) {
+        Domain.requireValid(msg.data[4:]);
+        return _plain(c);
+    }
+
+    function _plain(Context calldata c) private pure returns (Composition.Result memory) {
         T.RatificationRecord[][] memory empty = new T.RatificationRecord[][](c.collectionCount);
         for (uint256 i; i < empty.length; ++i) {
             empty[i] = new T.RatificationRecord[](0);
         }
-        return encodeRatified(c, empty);
+        return _encode(c, empty);
     }
 
-    function encodeRatified(Context memory c, T.RatificationRecord[][] memory ratifications)
+    /// @dev External entry only; ratifications keeps its complete original memory decoder.
+    function encodeRatified(Context calldata c, T.RatificationRecord[][] memory ratifications)
         public
+        pure
+        returns (Composition.Result memory result)
+    {
+        Domain.requireValid(msg.data[4:]);
+        return _encode(c, ratifications);
+    }
+
+    function _encode(Context calldata c, T.RatificationRecord[][] memory ratifications)
+        private
         pure
         returns (Composition.Result memory result)
     {

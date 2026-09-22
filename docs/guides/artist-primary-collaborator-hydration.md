@@ -69,5 +69,63 @@ actual linked deployment, execution, or the gas cost of added delegate frames.
 The partial-refusal scenario uses the original corrective proposal entry and
 saved refusal cause. Its class2 governance approval remains an explicitly typed
 unit boundary. Revert expectations materialize nonce producer reads before the
-call under test. All twenty authored cases still await their separate exact
-native execution campaign; inherited fixture tests are not counted among them.
+call under test. The twelve focused leaf/nonce cases pass against genuine canonical native
+artifacts, including 256 fuzz runs. Their Archive/provenance inputs are explicitly
+typed boundaries; they do not execute operation60 or a Safe. The eight actual
+owner/Safe scenarios remain a separate unexecuted scope. Inherited fixture tests
+are not counted among these twenty cases.
+
+
+## Fixed proof and family transport
+
+The capacity successor moves complete proof decoding, source collection and
+family phases into fixed linked workers. It preserves every existing public ABI
+entry, selector and storage layout. Full typed proof canonicalization precedes
+calldata projections, and full source recollection still compares the complete
+original proof. Attribution and consent imports retain their target checks,
+revocation order, nonce accounting, storage roots and original write order.
+
+Composition and family entry points eagerly validate every original typed field,
+including otherwise unused suite addresses, before reading source or semantic
+phases. Typed-valid padded encodings normalize to the same complete values.
+Terminal ABI returns are limited to those external entry paths; internal callers
+must use their explicit encoded worker methods rather than rely on an EVM return
+from a Solidity internal call.
+
+Nineteen new codec, projection and phase regression cases are authored and
+typechecked. They include full tuple parity, malformed nested values, complete
+validation forwarding, deliberate refusal propagation and exact restored retry.
+Surrounding source/validation boundaries are explicitly typed; these new cases
+have not yet executed. The preceding capacity captures apply to their saved
+source before the current sanction/ratification integration. They remain
+historical size evidence, not a current integrated artifact set. Final linked
+execution, the additional delegate-call gas, actual Safe migration and cold
+transaction limits remain separate acceptance requirements. Failed predecessor
+code-generation and capacity captures are retained.
+
+### Current sanction and ratification integration
+
+The fixed phases retain both original Family collection overloads and the
+original `encodeRatified` entry. An empty sanction inventory still permits
+ratifications. Full sanction observation, local owner4 proof, confirmation-aware
+revocation/attestation checks and the consent supplement proof keep their original
+positions. Identity checks precede sanction identity and ratification facts;
+supplemented conservation takes precedence when both families are present.
+
+After complete row encoding, the original sanction catalogue is rechecked and
+both returned carrier arrays are assigned. The row0 global sanction inventory
+preserves its existing ratification records, and the independent feature bits
+remain explicit. The complete original nominal Context and Inventory domains
+are validated before phase reads, including unused array rows at the public
+encoders. Fixed internal encoded entries receive already-validated canonical
+contexts; they do not recursively invoke the public entry adapters.
+
+Eight additional typed-boundary regressions cover both overloads, complete
+forwarding, conservation precedence, literal combined carriers, late catalogue
+refusal and restored retry, owner4 current/item equality, and malformed unused
+fields with valid padded controls. Together with the nineteen preceding repair
+cases, these twenty-seven cases are authored and typechecked, not executed.
+The current-source integration preserves all twenty-nine existing ABI entries,
+twenty-three selectors and storage layouts of the ten modified original
+products. Current integrated bytecode capacity and execution still require fresh
+evidence; no earlier capture is relabelled as covering this source.

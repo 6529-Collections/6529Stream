@@ -80,57 +80,47 @@ import {
 } from "./StreamArtistPrimaryCollaboratorFamilyValidation.sol";
 
 import {
-    StreamArtistPrimaryCollaboratorFamilyCollection as FamilyCollection
-} from "./StreamArtistPrimaryCollaboratorFamilyCollection.sol";
+    StreamArtistPrimaryCollaboratorCallFrames as FrameArgs
+} from "./StreamArtistPrimaryCollaboratorCallFrames.sol";
 import {
-    StreamArtistPrimaryCollaboratorFamilyFinish as FamilyFinish
-} from "./StreamArtistPrimaryCollaboratorFamilyFinish.sol";
+    StreamArtistPrimaryCollaboratorFamilyComposition as Family
+} from "./StreamArtistPrimaryCollaboratorFamilyComposition.sol";
 
-import {
-    StreamArtistPrimaryCollaboratorPipelineCanonical as Canonical
-} from "./StreamArtistPrimaryCollaboratorPipelineCanonical.sol";
-
-/// @notice Original consent/attestation families, identity and global conservation followed by encoding.
-/// @dev Complete original graph and chronology are supplied after the unchanged source prelude.
-library StreamArtistPrimaryCollaboratorFamilyComposition {
-    error InvalidRecoveredHydrationProfile();
-
-    struct Context {
-        Composition.Context source;
-        PC.Proof proof;
-        Source.Result observed;
-        A.AttributionBundle[] history;
+/// @notice Original consent then attestation collection over the complete input context.
+library StreamArtistPrimaryCollaboratorFamilyCollection {
+    struct Result {
+        G.Consents[] consents;
+        bytes[] attestations;
+        T.RatificationRecord[][] ratifications;
     }
 
-    /// @dev External library entry only; all original phases precede terminal return.
-    function collect(Context calldata c) public view returns (Composition.Result memory result) {
-        H.Inventory memory empty;
-        bytes memory raw = _run(Canonical.family(msg.data[4:]), abi.encode(empty));
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function collect(Context calldata c, H.Inventory calldata sanctions)
+    function collect(bytes calldata raw, bytes calldata history)
         public
         view
-        returns (Composition.Result memory result)
+        returns (bytes memory)
     {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(msg.data[4:]);
-        bytes memory raw = _run(context, history);
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function encoded(bytes calldata raw) public view returns (bytes memory) {
-        H.Inventory memory empty;
-        return _run(Canonical.family(raw), abi.encode(empty));
-    }
-
-    function encodedSupplemented(bytes calldata raw) public view returns (bytes memory) {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(raw);
-        return _run(context, history);
-    }
-
-    function _run(bytes memory context, bytes memory history) private view returns (bytes memory) {
-        bytes memory prepared = FamilyCollection.collect(context, history);
-        return FamilyFinish.finish(context, prepared, history);
+        Family.Context calldata c = FrameArgs.family(raw);
+        H.Inventory memory sanctions = abi.decode(history, (H.Inventory));
+        (G.Consents[] memory consents, T.RatificationRecord[][] memory ratifications) = ConsentCollection.collectSupplemented(
+            ConsentCollection.Context(
+                c.source.source.owners[6],
+                c.source.provenance,
+                c.source.scope,
+                c.source.economics,
+                c.source.freezes
+            ),
+            c.observed.generations.bindings,
+            sanctions
+        );
+        bytes[] memory attestations = Attestations.collect(
+            c.source.source.owners[4],
+            Queries.project(c.source.scope, RH.ownerProvenance(c.source.provenance, 4)),
+            RH.ownerProvenance(c.source.provenance, 4),
+            c.source.attestations,
+            c.observed.generations,
+            c.observed.clocks.clocks,
+            sanctions.sanctions.length != 0
+        );
+        return abi.encode(Result(consents, attestations, ratifications));
     }
 }

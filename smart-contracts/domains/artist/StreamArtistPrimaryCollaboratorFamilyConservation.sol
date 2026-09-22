@@ -80,57 +80,40 @@ import {
 } from "./StreamArtistPrimaryCollaboratorFamilyValidation.sol";
 
 import {
-    StreamArtistPrimaryCollaboratorFamilyCollection as FamilyCollection
+    StreamArtistPrimaryCollaboratorCallFrames as FrameArgs
+} from "./StreamArtistPrimaryCollaboratorCallFrames.sol";
+import {
+    StreamArtistPrimaryCollaboratorFamilyComposition as Family
+} from "./StreamArtistPrimaryCollaboratorFamilyComposition.sol";
+import {
+    StreamArtistPrimaryCollaboratorFamilyCollection as Collection
 } from "./StreamArtistPrimaryCollaboratorFamilyCollection.sol";
-import {
-    StreamArtistPrimaryCollaboratorFamilyFinish as FamilyFinish
-} from "./StreamArtistPrimaryCollaboratorFamilyFinish.sol";
 
-import {
-    StreamArtistPrimaryCollaboratorPipelineCanonical as Canonical
-} from "./StreamArtistPrimaryCollaboratorPipelineCanonical.sol";
-
-/// @notice Original consent/attestation families, identity and global conservation followed by encoding.
-/// @dev Complete original graph and chronology are supplied after the unchanged source prelude.
-library StreamArtistPrimaryCollaboratorFamilyComposition {
-    error InvalidRecoveredHydrationProfile();
-
-    struct Context {
-        Composition.Context source;
-        PC.Proof proof;
-        Source.Result observed;
-        A.AttributionBundle[] history;
-    }
-
-    /// @dev External library entry only; all original phases precede terminal return.
-    function collect(Context calldata c) public view returns (Composition.Result memory result) {
-        H.Inventory memory empty;
-        bytes memory raw = _run(Canonical.family(msg.data[4:]), abi.encode(empty));
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function collect(Context calldata c, H.Inventory calldata sanctions)
+/// @notice Original identity and global conservation after original consent/attestation collection.
+library StreamArtistPrimaryCollaboratorFamilyConservation {
+    function requireValid(bytes calldata raw, bytes calldata rows, bytes calldata history)
         public
         view
-        returns (Composition.Result memory result)
     {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(msg.data[4:]);
-        bytes memory raw = _run(context, history);
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function encoded(bytes calldata raw) public view returns (bytes memory) {
-        H.Inventory memory empty;
-        return _run(Canonical.family(raw), abi.encode(empty));
-    }
-
-    function encodedSupplemented(bytes calldata raw) public view returns (bytes memory) {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(raw);
-        return _run(context, history);
-    }
-
-    function _run(bytes memory context, bytes memory history) private view returns (bytes memory) {
-        bytes memory prepared = FamilyCollection.collect(context, history);
-        return FamilyFinish.finish(context, prepared, history);
+        Family.Context calldata c = FrameArgs.family(raw);
+        Collection.Result memory observed = abi.decode(rows, (Collection.Result));
+        G.Consents[] memory consents = observed.consents;
+        bytes[] memory attestations = observed.attestations;
+        H.Inventory memory sanctions = abi.decode(history, (H.Inventory));
+        FamilyValidation.validate(
+            FamilyValidation.Context(
+                c.source.identities,
+                c.source.scope,
+                c.proof.bindings,
+                c.proof.archive,
+                c.observed.clocks.primary,
+                c.source.provenance,
+                c.observed.generations,
+                consents,
+                attestations
+            ),
+            sanctions,
+            observed.ratifications
+        );
     }
 }

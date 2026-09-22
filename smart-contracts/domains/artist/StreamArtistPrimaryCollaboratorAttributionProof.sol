@@ -33,81 +33,91 @@ import {
 } from "./StreamArtistPrimaryCollaboratorSourceProof.sol";
 
 import {
-    StreamArtistRecoveredSanctionHistoryTypes as H
-} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
+    StreamArtistPrimaryCollaboratorAttributionRows as Rows
+} from "./StreamArtistPrimaryCollaboratorAttributionRows.sol";
+import {
+    StreamArtistPrimaryCollaboratorCurrentClocks as CurrentClocks
+} from "./StreamArtistPrimaryCollaboratorCurrentClocks.sol";
 
 import {
-    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
-} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+    StreamArtistPrimaryCollaboratorAttributionSemantics as Semantics
+} from "./StreamArtistPrimaryCollaboratorAttributionSemantics.sol";
 
 import {
-    StreamArtistRecoveredAggregateSanctionLocalProof as SanctionLocal
-} from "./StreamArtistRecoveredAggregateSanctionLocalProof.sol";
+    StreamArtistPrimaryCollaboratorProofFrame as Frame
+} from "./StreamArtistPrimaryCollaboratorProofFrame.sol";
+import {
+    StreamArtistPrimaryCollaboratorCallFrames as FrameArgs
+} from "./StreamArtistPrimaryCollaboratorCallFrames.sol";
+import {
+    StreamArtistPrimaryCollaboratorAttributionPrelude as Prelude
+} from "./StreamArtistPrimaryCollaboratorAttributionPrelude.sol";
+import {
+    StreamArtistPrimaryCollaboratorAttributionFinish as Finish
+} from "./StreamArtistPrimaryCollaboratorAttributionFinish.sol";
+
+import {
+    StreamArtistPrimaryCollaboratorPipelineCanonical as Canonical
+} from "./StreamArtistPrimaryCollaboratorPipelineCanonical.sol";
 
 /// @notice Complete canonical owner4 rows, original clocks, revocations and attestations.
 /// @dev Keeps the original semantic rows for clock/revocation validation and a fresh
 /// attestation row view. Neither validation consumes or alters the original row bytes.
 library StreamArtistPrimaryCollaboratorAttributionProof {
+    error InvalidRecoveredHydrationProfile();
+
     struct Result {
         A.AttributionBundle[] histories;
         Original.Bundle[] all;
     }
 
+    /// @dev External library entry only: preserve the complete original return tuple.
     function validate(
-        M.State memory scope,
-        RH.OwnerProvenance memory provenance,
-        PC.Proof memory inventory
+        M.State calldata scope,
+        RH.OwnerProvenance calldata provenance,
+        PC.Proof calldata inventory
     ) public view returns (Result memory result) {
-        H.Inventory memory sanctions;
-        (scope, sanctions) = SanctionTransport.decode(scope);
-        if (sanctions.sanctions.length != 0) {
-            SanctionLocal.validate(provenance, 4, scope.collections, sanctions);
-        }
-        result.histories = new A.AttributionBundle[](scope.rows.length);
-        M.State memory attested =
-            M.State(scope.artists, scope.collections, new bytes[](scope.rows.length));
-        for (uint256 k; k < scope.rows.length; ++k) {
-            G.Attribution memory row = abi.decode(scope.rows[k], (G.Attribution));
-            if (keccak256(scope.rows[k]) != keccak256(abi.encode(row))) _invalid();
-            if (
-                keccak256(abi.encode(row.history.current))
-                    != keccak256(abi.encode(row.records.item))
-            ) _invalid();
-            result.histories[k] = row.history;
-            attested.rows[k] = abi.encode(row.records);
-        }
-        if (
-            keccak256(abi.encode(provenance))
-                != keccak256(abi.encode(RH.ownerProvenance(inventory.provenance, 4)))
-        ) _invalid();
-        Source.Result memory source = Source.requireCurrent(scope, inventory);
-        Revocations.validate(
-            result.histories,
-            scope,
-            provenance,
-            source.generations,
-            source.clocks.clocks,
-            sanctions.confirmations
-        );
-        result.all = Validation.validate(
-            attested,
-            provenance,
-            source.generations,
-            source.clocks.clocks,
-            sanctions.sanctions.length != 0
-        );
+        bytes memory output = _run(msg.data[4:]);
+        assembly ("memory-safe") { return(add(output, 32), mload(output)) }
     }
 
-    /// @dev Same complete proof with no unused external return-data decoding at the final currentness call.
     function requireValid(
-        M.State memory scope,
-        RH.OwnerProvenance memory provenance,
-        PC.Proof memory inventory
+        M.State calldata scope,
+        RH.OwnerProvenance calldata provenance,
+        PC.Proof calldata inventory
     ) public view {
-        validate(scope, provenance, inventory);
+        _run(msg.data[4:]);
     }
 
-    function _invalid() private pure {
-        revert RH.InvalidRecoveredHydrationProfile();
+    /// @dev The fixed caller has completed the original full canonical/local proof checks.
+    function validateEncoded(
+        M.State calldata scope,
+        RH.OwnerProvenance calldata provenance,
+        bytes calldata raw
+    ) public view returns (Result memory) {
+        bytes[] memory fields = new bytes[](3);
+        fields[0] = abi.encode(scope);
+        fields[1] = abi.encode(provenance);
+        fields[2] = raw;
+        bytes memory output = _run(FrameArgs.join(fields, false));
+        assembly ("memory-safe") { return(add(output, 32), mload(output)) }
+    }
+
+    function encoded(
+        M.State calldata scope,
+        RH.OwnerProvenance calldata provenance,
+        bytes calldata raw
+    ) public view returns (bytes memory) {
+        bytes[] memory fields = new bytes[](3);
+        fields[0] = abi.encode(scope);
+        fields[1] = abi.encode(provenance);
+        fields[2] = raw;
+        return _run(FrameArgs.join(fields, false));
+    }
+
+    function _run(bytes memory arguments) private view returns (bytes memory) {
+        arguments = Canonical.attribution(arguments);
+        bytes memory prepared = Prelude.prepare(arguments);
+        return Finish.finish(arguments, prepared);
     }
 }

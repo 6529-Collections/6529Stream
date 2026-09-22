@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredSanctionHistoryTypes as H
-} from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
-import {
     StreamArtistRecoveredMultipleGenerationConsentCollection as ConsentCollection
 } from "./StreamArtistRecoveredMultipleGenerationConsentCollection.sol";
 import {
@@ -80,57 +77,59 @@ import {
 } from "./StreamArtistPrimaryCollaboratorFamilyValidation.sol";
 
 import {
-    StreamArtistPrimaryCollaboratorFamilyCollection as FamilyCollection
+    StreamArtistPrimaryCollaboratorCallFrames as FrameArgs
+} from "./StreamArtistPrimaryCollaboratorCallFrames.sol";
+import {
+    StreamArtistPrimaryCollaboratorFamilyComposition as Family
+} from "./StreamArtistPrimaryCollaboratorFamilyComposition.sol";
+import {
+    StreamArtistPrimaryCollaboratorFamilyCollection as Collection
 } from "./StreamArtistPrimaryCollaboratorFamilyCollection.sol";
-import {
-    StreamArtistPrimaryCollaboratorFamilyFinish as FamilyFinish
-} from "./StreamArtistPrimaryCollaboratorFamilyFinish.sol";
 
-import {
-    StreamArtistPrimaryCollaboratorPipelineCanonical as Canonical
-} from "./StreamArtistPrimaryCollaboratorPipelineCanonical.sol";
-
-/// @notice Original consent/attestation families, identity and global conservation followed by encoding.
-/// @dev Complete original graph and chronology are supplied after the unchanged source prelude.
-library StreamArtistPrimaryCollaboratorFamilyComposition {
-    error InvalidRecoveredHydrationProfile();
-
-    struct Context {
-        Composition.Context source;
-        PC.Proof proof;
-        Source.Result observed;
-        A.AttributionBundle[] history;
+/// @notice Exact full original encoding following all source and conservation checks.
+library StreamArtistPrimaryCollaboratorFamilyEncoding {
+    function encoded(bytes calldata raw, bytes calldata rows) public pure returns (bytes memory) {
+        Family.Context calldata c = FrameArgs.family(raw);
+        Collection.Result memory observed = abi.decode(rows, (Collection.Result));
+        G.Consents[] memory consents = observed.consents;
+        bytes[] memory attestations = observed.attestations;
+        bytes[5] memory fields;
+        fields[0] = abi.encode(c.proof);
+        fields[1] = abi.encode(c.proof.accepted);
+        fields[2] = abi.encode(consents);
+        fields[3] = abi.encode(attestations);
+        fields[4] = abi.encode(c.history);
+        return Encoding.encodedRatified(
+            _encoding(c.source.scope.collections.length, c.source.features, fields),
+            observed.ratifications
+        );
     }
 
-    /// @dev External library entry only; all original phases precede terminal return.
-    function collect(Context calldata c) public view returns (Composition.Result memory result) {
-        H.Inventory memory empty;
-        bytes memory raw = _run(Canonical.family(msg.data[4:]), abi.encode(empty));
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function collect(Context calldata c, H.Inventory calldata sanctions)
-        public
-        view
-        returns (Composition.Result memory result)
+    function _encoding(uint256 count, uint256 features, bytes[5] memory fields)
+        private
+        pure
+        returns (bytes memory out)
     {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(msg.data[4:]);
-        bytes memory raw = _run(context, history);
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function encoded(bytes calldata raw) public view returns (bytes memory) {
-        H.Inventory memory empty;
-        return _run(Canonical.family(raw), abi.encode(empty));
-    }
-
-    function encodedSupplemented(bytes calldata raw) public view returns (bytes memory) {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(raw);
-        return _run(context, history);
-    }
-
-    function _run(bytes memory context, bytes memory history) private view returns (bytes memory) {
-        bytes memory prepared = FamilyCollection.collect(context, history);
-        return FamilyFinish.finish(context, prepared, history);
+        uint256 length = 256;
+        for (uint256 i; i < 5; ++i) {
+            length += fields[i].length - 32;
+        }
+        out = new bytes(length);
+        assembly ("memory-safe") {
+            mstore(add(out, 32), 32)
+            mstore(add(out, 64), count)
+            mstore(add(out, 96), features)
+        }
+        uint256 tail = 224;
+        for (uint256 i; i < 5; ++i) {
+            bytes memory field = fields[i];
+            assembly ("memory-safe") { mstore(add(add(out, 128), mul(i, 32)), tail) }
+            for (uint256 at = 32; at < field.length; at += 32) {
+                assembly ("memory-safe") {
+                    mstore(add(add(out, 64), tail), mload(add(add(field, 32), at)))
+                }
+                tail += 32;
+            }
+        }
     }
 }

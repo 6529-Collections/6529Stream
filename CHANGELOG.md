@@ -1,5 +1,15 @@
 # Changelog
 
+## Current collaborator transport integration
+
+- Preserve current sanction and ratification behavior through the fixed
+  collaborator proof/source/family workers, including both original collection
+  overloads, complete eager encoder inputs, supplemented conservation and late
+  catalogue/current carrier checks. All original public interfaces remain.
+  Add eight typed-boundary regressions; current type checks are separate from
+  pending native capacity and linked execution. See the
+  [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
+
 ## Complete Artist history client
 
 - Add separate compiler-backed Complete History carriers and original
@@ -165,6 +175,12 @@
   [integration guide](docs/integrations/artist-recovered-multiple-disputes.md).
 ## PRIMARY_ONLY collaborator hydration
 
+- Preserve complete proof/source checks and original family/import order through
+  fixed typed capacity workers, including eager validation of the full original
+  argument domain. Existing ABI entries, selectors and storage stay unchanged.
+- Twelve focused leaf/nonce cases pass with 256 fuzz runs; nineteen additional
+  codec/phase cases are authored. Source-qualified capacity does not establish
+  joined native ownership, actual-owner/Safe execution or added-call gas.
 - Add complete original collaborator proposal, identity, acceptance and nonce
   transport through the existing seven-owner recovered-authority operation60.
 - Retain partial and repeated primary acceptance history, original binding terms,

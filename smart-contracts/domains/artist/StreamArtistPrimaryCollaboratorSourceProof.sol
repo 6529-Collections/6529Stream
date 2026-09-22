@@ -40,6 +40,17 @@ import {
     StreamArtistRecoveredMultipleCodec as Scope
 } from "./StreamArtistRecoveredMultipleCodec.sol";
 
+import {
+    StreamArtistPrimaryCollaboratorSourceClocks as ClockValidation
+} from "./StreamArtistPrimaryCollaboratorSourceClocks.sol";
+import {
+    StreamArtistPrimaryCollaboratorProofPart0 as ProvenanceField
+} from "./StreamArtistPrimaryCollaboratorProofPart0.sol";
+
+import {
+    StreamArtistPrimaryCollaboratorSourceCollection as Collection
+} from "./StreamArtistPrimaryCollaboratorSourceCollection.sol";
+
 /// @notice Full source proof shared by the fixed preparation and per-owner import paths.
 /// @dev No caller supplies a reduced global journal, historical timestamp or current authority.
 library StreamArtistPrimaryCollaboratorSourceProof {
@@ -53,17 +64,10 @@ library StreamArtistPrimaryCollaboratorSourceProof {
         view
         returns (PC.Proof memory proof, Result memory result)
     {
-        if (p.origins.length == 0) _invalid();
-        RH.OriginEnvironment memory source = p.origins[p.origins.length - 1];
-        proof.provenance = p;
-        proof.bindings = Bindings.collect(source.owners[0], scope, RH.ownerProvenance(p, 0));
-        (proof.archive.catalogues, proof.archive.operations) = Catalogue.collect(p);
-        proof.archive = Records.collect(p, proof.archive.catalogues, proof.archive.operations);
-        result = _clocks(scope, proof);
-        proof.accepted = Acceptance.collect(
-            source.owners[3], scope, p, proof.bindings, proof.archive, result.clocks
-        );
-        proof.accounts = Accounts.collect(p, proof.archive);
+        (bytes memory proofBytes, bytes memory resultBytes) = Collection.encoded(scope, p);
+        bytes memory output = _pair(proofBytes, resultBytes);
+        // External library entry only; original two complete dynamic tuple outputs.
+        assembly ("memory-safe") { return(add(output, 32), mload(output)) }
     }
 
     function requireCurrent(M.State memory scope, PC.Proof memory proof)
@@ -71,54 +75,42 @@ library StreamArtistPrimaryCollaboratorSourceProof {
         view
         returns (Result memory result)
     {
-        (PC.Proof memory actual, Result memory observed) = collect(scope, proof.provenance);
-        if (keccak256(abi.encode(actual)) != keccak256(abi.encode(proof))) _invalid();
-        return observed;
+        (bytes memory actual, bytes memory observed) = Collection.encoded(scope, proof.provenance);
+        if (keccak256(actual) != keccak256(abi.encode(proof))) _invalid();
+        // Exact original Result bytes, already generated from the complete original source.
+        assembly ("memory-safe") { return(add(observed, 32), mload(observed)) }
     }
 
-    function _clocks(M.State memory scope, PC.Proof memory proof)
+    function requireEncoded(M.State memory scope, bytes memory raw) public view {
+        RH.Provenance memory p = abi.decode(ProvenanceField.decode(raw), (RH.Provenance));
+        (bytes memory actual,) = Collection.encoded(scope, p);
+        if (keccak256(actual) != keccak256(raw)) _invalid();
+    }
+
+    function _pair(bytes memory first, bytes memory second)
         private
-        view
-        returns (Result memory result)
+        pure
+        returns (bytes memory out)
     {
-        bool nonempty =
-            proof.archive.proposals.length != 0 || proof.archive.accepted.length != 0;
-        for (uint256 k; k < proof.bindings.bindings.length; ++k) {
-            for (uint256 g; g < proof.bindings.generations[k].length; ++g) {
-                if (proof.bindings.bindings[k].bindings.rows[g].terms.count != 0) nonempty = true;
-                bytes32 binding = proof.bindings.generations[k][g].bindingHash;
-                uint256 count;
-                for (uint256 i; i < proof.archive.accepted.length; ++i) {
-                    if (proof.archive.accepted[i].acceptance.bindingHash == binding) ++count;
-                }
-                if (
-                    Collaborator(
-                                proof.provenance
-                                .origins[proof.provenance.origins.length - 1].owners[1]
-                            ).acceptedCount(binding) != count
-                ) _invalid();
+        out = new bytes(first.length + second.length);
+        uint256 firstTail = first.length - 32;
+        assembly ("memory-safe") {
+            mstore(add(out, 32), 64)
+            mstore(add(out, 64), add(64, firstTail))
+        }
+        uint256 at = 64;
+        for (uint256 i = 32; i < first.length; i += 32) {
+            assembly ("memory-safe") {
+                mstore(add(add(out, 32), at), mload(add(add(first, 32), i)))
             }
+            at += 32;
         }
-        if (!nonempty) _invalid();
-        result.clocks = Clocks.validate(scope, proof.provenance, proof.bindings, proof.archive);
-        BindingProof.validate(
-            scope,
-            RH.ownerProvenance(proof.provenance, 0),
-            proof.bindings,
-            proof.archive,
-            result.clocks
-        );
-        for (uint256 i; i < proof.archive.proposals.length; ++i) {
-            bytes32 id = proof.archive.proposals[i].state.acceptedArtistId;
-            if (id != 0) Scope.artist(scope, id);
+        for (uint256 i = 32; i < second.length; i += 32) {
+            assembly ("memory-safe") {
+                mstore(add(add(out, 32), at), mload(add(add(second, 32), i)))
+            }
+            at += 32;
         }
-        for (uint256 i; i < proof.archive.accepted.length; ++i) {
-            Scope.artist(scope, proof.archive.accepted[i].join.artistId);
-        }
-        result.generations.catalogues = proof.archive.catalogues;
-        result.generations.operations = proof.archive.operations;
-        result.generations.bindings = proof.bindings.bindings;
-        result.generations.generations = proof.bindings.generations;
     }
 
     function _invalid() private pure {

@@ -43,23 +43,33 @@ import {
 
 /// @notice Post-write revalidation of the complete generation envelope and all seven original Archive cutoffs.
 library StreamArtistPrimaryCollaboratorCurrent {
+    struct Context {
+        M.State scope;
+        Payload.Payload payload;
+        PC.Proof inventory;
+        bytes raw;
+    }
+
     function requireCurrent(RH.Provenance memory full, AH.Query memory anchor, bytes memory outer)
         public
         view
     {
-        (M.State memory scope, Payload.Payload memory p) = Codec.outer(4, anchor, outer);
+        Context memory c;
+        (c.scope, c.payload) = Codec.outer(4, anchor, outer);
         if (
-            keccak256(abi.encode(p.provenance))
+            keccak256(abi.encode(c.payload.provenance))
                 != keccak256(abi.encode(RH.ownerProvenance(full, 4)))
         ) _invalid();
-        (, bytes memory raw) = Codec.decodeAuxiliary(4, p.semanticState, p.provenance);
-        PC.Proof memory inventory = Codec.proof(4, raw, p.provenance);
+        (, c.raw) = Codec.decodeAuxiliary(4, c.payload.semanticState, c.payload.provenance);
+        c.inventory = Codec.proof(4, c.raw, c.payload.provenance);
         if (
-            keccak256(raw) != keccak256(abi.encode(inventory))
-                || keccak256(abi.encode(full)) != keccak256(abi.encode(inventory.provenance))
+            keccak256(c.raw) != keccak256(abi.encode(c.inventory))
+                || keccak256(abi.encode(full)) != keccak256(abi.encode(c.inventory.provenance))
         ) _invalid();
-        Proof.requireValid(scope, p.provenance, inventory);
-        Catalogue.requireCurrent(full, inventory.archive.catalogues, inventory.archive.operations);
+        Proof.requireValid(c.scope, c.payload.provenance, c.inventory);
+        Catalogue.requireCurrent(
+            full, c.inventory.archive.catalogues, c.inventory.archive.operations
+        );
     }
 
     function _invalid() private pure {

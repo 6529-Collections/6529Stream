@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
+import {
     StreamArtistPrimaryCollaboratorTypes as G
 } from "./StreamArtistPrimaryCollaboratorTypes.sol";
 import {
@@ -15,6 +18,10 @@ import {
 import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
+
+import {
+    StreamArtistPrimaryCollaboratorProofDecode as ProofDecode
+} from "./StreamArtistPrimaryCollaboratorProofDecode.sol";
 
 /// @notice Canonical aggregate scope and complete whole-owner membership; no projected provenance.
 library StreamArtistPrimaryCollaboratorCodec {
@@ -34,7 +41,7 @@ library StreamArtistPrimaryCollaboratorCodec {
     ) public pure returns (bytes memory) {
         validate(owner, s, p);
         if (auxiliary.length == 0) _invalid();
-        _proof(owner, auxiliary, p);
+        ProofDecode.requireValid(ProofDecode.Context(owner, auxiliary, p));
         return abi.encode(SCHEMA, M.VERSION, owner, s, auxiliary);
     }
 
@@ -63,7 +70,7 @@ library StreamArtistPrimaryCollaboratorCodec {
                 || auxiliary.length == 0
         ) _invalid();
         validate(owner, s, p);
-        _proof(owner, auxiliary, p);
+        ProofDecode.requireValid(ProofDecode.Context(owner, auxiliary, p));
     }
 
     function outer(uint8 owner, AH.Query memory anchor, bytes memory raw)
@@ -167,20 +174,39 @@ library StreamArtistPrimaryCollaboratorCodec {
         pure
         returns (G.Proof memory result)
     {
-        return _proof(owner, raw, local);
+        ProofDecode.requireValid(ProofDecode.Context(owner, raw, local));
+        // The original ABI result is exactly the complete canonical abi.encode(G.Proof).
+        // Terminal return avoids re-decoding and copying its deeply nested memory tuple.
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
-    function _proof(uint8 owner, bytes memory raw, RH.OwnerProvenance memory local)
-        private
+    /// @notice Exact import prelude with complete typed scope/payload bytes retained.
+    /// @dev In particular the original 34-word NonceWord tuples are not decoded again
+    /// in the caller; no nonce field, publication or owner provenance is omitted.
+    function prepareSource(uint8 owner, AH.Query memory anchor, bytes memory raw)
+        public
         pure
-        returns (G.Proof memory result)
+        returns (bytes memory scopeBytes, bytes memory payloadBytes, bytes memory proofBytes)
     {
-        result = abi.decode(raw, (G.Proof));
-        if (
-            keccak256(raw) != keccak256(abi.encode(result))
-                || keccak256(abi.encode(local))
-                    != keccak256(abi.encode(RH.ownerProvenance(result.provenance, owner)))
-        ) _invalid();
+        (M.State memory s, Payload.Payload memory p) = outer(owner, anchor, raw);
+        (, proofBytes) = decodeAuxiliary(owner, p.semanticState, p.provenance);
+        ProofDecode.requireValid(ProofDecode.Context(owner, proofBytes, p.provenance));
+        scopeBytes = abi.encode(s);
+        payloadBytes = abi.encode(p);
+    }
+
+    /// @notice Exact owner4 import prelude. The complete original payload is decoded
+    /// and validated here before projecting its only consumed field, provenance.
+    function prepareAttribution(AH.Query memory anchor, bytes memory raw)
+        public
+        pure
+        returns (M.State memory s, RH.OwnerProvenance memory provenance, bytes memory auxiliary)
+    {
+        Payload.Payload memory p;
+        (s, p) = outer(4, anchor, raw);
+        SanctionTransport.requireFeature(s.rows, raw);
+        (, auxiliary) = decodeAuxiliary(4, p.semanticState, p.provenance);
+        provenance = p.provenance;
     }
 
     function _invalid() private pure {

@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveredAggregateRatificationFacts as RatificationFacts
+} from "./StreamArtistRecoveredAggregateRatificationFacts.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionIdentityFacts as SanctionIdentity
+} from "./StreamArtistRecoveredAggregateSanctionIdentityFacts.sol";
+import {
     StreamArtistRecoveredSanctionHistoryTypes as H
 } from "./StreamArtistRecoveredSanctionHistoryTypes.sol";
 import {
@@ -75,62 +81,45 @@ import {
     StreamArtistPrimaryCollaboratorSourceProof as Source
 } from "./StreamArtistPrimaryCollaboratorSourceProof.sol";
 
-import {
-    StreamArtistPrimaryCollaboratorFamilyValidation as FamilyValidation
-} from "./StreamArtistPrimaryCollaboratorFamilyValidation.sol";
-
-import {
-    StreamArtistPrimaryCollaboratorFamilyCollection as FamilyCollection
-} from "./StreamArtistPrimaryCollaboratorFamilyCollection.sol";
-import {
-    StreamArtistPrimaryCollaboratorFamilyFinish as FamilyFinish
-} from "./StreamArtistPrimaryCollaboratorFamilyFinish.sol";
-
-import {
-    StreamArtistPrimaryCollaboratorPipelineCanonical as Canonical
-} from "./StreamArtistPrimaryCollaboratorPipelineCanonical.sol";
-
-/// @notice Original consent/attestation families, identity and global conservation followed by encoding.
-/// @dev Complete original graph and chronology are supplied after the unchanged source prelude.
-library StreamArtistPrimaryCollaboratorFamilyComposition {
-    error InvalidRecoveredHydrationProfile();
-
+/// @notice Original identity checks and global grant conservation in their original order.
+library StreamArtistPrimaryCollaboratorFamilyValidation {
     struct Context {
-        Composition.Context source;
-        PC.Proof proof;
-        Source.Result observed;
-        A.AttributionBundle[] history;
+        bytes[] identities;
+        M.State scope;
+        PC.BindingInventory bindings;
+        PC.Inventory archive;
+        PC.PrimaryReceipt[] primary;
+        RH.Provenance provenance;
+        G.Inventory generations;
+        G.Consents[] consents;
+        bytes[] attestations;
     }
 
-    /// @dev External library entry only; all original phases precede terminal return.
-    function collect(Context calldata c) public view returns (Composition.Result memory result) {
-        H.Inventory memory empty;
-        bytes memory raw = _run(Canonical.family(msg.data[4:]), abi.encode(empty));
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function collect(Context calldata c, H.Inventory calldata sanctions)
-        public
-        view
-        returns (Composition.Result memory result)
-    {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(msg.data[4:]);
-        bytes memory raw = _run(context, history);
-        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
-    }
-
-    function encoded(bytes calldata raw) public view returns (bytes memory) {
-        H.Inventory memory empty;
-        return _run(Canonical.family(raw), abi.encode(empty));
-    }
-
-    function encodedSupplemented(bytes calldata raw) public view returns (bytes memory) {
-        (bytes memory context, bytes memory history) = Canonical.supplemented(raw);
-        return _run(context, history);
-    }
-
-    function _run(bytes memory context, bytes memory history) private view returns (bytes memory) {
-        bytes memory prepared = FamilyCollection.collect(context, history);
-        return FamilyFinish.finish(context, prepared, history);
+    function validate(
+        Context calldata c,
+        H.Inventory calldata sanctions,
+        T.RatificationRecord[][] calldata ratifications
+    ) public view {
+        IdentityFacts.validate(
+            IdentityFacts.Context(
+                c.identities, c.scope, c.bindings, c.archive, c.primary, c.provenance
+            )
+        );
+        if (sanctions.sanctions.length != 0) {
+            SanctionIdentity.validate(c.identities, c.scope, sanctions, c.provenance);
+        }
+        bool hasRatifications;
+        for (uint256 i; i < ratifications.length; ++i) {
+            if (ratifications[i].length != 0) hasRatifications = true;
+        }
+        if (hasRatifications) {
+            RatificationFacts.validate(c.identities, c.scope, c.provenance, ratifications);
+        }
+        Conservation.Context memory conservation = Conservation.Context(
+            c.identities, c.scope, c.consents, c.attestations, c.generations, c.provenance
+        );
+        if (sanctions.sanctions.length != 0) Conservation.validateSupplemented(conservation);
+        else if (hasRatifications) Conservation.validateRatified(conservation);
+        else Conservation.validate(conservation);
     }
 }
