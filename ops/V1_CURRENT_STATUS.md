@@ -18,84 +18,74 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-Expanded full v1 remains incomplete. Integrated source `736bdadd8` includes
-the current collaborator repair, client scheduling repairs and new Museum
-profiles and the checkpoint test-fixture repair. ABI208 checks **4,686 Solidity
-sources with zero errors** at `736bdadd8`. The canonical inventory
-contains **3,136 production paths**. Source integration and scoped tests do not
-establish full current-stack acceptance. RC1 and Sepolia remain unchanged.
+Expanded full v1 remains incomplete. Integrated source `356d091d3` adds the
+dispute validation size repair, corrected Artist Museum reviews, actual local
+General review capture, preservation fixture corrections and scoped bundle
+size repair. Source integration and successful component tests do not establish
+full current-stack acceptance. RC1 and Sepolia remain unchanged.
 
-- **Artist contracts:** `07265d875` integrates the current collaborator repair
-  while preserving the later sanction12/13 and ratification52 features. Both
-  independent and root source reviews are clear. Twenty-seven regression cases
-  are authored. All 49 owned libraries now fit their runtime/full-init limits
-  on exact `07265d875`; native test-helper preparation and execution continue. Complete History and
-  repeated-import/Safe test composition remain source-integrated, not accepted
-  through the full current graph. Class4 activation is still open.
-- **Museum exports:** `a35a05d34` adds authenticated native IIIF painting and
-  PREMIS events, agents and rights in the portable package. All **46 focused
-  root tests pass** on that exact source. Retained synthetic inputs remain
-  identified; this does not establish institutional acceptance or a current
-  public-chain capture.
-- **Museum declarations and review:** `b7cd578e` adds explicit correction,
-  merge and complete split lineage. `1a899e47` and `19f0ed0b` add a separately
-  registered profile and exact source/reviewer admission policies. Old profile
-  bytes and authority boundaries remain intact. Independent review is clear;
-  all **89 combined root tests pass**. These are software/replay controls.
-  Actual local registered account-review capture `8967a96e1` and selection
-  `9312a0cf2` now pass **21 root fixture/selection tests**, independently reviewed.
-  They use explicitly historical contract products. General review adapter
-  `869061b27` is now integrated with independent review and **36 focused root
-  tests passing**, including original curator grants, actual receipt ordering,
-  exact review scope, malformed-record isolation and offline replay. Those
-  tests use synthetic native responses; real General publication remains open.
-  The separate Artist review adapter is under construction. Account qualification
-  does not prove human independence.
-- **Clients and CI:** the original 51 Inventory lifecycles now run in 17
-  independent stages, with all assertions retained. Platform11/53 provider
-  regression coverage and measured timing inputs are integrated. The timing
-  tools pass 14 root checks; the eight new provider tests pass on the producer.
-  The current client plan has **246 files and 1,472 execution units** across
-  the same 16 shards and original time limits. The last remote matrix on the
-  older `bf0e803e` source passed 15 shards; its unpartitioned Inventory unit
-  timed out. The new `eb840cfb` remote preparation passes and its exact
-  246-file/3,354-registration/1,472-unit plan is authenticated; shards 1-9 pass
-  and 10-16 are running.
-  Follow-up source work stays local while this client run finishes, avoiding
-  cancellation of its evidence. Full CI is not green.
-- **Preservation execution:** the frozen `39ed249c` campaign passes all
-  **31 manifest cases**, including two 256-input fuzz properties. The complete
-  44-case campaign prepared 163 products across 25 verified native contexts,
-  then all 13 checkpoint cases failed in shared setup; the 31 manifest cases
-  were not redispatched in that failed attempt. The cause was missing fixture
-  module-interface and role-registry methods. Test-only repair `736bdadd8`
-  preserves production and all original test bodies. Its five new native
-  products pass; the next checkpoint run improves to **4 passed / 9 failed**.
-  Remaining failures are six scope-membership reads, one 256-item inventory
-  batch and two STATIC-lock cases. Their causes are being investigated; no
-  guard or gas ceiling has been weakened. Two earlier compiler-side lint
-  failures remain recorded.
-  The new genuine
-  checkpoint-to-manifest three-case batch is source-integrated as `158ba55c`
-  and remains unexecuted.
-- **Capacity and remaining integration:** current preservation size repairs
-  remain measured at `5104c901`/`402bad28`; checkpoints are 22,475 runtime bytes
-  and manifests 14,293. Older isolated Collector captures still contain the
-  original overruns and cannot reuse these newer results. Owner test artifact
-  assembly and isolated paid-flow optimization continue. Neither is actual
-  full current-stack acceptance, and the 500,000-gas paid-flow ceiling remains.
+- **Artist contracts:** all 49 collaborator workers fit on their recorded
+  `07265d875` source. Twelve codec/projection cases pass, including one
+  256-input fuzz case; fifteen further collaborator cases remain pending.
+  Five existing generation/dispute dependencies then exceeded the deployment
+  limit. The dispute repair `3ea28d8eb` is independently reviewed: runtime
+  sizes are 23,804 and 10,299 bytes; all ten focused tests pass, including
+  256 fuzz inputs. Original ABI, selectors and validation order are preserved.
+  Sol is repairing the other four generation dependencies. Complete History,
+  repeated import, Class4 and all-call Safe acceptance remain open.
+- **Museum reviews and exports:** earlier native media/PREMIS tests (46),
+  declaration/review tests (89), account-fixture selection tests (21) and
+  General adapter tests (36) remain evidence for their recorded sources.
+  Corrected Artist review source `1c04f351c` passes all **72 integrated tests**
+  and independent review, including exact assertion selection and isolation
+  of malformed unselected siblings. These are synthetic native RPC controls.
+  General capture `8fd6ae74c` now records six actual local signed/curatorial
+  publications and passes four integrated offline replay tests. Its 30 native
+  products are explicitly historical; the unused typed Artist constructor
+  boundary and empty Artist lane are retained. This is not latest-stack,
+  institutional qualification or independent-human evidence. Portable Artist
+  review packaging and broader Museum composition continue.
+- **Clients:** run `35721327181` completed preparation, **all 16 shards and
+  the required client aggregate** at merge source `8d2e2323` (dispatch
+  `eb840cfb`). All 246 files / 1,472 execution units / 3,354 registrations
+  completed under the original limits, including every Inventory stage and
+  Platform group. The temporary publication hold is resolved. This client
+  result does not make the full repository CI or current contracts accepted.
+- **Preservation:** the repaired component campaign at builder `4a631c0a`
+  passes **44/44 cases**: checkpoint 13, manifest V1 21 and V2 10, with no
+  failures or skips. Independent runtime review is finishing. The fixture
+  repair is integrated as `c145c4754`; production, original test bodies and
+  enclosing gas limits are unchanged. Earlier failed attempts remain recorded.
+  The actual checkpoint-to-manifest join also passes **3/3 cases**, with
+  independent trace review pending. Its positive diagnostic uses a 32m read
+  allowance; it does not prove execution within the 16,777,216 transaction
+  limit. The builder is now addressing that real gas boundary.
+- **Paid flows and remaining integration:** scoped bundle size repair
+  `6903b3b12` / `356d091d3` has independent source clearance. The measured
+  builder deployment is 24,435 runtime bytes, below 24,576, and its two
+  focused native tests pass. All 102 native-context and 191 test-source paths
+  match integrated `356d091d3`. Actual current paid-flow acceptance remains open. The
+  500,000-gas paid-flow ceiling is unchanged. Testing is preparing the original
+  Genesis/Owner execution closure with whole-context artifact reuse and
+  disjoint captures; assembly is not execution acceptance.
 
-Remaining delivery work includes missing feature combinations and Museum
-adapters, current deployment-size/gas checks, actual current-stack and all-call
-Safe integration, complete fuzz/stateful campaigns, full CI and matching release
-evidence, then a frozen candidate and new testnet demonstration. No new funding
-is required. Audit, production ceremonies and Lean remain separate.
+The last broad ABI check remains ABI208: 4,686 Solidity sources, zero errors
+at `736bdadd8`. Later source changes need the next combined check and inventory
+refresh. Full current-stack/Safe integration, comprehensive fuzz/stateful tests,
+gas/code-size checks, full CI and matching release evidence remain, followed by
+a frozen candidate and testnet demonstration. No new funding is required.
+Audit, production ceremonies and Lean remain separate.
 
-Automatic approval review has blocked several destination-specific task
-handoffs, a Class4 handoff read and the separate Artist native run. The exact
-permission questions remain pending; held payloads and operations have not
-been routed through alternative executors. Unaffected work continues.
+The owner's model mix is active: GPT-6 Sol builds bounded feature batches,
+GPT-6 Luna handles focused support and reviews, and Astra/root owns architecture,
+integration, difficult decisions and final acceptance. Existing visible tasks
+are reused; briefs are short and source-specific. Builders continue while
+independent frozen tests run. Deterministic checks use scripts, and idle or
+duplicated model work is avoided.
 
+Previously denied destination-specific handoffs, the Class4 handoff read and
+the separate Artist native run remain held pending their exact approvals.
+Those restrictions do not block the independent work described above.
 
 ## Earlier source-specific evidence
 

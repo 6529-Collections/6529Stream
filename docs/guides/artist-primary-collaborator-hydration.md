@@ -124,7 +124,9 @@ Eight additional typed-boundary regressions cover both overloads, complete
 forwarding, conservation precedence, literal combined carriers, late catalogue
 refusal and restored retry, owner4 current/item equality, and malformed unused
 fields with valid padded controls. Together with the nineteen preceding repair
-cases, these twenty-seven cases are authored and typechecked, not executed.
+cases, these twenty-seven cases are authored and typechecked. Twelve codec
+and projection cases have now executed successfully, including one 256-input
+fuzz property; the remaining fifteen and the complete integration remain open.
 The current-source integration preserves all twenty-nine existing ABI entries,
 twenty-three selectors and storage layouts of the ten modified original
 products. Current integrated bytecode capacity and execution still require fresh
@@ -133,10 +135,15 @@ evidence; no earlier capture is relabelled as covering this source.
 ## Dispute validation deployment boundary
 
 The current native dependency graph exposed an oversized existing dispute-chain
-validator (28,084 runtime bytes). Its final generation-head validation now uses
+validator (28,084 runtime bytes). Its resolution and final generation-head
+validation now use
 the fixed compiler-linked `StreamArtistRecoveredDisputeHistoryHeads` library.
 The three original chain entry points, flags, original-record checks and current
 state predicates remain unchanged. This is a pure code boundary with no storage
 or caller-selected implementation. Focused synthetic chain/head regressions are
 separate from original-producer and complete hydration/Safe acceptance.
-Native size and linked execution evidence must match the repaired source.
+On exact `3ea28d8eb`, the original library is 23,804 runtime bytes and the
+helper is 10,299. All ten focused regressions pass, including 256 fuzz inputs.
+Independent review confirms the original checks and order are unchanged.
+This establishes the bounded validation boundary; full hydration and Safe
+execution still need their own matching evidence.

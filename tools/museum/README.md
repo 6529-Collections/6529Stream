@@ -387,6 +387,12 @@ join original signed or curatorial authority to authenticated publication order,
 exact review selection and offline graph replay. Malformed unselected statements
 remain ineligible evidence without blocking unrelated selected exports.
 
+[Native Artist review selection](../../docs/museum-native-artist-review.md)
+binds reviews to exact original assertion pointers and historical authority.
+[Recorded General reviews](../../docs/museum-general-review-capture-v1.md)
+replay actual local signed and curator publications with explicit historical
+native-product and unused Artist-boundary qualifications.
+
 ## Environment
 
 Run from the repository root with Python 3.11 or later. Create an isolated
