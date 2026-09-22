@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
+import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
 import {
     StreamArtistRecoveredPayloadHydration as Publications
 } from "./StreamArtistRecoveredPayloadHydration.sol";
@@ -93,7 +97,7 @@ library StreamArtistRecoveredHydrationOwnerPayload {
                 || header.semanticRecordCount != payload.provenance.journal.length
                 || payload.semanticState.length == 0
                 || header.semanticInventory != keccak256(payload.semanticState)
-                || (header.requiredFeatures & ~RH.KNOWN_FEATURES) != 0
+                || (header.requiredFeatures & ~XF.KNOWN_FEATURES) != 0
                 || (last != 0 && (header.requiredFeatures & RH.REPEATED_IMPORT) == 0)
         ) revert RH.InvalidRecoveredHydrationProfile();
         validateNonceShape(era.checkpoint, payload.nonces);

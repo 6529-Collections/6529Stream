@@ -2,6 +2,10 @@
 pragma solidity ^0.8.19;
 
 import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
+
+import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 
@@ -47,7 +51,7 @@ library StreamArtistRecoveredHydrationCodec {
             c.profile != RH.PROFILE || c.version != RH.VERSION || c.ownerIndex != ownerIndex
                 || c.ownerDomain != RH.ownerDomain(ownerIndex)
                 || c.checkpointSchema != RH.CHECKPOINT || c.stateSchema != RH.ownerTag(ownerIndex)
-                || (requiredFeatures & ~RH.KNOWN_FEATURES) != 0
+                || (requiredFeatures & ~XF.KNOWN_FEATURES) != 0
                 || (requiredFeatures & c.supportedFeatures) != requiredFeatures
         ) revert RH.InvalidRecoveredHydrationProfile();
     }

@@ -214,6 +214,26 @@ contract StreamArtistRecoveredHydrationOwnerPayloadTest {
         return Chronology.compareOwner(p, index, a, b);
     }
 
+    function testOwnerPayloadAcceptsRecognizedExtensionBitsWithoutChangingItsContents() external pure {
+        for (uint8 index; index < 7; ++index) {
+            Payload.Payload memory p = _payload(index);
+            RH.ExportHeader memory h = _header(index, p);
+            // Outer transport validation alone does not admit an owner's semantic profile.
+            h.requiredFeatures |= 4194304 | 8388608 | 16777216;
+            (RH.ExportHeader memory decoded, Payload.Payload memory out) =
+                Payload.decode(Payload.encode(index, h, p), index);
+            assert(keccak256(abi.encode(decoded)) == keccak256(abi.encode(h)));
+            assert(keccak256(abi.encode(out)) == keccak256(abi.encode(p)));
+        }
+    }
+
+    function testFuzzOwnerPayloadRejectsEveryUnknownExtensionBit(uint8 offset) external {
+        Payload.Payload memory p = _payload(2);
+        RH.ExportHeader memory h = _header(2, p);
+        h.requiredFeatures |= uint256(1) << (25 + uint256(offset) % 231);
+        _reject(h, p);
+    }
+
     function testOwnerPayloadRoundTripPreservesOneOwnerAndBothOriginal35Occurrences()
         external
         pure
@@ -359,7 +379,7 @@ contract StreamArtistRecoveredHydrationOwnerPayloadTest {
     function testOwnerPayloadRejectsUnsupportedFeatureAndNativeBoundaryCorruption() external {
         Payload.Payload memory p = _payload(2);
         RH.ExportHeader memory h = _header(2, p);
-        h.requiredFeatures |= 1024;
+        h.requiredFeatures |= uint256(1) << 25;
         _reject(h, p);
         p = _repeated();
         p.provenance.journal[2].position.point.ownerRevision = 3;

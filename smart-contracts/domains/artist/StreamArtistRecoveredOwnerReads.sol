@@ -2,6 +2,10 @@
 pragma solidity ^0.8.19;
 
 import {
+    StreamArtistExtendedHydrationFeatures as XF
+} from "../../interfaces/stream/artist/StreamArtistExtendedHydrationFeatures.sol";
+
+import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import {
@@ -39,7 +43,7 @@ library StreamArtistRecoveredOwnerReads {
         uint8 index = ownerIndex(binding.domain);
         bytes4 selector = bytes4(data[:4]);
         if (selector == API.recoveredAuthorityHydrationCapability.selector) {
-            if ((features & ~RH.KNOWN_FEATURES) != 0) revert RH.InvalidRecoveredHydrationProfile();
+            if ((features & ~XF.KNOWN_FEATURES) != 0) revert RH.InvalidRecoveredHydrationProfile();
             return abi.encode(
                 RH.Capability(
                     RH.PROFILE,
