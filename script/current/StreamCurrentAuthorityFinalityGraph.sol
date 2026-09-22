@@ -10,7 +10,34 @@ import {
     StreamCurrentArtistFactoryCalls
 } from "./StreamCurrentArtistFactoryCalls.sol";
 
-import "./StreamCurrentGraphCreation.sol";
+import { StreamCurrentGraphKinds } from "./StreamCurrentGraphKinds.sol";
+import { StreamArchivalCoverage } from "../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
+import { StreamArtistOnboardingCoordinator } from "../../smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol";
+import { StreamArtistOnboardingRegistry } from "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
+import { StreamArweaveCheckpointVerifier } from "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
+import { StreamArweaveObjectCheckpointVerifier } from "../../smart-contracts/domains/preservation/StreamArweaveObjectCheckpointVerifier.sol";
+import { StreamAssetPolicyRegistry } from "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
+import { StreamCollectionSnapshots } from "../../smart-contracts/domains/metadata/StreamCollectionSnapshots.sol";
+import { StreamCollectionTokenInventory } from "../../smart-contracts/domains/finality/StreamCollectionTokenInventory.sol";
+import { StreamContentLeafManifest } from "../../smart-contracts/domains/finality/StreamContentLeafManifest.sol";
+import { StreamCoreFinalityAdapter } from "../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
+import { StreamExternalArtifactCoverage } from "../../smart-contracts/domains/preservation/StreamExternalArtifactCoverage.sol";
+import { StreamFinalityArtifactCoverage } from "../../smart-contracts/domains/preservation/StreamFinalityArtifactCoverage.sol";
+import { StreamFinalityCoordinatorInventory } from "../../smart-contracts/domains/finality/StreamFinalityCoordinatorInventory.sol";
+import { StreamFinalityEntropySourceFactory } from "../../smart-contracts/domains/finality/StreamFinalityEntropySourceFactory.sol";
+import { StreamFinalityScopeMembership } from "../../smart-contracts/domains/finality/StreamFinalityScopeMembership.sol";
+import { StreamFinalityServingHostAdapter } from "../../smart-contracts/domains/finality/StreamFinalityServingHostAdapter.sol";
+import { StreamGovernanceExecutor } from "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
+import { StreamMintLedger } from "../../smart-contracts/domains/mint/StreamMintLedger.sol";
+import { StreamMintManager } from "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import { StreamOnchainContentCheckpoint } from "../../smart-contracts/domains/finality/StreamOnchainContentCheckpoint.sol";
+import { StreamReferenceRenderPublication } from "../../smart-contracts/domains/preservation/StreamReferenceRenderPublication.sol";
+import { StreamRevenueResolver } from "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
+import { StreamRoleRegistry } from "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
+import { StreamRoyaltyResolver } from "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
+import { StreamSplitFactory } from "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
+import { StreamSystemManifest } from "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
+import { StreamArtistOnboardingTypes as T } from "../../smart-contracts/interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import "./StreamCurrentAuthorityGraphCreation.sol";
 import {
     StreamArtistCurrentAuthorityTypes as CurrentAuthority
@@ -131,7 +158,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
     address[6] internal assemblyRouterAdapters;
     address internal assemblyMetadataAdapter;
 
-    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+    function _graphCreation(StreamCurrentGraphKinds.Kind kind)
         internal
         view
         virtual
@@ -197,13 +224,13 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         graphRendererCatalogId = keccak256("STREAM_CURRENT_REFERENCE_RENDERER_CLASS_V1");
         assemblySchemas = StreamSchemaRegistry(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamSchemaRegistry, abi.encode(executor_)
+                    StreamCurrentGraphKinds.Kind.StreamSchemaRegistry, abi.encode(executor_)
                 ))
         );
         assemblyStore = StreamSchemaDocumentStore(assemblySchemas.chunkStore());
         assemblyMetadata = StreamCollectionMetadataV1(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamCollectionMetadataV1,
+                    StreamCurrentGraphKinds.Kind.StreamCollectionMetadataV1,
                     abi.encode(
                         StreamCollectionMetadataV1.Configuration(
                             suite.core,
@@ -315,7 +342,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         }
         assemblyTokens = StreamCollectionTokenInventory(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamCollectionTokenInventory,
+                    StreamCurrentGraphKinds.Kind.StreamCollectionTokenInventory,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyExecutor),
@@ -325,7 +352,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
         assemblyMembership = StreamFinalityScopeMembership(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamFinalityScopeMembership,
+                    StreamCurrentGraphKinds.Kind.StreamFinalityScopeMembership,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyMetadata),
@@ -337,7 +364,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
         assemblyCoordinators = StreamFinalityCoordinatorInventory(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamFinalityCoordinatorInventory,
+                    StreamCurrentGraphKinds.Kind.StreamFinalityCoordinatorInventory,
                     abi.encode(address(assemblyCore), address(assemblyMembership), 150000, 2000000)
                 ))
         );
@@ -356,13 +383,13 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         entropyDependencies.inventoryGas = 3000000;
         assemblyEntropyFactory = StreamFinalityEntropySourceFactory(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamFinalityEntropySourceFactory,
+                    StreamCurrentGraphKinds.Kind.StreamFinalityEntropySourceFactory,
                     abi.encode(entropyDependencies)
                 ))
         );
         assemblyContentCheckpoint = StreamOnchainContentCheckpoint(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamOnchainContentCheckpoint,
+                    StreamCurrentGraphKinds.Kind.StreamOnchainContentCheckpoint,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyRouter),
@@ -375,7 +402,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
         assemblyArtifact = StreamFinalityArtifactCoverage(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamFinalityArtifactCoverage,
+                    StreamCurrentGraphKinds.Kind.StreamFinalityArtifactCoverage,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyArchive),
@@ -389,7 +416,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
         assemblyLeaves = StreamContentLeafManifest(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamContentLeafManifest,
+                    StreamCurrentGraphKinds.Kind.StreamContentLeafManifest,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyContentCheckpoint),
@@ -402,7 +429,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         StreamArchivalTypes.Observer[] memory observers = assemblyCheckpointVerifier.observers();
         assemblyObjectVerifier = StreamArweaveObjectCheckpointVerifier(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamArweaveObjectCheckpointVerifier,
+                    StreamCurrentGraphKinds.Kind.StreamArweaveObjectCheckpointVerifier,
                     abi.encode(
                         address(assemblyExecutor),
                         observers,
@@ -413,7 +440,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
         assemblyExternal = StreamExternalArtifactCoverage(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamExternalArtifactCoverage,
+                    StreamCurrentGraphKinds.Kind.StreamExternalArtifactCoverage,
                     abi.encode(
                         address(assemblyCore),
                         address(assemblyExecutor),
@@ -454,7 +481,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         configs[3] = _gas("SNAPSHOT_INVENTORY_GAS", d.inventoryGas, 50000, 1);
         assemblySnapshots = StreamCollectionSnapshots(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamCollectionSnapshots,
+                    StreamCurrentGraphKinds.Kind.StreamCollectionSnapshots,
                     abi.encode(d, address(assemblyExecutor), configs)
                 ))
         );
@@ -501,7 +528,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         configs[3] = _gas("REFERENCE_ARCHIVE_GAS", d.archiveGas, 50000, 1);
         assemblyReference = StreamReferenceRenderPublication(
             payable(_assemblyCreate(
-                    StreamCurrentGraphCreation.Kind.StreamReferenceRenderPublication,
+                    StreamCurrentGraphKinds.Kind.StreamReferenceRenderPublication,
                     abi.encode(d, address(assemblyExecutor), configs)
                 ))
         );
@@ -565,7 +592,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         assemblyRuntimes[uint256(Late.CORE_ADAPTER)] = _productRuntime(
             base,
             new string[](0),
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamCoreFinalityAdapter),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamCoreFinalityAdapter),
             v
         );
         (
@@ -732,7 +759,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         assemblyCoordinatorRuntime = _productRuntime(
             name,
             new string[](0),
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingCoordinator),
+            _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingCoordinator),
             v
         );
     }
@@ -1140,7 +1167,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         assemblyCoreAdapter = StreamCoreFinalityAdapter(
             _deployAssemblyLate(
                 Late.CORE_ADAPTER,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamCoreFinalityAdapter),
+                _graphCreation(StreamCurrentGraphKinds.Kind.StreamCoreFinalityAdapter),
                 abi.encode(
                     address(assemblyCore), address(assemblyMetadata), address(assemblyProvider)
                 )
@@ -1158,7 +1185,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
             assemblyRouterAdapters[i] = address(
                 StreamFinalityServingHostAdapter(
                     payable(_assemblyCreate(
-                            StreamCurrentGraphCreation.Kind.StreamFinalityServingHostAdapter,
+                            StreamCurrentGraphKinds.Kind.StreamFinalityServingHostAdapter,
                             abi.encode(
                                 address(assemblyCore),
                                 address(assemblyRouter),
@@ -1172,7 +1199,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         assemblyMetadataAdapter = address(
             StreamFinalityServingHostAdapter(
                 payable(_assemblyCreate(
-                        StreamCurrentGraphCreation.Kind.StreamFinalityServingHostAdapter,
+                        StreamCurrentGraphKinds.Kind.StreamFinalityServingHostAdapter,
                         abi.encode(
                             address(assemblyCore),
                             address(assemblyMetadata),
@@ -1232,7 +1259,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
             _deploySlot(
                 assemblyCoordinatorSlot,
                 assemblyCoordinatorAddress,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingCoordinator),
+                _graphCreation(StreamCurrentGraphKinds.Kind.StreamArtistOnboardingCoordinator),
                 abi.encode(assemblySuite, address(assemblyFinality)),
                 assemblyCoordinatorRuntime
             )
@@ -1376,16 +1403,16 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
         );
     }
 
-    mapping(StreamCurrentGraphCreation.Kind => bool) private assemblyVerifiedTemplates;
+    mapping(StreamCurrentGraphKinds.Kind => bool) private assemblyVerifiedTemplates;
 
-    function _assemblyCreate(StreamCurrentGraphCreation.Kind kind, bytes memory args)
+    function _assemblyCreate(StreamCurrentGraphKinds.Kind kind, bytes memory args)
         private
         returns (address product)
     {
         bytes memory creation = _graphCreation(kind);
         if (!assemblyVerifiedTemplates[kind]) {
             _linkRuntime(
-                graphVm.readFile(_artifact(StreamCurrentGraphCreation.name(kind))), creation
+                graphVm.readFile(_artifact(StreamCurrentGraphKinds.name(kind))), creation
             );
             assemblyVerifiedTemplates[kind] = true;
         }
