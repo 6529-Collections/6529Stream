@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistPayoutLifecycle
+} from "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
 
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import {
