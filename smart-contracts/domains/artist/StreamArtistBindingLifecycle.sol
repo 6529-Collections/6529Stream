@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistBindingTermsStorage } from "./StreamArtistBindingTermsStorage.sol";
 import { StreamArtistPrimaryCollaboratorBindingImport as PrimaryBindingImport } from "./StreamArtistPrimaryCollaboratorBindingImport.sol";
 import {
     StreamArtistExtendedHydrationFeatures as XF
@@ -306,27 +307,8 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         uint64 generation,
         T.CollaboratorRecord[] calldata rows
     ) private {
-        if (rows.length > 32) revert T.BoundExceeded(rows.length, 32);
-        for (uint256 i; i < rows.length; ++i) {
-            T.CollaboratorRecord calldata row = rows[i];
-            if (row.account == address(0)) revert T.InvalidRecord();
-            if (i != 0) {
-                T.CollaboratorRecord calldata prior = rows[i - 1];
-                // Strict (account,role) ordering also satisfies sorted triples and excludes duplicate pairs.
-                if (
-                    uint160(row.account) < uint160(prior.account)
-                        || (row.account == prior.account
-                            && uint256(row.role) <= uint256(prior.role))
-                ) revert T.InvalidRecord();
-            }
-            _collaborators[collectionId][generation].push(row);
-        }
-        _terms[collectionId][generation] = C.BindingTerms(
-            StreamArtistCollaboratorHashes.collaboratorSetHash(rows),
-            StreamArtistHashes.emptyCapabilities(),
-            0,
-            0,
-            uint32(rows.length)
+        StreamArtistBindingTermsStorage.store(
+            _terms, _collaborators, collectionId, generation, rows
         );
     }
 
