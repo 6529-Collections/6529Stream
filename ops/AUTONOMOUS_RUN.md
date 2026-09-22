@@ -58,11 +58,15 @@ current-stack acceptance. RC1 and its Sepolia evidence remain unchanged.
   failure remains recorded; the reduced host is not yet executed. Owner testing
   has 14 fresh native/physical products and a 24-product named-library join on
   its separate `52de8dd2` source; actual Owner execution remains pending.
-- **Client CI:** all original 238 files/3,240 registrations remain, plus 14
-  runner tests. Fourteen of 16 remote shards passed; shards4/7 timed out while
-  a late heavy case remained. Measured scheduling repair is being prepared
-  under unchanged deadlines, alongside Complete History client/Safe coverage.
-  No full CI success is claimed.
+- **Client CI:** scheduling repair `6de635eae` preserves all original tests
+  and deadlines. All 1,417 prior planned units now have measured scheduling
+  estimates, with the two slow interrupted cases timed separately. Root passes
+  20 runner/importer tests and reproduces the complete table from 2,853 pinned
+  evidence files. The unchanged 16-shard/two-child model improves from 740 to
+  380 seconds for the longest shard; this excludes setup/upload and is not a
+  runtime guarantee. The earlier remote result remains 14/16 passing shards,
+  two timeouts. A fresh full matrix and Complete History/Safe clients remain
+  pending; no full CI success is claimed.
 - **Capacity:** the five preservation overruns reported by the frozen capacity
   campaign are repaired in source. Snapshot/Reference at `5104c901` fit their
   runtime/full-initcode limits and retain six focused passes including fuzz256.
@@ -108,7 +112,7 @@ Current work ownership:
   for the held current Artist capacity request.
 - **Capacity:** frozen `027e7c70` campaign sealed, including failures; root repairs
   have their own later evidence and do not rewrite its outputs.
-- **Clients:** measured CI scheduling repair and Complete History/Safe clients.
+- **Clients:** fresh full CI for integrated measured scheduling; Complete History/Safe clients.
 - **Museum:** authenticated media painting and broader PREMIS event/agent/rights joins.
 - **Collector:** original paid-flow compiler closure, export/replay and gas acceptance.
 - **Metric:** independent incoming Complete History source/oracle review.
