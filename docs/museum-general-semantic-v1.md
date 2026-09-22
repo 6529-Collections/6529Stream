@@ -125,6 +125,11 @@ retain their separate scope. MSM-RELATIONS5, institutional acceptance, and the
 nineteen packet groups and forty-nine dossier assessments are not completed by
 this prerequisite.
 
+The additive [physical-transfer consumer](museum-recorded-physical-transfer-v1.md)
+uses this exact retained source and selection when an original statement also
+supplies explicit physical-event, enclosing-activity, status and instrument
+bindings. Its qualified Acquisition/custody projection has separate scope.
+
 ## Offline package and API
 
 The package includes complete native General and Metadata inputs, all original

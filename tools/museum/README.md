@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Recorded physical acquisition and custody](../../docs/museum-recorded-physical-transfer-v1.md)
+maps explicit original General event and instrument statements to qualified
+Acquisition or TransferOfCustody components with exact offline reconstruction.
+
 [General institutional and curatorial assertion reader](../../docs/museum-general-semantic-v1.md)
 joins exact General receipt authority to registered semantic definitions and
 earlier Metadata documentary evidence, with qualified offline reconstruction.
