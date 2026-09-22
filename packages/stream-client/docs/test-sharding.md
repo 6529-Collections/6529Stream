@@ -75,9 +75,12 @@ the bundle passed in 351 seconds, but the inventory child still reached its
 420-second bound despite starting first. The inventory regression now reports
 its 17 independent stages separately. Each stage retains all three layouts and
 the original lifecycle assertions, for the same 51 fresh-fixture flows. The
-other 15 tests in that file remain unchanged. The original aggregate timing is
-historical; these new stage names use the normal scheduling heuristics until
-their measurements are incorporated into a later timing seed.
+other 15 tests in that file remain unchanged. An additive timing extension now
+records all 17 successful stages on Windows Node 24.16 with two concurrent
+children, each retaining the 420-second limit. Observed elapsed times ranged
+from 4.0 to 49.2 seconds. These weights are scheduling estimates, not Linux CI
+runtime guarantees. The retired aggregate estimate remains as historical data
+so the original 1,417-unit calibration can be reconstructed byte-for-byte.
 
 Unmeasured new units use explicit scheduling heuristics. Estimates affect
 placement only and are not CI runtime guarantees. Pass `--timings PATH` to use an updated
@@ -96,6 +99,30 @@ node scripts/test-runner/timing-evidence.mjs --plan PLAN_JSON --results ARTIFACT
 Its evidence file records input hashes and the scheduling model. It cannot turn
 a cancelled or timed-out child into successful test evidence.
 
+The separate stage extension retains the exact measured test source, the
+unchanged lifecycle body and other 15 registrations, all 52 dependency hashes,
+and the successful TAP/report pairs. Reproduce or inspect it offline:
+
+```bash
+node scripts/test-runner/timing-extension.mjs --check
+node scripts/test-runner/timing-extension.mjs --extract-base .test-runs/original-timings.json
+node scripts/test-runner/timing-extension.mjs --write
+```
+
+`--check` verifies the extended table and applicability to the exact 52 current
+input bytes. `--write` performs the same applicability check and deterministically
+applies the extension to either the original table or the already extended table.
+`--extract-base` needs no current build or task-local artifacts and recovers SHA256
+`e8c138a6b1565c15d0560d7ab8a4e13342d6861a0ace335883d4e06b45058c93`.
+The recorded source commit is observation metadata; its Git object is not required.
+These commands never execute the recorded tests or modify runner limits.
+
+The live applicability check is a separate validation command, not an automatic
+CI gate. Future source changes can make it report stale measurements while the
+seed remains usable for scheduling. Ordinary extension regressions authenticate
+the sealed historical evidence and use synthetic inputs for stale-input refusal;
+they do not require historical production or `dist` bytes to remain current.
+
 The original `TypeScript client` check is the required aggregate. It requires
 successful preparation and every matrix job, then checks all shard reports
 against the plan, source commit and captured package inputs. Missing, duplicate,
@@ -104,4 +131,4 @@ This verifies client test execution; it makes no contract, Safe, deployment or
 release-readiness claim.
 
 Runner regression coverage is included in the normal suite and can be checked
-alone with `node --test test/test-runner.test.mjs test/test-runner-timing-evidence.test.mjs`.
+alone with `node --test test/test-runner.test.mjs test/test-runner-timing-evidence.test.mjs test/test-runner-timing-extension.test.mjs`.

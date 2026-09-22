@@ -1295,7 +1295,24 @@
       "saved-source drift and changed original capture block reject recapture without inventing current-plan getter": 2137,
       "segment schema, retained segment, topic and transaction identity must all agree": 4671,
       "TOKEN RELEASE SEASON source identities and actual permissionless caller, value and original begin": 3725,
-      "wrong stage, page length, row count and selected conservation branch refuse before original mutation": 3748
+      "wrong stage, page length, row count and selected conservation branch refuse before original mutation": 3748,
+      "original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 4007,
+      "original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 4582,
+      "original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 5652,
+      "original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 7082,
+      "original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 8292,
+      "original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 9421,
+      "original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 9367,
+      "original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 10560,
+      "original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 10210,
+      "original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 11568,
+      "original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 12560,
+      "original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 48846,
+      "original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 48946,
+      "original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 48702,
+      "original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 49208,
+      "original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 48654,
+      "original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)": 49143
     },
     "test/current-scoped-policy-publication-v2-workflow.test.mjs": {
       "all five original zero-value writes capture, simulate, and reconcile direct and both Safe layouts": 27811,
@@ -1563,5 +1580,26 @@
       "simulation compares stable observations and recomputes the return hash for each fixed block": 724,
       "unrelated post-execution Safe guard logs are allowed while receipt metadata is copied before awaits": 455
     }
-  }
+  },
+  "timingExtensions": [
+    {
+      "id": "scoped-policy-inventory-v2-stages-20260922",
+      "evidenceFile": "scripts/test-runner/inventory-stage-timing-extension.json",
+      "evidenceSha256": "3ee20513f33cbd1a3898a46ee33683fb234644a098fb81f3bdb5cc934445920c",
+      "baseTableSha256": "e8c138a6b1565c15d0560d7ab8a4e13342d6861a0ace335883d4e06b45058c93",
+      "qualification": "17 successful Windows Node24.16.0 stage measurements; scheduling estimates, not Linux CI guarantees. Original 1,417-unit calibration remains intact.",
+      "platform": "win32",
+      "node": "v24.16.0",
+      "sourceCommit": "06f38396f40a3ec5a7f7b0c646b261beeef0680d",
+      "testFile": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "testSha256": "51d6255bd80e47f2b2d5c220d0415537d13ef65d713362f8b82cdcd1487768fb",
+      "dependencyInventorySha256": "06cbcfeb18d9dbeff97ab184cf1d66ad094d22e3a5421dfacbeabf9d8e658f77",
+      "addedUnits": 17,
+      "retiredRegistration": {
+        "name": "all17 original inventory stages capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "retainedHistoricalEstimateMs": 361929,
+        "retainedForOriginalCalibration": true
+      }
+    }
+  ]
 }
