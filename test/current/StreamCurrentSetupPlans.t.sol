@@ -370,8 +370,24 @@ contract StreamCurrentSetupPlansTest {
             4,
             bytes32(uint256(12))
         );
-        rows[1] = rows[0];
+        // Allocate a separate struct: memory assignment would alias rows[0].
+        GovernanceActionPolicyEntry memory first = rows[0];
+        rows[1] = GovernanceActionPolicyEntry(
+            first.actionClass,
+            first.target,
+            first.selector,
+            first.targetCodeHash,
+            first.targetProfileHash,
+            first.callType,
+            first.valuePolicy,
+            first.valueLimit,
+            first.valueSemanticsHash
+        );
         rows[1].actionClass = 0;
+        require(
+            rows[0].actionClass == 3 && rows[1].actionClass == 0,
+            "independent additional policy classes"
+        );
     }
 }
 
