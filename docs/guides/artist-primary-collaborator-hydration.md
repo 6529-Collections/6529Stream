@@ -147,3 +147,18 @@ helper is 10,299. All ten focused regressions pass, including 256 fuzz inputs.
 Independent review confirms the original checks and order are unchanged.
 This establishes the bounded validation boundary; full hydration and Safe
 execution still need their own matching evidence.
+
+## Generation dependency deployment boundaries
+
+The four oversized generation dependencies now use six fixed typed workers for
+attestation inventory, journal validation, original source reads, base consent
+collection and the global attestation-use census. Source collection and validation
+retain their original order and complete provenance. The journal uses one nominal
+Context to keep Solidity 0.8.19 code generation within its stack constraints.
+
+All four original ABIs, selectors and storage layouts match their predecessors,
+including the original validation error. On exact builder `ebbf30c04`, runtime
+sizes are 22,160 bytes (attestation source), 23,742 (attestation validation),
+24,418 (consent source) and 22,058 (conservation); all six new workers also fit.
+The original collaborator regressions and full hydration/Safe/gas integration
+remain separate runtime acceptance work on the combined source.

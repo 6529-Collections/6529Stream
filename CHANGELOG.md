@@ -1,5 +1,12 @@
 # Changelog
 
+## Generation validation deployment size
+
+- Split four existing generation dependencies through fixed typed workers, preserving
+  their public ABI, errors, source reads and validation order. Use a single journal
+  context for Solidity 0.8.19 code generation; see the
+  [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
+
 ## Native Artist review selection
 
 - Add explicit native Artist review interpretation and selection with exact

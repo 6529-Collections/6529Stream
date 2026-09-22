@@ -18,7 +18,7 @@ Other held proposals remain separate.
 
 ## 22 September integrated batch
 
-Expanded full v1 remains incomplete. Integrated source `356d091d3` adds the
+Expanded full v1 remains incomplete. Integrated source `845cae7cd` adds the
 dispute validation size repair, corrected Artist Museum reviews, actual local
 General review capture, preservation fixture corrections and scoped bundle
 size repair. Source integration and successful component tests do not establish
@@ -31,7 +31,11 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   limit. The dispute repair `3ea28d8eb` is independently reviewed: runtime
   sizes are 23,804 and 10,299 bytes; all ten focused tests pass, including
   256 fuzz inputs. Original ABI, selectors and validation order are preserved.
-  Sol is repairing the other four generation dependencies. Complete History,
+  The other four generation repairs are integrated as `8d1a8da9a` through
+  `845cae7cd`, with independent source/ABI review. All ten selected original
+  and new products fit on exact builder `ebbf30c04`; the largest original
+  is 24,418 bytes. Original ABI, selectors and storage layouts are preserved.
+  Their remaining collaborator runtime cases continue. Complete History,
   repeated import, Class4 and all-call Safe acceptance remain open.
 - **Museum reviews and exports:** earlier native media/PREMIS tests (46),
   declaration/review tests (89), account-fixture selection tests (21) and
@@ -43,8 +47,9 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   publications and passes four integrated offline replay tests. Its 30 native
   products are explicitly historical; the unused typed Artist constructor
   boundary and empty Artist lane are retained. This is not latest-stack,
-  institutional qualification or independent-human evidence. Portable Artist
-  review packaging and broader Museum composition continue.
+  institutional qualification or independent-human evidence. Portable Artist review dossier `f7e9da5da` passes eight integrated
+  replay/tamper tests and independent review. Broader Museum composition
+  continues through an additive V5 join; earlier packages remain unchanged.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
   the required client aggregate** at merge source `8d2e2323` (dispatch
   `eb840cfb`). All 246 files / 1,472 execution units / 3,354 registrations
@@ -53,11 +58,11 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   result does not make the full repository CI or current contracts accepted.
 - **Preservation:** the repaired component campaign at builder `4a631c0a`
   passes **44/44 cases**: checkpoint 13, manifest V1 21 and V2 10, with no
-  failures or skips. Independent runtime review is finishing. The fixture
+  failures or skips. Independent runtime review is clear. The fixture
   repair is integrated as `c145c4754`; production, original test bodies and
   enclosing gas limits are unchanged. Earlier failed attempts remain recorded.
   The actual checkpoint-to-manifest join also passes **3/3 cases**, with
-  independent trace review pending. Its positive diagnostic uses a 32m read
+  independent trace review clear. Its positive diagnostic uses a 32m read
   allowance; it does not prove execution within the 16,777,216 transaction
   limit. The builder is now addressing that real gas boundary.
 - **Paid flows and remaining integration:** scoped bundle size repair
@@ -69,9 +74,9 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   Genesis/Owner execution closure with whole-context artifact reuse and
   disjoint captures; assembly is not execution acceptance.
 
-The last broad ABI check remains ABI208: 4,686 Solidity sources, zero errors
-at `736bdadd8`. Later source changes need the next combined check and inventory
-refresh. Full current-stack/Safe integration, comprehensive fuzz/stateful tests,
+ABI209 checks 4,688 Solidity sources at `778991df4` with zero errors.
+The final generation batch adds six workers; the active inventory is refreshed
+to 3,143 production paths and the next combined type check is running. Full current-stack/Safe integration, comprehensive fuzz/stateful tests,
 gas/code-size checks, full CI and matching release evidence remain, followed by
 a frozen candidate and testnet demonstration. No new funding is required.
 Audit, production ceremonies and Lean remain separate.
