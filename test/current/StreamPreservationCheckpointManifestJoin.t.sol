@@ -34,6 +34,10 @@ import {
     LeafManifestVm as JoinVm
 } from "../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
 
+interface PortableJoinVm {
+    function dumpState(string calldata path) external;
+}
+
 /// @notice Real V1 checkpoint -> exact full-row manifest -> SSTORE2 artifact/coverage -> verifier.
 /// @dev Native entropy policies/finalization, factory CREATE, membership, selection, checkpoint,
 /// Schema/Store, ArtifactCoverage and manifest verification are actual contracts. Preservation
@@ -44,6 +48,8 @@ import {
 /// independent archival providers, or transaction-gas acceptance. No frozen suite cap is changed.
 contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyContentFixtureV1 {
     JoinVm private constant jvm = JoinVm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    PortableJoinVm private constant pvm =
+        PortableJoinVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant JOIN_ARTIST = keccak256("artist");
     bytes32 private constant MANIFEST_READ =
         keccak256("6529STREAM_GGP_STATIC_OUTPUT_MANIFEST_READ_GAS");
@@ -69,6 +75,20 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
     );
 
     event CappedJoinCall(bytes4 indexed selector, uint256 callerGasSpent, uint256 ceiling);
+
+    event PortableJoinCut(
+        address manifest,
+        address checkpoint,
+        address core,
+        bytes32 checkpointId,
+        bytes32 artifact,
+        bytes32 coverage,
+        bytes32 plan,
+        uint256 chainId,
+        uint256 timestamp,
+        uint256 blockNumber,
+        uint256 gasLimit
+    );
 
     function testCheckpointManifestJoinAllCanonicalScopesAndOriginalGasMismatch() external {
         _joinFixture();
@@ -216,6 +236,9 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
                     == 2000000,
             "fresh checkpoint retains readiness read and uses measured render allowance"
         );
+        // A later account-state export cannot carry Foundry mock rules. Exercise the
+        // stored typed Core and Registry responses before the capped calls.
+        StaticRouteVm(address(vm)).clearMockedCalls();
         j.capture.id = j.capture.host.begin(j.capture.selection, keccak256("capped preservation"));
         j.capture.host.append(j.capture.id, _payload(j.capture));
         _assertComplete(j.capture);
@@ -228,6 +251,21 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
             value == 10000000 && floor == 100000 && failure == 2 && revision == 1,
             "fresh verifier genesis is lawful without lowering a governed parameter"
         );
+        bytes32 portablePlan = _planHash(j.verifier, _expectedManifest(j));
+        pvm.dumpState("artifacts/native-assembly/preservation-join-portable-v1.dump.json");
+        emit PortableJoinCut(
+            address(j.verifier),
+            address(j.capture.host),
+            address(core),
+            j.capture.id,
+            j.artifact,
+            j.coverage,
+            portablePlan,
+            block.chainid,
+            block.timestamp,
+            block.number,
+            block.gaslimit
+        );
         bytes memory input = abi.encodeCall(
             JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
         );
@@ -235,15 +273,18 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         (bool ok, bytes memory result) =
             address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
         uint256 spent = beforeGas - gasleft();
-        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual begin transaction");
+        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual begin call");
         emit CappedJoinCall(JoinV.beginManifest.selector, spent, JOIN_TX_CEILING);
         j.plan = abi.decode(result, (bytes32));
-        require(j.plan == _planHash(j.verifier, _expectedManifest(j)), "capped full plan identity");
+        require(
+            j.plan == portablePlan && j.plan == _planHash(j.verifier, _expectedManifest(j)),
+            "capped full plan identity"
+        );
         input = abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, j.capture.producers.length));
         beforeGas = gasleft();
         (ok, result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
         spent = beforeGas - gasleft();
-        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual verify transaction");
+        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual verify call");
         emit CappedJoinCall(JoinV.verifyNextOutputs.selector, spent, JOIN_TX_CEILING);
         _assertJoined(j, abi.decode(result, (bytes32)));
     }

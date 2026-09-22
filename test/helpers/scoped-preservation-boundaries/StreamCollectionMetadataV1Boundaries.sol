@@ -96,6 +96,12 @@ contract MetadataCoreBoundary {
     mapping(bytes32 => address) public selected;
     mapping(uint256 => address) public owners;
     mapping(uint256 => uint8) public lifecycles;
+    mapping(uint256 => uint256) private portableSerials;
+    mapping(bytes32 => address) private portablePointerTargets;
+    mapping(bytes32 => bytes32) private portablePointerCodeHashes;
+    mapping(bytes32 => address) private portableModuleRegistries;
+    mapping(bytes32 => bytes4) private portableCapabilities;
+    mapping(bytes32 => bool) private portablePointers;
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == 0x80ac58cd || id == 0x01ffc9a7;
@@ -109,12 +115,36 @@ contract MetadataCoreBoundary {
         selected[kind] = target;
     }
 
+    function setPortablePointer(bytes32 kind, address target, bytes4 capability, address modules)
+        external
+    {
+        portablePointerTargets[kind] = target;
+        portablePointerCodeHashes[kind] = target.codehash;
+        portableCapabilities[kind] = capability;
+        portableModuleRegistries[kind] = modules;
+        portablePointers[kind] = true;
+    }
+
     function getSatellitePointer(bytes32 kind)
         external
         view
         returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
     {
-        address target = selected[kind];
+        address target = portablePointers[kind] ? portablePointerTargets[kind] : selected[kind];
+        if (portablePointers[kind]) {
+            return (
+                target,
+                portablePointerCodeHashes[kind],
+                false,
+                kind,
+                portableCapabilities[kind],
+                portableModuleRegistries[kind],
+                1,
+                keccak256("typed module manifest"),
+                keccak256("typed deployment"),
+                1
+            );
+        }
         return (
             target,
             target.codehash,
@@ -134,12 +164,17 @@ contract MetadataCoreBoundary {
         lifecycles[id] = lifecycle;
     }
 
+    function setPortableTokenSerial(uint256 id, uint256 serial) external {
+        portableSerials[id] = serial;
+    }
+
     function tokenCollectionIdentity(uint256 id)
         external
         view
         returns (bool, uint256, uint256, bool)
     {
-        return (lifecycles[id] != 0, 1, id, lifecycles[id] == 3);
+        uint256 serial = portableSerials[id];
+        return (lifecycles[id] != 0, 1, serial == 0 ? id : serial, lifecycles[id] == 3);
     }
 
     function tokenLifecycle(uint256 id) external view returns (uint8) {

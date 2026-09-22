@@ -53,6 +53,7 @@ contract StaticRouteCore is MetadataCoreBoundary {
     address public entropy;
     bool public frozen;
     uint256 public minted;
+    mapping(uint256 => address) private portableCoordinators;
 
     function setEntropy(address a) external {
         entropy = a;
@@ -82,8 +83,13 @@ contract StaticRouteCore is MetadataCoreBoundary {
         return 0;
     }
 
-    function coordinatorAtMint(uint256) external view returns (address) {
-        return entropy;
+    function setPortableCoordinator(uint256 tokenId, address coordinator) external {
+        portableCoordinators[tokenId] = coordinator;
+    }
+
+    function coordinatorAtMint(uint256 tokenId) external view returns (address) {
+        address coordinator = portableCoordinators[tokenId];
+        return coordinator == address(0) ? entropy : coordinator;
     }
 
     function tokenData(uint256) external pure returns (bytes memory) {

@@ -15,6 +15,9 @@ import {
     IStreamCurrentCitationRenderer as CurrentRenderer
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRenderer.sol";
 import {
+    IStreamPreservationRegistryV1 as PortablePreservation
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamPreservationRegistryV1.sol";
+import {
     IStreamCurrentCitationRegistry as ScopedCitation
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamCurrentCitationRegistry.sol";
 
@@ -56,9 +59,35 @@ contract ScopedPolicyOutputModulesBoundary {
 
 contract ScopedPolicyOutputVersionsBoundary is TerminalRouteVersions {
     address private immutable actualRenderer;
+    mapping(bytes32 => PortablePreservation.ProducerBinding) private portableBindings;
+    mapping(bytes32 => PortablePreservation.Admission) private portableAdmissions;
+    mapping(bytes32 => bool) private portablePreservationExists;
 
     constructor(address e, address s, address r) TerminalRouteVersions(e, s, r) {
         actualRenderer = r;
+    }
+
+    function setPortablePreservation(
+        bytes32 versionKey,
+        address producer,
+        bytes32 outputProfile,
+        PortablePreservation.ProducerBinding calldata binding,
+        PortablePreservation.Admission calldata admission
+    ) external {
+        bytes32 id = keccak256(abi.encode(versionKey, producer, outputProfile));
+        portableBindings[id] = binding;
+        portableAdmissions[id] = admission;
+        portablePreservationExists[id] = true;
+    }
+
+    function requirePreservation(bytes32 versionKey, address producer, bytes32 outputProfile)
+        external
+        view
+        returns (PortablePreservation.ProducerBinding memory, PortablePreservation.Admission memory)
+    {
+        bytes32 id = keccak256(abi.encode(versionKey, producer, outputProfile));
+        require(portablePreservationExists[id], "portable preservation admission absent");
+        return (portableBindings[id], portableAdmissions[id]);
     }
 
     function requireCurrentCitation(bytes32 k)

@@ -32,6 +32,9 @@ import {
     IERC165 as PreservationERC165
 } from "../../smart-contracts/vendor/openzeppelin/IERC165.sol";
 import {
+    IStreamPreservationRegistryV1 as PortablePreservation
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamPreservationRegistryV1.sol";
+import {
     StreamScopeMembershipFacts as PreservationMembership
 } from "../../smart-contracts/interfaces/stream/finality/StreamScopeMembershipTypes.sol";
 
@@ -426,6 +429,20 @@ abstract contract PreservationPolicyContentFixtureV1 is ScopedPolicyContentFixtu
     function _admitAll(Capture memory c) internal {
         uint256 count = scopedSelections.checkpoint(c.selection).tokenCount;
         for (uint256 i; i < count; ++i) {
+            Selection.TokenSelection memory row = scopedSelections.selectionAt(c.selection, i);
+            PreservationTypes.Binding memory originalBinding = _binding(c, i);
+            PreservationTypes.Admission memory originalAdmission = _admission(c, i);
+            PortablePreservation.ProducerBinding memory binding =
+                abi.decode(abi.encode(originalBinding), (PortablePreservation.ProducerBinding));
+            PortablePreservation.Admission memory admission =
+                abi.decode(abi.encode(originalAdmission), (PortablePreservation.Admission));
+            ScopedPolicyOutputVersionsBoundary(row.selection.registry).setPortablePreservation(
+                row.selection.versionKey,
+                address(c.producers[i]),
+                keccak256("6529STREAM_PRESERVATION_RENDER_V1"),
+                binding,
+                admission
+            );
             _setAdmission(c, i, abi.encode(_binding(c, i), _admission(c, i)));
         }
     }

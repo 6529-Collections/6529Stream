@@ -368,6 +368,8 @@ abstract contract ScopedPolicyContentFixtureV2 is
         internal
     {
         core.setToken(token, address(this), lifecycle);
+        core.setPortableTokenSerial(token, serial);
+        core.setPortableCoordinator(token, original);
         StaticRouteVm(address(vm))
             .mockCall(
                 address(core),
@@ -383,6 +385,7 @@ abstract contract ScopedPolicyContentFixtureV2 is
     }
 
     function _scopedPointer(bytes32 kind, address target, bytes4 capability) internal {
+        core.setPortablePointer(kind, target, capability, address(scopedModules));
         StaticRouteVm(address(vm))
             .mockCall(
                 address(core),
