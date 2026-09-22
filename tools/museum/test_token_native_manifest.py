@@ -73,6 +73,18 @@ class TokenNativeManifestTests(unittest.TestCase):
         Path(self.products["StreamCore"]["artifact"]).write_bytes(b"{}")
         with self.assertRaisesRegex(ValueError, "input pin differs"): self.build()
 
+    def test_rehashed_link_with_wrong_source_origin_is_rejected(self):
+        museum = json.loads(Path(self.museum["path"]).read_bytes())
+        row = museum["products"][sorted(EXTENSIONS)[0]]
+        path = Path(row["artifact"])
+        artifact = json.loads(path.read_bytes())
+        artifact["bytecode"]["linkReferences"] = {
+            "smart-contracts/domains/metadata/DifferentRenderer.sol": {"StreamMetadataRenderer": []}}
+        path.write_bytes(dumps(artifact)); row["sha256"] = self.hash(path)
+        self.museum = self.write("museum.json", museum)
+        with self.assertRaisesRegex(ValueError, "native link origin outside exact closure"):
+            self.build()
+
     def test_changed_original_compilation_source_is_rejected(self):
         (self.extension / "smart-contracts/StreamCollectionAttestations.sol").write_bytes(b"changed")
         with self.assertRaisesRegex(ValueError, "compilation source changed"): self.build()
