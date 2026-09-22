@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamArtistRecoveredAuthorityActualTest
-} from "./StreamArtistRecoveredAuthorityActual.t.sol";
+    ArtistRecoveredAuthorityFixture
+} from "./ArtistRecoveredAuthorityFixture.sol";
 import { ArtistUnitGovernance, ArtistUnitRoles } from "./ArtistOnboardingFixture.sol";
 import {
     StreamArtistOnboardingTypes as T
@@ -173,7 +173,7 @@ interface DisputeHistoryVm {
 /// @notice Original Safe/signature, dispute/repudiation, recovered Identity and seven-owner imports.
 /// @dev Core, roles/action execution and documentary coverage facts are explicit typed boundaries.
 /// The actual Store/Artist owners/Safe/Archive are used. This source is not runtime acceptance.
-abstract contract ArtistRecoveredDisputeHistoryFixture is StreamArtistRecoveredAuthorityActualTest {
+abstract contract ArtistRecoveredDisputeHistoryFixture is ArtistRecoveredAuthorityFixture {
     DisputeHistoryVm internal constant dv =
         DisputeHistoryVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     StreamSchemaDocumentStore internal documents;
