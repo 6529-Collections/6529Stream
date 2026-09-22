@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
+import { StreamFullV1ArtifactProducts } from "../helpers/StreamFullV1ArtifactProducts.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import {
     StreamGenesisManifestTailFixture as TailFixture
@@ -67,7 +68,12 @@ contract StreamCurrentFullV1GenesisProductsTest is StreamCurrentStackFixture, Of
         composition.schemas = address(assemblySchemas);
         composition.ticketSigner = address(governor);
         composition.ticketSignerKind = 2;
-        composition.delegateRegistry = address(new GenesisDelegationServiceDouble());
+        composition.delegateRegistry = address(
+            _artistArtifactCreate(
+                "test/current/StreamCurrentFullV1GenesisProducts.t.sol:GenesisDelegationServiceDouble",
+                abi.encode()
+            )
+        );
         composition.delegationUsecase = keccak256("full-v1 genesis delegate gate fixture");
         composition.deploymentHash = DEPLOYMENT_HASH;
         composition.ticket = _manifest("tickets");
@@ -81,7 +87,7 @@ contract StreamCurrentFullV1GenesisProductsTest is StreamCurrentStackFixture, Of
         composition.dependencyReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_DEPENDENCY_READ_GAS", 300000, 50000, 2
         );
-        products = StreamFullV1GenesisProducts.deploy(composition);
+        products = StreamFullV1ArtifactProducts.deployGenesis(composition);
     }
 
     function _additionalOperatingPolicies()

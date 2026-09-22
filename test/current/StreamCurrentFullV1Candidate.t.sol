@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../helpers/StreamCurrentStackFixture.sol";
+import { StreamFullV1ArtifactProducts } from "../helpers/StreamFullV1ArtifactProducts.sol";
 import { StreamFullV1Candidate } from "../../script/current/StreamFullV1Candidate.sol";
 import { StreamFullV1GenesisProducts } from "../../script/current/StreamFullV1GenesisProducts.sol";
 import { StreamFullV1RecordProducts } from "../../script/current/StreamFullV1RecordProducts.sol";
@@ -300,7 +301,7 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
             c.fixedRevealGas
         );
         configuration.commerce = c;
-        products.commerce = StreamFullV1CommerceProducts.deploy(c);
+        products.commerce = StreamFullV1ArtifactProducts.deployCommerce(c);
     }
 
     function _independent() private {
@@ -311,7 +312,12 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.schemas = address(assemblySchemas);
         c.ticketSigner = vm.addr(PLATFORM_KEY);
         c.ticketSignerKind = 1;
-        c.delegateRegistry = address(new GenesisDelegationServiceDouble());
+        c.delegateRegistry = address(
+            _artistArtifactCreate(
+                "test/current/StreamCurrentFullV1GenesisProducts.t.sol:GenesisDelegationServiceDouble",
+                abi.encode()
+            )
+        );
         c.delegationUsecase = keccak256("full37 fixture");
         c.deploymentHash = DEPLOYMENT_HASH;
         c.ticket = StreamFullV1GenesisProducts.Manifest(
@@ -334,7 +340,7 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.signatureGas = _gas("METADATA_ERC1271_VERIFY_GAS", 400000, 90000, 2);
         c.dependencyReadGas = _gas("METADATA_DEPENDENCY_READ_GAS", 1000000, 100000, 2);
         configuration.independent = c;
-        products.independent = StreamFullV1GenesisProducts.deploy(c);
+        products.independent = StreamFullV1ArtifactProducts.deployGenesis(c);
     }
 
     function _records() private {
@@ -358,13 +364,21 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.signatureGas = configuration.independent.signatureGas;
         c.dependencyReadGas = configuration.independent.dependencyReadGas;
         configuration.records = c;
-        products.records = StreamFullV1RecordProducts.deploy(c);
+        products.records = StreamFullV1ArtifactProducts.deployRecords(c);
     }
 
     function _providers() private {
-        vrfService = new MockVRFCoordinatorV2Plus();
-        CurrentARRNGService service =
-            new CurrentARRNGService(address(governanceRoot), vm.addr(PLATFORM_KEY));
+        vrfService = MockVRFCoordinatorV2Plus(
+            _artistArtifactCreate(
+                "test/mocks/MockVRFCoordinatorV2Plus.sol:MockVRFCoordinatorV2Plus", abi.encode()
+            )
+        );
+        CurrentARRNGService service = CurrentARRNGService(
+            _artistArtifactCreate(
+                "test/current/StreamCurrentARRNG.t.sol:CurrentARRNGService",
+                abi.encode(address(governanceRoot), vm.addr(PLATFORM_KEY))
+            )
+        );
         StreamFullV1Candidate.ProviderConfiguration memory c;
         c.vrf = _vrf(address(entropy));
         c.arrng = StreamEntropyProviderARRNG.Config(
@@ -383,7 +397,7 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.vrfManifestHash = keccak256("full37 VRF fixture");
         c.arrngManifestURI = "urn:fixture:full37:arrng";
         c.arrngManifestHash = keccak256("full37 ARRNG fixture");
-        (products.vrf, products.arrng) = StreamFullV1Candidate.deployProviders(foundation, c);
+        (products.vrf, products.arrng) = StreamFullV1ArtifactProducts.deployProviders(foundation, c);
     }
 
     function _vrf(address coordinator)
@@ -429,7 +443,7 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.entropyTimes = StreamCurrentStackPlan.entropyTimeParameters();
         c.backupVRF = _vrf(address(0));
         configuration.continuity = c;
-        products.continuity = StreamFullV1ContinuityProducts.deploy(c);
+        products.continuity = StreamFullV1ArtifactProducts.deployContinuity(c);
     }
 
     function _rendering() private {
@@ -467,8 +481,8 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         configuration.rendering.goldenGas = IStreamGasParameterHost.GasParameterConfig(
             "RENDERER_GOLDEN_VECTOR_GAS", 20000000, 100000, 2
         );
-        products.rendering = StreamFullV1StaticRendererPlan.deployRenderer(configuration.rendering);
-        products.rendering = StreamFullV1StaticRendererPlan.deployRegistry(
+        products.rendering = StreamFullV1ArtifactProducts.deployRenderer(configuration.rendering);
+        products.rendering = StreamFullV1ArtifactProducts.deployRendererRegistry(
             configuration.rendering, products.rendering, _targets()
         );
     }

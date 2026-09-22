@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
+import { StreamFullV1ArtifactProducts } from "../helpers/StreamFullV1ArtifactProducts.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import {
     StreamGenesisManifestTailFixture as TailFixture
@@ -79,7 +80,7 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
             "METADATA_DEPENDENCY_READ_GAS", 1000000, 100000, 2
         );
         // The Artist coordinator and original owners must already exist and be reciprocal.
-        records = StreamFullV1RecordProducts.deploy(configuration);
+        records = StreamFullV1ArtifactProducts.deployRecords(configuration);
         _extendCatalog();
         TailFixture.Plan memory tail =
             TailFixture.plan(executor, address(registry), registry.registerModule.selector);
