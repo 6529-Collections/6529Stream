@@ -1326,6 +1326,11 @@ the release policy in `docs/release-policy.md`.
 - Add closed consent/root Safe transport for source-pinned unsigned packets,
   preserving exact envelope fields and separate original record verification.
 
+- Add an explicit recorded EXHIBITION location and TGN join, replaying both
+  original source packages and requiring the owner's exact declaration payload
+  commitment. Retain separate account review, unresolved mappings and historical
+  authority without inferring owner approval of geographic identity.
+
 - Add native VIEW reference and file-role semantic exports with exact source
   replay, occurrence-specific resources, qualified environment/output relations
   and separate declared-file, received-byte and Archive correspondence evidence.

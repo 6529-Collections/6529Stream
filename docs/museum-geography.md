@@ -10,6 +10,11 @@ profile, authenticate an owner record, retrieve Getty data, or establish that a
 historical statement is true. Recorded-source and package adapters must perform
 those joins before using this output as authenticated evidence.
 
+The separate [recorded exhibition location consumer](museum-recorded-exhibition-geography-v1.md)
+implements one such join through the original owner's exact location hash and
+a replayed Authority V2 Place declaration. It does not register this draft
+schema or implement the other place roles below.
+
 ## Input contract
 
 `project(source_bytes, linked_art)` accepts canonical JSON bytes and a pinned

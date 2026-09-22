@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Recorded exhibition location and TGN join](../../docs/museum-recorded-exhibition-geography-v1.md)
+connects the owner's exact location commitment to a separately reviewed account
+Place alignment, retaining both complete sources and their distinct authority.
+
 [Native VIEW reference and file semantics](../../docs/museum-native-view-reference-semantics-v1.md)
 map exact native file roles and token/reference relationships with original
 source replay, separate received-byte evidence and an offline graph package.
