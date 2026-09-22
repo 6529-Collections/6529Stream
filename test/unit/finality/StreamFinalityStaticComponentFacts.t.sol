@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 import "../../helpers/StaticMetadataRoutingFixture.sol";
 import {
+    IStreamMetadataRouter
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol";
+import {
     StreamStaticSelectionCheckpoint
 } from "../../../smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol";
 import {
