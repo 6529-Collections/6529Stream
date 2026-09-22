@@ -12,8 +12,8 @@ async function capture(kind='beginInventory',options={}) {
 }
 const receipt=async(f,mode='direct')=>{const tx=f.install(f.capture,mode);return w.reconcileScopedPolicyInventoryV2Receipt(f.provider,f.capture,tx.txHash,tx.options);};
 
-test('all17 original inventory stages capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)',async()=>{
-  for(const kind of methods)for(const mode of ['direct','legacy','indexed']){
+for(const kind of methods)test(`original inventory stage ${kind}: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)`,async()=>{
+  for(const mode of ['direct','legacy','indexed']){
     const f=await capture(kind);
     const simulated=await w.simulateScopedPolicyInventoryV2(f.provider,f.capture,{blockTag:91,gasLimit:f.gasLimit});
     assert.equal(simulated.originalCallSucceeded,true);assert.equal(simulated.stateChangesPersisted,false);

@@ -67,7 +67,17 @@ Both interrupted tests previously had two-second estimates and started late.
 The revised schedule starts them immediately. Replaying the measured durations
 reduces the maximum estimated shard from 740 to 380 seconds, excluding job setup
 and artifact upload. This is a scheduling model; a fresh full CI run remains
-required. Every original file, registration, assertion and timeout stays intact.
+required. That calibration preserved every original file, registration,
+assertion and timeout.
+
+In [the next run](https://github.com/6529-Collections/6529Stream/actions/runs/35714135709),
+the bundle passed in 351 seconds, but the inventory child still reached its
+420-second bound despite starting first. The inventory regression now reports
+its 17 independent stages separately. Each stage retains all three layouts and
+the original lifecycle assertions, for the same 51 fresh-fixture flows. The
+other 15 tests in that file remain unchanged. The original aggregate timing is
+historical; these new stage names use the normal scheduling heuristics until
+their measurements are incorporated into a later timing seed.
 
 Unmeasured new units use explicit scheduling heuristics. Estimates affect
 placement only and are not CI runtime guarantees. Pass `--timings PATH` to use an updated
