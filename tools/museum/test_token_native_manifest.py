@@ -8,6 +8,8 @@ import unittest
 from .canonical import dumps, keccak256
 from .token_native_manifest import EXTENSIONS, build_manifest
 
+RENDERER_SOURCE = "smart-contracts/domains/metadata/StreamMetadataRenderer.sol"
+
 
 class TokenNativeManifestTests(unittest.TestCase):
     def setUp(self):
@@ -23,7 +25,7 @@ class TokenNativeManifestTests(unittest.TestCase):
         for name in EXTENSIONS:
             path = Path(museum_products[name]["artifact"])
             value = json.loads(path.read_bytes())
-            value["bytecode"]["linkReferences"] = {"smart-contracts/StreamMetadataRenderer.sol": {"StreamMetadataRenderer": []}}
+            value["bytecode"]["linkReferences"] = {RENDERER_SOURCE: {"StreamMetadataRenderer": []}}
             path.write_bytes(dumps(value)); museum_products[name]["sha256"] = self.hash(path)
         safe = self.write("safe.json", {})
         self.museum = self.write("museum.json", {"mode": "current_museum_native_products_v1",
@@ -43,8 +45,8 @@ class TokenNativeManifestTests(unittest.TestCase):
         return {"path": str(path), "sha256": self.hash(path)}
 
     def product(self, project, name):
-        source = "smart-contracts/" + name + ".sol"
-        path = project / source; path.parent.mkdir(exist_ok=True)
+        source = RENDERER_SOURCE if name == "StreamMetadataRenderer" else "smart-contracts/" + name + ".sol"
+        path = project / source; path.parent.mkdir(parents=True, exist_ok=True)
         raw = ("contract " + name + " {}\r\n").encode(); path.write_bytes(raw)
         artifact = project / "out" / (name + ".sol") / (name + ".json")
         artifact.parent.mkdir(parents=True)
