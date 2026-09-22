@@ -55,3 +55,19 @@ selected production capacity, execution of these cases and cold transaction/leaf
 gas acceptance remain separate evidence. This source batch makes no full system,
 testnet, audit or release-readiness claim. The local diagnostic captures remain
 source-qualified; failed predecessor captures are retained.
+
+The first selected native capacity pass measured Clocks at 29,164 bytes and
+Preparation at 27,123 bytes, over the unchanged 24,576-byte runtime limit. Fixed
+typed workers now retain the exact original transition and collection phases.
+Five source-qualified native products fit: Clocks 24,256; ClockBindingProof
+16,421; Preparation 13,470; PreparationAdmitted 23,547; and
+PreparationPrincipals 16,230 bytes. Their full library initcode also fits.
+Those captures retain complete native fields, own-source AST and metadata source
+joins; they do not establish capacity of the other workers or joined owners,
+actual linked deployment, execution, or the gas cost of added delegate frames.
+
+The partial-refusal scenario uses the original corrective proposal entry and
+saved refusal cause. Its class2 governance approval remains an explicitly typed
+unit boundary. Revert expectations materialize nonce producer reads before the
+call under test. All twenty authored cases still await their separate exact
+native execution campaign; inherited fixture tests are not counted among them.

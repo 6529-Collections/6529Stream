@@ -11,6 +11,14 @@ import {
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistCollaboratorLifecycle.sol";
 import "./ArtistRecoveredMultipleFixture.sol";
 import {
+    StreamArtistBindingCorrectionTypes as PCBC,
+    IStreamArtistBindingCorrection as PCCorrection,
+    IStreamArtistBindingCorrectionOwner as PCCorrectionOwner
+} from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistBindingCorrection.sol";
+import {
+    StreamArtistBindingCorrectionAdmission as PCCorrectionAdmission
+} from "../../../smart-contracts/domains/artist/StreamArtistBindingCorrectionAdmission.sol";
+import {
     StreamArtistPrimaryCollaboratorTypes as PC
 } from "../../../smart-contracts/domains/artist/StreamArtistPrimaryCollaboratorTypes.sol";
 import {
@@ -121,7 +129,76 @@ abstract contract ArtistPrimaryCollaboratorFixture is ArtistRecoveredMultipleFix
         p.collaborators[0] = T.CollaboratorRecord(
             address(delegateSafe), keccak256("composer"), keccak256("composer-share")
         );
-        ingress.proposeArtistBinding(2, p, bytes("unit identity document"), "Artist Safe");
+        T.Binding memory previous = Binding(suite.owners[0]).binding(2);
+        if (previous.generation == 0) {
+            ingress.proposeArtistBinding(2, p, bytes("unit identity document"), "Artist Safe");
+        } else {
+            // Actual original correction admission reads the saved refusal. Only the
+            // inherited governance approval context is an explicit typed unit boundary.
+            p.reasonHash = keccak256(
+                abi.encode(
+                    "original collaborator refusal correction",
+                    previous.bindingHash,
+                    previous.generation
+                )
+            );
+            (PCBC.Context memory context,) = PCCorrectionAdmission.context(
+                suite, 2, p, bytes("unit identity document"), "Artist Safe", 0
+            );
+            address authority = manager.governanceAuthority();
+            ArtistUnitRoles(suite.roleRegistry).setAdmin(authority, true);
+            ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
+            ArtistUnitGovernance(authority)
+                .configureContestReads(
+                    suite.roleRegistry,
+                    address(artist),
+                    p.reasonHash,
+                    "urn:pc:correction:governance"
+                );
+            bytes32 action = keccak256(
+                abi.encode("pc original refusal correction", context, previous.generation)
+            );
+            ArtistUnitGovernance(authority)
+                .executeModuleContextWithAction(
+                    action,
+                    address(ingress),
+                    abi.encodeCall(
+                        PCCorrection.proposeArtistBindingAfterRevocation,
+                        (uint256(2), p, bytes("unit identity document"), "Artist Safe", bytes32(0))
+                    ),
+                    2,
+                    context.scopeHash,
+                    context.oldValueHash,
+                    context.newValueHash
+                );
+            T.Binding memory corrected = Binding(suite.owners[0]).binding(2);
+            (PCBC.Approval memory approval, bytes32 record) =
+                PCCorrectionOwner(suite.owners[0]).bindingCorrection(corrected.bindingHash);
+            require(
+                approval.cause == 1
+                    && approval.causeRecord
+                        == Lifecycle(suite.owners[0])
+                        .bindingTermination(2, previous.generation)
+                        .recordHash && approval.governance.actionId == action
+                    && approval.previous.bindingHash == previous.bindingHash
+                    && corrected.generation == previous.generation + 1 && !corrected.accepted
+                    && record != 0,
+                "genuine original refused-binding correction and retained cause"
+            );
+            (
+                bool active,
+                bytes32 id,
+                uint8 kind,
+                bytes32 scope_,
+                bytes32 oldValue,
+                bytes32 newValue
+            ) = IStreamGovernanceReads(authority).currentAction();
+            require(
+                !active && id == 0 && kind == 0 && scope_ == 0 && oldValue == 0 && newValue == 0,
+                "typed correction context cleared before original recovery"
+            );
+            _rhCandidate(0, "binding_lifecycle.replay.correction_action", action);
+        }
         T.Binding memory b = Binding(suite.owners[0]).binding(2);
         _rhCandidate(
             0,
@@ -218,8 +295,8 @@ abstract contract ArtistPrimaryCollaboratorFixture is ArtistRecoveredMultipleFix
         _pcRemember(artistId, record, digest, a);
         _rhCandidate(
             0,
-            "binding_lifecycle.replay.termination_key",
-            keccak256(abi.encode(uint256(2), b.generation, uint8(1)))
+            "binding_lifecycle.replay.refusal_uniqueness",
+            keccak256(abi.encode(uint256(2), b.generation))
         );
     }
 

@@ -108,43 +108,56 @@ import {
     StreamArtistPrimaryCollaboratorAdmission as NewAdmission
 } from "./StreamArtistPrimaryCollaboratorAdmission.sol";
 
-/// @notice Distinct complete aggregate composition for original Consent14/15/16/17/20/21 and grants.
-import {
-    StreamArtistPrimaryCollaboratorPreparationPrincipals as Principals
-} from "./StreamArtistPrimaryCollaboratorPreparationPrincipals.sol";
-
-import {
-    StreamArtistPrimaryCollaboratorPreparationAdmitted as Admitted
-} from "./StreamArtistPrimaryCollaboratorPreparationAdmitted.sol";
-
-library StreamArtistPrimaryCollaboratorPreparation {
-    struct Context {
-        T.SuiteConfiguration destination;
-        RH.Request request;
-        T.RoyaltyFreeze[] royalties;
-        bool requireInventory;
-        Admission.Certificate admission;
+/// @notice Fixed original per-principal identity, payout and evidence collection phase.
+/// @dev Runs after the original witness collection and before family composition.
+library StreamArtistPrimaryCollaboratorPreparationPrincipals {
+    struct Result {
+        bytes[] identities;
+        bytes[] payouts;
+        TM.Checkpoint timing;
+        External.Snapshot externalGuards;
+        uint256 features;
     }
 
-    /// @dev Compiler-owned memory frame; every former local retains its exact nominal type.
-
-    function encode(
-        T.SuiteConfiguration memory destination,
-        RH.Request memory request,
-        T.RoyaltyFreeze[] memory royalties,
-        bool requireInventory
-    ) public view returns (bytes memory) {
-        Context memory context;
-        context.destination = destination;
-        context.request = request;
-        context.royalties = royalties;
-        context.requireInventory = requireInventory;
-        context.admission = NewAdmission.collect(destination, request);
-        return encodeAdmitted(context);
+    /// @dev Canonical complete Result transport; fixed caller decodes the same nominal tuple.
+    function collectEncoded(Admission.Certificate memory c) public view returns (bytes memory) {
+        return abi.encode(collect(c));
     }
 
-    /// @dev The caller passes the one complete admission; this entry never recollects source history.
-    function encodeAdmitted(Context memory input) public view returns (bytes memory) {
-        return Admitted.encode(input);
+    function collect(Admission.Certificate memory c) public view returns (Result memory result) {
+        result.identities = new bytes[](c.artists.length);
+        result.payouts = new bytes[](c.artists.length);
+        External.Snapshot[] memory observations = new External.Snapshot[](c.artists.length);
+        result.features = PC.FEATURE | RH.BINDING_GENERATIONS;
+        for (uint256 i; i < c.artists.length; ++i) {
+            (bool ok, bytes memory raw) = address(Identity)
+                .staticcall(
+                    abi.encodeWithSelector(
+                        Identity.collect.selector,
+                        c.source.owners[2],
+                        c.artists[i],
+                        RH.ownerProvenance(c.provenance, 2)
+                    )
+                );
+            result.identities[i] = Tuple.result(ok, raw);
+            Tuple.requireSingle(result.identities[i]);
+            bool continuations;
+            (raw, continuations) =
+                Payout.collect(c.source.owners[5], c.artists[i].artistId, c.provenance);
+            result.payouts[i] = Payout.encode(raw, c.provenance);
+            TM.Checkpoint memory timing;
+            uint256 selected;
+            bool delegated;
+            (observations[i], timing, selected, delegated) = Evidence.collect(
+                result.identities[i], c.provenance, c.source.owners[2], continuations
+            );
+            if (i != 0 && keccak256(abi.encode(timing)) != keccak256(abi.encode(result.timing))) {
+                revert T.UnsupportedProfile();
+            }
+            result.timing = timing;
+            result.features |= selected;
+            if (delegated) result.features |= RH.DELEGATED_CONSENT;
+        }
+        result.externalGuards = Observations.collect(observations);
     }
 }

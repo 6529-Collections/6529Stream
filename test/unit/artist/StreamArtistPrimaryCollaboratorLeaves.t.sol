@@ -258,14 +258,15 @@ contract StreamArtistPrimaryCollaboratorLeavesTest {
             producer.consume(uses[i].account, uses[i].nonce);
         }
         RH.OwnerProvenance memory p = _provenance(uses);
+        IH.NonceLane[] memory rows = producer.rows();
         uses[2].nonce = 300;
         vm.expectRevert(RH.InvalidRecoveredHydrationProfile.selector);
-        Accounts.validate(producer.rows(), uses, p);
+        Accounts.validate(rows, uses, p);
         uses[2].nonce = 2;
         vm.expectRevert(RH.InvalidRecoveredHydrationProfile.selector);
-        Accounts.validate(producer.rows(), uses, p);
+        Accounts.validate(rows, uses, p);
         uses[2].nonce = 1;
-        Accounts.validate(producer.rows(), uses, p);
+        Accounts.validate(rows, uses, p);
     }
 
     function testExtraConsumedBitAncestorWordAndWrongHintRefuseThenRestore() public {
@@ -287,7 +288,8 @@ contract StreamArtistPrimaryCollaboratorLeavesTest {
         rows[0].hint = 3;
         vm.expectRevert(RH.InvalidRecoveredHydrationProfile.selector);
         Accounts.validate(rows, uses, p);
-        Accounts.validate(producer.rows(), uses, p);
+        rows = producer.rows();
+        Accounts.validate(rows, uses, p);
     }
 
     function testAccountWordNarrowingAndMissingAliasRefuse() public {

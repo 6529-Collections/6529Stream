@@ -45,6 +45,9 @@
 - Add focused leaf/nonce and actual-owner/Safe scenarios. Source/type checks do
   not establish native execution, production capacity or transaction gas; see
   the [profile guide](docs/guides/artist-primary-collaborator-hydration.md).
+- Factor complete clock and preparation phases into fixed typed workers; all
+  five selected products fit original native size limits. Retain separate
+  whole-profile capacity, actual execution and added-call gas requirements.
 
 
 ## Registry writer deployment capacity

@@ -27,9 +27,9 @@ import {
 } from "./StreamArtistRecoveredPlatformTypes.sol";
 import { SSTORE2 } from "../../libraries/SSTORE2.sol";
 
-interface IStreamPrimaryCollaboratorConfiguration {
-    function configurationHash() external view returns (bytes32);
-}
+import {
+    IStreamPrimaryCollaboratorConfiguration
+} from "../../interfaces/stream/artist/IStreamPrimaryCollaboratorConfiguration.sol";
 
 /// @notice Exhaustive original Archive catalogue for PRIMARY_ONLY collaborator hydration.
 /// @dev Records preserve their original operation domains. Catalogue integrity grants no

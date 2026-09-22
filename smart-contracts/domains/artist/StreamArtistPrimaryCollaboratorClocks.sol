@@ -54,6 +54,10 @@ import { StreamArtistAttributionStateTypes as AS } from "./StreamArtistAttributi
 /// @notice Exhaustive original proposal, partial acceptance and completion chronology.
 /// @dev All original Archive rows and owner journals are retained. An op2 can overwrite
 /// its binding's primary map while still pending; every native occurrence survives here.
+import {
+    StreamArtistPrimaryCollaboratorClockBindingProof as BindingProof
+} from "./StreamArtistPrimaryCollaboratorClockBindingProof.sol";
+
 library StreamArtistPrimaryCollaboratorClocks {
     struct Result {
         OriginalClocks.Result clocks;
@@ -99,7 +103,7 @@ library StreamArtistPrimaryCollaboratorClocks {
             ) _invalid();
             c.previousEra = era;
             c.previousIndex = row.evidence.catalogueIndex;
-            _bounds(inventory.catalogues[era], e);
+            BindingProof.bounds(inventory.catalogues[era].lower, inventory.catalogues[era].upper, e);
             if (e.operation == 5) {
                 Leaves.proposal(p.origins[era], e);
                 continue;
@@ -182,28 +186,7 @@ library StreamArtistPrimaryCollaboratorClocks {
         uint256 k,
         uint256 g
     ) private pure {
-        A.Generation memory generation = b.generations[k][g];
-        if (
-            g != c.cursors[k].generation || (g != 0 && !c.cursors[k].completed)
-                || generation.generation != g + 1
-                || generation.bindingHash != b.bindings[k].bindings.rows[g].item.bindingHash
-                || generation.accepted != b.bindings[k].bindings.rows[g].item.accepted
-                || generation.proposal.ownerIndex != 0
-        ) _invalid();
-        BindingLeaves.row(
-            b.bindings[k].bindings.rows[g],
-            scope.collections[k],
-            uint64(g + 1),
-            c.owner4.origins[era],
-            b.collaborators[k][g]
-        );
-        BindingLeaves.correction(b.bindings[k], scope.collections[k], g, c.owner4.origins[era]);
-        _fixedFrames(e, 0x15, e.after_[2].revision == e.before_[2].revision ? 0x11 : 0x15);
-        P.Platform memory platform;
-        platform.collectionId = scope.collections[k].collectionId;
-        c.cursors[k] = Proposal.advance(
-            platform, b.bindings[k], b.generations[k], c.cursors[k], c.owner4, era, e, true
-        );
+        c.cursors[k] = BindingProof.proposal(_bindingContext(scope, b, c, era, e, k, g));
         r.clocks.collections[k].proposals[g] =
             RH.Point(c.owner4.eras[era].originHash, 0, e.after_[0].revision);
         r.clocks.collections[k].attributionProposals[g] = _attributionPoint(r, c, era, e);
@@ -302,27 +285,16 @@ library StreamArtistPrimaryCollaboratorClocks {
                 || r.finalPrimary[k][g] == 0
                 || r.accepted[k][g] != b.bindings[k].bindings.rows[g].terms.count
         ) _invalid();
-        RH.Point memory point = RH.Point(c.owner4.eras[era].originHash, 4, e.after_[4].revision);
-        // The shared _attributionPoint below advances the global cursor once, after
-        // the complete original transition preimage is authenticated.
-        if (!Clock.beforeOwner(c.owner4, 4, r.clocks.collections[k].attributionProposals[g], point))
-        {
-            _invalid();
-        }
-        T.Binding memory pending =
-            abi.decode(abi.encode(b.bindings[k].bindings.rows[g].item), (T.Binding));
-        pending.accepted = false;
-        Transition.validateWithRecords(
-            c.owner4.origins[era],
-            c.owner4,
-            era,
-            e,
-            keccak256(abi.encode(scope.collections[k].collectionId, pending, e.value)),
-            keccak256(
-                abi.encode(scope.collections[k].collectionId, AS.Attribution(2, uint64(g + 1)))
-            ),
-            0,
-            0
+        BindingProof.complete(
+            BindingProof.Completion({
+                collectionId: scope.collections[k].collectionId,
+                binding: b.bindings[k].bindings.rows[g].item,
+                owner4: c.owner4,
+                era: era,
+                envelope: e,
+                generation: g,
+                proposal: r.clocks.collections[k].attributionProposals[g]
+            })
         );
         r.clocks.collections[k].completions[g] =
             RH.Point(c.owner4.eras[era].originHash, 0, e.after_[0].revision);
@@ -340,13 +312,7 @@ library StreamArtistPrimaryCollaboratorClocks {
         uint256 k,
         uint256 g
     ) private view {
-        if (e.operation != 3 && e.operation != 4) _invalid();
-        _fixedFrames(e, e.operation == 3 ? 0x15 : 0x11, e.operation == 3 ? 0x15 : 0x11);
-        P.Platform memory platform;
-        platform.collectionId = scope.collections[k].collectionId;
-        c.cursors[k] = Terminal.advance(
-            platform, b.bindings[k], b.generations[k], c.cursors[k], c.owner4, era, e, true
-        );
+        c.cursors[k] = BindingProof.terminal(_bindingContext(scope, b, c, era, e, k, g));
         r.clocks.collections[k].completions[g] =
             RH.Point(c.owner4.eras[era].originHash, 0, e.after_[0].revision);
         r.clocks.collections[k].attributionCompletions[g] = _attributionPoint(r, c, era, e);
@@ -439,34 +405,24 @@ library StreamArtistPrimaryCollaboratorClocks {
         return keccak256(abi.encode(observed)) == keccak256(abi.encode(pending));
     }
 
-    function _bounds(P.Catalogue memory catalogue, H.Envelope memory e) private pure {
-        for (uint8 i; i < 7; ++i) {
-            T.Snapshot memory a = e.before_[i];
-            T.Snapshot memory b = e.after_[i];
-            if (a.domainId == 0 && b.domainId == 0) continue;
-            if (
-                a.domainId != RH.ownerDomain(i) || b.domainId != a.domainId || a.stateRoot == 0
-                    || b.stateRoot == 0 || a.recordChainTip == 0 || b.recordChainTip == 0
-                    || a.revision < catalogue.lower[i] || b.revision > catalogue.upper[i]
-                    || b.revision < a.revision || b.revision > a.revision + 1
-            ) _invalid();
-        }
-    }
-
-    function _fixedFrames(H.Envelope memory e, uint256 observed, uint256 changed) private pure {
-        T.Snapshot memory zero;
-        for (uint8 i; i < 7; ++i) {
-            if ((observed & (1 << i)) == 0) {
-                if (
-                    keccak256(abi.encode(e.before_[i])) != keccak256(abi.encode(zero))
-                        || keccak256(abi.encode(e.after_[i])) != keccak256(abi.encode(zero))
-                ) _invalid();
-            } else if ((changed & (1 << i)) != 0) {
-                if (e.after_[i].revision != e.before_[i].revision + 1) _invalid();
-            } else if (keccak256(abi.encode(e.before_[i])) != keccak256(abi.encode(e.after_[i]))) {
-                _invalid();
-            }
-        }
+    function _bindingContext(
+        M.State memory scope,
+        PC.BindingInventory memory b,
+        Context memory c,
+        uint256 era,
+        H.Envelope memory e,
+        uint256 k,
+        uint256 g
+    ) private pure returns (BindingProof.Context memory x) {
+        x.query = scope.collections[k];
+        x.binding = b.bindings[k];
+        x.generations = b.generations[k];
+        x.collaborators = b.collaborators[k][g];
+        x.cursor = c.cursors[k];
+        x.owner4 = c.owner4;
+        x.era = era;
+        x.envelope = e;
+        x.generation = g;
     }
 
     function _invalid() private pure {

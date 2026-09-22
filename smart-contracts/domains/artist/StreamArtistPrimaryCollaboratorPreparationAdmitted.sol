@@ -108,43 +108,74 @@ import {
     StreamArtistPrimaryCollaboratorAdmission as NewAdmission
 } from "./StreamArtistPrimaryCollaboratorAdmission.sol";
 
-/// @notice Distinct complete aggregate composition for original Consent14/15/16/17/20/21 and grants.
+import {
+    StreamArtistPrimaryCollaboratorPreparation as Preparation
+} from "./StreamArtistPrimaryCollaboratorPreparation.sol";
 import {
     StreamArtistPrimaryCollaboratorPreparationPrincipals as Principals
 } from "./StreamArtistPrimaryCollaboratorPreparationPrincipals.sol";
 
-import {
-    StreamArtistPrimaryCollaboratorPreparationAdmitted as Admitted
-} from "./StreamArtistPrimaryCollaboratorPreparationAdmitted.sol";
-
-library StreamArtistPrimaryCollaboratorPreparation {
-    struct Context {
-        T.SuiteConfiguration destination;
-        RH.Request request;
-        T.RoyaltyFreeze[] royalties;
-        bool requireInventory;
-        Admission.Certificate admission;
+/// @notice Fixed complete admitted preparation phase, after original admission.
+/// @dev Carries the unchanged nominal Context and returns original complete seal bytes.
+library StreamArtistPrimaryCollaboratorPreparationAdmitted {
+    struct Frame {
+        Owners.Context context;
+        Admission.Certificate c;
+        M.State scope;
+        Witnesses.Plan witnesses;
+        Principals.Result principals;
+        Composition.Context phase;
+        Composition.Result result;
     }
 
-    /// @dev Compiler-owned memory frame; every former local retains its exact nominal type.
+    function encode(Preparation.Context memory input) public view returns (bytes memory) {
+        Frame memory frame;
+        frame.context.prepared.admission = input.admission;
+        frame.c = frame.context.prepared.admission;
 
-    function encode(
-        T.SuiteConfiguration memory destination,
-        RH.Request memory request,
-        T.RoyaltyFreeze[] memory royalties,
-        bool requireInventory
-    ) public view returns (bytes memory) {
-        Context memory context;
-        context.destination = destination;
-        context.request = request;
-        context.royalties = royalties;
-        context.requireInventory = requireInventory;
-        context.admission = NewAdmission.collect(destination, request);
-        return encodeAdmitted(context);
-    }
+        frame.scope.artists = frame.c.artists;
+        frame.scope.collections = frame.c.collections;
+        Identity.preparationOwners(
+            frame.c.source.owners[2], frame.scope, RH.ownerProvenance(frame.c.provenance, 2)
+        );
+        frame.context.prepared.query = Codec.anchorQuery(frame.scope);
+        frame.witnesses = Witnesses.collect(
+            frame.c.source,
+            frame.c.provenance,
+            frame.scope,
+            input.request.records.witnesses,
+            input.royalties
+        );
+        frame.principals = abi.decode(Principals.collectEncoded(frame.c), (Principals.Result));
+        frame.context.identities = frame.principals.identities;
+        frame.context.payouts = frame.principals.payouts;
+        frame.context.prepared.timing = frame.principals.timing;
+        frame.context.prepared.externalGuards = frame.principals.externalGuards;
+        frame.context.features = frame.principals.features;
 
-    /// @dev The caller passes the one complete admission; this entry never recollects source history.
-    function encodeAdmitted(Context memory input) public view returns (bytes memory) {
-        return Admitted.encode(input);
+        frame.phase.source = frame.c.source;
+        frame.phase.provenance = frame.c.provenance;
+        frame.phase.scope = frame.scope;
+        frame.phase.identities = frame.context.identities;
+        frame.phase.economics = frame.witnesses.economics;
+        frame.phase.freezes = frame.witnesses.freezes;
+        frame.phase.attestations = frame.witnesses.attestations;
+        frame.phase.features = frame.context.features;
+        frame.result = Composition.collect(frame.phase);
+        frame.context.bindings = frame.result.bindings;
+        frame.context.consents = frame.result.consents;
+        frame.context.features = frame.result.features;
+        frame.context.attribution = frame.result.attribution;
+        frame.context.accepted = frame.result.accepted;
+        frame.context.inventory = frame.result.inventory;
+        frame.context.generations = frame.result.generations;
+        frame.context.accounts = frame.result.accounts;
+        if ((frame.context.features & ~PC.ALLOWED) != 0) revert T.UnsupportedProfile();
+        frame.context.destination = input.destination;
+        frame.context.expected = input.request.expectedCapabilities;
+        frame.context.replayOrigins = input.request.records.authority.replayOrigins;
+        return Owners.encode(
+            frame.context, input.requireInventory, input.request.expectedSemanticInventory
+        );
     }
 }
