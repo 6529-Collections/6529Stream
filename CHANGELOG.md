@@ -37,8 +37,10 @@
   while preserving the complete `npm test` command and every source-oracle test.
   CI prepares once, distributes the full inventory, retains failure logs and
   requires every shard under the existing `TypeScript client` check. See the
-  [runner guide](packages/stream-client/docs/test-sharding.md). Full remote matrix
-  timing validation remains pending integration; no release evidence is renewed.
+  [runner guide](packages/stream-client/docs/test-sharding.md). Calibrate all
+  original test units from the first remote run and exact-input local supplements,
+  moving two long combined flows ahead of short tests without changing limits.
+  Fresh full-matrix validation remains pending; no release evidence is renewed.
 
 ## Complete Artist history composition workers
 

@@ -54,13 +54,37 @@ after a test failure, and CI preserves available TAP, process and structured
 logs for 14 days. A canceled job can leave an incomplete result, which fails
 the aggregate.
 
-The planner greedily balances estimated work. The checked-in timing seed uses
-38 measured dispute workflow cases from Windows Node 22.12.0; other units use
-explicit scheduling heuristics. These estimates affect placement only and are
-not CI runtime guarantees. Pass `--timings PATH` to planning to use an updated
+The planner greedily balances estimated work. The checked-in timing seed covers
+all 1,417 units from [CI run 35706718194](https://github.com/6529-Collections/6529Stream/actions/runs/35706718194):
+1,239 units from 14 complete shards, 176 successful units from two cancelled
+shards, and two separately recorded Windows measurements of the interrupted
+tests. The CI plan identifies tested merge commit `f88799e6200f8f6d1c3cc8ef646c0e0547f23c1b`.
+The isolated tests' 47 dependency inputs match that plan byte-for-byte. The
+bundle test passed in 312 seconds on Node 22.12; the inventory test passed in
+362 seconds on CI-matching Node 24.16 after an earlier Node 22 timeout.
+
+Both interrupted tests previously had two-second estimates and started late.
+The revised schedule starts them immediately. Replaying the measured durations
+reduces the maximum estimated shard from 740 to 380 seconds, excluding job setup
+and artifact upload. This is a scheduling model; a fresh full CI run remains
+required. Every original file, registration, assertion and timeout stays intact.
+
+Unmeasured new units use explicit scheduling heuristics. Estimates affect
+placement only and are not CI runtime guarantees. Pass `--timings PATH` to use an updated
 JSON object with `files` (file to milliseconds) and/or `cases` (file to name to
 milliseconds). Result reports include measured child and case durations for
 future calibration. Avoid increasing bounds until the slow cases are examined.
+
+The offline importer authenticates completed reports and their TAP/report files,
+keeps interrupted observations separate, and requires completed supplements
+before generating a full timing table:
+
+```bash
+node scripts/test-runner/timing-evidence.mjs --plan PLAN_JSON --results ARTIFACT_DIRECTORY --partial 4=SHARD4_LOG --partial 7=SHARD7_LOG --supplement BUNDLE_RESULT --supplement INVENTORY_RESULT --run RUN_URL --output TIMINGS_JSON --evidence LOCAL_EVIDENCE_JSON
+```
+
+Its evidence file records input hashes and the scheduling model. It cannot turn
+a cancelled or timed-out child into successful test evidence.
 
 The original `TypeScript client` check is the required aggregate. It requires
 successful preparation and every matrix job, then checks all shard reports
@@ -70,4 +94,4 @@ This verifies client test execution; it makes no contract, Safe, deployment or
 release-readiness claim.
 
 Runner regression coverage is included in the normal suite and can be checked
-alone with `node --test test/test-runner.test.mjs`.
+alone with `node --test test/test-runner.test.mjs test/test-runner-timing-evidence.test.mjs`.
