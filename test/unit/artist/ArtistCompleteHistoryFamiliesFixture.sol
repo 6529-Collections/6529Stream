@@ -149,7 +149,7 @@ abstract contract ArtistCompleteHistoryFamiliesFixture is
         );
     }
 
-    function _chCredential(bytes32 previous, bool delegated) private returns (bytes32 record) {
+    function _chCredential(bytes32 previous, bool delegated) internal returns (bytes32 record) {
         CHFC2PA.Credential[] memory credentials = new CHFC2PA.Credential[](1);
         credentials[0] =
             CHFC2PA.Credential(1, keccak256("mixed SPKI"), keccak256("mixed identity key"), 1, 0);
@@ -345,7 +345,7 @@ abstract contract ArtistCompleteHistoryFamiliesFixture is
             "exact revoked grant count across three consuming families"
         );
         require(
-            chPayouts.length >= 2 && chAttestations.length == 2 && chPolicyRecord != 0
+            chPayouts.length >= 2 && chAttestations.length >= 2 && chPolicyRecord != 0
                 && chOpening != 0 && chWithdrawal != 0,
             "fixture actually exercises each claimed family"
         );

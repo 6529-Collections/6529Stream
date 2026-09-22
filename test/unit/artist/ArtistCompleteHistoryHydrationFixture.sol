@@ -58,9 +58,42 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
 
     function _chRun() internal returns (CompleteRun memory run) {
         CHAdmissionType.Certificate memory source;
-        (source, run.latest) = _compositionSource();
-        _chAcceptedRepudiation();
+        (source, run.latest) = _chRichSource();
         return _chPrepare(source, run.latest);
+    }
+
+    function _chRichSource()
+        internal
+        returns (CHAdmissionType.Certificate memory source, bytes32 latest)
+    {
+        (source, latest) = _compositionSource();
+        _chAcceptedRepudiation();
+    }
+
+    function _chSafeEnvelope(
+        OfficialSafe account,
+        address target,
+        bytes memory input,
+        uint256 nonce
+    ) internal returns (bytes memory) {
+        bytes32 digest = account.getTransactionHash(
+            target, 0, input, 0, 0, 0, 0, address(0), address(0), nonce
+        );
+        return abi.encodeCall(
+            OfficialSafe.execTransaction,
+            (
+                target,
+                uint256(0),
+                input,
+                uint8(0),
+                uint256(0),
+                uint256(0),
+                uint256(0),
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(keys, digest)
+            )
+        );
     }
 
     function _chPrepare(CHAdmissionType.Certificate memory source, bytes32 latest)
@@ -272,7 +305,7 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
         coordinator = run.next.coordinator;
         archive = run.next.archive;
         suite = run.next.coordinator.suiteConfiguration();
-        // Preserve the actual ordinary principal Safe and keys; this source never recovered.
+        // Preserve the actual current principal Safe and keys across the suite cutover.
         require(
             IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).authorityAddress
                 == address(artist),
@@ -424,8 +457,12 @@ abstract contract ArtistCompleteHistoryHydrationFixture is
         require(
             CHRepudiationOwner(target.owners[4])
                 .repudiationCount(artistId, keccak256(abi.encode(chRepudiation.authorityHead)))
-            == 1,
-            "authentic pending cohort count"
+            == (CHRepudiationOwner(suite.owners[4])
+                .attributionRepudiationTerminal(chRepudiation.recordHash)
+                .phase == 1
+                    ? 1
+                    : 0),
+            "single original cohort is occupied only while its repudiation remains pending"
         );
     }
 

@@ -82,32 +82,6 @@ contract StreamArtistCompleteHistoryHydrationActualTest is ArtistCompleteHistory
         _chAssert(run);
     }
 
-    function _chSafeEnvelope(
-        OfficialSafe account,
-        address target,
-        bytes memory input,
-        uint256 nonce
-    ) private returns (bytes memory) {
-        bytes32 digest = account.getTransactionHash(
-            target, 0, input, 0, 0, 0, 0, address(0), address(0), nonce
-        );
-        return abi.encodeCall(
-            OfficialSafe.execTransaction,
-            (
-                target,
-                uint256(0),
-                input,
-                uint8(0),
-                uint256(0),
-                uint256(0),
-                uint256(0),
-                address(0),
-                payable(address(0)),
-                safeThresholdSignature(keys, digest)
-            )
-        );
-    }
-
     function testCompleteHistoryActualSourceCheckpointMismatchRejectsAndOriginalRequestRetries()
         external
     {
