@@ -108,6 +108,6 @@ library StreamArtistRecoveredMultipleGenerationAttestationValidation {
     ) public pure returns (Original.Bundle[] memory all) {
         uint256 total;
         (all, total) = InventoryValidation.validate(scope, p, inventory, clocks, sanctioned);
-        Journal.validate(scope, p, inventory, clocks, all, total);
+        Journal.validate(Journal.Context(scope, p, inventory, clocks, all, total));
     }
 }

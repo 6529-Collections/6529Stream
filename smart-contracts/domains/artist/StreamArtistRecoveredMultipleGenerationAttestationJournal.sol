@@ -84,14 +84,22 @@ import { StreamArtistRecoveredMultipleGenerationAttestationInventory as Inventor
 
 /// @notice Validate the complete original owner4 journal in receipt order.
 library StreamArtistRecoveredMultipleGenerationAttestationJournal {
-    function validate(
-        M.State memory scope,
-        RH.OwnerProvenance memory p,
-        G.Inventory memory inventory,
-        Clocks.Result memory clocks,
-        Original.Bundle[] memory all,
-        uint256 total
-    ) public pure {
+    struct Context {
+        M.State scope;
+        RH.OwnerProvenance provenance;
+        G.Inventory inventory;
+        Clocks.Result clocks;
+        Original.Bundle[] all;
+        uint256 total;
+    }
+
+    function validate(Context memory x) public pure {
+        M.State memory scope = x.scope;
+        RH.OwnerProvenance memory p = x.provenance;
+        G.Inventory memory inventory = x.inventory;
+        Clocks.Result memory clocks = x.clocks;
+        Original.Bundle[] memory all = x.all;
+        uint256 total = x.total;
         uint256 nativeRecords;
         for (uint256 i; i < p.journal.length; ++i) {
             if (p.journal[i].receipt.operation == 24) ++nativeRecords;
