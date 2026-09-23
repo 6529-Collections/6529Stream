@@ -9,7 +9,7 @@ import {
 } from "../../../smart-contracts/interfaces/stream/artist/StreamArtistContentTypes.sol";
 import {
     RecoveredDelegationSaleFacts
-} from "./StreamArtistRecoveredDelegationAuthorityActual.t.sol";
+} from "../../helpers/RecoveredDelegationSaleFacts.sol";
 import {
     StreamArtistMultipleRecordsTypes as MR
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
