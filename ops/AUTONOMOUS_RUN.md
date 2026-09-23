@@ -7,7 +7,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 22 September 2026. The owner authorizes autonomous completion of the
+Updated 23 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -21,20 +21,20 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `84f2be42f`; ABI211 4,695 sources / zero errors on identical Solidity; Museum final20 PASS; reviewed Genesis fixture44 retained, runtime pending. Current-stack and full CI acceptance pending. |
+| Source checkpoint | `615451b9c`; ABI212 4,697 sources / zero errors on identical Solidity; Museum assessment6 PASS and review finding closed; checksum3 PASS; reviewed Genesis engine retains44 cases, runtime pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-22 UTC` |
+| Last updated | `2026-09-23 UTC` |
 
-## Active continuation: 22 September
+## Active continuation: 23 September
 
-Expanded full v1 remains incomplete. Integrated source `84f2be42f` now adds
-verified Museum review-package composition and the Genesis fixture compilation
-repair to the earlier contract batch `4e88540ce`. The new fixture preserves all
-44 original cases and deploys genuine products from their native artifacts.
-Source integration and component tests do not establish full current-stack
-acceptance. RC1 and Sepolia remain unchanged.
+Expanded full v1 remains incomplete. Integrated source `615451b9c` adds a
+Museum native-state requirement assessment, a reviewed Genesis test engine and
+a release-checksum test correction. Production Solidity remains `4e88540ce`.
+The Genesis fixture retains all 44 original cases and uses genuine product
+artifacts. Source integration and focused tests do not establish full
+current-stack acceptance. RC1 and Sepolia remain unchanged.
 
 - **Artist contracts:** all 49 collaborator workers fit on their recorded
   `07265d875` source. Twelve codec/projection cases pass, including one
@@ -65,9 +65,15 @@ acceptance. RC1 and Sepolia remain unchanged.
   independent source review and passes all **20 final focused tests**: eight
   new join/replay/tamper cases, eight Artist dossier regressions and four
   retained General capture replays. Original child bytes, profiles and the
-  19/49 assessment denominator remain unchanged. A separate typed native-state
-  assessment adapter is being built; wrapper replay alone does not complete
-  those requirements or establish institutional acceptance.
+  19/49 assessment denominator remain unchanged. The additive native-state
+  assessment at `615451b9c` passes all six focused tests and independent review.
+  It can derive five requirement codes from replayed identity, finality,
+  content-root, entropy and attribution proofs. Four codes are exercised in
+  one joined dossier; entropy is separately proved on its own exact target.
+  The reviewer found an omitted supplemental-source comparison; the fix and
+  regression now include every retained V4 family. A coherent all-five positive
+  fixture is next. These synthetic RPC controls do not establish actual-chain
+  or institutional acceptance, and all other requirements remain explicit.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
   the required client aggregate** at merge source `8d2e2323` (dispatch
   `eb840cfb`). All 246 files / 1,472 execution units / 3,354 registrations
@@ -75,8 +81,13 @@ acceptance. RC1 and Sepolia remain unchanged.
   Platform group. The temporary publication hold is resolved. This client
   result does not make the full repository CI or current contracts accepted.
   The newer `35797757494` run also passes all 16 client shards and aggregate
-  at merge `9e9312b9` (dispatch `3f9c9944`). Its native jobs remain running;
-  Slither baseline and release-artifact jobs failed and are being diagnosed.
+  at merge `9e9312b9` (dispatch `3f9c9944`). Its native jobs remain separate.
+  Slither stopped at stale baseline provenance before live analysis; release
+  verification found stale checksum evidence and a real binary-classification
+  test mismatch. The latter is fixed at `986862299`: all three focused raw-byte
+  tests pass on a clean Git checkout. The raw `.abi` fixture caused the mismatch;
+  Museum `.bin` byte preservation has a separate regression. Generated release
+  evidence and the full CI result still need final refresh and validation.
 - **Preservation:** the repaired component campaign at builder `4a631c0a`
   passes **44/44 cases**: checkpoint 13, manifest V1 21 and V2 10, with no
   failures or skips. Independent runtime review is clear. The fixture
@@ -98,13 +109,17 @@ acceptance. RC1 and Sepolia remain unchanged.
   `6bdeb2f2` / control `5f138526` has bounded root/Luna source review, but its
   first two native fixture captures timed out at 900 seconds with zero paid
   executions. A test-only construction split is authorized; the exact source
-  equality gate and time bound remain intact. Genesis helper `bf26e7cd8`
-  passes independent stage-equivalence review and preserves all 44 cases.
-  Fresh smaller native captures continue; Genesis and Owner runtime acceptance
-  remain pending.
+  equality gate and time bound remain intact. Paid fixture phase split
+  `a2e481dfa` now has independent root/Luna source review; native capture remains
+  in progress and the prototype is not adopted. Genesis helper `bf26e7cd8`
+  preserved all 44 cases, but its host and doubles still timed out in native
+  compilation. Reviewed successor `78cc95f2c` moves the unchanged construction
+  stages behind a stateless test engine, preserving caller and CREATE order.
+  Smaller native captures continue; Genesis and Owner runtime acceptance remain
+  pending. The engine is test-only, not a production-contract change.
 
-ABI211 checks **4,695 Solidity sources with zero errors** at `bf26e7cd8`;
-`84f2be42f` has identical Solidity bytes. The active inventory remains
+ABI212 checks **4,697 Solidity sources with zero errors** at `78cc95f2c`;
+`615451b9c` has identical Solidity bytes. The active inventory remains
 **3,143 production paths**. Existing parallel runtime work stays pinned to
 its recorded source; these new test and Museum changes do not relabel it. Full current-stack/Safe
 integration, comprehensive fuzz/stateful tests,
