@@ -209,7 +209,12 @@ abstract contract PreservationReferenceFixtureV1 is PreservationSnapshotFixtureV
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        referenceHost = new Ref(d, address(executor), _referenceGas());
+        referenceHost = Ref(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamPreservationPolicyReferencePublicationV1.sol:StreamPreservationPolicyReferencePublicationV1",
+                abi.encode(d, address(executor), _referenceGas())
+            )
+        );
         _upload(
             bytes(
                 StreamReferenceEnvironmentJson.files(
@@ -880,7 +885,10 @@ contract StreamPreservationPolicyReferencePublicationV1Test is PreservationRefer
             abi.encode(keccak256("old policy snapshot"))
         );
         vm.expectRevert(abi.encodeWithSelector(RefT.InvalidPolicyReference.selector));
-        new Ref(d, address(executor), _referenceGas());
+        _artistArtifactCreate(
+            "smart-contracts/domains/preservation/StreamPreservationPolicyReferencePublicationV1.sol:StreamPreservationPolicyReferencePublicationV1",
+            abi.encode(d, address(executor), _referenceGas())
+        );
         snapshotVm.mockCall(
             address(snapshotHost),
             abi.encodeCall(SnapshotInterface.preservationPolicySnapshotProfile, ()),

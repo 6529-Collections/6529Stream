@@ -338,7 +338,12 @@ contract StreamScopedPolicyContentCheckpointV2Test is ScopedPolicyContentFixture
         StreamFinalityScope memory scope = _scopedScope(1);
         (Checkpoint host, bytes32 selection) = _scopedCapture(scope);
         address set = host.entropySourceSet();
-        Factory other = new Factory(_scopedDependencies());
+        Factory other = Factory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamFinalityScopedEntropyPolicySourceFactoryV2.sol:StreamFinalityScopedEntropyPolicySourceFactoryV2",
+                abi.encode(_scopedDependencies())
+            )
+        );
         StaticRouteVm(address(vm))
             .mockCall(set, abi.encodeCall(E.factory, ()), abi.encode(address(other)));
         vm.expectRevert();

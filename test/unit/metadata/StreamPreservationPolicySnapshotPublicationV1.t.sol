@@ -221,14 +221,21 @@ abstract contract PreservationSnapshotFixtureV1 is PreservationPolicyContentFixt
         address predicted = createVm.computeCreateAddress(
             address(this), uint256(createVm.getNonce(address(this))) + 1
         );
-        snapshotCoverage = new StreamFinalityArtifactCoverage(
-            address(core),
-            address(snapshotArchive),
-            address(schemas),
-            address(snapshotStore),
-            predicted,
-            address(executor),
-            Gas.GasParameterConfig("FINALITY_ARTIFACT_DEPENDENCY_READ_GAS", 300000, 300000, 2)
+        snapshotCoverage = StreamFinalityArtifactCoverage(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamFinalityArtifactCoverage.sol:StreamFinalityArtifactCoverage",
+                abi.encode(
+                    address(core),
+                    address(snapshotArchive),
+                    address(schemas),
+                    address(snapshotStore),
+                    predicted,
+                    address(executor),
+                    Gas.GasParameterConfig(
+                        "FINALITY_ARTIFACT_DEPENDENCY_READ_GAS", 300000, 300000, 2
+                    )
+                )
+            )
         );
         address finality =
             address(new LeafManifestFinalityBoundary(address(core), address(snapshotCoverage)));
@@ -285,12 +292,17 @@ abstract contract PreservationSnapshotFixtureV1 is PreservationPolicyContentFixt
         );
         require(raw.length == 640 + 1152 * p.tokenCount);
         (bytes32 artifact, bytes32 coverage) = _archive(raw);
-        snapshotOutputs = new OutputHost(
-            address(core),
-            address(snapshotContent),
-            address(snapshotCoverage),
-            address(executor),
-            Gas.GasParameterConfig("STATIC_OUTPUT_MANIFEST_READ_GAS", 32000000, 100000, 2)
+        snapshotOutputs = OutputHost(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamPreservationPolicyOutputManifestV1.sol:StreamPreservationPolicyOutputManifestV1",
+                abi.encode(
+                    address(core),
+                    address(snapshotContent),
+                    address(snapshotCoverage),
+                    address(executor),
+                    Gas.GasParameterConfig("STATIC_OUTPUT_MANIFEST_READ_GAS", 32000000, 100000, 2)
+                )
+            )
         );
         bytes32 plan = snapshotOutputs.beginManifest(c.id, artifact, coverage, SNAPSHOT_ARTIST);
         bytes32 output = snapshotOutputs.verifyNextOutputs(plan, p.tokenCount);
@@ -313,7 +325,12 @@ abstract contract PreservationSnapshotFixtureV1 is PreservationPolicyContentFixt
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        snapshotHost = new Snapshot(d, address(executor), _snapshotGas());
+        snapshotHost = Snapshot(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamPreservationPolicySnapshotPublicationV1.sol:StreamPreservationPolicySnapshotPublicationV1",
+                abi.encode(d, address(executor), _snapshotGas())
+            )
+        );
         publication = Snap.Publication(
             scope,
             keccak256("collection preservation snapshot"),
