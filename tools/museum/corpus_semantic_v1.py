@@ -205,14 +205,14 @@ def _extension(name, source, schema, coverage_raw, provenance_raw):
 def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROOT,
           *, crosswalk_bytes: bytes | None = None, version: str = "1") -> ResourcePackage:
     corpus_directory, model_root = Path(corpus_directory).resolve(), Path(model_root).resolve()
-    if version not in ("1", "2", "3"):
+    if version not in ("1", "2", "3", "4"):
         raise MuseumError("semantic corpus package version unsupported")
-    scenarios = {"1": LEGACY_CASES, "2": V2_CASES, "3": CASES}[version]
+    scenarios = {"1": LEGACY_CASES, "2": V2_CASES, "3": CASES, "4": CASES}[version]
     verify_corpus(corpus_directory, corpus_hash)
     if crosswalk_bytes is None:
         crosswalk_bytes = (model_root / "projection/crosswalk-v2.json").read_bytes()
     profile = _profile(model_root, crosswalk_bytes)
-    files = _dependencies(model_root, recorded=True)
+    files = _dependencies(model_root, recorded=True, lido=version == "4")
     files[CROSSWALK_PATH] = crosswalk_bytes
     for path in sorted(corpus_directory.rglob("*")):
         if path.is_file():
@@ -224,7 +224,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
     for name in scenarios:
         source = loads(files["input/corpus/" + name + "/source/payload.json"], canonical=True)
         encoded, coverage, provenance = _project(name, source, schema, profile)
-        if version == "3":
+        if version in ("3", "4"):
             extension, coverage, provenance = _extension(name, source, schema, coverage, provenance)
             if extension is not None:
                 files[extension[0]] = extension[1]
@@ -248,6 +248,9 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
         "completeness": "incomplete", "claims": {"recordedState": False,
             "receivedMedia": False, "fullMuseumConformance": False,
             "institutionalAcceptance": False}})
+    if version == "4":
+        from .corpus_formats_v1 import build as build_formats
+        files.update(build_formats(files, model_root))
     return _assemble(model_root, files, {"mode": MODE, "version": version,
         "corpusManifestHash": corpus_hash, "crosswalkHash": CROSSWALK_V2_HASH,
         "claims": {"authenticatedChainState": False, "fullMuseumScope": False,
@@ -257,7 +260,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
 def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
     directory = Path(directory)
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
-    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2", "3")
+    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2", "3", "4")
             or manifest.get("crosswalkHash") != CROSSWALK_V2_HASH):
         raise MuseumError("semantic corpus package profile differs")
     try:
@@ -278,7 +281,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     make = sub.add_parser("build"); make.add_argument("corpus", type=Path)
     make.add_argument("output", type=Path); make.add_argument("--corpus-hash", required=True)
-    make.add_argument("--version", choices=("1", "2", "3"), default="1")
+    make.add_argument("--version", choices=("1", "2", "3", "4"), default="1")
     check = sub.add_parser("verify"); check.add_argument("directory", type=Path)
     check.add_argument("--manifest-hash", required=True)
     args = parser.parse_args()

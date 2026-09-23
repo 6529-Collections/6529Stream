@@ -15,6 +15,10 @@ adds interactive-object and local-place projections while preserving V1 replay.
 adds unresolved custody-claim and revision-lineage extensions for the final
 three cases, preserving both earlier package versions.
 
+[Synthetic media/history four-format correspondence V4](../../docs/museum-media-history-semantic-slice-v4.md)
+adds a field ledger and bounded LIDO descriptions for the photograph and
+interactive work, with explicit PREMIS and IIIF limitations.
+
 [Authenticated account review policies](../../docs/museum-qualified-account-review.md)
 select exact recorded approvals, rejections and SELF reviews while preserving
 original statements. [The retained local fixture](../../docs/museum-qualified-review-fixture.md)
