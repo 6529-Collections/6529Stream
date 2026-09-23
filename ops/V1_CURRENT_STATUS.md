@@ -2,6 +2,22 @@
 
 ### Latest bounded results: `64c1d815`
 
+Fifteen focused Artist transport/supplement tests now pass against sources
+matched to `b0ba19b47`, with independent runtime/artifact review. They retain
+typed source/phase boundaries and the original aggregate test limits; this is
+not full op60 migration, all-call Safe or cold transaction acceptance. Thirteen
+other Artist cases hit the 900-second compiler limit. Reviewed import-only
+repair `16376270f` removes three unrelated test hosts from their dependency
+selection; narrower native captures are next.
+
+Two current paid-test components now finish native compilation and physical
+verification in 1,111 and 1,214 seconds, after earlier 1,800-second failures on
+the old fixture. Actual paid execution and gas remain pending. The isolated
+render host still failed at 900 seconds; a single 1,800-second diagnostic
+attempt is authorized while other tests proceed. Product gas/size limits are
+unchanged. The new advisory capture planner passes 34 focused/related tests
+and checks embedded children and inherited immutables before expensive runs.
+
 The Museum photograph example now carries a real, explicitly synthetic PNG
 through Linked Art, PREMIS, IIIF and LIDO. Three new root tests pass, including
 exact file identity, offline replay without a compressor or network, and
