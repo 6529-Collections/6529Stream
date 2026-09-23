@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/PreservationPolicyContentFixtureV1.sol";
+import { OfficialSafe } from "../helpers/OfficialSafeFixture.sol";
 import {
     StreamPreservationPolicyOutputManifestV1 as JoinManifest
 } from "../../smart-contracts/domains/finality/StreamPreservationPolicyOutputManifestV1.sol";
@@ -90,6 +91,23 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         uint256 chainId,
         uint256 timestamp,
         uint256 blockNumber,
+        uint256 gasLimit
+    );
+
+    event PortableSafeJoinCut(
+        address safe,
+        address manifest,
+        bytes32 checkpointId,
+        bytes32 artifact,
+        bytes32 coverage,
+        bytes32 plan,
+        bytes32 expectedManifestHash,
+        uint256 outputCount,
+        bytes tamperedTransaction,
+        bytes beginTransaction,
+        bytes verifyTransaction,
+        uint256 chainId,
+        uint256 timestamp,
         uint256 gasLimit
     );
 
@@ -209,8 +227,49 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
     }
 
     function testCheckpointManifestJoinFreshBudgetsFitOriginalTransactionCeiling() external {
+        (Joined memory j, bytes32 portablePlan) = _preparePortableJoin();
+        pvm.createDir("artifacts/native-assembly", true);
+        pvm.dumpState("artifacts/native-assembly/preservation-join-portable-v1.dump.json");
+        emit PortableJoinCut(
+            address(j.verifier),
+            address(j.capture.host),
+            address(core),
+            j.capture.id,
+            j.artifact,
+            j.coverage,
+            portablePlan,
+            keccak256(abi.encode(_expectedManifest(j))),
+            j.capture.producers.length,
+            block.chainid,
+            block.timestamp,
+            block.number,
+            block.gaslimit
+        );
+        bytes memory input = abi.encodeCall(
+            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+        );
+        uint256 beforeGas = gasleft();
+        (bool ok, bytes memory result) =
+            address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
+        uint256 spent = beforeGas - gasleft();
+        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual begin call");
+        emit CappedJoinCall(JoinV.beginManifest.selector, spent, JOIN_TX_CEILING);
+        j.plan = abi.decode(result, (bytes32));
+        require(
+            j.plan == portablePlan && j.plan == _planHash(j.verifier, _expectedManifest(j)),
+            "capped full plan identity"
+        );
+        input = abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, j.capture.producers.length));
+        beforeGas = gasleft();
+        (ok, result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
+        spent = beforeGas - gasleft();
+        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual verify call");
+        emit CappedJoinCall(JoinV.verifyNextOutputs.selector, spent, JOIN_TX_CEILING);
+        _assertJoined(j, abi.decode(result, (bytes32)));
+    }
+
+    function _preparePortableJoin() private returns (Joined memory j, bytes32 portablePlan) {
         _joinFixture();
-        Joined memory j;
         j.capture = _capture(_scope(1), true);
         Preservation original = j.capture.host;
         j.capture.host = Preservation(
@@ -254,45 +313,124 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
             value == 12000000 && floor == 100000 && failure == 2 && revision == 1,
             "fresh verifier genesis is lawful without lowering a governed parameter"
         );
-        bytes32 portablePlan = _planHash(j.verifier, _expectedManifest(j));
-        pvm.createDir("artifacts/native-assembly", true);
-        pvm.dumpState("artifacts/native-assembly/preservation-join-portable-v1.dump.json");
-        emit PortableJoinCut(
+        portablePlan = _planHash(j.verifier, _expectedManifest(j));
+    }
+
+    function testCheckpointManifestJoinOfficialSafeColdTransactionCut() external {
+        (Joined memory j, bytes32 portablePlan) = _preparePortableJoin();
+        uint256[] memory owners = new uint256[](3);
+        owners[0] = 0xA1101;
+        owners[1] = 0xA1102;
+        owners[2] = 0xA1103;
+        uint256[] memory signers = new uint256[](2);
+        signers[0] = owners[0];
+        signers[1] = owners[1];
+        SafeComponents memory components = deploySafeComponents("1.4.1");
+        OfficialSafe account = createOfficialSafe(components, safeOwnerAddresses(owners), 2, 6529);
+        require(
+            account.getThreshold() == 2 && account.getOwners().length == 3
+                && account.nonce() == 0 && address(account).balance == 0
+                && keccak256(bytes(account.VERSION())) == keccak256("1.4.1"),
+            "official zero-value threshold Safe"
+        );
+        bytes memory beginCall = abi.encodeCall(
+            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+        );
+        bytes memory verifyCall = abi.encodeCall(
+            JoinV.verifyNextOutputs, (portablePlan, j.capture.producers.length)
+        );
+        bytes memory beginSignatures = _safeJoinSignatures(
+            account, signers, address(j.verifier), beginCall, 0
+        );
+        bytes memory beginTransaction =
+            _safeJoinTransaction(address(j.verifier), beginCall, beginSignatures);
+        bytes memory verifyTransaction = _safeJoinTransaction(
             address(j.verifier),
-            address(j.capture.host),
-            address(core),
+            verifyCall,
+            _safeJoinSignatures(account, signers, address(j.verifier), verifyCall, 1)
+        );
+        bytes memory tamperedCall = abi.encodeCall(
+            JoinV.beginManifest,
+            (bytes32(uint256(j.capture.id) ^ 1), j.artifact, j.coverage, JOIN_ARTIST)
+        );
+        bytes memory tamperedTransaction =
+            _safeJoinTransaction(address(j.verifier), tamperedCall, beginSignatures);
+        pvm.createDir("artifacts/native-assembly", true);
+        pvm.dumpState("artifacts/native-assembly/preservation-safe-join-portable-v1.dump.json");
+        emit PortableSafeJoinCut(
+            address(account),
+            address(j.verifier),
             j.capture.id,
             j.artifact,
             j.coverage,
             portablePlan,
             keccak256(abi.encode(_expectedManifest(j))),
             j.capture.producers.length,
+            tamperedTransaction,
+            beginTransaction,
+            verifyTransaction,
             block.chainid,
             block.timestamp,
-            block.number,
             block.gaslimit
         );
-        bytes memory input = abi.encodeCall(
-            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
-        );
-        uint256 beforeGas = gasleft();
-        (bool ok, bytes memory result) =
-            address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
-        uint256 spent = beforeGas - gasleft();
-        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual begin call");
-        emit CappedJoinCall(JoinV.beginManifest.selector, spent, JOIN_TX_CEILING);
-        j.plan = abi.decode(result, (bytes32));
+        (bool tampered,) = address(account).call{gas: JOIN_TX_CEILING}(tamperedTransaction);
         require(
-            j.plan == portablePlan && j.plan == _planHash(j.verifier, _expectedManifest(j)),
-            "capped full plan identity"
+            !tampered && account.nonce() == 0
+                && j.verifier.manifestPlan(portablePlan).manifest.tokenCount == 0,
+            "tampered threshold transaction rolls back Safe nonce and manifest plan"
         );
-        input = abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, j.capture.producers.length));
-        beforeGas = gasleft();
-        (ok, result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(input);
-        spent = beforeGas - gasleft();
-        require(ok && spent + 100000 < JOIN_TX_CEILING, "capped actual verify call");
-        emit CappedJoinCall(JoinV.verifyNextOutputs.selector, spent, JOIN_TX_CEILING);
-        _assertJoined(j, abi.decode(result, (bytes32)));
+        _executeSafeJoin(account, beginTransaction);
+        require(
+            account.nonce() == 1
+                && j.verifier.manifestPlan(portablePlan).manifest.tokenCount
+                    == j.capture.producers.length
+                && j.verifier.manifestPlan(portablePlan).nextIndex == 0,
+            "Safe begins exact manifest plan"
+        );
+        _executeSafeJoin(account, verifyTransaction);
+        j.plan = portablePlan;
+        bytes32 record = j.verifier.manifestPlan(portablePlan).recordHash;
+        _assertJoined(j, record);
+        require(account.nonce() == 2 && address(account).balance == 0, "two zero-value Safe calls");
+    }
+
+    function _safeJoinSignatures(
+        OfficialSafe account,
+        uint256[] memory signers,
+        address target,
+        bytes memory callData,
+        uint256 nonce
+    ) private returns (bytes memory) {
+        bytes32 digest = account.getTransactionHash(
+            target, 0, callData, 0, 0, 0, 0, address(0), address(0), nonce
+        );
+        return safeThresholdSignature(signers, digest);
+    }
+
+    function _safeJoinTransaction(address target, bytes memory callData, bytes memory signatures)
+        private
+        pure
+        returns (bytes memory)
+    {
+        return abi.encodeCall(
+            OfficialSafe.execTransaction,
+            (target, 0, callData, 0, 0, 0, 0, address(0), payable(address(0)), signatures)
+        );
+    }
+
+    function _executeSafeJoin(OfficialSafe account, bytes memory transaction) private {
+        vm.recordLogs();
+        (bool ok, bytes memory result) = address(account).call{gas: JOIN_TX_CEILING}(transaction);
+        require(ok && result.length == 32 && abi.decode(result, (bool)), "Safe target success");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 successes;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == address(account) && logs[i].topics.length != 0
+                    && logs[i].topics[0] == keccak256("ExecutionSuccess(bytes32,uint256)")
+            ) ++successes;
+        }
+        require(successes == 1, "actual Safe ExecutionSuccess event");
     }
 
     function _joinFixture() private {
