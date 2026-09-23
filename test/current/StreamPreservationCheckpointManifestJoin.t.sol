@@ -69,6 +69,24 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         bytes32 plan;
     }
 
+    struct JoinModel {
+        uint64 accepted;
+        bytes32 expectedRecord;
+        bytes32 checkpointHistory;
+        bytes32 artifactHistory;
+        bytes32 coverageHistory;
+        bytes32 manifestHistory;
+        bool complete;
+    }
+
+    struct DriftSnapshot {
+        bool admission;
+        uint256 index;
+        bytes admissionBytes;
+        string json;
+        string html;
+    }
+
     event OutputManifestVerified(
         uint16 schemaVersion,
         bytes32 indexed recordHash,
@@ -77,6 +95,7 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
     );
 
     event CappedJoinCall(bytes4 indexed selector, uint256 callerGasSpent, uint256 ceiling);
+    event StatefulJoinSchedule(uint8 indexed schedule, bytes32 indexed plan, bytes32 record);
 
     event PortableJoinCut(
         address manifest,
@@ -227,7 +246,7 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
     }
 
     function testCheckpointManifestJoinFreshBudgetsFitOriginalTransactionCeiling() external {
-        (Joined memory j, bytes32 portablePlan) = _preparePortableJoin();
+        (Joined memory j, bytes32 portablePlan) = _preparePortableJoin(1);
         pvm.createDir("artifacts/native-assembly", true);
         pvm.dumpState("artifacts/native-assembly/preservation-join-portable-v1.dump.json");
         emit PortableJoinCut(
@@ -268,9 +287,12 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         _assertJoined(j, abi.decode(result, (bytes32)));
     }
 
-    function _preparePortableJoin() private returns (Joined memory j, bytes32 portablePlan) {
+    function _preparePortableJoin(uint8 kind)
+        private
+        returns (Joined memory j, bytes32 portablePlan)
+    {
         _joinFixture();
-        j.capture = _capture(_scope(1), true);
+        j.capture = _capture(_scope(kind), true);
         Preservation original = j.capture.host;
         j.capture.host = Preservation(
             address(
@@ -317,7 +339,7 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
     }
 
     function testCheckpointManifestJoinOfficialSafeColdTransactionCut() external {
-        (Joined memory j, bytes32 portablePlan) = _preparePortableJoin();
+        (Joined memory j, bytes32 portablePlan) = _preparePortableJoin(1);
         uint256[] memory owners = new uint256[](3);
         owners[0] = 0xA1101;
         owners[1] = 0xA1102;
@@ -431,6 +453,186 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
             ) ++successes;
         }
         require(successes == 1, "actual Safe ExecutionSuccess event");
+    }
+
+    /// @dev Eight schedules cover both invalid counts, both drift orders and either output.
+    function testStatefulJoinEightSchedules() external {
+        for (uint8 schedule; schedule < 8; ++schedule) {
+            _exerciseStatefulJoin(schedule, true);
+        }
+    }
+
+    function testFuzzStatefulJoinMixedValidInvalid(uint256 seed) external {
+        _exerciseStatefulJoin(uint8(seed & 7), false);
+    }
+
+    function _exerciseStatefulJoin(uint8 schedule, bool thorough) private {
+        (Joined memory j, bytes32 expectedPlan) = _preparePortableJoin(2);
+        require(j.capture.producers.length == 2, "two independently selected output rows");
+        bytes memory beginInput = abi.encodeCall(
+            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+        );
+        (bool ok, bytes memory result) =
+            address(j.verifier).call{gas: JOIN_TX_CEILING}(beginInput);
+        require(ok && result.length == 32, "bounded initial manifest begin");
+        j.plan = abi.decode(result, (bytes32));
+        require(j.plan == expectedPlan, "independent expected plan identity");
+        JoinModel memory model = JoinModel({
+            accepted: 0,
+            expectedRecord: keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_VERIFIED_V1"),
+                    expectedPlan
+                )
+            ),
+            checkpointHistory: _history(j.capture),
+            artifactHistory: keccak256(abi.encode(joinCoverage.artifact(j.artifact))),
+            coverageHistory: keccak256(abi.encode(joinCoverage.coverage(j.coverage))),
+            manifestHistory: keccak256(abi.encode(_expectedManifest(j))),
+            complete: false
+        });
+        _assertJoinModel(j, model);
+
+        uint256 invalidBefore = (schedule & 1) == 0 ? 0 : 3;
+        _rejectVerify(j, invalidBefore, true);
+        _assertJoinModel(j, model);
+        require(_acceptVerify(j, 1) == 0, "one accepted row is partial");
+        model.accepted = 1;
+        _assertJoinModel(j, model);
+        require(
+            j.verifier.beginManifest(j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+                == expectedPlan,
+            "identical begin retains partial progress"
+        );
+        _assertJoinModel(j, model);
+
+        uint256 index = uint256(schedule >> 2);
+        DriftSnapshot memory first = _applyJoinDrift(j, (schedule & 2) != 0, index, schedule);
+        _rejectVerify(j, 1, false);
+        _assertJoinModel(j, model);
+        _restoreJoinDrift(j, first);
+        _rejectVerify(j, (schedule & 1) == 0 ? 2 : 0, true);
+        _assertJoinModel(j, model);
+        require(_acceptVerify(j, 1) == model.expectedRecord, "restored terminal retry");
+        model.accepted = 2;
+        model.complete = true;
+        _assertJoinModel(j, model);
+
+        DriftSnapshot memory second =
+            _applyJoinDrift(j, !first.admission, 1 - index, schedule + 8);
+        (ok, result) = address(j.verifier).staticcall{gas: JOIN_TX_CEILING}(
+            abi.encodeCall(JoinV.requireCurrentManifest, (model.expectedRecord, JOIN_ARTIST))
+        );
+        require(
+            !ok
+                && keccak256(result)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            JoinV.OutputManifestReadFailed.selector,
+                            address(j.capture.host),
+                            Preservation.requireCurrentCheckpoint.selector
+                        )
+                    ),
+            "drift invalidates currentness without replacing history"
+        );
+        _assertJoinModel(j, model);
+        _restoreJoinDrift(j, second);
+        require(
+            keccak256(abi.encode(j.verifier.requireCurrentManifest(model.expectedRecord, JOIN_ARTIST)))
+                == model.manifestHistory,
+            "restored currentness returns original full row"
+        );
+        _rejectVerify(j, 1, true);
+        require(
+            j.verifier.beginManifest(j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+                == expectedPlan,
+            "identical completed begin cannot reset progress"
+        );
+        _assertJoinModel(j, model);
+        if (thorough) _assertJoined(j, model.expectedRecord);
+        emit StatefulJoinSchedule(schedule, expectedPlan, model.expectedRecord);
+    }
+
+    function _acceptVerify(Joined memory j, uint256 count) private returns (bytes32 record) {
+        (bool ok, bytes memory result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(
+            abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, count))
+        );
+        require(ok && result.length == 32, "bounded accepted verification");
+        record = abi.decode(result, (bytes32));
+    }
+
+    function _rejectVerify(Joined memory j, uint256 count, bool invalidBatch) private {
+        (bool ok, bytes memory result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(
+            abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, count))
+        );
+        require(!ok, "invalid verification accepted");
+        if (invalidBatch) {
+            require(
+                keccak256(result)
+                    == keccak256(abi.encodeWithSelector(JoinV.OutputManifestBatch.selector, count)),
+                "invalid count rejected by original batch rule"
+            );
+        }
+    }
+
+    function _applyJoinDrift(Joined memory j, bool admission, uint256 index, uint256 salt)
+        private
+        returns (DriftSnapshot memory d)
+    {
+        d.admission = admission;
+        d.index = index;
+        if (admission) {
+            PreservationTypes.Admission memory altered = _admission(j.capture, index);
+            d.admissionBytes = abi.encode(_binding(j.capture, index), altered);
+            altered.goldenHash = keccak256(abi.encode("stateful admission drift", salt, index));
+            _setAdmission(j.capture, index, abi.encode(_binding(j.capture, index), altered));
+        } else {
+            uint256 token = scopedSelections.selectionAt(j.capture.selection, index).tokenId;
+            d.json = j.capture.producers[index].preservationTokenJSON(token);
+            d.html = j.capture.producers[index].preservationTokenHTML(token);
+            j.capture.producers[index].setBytes(
+                token, string(abi.encodePacked(d.json, " drift")), d.html
+            );
+        }
+    }
+
+    function _restoreJoinDrift(Joined memory j, DriftSnapshot memory d) private {
+        if (d.admission) {
+            _setAdmission(j.capture, d.index, d.admissionBytes);
+        } else {
+            uint256 token = scopedSelections.selectionAt(j.capture.selection, d.index).tokenId;
+            j.capture.producers[d.index].setBytes(token, d.json, d.html);
+        }
+    }
+
+    function _assertJoinModel(Joined memory j, JoinModel memory model) private view {
+        JoinV.Plan memory actual = j.verifier.manifestPlan(j.plan);
+        require(
+            actual.manifest.tokenCount == 2 && actual.nextIndex == model.accepted
+                && actual.recordHash == (model.complete ? model.expectedRecord : bytes32(0))
+                && keccak256(abi.encode(actual.manifest)) == model.manifestHistory,
+            "only accepted rows advance the original full manifest plan"
+        );
+        require(
+            _history(j.capture) == model.checkpointHistory
+                && keccak256(abi.encode(joinCoverage.artifact(j.artifact)))
+                    == model.artifactHistory
+                && keccak256(abi.encode(joinCoverage.coverage(j.coverage)))
+                    == model.coverageHistory,
+            "invalid attempts and input drift preserve checkpoint/artifact history"
+        );
+        if (model.complete) {
+            require(
+                keccak256(abi.encode(j.verifier.manifestRecord(model.expectedRecord)))
+                    == model.manifestHistory,
+                "accepted record remains append-only while currentness changes"
+            );
+        } else {
+            (bool ok,) = address(j.verifier).staticcall(
+                abi.encodeCall(JoinV.manifestRecord, (model.expectedRecord))
+            );
+            require(!ok, "partial progress cannot expose a completed record");
+        }
     }
 
     function _joinFixture() private {
