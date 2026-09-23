@@ -116,10 +116,13 @@ def run(view_file: Path, expected_hash: str, forge: Path, forge_sha256: str, des
     require(snapshot['expectedCases'], 'No test entrypoint: helper/script execution is unsupported')
     require(0 < timeout <= 3600, 'Expected bounded process timeout')
     # Helpers may exist as dependencies, but are never silently counted as executed cases.
-    cases = snapshot['expectedCases']; project = Path(snapshot['project']); view = Path(snapshot['view'])
+    cases = snapshot['expectedCases']; project = Path(snapshot.get('executionProject', snapshot['project']))
+    view = Path(snapshot['view'])
     require(not destination.exists(), 'Dispatch destination must be new')
     require(not destination.resolve().is_relative_to(view / 'out')
-            and not destination.resolve().is_relative_to(view / 'cache'), 'Dispatch cannot overwrite routing evidence')
+            and not destination.resolve().is_relative_to(view / 'cache')
+            and not destination.resolve().is_relative_to(project),
+            'Dispatch cannot overwrite routing or execution project evidence')
     from tools.build.current_native_execution_view import require_disjoint
     require_disjoint(destination, [Path(p) for p in snapshot['protectedDirectories']]
                      + [Path(p) for p in snapshot['inputFiles']] + [view_file])

@@ -20,6 +20,7 @@ from tools.build.prepare_current_graph import (
     CREATION_NAME, CREATION_SOURCE, helper_coordinate, host_coordinate, sha, source_closure,
 )
 from tools.build.scoped_standard_json import canonical, forge_abi_transport, forge_ast_transport, forge_storage_transport
+from tools.build.native_execution_fixtures import stage_execution_project
 
 
 def file_hash(path: Path) -> str:
@@ -367,12 +368,19 @@ def routing_cache_hash(cache: dict) -> str:
     return sha(canonical(value))
 
 
+def recheck_execution_project(project: Path, expected: dict[str, str]):
+    require(file_inventory(project) == expected,
+            'Execution-only project or authenticated fixtures changed')
+
+
 def recheck(snapshot: dict):
     for folder, expected in snapshot['protectedDirectories'].items():
         require(file_inventory(Path(folder)) == expected, f'Original native evidence changed: {folder}')
     for path, expected in snapshot['inputFiles'].items():
         require(file_hash(Path(path)) == expected, f'Execution input changed: {path}')
     root = Path(snapshot['view'])
+    if snapshot.get('executionProject'):
+        recheck_execution_project(Path(snapshot['executionProject']), snapshot['executionProjectFiles'])
     require(file_inventory(root / 'out') == snapshot['viewArtifacts'], 'Execution artifacts changed')
     current = file_inventory(root / 'cache')
     require(set(current) == set(snapshot['viewCache']), 'Execution cache file inventory changed')
@@ -385,13 +393,16 @@ def recheck(snapshot: dict):
 
 def prepare_view(project: Path, products: Path, owners: Path, preparation: Path, preparation_sha256: str,
                  destination: Path, entrypoints: dict[str, str], *, inputs: tuple[Path, ...] = (),
-                 routing: dict | None = None) -> dict:
+                 routing: dict | None = None, source_repo: Path | None = None,
+                 source_commit: str | None = None) -> dict:
     project = project.resolve(); destination = destination.resolve()
     require(not destination.exists(), 'Execution view must be a new directory')
     evidence = authenticate(project, products, owners, preparation, preparation_sha256, entrypoints)
     originals = [Path(p) for p in evidence['protectedDirectories']]
     require_disjoint(destination, originals + [owners, products, preparation, project / 'foundry.toml'])
     require(not project.is_relative_to(destination), 'Execution view cannot contain the project')
+    require((source_repo is None) == (source_commit is None),
+            'Exact source repository and commit must be supplied together')
     library_transports = {}
     cache, copies, routing_sources = cache_transport(evidence['contexts'], evidence['owners'], destination,
         routing=routing, project=project, transport_report=library_transports)
@@ -416,6 +427,7 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
     for relative in ('tools/build/current_native_execution_view.py', 'tools/build/current_graph_owners.py',
                      'tools/build/prepare_current_graph.py', 'tools/build/scoped_standard_json.py',
                      'tools/build/native_capture.py', 'tools/build/partition_native_capture.py',
+                     'tools/build/native_execution_fixtures.py',
                      'test/helpers/native_assembly_artifacts.py', 'test/helpers/native_assembly_native_exports.py',
                      'tools/development/run_native_execution_view.py', 'tools/development/run_current_acceptance.py'):
         path = tool_root / relative
@@ -424,6 +436,10 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
     if remappings.exists():
         input_files[str(remappings)] = file_hash(remappings)
     destination.mkdir(parents=True)
+    fixture_source = None
+    if source_repo is not None:
+        fixture_source = stage_execution_project(project, destination / 'project', evidence['sources'],
+                                                 source_repo, source_commit)
     for relative, original in copies.items():
         target = destination / 'out' / relative
         target.parent.mkdir(parents=True, exist_ok=True); target.write_bytes(original.read_bytes())
@@ -443,6 +459,10 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
               'Build-context filename keys are full owner identities, not new compiler evidence. '
               'Base initcode/runtime limits only; constructor arguments, deployed code and test results require runtime evidence. '
               'Helper/script authentication is supported; Forge script execution is not supported.'}
+    if fixture_source is not None:
+        result['executionProject'] = str(destination / 'project')
+        result['executionProjectFiles'] = file_inventory(destination / 'project')
+        result['authenticatedFixtureSource'] = fixture_source
     for context in evidence['contexts'].values():
         owned.recheck_context(project, context)
     recheck(result)
@@ -460,13 +480,16 @@ def main():
     parser.add_argument('--routing-context', help='Explicit source cache for execution profile/path routing')
     parser.add_argument('--routing-profile', help='Target profile in the selected routing context')
     parser.add_argument('--input', action='append', default=[], type=Path, help='Additional fixture file/directory to seal')
+    parser.add_argument('--source-repo', type=Path, help='Git repository containing exact fixture source commit')
+    parser.add_argument('--source-commit', help='Exact source commit for read permissions and non-Solidity fixtures')
     args = parser.parse_args()
     coordinates = [(s + ':' + n, kind) for kind, items in [('test', args.host), ('helper', args.entrypoint)] for s, n in items]
     require(len(coordinates) == len(dict(coordinates)), 'Duplicate entrypoint')
     require(bool(args.routing_context) == bool(args.routing_profile), 'Both routing context and profile are required')
     routing = {'context': args.routing_context, 'profile': args.routing_profile} if args.routing_context else None
     result = prepare_view(args.project, args.products, args.owners, args.preparation, args.preparation_sha256,
-                          args.destination, dict(coordinates), inputs=tuple(args.input), routing=routing)
+                          args.destination, dict(coordinates), inputs=tuple(args.input), routing=routing,
+                          source_repo=args.source_repo, source_commit=args.source_commit)
     print(json.dumps({'status': result['status'], 'artifacts': len(result['artifacts']), 'expectedCases': result['expectedCases']}))
 
 

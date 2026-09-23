@@ -251,6 +251,15 @@ Sources, standard fixture directories, configuration, tools and original native
 evidence are hashed and rechecked. Add other input files/directories with
 `--input PATH`. No source or original native output is rewritten.
 
+When a captured project omits data files needed by `vm.readFile`, add
+`--source-repo REPO --source-commit FULL_SHA`. The view then builds a separate
+execution-only project. Every copied Solidity source must match that Git commit.
+Only Git-tracked, non-Solidity files under its original profile's scoped read
+permissions are staged; broad and write permissions are excluded. The derived
+Foundry configuration changes only those read permissions, preserving compiler,
+gas, memory, and code-size settings. The original native project remains
+untouched, and the runner checks every staged file before and after execution.
+
 Each physical artifact and original full build-info file is copied byte for byte.
 Only cache routing is derived. Unassigned source-only cache rows are retained only when their original literal
 source bytes and full transitive import closures match the current project. Their
