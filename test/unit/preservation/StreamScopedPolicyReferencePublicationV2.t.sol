@@ -330,7 +330,7 @@ abstract contract ScopedPolicyReferenceFixtureV2 is ScopedPolicyContentFixtureV2
         // Parent reservations intentionally cover the genuine nested whole-scope producers.
         // They are fixture caps, not transaction/gas acceptance evidence.
         configs[0] = Gas.GasParameterConfig("SCOPED_POLICY_REFERENCE_READ_GAS", 2000000, 50000, 1);
-        configs[1] = Gas.GasParameterConfig("SCOPED_POLICY_REFERENCE_SOURCE_GAS", 8000000, 50000, 1);
+        configs[1] = Gas.GasParameterConfig("SCOPED_POLICY_REFERENCE_SOURCE_GAS", 16000000, 50000, 1);
         configs[2] =
             Gas.GasParameterConfig("SCOPED_POLICY_REFERENCE_SNAPSHOT_GAS", 128000000, 50000, 1);
         configs[3] =
