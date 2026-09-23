@@ -35,12 +35,15 @@ ACTIVE documents, exact original chunks and Store carriers.
 
 `token_script_registry_source_v1` reads those four documents from the
 Core-selected Metadata host's SchemaRegistry. The registered-capture join
-replays both original transcripts, requires the same chain/Core/block and
-current Metadata runtime, and only then exposes an
-`OD-SCRIPT-MANIFEST` eligibility reference. A missing, retired or mismatched
-document fails the join. Synthetic fixture registration demonstrates the
-checker; it is not a deployed registration or an actual-chain acceptance
-claim. The final Museum dossier assessment remains separate.
+replays both original transcripts and requires the same chain/Core/block,
+current Metadata runtime, complete script bytes, and either complete native
+dependency bytes or an authenticated empty dependency. Only then does it
+expose an `OD-SCRIPT-MANIFEST` eligibility reference. A complete script with
+an incomplete nonempty dependency remains positively classified as a script,
+but earns no registered requirement. A missing, retired or mismatched document
+fails the join. Synthetic fixture registration demonstrates the checker; it is
+not a deployed registration or an actual-chain acceptance claim. The final
+Museum dossier assessment remains separate.
 
 Both source readers trust a provider's complete log responses and canonical
 header mapping. They do not prove consensus, full ancestry or receipt tries,

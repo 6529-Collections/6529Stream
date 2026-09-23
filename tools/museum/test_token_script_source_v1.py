@@ -341,6 +341,52 @@ class TokenScriptSourceTests(unittest.TestCase):
         self.assertEqual(registered_capture.verify(dict(joined.files),
             joined.manifest_hash).manifest_hash, joined.manifest_hash)
 
+    def test_incomplete_nonempty_library_keeps_script_but_not_registered_requirement(self):
+        fixture = TokenScriptFixture('chunked')
+        bundle_id = fixture.value['library']['bundleId']
+        fixture.fail(fixture.metadata, 'dependencyChunk(bytes32,uint256)',
+            ('bytes32', 'uint256'), (bundle_id, 0))
+        token = fixture.source(); snapshot_raw = token.snapshot()
+        snapshot = loads(snapshot_raw, maximum=rpc.MAX_TRANSCRIPT)
+        self.assertEqual(snapshot['workClass'], 'script')
+        self.assertTrue(snapshot['interpretation']['report']['completeScriptBytes'])
+        self.assertFalse(snapshot['interpretation']['report']['completeDependencyBytes'])
+        self.assertEqual(snapshot['interpretation']['report']['dependency']['status'],
+            'partial_unavailable')
+        transcript = token.transcript()
+        token_package = capture.replay(fixture.anchor_raw, keccak256(fixture.anchor_raw),
+            transcript, keccak256(transcript), fixture.runtime_bridge_raw,
+            keccak256(fixture.runtime_bridge_raw), provenance='synthetic_fixture',
+            disclosure='public')
+        registry = fixture.install_registry(); registry.snapshot()
+        registry_transcript = registry.transcript()
+        joined = registered_capture.compose(dict(token_package.files),
+            token_package.manifest_hash, fixture.registry_anchor_raw,
+            keccak256(fixture.registry_anchor_raw), registry_transcript,
+            keccak256(registry_transcript), disclosure='public')
+        self.assertEqual(joined.report['workClass'], 'script')
+        self.assertEqual(joined.report['currentVerifiedCodes'], [])
+        self.assertIsNone(joined.report['scriptRequirement'])
+        self.assertEqual(registered_capture.verify(dict(joined.files),
+            joined.manifest_hash).manifest_hash, joined.manifest_hash)
+
+    def test_complete_chunked_library_earns_registered_requirement(self):
+        fixture = TokenScriptFixture('chunked')
+        token = fixture.source(); token.snapshot(); transcript = token.transcript()
+        token_package = capture.replay(fixture.anchor_raw, keccak256(fixture.anchor_raw),
+            transcript, keccak256(transcript), fixture.runtime_bridge_raw,
+            keccak256(fixture.runtime_bridge_raw), provenance='synthetic_fixture',
+            disclosure='public')
+        registry = fixture.install_registry(); registry.snapshot()
+        registry_transcript = registry.transcript()
+        joined = registered_capture.compose(dict(token_package.files),
+            token_package.manifest_hash, fixture.registry_anchor_raw,
+            keccak256(fixture.registry_anchor_raw), registry_transcript,
+            keccak256(registry_transcript), disclosure='public')
+        self.assertEqual(joined.report['currentVerifiedCodes'], ['OD-SCRIPT-MANIFEST'])
+        self.assertEqual(registered_capture.verify(dict(joined.files),
+            joined.manifest_hash).manifest_hash, joined.manifest_hash)
+
     def test_offchain_mode_still_has_positive_script_and_later_default_does_not_rewrite_activation(self):
         fixture = TokenScriptFixture('stable', offchain=True, foreign_override=True,
             collection_override=True)

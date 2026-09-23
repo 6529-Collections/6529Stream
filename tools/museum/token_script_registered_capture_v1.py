@@ -16,8 +16,9 @@ CLAIMS = {'tokenSourceReplayed': True, 'registeredInterpretationReplayed': True,
     'negativeWorkClassProven': False, 'completeSelectionHistoryProven': False,
     'historicalWriterGrantProven': False, 'sourceOriginAuthenticated': False,
     'consensusVerified': False, 'institutionalAcceptance': False}
-QUALIFICATION = ('Only a complete positively selected token script, exact native '
-    'override/frozen-source history and all four current ACTIVE SchemaRegistry '
+QUALIFICATION = ('Only a complete positively selected token script with complete native '
+    'dependency bytes or authenticated empty dependency, exact override/frozen-source '
+    'history and all four current ACTIVE SchemaRegistry '
     'interpretation documents at the same block earn a script-manifest reference. '
     'The preserved bytes do not prove renderer execution, a non-script class, '
     'global selection history, source origin, consensus or institutional acceptance.')
@@ -70,8 +71,9 @@ def _compose(token_files, token_hash, registry_anchor, registry_anchor_hash,
         next(row['runtimeHash'] for row in registry_value['graph']['runtimePins']
             if row['address'] == registry_value['graph']['metadataHost']),
         'registered token script selected Metadata differs')
-    eligible = token_snapshot['positiveScriptClassification'] is True
-    if eligible:
+    positive = token_snapshot['positiveScriptClassification'] is True
+    eligible = False
+    if positive:
         selected = token_snapshot['interpretation']
         require(selected is not None and selected['report']['completeScriptBytes'] is True
             and selected['report']['manifest']['rendererCompatibility'] in
@@ -81,6 +83,9 @@ def _compose(token_files, token_hash, registry_anchor, registry_anchor_hash,
             'registered token script selected manifest differs')
         require('payloads/script.bin' in token_files,
             'registered token script complete payload absent')
+        dependency = selected['report']['dependency']
+        eligible = (selected['report']['completeDependencyBytes'] is True
+            and dependency['status'] in ('complete', 'authenticated_empty'))
     report = {'profile': PROFILE, 'profileHash': PROFILE_HASH,
         'sourceState': token_state, 'workClass': token_snapshot['workClass'],
         'currentVerifiedCodes': ['OD-SCRIPT-MANIFEST'] if eligible else [],
