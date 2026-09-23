@@ -49,7 +49,7 @@ test('current commerce and preservation plans keep payer and artist Safe callers
     {safe:artistSafe,intent:'Record the artist-authorized preservation payload',abi:recordAbi,
       call:{to:records,value:0n,data:recordIface.encodeFunctionData('recordCollectionRecordWithPayload',[1n,record,'0xabcd'])}},
   ]);
-  assert.deepEqual(plan.steps.map(step=>step.safe),[userSafe,artistSafe]);
+  assert.deepEqual(plan.steps.map(step=>step.safe),[getAddress(userSafe),getAddress(artistSafe)]);
   assert.deepEqual(plan.steps.map(step=>step.method),['claimRefund(bytes32,address)','recordCollectionRecordWithPayload(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes)']);
   assert.deepEqual(verifySafeCallPlan(plan,[payerAbi,recordAbi]),plan);
 });
