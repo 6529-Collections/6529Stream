@@ -6,6 +6,7 @@ import "../../smart-contracts/domains/finality/StreamCollectionTokenInventory.so
 import "../../smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol";
 import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
 import "../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "./ArtistArtifactCreate.sol";
 
 /// @dev Explicit identity/Core selection boundary; actual Metadata/schema/store/inventory below.
 contract ScopeMetadataCoreBoundary {
@@ -167,7 +168,10 @@ contract ScopeMetadataExecutorBoundary {
 }
 
 /// @dev Governance is an exact currentAction/root boundary; no actual scheduling authority claim.
-abstract contract ScopeMembershipPublicationFixture is CharacterizationTestBase {
+abstract contract ScopeMembershipPublicationFixture is
+    CharacterizationTestBase,
+    ArtistArtifactCreate
+{
     ScopeMetadataCoreBoundary internal core;
     ScopeMetadataExecutorBoundary internal executor;
     ScopeMetadataArtistBoundary internal artist;
@@ -185,7 +189,12 @@ abstract contract ScopeMembershipPublicationFixture is CharacterizationTestBase 
         core = new ScopeMetadataCoreBoundary();
         executor = new ScopeMetadataExecutorBoundary();
         artist = new ScopeMetadataArtistBoundary(address(core));
-        schemas = new StreamSchemaRegistry(address(executor));
+        schemas = StreamSchemaRegistry(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamSchemaRegistry.sol:StreamSchemaRegistry",
+                abi.encode(address(executor))
+            )
+        );
         store = StreamSchemaDocumentStore(schemas.chunkStore());
         _register(
             "RAW_BYTES",
@@ -220,25 +229,40 @@ abstract contract ScopeMembershipPublicationFixture is CharacterizationTestBase 
         c.artistReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_ARTIST_READ_GAS", 2000000, 1000000, 2
         );
-        metadata = new StreamCollectionMetadataV1(c);
+        metadata = StreamCollectionMetadataV1(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol:StreamCollectionMetadataV1",
+                abi.encode(c)
+            )
+        );
         core.setPointer(keccak256("COLLECTION_METADATA"), address(metadata));
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(artist));
         _admit(SCOPE_RECORD, StreamRecordFamilies.IDENTITY, 384);
         _grant(1, StreamRecordFamilies.IDENTITY, 7, address(this), true);
-        inventory = new StreamCollectionTokenInventory(
-            address(core),
-            address(executor),
-            IStreamGasParameterHost.GasParameterConfig(
-                "TOKEN_INVENTORY_CORE_READ_GAS", 100000, 50000, 1
+        inventory = StreamCollectionTokenInventory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamCollectionTokenInventory.sol:StreamCollectionTokenInventory",
+                abi.encode(
+                    address(core),
+                    address(executor),
+                    IStreamGasParameterHost.GasParameterConfig(
+                        "TOKEN_INVENTORY_CORE_READ_GAS", 100000, 50000, 1
+                    )
+                )
             )
         );
-        membership = new StreamFinalityScopeMembership(
-            address(core),
-            address(metadata),
-            address(inventory),
-            address(executor),
-            IStreamGasParameterHost.GasParameterConfig(
-                "SCOPE_MEMBERSHIP_READ_GAS", 500000, 50000, 1
+        membership = StreamFinalityScopeMembership(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamFinalityScopeMembership.sol:StreamFinalityScopeMembership",
+                abi.encode(
+                    address(core),
+                    address(metadata),
+                    address(inventory),
+                    address(executor),
+                    IStreamGasParameterHost.GasParameterConfig(
+                        "SCOPE_MEMBERSHIP_READ_GAS", 500000, 50000, 1
+                    )
+                )
             )
         );
     }
