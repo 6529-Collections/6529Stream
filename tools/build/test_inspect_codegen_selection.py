@@ -94,6 +94,31 @@ class SelectionInspectionTests(unittest.TestCase):
         self.assertTrue(all(row["wildcardBinaryFields"] == ["evm.bytecode"]
                             for row in report["sources"]))
 
+    def test_global_named_selector_matches_only_sources_declaring_that_name(self):
+        analysis, codegen = inputs(
+            {"A.sol": [definition("A")], "B.sol": [definition("B")]},
+            {"*": {"A": ["evm.bytecode"]}},
+        )
+        rows = inspect_selection(analysis, codegen)["sources"]
+        self.assertEqual(rows[0]["explicitContractNames"], ["A"])
+        self.assertEqual(rows[1]["explicitContractNames"], [])
+        self.assertEqual(rows[1]["expandedConcreteHostCount"], 0)
+
+    def test_all_output_fields_include_binary_outputs(self):
+        analysis, codegen = inputs({"A.sol": [definition("A")]},
+                                   {"A.sol": {"A": ["*"]}})
+        row = inspect_selection(analysis, codegen)["sources"][0]
+        self.assertEqual(row["namedBinarySelectors"], [{"name": "A", "fields": ["*"]}])
+        self.assertTrue(row["selectors"][0]["namedContracts"][0]["requestsBinary"])
+
+    def test_public_library_constant_has_an_external_getter(self):
+        lib = definition("L", kind="library")
+        lib["nodes"].append({"nodeType": "VariableDeclaration", "visibility": "public",
+                             "stateVariable": True, "constant": True})
+        analysis, codegen = inputs({"L.sol": [lib]}, {"L.sol": {"": ["ast"]}})
+        row = inspect_selection(analysis, codegen)["sources"][0]
+        self.assertEqual(row["expandedDefinitions"][0]["classification"], "library")
+
     def test_named_contract_missing_from_analysis_ast_fails_explicitly(self):
         analysis, codegen = inputs(
             {"Core.sol": [definition("Core")]},

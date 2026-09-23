@@ -67,8 +67,11 @@ def _library_is_internal_only(node: dict) -> bool:
         raise SelectionError("contract definition nodes must be an array")
     return not any(
         isinstance(child, dict)
-        and child.get("nodeType") == "FunctionDefinition"
-        and child.get("visibility") in ("public", "external")
+        and ((child.get("nodeType") == "FunctionDefinition"
+              and child.get("visibility") in ("public", "external"))
+             or (child.get("nodeType") == "VariableDeclaration"
+                 and child.get("stateVariable") is True
+                 and child.get("visibility") == "public"))
         for child in body
     )
 
@@ -79,7 +82,7 @@ def _is_concrete(node: dict) -> bool:
 
 def _requests_binary(fields: list[str]) -> bool:
     return any(
-        field == "evm"
+        field in ("*", "evm")
         or field in ("evm.bytecode", "evm.deployedBytecode")
         or field.startswith(("evm.bytecode.", "evm.deployedBytecode."))
         for field in fields
@@ -105,6 +108,7 @@ def inspect_selection(analysis_output: dict, codegen_input: dict) -> dict:
     # definitions within their source for the empty contract-key output.
     wildcard = "*" in selection
     source_rows = []
+    global_names, matched_global_names = set(), set()
     for source in sorted(sources):
         source_selectors = []
         if wildcard:
@@ -114,6 +118,8 @@ def inspect_selection(analysis_output: dict, codegen_input: dict) -> dict:
         if not source_selectors:
             continue
 
+        definitions = _contracts(_source_ast(analysis_output, source), source)
+        definitions_by_name = {definition["name"]: definition for definition in definitions}
         exact_names: set[str] = set()
         exact_fields: dict[str, set[str]] = {}
         wildcard_fields: set[str] = set()
@@ -143,12 +149,14 @@ def inspect_selection(analysis_output: dict, codegen_input: dict) -> dict:
                     raise SelectionError(f"invalid contract selector in {row['source']!r}")
                 if not isinstance(fields, list) or not fields or any(not isinstance(f, str) for f in fields):
                     raise SelectionError(f"invalid output fields for {row['source']}:{name}")
+                if row["source"] == "*":
+                    global_names.add(name)
+                    if name not in definitions_by_name:
+                        continue
+                    matched_global_names.add(name)
                 exact_names.add(name)
                 exact_fields.setdefault(name, set()).update(fields)
 
-        ast = _source_ast(analysis_output, source) if ast_expand or select_all or exact_names else None
-        definitions = _contracts(ast, source) if ast is not None else []
-        definitions_by_name = {definition["name"]: definition for definition in definitions}
         unknown = sorted(exact_names - definitions_by_name.keys())
         if unknown:
             raise SelectionError(f"requested contract absent from analysis AST: {source}:{unknown[0]}")
@@ -216,6 +224,9 @@ def inspect_selection(analysis_output: dict, codegen_input: dict) -> dict:
             ),
         })
 
+    missing_global = sorted(global_names - matched_global_names)
+    if missing_global:
+        raise SelectionError(f"requested contract absent from analysis AST: *:{missing_global[0]}")
     return {
         "tool": "inspect_codegen_selection",
         "compilerSemantics": "Solidity 0.8.19 requested-contract selector expansion",
