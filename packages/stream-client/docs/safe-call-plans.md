@@ -33,6 +33,16 @@ Artist approval. If the target owner is a GovernanceExecutor, wrap the target
 call using that executor's governed scheduling workflow. Its address is not a
 Safe and cannot be impersonated by a Safe plan.
 
+For Solidity's non-function entry points, set `route: "receive"` or
+`route: "fallback"` on that step. The selected compiler ABI must contain the
+corresponding handler. Receive requires empty calldata. Fallback preserves all
+calldata as its reviewed argument, rejects any known function selector, and
+rejects empty calldata when the ABI also declares receive because Solidity will
+dispatch that call to receive. Fallback calls may carry value only when the ABI
+marks fallback payable; receive is payable by Solidity definition. Raw calldata
+is never inferred to be fallback when `route` is omitted. Mixed function,
+receive and fallback steps keep their order and use ordinary Safe `CALL`.
+
 `safeCallInventory(abi)` lists **all** supplied state-changing signatures,
 selectors and payable flags. It is a caller inventory, not proof that each
 selector has run through Safe 1.4.1 or that the deployed contract matches the ABI.

@@ -1,4 +1,4 @@
-import { AbiCoder, FunctionFragment, Interface, getAddress, id, keccak256, toUtf8Bytes, ZeroAddress } from "ethers";
+import { AbiCoder, FallbackFragment, FunctionFragment, Interface, getAddress, id, keccak256, toUtf8Bytes, ZeroAddress } from "ethers";
 import type { InterfaceAbi, Provider } from "ethers";
 import type { Address, Hex } from "./generated/contracts.js";
 import type { UnsignedCall } from "./binding.js";
@@ -6,12 +6,15 @@ import { toSafeCall } from "./safe.js";
 import type { SafeCall } from "./safe.js";
 
 export type SafeArgument = string | boolean | readonly SafeArgument[];
+export type SafePlanRoute = "receive" | "fallback";
 export interface SafePlanInput {
   /** The actual target caller, including for approve, owner/admin and value-bearing actions. */
   readonly safe: Address;
   readonly intent: string;
   readonly call: UnsignedCall;
   readonly abi: InterfaceAbi;
+  /** Explicit route for Solidity's non-function receive/fallback entry points. Omit for ABI functions. */
+  readonly route?: SafePlanRoute;
 }
 export interface SafePlanStep {
   readonly index: number;
@@ -19,6 +22,8 @@ export interface SafePlanStep {
   readonly intent: string;
   readonly method: string;
   readonly arguments: readonly SafeArgument[];
+  /** Present only for explicitly selected receive/fallback routes; function plans keep their original shape. */
+  readonly route?: SafePlanRoute;
   readonly transaction: SafeCall;
   readonly hash: Hex;
 }
@@ -56,6 +61,49 @@ function hashPlan(chain: bigint, title: string, steps: readonly SafePlanStep[]):
     [id("6529STREAM_SAFE_CALL_PLAN_V1"), chain, keccak256(toUtf8Bytes(title)), steps.map(s => s.hash)])) as Hex;
 }
 
+function receiveFragment(iface: Interface): FallbackFragment | undefined {
+  return iface.fragments.find((f): f is FallbackFragment => {
+    if (f.type !== "fallback") return false;
+    return JSON.parse(f.format("json")).type === "receive";
+  });
+}
+
+function fallbackFragment(iface: Interface): FallbackFragment | null {
+  return iface.fallback;
+}
+
+function describeStep(input: SafePlanInput, transaction: SafeCall, iface: Interface): {
+  method: string; arguments: readonly SafeArgument[]; route?: SafePlanRoute;
+} {
+  if (input.route === undefined) {
+    const parsed = iface.parseTransaction({ data: transaction.data, value: transaction.value });
+    if (!parsed || parsed.fragment.constant) throw Error("Plan requires a known state-changing ABI function or an explicit receive/fallback route");
+    if (input.call.value !== 0n && !parsed.fragment.payable) throw Error("Nonpayable CALL cannot carry value");
+    if (iface.encodeFunctionData(parsed.fragment, parsed.args).toLowerCase() !== transaction.data.toLowerCase()) throw Error("Noncanonical or trailing CALL bytes");
+    return { method: parsed.fragment.format("sighash"), arguments: Object.freeze(Array.from(parsed.args, argument)) };
+  }
+
+  if (input.route === "receive") {
+    const fragment = receiveFragment(iface);
+    if (!fragment) throw Error("Receive route requires a compiled ABI receive entry");
+    if (!fragment.payable) throw Error("Receive route requires a payable receive entry");
+    if (transaction.data !== "0x") throw Error("Receive route requires empty calldata");
+    return { method: "receive()", arguments: Object.freeze([]), route: "receive" };
+  }
+
+  if (input.route !== "fallback") throw Error("Unknown Safe plan route");
+  const fragment = fallbackFragment(iface);
+  if (!fragment) throw Error("Fallback route requires a compiled ABI fallback entry");
+  if (transaction.data === "0x" && receiveFragment(iface)) throw Error("Empty calldata dispatches to receive when the ABI declares receive");
+  if (transaction.data.length >= 10) {
+    const selector = transaction.data.slice(0, 10).toLowerCase();
+    const matched = iface.fragments.filter((f): f is FunctionFragment => f.type === "function").some(f => f.selector.toLowerCase() === selector);
+    if (matched) throw Error("Fallback route cannot use a known function selector");
+  }
+  if (input.call.value !== 0n && !fragment.payable) throw Error("Nonpayable fallback cannot carry value");
+  return { method: "fallback(bytes)", arguments: Object.freeze([transaction.data]), route: "fallback" };
+}
+
 /**
  * Make a reviewable, ordered plan for any state-changing function in a caller-selected compiled ABI.
  * No signer, Safe service, MultiSend, DELEGATECALL, owner impersonation or automatic retry is involved.
@@ -67,13 +115,9 @@ export function createSafeCallPlan(chainId: bigint, title: string, inputs: reado
     const safe = getAddress(input.safe) as Address;
     if (safe === ZeroAddress) throw Error("Safe caller must be nonzero"); text(input.intent);
     const transaction = toSafeCall(input.call), iface = new Interface(input.abi);
-    const parsed = iface.parseTransaction({ data: transaction.data, value: transaction.value });
-    if (!parsed || parsed.fragment.constant) throw Error("Plan requires a known state-changing ABI function");
-    if (input.call.value !== 0n && !parsed.fragment.payable) throw Error("Nonpayable CALL cannot carry value");
-    if (iface.encodeFunctionData(parsed.fragment, parsed.args).toLowerCase() !== transaction.data.toLowerCase()) throw Error("Noncanonical or trailing CALL bytes");
-    const method = parsed.fragment.format("sighash");
-    return Object.freeze({ index, safe, intent: input.intent, method, arguments: Object.freeze(Array.from(parsed.args, argument)), transaction,
-      hash: hashStep(chainId, index, safe, input.intent, method, transaction) });
+    const described = describeStep(input, transaction, iface);
+    return Object.freeze({ index, safe, intent: input.intent, ...described, transaction,
+      hash: hashStep(chainId, index, safe, input.intent, described.method, transaction) });
   });
   return Object.freeze({ schemaVersion: 1, chainId, title, steps: Object.freeze(steps), hash: hashPlan(chainId, title, steps) });
 }
@@ -83,7 +127,8 @@ export function verifySafeCallPlan(plan: SafeCallPlan, abis: readonly InterfaceA
   if (!plan || plan.schemaVersion !== 1 || !Array.isArray(plan.steps) || plan.steps.length !== abis.length) throw Error("Plan/catalog shape differs");
   const rebuilt = createSafeCallPlan(plan.chainId, plan.title, plan.steps.map((s, i) => {
     if (s.transaction.operation !== 0 || typeof s.transaction.value !== "string" || !/^(0|[1-9][0-9]*)$/.test(s.transaction.value)) throw Error("Expected canonical Safe CALL");
-    return { safe: s.safe, intent: s.intent, abi: abis[i]!, call: { to: s.transaction.to, data: s.transaction.data, value: BigInt(s.transaction.value) } };
+    return { safe: s.safe, intent: s.intent, abi: abis[i]!, ...(s.route === undefined ? {} : { route: s.route }),
+      call: { to: s.transaction.to, data: s.transaction.data, value: BigInt(s.transaction.value) } };
   }));
   const encode = (v: unknown) => JSON.stringify(v, (_, x) => typeof x === "bigint" ? x.toString() : x);
   // Compare explicit fields, independent of JSON property order.

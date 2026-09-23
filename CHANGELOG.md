@@ -1,5 +1,11 @@
 # Changelog
 
+## Safe receive and fallback plans
+
+- Add explicit ABI-checked Safe plan routes for Solidity receive and fallback
+  handlers. Preserve raw target/value/calldata, enforce dispatch precedence and
+  payable rules, and keep existing function-plan hashes unchanged.
+
 ## Current native Museum requirement assessment
 
 - Add a separate, replayed 49-row current assessment for five native-state
