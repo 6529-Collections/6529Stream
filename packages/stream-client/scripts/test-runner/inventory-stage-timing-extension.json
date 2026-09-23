@@ -1,0 +1,1432 @@
+{
+  "schemaVersion": 1,
+  "id": "scoped-policy-inventory-v2-stages-20260922",
+  "qualification": "Successful Windows Node24.16.0 provider-mock test measurements. These are scheduling estimates, not Linux CI guarantees or native contract/Safe execution evidence.",
+  "baseTableSha256": "e8c138a6b1565c15d0560d7ab8a4e13342d6861a0ace335883d4e06b45058c93",
+  "authenticatedProposalSha256": "33a205d4b9204065e73ae3a81d1067f639f63645ad2a1281db0f535b649bf410",
+  "authenticatedResultSha256": "37fe3a0b237adcb1ca3623980a13cf7d5f3d405b4f28f1a39edf9c41f02a6d6b",
+  "originalRunResultSha256": "d7d1b4ba63e5095148be0e7562debe981a44e02c635d068eacd5a66e0ebbdc63",
+  "testFile": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+  "oldFileSha256": "703f2b9e9d34a96ce86d17dbb8de57256b4a09ec7b9634e4d714ff5f3f69dbd6",
+  "newFileSha256": "51d6255bd80e47f2b2d5c220d0415537d13ef65d713362f8b82cdcd1487768fb",
+  "lifecycleBodySha256": "3618305aeb7d3c0ae5c6d273f43fb2cecfac12b9256ff2d8719d29cf92385826",
+  "otherBodies": [
+    {
+      "name": "TOKEN RELEASE SEASON source identities and actual permissionless caller, value and original begin",
+      "sha256": "1606b3937d00805c944181122026349ff595b8ecf80f522752e6b32153eda365"
+    },
+    {
+      "name": "begin retry is eventless with exact prior retained state; new begin requires its event",
+      "sha256": "924ea81ba1100f45fc644546ec61e7ad5c66440c75e3f3a38bb77b9a5db90daf"
+    },
+    {
+      "name": "complete ordered event locators preserve duplicate Item occurrences and reject missing/order/hash substitutions",
+      "sha256": "c5ea43ce3b22d313d3a3587e7547290172503d02f37d8bc9e29e316c88018988"
+    },
+    {
+      "name": "segment schema, retained segment, topic and transaction identity must all agree",
+      "sha256": "6c6be99c0d274972e68143d70c622778d7cd28dcf8fab41dac31197f1e47620d"
+    },
+    {
+      "name": "saved-source drift and changed original capture block reject recapture without inventing current-plan getter",
+      "sha256": "60f8f15ade1799d48fb79f98effd47e532df197cddeb176e4b9e8a978bbf8c80"
+    },
+    {
+      "name": "wrong stage, page length, row count and selected conservation branch refuse before original mutation",
+      "sha256": "963eb56022bfe823994d8d90a56f708b1e16ba0d0066107ca00716a6cd5a816c"
+    },
+    {
+      "name": "all31 fixed definitions are source-bound; altered selected definition and retained facts refuse",
+      "sha256": "67ffe39edc8c4cadd3984e919d42961214464396bfb60c5a2b124e15b6a1cd57"
+    },
+    {
+      "name": "bounded currentness and full definition diagnostic differ, detached options never change selected block",
+      "sha256": "91c4da971ea379a4a2e112fc334f82a655f532980ecd8073226f300447d1c03d"
+    },
+    {
+      "name": "local complete history survives former source/worker loss; current source inspection refuses",
+      "sha256": "99ad60afa24be7fda39a6580f44d69007a5d9787f3e3cd7f239a62d5bb34cc52"
+    },
+    {
+      "name": "receipt progress, event absence/duplication, wrong schema and later same-block progress refuse attribution",
+      "sha256": "6c7fa0a44f97406be100b2f40d9c2e25259cecae2aef5e24c6c51af053e27fab"
+    },
+    {
+      "name": "Safe exact inner CALL, independent hash and final success order; original planner round-trip",
+      "sha256": "83c0a4853ed313e3483b7faff5913cc14a96e234f281cb066fcc23eda1585f0d"
+    },
+    {
+      "name": "receipt copied logs resist mutation; host-linked runtime and exact mined identities are mandatory",
+      "sha256": "519b4871a5a27ab3f773a094d10b842ca6522fa89dc8f883ee61b0f33e87783e"
+    },
+    {
+      "name": "refusal distinguishes original revert from RPC failure and reports observation equality without rollback proof",
+      "sha256": "7c501676781c6aecac93b05221ea6f0c34657d608138c9e41686c74ba2378e97"
+    },
+    {
+      "name": "input snapshots and finite block/gas/runtime/canonical-response bounds refuse contradictory evidence",
+      "sha256": "e4c7fc98861b11f3584b437f5eb83eeeae3a6edf6246a5f4c4498cdaf6830949"
+    },
+    {
+      "name": "original PRESENT0 and WAIVED1 remain distinct from malformed enum values and wrong selected branch",
+      "sha256": "6252cc55c115b99f78d1d5ce159aaccf05bf17235ff1da64ce39383918bd7654"
+    }
+  ],
+  "matrix": [
+    {
+      "method": "beginInventory",
+      "mode": "direct"
+    },
+    {
+      "method": "beginInventory",
+      "mode": "legacy"
+    },
+    {
+      "method": "beginInventory",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendNative",
+      "mode": "direct"
+    },
+    {
+      "method": "appendNative",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendNative",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendReference",
+      "mode": "direct"
+    },
+    {
+      "method": "appendReference",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendReference",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendWork",
+      "mode": "direct"
+    },
+    {
+      "method": "appendWork",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendWork",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendRights",
+      "mode": "direct"
+    },
+    {
+      "method": "appendRights",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendRights",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendIntent",
+      "mode": "direct"
+    },
+    {
+      "method": "appendIntent",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendIntent",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendIntentWaiver",
+      "mode": "direct"
+    },
+    {
+      "method": "appendIntentWaiver",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendIntentWaiver",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendInterview",
+      "mode": "direct"
+    },
+    {
+      "method": "appendInterview",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendInterview",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendInterviewWaiver",
+      "mode": "direct"
+    },
+    {
+      "method": "appendInterviewWaiver",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendInterviewWaiver",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendRootAuthorization",
+      "mode": "direct"
+    },
+    {
+      "method": "appendRootAuthorization",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendRootAuthorization",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendDefinition",
+      "mode": "direct"
+    },
+    {
+      "method": "appendDefinition",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendDefinition",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendTokenOutput",
+      "mode": "direct"
+    },
+    {
+      "method": "appendTokenOutput",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendTokenOutput",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendTokenScript",
+      "mode": "direct"
+    },
+    {
+      "method": "appendTokenScript",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendTokenScript",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendTokenLibrary",
+      "mode": "direct"
+    },
+    {
+      "method": "appendTokenLibrary",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendTokenLibrary",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendTokenRenderer",
+      "mode": "direct"
+    },
+    {
+      "method": "appendTokenRenderer",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendTokenRenderer",
+      "mode": "indexed"
+    },
+    {
+      "method": "appendTokenCitation",
+      "mode": "direct"
+    },
+    {
+      "method": "appendTokenCitation",
+      "mode": "legacy"
+    },
+    {
+      "method": "appendTokenCitation",
+      "mode": "indexed"
+    },
+    {
+      "method": "sealInventory",
+      "mode": "direct"
+    },
+    {
+      "method": "sealInventory",
+      "mode": "legacy"
+    },
+    {
+      "method": "sealInventory",
+      "mode": "indexed"
+    }
+  ],
+  "discovery": {
+    "registrations": [
+      {
+        "name": "original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "TOKEN RELEASE SEASON source identities and actual permissionless caller, value and original begin",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "begin retry is eventless with exact prior retained state; new begin requires its event",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "complete ordered event locators preserve duplicate Item occurrences and reject missing/order/hash substitutions",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "segment schema, retained segment, topic and transaction identity must all agree",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "saved-source drift and changed original capture block reject recapture without inventing current-plan getter",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "wrong stage, page length, row count and selected conservation branch refuse before original mutation",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "all31 fixed definitions are source-bound; altered selected definition and retained facts refuse",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "bounded currentness and full definition diagnostic differ, detached options never change selected block",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "local complete history survives former source/worker loss; current source inspection refuses",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "receipt progress, event absence/duplication, wrong schema and later same-block progress refuse attribution",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "Safe exact inner CALL, independent hash and final success order; original planner round-trip",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "receipt copied logs resist mutation; host-linked runtime and exact mined identities are mandatory",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "refusal distinguishes original revert from RPC failure and reports observation equality without rollback proof",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "input snapshots and finite block/gas/runtime/canonical-response bounds refuse contradictory evidence",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      },
+      {
+        "name": "original PRESENT0 and WAIVED1 remain distinct from malformed enum values and wrong selected branch",
+        "kind": "test",
+        "skip": false,
+        "todo": false,
+        "only": false
+      }
+    ],
+    "wholeFile": false
+  },
+  "node": "v24.16.0",
+  "platform": "win32",
+  "sourceCommit": "06f38396f40a3ec5a7f7b0c646b261beeef0680d",
+  "concurrency": 2,
+  "timeoutMs": 420000,
+  "inputsUnchanged": true,
+  "beforeInputs": [
+    {
+      "file": "dist/current-manifests.js",
+      "sha256": "1509d4f76f3c4e529527aeecd1dee8b91d89070ad0c47ff8c7f6e4bea8c1a2a6"
+    },
+    {
+      "file": "dist/current-reference-environment.js",
+      "sha256": "41497024ad0ef581260b48edc4ca6fd2b33ab09f00b204f14ab9fc3e25fa0b12"
+    },
+    {
+      "file": "dist/current-reference-inventory.js",
+      "sha256": "a2379dfd6044edaa9c359858e95e7693668163f979127d3931ebcd24fe0acf6c"
+    },
+    {
+      "file": "dist/current-scoped-policy-bundle-v2-workflow.js",
+      "sha256": "605e7beabc276bc7cb038adb21bd385b859d1596df59c921ea49a30419083464"
+    },
+    {
+      "file": "dist/current-scoped-policy-bundle-v2.js",
+      "sha256": "6b96793df174d12a44515eeeafcafbb38109b31cc1bf4b188eb13c356857ef3c"
+    },
+    {
+      "file": "dist/current-scoped-policy-graph-v2.js",
+      "sha256": "11205f43c91a88f8811ba2f070a8c20bb052e9ebb50fb97cac7776e5f3bff40e"
+    },
+    {
+      "file": "dist/current-scoped-policy-inventory-archive-workflow-internal.js",
+      "sha256": "ef4b9bd6ff145ceb257586a96c4932949acd511e8231e35333445328046cd889"
+    },
+    {
+      "file": "dist/current-scoped-policy-inventory-v2-workflow.js",
+      "sha256": "f150ef6f1ce54fb423430e01993a53f3c3f3d1ff260912465cb7dcb378569889"
+    },
+    {
+      "file": "dist/current-scoped-policy-inventory-v2.js",
+      "sha256": "95b39cfc59a0306fc542bd5928713d9c1bb389e18efa0922d188e798e1ea1341"
+    },
+    {
+      "file": "dist/current-scoped-policy-publication-v2.js",
+      "sha256": "16c132db57eae0acfc930935063d8246586ff447451c89dba5edfa633db01716"
+    },
+    {
+      "file": "dist/current-scoped-policy-reference-v2.js",
+      "sha256": "24b3d890b4232ea109907de5d7cc5cf2eae17fb85b9e55fb0cfb1a6ea3a91d1c"
+    },
+    {
+      "file": "dist/current-scoped-policy-root-v2.js",
+      "sha256": "308ee9d8629da9ee463e02a0309467ff62ac02d561875d756d928cbe246b6f53"
+    },
+    {
+      "file": "dist/safe-plan.js",
+      "sha256": "47bbafc422d047beddb633114647b6d39879b4b97912e75de761993eabf356a0"
+    },
+    {
+      "file": "dist/safe.js",
+      "sha256": "3b3f19f542cad2c40e0d784d020886d3ca95bbaff811c64ad12bd4c96a2741af"
+    },
+    {
+      "file": "dist/signing-payload.js",
+      "sha256": "aa23e4fcf3627c90a6a32e8b26716975e331d44a201b3c5e5e37636430429da3"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "e07fb909cc493cb6f00a3ba7e14028986aeaaaabb5e7d52ab68d760e9b677d8d"
+    },
+    {
+      "file": "package.json",
+      "sha256": "2f7e1e9ed260da0ea7af830e91813d7678a41ae975118080608fe190d1264a9c"
+    },
+    {
+      "file": "scripts/test-runner.mjs",
+      "sha256": "635cbfe94e6ee044cfc996ef4afb8f8d8e4d3d49b34533f1677bd0de9cbac261"
+    },
+    {
+      "file": "scripts/test-runner/discover.mjs",
+      "sha256": "6ac9b782f2b677ccd14b68a4da2cefc67d94ba2edfa92626d638eb12877433b5"
+    },
+    {
+      "file": "scripts/test-runner/discovery-loader.mjs",
+      "sha256": "00f9a0940ccb10baae4e226c95935924ab4d43c7caf389a3f0d8fb2ee31fa3ed"
+    },
+    {
+      "file": "scripts/test-runner/discovery-test.mjs",
+      "sha256": "e8f64438141d8439181027c928f122bb9160f9f4163e790453e5a85000ddd907"
+    },
+    {
+      "file": "scripts/test-runner/reporter.mjs",
+      "sha256": "f29d21ad104e4bc48fc68f9f105aeb3bc634ec956cd71074e7685eb1e8fcbebf"
+    },
+    {
+      "file": "src/current-manifests.ts",
+      "sha256": "b885f52c6d57109eac44e326f0efd94e3a4024e52c61fbf1881476ba0fae7ec0"
+    },
+    {
+      "file": "src/current-reference-environment.ts",
+      "sha256": "2642002febfbf17673eb74e24af7308906f660aaca2b7370e416bd5f09b770db"
+    },
+    {
+      "file": "src/current-reference-inventory.ts",
+      "sha256": "bff74b16f434024eb75ed20035bd44d523e4c323f879a7a0a22c08a618e19350"
+    },
+    {
+      "file": "src/current-scoped-policy-bundle-v2-workflow.ts",
+      "sha256": "556dc605a359ac401092f786b655fd6055f53ccfe473c584b6a801fbd4e39fa1"
+    },
+    {
+      "file": "src/current-scoped-policy-bundle-v2.ts",
+      "sha256": "7b97edd49e014e4a73c42d9ccb6496ac84d740ff555b8af288fe40ff06b77207"
+    },
+    {
+      "file": "src/current-scoped-policy-graph-v2.ts",
+      "sha256": "acb5f84ecf85d5d66b666f5b4c8d9e5745da56bf7d0a30c4b93286cd8822be50"
+    },
+    {
+      "file": "src/current-scoped-policy-inventory-archive-workflow-internal.ts",
+      "sha256": "dd10ba3861416122d91ff20ab17d6a7d79d0e98e9959bfc5def66606a3dbea04"
+    },
+    {
+      "file": "src/current-scoped-policy-inventory-v2-workflow.ts",
+      "sha256": "55cf2b7e831bf4edd31104dd33ee745e0143714460f8b9bd2d3f8bf27710d4e3"
+    },
+    {
+      "file": "src/current-scoped-policy-inventory-v2.ts",
+      "sha256": "6f9326ea96a0469b2ae952baf01ccea9e7298dd7a8a057050524481674ff1732"
+    },
+    {
+      "file": "src/current-scoped-policy-publication-v2.ts",
+      "sha256": "94aa9543c0abf459c5ec9040717549b5cdd1bb43d95b390c3f7d75970c4ee65d"
+    },
+    {
+      "file": "src/current-scoped-policy-reference-v2.ts",
+      "sha256": "7adad17324d4c3938afba4df79fe5cf745660122078df26e629e33e33d8f634d"
+    },
+    {
+      "file": "src/current-scoped-policy-root-v2.ts",
+      "sha256": "691f73a84cc0b518fa9f7b599aeb983b0a15a63654602932bddf232697b9b521"
+    },
+    {
+      "file": "src/safe-plan.ts",
+      "sha256": "f5aa889d23787da4d761fc1143110441f06e87b787b799d9863d5925e4cedde7"
+    },
+    {
+      "file": "src/safe.ts",
+      "sha256": "fd25827a64b1b902b4fa55747ea6c384df0b8fe7d2e3c41b8a3ee62bd4e9ddb7"
+    },
+    {
+      "file": "src/signing-payload.ts",
+      "sha256": "af27655f80c54883f0ada6b9172f51a26fe0247d7da535230dde783c76122ae2"
+    },
+    {
+      "file": "test/current-scoped-policy-bundle-v2-workflow-fixture.mjs",
+      "sha256": "ebbf3807bf24f2132635a1cdf6f8a42e729ccdab591005ea2a59d04d4c04a039"
+    },
+    {
+      "file": "test/current-scoped-policy-bundle-v2-workflow.test.mjs",
+      "sha256": "a95b1e20bc3f9a3db327ae3a7970e9088cb9be5c0af6be1b966b02414e6ef807"
+    },
+    {
+      "file": "test/current-scoped-policy-graph-v2-fixture.mjs",
+      "sha256": "6a9412b039881c026ac53c8c277580ef0188a27524687811edd686d57aef896c"
+    },
+    {
+      "file": "test/current-scoped-policy-graph-v2-workflow-fixture.mjs",
+      "sha256": "3c3427f873bbf0532c68c45512b8fcc8bb0396e1486d6bb9748765a75e9480f1"
+    },
+    {
+      "file": "test/current-scoped-policy-inventory-archive-v2-fixture.mjs",
+      "sha256": "d9c3147366c88764bc5e107830b0b7e6c59dd39b5e610f6d70106d437c3ac3c1"
+    },
+    {
+      "file": "test/current-scoped-policy-inventory-v2-workflow-fixture.mjs",
+      "sha256": "67c3d672b1e880cddd910b3fa791b87b264768b0ff8eee3d67162cf1b8f2709d"
+    },
+    {
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "sha256": "51d6255bd80e47f2b2d5c220d0415537d13ef65d713362f8b82cdcd1487768fb"
+    },
+    {
+      "file": "test/current-scoped-policy-publication-v2-fixture.mjs",
+      "sha256": "ec1c04666d7dc758d36c4779bc14f0749d522cd4641002ed7e050c5d9e8f78b7"
+    },
+    {
+      "file": "test/current-scoped-policy-publication-v2-workflow-fixture.mjs",
+      "sha256": "40c1d8ecd9a5973afd5f2581e6a85ab544f34faeb5671985319e52d53a75be7f"
+    },
+    {
+      "file": "test/current-scoped-policy-reference-v2-fixture.mjs",
+      "sha256": "8b4948d7f10db9c7cad6c460177ac69d6dd8d77793a56ac5dd5ef3a5f0e34937"
+    },
+    {
+      "file": "test/current-scoped-policy-reference-v2-workflow-fixture.mjs",
+      "sha256": "68e1062ab337a5d256a9ff7c16ab80a490d0df0c432e987e82e0e2a521cd1162"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-graph-v2-abi.json",
+      "sha256": "5619a6309d421b83230fff8cdd2aba843badb6c7ce42de67ed3fd8fbda4d21d7"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-inventory-archive-v2-abi.json",
+      "sha256": "bd897630217c74bc50703be975ce56aaf38a77e6887434631bf9497a90f3af16"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-publication-v2-abi.json",
+      "sha256": "2dcd7e36aba931251cb0433124c2853c36f31a391915bb8fdd66f947fcaee87f"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-reference-v2-abi.json",
+      "sha256": "67818cf0b4801adb9557d6923972c0eb3948c9e95f59cf1254a4151c26b4731c"
+    }
+  ],
+  "afterInputs": [
+    {
+      "file": "dist/current-manifests.js",
+      "sha256": "1509d4f76f3c4e529527aeecd1dee8b91d89070ad0c47ff8c7f6e4bea8c1a2a6"
+    },
+    {
+      "file": "dist/current-reference-environment.js",
+      "sha256": "41497024ad0ef581260b48edc4ca6fd2b33ab09f00b204f14ab9fc3e25fa0b12"
+    },
+    {
+      "file": "dist/current-reference-inventory.js",
+      "sha256": "a2379dfd6044edaa9c359858e95e7693668163f979127d3931ebcd24fe0acf6c"
+    },
+    {
+      "file": "dist/current-scoped-policy-bundle-v2-workflow.js",
+      "sha256": "605e7beabc276bc7cb038adb21bd385b859d1596df59c921ea49a30419083464"
+    },
+    {
+      "file": "dist/current-scoped-policy-bundle-v2.js",
+      "sha256": "6b96793df174d12a44515eeeafcafbb38109b31cc1bf4b188eb13c356857ef3c"
+    },
+    {
+      "file": "dist/current-scoped-policy-graph-v2.js",
+      "sha256": "11205f43c91a88f8811ba2f070a8c20bb052e9ebb50fb97cac7776e5f3bff40e"
+    },
+    {
+      "file": "dist/current-scoped-policy-inventory-archive-workflow-internal.js",
+      "sha256": "ef4b9bd6ff145ceb257586a96c4932949acd511e8231e35333445328046cd889"
+    },
+    {
+      "file": "dist/current-scoped-policy-inventory-v2-workflow.js",
+      "sha256": "f150ef6f1ce54fb423430e01993a53f3c3f3d1ff260912465cb7dcb378569889"
+    },
+    {
+      "file": "dist/current-scoped-policy-inventory-v2.js",
+      "sha256": "95b39cfc59a0306fc542bd5928713d9c1bb389e18efa0922d188e798e1ea1341"
+    },
+    {
+      "file": "dist/current-scoped-policy-publication-v2.js",
+      "sha256": "16c132db57eae0acfc930935063d8246586ff447451c89dba5edfa633db01716"
+    },
+    {
+      "file": "dist/current-scoped-policy-reference-v2.js",
+      "sha256": "24b3d890b4232ea109907de5d7cc5cf2eae17fb85b9e55fb0cfb1a6ea3a91d1c"
+    },
+    {
+      "file": "dist/current-scoped-policy-root-v2.js",
+      "sha256": "308ee9d8629da9ee463e02a0309467ff62ac02d561875d756d928cbe246b6f53"
+    },
+    {
+      "file": "dist/safe-plan.js",
+      "sha256": "47bbafc422d047beddb633114647b6d39879b4b97912e75de761993eabf356a0"
+    },
+    {
+      "file": "dist/safe.js",
+      "sha256": "3b3f19f542cad2c40e0d784d020886d3ca95bbaff811c64ad12bd4c96a2741af"
+    },
+    {
+      "file": "dist/signing-payload.js",
+      "sha256": "aa23e4fcf3627c90a6a32e8b26716975e331d44a201b3c5e5e37636430429da3"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "e07fb909cc493cb6f00a3ba7e14028986aeaaaabb5e7d52ab68d760e9b677d8d"
+    },
+    {
+      "file": "package.json",
+      "sha256": "2f7e1e9ed260da0ea7af830e91813d7678a41ae975118080608fe190d1264a9c"
+    },
+    {
+      "file": "scripts/test-runner.mjs",
+      "sha256": "635cbfe94e6ee044cfc996ef4afb8f8d8e4d3d49b34533f1677bd0de9cbac261"
+    },
+    {
+      "file": "scripts/test-runner/discover.mjs",
+      "sha256": "6ac9b782f2b677ccd14b68a4da2cefc67d94ba2edfa92626d638eb12877433b5"
+    },
+    {
+      "file": "scripts/test-runner/discovery-loader.mjs",
+      "sha256": "00f9a0940ccb10baae4e226c95935924ab4d43c7caf389a3f0d8fb2ee31fa3ed"
+    },
+    {
+      "file": "scripts/test-runner/discovery-test.mjs",
+      "sha256": "e8f64438141d8439181027c928f122bb9160f9f4163e790453e5a85000ddd907"
+    },
+    {
+      "file": "scripts/test-runner/reporter.mjs",
+      "sha256": "f29d21ad104e4bc48fc68f9f105aeb3bc634ec956cd71074e7685eb1e8fcbebf"
+    },
+    {
+      "file": "src/current-manifests.ts",
+      "sha256": "b885f52c6d57109eac44e326f0efd94e3a4024e52c61fbf1881476ba0fae7ec0"
+    },
+    {
+      "file": "src/current-reference-environment.ts",
+      "sha256": "2642002febfbf17673eb74e24af7308906f660aaca2b7370e416bd5f09b770db"
+    },
+    {
+      "file": "src/current-reference-inventory.ts",
+      "sha256": "bff74b16f434024eb75ed20035bd44d523e4c323f879a7a0a22c08a618e19350"
+    },
+    {
+      "file": "src/current-scoped-policy-bundle-v2-workflow.ts",
+      "sha256": "556dc605a359ac401092f786b655fd6055f53ccfe473c584b6a801fbd4e39fa1"
+    },
+    {
+      "file": "src/current-scoped-policy-bundle-v2.ts",
+      "sha256": "7b97edd49e014e4a73c42d9ccb6496ac84d740ff555b8af288fe40ff06b77207"
+    },
+    {
+      "file": "src/current-scoped-policy-graph-v2.ts",
+      "sha256": "acb5f84ecf85d5d66b666f5b4c8d9e5745da56bf7d0a30c4b93286cd8822be50"
+    },
+    {
+      "file": "src/current-scoped-policy-inventory-archive-workflow-internal.ts",
+      "sha256": "dd10ba3861416122d91ff20ab17d6a7d79d0e98e9959bfc5def66606a3dbea04"
+    },
+    {
+      "file": "src/current-scoped-policy-inventory-v2-workflow.ts",
+      "sha256": "55cf2b7e831bf4edd31104dd33ee745e0143714460f8b9bd2d3f8bf27710d4e3"
+    },
+    {
+      "file": "src/current-scoped-policy-inventory-v2.ts",
+      "sha256": "6f9326ea96a0469b2ae952baf01ccea9e7298dd7a8a057050524481674ff1732"
+    },
+    {
+      "file": "src/current-scoped-policy-publication-v2.ts",
+      "sha256": "94aa9543c0abf459c5ec9040717549b5cdd1bb43d95b390c3f7d75970c4ee65d"
+    },
+    {
+      "file": "src/current-scoped-policy-reference-v2.ts",
+      "sha256": "7adad17324d4c3938afba4df79fe5cf745660122078df26e629e33e33d8f634d"
+    },
+    {
+      "file": "src/current-scoped-policy-root-v2.ts",
+      "sha256": "691f73a84cc0b518fa9f7b599aeb983b0a15a63654602932bddf232697b9b521"
+    },
+    {
+      "file": "src/safe-plan.ts",
+      "sha256": "f5aa889d23787da4d761fc1143110441f06e87b787b799d9863d5925e4cedde7"
+    },
+    {
+      "file": "src/safe.ts",
+      "sha256": "fd25827a64b1b902b4fa55747ea6c384df0b8fe7d2e3c41b8a3ee62bd4e9ddb7"
+    },
+    {
+      "file": "src/signing-payload.ts",
+      "sha256": "af27655f80c54883f0ada6b9172f51a26fe0247d7da535230dde783c76122ae2"
+    },
+    {
+      "file": "test/current-scoped-policy-bundle-v2-workflow-fixture.mjs",
+      "sha256": "ebbf3807bf24f2132635a1cdf6f8a42e729ccdab591005ea2a59d04d4c04a039"
+    },
+    {
+      "file": "test/current-scoped-policy-bundle-v2-workflow.test.mjs",
+      "sha256": "a95b1e20bc3f9a3db327ae3a7970e9088cb9be5c0af6be1b966b02414e6ef807"
+    },
+    {
+      "file": "test/current-scoped-policy-graph-v2-fixture.mjs",
+      "sha256": "6a9412b039881c026ac53c8c277580ef0188a27524687811edd686d57aef896c"
+    },
+    {
+      "file": "test/current-scoped-policy-graph-v2-workflow-fixture.mjs",
+      "sha256": "3c3427f873bbf0532c68c45512b8fcc8bb0396e1486d6bb9748765a75e9480f1"
+    },
+    {
+      "file": "test/current-scoped-policy-inventory-archive-v2-fixture.mjs",
+      "sha256": "d9c3147366c88764bc5e107830b0b7e6c59dd39b5e610f6d70106d437c3ac3c1"
+    },
+    {
+      "file": "test/current-scoped-policy-inventory-v2-workflow-fixture.mjs",
+      "sha256": "67c3d672b1e880cddd910b3fa791b87b264768b0ff8eee3d67162cf1b8f2709d"
+    },
+    {
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "sha256": "51d6255bd80e47f2b2d5c220d0415537d13ef65d713362f8b82cdcd1487768fb"
+    },
+    {
+      "file": "test/current-scoped-policy-publication-v2-fixture.mjs",
+      "sha256": "ec1c04666d7dc758d36c4779bc14f0749d522cd4641002ed7e050c5d9e8f78b7"
+    },
+    {
+      "file": "test/current-scoped-policy-publication-v2-workflow-fixture.mjs",
+      "sha256": "40c1d8ecd9a5973afd5f2581e6a85ab544f34faeb5671985319e52d53a75be7f"
+    },
+    {
+      "file": "test/current-scoped-policy-reference-v2-fixture.mjs",
+      "sha256": "8b4948d7f10db9c7cad6c460177ac69d6dd8d77793a56ac5dd5ef3a5f0e34937"
+    },
+    {
+      "file": "test/current-scoped-policy-reference-v2-workflow-fixture.mjs",
+      "sha256": "68e1062ab337a5d256a9ff7c16ab80a490d0df0c432e987e82e0e2a521cd1162"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-graph-v2-abi.json",
+      "sha256": "5619a6309d421b83230fff8cdd2aba843badb6c7ce42de67ed3fd8fbda4d21d7"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-inventory-archive-v2-abi.json",
+      "sha256": "bd897630217c74bc50703be975ce56aaf38a77e6887434631bf9497a90f3af16"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-publication-v2-abi.json",
+      "sha256": "2dcd7e36aba931251cb0433124c2853c36f31a391915bb8fdd66f947fcaee87f"
+    },
+    {
+      "file": "test/fixtures/current-scoped-policy-reference-v2-abi.json",
+      "sha256": "67818cf0b4801adb9557d6923972c0eb3948c9e95f59cf1254a4151c26b4731c"
+    }
+  ],
+  "results": [
+    {
+      "unitId": "d06f3f5d0dab5eb850a98bb9",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:38.613Z",
+      "completed": "2026-09-22T10:24:42.623Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 4006.2759,
+      "report": [
+        {
+          "name": "original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 2469.9878,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "5d47a70c4c0ad14db5d12f587a082b0563a6f0ac5f92453c756c7d0f7d5c93c5",
+      "jsonlSha256": "4831005291e73b4399a23e3434fc8eead6c72eae3702c5481998f2f82f3ede58",
+      "tap": "TAP version 13\n# Subtest: original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 2469.9878\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 2497.7875\n",
+      "jsonl": "{\"name\":\"original inventory stage beginInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":2469.9878,\"error\":null}\n"
+    },
+    {
+      "unitId": "4a7265e527bb623a1402aa7a",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:38.624Z",
+      "completed": "2026-09-22T10:24:43.208Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 4581.7106,
+      "report": [
+        {
+          "name": "original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 3065.1021,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "ab92f86bd560734cd8748ccde956116ecfa2af193142e065f768838cbff7c803",
+      "jsonlSha256": "ac90b5f9e022200d837b28f876fc2dce80ba624575d7dfbc8c2fe6a5cff757d1",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 3065.1021\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3092.9585\n",
+      "jsonl": "{\"name\":\"original inventory stage appendNative: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":3065.1021,\"error\":null}\n"
+    },
+    {
+      "unitId": "5a64dc3e6d347e19c545a168",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:42.625Z",
+      "completed": "2026-09-22T10:24:48.278Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 5651.590800000001,
+      "report": [
+        {
+          "name": "original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 4125.4115,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "10a51aafe87fb9c386b1658902f48d81f92b007fe264cc08b303ba1f0e9d66da",
+      "jsonlSha256": "d2721ee8ce79426a770d74f6a6ab596250860aba90ed2a6ebc5e49d951c36ae1",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 4125.4115\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 4152.9729\n",
+      "jsonl": "{\"name\":\"original inventory stage appendReference: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":4125.4115,\"error\":null}\n"
+    },
+    {
+      "unitId": "7e31b1b9ae21ca00646af226",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:43.209Z",
+      "completed": "2026-09-22T10:24:50.293Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 7081.626199999999,
+      "report": [
+        {
+          "name": "original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 5554.1079,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "9703efc675f4cabf2901650e2163ef163e654a0dd6c39c29cf3c03f9cacd46b8",
+      "jsonlSha256": "a342cee324f20999c5cf7ef7324bd7cf517be6559d858475b65c2e063b1fbc11",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 5554.1079\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 5583.0539\n",
+      "jsonl": "{\"name\":\"original inventory stage appendWork: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":5554.1079,\"error\":null}\n"
+    },
+    {
+      "unitId": "691bf345befadd4981844c6c",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:48.280Z",
+      "completed": "2026-09-22T10:24:56.574Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 8291.3249,
+      "report": [
+        {
+          "name": "original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 6760.3684,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "7e2af2fec74d41ae634abf22241bc09b3858c4fe9ca26c25cd724158cf114d83",
+      "jsonlSha256": "fed2246a98babc8bd8870cdb3f71166d33f5597363d8f9d1ec1796e1c511babd",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 6760.3684\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 6788.7056\n",
+      "jsonl": "{\"name\":\"original inventory stage appendRights: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":6760.3684,\"error\":null}\n"
+    },
+    {
+      "unitId": "15f3fb4b3455701728cfe541",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:50.294Z",
+      "completed": "2026-09-22T10:24:59.716Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 9420.3215,
+      "report": [
+        {
+          "name": "original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 7893.0225,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "f70194e9f82a3c3d3c2bdbd0081392d51b8b6e2ed15cebcfd323216370b7c58b",
+      "jsonlSha256": "d4f46b15f550734c65fa3c29c46c021bc65c85c4a0a4a9e1e13999f5db423530",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 7893.0225\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 7922.3273\n",
+      "jsonl": "{\"name\":\"original inventory stage appendIntent: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":7893.0225,\"error\":null}\n"
+    },
+    {
+      "unitId": "76b349191437867c59226536",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:56.576Z",
+      "completed": "2026-09-22T10:25:05.943Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 9366.3962,
+      "report": [
+        {
+          "name": "original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 7833.552,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "b7756033505b1469dfc20e44001b3f57a965769191638274ab46799541d3ce60",
+      "jsonlSha256": "b83a084d0e471580ab7e103bc97bfce6a233d92944d7ccb954aab3a237af3a82",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 7833.552\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 7863.7489\n",
+      "jsonl": "{\"name\":\"original inventory stage appendIntentWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":7833.552,\"error\":null}\n"
+    },
+    {
+      "unitId": "11bd9930121f979b1201c222",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:24:59.718Z",
+      "completed": "2026-09-22T10:25:10.278Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 10559.143200000002,
+      "report": [
+        {
+          "name": "original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 9037.6535,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "dc6627d604bd518263cfbb36facaf4ef94c58144abc852d41de5ec1af091d3cd",
+      "jsonlSha256": "2807bcffa5c3db3864b8e990786309fe5a30050184b7aedac90219f89f4a0d15",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 9037.6535\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 9068.0524\n",
+      "jsonl": "{\"name\":\"original inventory stage appendInterview: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":9037.6535,\"error\":null}\n"
+    },
+    {
+      "unitId": "52ee7dd708a85482d4f0660c",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:25:05.945Z",
+      "completed": "2026-09-22T10:25:16.157Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 10209.713600000003,
+      "report": [
+        {
+          "name": "original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 8674.0327,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "7aa6a37e523246b933b1b71a2aafa4b1c4c6ad512ea2d41b6b567deedafef5f9",
+      "jsonlSha256": "d4b83558e6f3e1bf7d863dabcf7cb01211052e31dff3fcacd5fe72841bb26e77",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 8674.0327\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 8703.4339\n",
+      "jsonl": "{\"name\":\"original inventory stage appendInterviewWaiver: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":8674.0327,\"error\":null}\n"
+    },
+    {
+      "unitId": "ca90e367e80771d134bf9890",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:25:10.282Z",
+      "completed": "2026-09-22T10:25:21.850Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 11567.0405,
+      "report": [
+        {
+          "name": "original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 10028.6876,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "95914b9e4eded8706e329166720926d10f753991c6db75090e9db3f482d31357",
+      "jsonlSha256": "53c2c100bc08a1de78978b2a0ac6f9d5345bae1ae3cc543d5e1f6eabebd70822",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 10028.6876\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 10059.9492\n",
+      "jsonl": "{\"name\":\"original inventory stage appendRootAuthorization: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":10028.6876,\"error\":null}\n"
+    },
+    {
+      "unitId": "fc0cb892393181a80f067214",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:25:16.158Z",
+      "completed": "2026-09-22T10:25:28.719Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 12559.520599999996,
+      "report": [
+        {
+          "name": "original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 11029.8375,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "3e85d1c8e0ec25e3bb20f6e68081220b33656d0200cb7d52d874e888a013f0cb",
+      "jsonlSha256": "138caeb31e31ec2c784440bc72c58efc2857178d43e42899e4452036f7d8fdea",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 11029.8375\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 11059.1361\n",
+      "jsonl": "{\"name\":\"original inventory stage appendDefinition: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":11029.8375,\"error\":null}\n"
+    },
+    {
+      "unitId": "0dd22bfb95703a00a55ff4cc",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:25:21.853Z",
+      "completed": "2026-09-22T10:26:10.699Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 48845.094399999994,
+      "report": [
+        {
+          "name": "original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 47310.9805,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "0b8ad16e50513054e659e64fd99d9c5acb122723432cd437a09b313bc6fbd916",
+      "jsonlSha256": "0d8bbb3a811e023199cdc726523fab8150cef3a0a8cd2f0ee6df6b9de142cf2b",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 47310.9805\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47348.041\n",
+      "jsonl": "{\"name\":\"original inventory stage appendTokenOutput: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":47310.9805,\"error\":null}\n"
+    },
+    {
+      "unitId": "458561e8aaf7c02458d23825",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:25:28.722Z",
+      "completed": "2026-09-22T10:26:17.669Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 48945.14030000001,
+      "report": [
+        {
+          "name": "original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 47408.439,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "6278e05d19636957f4c8a9c43d9b0b41ebea4a50de580717637190e6d0d13db9",
+      "jsonlSha256": "f14d1434471ddf4aae035f8823ed490661695a736f2e889217db59a00c3d83c9",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 47408.439\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47444.2955\n",
+      "jsonl": "{\"name\":\"original inventory stage appendTokenScript: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":47408.439,\"error\":null}\n"
+    },
+    {
+      "unitId": "539a4b02aac2d9214f7f3203",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:26:10.701Z",
+      "completed": "2026-09-22T10:26:59.404Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 48701.35459999999,
+      "report": [
+        {
+          "name": "original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 47161.4168,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "a99009b03858706dc8736c04805ed1e89890f23fc4e9310783fcf0c6a92aa812",
+      "jsonlSha256": "1ca2376bc7891d618ed343a100e5da765454471b4856343a010e4805da73e920",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 47161.4168\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47198.8233\n",
+      "jsonl": "{\"name\":\"original inventory stage appendTokenLibrary: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":47161.4168,\"error\":null}\n"
+    },
+    {
+      "unitId": "731dabf99c98364cc42dd24d",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:26:17.670Z",
+      "completed": "2026-09-22T10:27:06.880Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 49207.93400000001,
+      "report": [
+        {
+          "name": "original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 47658.9267,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "c0817eceb223787c03dc777b03f9f9e7db073c3523bd0b917fa36f3406a091b1",
+      "jsonlSha256": "c0ad4e2c62b5a06b2bf50a33b8cf08b656db2f01eeeb0702c4cb88156c383295",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 47658.9267\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47694.0953\n",
+      "jsonl": "{\"name\":\"original inventory stage appendTokenRenderer: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":47658.9267,\"error\":null}\n"
+    },
+    {
+      "unitId": "36955ddf25f046953d556541",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:26:59.407Z",
+      "completed": "2026-09-22T10:27:48.061Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 48653.53430000003,
+      "report": [
+        {
+          "name": "original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 47117.4759,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "e0482187e4c8bef4fb21cc25b9b537df84e7aeefbab09f67e7fd5f10d19891e7",
+      "jsonlSha256": "3eb95ecff240fd82335d1dd2e6ba17c65c583a5943b885b346fea6ee3e26c688",
+      "tap": "TAP version 13\n# Subtest: original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 47117.4759\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47151.881\n",
+      "jsonl": "{\"name\":\"original inventory stage appendTokenCitation: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":47117.4759,\"error\":null}\n"
+    },
+    {
+      "unitId": "28873633f18759a0cc28a2ca",
+      "file": "test/current-scoped-policy-inventory-v2-workflow.test.mjs",
+      "names": [
+        "original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)"
+      ],
+      "started": "2026-09-22T10:27:06.882Z",
+      "completed": "2026-09-22T10:27:56.025Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "elapsedMs": 49142.49840000001,
+      "report": [
+        {
+          "name": "original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)",
+          "nesting": 0,
+          "status": "pass",
+          "skip": false,
+          "todo": false,
+          "durationMs": 47615.2384,
+          "error": null
+        }
+      ],
+      "error": null,
+      "tapSha256": "7f35d462507d9b892d16f8e5d9a2cf53dcf2ef8b9ce5597a1512ecb7e646ec9b",
+      "jsonlSha256": "a4febe9574a98dff5b6c702ba9deffc00c4eb90bf4256383dce090990b4ec13b",
+      "tap": "TAP version 13\n# Subtest: original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\nok 1 - original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\n  ---\n  duration_ms: 47615.2384\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47649.6644\n",
+      "jsonl": "{\"name\":\"original inventory stage sealInventory: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)\",\"nesting\":0,\"status\":\"pass\",\"skip\":false,\"todo\":false,\"durationMs\":47615.2384,\"error\":null}\n"
+    }
+  ],
+  "testSource": "import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { ZeroHash, ZeroAddress } from 'ethers';\nimport { setup, methods, inv, w, A, H, pin, host, safe, coder, item } from './current-scoped-policy-inventory-v2-workflow-fixture.mjs';\nimport { createSafeCallPlan, verifySafeCallPlan } from '../dist/safe-plan.js';\n\nasync function capture(kind='beginInventory',options={}) {\n  const f=setup({waiver:kind==='appendIntentWaiver',interviewWaiver:kind==='appendInterviewWaiver',...options});\n  f.request=f.prepare(kind);\n  f.capture=await w.captureScopedPolicyInventoryV2(f.provider,f.deployment,f.caller,f.request,f.options());\n  return f;\n}\nconst receipt=async(f,mode='direct')=>{const tx=f.install(f.capture,mode);return w.reconcileScopedPolicyInventoryV2Receipt(f.provider,f.capture,tx.txHash,tx.options);};\n\nfor(const kind of methods)test(`original inventory stage ${kind}: capture, simulate and reconcile direct plus both Safe layouts (mocked source producers)`,async()=>{\n  for(const mode of ['direct','legacy','indexed']){\n    const f=await capture(kind);\n    const simulated=await w.simulateScopedPolicyInventoryV2(f.provider,f.capture,{blockTag:91,gasLimit:f.gasLimit});\n    assert.equal(simulated.originalCallSucceeded,true);assert.equal(simulated.stateChangesPersisted,false);\n    const result=await receipt(f,mode);assert.equal(result.planId,f.planId);assert.equal(result.precedingAndEndBlockAttribution,true);\n    assert.equal(result.currentAfterReceipt,false);\n    if(f.capture.stage.appended){assert.ok(result.segmentLocator);assert.deepEqual(result.appended.items,f.capture.stage.appended.items);}\n  }\n});\ntest('TOKEN RELEASE SEASON source identities and actual permissionless caller, value and original begin',async()=>{\n  for(const scopeType of [1n,2n,3n]){const scope={scopeType,collectionId:1n,tokenId:scopeType===1n?11n:0n,scopeId:scopeType===1n?ZeroHash:H(55)};\n    const f=await capture('beginInventory',{scope});assert.equal(f.capture.prepared.call.value,0n);\n    assert.ok(f.state.calls.some(x=>x.to===f.coords.inventory&&x.from===f.caller&&x.data.startsWith(host.getFunction('beginInventory').selector)));\n    await receipt(f);}\n});\ntest('begin retry is eventless with exact prior retained state; new begin requires its event',async()=>{\n  const old=await capture('beginInventory',{existing:true});assert.equal(old.capture.stage.existing,true);await receipt(old);\n  const f=await capture();const tx=f.install(f.capture);f.state.receipts.get(tx.txHash).logs=[];\n  await assert.rejects(w.reconcileScopedPolicyInventoryV2Receipt(f.provider,f.capture,tx.txHash,tx.options),/begin events/);\n});\ntest('complete ordered event locators preserve duplicate Item occurrences and reject missing/order/hash substitutions',async()=>{\n  const f=await capture('appendReference');assert.deepEqual(f.capture.stage.segments[0].items[0],f.capture.stage.segments[0].items[1]);\n  await assert.rejects(w.captureScopedPolicyInventoryV2(f.provider,f.deployment,f.caller,f.request,{...f.options(),segments:[]}),/locators/);\n  const locator=f.locators()[0],log=f.state.receipts.get(locator.transactionHash).logs[0];log.data=log.data.slice(0,-2)+'01';\n  await assert.rejects(w.inspectScopedPolicyInventoryV2Segment(f.provider,f.historyDeployment,locator,{blockTag:90}));\n});\ntest('segment schema, retained segment, topic and transaction identity must all agree',async()=>{\n  for(const variant of ['schema','retained','removed','index','metadata']){\n    const f=await capture('appendReference');const locator=f.locators()[0],r=f.state.receipts.get(locator.transactionHash);\n    if(variant==='schema'){const x=f.state.segments[0];r.logs[0]={...r.logs[0],...f.emit('ScopedInventorySegmentRecorded',[1n,f.planId,0n,x.segment,x.items])};}\n    if(variant==='retained')f.state.segments[0].segment={...f.state.segments[0].segment,sourceWitnessHash:H(9)};\n    if(variant==='removed')r.logs[0].removed=true;if(variant==='index')r.logs[0].index=NaN;if(variant==='metadata')delete r.logs[0].blockHash;\n    await assert.rejects(w.inspectScopedPolicyInventoryV2Segment(f.provider,f.historyDeployment,locator,{blockTag:90}));\n  }\n});\ntest('saved-source drift and changed original capture block reject recapture without inventing current-plan getter',async()=>{\n  const f=await capture();f.state.blockHashes.set(90,H(1));\n  await assert.rejects(w.simulateScopedPolicyInventoryV2(f.provider,f.capture,{blockTag:91,gasLimit:f.gasLimit}),/changed/);\n  const g=await capture('appendNative');g.context.rootRecordHash=H(2);\n  await assert.rejects(w.simulateScopedPolicyInventoryV2(g.provider,g.capture,{blockTag:91,gasLimit:g.gasLimit}),/stale|differs/);\n});\ntest('wrong stage, page length, row count and selected conservation branch refuse before original mutation',async()=>{\n  const f=setup();const q=f.prepare('appendRights');f.state.before.progress.completedStages=2n;\n  await assert.rejects(w.captureScopedPolicyInventoryV2(f.provider,f.deployment,f.caller,q,f.options()),/stage/);\n  for(const values of [[[],2n],[[item()],3n]]){const g=setup();const request=g.prepare('appendNative');g.state.workerResult=(worker,args,old)=>worker.role==='native'?values:old;\n    await assert.rejects(w.captureScopedPolicyInventoryV2(g.provider,g.deployment,g.caller,request,g.options()),/page/);}\n});\ntest('all31 fixed definitions are source-bound; altered selected definition and retained facts refuse',async()=>{\n  const f=setup();const q=f.prepare('appendDefinition');f.state.workerResult=(worker,args,values)=>worker.role==='documents'&&worker.method==='item'?[{...values[0],catalogHash:H(4)}]:values;\n  await assert.rejects(w.captureScopedPolicyInventoryV2(f.provider,f.deployment,f.caller,q,f.options()),/definition/);\n  const g=setup();g.completed();g.state.workerResult=(worker,args,values)=>worker.method==='currentFactsHash'?[H(1)]:values;\n  await assert.rejects(w.inspectScopedPolicyInventoryV2Current(g.provider,g.deployment,g.context.scope,{...g.options(),fullDefinitionBytes:true}),/document/);\n});\ntest('bounded currentness and full definition diagnostic differ, detached options never change selected block',async()=>{\n  const f=setup();f.completed();const opts={...f.options(),fullDefinitionBytes:false};\n  f.state.hooks.network=()=>{opts.blockTag=999;opts.fullDefinitionBytes=true;};\n  const result=await w.inspectScopedPolicyInventoryV2Current(f.provider,f.deployment,f.context.scope,opts);\n  assert.equal(result.fullDefinitionBytesChecked,false);assert.equal(result.capture.observed.blockNumber,90);\n  assert.ok(f.state.calls.every(x=>x.blockTag===90));assert.ok(!f.state.calls.some(x=>x.data.startsWith(host.getFunction('requireFullDefinitionBytes').selector)));\n});\ntest('local complete history survives former source/worker loss; current source inspection refuses',async()=>{\n  const f=setup();f.completed();f.state.code.set(f.deployment.workers.source.address,'0x');f.state.sourceStale=true;\n  const result=await w.inspectScopedPolicyInventoryV2History(f.provider,f.historyDeployment,f.planId,{blockTag:90,segments:f.locators()});\n  assert.equal(result.currentSourceChecked,false);assert.ok(result.evidence);\n  await assert.rejects(w.inspectScopedPolicyInventoryV2Current(f.provider,f.deployment,f.context.scope,f.options()));\n});\ntest('receipt progress, event absence/duplication, wrong schema and later same-block progress refuse attribution',async()=>{\n  for(const variant of ['missing','duplicate','schema','progress','token']){const f=await capture('appendNative');const tx=f.install(f.capture);const r=f.state.receipts.get(tx.txHash);\n    if(variant==='missing')r.logs=[];if(variant==='duplicate'){r.logs.push({...r.logs[0]});f.renumber();}\n    if(variant==='schema'){const a=f.capture.stage.appended;r.logs[0]={...r.logs[0],...f.emit('ScopedInventorySegmentRecorded',[1n,f.planId,0n,a.segment,a.items])};}\n    if(variant==='progress')f.state.after.progress.itemCount++;if(variant==='token')f.state.tokenAfter.phase=1n;\n    await assert.rejects(w.reconcileScopedPolicyInventoryV2Receipt(f.provider,f.capture,tx.txHash,tx.options));}\n});\ntest('Safe exact inner CALL, independent hash and final success order; original planner round-trip',async()=>{\n  const f=await capture();const plan=createSafeCallPlan(1n,'Inventory',[{safe:f.caller,intent:'Begin inventory',call:f.capture.prepared.call,abi:inv.SCOPED_POLICY_INVENTORY_V2_ABI}]);\n  assert.equal(verifySafeCallPlan(plan,[inv.SCOPED_POLICY_INVENTORY_V2_ABI]).steps.length,1);\n  for(const variant of ['hash','operation','value','early','failure']){const g=await capture('appendNative');const tx=g.install(g.capture,'indexed');const r=g.state.receipts.get(tx.txHash),t=g.state.transactions.get(tx.txHash);\n    if(variant==='hash')tx.options.expectedSafeTxHash=H(3);\n    if(variant==='operation'||variant==='value'){const a=Array.from(safe.decodeFunctionData('execTransaction',t.data));a[variant==='operation'?3:1]=1n;t.data=safe.encodeFunctionData('execTransaction',a);}\n    if(variant==='early'){r.logs.reverse();g.renumber();}if(variant==='failure')r.logs.at(-1).topics[0]=safe.getEvent('ExecutionFailure').topicHash;\n    await assert.rejects(w.reconcileScopedPolicyInventoryV2Receipt(g.provider,g.capture,tx.txHash,tx.options));}\n});\ntest('receipt copied logs resist mutation; host-linked runtime and exact mined identities are mandatory',async()=>{\n  const f=await capture();const tx=f.install(f.capture,'indexed');const raw=f.state.receipts.get(tx.txHash);\n  f.state.hooks.transaction=()=>{raw.logs.at(-1).topics[1]=H(3);};await w.reconcileScopedPolicyInventoryV2Receipt(f.provider,f.capture,tx.txHash,tx.options);\n  for(const variant of ['worker','link','from','removed','outer']){const g=await capture();const t=g.install(g.capture);const r=g.state.receipts.get(t.txHash);\n    if(variant==='worker'||variant==='link')g.state.hooks.code=(address,tag)=>{if(tag===100&&address===(variant==='worker'?g.deployment.workers.source.address:g.deployment.linkedDependencies[0].address))g.state.code.set(address,'0x6001');};\n    if(variant==='from')r.from=A(9);if(variant==='removed')r.logs[0].removed=true;if(variant==='outer')g.state.transactions.get(t.txHash).data='0x'+'00'.repeat(2097152+16385);\n    await assert.rejects(w.reconcileScopedPolicyInventoryV2Receipt(g.provider,g.capture,t.txHash,t.options));}\n});\ntest('refusal distinguishes original revert from RPC failure and reports observation equality without rollback proof',async()=>{\n  const f=await capture('appendNative');f.state.hooks.call=tx=>{if(tx.blockTag===91&&tx.data===f.capture.prepared.call.data)throw Object.assign(Error('late failure'),{code:'CALL_EXCEPTION'});};\n  const result=await w.observeScopedPolicyInventoryV2Refusal(f.provider,f.capture,{blockTag:91,gasLimit:f.gasLimit});\n  assert.equal(result.outcome,'execution-reverted');assert.equal(result.retainedStateUnchanged,true);assert.equal(result.rollbackProven,false);\n  f.state.hooks.call=tx=>{if(tx.blockTag===91&&tx.data===f.capture.prepared.call.data)throw Error('transport');};\n  assert.equal((await w.observeScopedPolicyInventoryV2Refusal(f.provider,f.capture,{blockTag:91,gasLimit:f.gasLimit})).outcome,'rpc-failed');\n});\ntest('input snapshots and finite block/gas/runtime/canonical-response bounds refuse contradictory evidence',async()=>{\n  const f=setup(),q=structuredClone(f.prepare()),d=structuredClone(f.deployment),opts=f.options();\n  f.state.hooks.network=()=>{d.core=A(6);q.scope.collectionId=999n;opts.blockTag=91;};\n  const captured=await w.captureScopedPolicyInventoryV2(f.provider,d,f.caller,q,opts);\n  assert.equal(captured.deployment.core,A(1));assert.equal(captured.observed.blockNumber,90);\n  const g=setup();const request=g.prepare();await assert.rejects(w.captureScopedPolicyInventoryV2(g.provider,g.deployment,g.caller,request,{...g.options(),gasLimit:100000001n}));\n  g.state.raw=(name,raw)=>name==='dependencyHash'?raw+'00':raw;await assert.rejects(w.captureScopedPolicyInventoryV2(g.provider,g.deployment,g.caller,request,g.options()),/canonical|invalid length/);\n});\n\ntest('original PRESENT0 and WAIVED1 remain distinct from malformed enum values and wrong selected branch',async()=>{\n  for(const kind of ['appendInterview','appendInterviewWaiver']){const f=await capture(kind);assert.equal(f.context.conservation.interviewStatus,kind==='appendInterview'?0n:1n);}\n  const f=setup({interviewWaiver:true});const q=f.prepare('appendInterview');\n  await assert.rejects(w.captureScopedPolicyInventoryV2(f.provider,f.deployment,f.caller,q,f.options()),/branch/);\n  const g=setup();const request=g.prepare();g.context.conservation.interviewStatus=2n;\n  await assert.rejects(w.captureScopedPolicyInventoryV2(g.provider,g.deployment,g.caller,request,g.options()),/enum/);\n});\n"
+}

@@ -1,0 +1,69 @@
+de>, <code class="language-plaintext highlighter-rouge">object</code>, <code class="language-plaintext highlighter-rouge">form</code>, <code class="language-plaintext highlighter-rouge">input</code> and similar.</li>
+  <li>All attributes other than <code class="language-plaintext highlighter-rouge">href</code> on the <code class="language-plaintext highlighter-rouge">a</code> tag, <code class="language-plaintext highlighter-rouge">src</code> and <code class="language-plaintext highlighter-rouge">alt</code> on the <code class="language-plaintext highlighter-rouge">img</code> tag.</li>
+  <li>All <code class="language-plaintext highlighter-rouge">href</code> attributes that start with the strings other than “http:”, “https:”, and “mailto:”.</li>
+  <li>CData sections.</li>
+  <li><abbr title="eXtensible Markup Language">XML</abbr> Comments.</li>
+  <li>Processing instructions.</li>
+</ul>
+
+<p>Clients <em class="rfc">should</em> allow only <code class="language-plaintext highlighter-rouge">a</code>, <code class="language-plaintext highlighter-rouge">b</code>, <code class="language-plaintext highlighter-rouge">br</code>, <code class="language-plaintext highlighter-rouge">i</code>, <code class="language-plaintext highlighter-rouge">img</code>, <code class="language-plaintext highlighter-rouge">p</code>, <code class="language-plaintext highlighter-rouge">small</code>, <code class="language-plaintext highlighter-rouge">span</code>, <code class="language-plaintext highlighter-rouge">sub</code> and <code class="language-plaintext highlighter-rouge">sup</code> tags. Clients <em class="rfc">may</em> choose to remove any and all tags, therefore it <em class="rfc">should not</em> be assumed that the formatting will always be rendered.  Note that publishers <em class="rfc">may</em> include arbitrary <abbr title="HyperText Markup Language">HTML</abbr> content for processing using customized or experimental applications, and the requirements for clients assume an untrusted or unknown publisher.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en-latn"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"&lt;p&gt;Short &lt;b&gt;summary&lt;/b&gt; of the resource.&lt;/p&gt;"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="46-linked-data-context-and-extensions">
+        
+        
+          4.6. Linked Data Context and Extensions <a href="#46-linked-data-context-and-extensions" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>The top level resource in the response <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">@context</code> property, and it <em class="rfc">should</em> appear as the very first key/value pair of the <abbr title="JavaScript Object Notation">JSON</abbr> representation. This tells Linked Data processors how to interpret the document. The <abbr title="International Image Interoperability Framework">IIIF</abbr> Presentation <abbr title="Application Programming Interface">API</abbr> context, below, <em class="rfc">must</em> occur once per response in the top-most resource, and thus <em class="rfc">must not</em> appear within <a href="/api/presentation/3.0/#12-terminology">embedded</a> resources. For example, when embedding a Canvas within a Manifest, the Canvas will not have the <code class="language-plaintext highlighter-rouge">@context</code> property.</p>
+
+<p>The value of the <code class="language-plaintext highlighter-rouge">@context</code> property <em class="rfc">must</em> be either the URI <code class="language-plaintext highlighter-rouge">http://iiif.io/api/presentation/3/context.json</code> or a <abbr title="JavaScript Object Notation">JSON</abbr> array with the URI <code class="language-plaintext highlighter-rouge">http://iiif.io/api/presentation/3/context.json</code> as the last item. Further contexts, such as those for local or <a href="/api/registry/" title="IIIF Extension Registry">registered extensions</a>, <em class="rfc">must</em> be added at the beginning of the array.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Any additional properties beyond those defined in this specification or the Web Annotation Data Model <em class="rfc">should</em> be mapped to <abbr title="Resource Description Framework">RDF</abbr> predicates using further context documents. These extensions <em class="rfc">should</em> be added to the top level <code class="language-plaintext highlighter-rouge">@context</code> property, and <em class="rfc">must</em> be added before the above context. The <abbr title="JSON for Linking Data">JSON-LD</abbr> 1.1 functionality of predicate specific context definitions, known as <a href="https://json-ld.org/spec/latest/json-ld/#scoped-contexts" title="JSON-LD Scoped Contexts">scoped contexts</a>, <em class="rfc">must</em> be used to minimize cross-extension collisions. Extensions intended for community use <em class="rfc">should</em> be <a href="/api/registry/" title="IIIF Extension Registry">registered in the extensions registry</a>, but registration is not mandatory.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"http://example.org/extension/context.json"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The <abbr title="JavaScript Object Notation">JSON</abbr> representation <em class="rfc">must not</em> include the <code class="language-plaintext highlighter-rouge">@graph</code> key at the top level. This key might be created when serializing directly from <abbr title="Resource Description Framework">RDF</abbr> data using the <abbr title="JSON for Linking Data">JSON-LD</abbr> 1.0 compaction algorithm. Instead, <abbr title="JSON for Linking Data">JSON-LD</abbr> framing and/or custom code should be used to ensure the structure of the document is as defined by this specification.</p>
+      <h3 id="47-term-collisions-between-contexts">
+        
+        
+          4.7. Term Collisions between Contexts <a href="#47-term-collisions-between-contexts" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>There are some common terms used in more than one <abbr title="JSON for Linking Data">JSON-LD</abbr> context document. Every attempt has been made to minimize these collisions, but some are inevitable. In order to know which specification is in effect at any given p

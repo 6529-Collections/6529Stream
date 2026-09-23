@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "capture": {
+    "inputSha256": "26559f3d1692afc1ffd92966bc3792848e55c6d5ab6f2bf5708f53a653b027d5",
+    "outputSha256": "9438e09e7d9c8fb6520c9ea299e1df3769c6a91434037a2ca1bf2965c8f5558e",
+    "settingsSha256": "315a88e73d23986ea2c3aafc5a1d0a07a40fe10198fdd411f806a1727d646389",
+    "sourceCommit": "aa2ca4a2764ca981630c668966a665637692842d"
+  },
+  "artifacts": {
+    "profile": {
+      "fileName": "safe-acceptance-current-profile.json",
+      "sha256": "8478264085d8b16d75540254a10cb54c838259fe243f871508e3a5ce7f1541c0"
+    },
+    "report": {
+      "fileName": "safe-acceptance-current.json",
+      "sha256": "3f3055596f90e8c75a749237900a2e56b5e720f0ca8ad63016b5407cafeff509"
+    }
+  },
+  "summary": {
+    "machineRecords": 12270,
+    "primaryContracts": 164,
+    "primaryFunctions": 6553,
+    "primaryUncoveredFunctions": 6553,
+    "receiveEntries": 3,
+    "fallbackEntries": 0,
+    "callbackObligations": 4,
+    "implementationArtifacts": 1365,
+    "implementationAbiFunctions": 2405,
+    "unresolvedCompilerAliasRecords": 3305,
+    "unclassifiedExposureRecords": 0,
+    "classified": 2,
+    "deploymentBindings": 0,
+    "coveredLocalReviewed": 0,
+    "machineUncoveredRecords": 12270,
+    "actualEvidenceRecords": 0,
+    "candidateEvidenceRecords": 2,
+    "completeAcceptance": false
+  },
+  "roleCount": 37,
+  "planningInstances": 0,
+  "unresolvedKinds": {
+    "external-callback": 2,
+    "unresolved-profile-edge": 26,
+    "unmatched-compiler-method-ABI": 3305,
+    "missing-contract-AST": 1529,
+    "unresolved-declaration": 8961,
+    "unresolved-contract-kind-selector": 1102,
+    "unresolved-library-selector": 681,
+    "no-deployment-instances": 1,
+    "unresolved-nonfunction-callback": 4,
+    "unresolved-role": 37
+  },
+  "qualification": "Offline identity reconciliation of explicit reviewed per-call claims. No semantic proof is inferred from test names, broad passes or mocks. Local reviewed execution is not deployed, all-configuration, gas, audit or release acceptance. Unresolved inventory, deployment and routing obligations remain gaps.",
+  "exposureQualification": "Primary functions exclude implementation-only library ABI and unmatched compiler alias records. Library classification alone confers no workflow or callguard evidence."
+}

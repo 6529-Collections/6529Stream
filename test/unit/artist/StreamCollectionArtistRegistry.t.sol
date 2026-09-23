@@ -1,7 +1,37 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../helpers/StreamSaleTestBase.sol";
+import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "../../../smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol";
+import "../../../smart-contracts/interfaces/stream/artist/IStreamArtistMintConsent.sol";
+
+/// @dev Explicit collection-state boundary for the earlier attribution-only registry.
+///      It is not the current Core and supplies no mint authorization.
+contract AttributionCollectionStateFixture {
+    uint256 public mintedEver;
+    bool public frozen;
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == 0x80ac58cd || interfaceId == 0x01ffc9a7;
+    }
+
+    function collectionExists(uint256 collectionId) external pure returns (bool) {
+        return collectionId == 1;
+    }
+
+    function collectionMintedEver(uint256) external view returns (uint256) {
+        return mintedEver;
+    }
+
+    function collectionFreezeStatus(uint256) external view returns (bool) {
+        return frozen;
+    }
+
+    function setCollectionState(uint256 mintedEver_, bool frozen_) external {
+        mintedEver = mintedEver_;
+        frozen = frozen_;
+    }
+}
 
 contract CollectionArtist1271 {
     bytes32 public approved;
@@ -15,13 +45,21 @@ contract CollectionArtist1271 {
     }
 }
 
-contract StreamCollectionArtistRegistryTest is StreamSaleTestBase {
+/// @dev Domain tests for the flat attribution registry; current artist consent uses the modular suite.
+contract StreamCollectionArtistRegistryTest is CharacterizationTestBase {
+    uint256 private constant ARTIST_KEY = 0xB0B;
+    uint256 private constant PLATFORM_KEY = 0xA11CE;
+    AttributionCollectionStateFixture private collectionState;
+    address private artist;
+    address private platform;
     StreamCollectionArtistRegistry private attributionRegistry;
 
     function setUp() public {
-        _setUpSaleFixture();
+        artist = vm.addr(ARTIST_KEY);
+        platform = vm.addr(PLATFORM_KEY);
+        collectionState = new AttributionCollectionStateFixture();
         attributionRegistry = new StreamCollectionArtistRegistry(
-            address(core),
+            address(collectionState),
             address(this),
             keccak256("deploy"),
             "urn:test:artist-attribution",
@@ -145,24 +183,19 @@ contract StreamCollectionArtistRegistryTest is StreamSaleTestBase {
         );
     }
 
-    function testCannotBackfillArtistAfterFirstMintAndCoreInstallsRealInterface() public {
-        _install(
-            keccak256("ARTIST_REGISTRY"),
-            address(attributionRegistry),
-            type(IStreamCollectionArtistRegistry).interfaceId
-        );
-        require(
-            core.pointerState(keccak256("ARTIST_REGISTRY")).target == address(attributionRegistry),
-            "actual Core installs artist module"
-        );
+    function testCannotBackfillArtistAfterFirstMintAndAdvertisesOnlyAttribution() public {
         require(
             attributionRegistry.supportsInterface(type(IStreamModule).interfaceId)
-                && !attributionRegistry.supportsInterface(0xffffffff),
-            "canonical module interface"
+                && attributionRegistry.supportsInterface(
+                    type(IStreamCollectionArtistRegistry).interfaceId
+                )
+                && !attributionRegistry.supportsInterface(
+                    type(IStreamArtistMintConsent).interfaceId
+                ) && !attributionRegistry.supportsInterface(0xffffffff),
+            "attribution module does not supply current mint consent"
         );
         bytes32 nomination = attributionRegistry.attribution(1).nominationHash;
-        vm.prank(address(manager));
-        core.mintFromManager(1, artist, "token", keccak256("token"), keccak256("commitment"));
+        collectionState.setCollectionState(1, false);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionArtistRegistry.ArtistRegistryCollectionStarted.selector, 1
@@ -170,6 +203,32 @@ contract StreamCollectionArtistRegistryTest is StreamSaleTestBase {
         );
         vm.prank(artist);
         attributionRegistry.acceptArtist(1, nomination, 0, uint64(block.timestamp + 1 days), "");
+        require(
+            attributionRegistry.acceptedArtist(1) == address(0),
+            "started collection stays unaccepted"
+        );
+        require(
+            attributionRegistry.acceptanceNonces(artist) == 0, "failed acceptance preserves nonce"
+        );
+    }
+
+    function testFrozenUnmintedCollectionRejectsNominationAndAcceptance() public {
+        bytes32 nomination = attributionRegistry.attribution(1).nominationHash;
+        collectionState.setCollectionState(0, true);
+        bytes memory expected = abi.encodeWithSelector(
+            IStreamCollectionArtistRegistry.ArtistRegistryCollectionStarted.selector, 1
+        );
+        vm.expectRevert(expected);
+        attributionRegistry.nominateArtist(1, platform, keccak256("replacement"));
+        vm.expectRevert(expected);
+        vm.prank(artist);
+        attributionRegistry.acceptArtist(1, nomination, 0, uint64(block.timestamp + 1 days), "");
+        require(
+            attributionRegistry.attribution(1).nominationHash == nomination, "nomination unchanged"
+        );
+        require(
+            attributionRegistry.acceptanceNonces(artist) == 0, "frozen collection preserves nonce"
+        );
     }
 
     function _signAcceptance(bytes32 digest, uint256 key) private returns (bytes memory) {

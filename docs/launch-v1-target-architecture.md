@@ -32,6 +32,13 @@ is the enforcement point: it blocks any production deployment on the full
 gate set, and [`docs/architecture.md`](architecture.md) maps the as-built
 baseline honestly until the implementation conforms.
 
+The full-v1 museum target includes the adopted
+[museum semantic profile](museum-semantic-mapping.md) (ADR 0036 decision M1).
+It adds registered mappings, attributed assertions and offline museum exports
+through existing record and registry mechanisms. It adds no Core identity,
+mint, payment, signing or finality requirement. Its conformance remains required
+for the full-v1 target while engineering testnet work proceeds in parallel.
+
 ## Protocol v1 Scope
 
 Requirements [PV1-SCOPE]:

@@ -2,9 +2,11 @@
 pragma solidity ^0.8.19;
 
 import "../../../vendor/openzeppelin/IERC165.sol";
+import "./IStreamSaleFunding.sol";
+import "../revenue/IStreamRevenueResolver.sol";
 
 /// @notice Signed native-ETH sales into the current Core mint path and immutable split wallets.
-interface IStreamFixedPriceSaleAdapter is IERC165 {
+interface IStreamFixedPriceSaleAdapter is IERC165, IStreamSaleFunding {
     struct SaleAuthorization {
         uint256 collectionId;
         bytes32 phaseId;
@@ -12,6 +14,7 @@ interface IStreamFixedPriceSaleAdapter is IERC165 {
         address recipient;
         address artist;
         bytes32 profileId;
+        bytes32 expectedPrimaryPolicyHash;
         bytes32 tokenDataHash;
         bytes32 mintCommitment;
         bytes32 mintPolicyHash;
@@ -31,6 +34,8 @@ interface IStreamFixedPriceSaleAdapter is IERC165 {
     error InvalidSplitProfile(bytes32 profileId);
     error SaleDepositFailed(address wallet);
     error SaleMintResultInvalid();
+    error NativePrimaryPolicyMismatch(bytes32 expected, bytes32 actual);
+    error NativePrimaryAssignmentUnsupported();
 
     event NativeSaleSettled(
         bytes32 indexed authorizationId,
@@ -63,4 +68,9 @@ interface IStreamFixedPriceSaleAdapter is IERC165 {
     function authorizationId(address artist, bytes32 nonce) external view returns (bytes32);
     function authorizationUsed(address artist, bytes32 nonce) external view returns (bool);
     function cancelAuthorization(bytes32 nonce) external;
+    function revenueResolver() external view returns (IStreamRevenueResolver);
+    function primaryPolicy(uint256 collectionId)
+        external
+        view
+        returns (bytes32 policyHash, bytes32 profileId, address wallet);
 }

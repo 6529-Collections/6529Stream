@@ -28,15 +28,19 @@ LOCK_PATH = Path("requirements-tools.lock")
 WORKFLOW_DIRECTORY = Path(".github/workflows")
 CI_WORKFLOW_PATH = Path(".github/workflows/ci.yml")
 RELEASE_WORKFLOW_PATH = Path(".github/workflows/release-mode.yml")
+MUSEUM_WORKFLOW_PATH = Path(".github/workflows/museum.yml")
 WORKFLOW_PATHS = (
     CI_WORKFLOW_PATH,
     RELEASE_WORKFLOW_PATH,
+    MUSEUM_WORKFLOW_PATH,
 )
 RELEASE_BRANCH_GUARD = "- name: Require protected default branch"
 PROVENANCE_PATHS = (
     DIRECT_REQUIREMENTS_PATH,
     LOCK_PATH,
     *WORKFLOW_PATHS,
+    Path("tools/museum/requirements.txt"),
+    Path("tools/museum/requirements-jsonld.txt"),
     Path("tools/development/check_python_toolchain.py"),
     Path("tools/development/test_python_toolchain.py"),
 )
@@ -160,13 +164,14 @@ WORKFLOW_APPROVED_INSTALL_LINES = {
     RELEASE_WORKFLOW_PATH: {"- name: Install release tooling"},
 }
 WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS = {
-    CI_WORKFLOW_PATH: 5,
+    CI_WORKFLOW_PATH: 6,
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_PYTHON_VERSIONS = {
     CI_WORKFLOW_PATH: (
         PYTHON_VERSION,
         WINDOWS_PYTHON_VERSION,
+        PYTHON_VERSION,
         PYTHON_VERSION,
         PYTHON_VERSION,
         PYTHON_VERSION,
@@ -178,7 +183,7 @@ WORKFLOW_SOLC_SELECT_COUNTS = {
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_EXPECTED_JOB_NAMES = {
-    CI_WORKFLOW_PATH: {"current-stack", "windows-wrapper", "slither-baseline", "foundry", "stream-client", "release-verification"},
+    CI_WORKFLOW_PATH: {"current-stack", "windows-wrapper", "slither-baseline", "foundry", "stream-client-prepare", "stream-client-shards", "stream-client", "release-verification", "repository-checks", "foundry-result"},
     RELEASE_WORKFLOW_PATH: {"release-mode"},
 }
 WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
@@ -199,6 +204,11 @@ WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
             "solc_select": 1,
         },
         "release-verification": {
+            "python_version": PYTHON_VERSION,
+            "playwright": 0,
+            "solc_select": 0,
+        },
+        "repository-checks": {
             "python_version": PYTHON_VERSION,
             "playwright": 0,
             "solc_select": 0,
@@ -444,8 +454,103 @@ def workflow_job_blocks(text: str) -> dict[str, str]:
     return blocks
 
 
+def check_museum_workflow(text: str) -> list[str]:
+    """Validate the separately pinned offline matrix without release-tool exemptions.
+
+    The header fixes triggers, read-only permissions and both Python/OS pairs.
+    Step bodies fix action pins, setup order, exact install and complete offline
+    cohorts. Names/comments can change; added conditions, shells or commands
+    require a policy review. This profile uses version pins, not the tools hash lock.
+    """
+    def significant(block: str) -> str:
+        return "\n".join(line.rstrip() for line in block.splitlines()
+                         if line.strip() and not line.lstrip().startswith("#"))
+
+    expected_header = """\
+name: Museum tooling
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/museum.yml"
+      - "tools/museum/**"
+      - "tools/metadata/**"
+      - "tools/preservation/**"
+      - "test/fixtures/preservation/**"
+      - "smart-contracts/domains/records/StreamReferenceModeDefinitions.sol"
+      - "docs/integrations/reference-metric-package.md"
+      - "schemas/museum/**"
+      - "schemas/records/**"
+      - "test/fixtures/metadata/**"
+      - "docs/museum-*.md"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/museum.yml"
+      - "tools/museum/**"
+      - "tools/metadata/**"
+      - "tools/preservation/**"
+      - "test/fixtures/preservation/**"
+      - "smart-contracts/domains/records/StreamReferenceModeDefinitions.sol"
+      - "docs/integrations/reference-metric-package.md"
+      - "schemas/museum/**"
+      - "schemas/records/**"
+      - "test/fixtures/metadata/**"
+      - "docs/museum-*.md"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: museum-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  offline-tooling:
+    name: Offline museum tooling (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.12.13"
+          - os: windows-latest
+            python: "3.12.10"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40"""
+    expected_steps = (
+        '        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5\n        with:\n          persist-credentials: false',
+        '        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1\n        with:\n          python-version: ${{ matrix.python }}',
+        '        run: |\n          python -m pip install --disable-pip-version-check --only-binary=:all: -r tools/museum/requirements-jsonld.txt',
+        '        run: python -m pip check',
+        '        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile tools.metadata.test_work_definitions tools.metadata.test_owner_notice_profile tools.metadata.test_acquisition_packet_v2 tools.metadata.test_acquisition_packet_v3 tools.metadata.test_acquisition_personhood_v1 tools.metadata.test_acquisition_direct_floor_v1 tools.metadata.test_acquisition_conservation_context_v1 tools.metadata.test_acquisition_packet_v5 tools.metadata.test_acquisition_native_finality_v1 tools.metadata.test_acquisition_packet_v6 tools.metadata.test_acquisition_governance_transactions_v1 -v',
+        '        run: |\n          python -m tools.metadata.rights_profile --check\n          python -m tools.metadata.work_profile --check\n          python -m tools.metadata.rights_definitions --check\n          python -m tools.metadata.work_definitions --check\n          python -m tools.metadata.owner_notice_profile --check\n          python -m tools.metadata.acquisition_packet_v2 --check\n          python -m tools.metadata.acquisition_packet_v3 --check\n          python -m tools.metadata.acquisition_personhood_v1 --check\n          python -m tools.metadata.acquisition_direct_floor_v1 --check\n          python -m tools.metadata.acquisition_conservation_context_v1 --check\n          python -m tools.metadata.acquisition_packet_v5 --check\n          python -m tools.metadata.acquisition_native_finality_v1 --check\n          python -m tools.metadata.acquisition_packet_v6 --check\n          python -m tools.metadata.acquisition_governance_transactions_v1 --check\n          python -m tools.metadata.acquisition_scoped_static_finality_v1 --check\n          python -m tools.metadata.acquisition_packet_v7 --check\n          python -m tools.metadata.acquisition_policy_collection_finality_v2 --check\n          python -m tools.metadata.acquisition_packet_v8 --check',
+        '        run: python -m unittest tools.metadata.test_acquisition_scoped_static_finality_v1 tools.metadata.test_acquisition_packet_v7 -v',
+        '        run: python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v',
+        '        run: python -m unittest tools.metadata.test_acquisition_policy_collection_finality_v2 tools.metadata.test_acquisition_packet_v8 -v',
+        '        run: python -m unittest discover -s tools/museum -t . -p "test_*.py" -v',
+        '        run: python -m tools.museum.schemas --check',
+        '        run: python -m tools.museum.fixtures --check',
+        '        run: python -m tools.museum.review --check',
+        '        run: python -m tools.museum.projection --check',
+        '        run: python -m tools.museum.projection_v2 --check',
+        '        run: python -m tools.museum.premis --check',
+        '        run: python -m tools.museum.iiif_model --check',
+        '        run: python -m tools.museum.lido_model --check',
+        '        run: python -m tools.museum.work_lido_fixture --check',
+    )
+    header, separator, steps = text.partition("    steps:\n")
+    errors = []
+    if not separator or significant(header) != expected_header:
+        errors.append(f"{MUSEUM_WORKFLOW_PATH} must retain the reviewed triggers, permissions and Python matrix")
+    bodies = re.split(r"^      - name: [^\n]+\n", steps, flags=re.MULTILINE)
+    if not bodies or bodies[0].strip() or tuple(significant(body) for body in bodies[1:]) != expected_steps:
+        errors.append(f"{MUSEUM_WORKFLOW_PATH} must retain the reviewed action pins, setup order and complete offline checks")
+    return errors
+
+
 def check_workflow(path: Path, text: str) -> list[str]:
     """Return CI/release workflow policy violations."""
+
+    if path == MUSEUM_WORKFLOW_PATH:
+        return check_museum_workflow(text)
 
     errors: list[str] = []
     setup_ref = f"uses: actions/setup-python@{SETUP_PYTHON_SHA}"
@@ -491,12 +596,15 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 f"{path}:{line_number} flow-style YAML steps are not allowed"
             )
 
-        if not in_literal_run_block and YAML_ANCHOR_ALIAS_RE.search(raw_line):
+        # GitHub expressions are scalar content: && and ! are not YAML anchors
+        # or tags. Keep checking any syntax outside the complete expression.
+        yaml_line = re.sub(r"\$\{\{[^{}\r\n]*\}\}", "EXPRESSION", raw_line)
+        if not in_literal_run_block and YAML_ANCHOR_ALIAS_RE.search(yaml_line):
             errors.append(
                 f"{path}:{line_number} YAML anchors and aliases are not allowed"
             )
 
-        if not in_literal_run_block and YAML_TAG_RE.search(raw_line):
+        if not in_literal_run_block and YAML_TAG_RE.search(yaml_line):
             errors.append(
                 f"{path}:{line_number} YAML tags are not allowed"
             )
@@ -828,6 +936,21 @@ def check_repository(repo_root: Path) -> tuple[list[str], int]:
             errors.append(str(exc))
             continue
         errors.extend(check_workflow(workflow_path, workflow_text))
+
+    # Museum uses a separate exact-version environment; do not silently treat
+    # its requirements include as an unreviewed installer or a hashed lock.
+    for relative, include in (("tools/museum/requirements.txt", None),
+                              ("tools/museum/requirements-jsonld.txt", "-r requirements.txt")):
+        try:
+            lines = [line.strip() for line in (repo_root / relative).read_text(encoding="utf-8").splitlines()
+                     if line.strip() and not line.lstrip().startswith("#")]
+            if include is not None:
+                if not lines or lines.pop(0) != include:
+                    raise ToolchainError(f"{relative} must include only its reviewed local requirements.txt")
+            if not lines or any(re.fullmatch(rf"{NAME_PATTERN}==[A-Za-z0-9_.+!-]+", line) is None for line in lines):
+                raise ToolchainError(f"{relative} must contain exact package version pins only")
+        except (OSError, ToolchainError) as exc:
+            errors.append(str(exc))
 
     checksum_generator = repo_root / "tools" / "release" / "generate_release_checksums.py"
     try:

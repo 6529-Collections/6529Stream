@@ -1,0 +1,79 @@
+============================================== -->
+	<complexType name="LinearRingType">
+		<annotation>
+			<documentation>A LinearRing is defined by four or more coordinate tuples, with linear interpolation between them; the first and last coordinates must be coincident.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractRingType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a linear ring.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this ring, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this ring (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this ring only. The number of direct positions in the list must be at least four.</documentation>
+						</annotation>
+						<choice minOccurs="4" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+						<element ref="gml:coord" minOccurs="4" maxOccurs="unbounded">
+							<annotation>
+								<documentation>Deprecated with GML version 3.0 and included for backwards compatibility with GML 2. Use "pos" elements instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<complexType name="LinearRingPropertyType">
+		<annotation>
+			<documentation>Encapsulates a ring to represent properties in features or geometry collections.</documentation>
+		</annotation>
+		<choice>
+			<element ref="gml:LinearRing"/>
+		</choice>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- 
+	
+	The following types and elements are deprecated and should not be used !
+	
+	-->
+	<!-- =========================================================== -->
+	<element name="polygonProperty" type="gml:PolygonPropertyType">
+		<annotation>
+			<documentation>Deprecated with GML 3.0 and included only for backwards compatibility with GML 2.0. Use "surfaceProperty" instead.
+This property element either references a polygon via the XLink-attributes or contains the polygon element.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="PolygonPropertyType">
+		<annotation>
+			<documentation>This type is deprecated with GML 3 and shall not be used. It is included for backwards compatibility with GML 2. Use SurfacePropertyType instead.
+A property that has a polygon as its value domain can either be an appropriate geometry element encapsulated in an element of this type or an XLink reference to a remote geometry element (where remote includes geometry elements located elsewhere in the same document). Either the reference or the contained element must be given, but neither both nor none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:Polygon"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup">
+			<annotation>
+				<documentation>This attribute group includes the XLink attributes (see xlinks.xsd). XLink is used in GML to reference remote resources (including those elsewhere in the same document). A simple link element can be constructed by including a specific set of XLink attributes. The XML Linking Language (XLink) is currently a Proposed Recommendation of the World Wide Web Consortium. XLink allows elements to be inserted into XML documents so as to create sophisticated links between resources; such links can be used to reference remote properties.
+A simple link element can be used to implement pointer functionality, and this functionality has been built into various GML 3 elements by including the gml:AssociationAttributeGroup.</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- =========================================================== -->
+</schema>

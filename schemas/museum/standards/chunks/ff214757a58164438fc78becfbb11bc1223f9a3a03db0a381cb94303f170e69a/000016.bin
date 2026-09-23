@@ -1,0 +1,95 @@
+bel xml:lang="en">is identified by</rdfs:label>
+    <rdfs:label xml:lang="de">wird bezeichnet als</rdfs:label>
+    <rdfs:label xml:lang="el">αναγνωρίζεται ως</rdfs:label>
+    <rdfs:label xml:lang="fr">est identifié par</rdfs:label>
+    <rdfs:label xml:lang="pt">é identificado por</rdfs:label>
+    <rdfs:label xml:lang="ru">идeнтифицируeтся</rdfs:label>
+    <rdfs:label xml:lang="zh">被标识为</rdfs:label>
+    <rdfs:comment>This property describes the naming or identification of any real-world item by a name or any other identifier.
+This property is intended for identifiers in general use, which form part of the world the model intends to describe, and not merely for internal database identifiers which are specific to a technical system, unless these latter also have a more general use outside the technical context. This property includes in particular identification by mathematical expressions such as coordinate systems used for the identification of instances of E53 Place. The property does not reveal anything about when, where and by whom this identifier was used. A more detailed representation can be made using the fully developed (i.e. indirect) path through E15 Identifier Assignment.
+This property is a shortcut for the path from E1 CRM Entity through P140i was attributed by, E15 Identifier Assignment, P37 assigned to E42 Identifier.
+It is also a shortcut for the path from E1 CRM Entity through P1 is identified by, E41 Appellation, P139 has alternative form to E41 Appellation.</rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E41_Appellation" />
+    <owl:inverseOf rdf:resource="P1i_identifies" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P1i_identifies">
+    <rdfs:label xml:lang="en">identifies</rdfs:label>
+    <rdfs:label xml:lang="de">bezeichnet</rdfs:label>
+    <rdfs:label xml:lang="el">είναι αναγνωριστικό</rdfs:label>
+    <rdfs:label xml:lang="fr">identifie</rdfs:label>
+    <rdfs:label xml:lang="pt">identifica</rdfs:label>
+    <rdfs:label xml:lang="ru">идeнтифицируeт</rdfs:label>
+    <rdfs:label xml:lang="zh">标识</rdfs:label>
+    <rdfs:domain rdf:resource="E41_Appellation" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P1_is_identified_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P2_has_type">
+    <rdfs:label xml:lang="en">has type</rdfs:label>
+    <rdfs:label xml:lang="de">hat den Typus</rdfs:label>
+    <rdfs:label xml:lang="el">έχει τύπο</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour type</rdfs:label>
+    <rdfs:label xml:lang="pt">é do tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тип</rdfs:label>
+    <rdfs:label xml:lang="zh">有类型</rdfs:label>
+    <rdfs:comment>This property allows sub-typing of CIDOC CRM entities –a form of specialisation – through the use of a terminological hierarchy, or thesaurus.
+The CIDOC CRM is intended to focus on the high-level entities and relationships needed to describe data structures. Consequently, it does not specialise entities any further than is required for this immediate purpose. However, entities in the isA hierarchy of the CIDOC CRM may by specialised into any number of sub-entities, which can be defined in the E55 Type hierarchy. E41 Appellation, for example, may be specialised into “e-mail address”, “telephone number”, “post office box”, “URL”, etc., none of which figures explicitly in the CIDOC CRM class hierarchy. A comprehensive explanation about refining CIDOC CRM concepts by E55 Type is given in the section “About Types” in the section on “Specific Modelling Constructs” of this document.
+This property is a shortcut for the path from E1 CRM Entity through P41i was classified by, E17 Type Assignment, P42 assigned to E55 Type.</rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P2i_is_type_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P2i_is_type_of">
+    <rdfs:label xml:lang="en">is type of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Typus von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ο τύπος του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est le type de</rdfs:label>
+    <rdfs:label xml:lang="pt">é o tipo de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся типом</rdfs:label>
+    <rdfs:label xml:lang="zh">是类型</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P2_has_type" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P3_has_note">
+    <rdfs:label xml:lang="en">has note</rdfs:label>
+    <rdfs:label xml:lang="de">hat Anmerkung</rdfs:label>
+    <rdfs:label xml:lang="el">έχει επεξήγηση</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour note</rdfs:label>
+    <rdfs:label xml:lang="pt">tem nota</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт примeчаниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有注释</rdfs:label>
+    <rdfs:comment>This property is a container for all informal descriptions about an object that have not been expressed in terms of CIDOC CRM constructs.
+In particular, it captures the characterisation of the item itself, its internal structures, appearance, etc.
+Like property P2 has type (is type of), this property is a consequence of the restricted focus of the CIDOC CRM. The aim is not to capture, in a structured form, everything that can be said about an item; indeed, the CIDOC CRM formalism is not regarded as sufficient to express everything that can be said. Good practice requires use of distinct note fields for different aspects of a characterisation. The P3.1 has type property of P3 has note allows differentiation of specific notes, e.g. “construction”, “decoration”, etc.
+An item may have many notes, but a note is attached to a specific item.</rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P4_has_time-span">
+    <rdfs:label xml:lang="en">has time-span</rdfs:label>
+    <rdfs:label xml:lang="de">hat Zeitspanne</rdfs:label>
+    <rdfs:label xml:lang="el">βρισκόταν σε εξέλιξη</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour intervalle temporel</rdfs:label>
+    <rdfs:label xml:lang="pt">tem período de tempo</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт врeмeнной интeрвал</rdfs:label>
+    <rdfs:label xml:lang="zh">发生时段是</rdfs:label>
+    <rdfs:comment>This property associates an instance of E2 Temporal Entity with the instance of E52 Time-Span during which it was on-going. The associated instance of E52 Time-Span is understood as the real time-span during which the phenomena making up the temporal entity instance were active. More than one instance of E2 Temporal Entity may share a common instance of E52 Time-Span only if they come into being and end being due to identical declarations or events.</rdfs:comment>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E52_Time-Span" />
+    <owl:inverseOf rdf:resource="P4i_is_time-span_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P4i_is_time-span_of">
+    <rdfs:label xml:lang="en">is time-span of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Zeitspanne von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι χρονικό διάστημα του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est l’intervalle temporel de</rdfs:label>
+    <rdfs:label xml:lang="pt">é o período de tempo de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся врeмeнным интeрвалом</rdfs:label>
+    <rdfs:label xml:lang="zh">是时段</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <owl:inverseOf rdf:resource="P4_has_time-span" />
+  </rdf:Property>
+  <rdf:Property rd

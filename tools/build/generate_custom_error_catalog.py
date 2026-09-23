@@ -366,10 +366,11 @@ TRACEABILITY_BY_CATEGORY = {
         "test/unit/mint/StreamMintModuleRegistry.t.sol",
     ],
     "primary_settlement_safety": [
-        "test/unit/revenue/StreamPrimarySaleSettlement.t.sol",
+        "test/unit/revenue/StreamUniversalSettlement.t.sol",
+        "test/unit/revenue/StreamUniversalSettlementAdversarial.t.sol",
     ],
     "revenue_assignment_safety": [
-        "test/unit/revenue/StreamPrimarySaleSettlement.t.sol",
+        "test/unit/revenue/StreamRevenueAssignments.t.sol",
     ],
     "split_payment_safety": [
         "test/unit/revenue/StreamSplitWallet.t.sol",

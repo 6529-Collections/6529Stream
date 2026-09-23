@@ -1,0 +1,200 @@
+PI](https://linked.art/api/1.0/shared/identifier/) | [Model](https://linked.art/model/base/#identifiers)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Identifier"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "content": {
+                    "$ref": "#/definitions/contentProp"
+                },
+                "part": {
+                    "description": "A list of one or more `Identifier` structures, which are parts of this `Identifier`",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Identifier"
+                    }
+                },
+                "assigned_by": {
+                    "description": "The activity through which this `Identifier` was assigned to the entity",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AttributeAssignment"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "Statement": {
+            "title": "crm:E33_Linguistic_Object",
+            "description": "An embedded, relatively short piece of textual content\nSee: [API](https://linked.art/api/1.0/shared/statement/) | [Model](https://linked.art/model/base/#statements-about-a-resource)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "LinguisticObject"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "content": {
+                    "$ref": "#/definitions/contentProp"
+                },
+                "language": {
+                    "$ref": "#/definitions/languageProp"
+                },
+                "format": {
+                    "$ref": "#/definitions/formatProp"
+                }
+            },
+            "required": [
+                "type",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "TimeSpan": {
+            "title": "crm:E52_Time-Span",
+            "description": "A data structure for recording a span of time\nSee: [API](https://linked.art/api/1.0/shared/timespan/) | [Model](https://linked.art/model/base/#time-span-details)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "TimeSpan"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "begin_of_the_begin": {
+                    "title": "crm:P82a_begin_of_the_begin",
+                    "description": "The earliest possible date-time at which the timespan could have started",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end_of_the_begin": {
+                    "title": "crm:P81a_end_of_the_begin",
+                    "description": "The latest possible date-time at which the timespan could have started",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "begin_of_the_end": {
+                    "title": "crm:P81b_begin_of_the_end",
+                    "description": "The earliest possible date-time at which the timespan could have ended",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end_of_the_end": {
+                    "title": "crm:P82b_end_of_the_end",
+                    "description": "The latest possible date-time at which the timespan could have ended",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "duration": {
+                    "title": "crm:P191_had_duration",
+                    "description": "A `Dimension` that describes the duration of the timespan within any given date-times",
+                    "$ref": "#/definitions/Dimension"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "Dimension": {
+            "title": "crm:E54_Dimension",
+            "description": "A measurable aspect of an entity, with a numeric value, a unit for that value, and a type relative to the entity\nSee: [API](https://linked.art/api/1.0/shared/dimension/) | [Model](https://linked.art/model/object/physical/#dimensions)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Dimension"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "value": {
+                    "$ref": "#/definitions/valueProp"
+                },
+                "lower_value_limit": {
+                    "$ref": "#/definitions/lower_value_limitProp"
+                },
+                "upper_value_limit": {
+                    "$ref": "#/definitions/upper_value_limitProp"
+                },
+                "unit": {
+                    "title": "crm:P91_has_unit",
+                    "description": "Reference to the MeasurementUnit for this dimension",
+                    "$ref": "#/definitions/UnitRef"
+                },
+                "assigned_by": {
+                    "title": "crm:P141i_was_assigned_by",
+                    "description": "The Measurement(s) that led to the assigning of this dimension",
+                    "type": "array",
+        

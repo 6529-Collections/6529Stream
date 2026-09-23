@@ -1,0 +1,70 @@
+
+            <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+                <head>
+                    <title>Error/Maintenance - Authorities &amp; Vocabularies (Library of Congress)</title>
+                    <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>
+                    <link type="text/css" media="screen" rel="stylesheet" href="http://id.loc.gov/static/css/2010/loc_standard_v2.css"/>
+                </head>
+                <body>
+                    <div id="container">
+                        <a id="skip" href="#skip_menu">skip navigation</a>
+                        <div id="branding">
+                            <h2>Library of Congress</h2>
+                            <h3>Authorities &amp; Vocabularies</h3>
+                        </div>
+                        <!-- begin id:topnav -->
+                        <div id="topnav">
+                            <ul id="menu">
+                                <li id="logo_lc">
+                                    <a title="The Library of Congress" href="http://www.loc.gov"/>
+                                </li>
+                                <li id="global_nav"><a href="http://www.loc.gov/rr/askalib/"><img src="http://id.loc.gov/static/images/header/ask_librarian.gif" 
+                                alt="Ask a Librarian" width="101" height="40"/></a><a href="http://www.loc.gov/library/libarch-digital.html"><img 
+                                src="http://id.loc.gov/static/images/header/digital_collections.gif" alt="Digital Collections" width="119" height="40"/></a><a 
+                                href="http://catalog.loc.gov/"><img src="http://id.loc.gov/static/images/header/library_catalog.gif" alt="Library Catalogs" width="111" 
+                                height="40"/></a></li>
+                                <li id="searchmenu">
+                                    <form action="http://www.loc.gov/fedsearch/metasearch/" method="get">
+                                        <div>
+                                            <input type="text" name="cclquery" maxlength="250"/>
+                                            <input class="button" id="search_button" name="search_button"
+                                                type="submit" value="GO"/>
+                                            <a href="http://www.loc.gov/search/more_search.html">Options</a>
+                                        </div>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="crumb_nav">
+                            <a href="http://www.loc.gov">The Library of Congress</a>
+                            <span> &gt; </span>
+                            <a href="/">Authorities &amp; Vocabularies</a>
+                        </div>
+                        <!-- end id:topnav -->
+                        <div id="content">
+                            <div id="main_body_full">
+                                <div id="page_head" class="w_742">
+                                    <span id="skip_menu" style="width: 100%;"><!-- --></span>
+                                    <h1 class="oneline">Authorities and Vocabularies</h1>
+                                </div>
+                                <br/>
+                                <div
+                                    style="position: relative; width: 100%; height: 30 px; border: 2px solid red; background-color: #FFFF00; color: #FF0000; text-align: center"><h1 style="color: #FF0000;">LC Authority and Vocabulary Service Error/Maintenance!</h1><br/> 
+                                    You have either encountered an error or the ID.LOC.GOV service is under
+                                    maintenance.  
+                                    <br/>
+                                    If you believe this to be an error, please check/post the ID.LOC.GOV listserv
+                                    for more information.
+                                    <br/> 
+                                    Full service will be restored as soon as possible. Thank
+                                    you for your patience. 
+                                    <br/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+            </html>
+            

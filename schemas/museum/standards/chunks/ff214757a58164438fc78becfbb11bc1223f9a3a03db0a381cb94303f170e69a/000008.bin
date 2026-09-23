@@ -1,0 +1,95 @@
+e respective product.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E73_Information_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E30_Right">
+    <rdfs:label xml:lang="en">Right</rdfs:label>
+    <rdfs:label xml:lang="de">Recht</rdfs:label>
+    <rdfs:label xml:lang="el">Δικαίωμα</rdfs:label>
+    <rdfs:label xml:lang="fr">Droit</rdfs:label>
+    <rdfs:label xml:lang="pt">Direitos</rdfs:label>
+    <rdfs:label xml:lang="ru">Право</rdfs:label>
+    <rdfs:label xml:lang="zh">权限</rdfs:label>
+    <rdfs:comment>This class comprises legal privileges concerning material and immaterial things or their derivatives.
+These include reproduction and property rights.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E89_Propositional_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E31_Document">
+    <rdfs:label xml:lang="en">Document</rdfs:label>
+    <rdfs:label xml:lang="de">Dokument</rdfs:label>
+    <rdfs:label xml:lang="el">Τεκμήριο</rdfs:label>
+    <rdfs:label xml:lang="fr">Document</rdfs:label>
+    <rdfs:label xml:lang="pt">Documento</rdfs:label>
+    <rdfs:label xml:lang="ru">Докумeнт</rdfs:label>
+    <rdfs:label xml:lang="zh">文献</rdfs:label>
+    <rdfs:comment>This class comprises identifiable immaterial items that make propositions about reality.
+These propositions may be expressed in text, graphics, images, audiograms, videograms, or by other similar means. Documentation databases are regarded as instances of E31 Document. This class should not be confused with the concept “document” in Information Technology, which is compatible with E73 Information Object.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E73_Information_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E32_Authority_Document">
+    <rdfs:label xml:lang="en">Authority Document</rdfs:label>
+    <rdfs:label xml:lang="de">Referenzdokument</rdfs:label>
+    <rdfs:label xml:lang="el">Πηγή Καθιερωμένων Όρων</rdfs:label>
+    <rdfs:label xml:lang="fr">Document de référence</rdfs:label>
+    <rdfs:label xml:lang="pt">Documento de Referência</rdfs:label>
+    <rdfs:label xml:lang="ru">Официальный Докумeнт</rdfs:label>
+    <rdfs:label xml:lang="zh">规范文档</rdfs:label>
+    <rdfs:comment>This class comprises encyclopaedia, thesauri, authority lists and other documents that define terminology or conceptual systems for consistent use.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E31_Document" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E33_Linguistic_Object">
+    <rdfs:label xml:lang="en">Linguistic Object</rdfs:label>
+    <rdfs:label xml:lang="de">Sprachlicher Gegenstand</rdfs:label>
+    <rdfs:label xml:lang="el">Γλωσσικό Αντικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet linguistique</rdfs:label>
+    <rdfs:label xml:lang="pt">Objeto Lingüístico</rdfs:label>
+    <rdfs:label xml:lang="ru">Лингвистичeский Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">语言对象</rdfs:label>
+    <rdfs:comment>This class comprises identifiable expressions in natural language or languages.
+Instances of E33 Linguistic Object can be expressed in many ways: e.g. as written texts, recorded speech, or sign language. However, the CIDOC CRM treats instances of E33 Linguistic Object independently from the medium or method by which they are expressed. Expressions in formal languages, such as computer code or mathematical formulae, are not treated as instances of E33 Linguistic Object by the CIDOC CRM. These should be modelled as instances of E73 Information Object.
+In general, an instance of E33 Linguistic Object may also contain non-linguistic information, often of artistic or aesthetic value. Only in cases in which the content of an instance of E33 Linguistic Object can completely be expressed by a series of binary-encoded symbols, its content may be documented within a respective knowledge base by the property P190 has symbolic content: E62 String. Otherwise, it should be understood as an identifiable digital resource only available independently from the respective knowledge base.
+In other cases, such as pages of an illuminated manuscript or recordings containing speech in a language supported by a writing system, the linguistic part of the content of an instance of E33 Linguistic Object may be documented within a respective knowledge base in a note by P3 has note: E62 String. Otherwise, it may be described using the property P165 incorporates (is incorporated in): E73 Information Object as a different object with its own identity.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E73_Information_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E33_E41_Linguistic_Appellation">
+    <rdfs:label xml:lang="en">Linguistic Appellation</rdfs:label>
+    <rdfs:subClassOf rdf:resource="E33_Linguistic_Object" />
+    <rdfs:subClassOf rdf:resource="E41_Appellation" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E34_Inscription">
+    <rdfs:label xml:lang="en">Inscription</rdfs:label>
+    <rdfs:label xml:lang="de">Inschrift</rdfs:label>
+    <rdfs:label xml:lang="el">Επιγραφή</rdfs:label>
+    <rdfs:label xml:lang="fr">Inscription</rdfs:label>
+    <rdfs:label xml:lang="pt">Inscrição</rdfs:label>
+    <rdfs:label xml:lang="ru">Надпись</rdfs:label>
+    <rdfs:label xml:lang="zh">题识</rdfs:label>
+    <rdfs:comment>This class comprises recognisable texts that can be attached to instances of E24 Physical Human-Made Thing.
+The transcription of the text can be documented in a note by P3 has note: E62 String. The alphabet used can be documented by P2 has type: E55 Type. This class is not intended to describe the idiosyncratic characteristics of an individual physical embodiment of an inscription, but the underlying prototype. The physical embodiment is modelled in the CIDOC CRM as instances of E24 Physical Human-Made Thing.
+The relationship of a physical copy of a book to the text it contains is modelled using E18 Physical Thing. P128 carries (is carried by): E33 Linguistic Object.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E33_Linguistic_Object" />
+    <rdfs:subClassOf rdf:resource="E37_Mark" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E35_Title">
+    <rdfs:label xml:lang="en">Title</rdfs:label>
+    <rdfs:label xml:lang="de">Titel</rdfs:label>
+    <rdfs:label xml:lang="el">Τίτλος</rdfs:label>
+    <rdfs:label xml:lang="fr">Titre</rdfs:label>
+    <rdfs:label xml:lang="pt">Título</rdfs:label>
+    <rdfs:label xml:lang="ru">Названиe</rdfs:label>
+    <rdfs:label xml:lang="zh">题名</rdfs:label>
+    <rdfs:comment>This class comprises the textual strings that within a cultural context can be clearly identified as titles due to their form. Being a subclass of E41 Appellation, E35 Title can only be used when such a string is actually used as a title of a work, such as a text, an artwork, or a piece of music.
+Titles are proper noun phrases or verbal phrases, and should not be confused with generic object names such as “chair”, “painting”, or “book” (the latter are common nouns that stand for instances of E55 Type). Titles may be assigned by the creator of the work itself, or by a social group.
+This class also comprises the translations of titles that are used as surrogates for the original titles in different social contexts.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E33_Linguistic_Object" />
+    <rdfs:subClassOf rdf:resource="E41_Appellation" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E36_Visual_Item">
+    <rdfs:label xml:lang="en">Visual Item</rdfs:label>
+    <rdfs:label xml:lang="de">Bildliches</rdfs:label>
+    <rdfs:label xml:lang="el">Οπτικό Στοιχείο</rdfs:label>
+    <rdfs:label xml:lang="fr">Entité visuelle</rdfs:label>
+    <rdfs:label xml:lang="pt">Item Visual</rdfs:label>
+    <rdfs:label xml:lang="ru">Визуальный Прeдмeт</rdfs:label>
+    <rdfs:label xml:lang="zh">可视项</rdfs:label>
+    <rdfs:comment>This class comprises the intellectual or conceptual aspects of recognisable marks and images.
+This class doe

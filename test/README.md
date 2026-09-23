@@ -1,12 +1,16 @@
 # Test map
 
-Run the current product first:
+After the current build, prepare its generated graph fixtures and run the
+current product tests first:
 
 ```text
+python scripts/dev.py build
+python scripts/dev.py prepare-graph
 python scripts/dev.py test
 ```
 
-This selects the `current` profile and integration suites under `test/current`.
+See [graph fixture preparation](../docs/tooling.md#current-graph-fixture-preparation)
+for cached-input ownership and regeneration. The test command selects the `current` profile and integration suites under `test/current`.
 They wire actual permanent Core, governance, canonical registry, sale/auction,
 artist attribution, entropy, metadata, ERC-20 payments, state exports and split wallets. Start here to understand
 a complete transaction.
@@ -14,8 +18,10 @@ a complete transaction.
 | Path | Responsibility | Command |
 | --- | --- | --- |
 | `current/` | Product, adversarial flow and catalog replacement integration | `python scripts/dev.py test` |
+| `current/StreamCurrentSafeBatch.t.sol` | Official Safe all-CALL purchase/reveal/custody and cross-component rollback | `python scripts/dev.py test --match-contract StreamCurrentSafeBatchTest` |
 | `current/StreamCurrentStackFuzz.t.sol`, `current/StreamCurrentStackInvariant.t.sol` | Varied signed inputs and dependent handler sequences | `python scripts/dev.py campaign --mode quick --seed 0x6529` |
 | `unit/<domain>/` | Current contract/library behavior and focused target components | `python scripts/dev.py test --suite unit` |
+| `unit/metadata/StreamTokenContentTree.t.sol`, `unit/finality/StreamFinalityHostAdapter.t.sol` | Independent content-root vectors, fuzzing and fixed-host boundary/Safe reads | Select `StreamTokenContentTreeTest` or `StreamFinalityHostAdapterTest` in the unit suite |
 | `regression/legacy/<domain>/` | Earlier behavior whose import closure reaches LegacyStreamCore | `python scripts/dev.py test --suite legacy` |
 | `gas/` | Scenario snapshots and gas budgets | `python scripts/dev.py test --suite gas` |
 | `helpers/`, `mocks/`, `fixtures/` | Shared setup, adversarial collaborators and vectors | Imported by suites |
@@ -45,6 +51,15 @@ mock-only proof when a failure depends on real contracts interacting. Preserve
 legacy regressions while that implementation remains supported; do not present
 them as current API proof. Interface refactors preserve public ABI and advertised
 ERC-165 IDs, including aggregate interfaces.
+
+Reusable setup belongs in an abstract fixture with no `test*` entrypoints.
+New profile suites should inherit that fixture, rather than another concrete
+test suite: otherwise every inherited case becomes another expensive compile
+and execution target. The Artist Guardian and RecoveredAuthority fixtures keep
+their original test bodies in their named suites; generation, dispute,
+collaborator and unbound profiles reuse only setup/state/helpers. When extracting
+a fixture, preserve storage order, constructor/override dispatch and every
+original test body; retain separate named cohorts for the moved entrypoints.
 
 Fixture files are inputs, not credentials. The [full validation command](../docs/tooling.md)
 adds Python policy tests, reproducible artifacts and release checks. Run it at the

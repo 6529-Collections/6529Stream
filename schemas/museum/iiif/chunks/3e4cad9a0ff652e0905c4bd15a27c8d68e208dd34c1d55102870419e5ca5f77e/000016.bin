@@ -1,0 +1,97 @@
+fc">may</em> have the <code class="language-plaintext highlighter-rouge">service</code> property with at least one item.<br />
+Clients <em class="rfc">may</em> process <code class="language-plaintext highlighter-rouge">service</code> on any resource type, and <em class="rfc">should</em> process the <abbr title="International Image Interoperability Framework">IIIF</abbr> Image <abbr title="Application Programming Interface">API</abbr> service.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"service"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/service"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ExampleExtensionService"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/docs/service"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>For cross-version consistency, this specification defines the following values for the <code class="language-plaintext highlighter-rouge">type</code> or <code class="language-plaintext highlighter-rouge">@type</code> property for backwards compatibility with other <abbr title="International Image Interoperability Framework">IIIF</abbr> APIs. Future versions of these APIs will define their own types. These <code class="language-plaintext highlighter-rouge">type</code> values are necessary extensions for compatibility of the older versions.</p>
+
+<table class="api-table" id="table-service-types">
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Specification</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ImageService1</td>
+      <td><a href="/api/image/1.1/" title="Image API 1.1">Image <abbr title="Application Programming Interface">API</abbr> version 1</a></td>
+    </tr>
+    <tr>
+      <td>ImageService2</td>
+      <td><a href="/api/image/2.1/" title="Image API 2.1">Image <abbr title="Application Programming Interface">API</abbr> version 2</a></td>
+    </tr>
+    <tr>
+      <td>SearchService1</td>
+      <td><a href="/api/search/1.0/">Search <abbr title="Application Programming Interface">API</abbr> version 1</a></td>
+    </tr>
+    <tr>
+      <td>AutoCompleteService1</td>
+      <td><a href="/api/search/1.0/#autocomplete">Search <abbr title="Application Programming Interface">API</abbr> version 1</a></td>
+    </tr>
+    <tr>
+      <td>AuthCookieService1</td>
+      <td><a href="/api/auth/1.0/#access-cookie-service" title="IIIF Authentication Cookie Service">Authentication <abbr title="Application Programming Interface">API</abbr> version 1</a></td>
+    </tr>
+    <tr>
+      <td>AuthTokenService1</td>
+      <td><a href="/api/auth/1.0/#access-token-service" title="IIIF Authentication Access Token Service">Authentication <abbr title="Application Programming Interface">API</abbr> version 1</a></td>
+    </tr>
+    <tr>
+      <td>AuthLogoutService1</td>
+      <td><a href="/api/auth/1.0/#logout-service" title="IIIF Authentication Logout Service">Authentication <abbr title="Application Programming Interface">API</abbr> version 1</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Implementations <em class="rfc">should</em> be prepared to recognize the <code class="language-plaintext highlighter-rouge">@id</code> and <code class="language-plaintext highlighter-rouge">@type</code> property names used by older specifications, as well as <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code>. Note that the <code class="language-plaintext highlighter-rouge">@context</code> key <em class="rfc">should not</em> be present within the <code class="language-plaintext highlighter-rouge">service</code>, but instead included at the beginning of the document. The example below includes both version 2 and version 3 <abbr title="International Image Interoperability Framework">IIIF</abbr> Image <abbr title="Application Programming Interface">API</abbr> services.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"service"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"@id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif2/image1/identifier"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"@type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ImageService2"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/image/2/level2.json"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif3/image1/identifier"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ImageService3"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"level2"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="services">
+        
+        
+          services <a href="#services" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A list of one or more service definitions on the top-most resource of the document, that are typically shared by more than one subsequent resource. This allows for these shared services to be collected together in a single place, rather than either having their information duplicated potentially many times throughout the document, or requiring a consuming client to traverse the entire document structure to find the information. The resource that the service applies to <em class="rfc">must</em> still have the <code class="language-plaintext highlighter-rouge">service</code> property, as described above, where the service resources have at least the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> or <code class="language-plaintext highlighter-rouge">@id</code> and <code class="language-plaintext highlighter-rouge">@type</code> properties. This allows the client to know that the service applies to that resource. Usage of the <code class="language-plaintext highlighter-rouge">services</code> property is at the discretion of the publishing system.</p>
+
+<p>A client encountering a <code class="language-plaintext highlighter-rouge">service</code> property where the definition consists only of an <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> <em

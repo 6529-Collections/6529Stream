@@ -1,0 +1,1993 @@
+{
+  "schemaVersion": 1,
+  "capture": "reference-modes-abi40",
+  "compilerVersion": "0.8.19",
+  "sourceCommit": "dfe75d52a2baa3fc394b0a94140565cd3ce850f4",
+  "sourceCount": 127,
+  "inputSha256": "d8c2ec0ad23d30802f2f5d36a63c20a608a370449e449b281daeccb8f27a149f",
+  "outputSha256": "57a037664968f7d7f0ac96c7583732bff23d6f37edc550a5361327417c6c8f9b",
+  "sourceBinding": "All 127 literal input sources independently verified byte-for-byte against this Git commit.",
+  "qualification": "Frozen source and ABI evidence only; no whole publisher, actual Safe, complete gas-envelope, genesis or release acceptance.",
+  "sources": {
+    "smart-contracts/domains/finality/StreamChunkedContentEvidence.sol": "44aeff8b4f612e5c1b8cc6f724c3f12ae77bc7f2c2af4e1b181bb6359caafbd5",
+    "smart-contracts/domains/finality/StreamContentRootSchemas.sol": "7d9ed6db560ed0786e0e328839bdf21996ec3c7940f245b079c71984a4a9f3a9",
+    "smart-contracts/domains/finality/StreamFinalityRouterEvidence.sol": "8106f837ae00229c4af7c7665033832b20564b699b6a80125feea5fd18a6c805",
+    "smart-contracts/domains/finality/StreamFinalitySnapshotReads.sol": "5a87daa716f3bce3439d2b06d7d239e3fdcc4fac562e737353224439ee516fd8",
+    "smart-contracts/domains/finality/StreamOnchainContentBytes.sol": "01c5987826275057eedc996bbbe2cba514dc14c87e9d43e397faca98be2e0c89",
+    "smart-contracts/domains/metadata/StreamMetadataRecoveryRoutes.sol": "fb9ee1c2b7c4a7da06fa99f0cfa8b1a1604cf78baf7913f1b8a06e9a69e3c4c7",
+    "smart-contracts/domains/metadata/StreamMetadataRenderer.sol": "c57e7736cd31c276bd16a189cfb26edab75dd882ff7622f0d09f84609fe3b3a0",
+    "smart-contracts/domains/metadata/StreamMetadataSubjects.sol": "a60608b0c1b311b5053cad175d8979cf0718a5e8c5b1b2bf1acffa928fb3a711",
+    "smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol": "a162258ace7233828bc96a1e0bfb7eed2f8365f7e81b416bb3ce5a035285b5ad",
+    "smart-contracts/domains/parameters/StreamGasParameterHost.sol": "09932d1df58cd555e29ad43e7bc562a88da5bc4b8588b8207b4867cdb7ad1552",
+    "smart-contracts/domains/preservation/StreamReferenceDependencyReads.sol": "49a303ba53861b38c4fc05a2994fd2b2dee7a6e38913f37b7970bb91b6127121",
+    "smart-contracts/domains/preservation/StreamReferenceInventoryPreparation.sol": "f3fd5a3fa4f414549d44666814dadf67405e0eef6bf27a93c9e985fdc0d3dfa3",
+    "smart-contracts/domains/preservation/StreamReferenceMetricProof.sol": "455faa8fd98d69f529a52a6c4732a19c942c2188a77aaba27e52ab2e0b5685f3",
+    "smart-contracts/domains/preservation/StreamReferenceMetricStorage.sol": "e12a12538d42e1eba355bbbd864d62629cf3d210a5ddda2c14785e7417f0c405",
+    "smart-contracts/domains/preservation/StreamReferenceModeCurated.sol": "d1457f65b9a374a11221b8562eed05b1635e550d761a91110294f1956b61fe55",
+    "smart-contracts/domains/preservation/StreamReferenceModeDefinitionsRead.sol": "d7499199d441b6500d6cc8d5ad5467cc5b6001d13eb2706f5f57ae99dbbdc16a",
+    "smart-contracts/domains/preservation/StreamReferenceModePreparation.sol": "eb9f3249865b8630adc9ce7d9af0e1768a87f51e62bee7bd9f713d1d26ac2092",
+    "smart-contracts/domains/preservation/StreamReferenceModeProof.sol": "5762b4c79dc03db147761702a5debaf539587529908d5c45e83dbdbc2bf3544b",
+    "smart-contracts/domains/preservation/StreamReferenceModePublication.sol": "9b5c188e866448c9baaaef8f3f301fc613fe55c70da7995fdfc621abacd30cf4",
+    "smart-contracts/domains/preservation/StreamReferenceModeReads.sol": "fb387b7b4a4571294fb0826f1485b4def3eb7a8d63341733cc0660d4a1bdf630",
+    "smart-contracts/domains/preservation/StreamReferenceModeStateReads.sol": "3a78f9b94e736774a6c369a9e9ed874a1764d537f530f1ccbf33b3db24814efb",
+    "smart-contracts/domains/preservation/StreamReferenceRenderPreparation.sol": "25aba0b294b8702217a5bb2f6fa09c2259a9ce538465bf0dfaddabfb48d2ccb9",
+    "smart-contracts/domains/preservation/StreamReferenceRenderPublication.sol": "ef00cbeaec86f90f3ba4f48dd5922ae57dcf2f8bb3d907087be2c2c64b44e4b6",
+    "smart-contracts/domains/preservation/StreamReferenceRenderRecordReads.sol": "965ef3a999bd8d384f191bdef367941495fd51955b8bbd4709df4603f816c5bb",
+    "smart-contracts/domains/preservation/StreamReferenceRenderSourceReads.sol": "1b32a7e3e86eebcda2ca6229832cd0335ab59c9b868d7b016a1890e3fc2a8615",
+    "smart-contracts/domains/records/StreamArtistIntentJson.sol": "49749df9f86ba661d213f4a73741fce2ea9d14a7c1a8b73318a5196b8c7309d7",
+    "smart-contracts/domains/records/StreamChunkedSnapshotDefinitions.sol": "75017994d5d3979a29fabf8cec334450d43e52181c1d6b1e1c02273224fdea34",
+    "smart-contracts/domains/records/StreamCollectionRecordHashes.sol": "6839c5af226cb0c00aa0fcdd696f5d98ebd8aa68868a901ce09ce8a071d922dd",
+    "smart-contracts/domains/records/StreamConservationDefinitions.sol": "441085d2d76a0e55b2627623b69ae65850b92b9939be7b569cbe3e623e87c255",
+    "smart-contracts/domains/records/StreamConservationRecordFields.sol": "3127ffd0a932a01be46c700236ee3af034b7b61e439094844af8adc7e48f4311",
+    "smart-contracts/domains/records/StreamRecordArtistIdentityReads.sol": "eb8e8e38d65621eabf06f1ba75d2fcc21ff87cf6064e46d1a1a051642b143ed4",
+    "smart-contracts/domains/records/StreamRecordFamilies.sol": "823f8cfc331e8a33da05be8956cf7f10aec7f050db546229308d84780a6369df",
+    "smart-contracts/domains/records/StreamRecordJson.sol": "3f5ea80a1e6c7866fde9fc8a457e6ea780214e11dbe93fae85049a9ccef856bd",
+    "smart-contracts/domains/records/StreamReferenceEnvironmentJson.sol": "36eb18c16c3f3715833dffd757f3b5351cd136a214d62539916276e93d48dd16",
+    "smart-contracts/domains/records/StreamReferenceManifestJson.sol": "b8f152ea756eb11b2b805eeecc46f5149623f55d53a63fea13a34f5450f658ac",
+    "smart-contracts/domains/records/StreamReferenceMetricDefinitions.sol": "8fdea1a99dbceaa6feeb3b574fce638fe39dbb4bdf403219adeeb34c16fe5f66",
+    "smart-contracts/domains/records/StreamReferenceModeDefinitions.sol": "c732cf059469bbfeee6d8fa9d42d1b32b9791ec6aed2f10fed144851fe8c1a70",
+    "smart-contracts/domains/records/StreamReferenceRenderDefinitionReads.sol": "b16bee6159c4855a3bab8ebf55da7ccf810fa4232f0070a6bc3bf9628e52bd82",
+    "smart-contracts/domains/records/StreamReferenceRenderDefinitions.sol": "6a8ea56328f29589560859238677bbaef2ae4ab058aa34ec5a1d746d12e2407a",
+    "smart-contracts/domains/records/StreamReferenceRendererCatalog.sol": "f79bdfa3b1b41a80d189bb6693cfa1a855f6582a97cb1890d29e6a6ef7f7606c",
+    "smart-contracts/domains/records/StreamSnapshotDefinitions.sol": "92c6c1dbc0d1142573acddbcc6c21798290932bf485218d5b965008522e3e5ce",
+    "smart-contracts/domains/records/StreamSnapshotManifestBytes.sol": "d3ab6e12fe6a6c8f855b507f39039ed93ae4bda7bbc2b0c1a52aa038f5ff9248",
+    "smart-contracts/domains/records/StreamSnapshotManifestJson.sol": "8e9e2fd9c995a6e700e540c05dce2532358ca5a88890d9754bdba97b67e2d1c4",
+    "smart-contracts/domains/records/StreamSnapshotSourceReads.sol": "c7721ea2f228efa1c52e9c71a5f2ae661279b263e8e47b2a33a4599e389b619d",
+    "smart-contracts/domains/records/StreamWorkFormatJson.sol": "99c68352816773b2a5013c6ca08e481f2f5a3344ad330287ec35d19698cc78bc",
+    "smart-contracts/domains/records/StreamWorkRecordContext.sol": "6f35b3febe52e953e929b1d0cce89b95ee45e7d849371457acb6dfa3ec1ba9ae",
+    "smart-contracts/domains/records/StreamWorkRecordDefinitions.sol": "552864ce1d1fb981273ff707c7ce9c1e063b2f0cb0fda6b1d18846828b182f04",
+    "smart-contracts/domains/records/StreamWorkRecordFields.sol": "3b897365b513fd2048810e580be7881e72a1063fea5a3d77e717d07dea8dfa1c",
+    "smart-contracts/domains/records/StreamWorkRecordJson.sol": "65aaaf155f7f76cdf4800dda9cff1a6b92ff09dfca5fcd406fc5b64256a998a4",
+    "smart-contracts/interfaces/stream/access/IStreamAdmins.sol": "90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistAttributionOwner.sol": "c4801c6a6e9a61c042c3b2ba4a1d25eb1a20f1fe79872aae13a7edb506ba0ad6",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistBindingOwner.sol": "f0641d44b37216fe3568d67e33f4bd01fe867c11b51cd800eb368af9c28238c6",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistFinalityBinding.sol": "d6283f769a71e4c1b36e66b3b31bb97a607b8f1717797f68d312462f4bf71038",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistIdentityOwner.sol": "bfe03e6aeea9bc8c3b840b69dbdb52f734a9440b69355ea7410039696ddf6c82",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistIngressBinding.sol": "cd43842207f74906de79cd36acdc9390d701a21f592f9c2c8f79103f6e1be068",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistOwner.sol": "e29c23394151db76ecc885a26ea22f38f4c9618b241d95165ce8b4de7089c71e",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistRecordPublicationOwner.sol": "3f02fc2bffabb3982b27350a3211024508eb90ecede1f614587981b9aafe1687",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistSuiteReads.sol": "ce6bd40af1c3dbdf79bb797dfb08f4918b5c31ec6d6eeb4ed923512bf3823bb1",
+    "smart-contracts/interfaces/stream/artist/StreamArtistOnboardingTypes.sol": "caadd0e470cb744fb7bcc7980597b629ba0ea8871eb6d6dd691973f329014321",
+    "smart-contracts/interfaces/stream/artist/StreamArtistRecordPublicationTypes.sol": "2d04b12f628e11159289bbac81af3471d090e5df97d96c421a4e6a3fc4f8f590",
+    "smart-contracts/interfaces/stream/artist/StreamArtistRotationTypes.sol": "92a54c6dfb349929b3bc138925725659bdb6d082108a0381d013f7fdaeaca840",
+    "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol": "8a5ce0c442d2f9b29b81bf53696da483cc44f61e2af1b7f78f902f43df685046",
+    "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol": "5adc232448975b2cd3835206647384866d313b6b5047db4c6a8f90c84d9de252",
+    "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol": "018244ade20202342ff4a998b0005527208a7f5127d091df64626b7fba38c7ed",
+    "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": "d3971717024317891effbb623d6ee4351427d7ba7e6ceed0f79630b5565d3a55",
+    "smart-contracts/interfaces/stream/core/StreamCoreTypes.sol": "89b899592a917e72408082d2bf240b97b232463dba5d4d94a5b6ffe718b5c911",
+    "smart-contracts/interfaces/stream/dependencies/IDependencyRegistry.sol": "51bcc84c717b83338933bd4fd8fa8ade48be1b6d9a4d130ac002b87e43977c53",
+    "smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol": "07eec7049003b2cd046f382d4f66cf3cf04400e71c6340a201bd7098d6b49561",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityComponents.sol": "9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRecovery.sol": "3ebe8fc25eaf9e0683f54d4ba157a8df1177122ffdfac2d9d7bf5fd1c9c4349a",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol": "826bfcf8ee17490294ff2e90067281544e92ab5a2ca08c13bffaf65639538677",
+    "smart-contracts/interfaces/stream/finality/IStreamChunkedContentCheckpoint.sol": "faa8f8b3e01f680da687d5ee85b48e4622212b178bfcfefbd9748a333b679dd9",
+    "smart-contracts/interfaces/stream/finality/IStreamContentLeafManifest.sol": "65238eff45c5fc751bb8d2d8c73d664af541e2d20f25c3257dd8b14cefae0582",
+    "smart-contracts/interfaces/stream/finality/IStreamFinalityDeploymentBindings.sol": "37b60e7bb30cf014c694b6185883d8307944d2c4a5cb38e6ba87462681e38c8c",
+    "smart-contracts/interfaces/stream/finality/IStreamFinalityHostAdapter.sol": "916ddee5a0fe31bd70c297f61066dad6f5219985e516d35927fee66357b7fe43",
+    "smart-contracts/interfaces/stream/finality/IStreamFinalityRecoveryServingBindings.sol": "f9ed97759a83af3abcd9b1a8f4f027bffd4bf8bbb58df9b89b6adb6f29be7c81",
+    "smart-contracts/interfaces/stream/finality/IStreamOnchainContentCheckpoint.sol": "f2e295ffdcaa2dd61b3394c6f557a33f7df050a6b76c255cbdf36f5fb3a1f134",
+    "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol": "caeda7b29efd6ee23db0aabd754c0cc1d20eb95428e6f42e7366a9dd7a4cbc7f",
+    "smart-contracts/interfaces/stream/finality/StreamFinalityCoordinatorPolicyTypes.sol": "c42ee8f285c1d4f7f1e7664935631c2082dbb906d6215898e4cbc44966e8cde4",
+    "smart-contracts/interfaces/stream/finality/StreamFinalityEvidenceTypes.sol": "cd75e022c3e2407a6e27613f1ee3e85cad70929ed9e69e8b6ad38ab02743f3c4",
+    "smart-contracts/interfaces/stream/finality/StreamFinalityRecoveryTypes.sol": "255983341e3bb18831cbd836f6257e2f6f91e69f46f7bd347f4d641b0073d7bf",
+    "smart-contracts/interfaces/stream/finality/StreamFinalitySnapshotTypes.sol": "6b7826ff02af8c3808bb5218e31092bd2d9fe2e177933b08a88bf05d71f8cb0d",
+    "smart-contracts/interfaces/stream/legacy/entropy/IRandomizerLifecycle.sol": "8be92ab4ee63f74c716c662d90f1a5e30ab78ff20c033ae7343deaece3ac6f06",
+    "smart-contracts/interfaces/stream/metadata/IStreamCollectionAttestations.sol": "0589e44bfca949f58f6c89f2936f5451cca86d4829c3420a2c8be9e8d67e322a",
+    "smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol": "ea23c5205b287d8c473448fcf31347d9a3ba7ab7d554dbf4704caf45b6183a43",
+    "smart-contracts/interfaces/stream/metadata/IStreamCollectionRecordReceipts.sol": "f99baed9d964c756c41ec5d48ac4a9115a6f337d53613bffc1ac6dbcdd028660",
+    "smart-contracts/interfaces/stream/metadata/IStreamCollectionSnapshots.sol": "4484990eda31c6d05534323bfe0793b72e0bb37944424d2c3e3f844d2d343d98",
+    "smart-contracts/interfaces/stream/metadata/IStreamConservationRecordSelection.sol": "fa35c9b5f8aaa7f643dc4a12d95ba17a13d1c5c7ce8a1097e1a7f35f64c26c49",
+    "smart-contracts/interfaces/stream/metadata/IStreamContentRootPublication.sol": "19989cf55f717264a25571c0b9e746a6dfe2fda33e1fa83ae881669c758e622c",
+    "smart-contracts/interfaces/stream/metadata/IStreamMetadataRenderingProfile.sol": "7793d82c5433de6d1ae900b1009182ce4424bd068ed3a9077200f496d911ba8b",
+    "smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol": "a858388864ad6dc5512ccc05c151773e1a1f4af86817a0916c5ca3b7ec257536",
+    "smart-contracts/interfaces/stream/metadata/IStreamMetadataRouterBinding.sol": "aef2c5072976b67a983b7600b842a5544c16c39447335791da5a26acf6de417d",
+    "smart-contracts/interfaces/stream/metadata/IStreamMetadataServingFacts.sol": "cdaafe9f3856710374ac08d43b11aab07f6dab908e2d9af8441412d0552c3ff8",
+    "smart-contracts/interfaces/stream/metadata/IStreamSchemaDocumentFacts.sol": "004e47eb9941f74513225e1b38c13990a1a30ebedb9237dc8328c49f728be5cb",
+    "smart-contracts/interfaces/stream/metadata/IStreamSchemaRegistry.sol": "e05fbd4c3321524333d208ecf5a9221f2dccb9a7f1dc1f2e770699e035f2eb5c",
+    "smart-contracts/interfaces/stream/metadata/IStreamScriptBundles.sol": "7a1edfb0b675c8db5cc551e517228d09212b5bf822cc1cc65a1937a518c25f0c",
+    "smart-contracts/interfaces/stream/metadata/IStreamWorkRecordSelection.sol": "7e59cf0e74d29c03eed4a6fc991316df3ac422a5c633d78d20125f4d994cb7bf",
+    "smart-contracts/interfaces/stream/metadata/StreamCollectionManifestTypes.sol": "2e59593ad917a0a46fe6bd033cf3e917948bc52245a3f8e0192c84096299fd22",
+    "smart-contracts/interfaces/stream/metadata/StreamConservationRecordTypes.sol": "9dac2147ece0cb500b7a6c7f3292dfd4a556ff50f41279b6c169dff20d7f9ad1",
+    "smart-contracts/interfaces/stream/metadata/StreamSnapshotTypes.sol": "8d1dc3406e7898c4feec56d0963f1d24dfe1e5dece490f624c1ab9f025ebe5fc",
+    "smart-contracts/interfaces/stream/metadata/StreamTokenContentTypes.sol": "e04c7fdcf585af47145d4b51ae7f65b88cb0069965a4af70721f0c55df5b09f0",
+    "smart-contracts/interfaces/stream/metadata/StreamWorkRecordTypes.sol": "d3d440b1867174fc0dc22e7550fe4cbede2a3daa37562de273e1fed1ba4eec16",
+    "smart-contracts/interfaces/stream/modules/IStreamModule.sol": "62832b63a673d119eec5619856f5089591100cc8cbd049fea33f365659b65c8a",
+    "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol": "1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7",
+    "smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol": "a50e29b292e8d93068617548806aab531bb7595cbce9ce3127f9b05f2572951f",
+    "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol": "d8e32f79e4dbb7a072c00efd112bdc7d9edce45e91026654d89c5c2ec3608731",
+    "smart-contracts/interfaces/stream/preservation/IStreamExternalArtifactCoverage.sol": "4a31b7ce30a892de631f3916859af6a80fb840e5b8d32b8f39f40696ca9eeef8",
+    "smart-contracts/interfaces/stream/preservation/IStreamExternalArtifactCurrentPair.sol": "b36cafde690ce5813cdf7a8905332c6e18c6cc557dd5270e8c325130a03c1d83",
+    "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol": "699e2dd62061702633d00a5e70afde86b00da36b76f5259aad384ebe82b92ef6",
+    "smart-contracts/interfaces/stream/preservation/IStreamReferenceEnvironmentPreparation.sol": "8241ca0dd2905c7298d6a23f68e06849ea6b0dca48d9a219abd7fe9942c4626f",
+    "smart-contracts/interfaces/stream/preservation/IStreamReferenceInventoryPreparation.sol": "f31a7598f11400163cfd79b8f9de269857ff9c062f08c977cf10bf17cf87cb7b",
+    "smart-contracts/interfaces/stream/preservation/IStreamReferenceMetricSupplement.sol": "7dcc5d8345bf390349c8b982d617876074d13335c7f045900c703e976d4d8c70",
+    "smart-contracts/interfaces/stream/preservation/IStreamReferenceModePublication.sol": "3f63f9db841ecfec86e62690086fd7e408508a0cfd5299b13010acce64c1175c",
+    "smart-contracts/interfaces/stream/preservation/IStreamReferenceRenderPublication.sol": "e371776aa720e911e4f1f47c2b61445c461f009b5a6239eec58fa8b0199a8f34",
+    "smart-contracts/interfaces/stream/preservation/StreamArchivalTypes.sol": "a908d04e1d1b77f9f077301d6ebb22e0a448b2883da04ef9dedd8989318f3539",
+    "smart-contracts/interfaces/stream/preservation/StreamExternalArtifactTypes.sol": "7c4d848ab6a54e8ef4ecdc1c219a15903e54ded26dcf417c3f1b02f06eb1dae4",
+    "smart-contracts/interfaces/stream/preservation/StreamReferenceMetricTypes.sol": "54cc4eb30a8bd84fd7a5a530ca74bfca638136b5bdee55648d64d47511340c40",
+    "smart-contracts/interfaces/stream/preservation/StreamReferenceModeTypes.sol": "9408af4f007f427f1f91809f2ab71be0ad0816048bde53afb0bef0774e4567a7",
+    "smart-contracts/interfaces/stream/preservation/StreamReferenceRenderTypes.sol": "f7d8300942f235cb4dabd5c397b7f01659267f1ab02ccc4f4119063564a6d3af",
+    "smart-contracts/libraries/SSTORE2.sol": "8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb",
+    "smart-contracts/vendor/openzeppelin/Base64.sol": "fd4b111803de39b774b62e902b6c6d3edb30861fb26c09a0551b87c1a138fbcf",
+    "smart-contracts/vendor/openzeppelin/IERC165.sol": "92762629f91532d937e795ceee7391d5e4e9db0ca8eba233da3dd1e95ce9d792",
+    "smart-contracts/vendor/openzeppelin/Math.sol": "d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21",
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol": "aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429",
+    "smart-contracts/vendor/openzeppelin/Strings.sol": "fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2",
+    "test/helpers/ReferenceEnvironmentJsonFrozen.sol": "428e7640412d9815488b5cda5eee1f06883ac991507b625e57eaab8debbd8e7f",
+    "test/unit/preservation/StreamReferenceEnvironmentPreparation.t.sol": "f471110dfb39f5904407516b117e6aae012833710cfc5051811f5ae9a3ce2496"
+  },
+  "selections": {
+    "host": {
+      "source": "smart-contracts/domains/preservation/StreamReferenceRenderPublication.sol",
+      "contract": "StreamReferenceRenderPublication",
+      "methods": [
+        "prepareEnvironment",
+        "prepareFileInventory",
+        "prepareFileInventoryPart",
+        "prepareFileInventoryFromParts",
+        "preparedFileInventory",
+        "deploymentChainId",
+        "dependencies",
+        "supportsInterface"
+      ],
+      "events": [
+        "ReferenceEnvironmentPrepared",
+        "ReferenceInventoryPartPrepared",
+        "ReferenceInventoryAssembled"
+      ]
+    },
+    "modeHost": {
+      "source": "smart-contracts/domains/preservation/StreamReferenceModePublication.sol",
+      "contract": "StreamReferenceModePublication",
+      "methods": [
+        "prepareEnvironment",
+        "prepareFileInventory",
+        "prepareFileInventoryPart",
+        "prepareFileInventoryFromParts",
+        "preparedFileInventory",
+        "deploymentChainId",
+        "dependencies",
+        "supportsInterface"
+      ],
+      "events": [
+        "ReferenceEnvironmentPrepared",
+        "ReferenceInventoryPartPrepared",
+        "ReferenceInventoryAssembled"
+      ]
+    },
+    "companion": {
+      "source": "smart-contracts/interfaces/stream/preservation/IStreamReferenceEnvironmentPreparation.sol",
+      "contract": "IStreamReferenceEnvironmentPreparation",
+      "full": true
+    },
+    "environmentJson": {
+      "source": "smart-contracts/domains/records/StreamReferenceEnvironmentJson.sol",
+      "contract": "StreamReferenceEnvironmentJson",
+      "full": true
+    },
+    "store": {
+      "source": "smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol",
+      "contract": "StreamSchemaDocumentStore",
+      "methods": [
+        "MAX_CHUNK_BYTES",
+        "chunk",
+        "publishChunk"
+      ],
+      "events": [
+        "ChunkPublished"
+      ]
+    }
+  },
+  "abis": {
+    "host": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "environmentId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceEnvironmentPrepared",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "inventoryId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "rowCount",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceInventoryAssembled",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "partId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "rowCount",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceInventoryPartPrepared",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "dependencies",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address[7]",
+                "name": "targets",
+                "type": "address[7]"
+              },
+              {
+                "internalType": "bytes32[7]",
+                "name": "codeHashes",
+                "type": "bytes32[7]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "rendererCatalogId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "rendererCatalogHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "rendererCatalogBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "readGas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sourceGas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "snapshotGas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "archiveGas",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Dependencies",
+            "name": "d",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "deploymentChainId",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "objectHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "coverageHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "manifestBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "engineVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "engineExecutableSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "toolchainSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineExecutablePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainPath",
+                "type": "string"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "packageFiles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "platformPrerequisites",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystem",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystemVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "architecture",
+                "type": "string"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportWidth",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportHeight",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint8",
+                "name": "devicePixelRatio",
+                "type": "uint8"
+              },
+              {
+                "internalType": "string",
+                "name": "colorSpace",
+                "type": "string"
+              },
+              {
+                "internalType": "bool",
+                "name": "softwareRasterization",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "captureProfile",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "licenseNote",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Environment",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "name": "prepareEnvironment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "rows",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          }
+        ],
+        "name": "prepareFileInventory",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "name": "prepareFileInventoryFromParts",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "name": "prepareFileInventoryPart",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "preparedFileInventory",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "id",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      }
+    ],
+    "modeHost": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "environmentId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceEnvironmentPrepared",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "inventoryId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "rowCount",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceInventoryAssembled",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "partId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "rowCount",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceInventoryPartPrepared",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "dependencies",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address[7]",
+                "name": "targets",
+                "type": "address[7]"
+              },
+              {
+                "internalType": "bytes32[7]",
+                "name": "codeHashes",
+                "type": "bytes32[7]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "rendererCatalogId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "rendererCatalogHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "rendererCatalogBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "readGas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sourceGas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "snapshotGas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "archiveGas",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Dependencies",
+            "name": "d",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "deploymentChainId",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "objectHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "coverageHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "manifestBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "engineVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "engineExecutableSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "toolchainSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineExecutablePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainPath",
+                "type": "string"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "packageFiles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "platformPrerequisites",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystem",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystemVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "architecture",
+                "type": "string"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportWidth",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportHeight",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint8",
+                "name": "devicePixelRatio",
+                "type": "uint8"
+              },
+              {
+                "internalType": "string",
+                "name": "colorSpace",
+                "type": "string"
+              },
+              {
+                "internalType": "bool",
+                "name": "softwareRasterization",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "captureProfile",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "licenseNote",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Environment",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "name": "prepareEnvironment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "rows",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          }
+        ],
+        "name": "prepareFileInventory",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "name": "prepareFileInventoryFromParts",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "name": "prepareFileInventoryPart",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "preparedFileInventory",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "id",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      }
+    ],
+    "companion": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "environmentId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "contentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "byteLength",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferenceEnvironmentPrepared",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "objectHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "coverageHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "manifestBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "engineVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "engineExecutableSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "toolchainSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineExecutablePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainPath",
+                "type": "string"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "packageFiles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "platformPrerequisites",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystem",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystemVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "architecture",
+                "type": "string"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportWidth",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportHeight",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint8",
+                "name": "devicePixelRatio",
+                "type": "uint8"
+              },
+              {
+                "internalType": "string",
+                "name": "colorSpace",
+                "type": "string"
+              },
+              {
+                "internalType": "bool",
+                "name": "softwareRasterization",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "captureProfile",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "licenseNote",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Environment",
+            "name": "environment",
+            "type": "tuple"
+          }
+        ],
+        "name": "prepareEnvironment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "environmentId",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "interfaceId",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "environmentJson": [
+      {
+        "inputs": [],
+        "name": "InvalidReferenceRender",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "internalType": "uint64",
+                "name": "byteSize",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sha256Digest",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+            "name": "rows",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "relative",
+            "type": "bool"
+          }
+        ],
+        "name": "files",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "out",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "objectHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "coverageHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "manifestBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "engineVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "engineExecutableSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "toolchainSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineExecutablePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainPath",
+                "type": "string"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "packageFiles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "platformPrerequisites",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystem",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystemVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "architecture",
+                "type": "string"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportWidth",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportHeight",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint8",
+                "name": "devicePixelRatio",
+                "type": "uint8"
+              },
+              {
+                "internalType": "string",
+                "name": "colorSpace",
+                "type": "string"
+              },
+              {
+                "internalType": "bool",
+                "name": "softwareRasterization",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "captureProfile",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "licenseNote",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Environment",
+            "name": "e",
+            "type": "tuple"
+          }
+        ],
+        "name": "manifest",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "objectHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "coverageHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "manifestBytes",
+                "type": "uint32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "engineVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "engineExecutableSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "toolchainSha256",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "engineExecutablePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "toolchainPath",
+                "type": "string"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "packageFiles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "path",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "byteSize",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sha256Digest",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamReferenceRenderTypes.PackageFile[]",
+                "name": "platformPrerequisites",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystem",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "operatingSystemVersion",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "architecture",
+                "type": "string"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportWidth",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "viewportHeight",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint8",
+                "name": "devicePixelRatio",
+                "type": "uint8"
+              },
+              {
+                "internalType": "string",
+                "name": "colorSpace",
+                "type": "string"
+              },
+              {
+                "internalType": "bool",
+                "name": "softwareRasterization",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "captureProfile",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "licenseNote",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StreamReferenceRenderTypes.Environment",
+            "name": "e",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "packageJSON",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes",
+            "name": "platformJSON",
+            "type": "bytes"
+          }
+        ],
+        "name": "manifestWithAuthenticatedFiles",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      }
+    ],
+    "store": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "pointer",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "length",
+            "type": "uint32"
+          }
+        ],
+        "name": "ChunkPublished",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "MAX_CHUNK_BYTES",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "name": "chunk",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "pointer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "length",
+            "type": "uint32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes",
+            "name": "payload",
+            "type": "bytes"
+          }
+        ],
+        "name": "publishChunk",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "pointer",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  }
+}

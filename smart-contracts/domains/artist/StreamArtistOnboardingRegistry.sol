@@ -1,0 +1,2241 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveredHydrationTypes as Recovered
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
+import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+
+import {
+    StreamArtistRecoveryRewindTypes as RewindTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
+import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
+import { StreamArtistRegistryAuxiliaryEncoding } from "./StreamArtistRegistryAuxiliaryEncoding.sol";
+import { StreamArtistStaticProjectionTransport } from "./StreamArtistStaticProjectionTransport.sol";
+import { StreamArtistStaticDisplay } from "./StreamArtistStaticDisplay.sol";
+import { StreamArtistStaticCalls } from "./StreamArtistStaticCalls.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+
+import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
+import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
+import { StreamArtistRegistryInterfaces } from "./StreamArtistRegistryInterfaces.sol";
+import "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    StreamArtistAuthorityHydrationTypes as AH
+} from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    IStreamArtistHistory,
+    IStreamArtistHistoryCoordinator,
+    StreamArtistHistoryTypes as H
+} from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
+import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentHostEvidence.sol";
+import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import {
+    StreamArtistStewardCapabilityTypes as SC
+} from "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG,
+    IStreamArtistStewardSanctionGrantCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
+import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
+import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
+import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
+import {
+    IStreamArtistRecoveryActionOwner,
+    IStreamArtistRecoveryActionCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
+import {
+    StreamArtistRecoveryActionTypes as RecoveryAction
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
+import {
+    IStreamArtistIdentityRecoveryV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
+import {
+    StreamArtistRecoveryEvidenceTypes as RecoveryEvidence
+} from "../../interfaces/stream/artist/StreamArtistRecoveryEvidenceTypes.sol";
+import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
+
+import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistRegistryWriterExtension.sol";
+import "./StreamArtistRegistryReadExtension.sol";
+import "./StreamArtistRegistryFinalityReadExtension.sol";
+import "./StreamArtistRegistryExtensionDeployment.sol";
+import "./StreamArtistFinalityReadDeployment.sol";
+import "./StreamArtistEstateCoverage.sol";
+import "../../interfaces/stream/artist/IStreamArtistCommercialAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistRecordPublication.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionState.sol";
+import {
+    IStreamArtistContentAuthority
+} from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistDelegation.sol";
+import "../../interfaces/stream/artist/IStreamArtistBindingLifecycle.sol";
+import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorLifecycle.sol";
+
+import "./StreamArtistOnboardingCoordinator.sol";
+import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentRatification.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateMutationAuthority.sol";
+import "../modules/StreamModuleBase.sol";
+import "../parameters/StreamGasParameterHost.sol";
+import {
+    StreamArtistOnboardingTypes as T
+} from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
+
+/// @notice Immutable artist ingress and composed reads for the supported first-sale profile.
+/// @dev The facade is the EIP712 registry identity. Semantic state stays in its separate owners.
+///      This subset does not advertise the full artist lifecycle or legacy nomination API.
+contract StreamArtistOnboardingRegistry is
+    IStreamArtistOnboarding,
+    IStreamArtistReconstruction,
+    IStreamArtistHistory,
+    IStreamArtistDormancy,
+    IStreamArtistStewardCapabilities,
+    IStreamArtistDormancyEvidence,
+    SG,
+    IStreamArtistMintConsent,
+    IStreamArtistAttribution,
+    IStreamArtistContentRatification,
+    IStreamArtistEconomicsAuthority,
+    IStreamArtistTemplateEconomicsAuthority,
+    IStreamArtistTemplateMutationAuthority,
+    IStreamArtistDelegation,
+    IStreamArtistBindingLifecycle,
+    IStreamArtistBeneficiaryFacts,
+    IStreamArtistCollaboratorLifecycle,
+    IStreamArtistAuthorizationRevocation,
+    IStreamArtistContentAuthority,
+    IStreamArtistContentHostEvidence,
+    IStreamArtistIdentityRevision,
+    IStreamArtistRotation,
+    IStreamArtistWindows,
+    IStreamArtistSaleAuthority,
+    IStreamArtistAttributionState,
+    IStreamArtistIdentityContest,
+    IStreamArtistSuccessionRecords,
+    IStreamArtistIdentityDismissal,
+    IStreamArtistIdentityRecovery,
+    IStreamArtistIdentityRecoveryV2,
+    IStreamArtistEstateActivation,
+    IStreamArtistEstateBinding,
+    IStreamArtistCommercialAuthority,
+    IStreamArtistRecordPublication,
+    IStreamArtistFinalityBinding,
+    IStreamArtistSanction,
+    IStreamArtistSanctionConfirmation,
+    IStreamArtistUnavailability,
+    IStreamArtistRecoveryApproval,
+    IStreamArtworkFinalityComponent,
+    IStreamArtworkScopedFinalityComponent,
+    StreamModuleBase,
+    StreamGasParameterHost
+{
+    address public immutable override(IStreamArtistMintConsent, IStreamArtistAttribution) core;
+    address public immutable override mintManager;
+    address public immutable operationCoordinator;
+    address public immutable registryWriterExtension;
+    address public immutable registryReadExtension;
+    address public immutable registryFinalityReadExtension;
+    address public immutable override archivalCoverage;
+    bytes32 public immutable override archivalCoverageCodeHash;
+    bytes32 public immutable override archivalCoverageConfigurationHash;
+
+    function recordEntropyUnavailabilityFinding(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function entropyUnavailabilityFindingContext(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external view returns (U.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function entropyUnavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.FindingRecord memory, EU.Admission memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function verifyEntropyRecoveryUnavailability(
+        address coordinator,
+        IStreamEntropyFreshRecovery.RecoveryInput calldata input,
+        bytes32 intentHash,
+        bytes32 expectedFinding
+    ) external view returns (bool, bytes32, bytes32, uint64) {
+        _forwardFinalityRead();
+    }
+
+    function recordUnavailabilityFinding(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function unavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.FindingRecord memory, U.Admission memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function unavailabilityFindingContext(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external view returns (U.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function verifyRecoveryUnavailability(U.Target calldata target)
+        external
+        view
+        returns (bool, bytes32, bytes32, uint64)
+    {
+        _forwardFinalityRead();
+    }
+
+    function recordArtistSanction(Q.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recordRecoveryApproval(Approval.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recoveryApprovalDigest(Recovery.ApprovalTerms calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function recoveryApprovalRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.ApprovalRecord memory, Approval.Admission memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function verifyRecoveryApproval(
+        uint256 collectionId,
+        bytes32 originalHash,
+        bytes32 manifestHash
+    ) external view returns (bool, bytes32, address, uint8) {
+        _forwardFinalityRead();
+    }
+
+    function confirmSanctionFinalized(uint256 collectionId) external {
+        _forwardRegistryWriter();
+    }
+
+    function prepareArtistSanction(Q.Request calldata p) external view returns (Q.Prepared memory) {
+        _forwardFinalityRead();
+    }
+
+    function sanctionDigest(S.Terms calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function sanctionRecord(bytes32 recordHash) external view returns (S.Record memory) {
+        _forwardFinalityRead();
+    }
+
+    function sanctionArchiveBytes(bytes32 recordHash) external view returns (bytes memory) {
+        _forwardFinalityRead();
+    }
+
+    function sanctionArchiveFacts(bytes32 recordHash)
+        external
+        view
+        returns (IStreamArtistSanctionArchiveFacts.Facts memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function collectionSanctionComponentType(uint256 collectionId) external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
+
+    function verifySanctionForSubject(
+        uint8 scopeType,
+        uint256 collectionId,
+        uint256 tokenId,
+        bytes32 scopeId,
+        bytes32 subject
+    ) external view returns (bool, bytes32, address, uint8) {
+        _forwardFinalityRead();
+    }
+
+    function finalityState(uint256 collectionId)
+        external
+        view
+        returns (StreamFinalityComponentState memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function finalityStateForScope(StreamFinalityScope calldata scope)
+        external
+        view
+        returns (StreamFinalityComponentState memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function finalityRegistry() external view returns (address) {
+        _forwardFinalityRead();
+    }
+
+    function finalityRegistryCodeHash() external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
+
+    constructor(
+        address core_,
+        address manager_,
+        address coordinator_,
+        address governance_,
+        address archivalCoverage_,
+        bytes32 deploymentHash,
+        string memory manifestURI,
+        bytes32 manifestHash,
+        address extensionFactory_,
+        address[3] memory extensions_
+    )
+        StreamModuleBase(
+            keccak256("6529stream.artist-onboarding.v1"),
+            address(0),
+            deploymentHash,
+            manifestURI,
+            manifestHash
+        )
+        StreamGasParameterHost(governance_)
+    {
+        if (
+            core_.code.length == 0 || manager_.code.length == 0 || coordinator_ == address(0)
+                || coordinator_ == address(this) || core_ == manager_
+        ) revert T.InvalidBinding();
+        core = core_;
+        mintManager = manager_;
+        operationCoordinator = coordinator_;
+        archivalCoverageConfigurationHash =
+            StreamArtistEstateCoverage.admit(core_, manager_, governance_, archivalCoverage_);
+        archivalCoverage = archivalCoverage_;
+        archivalCoverageCodeHash = archivalCoverage_.codehash;
+        StreamArtistExtensionAdmission.registry(
+            extensionFactory_, extensions_, address(this), coordinator_
+        );
+        registryWriterExtension = extensions_[0];
+        registryReadExtension = extensions_[1];
+        registryFinalityReadExtension = extensions_[2];
+        _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
+        _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
+        _registerGasParameter(
+            GasParameterConfig("ARTIST_RECORD_PUBLICATION_READ_GAS", 400_000, 150_000, 2)
+        );
+        _registerGasParameter(
+            GasParameterConfig("ARTIST_ARCHIVAL_COVERAGE_READ_GAS", 400_000, 250_000, 2)
+        );
+        _registerGasParameter(GasParameterConfig("ARTIST_FINALITY_READ_GAS", 2_000_000, 500_000, 2));
+    }
+
+    function streamModuleType() public pure override returns (bytes32) {
+        return keccak256("ARTIST_REGISTRY");
+    }
+
+    function streamModuleVersion() public pure override returns (bytes32) {
+        return keccak256("6529stream.artist-onboarding.v1");
+    }
+
+    function streamModuleInterfaceId() public pure override returns (bytes4) {
+        return type(IStreamArtistMintConsent).interfaceId;
+    }
+
+    function recordPreimageBytes(bytes32 hash) external view override returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function storedPayloadCount() external view override returns (uint256) {
+        _forwardRegistryRead();
+    }
+
+    function storedPayloadAt(uint256 index)
+        external
+        view
+        override
+        returns (address, bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function supportsInterface(bytes4 id)
+        public
+        view
+        override(StreamModuleBase, IERC165)
+        returns (bool)
+    {
+        return StreamArtistRegistryInterfaces.supportsArtistInterface(id)
+            || super.supportsInterface(id);
+    }
+
+    function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function requestEstateActivation(Estate.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function cancelEstateActivation(bytes32 artistId, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function executeEstateActivation(Estate.Execution calldata p) external {
+        _forwardRegistryWriter();
+    }
+
+    function estateActivationDigest(Estate.Request calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateActivationState(bytes32 artistId)
+        external
+        view
+        returns (address, uint64, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateActivationRecord(bytes32 record)
+        external
+        view
+        returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateActivationNonceHint(bytes32 artistId, address successor)
+        external
+        view
+        returns (uint256)
+    {
+        _forwardRegistryRead();
+    }
+
+    function currentAuthorityCapabilities(bytes32 artistId)
+        external
+        view
+        returns (Estate.AuthorityCapabilities memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateAccelerationContext(Estate.Execution calldata p)
+        external
+        view
+        returns (Estate.AccelerationContext memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function collectionArtistAuthority(uint256 collectionId)
+        external
+        view
+        returns (bytes32, uint64, bytes32, address, uint8, uint8, uint32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function recordSuccessorDesignation(Succ.Designation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recordEstateDirective(
+        Succ.Directive calldata p,
+        T.Authorization calldata a,
+        Succ.PublicDocument calldata document
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function successorDesignation(bytes32 artistId)
+        external
+        view
+        returns (address, uint8, uint32, bytes32, bytes32, uint256)
+    {
+        _forwardRegistryRead();
+    }
+
+    function operativeSuccessorRecord(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function operativeEstateDirective(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function successorDesignationRecord(bytes32 record)
+        external
+        view
+        returns (Succ.DesignationRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateDirectiveRecord(bytes32 record)
+        external
+        view
+        returns (Succ.DirectiveRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateDirectivePayload(bytes32 record) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function successorDesignationDigest(Succ.Designation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateDirectiveDigest(Succ.Directive calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function previewEstateDirectivePayload(
+        uint32 granted,
+        uint32 forbidden,
+        Succ.PublicDocument calldata document
+    ) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function registerIdentityRecoveryActionV3(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recoverArtistIdentityV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryContextV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function identityRecoveryEvidenceStateV3(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RewindTypes.EvidenceStateV3 memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function registerIdentityRecoveryActionV2(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recoverArtistIdentityV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryContextV2(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function identityRecoveryEvidenceState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RecoveryEvidence.EvidenceStateV2 memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function registerIdentityRecoveryAction(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function vetoIdentityRecovery(bytes32 artistId, bytes32 reasonHash) external {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryActionState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RecoveryAction.Association memory, RecoveryAction.Veto memory, bytes32, uint64)
+    {
+        _forwardFinalityRead();
+    }
+
+    function recoverArtistIdentity(IdentityRecovery.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryContext(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function identityRecoveryRecord(bytes32 record)
+        external
+        view
+        returns (IdentityRecovery.Record memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function latestIdentityRecovery(bytes32 artistId) external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
+
+    function dismissArtistIdentityContest(Dismissal.Request calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityContestDismissalContext(Dismissal.Request calldata p)
+        external
+        view
+        returns (Dismissal.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function currentIdentityContestCause(bytes32 artistId)
+        external
+        view
+        returns (Dismissal.Cause memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function identityContestCause(bytes32 causeHash)
+        external
+        view
+        returns (Dismissal.Cause memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function identityContestDismissalRecord(bytes32 recordHash)
+        external
+        view
+        returns (Dismissal.Record memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function latestIdentityContestDismissal(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function identityTransitionClosure(bytes32 artistId, bytes32 transitionRecordHash)
+        external
+        view
+        returns (Dismissal.Closure memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function identityRevisionContinuation(bytes32 continuationHash)
+        external
+        view
+        returns (Dismissal.RevisionContinuation memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function contestArtistIdentity(
+        bytes32 artistId,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityContestRecord(bytes32 record) external view returns (Contest.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function latestIdentityContest(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function identityContestGovernanceContext(
+        bytes32 artistId,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash
+    ) external view returns (bytes32, bytes32, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function saleConsentDigest(Sale.Consent calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function saleConsentScope(uint256 collectionId) external view returns (uint8) {
+        return StreamArtistSaleOperations.scope(_contentSuite(), collectionId);
+    }
+
+    /// @notice Stored evidence only, independent of its current applicability.
+    function isSaleConsented(uint256 collectionId, bytes32 saleId, bytes32 saleConfigHash)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return StreamArtistSaleOperations.isConsented(
+            _contentSuite(), collectionId, saleId, saleConfigHash
+        );
+    }
+
+    function requireSaleConsent(uint256 collectionId, bytes32 saleId, bytes32 saleConfigHash)
+        external
+        view
+    {
+        StreamArtistSaleOperations.requireConsent(
+            _contentSuite(), msg.sender, collectionId, saleId, saleConfigHash
+        );
+    }
+
+    function saleConsentRecord(bytes32 recordHash) external view returns (Sale.Record memory) {
+        _returnAuxiliaryRead();
+    }
+
+    function requireRecordPublication(bytes32 recordHash, P.Publication calldata publication)
+        external
+        view
+        returns (P.Evidence memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    /// @notice Permissionless derivative checkpoint; the fixed Identity owner validates maturity.
+    function checkpointStaticIdentityMaturity(bytes32 artistId) external returns (bytes32) {
+        return StreamArtistStaticProjectionTransport.checkpoint(operationCoordinator, artistId);
+    }
+
+    /// @notice Additive closed display transport. The linked worker is called by STATICCALL,
+    /// not Solidity's library dispatch, and its owner reads never enter delegatecall codecs.
+    function staticDisplayRead(bytes calldata originalCalldata)
+        external
+        view
+        returns (bytes memory)
+    {
+        address target = address(StreamArtistStaticDisplay);
+        address coordinator = operationCoordinator;
+        bytes4 selector = StreamArtistStaticDisplay.read.selector;
+        bytes4 failed = StreamArtistStaticCalls.StaticArtistReadFailed.selector;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            mstore(pointer, selector)
+            mstore(add(pointer, 4), coordinator)
+            mstore(add(pointer, 36), 64)
+            mstore(add(pointer, 68), originalCalldata.length)
+            let padded := and(add(originalCalldata.length, 31), not(31))
+            mstore(add(add(pointer, 100), originalCalldata.length), 0)
+            calldatacopy(add(pointer, 100), originalCalldata.offset, originalCalldata.length)
+            let output := add(pointer, and(add(add(padded, 100), 31), not(31)))
+            let ok := 0
+            if gt(gas(), 12000) {
+                ok := staticcall(sub(gas(), 10000), target, pointer, add(100, padded), output, 704)
+            }
+            let size := returndatasize()
+            let length := mload(add(output, 32))
+            let malformed := or(lt(size, 64), gt(size, 704))
+            malformed := or(malformed, iszero(eq(mload(output), 32)))
+            malformed := or(malformed, or(gt(length, 640), and(length, 31)))
+            malformed := or(malformed, iszero(eq(size, add(64, length))))
+            if or(iszero(ok), malformed) {
+                mstore(pointer, failed)
+                mstore(add(pointer, 4), target)
+                revert(pointer, 36)
+            }
+            // Canonical outer bytes result is already the exact facade return.
+            return(output, size)
+        }
+    }
+
+    function collectionArtistState(uint256 collectionId)
+        external
+        view
+        returns (
+            uint8 attributionState,
+            uint64 bindingGeneration,
+            bytes32 artistId,
+            uint8 authorityStatus,
+            bytes32 bindingHash
+        )
+    {
+        bytes memory out = StreamArtistSaleOperations.attributionStateEncoded(
+            _contentSuite(), collectionId
+        );
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function recordIdentityRevision(
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function setArtistGuardians(R.GuardianSet calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function rotateArtistAddress(
+        R.Rotation calldata p,
+        T.Authorization calldata oldAuthorization,
+        T.Authorization calldata newAuthorization
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function approveArtistRotation(bytes32 artistId, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function vetoArtistRotation(bytes32 artistId, bytes32 expected, bytes32 reasonHash) external {
+        _forwardRegistryWriter();
+    }
+
+    function executeArtistRotation(bytes32 artistId, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function revokePriorAddressStanding(R.StandingRevocation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function guardianSetDigest(R.GuardianSet calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function rotationDigest(R.Rotation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function rotationAcceptanceDigest(R.Rotation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function standingRevocationDigest(R.StandingRevocation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function _rotationOwner() private view returns (IStreamArtistRotationOwner) {
+        return IStreamArtistRotationOwner(_contentSuite().owners[2]);
+    }
+
+    function guardianSet(bytes32 artistId)
+        external
+        view
+        returns (address[] memory, uint32, uint64, bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function pendingRotation(bytes32 artistId)
+        external
+        view
+        returns (address, address, uint64, uint32, bytes32)
+    {
+        return _rotationOwner().pendingRotation(artistId);
+    }
+
+    function priorAddressStandingRevoked(bytes32 artistId, address account)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return _rotationOwner().priorAddressStandingRevoked(artistId, account);
+    }
+
+    function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord memory) {
+        _forwardRegistryRead();
+    }
+
+    function rotationRecord(bytes32 record) external view returns (R.RotationRecord memory) {
+        _forwardRegistryRead();
+    }
+
+    function standingRevocationRecord(bytes32 record)
+        external
+        view
+        returns (R.StandingRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistTransitionState(bytes32 record)
+        external
+        view
+        returns (R.TransitionState memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function lastArtistTransition(bytes32 artistId) external view returns (bytes32) {
+        return _rotationOwner().lastArtistTransition(artistId);
+    }
+
+    function identityRevisionProvisionalAssociation(bytes32 record)
+        external
+        view
+        returns (R.ProvisionalAssociation memory)
+    {
+        return _rotationOwner().identityRevisionProvisionalAssociation(record);
+    }
+
+    function payoutDesignationProvisionalAssociation(bytes32 record)
+        external
+        view
+        returns (R.ProvisionalAssociation memory)
+    {
+        _returnAuxiliaryRead();
+    }
+
+    function activeAuthorityWindow(bytes32 artistId) external view returns (bytes32, uint64, bool) {
+        return _rotationOwner().activeAuthorityWindow(artistId);
+    }
+
+    function rotationAcceptanceNonceState(bytes32 artistId, address account, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        return _rotationOwner().rotationAcceptanceNonceState(artistId, account, nonce);
+    }
+
+    function artistWindowInfo(bytes32 parameter) external view returns (uint64, uint64, uint64) {
+        return IStreamArtistWindows(address(_rotationOwner())).artistWindowInfo(parameter);
+    }
+
+    function artistWindowScope(bytes32 parameter) external view returns (bytes32) {
+        return IStreamArtistWindows(address(_rotationOwner())).artistWindowScope(parameter);
+    }
+
+    function artistWindowStateHash(bytes32 parameter, uint64 value, uint64 revision)
+        external
+        view
+        returns (bytes32)
+    {
+        return IStreamArtistWindows(address(_rotationOwner()))
+            .artistWindowStateHash(parameter, value, revision);
+    }
+
+    function setArtistWindow(bytes32 parameter, uint64 value, uint64 expectedRevision) external {
+        _forwardRegistryWriter();
+    }
+
+    function identityRevisionDigest(
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function _identityOwner() private view returns (IStreamArtistIdentityRevisionOwner) {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistIdentityRevisionOwner(s.owners[2]);
+    }
+
+    function operativeIdentityRecord(bytes32 artistId) external view returns (bytes32) {
+        return _identityOwner().operativeIdentityRecord(artistId);
+    }
+
+    function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function identityDocumentBytes(bytes32 hash) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function artistDisplayName(bytes32 artistId) external view returns (string memory, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function identityRevisionRecord(bytes32 record)
+        external
+        view
+        returns (StreamArtistIdentityRevisionTypes.Record memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function revokeArtistAuthorization(
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function authorizationRevocationDigest(
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function artistAuthorizationState(bytes32 artistId, bytes32 digest, uint256 nonce)
+        external
+        view
+        returns (StreamArtistAuthorizationTypes.State memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function proposeCollaboratorIdentity(C.IdentityProposal calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function acceptCollaboratorIdentity(
+        address account,
+        bytes32 identityRecordHash,
+        T.Authorization calldata a,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function acceptCollaborator(C.BindingAcceptance calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function collaboratorIdentityDigest(
+        address account,
+        bytes32 identityRecordHash,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
+
+    function collaboratorAcceptanceDigest(
+        C.BindingAcceptance calldata p,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
+
+    function collaboratorIdentityProposal(address account, bytes32 identityRecordHash)
+        external
+        view
+        returns (C.IdentityProposalState memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function collaboratorRegistrationNonceState(address account, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        _returnAuxiliaryRead();
+    }
+
+    function collaboratorCount(uint256 collectionId, uint64 generation)
+        external
+        view
+        returns (uint256)
+    {
+        _returnAuxiliaryRead();
+    }
+
+    function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)
+        external
+        view
+        returns (C.Row memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function collaboratorPayoutAccount(bytes32 artistId, address account)
+        external
+        view
+        returns (address, bytes32)
+    {
+        return _reads().collaboratorPayoutAccount(artistId, account);
+    }
+
+    function grantArtistDelegation(D.Grant calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function revokeArtistDelegation(D.Revocation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedPolicyConsent(
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedSaleConsent(
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedProspectiveEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function authorizeDelegatedRoyaltyFreeze(
+        T.RoyaltyFreeze calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function delegationGrantDigest(D.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function delegationRevocationDigest(D.Revocation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function delegationRecord(bytes32 grant) public view returns (D.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function delegationState(bytes32 grant)
+        external
+        view
+        returns (bool, address, uint256, uint32, uint64, uint64, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function delegatedNonceState(bytes32 artistId, address delegate, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        _returnAuxiliaryRead();
+    }
+
+    function recordDelegation(bytes32 record) external view returns (bytes32) {
+        _returnAuxiliaryRead();
+    }
+
+    function proposeArtistBindingAfterRevocation(
+        uint256 collectionId,
+        T.BindingProposal calldata p,
+        bytes calldata document,
+        string calldata displayName,
+        bytes32 repudiationRecord
+    ) external returns (bytes32, bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function proposeArtistBinding(
+        uint256 collectionId,
+        T.BindingProposal calldata p,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32, bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function acceptArtistBinding(uint256 collectionId, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function acceptArtistBindingExpected(
+        uint256 collectionId,
+        uint64 generation,
+        bytes32 bindingHash,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function refuseArtistBinding(L.Termination calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function withdrawArtistBinding(L.Termination calldata p) external {
+        _forwardRegistryWriter();
+    }
+
+    function bindingRefusalDigest(L.Termination calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function bindingTermination(uint256 collectionId, uint64 generation)
+        external
+        view
+        returns (L.Terminal memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function recordPolicyConsent(T.PolicyConsent calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recordEconomicsConsent(T.EconomicsConsent calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recordPayoutDesignation(T.PayoutDesignation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function declarePlatformWorks(uint256 id, bytes32 statement) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function displayBinding(uint256 id) external view returns (T.Binding memory) {
+        _forwardRegistryRead();
+    }
+
+    function artistAttestationStatus(uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash)
+        external
+        view
+        returns (uint8, bytes32, bytes32, uint8, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function displaySanction(StreamFinalityScope calldata scope)
+        external
+        view
+        returns (S.Record memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionClaims(uint256 id) external view returns (uint256, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function deploymentAttestation(uint256 id) external view returns (bytes32, uint8, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function attestationAuthorityClass(bytes32 record) external view returns (uint8) {
+        _forwardRegistryRead();
+    }
+
+    function attributionClaimRecord(bytes32 record)
+        external
+        view
+        returns (StreamArtistAttributionClaimTypes.Claim memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function fileAttributionClaim(uint256 id, bytes32 evidence, bytes32 reason, string calldata uri)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function filePlatformWorksClaim(
+        uint256 id,
+        bytes32 evidence,
+        bytes32 reason,
+        string calldata uri
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function setPlatformWorksContest(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function approvePlatformWorksCorrection(
+        uint256 id,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function platformWorksState(uint256 id) external view returns (PW.State memory) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksDeclaration(uint256 id) external view returns (bool, bytes32, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksContest(uint256 id) external view returns (uint8, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksClaims(uint256 id) external view returns (uint256, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksCorrection(uint256 id) external view returns (uint64, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim memory) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest memory) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksContext(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason,
+        bool correction
+    ) external view returns (PW.Context memory) {
+        _forwardRegistryRead();
+    }
+
+    function recordProspectiveTemplateFreezeConsent(
+        T.EconomicsConsent calldata p,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordProspectiveTemplateEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        bytes32 templateId,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordProspectiveEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function authorizeArtistRoyaltyFreeze(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function isRoyaltyFreezeAuthorized(uint256 collectionId, bytes32 expectedAssignmentHash)
+        external
+        view
+        returns (bool)
+    {
+        return _reads().isRoyaltyFreezeAuthorized(collectionId, expectedAssignmentHash);
+    }
+
+    function royaltyFreezeDigest(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attestationAssociation(bytes32 record)
+        external
+        view
+        returns (Attest.Association memory)
+    {
+        _returnAuxiliaryRead();
+    }
+
+    function recordArtistScopedAttestation(
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedArtistAttestation(
+        T.Attestation calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedArtistScopedAttestation(
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordArtistAttestation(
+        T.Attestation calldata p,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordContentConsent(Content.Consent calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function authorizeArtistContentFreeze(Content.Freeze calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function contentConsentDigest(Content.Consent calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function contentFreezeDigest(Content.Freeze calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function requireContentConsent(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
+        external
+        view
+    {
+        StreamArtistContentOperations.consentEvidence(
+            _contentSuite(), collectionId, familyId, newStateHash
+        );
+    }
+
+    function contentConsentEvidence(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistContentOperations.consentEvidence(
+            _contentSuite(), collectionId, familyId, newStateHash
+        );
+    }
+
+    function contentConsentEvidenceForHost(
+        uint256 collectionId,
+        address contentHost,
+        bytes32 familyId,
+        bytes32 newStateHash
+    ) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function isContentFreezeAuthorized(uint256 collectionId, bytes32 lockClass)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return StreamArtistContentOperations.freezeAuthorized(
+            _contentSuite(), collectionId, lockClass
+        );
+    }
+
+    function contentFreezeAuthorization(bytes32 recordHash)
+        external
+        view
+        returns (Content.FreezeRecord memory)
+    {
+        return IStreamArtistContentRecordsOwner(_contentSuite().owners[6])
+            .contentFreezeRecord(recordHash);
+    }
+
+    function _contentSuite() private view returns (T.SuiteConfiguration memory) {
+        return StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+    }
+
+    function recordContentRatification(T.Ratification calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function consentMode(uint256 collectionId) external view returns (uint8) {
+        return _reads().consentMode(collectionId);
+    }
+
+    function acceptedArtist(uint256 collectionId) external view returns (address) {
+        return _reads().acceptedArtist(collectionId);
+    }
+
+    /// @notice Primary acceptance hash/time are historical evidence; artist is zero until whole-set acceptance.
+    function attribution(uint256 collectionId)
+        external
+        view
+        returns (IStreamCollectionArtistRegistry.Attribution memory)
+    {
+        return _reads().attribution(collectionId);
+    }
+
+    function isPolicyConsented(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return _reads().isPolicyConsented(collectionId, phaseId, policyHash);
+    }
+
+    function requireMintConsent(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)
+        external
+        view
+    {
+        _reads().requireMintConsent(collectionId, phaseId, policyHash);
+    }
+
+    function firstReleaseRatification(uint256 collectionId)
+        external
+        view
+        returns (bool, bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function collectionArtistBeneficiary(uint256 collectionId)
+        external
+        view
+        returns (bytes32, address, bytes32)
+    {
+        return _reads().collectionArtistBeneficiary(collectionId);
+    }
+
+    function artistPayoutAccount(bytes32 artistId) external view returns (address, bytes32) {
+        return _reads().artistPayoutAccount(artistId);
+    }
+
+    function requireEconomicsConsent(
+        uint256 collectionId,
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 assignmentHash
+    ) external view {
+        _reads()
+            .requireEconomicsConsent(
+                T.EconomicsConsent(
+                    collectionId, msg.sender, revenueClass, scope, scopeId, assignmentHash
+                )
+            );
+    }
+
+    function acceptanceDigest(uint256 collectionId, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function policyConsentDigest(T.PolicyConsent calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function economicsConsentDigest(T.EconomicsConsent calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function payoutDesignationDigest(T.PayoutDesignation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attestationDigest(T.Attestation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function contentRatificationDigest(T.Ratification calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function _returnAuxiliaryRead() private view {
+        bytes memory result =
+            StreamArtistRegistryAuxiliaryEncoding.read(operationCoordinator, msg.data);
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
+    }
+
+    function _reads() private view returns (StreamArtistOnboardingReads) {
+        return StreamArtistOnboardingCoordinator(operationCoordinator).reads();
+    }
+
+    function _forwardRegistryWriter() private {
+        address target = registryWriterExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := delegatecall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
+    }
+
+    function _forwardRegistryRead() private view {
+        address target = registryReadExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := staticcall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
+    }
+
+    function _forwardFinalityRead() private view {
+        address target = registryFinalityReadExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := staticcall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
+    }
+
+    function initiateArtistDormancy(Dorm.Initiation calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function cancelArtistDormancy(bytes32 id, bytes32 expected, bytes32 grant) external {
+        _forwardRegistryWriter();
+    }
+
+    function completeArtistDormancy(Dorm.Completion calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordStewardSanctionGrant(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function dormancyState(bytes32 id) external view returns (uint8, uint64, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function dormancyNotice(bytes32 id) external view returns (bytes32, uint8, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function dormancyRecord(bytes32 hash)
+        external
+        view
+        returns (Dorm.Notice memory, uint8, Dorm.Terminal memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function dormancyInitiationContext(Dorm.Initiation calldata p)
+        external
+        view
+        returns (Dorm.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function dormancyCompletionContext(Dorm.Completion calldata p)
+        external
+        view
+        returns (Dorm.Context memory, Dorm.Plan memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function dormancyCompletionEvidence(Dorm.Completion calldata p)
+        external
+        view
+        returns (bytes memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrant(bytes32 id) external view returns (bool, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrantRecord(bytes32 hash)
+        external
+        view
+        returns (SG.GrantRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrantDigest(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function grantStewardCapabilities(SC.Grant calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function stewardCapabilityGrantContext(SC.Grant calldata p)
+        external
+        view
+        returns (SC.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function stewardCapabilityGrantRecord(bytes32 hash) external view returns (SC.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function stewardCapabilityGrantState(bytes32 appointment)
+        external
+        view
+        returns (bytes32, uint32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistRecordChainHash(bytes32 id) external view override returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function collectionRecordChainHash(uint256 id) external view override returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryLane(uint8 kind, bytes32 id)
+        external
+        view
+        override
+        returns (bytes32, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryRecordAt(uint8 kind, bytes32 id, uint64 index)
+        external
+        view
+        override
+        returns (bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryContinuityCommitment() external view override returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function importedHistoryBindingCount() external view override returns (uint256) {
+        _forwardRegistryRead();
+    }
+
+    function importedHistoryBinding(uint256 index)
+        external
+        view
+        override
+        returns (address, uint64, bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryPredecessorBinding(address source)
+        external
+        view
+        override
+        returns (bool, bytes32, uint256)
+    {
+        _forwardRegistryRead();
+    }
+
+    function verifyImportedRecord(bytes32 root, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        view
+        override
+        returns (bool)
+    {
+        _forwardRegistryRead();
+    }
+
+    function importedLaneVerified(uint8 kind, bytes32 id)
+        external
+        view
+        override
+        returns (bool, bytes32, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistRegistryCutover() external view override returns (bool, address, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryImportContext(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external view override returns (H.Context memory) {
+        _forwardRegistryRead();
+    }
+
+    function commitArtistHistoryImportRoot(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external override {
+        _forwardRegistryWriter();
+    }
+
+    function verifyImportedLaneTip(uint256 index, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        override
+    {
+        _forwardRegistryWriter();
+    }
+
+    function observeRegistryCutover() external override {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateRecoveredArtistAuthority(Recovered.Request calldata p)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateRecoveredArtistAuthorityWithConsents(
+        Recovered.Request calldata p,
+        T.RoyaltyFreeze[] calldata royaltyFreezes
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateMultipleArtistAuthorityWithRecords(
+        StreamArtistMultipleRecordsTypes.Request calldata p
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateMultipleArtistAuthority(StreamArtistMultipleHydrationTypes.Request calldata p)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithDelegations(AH.Request calldata p)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthority(AH.Request calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithPayout(AH.Request calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithEconomics(
+        StreamArtistEconomicsHydrationTypes.Request calldata p
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithReadiness(
+        StreamArtistReadinessHydrationTypes.Request calldata p
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithPublications(
+        StreamArtistReadinessHydrationTypes.Request calldata p
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithEntropyFindings(
+        StreamArtistEntropyFindingHydrationTypes.Request calldata p
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function withdrawAttributionDispute(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function attributionDisputeWithdrawal(bytes32 opening)
+        external
+        view
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function openAttributionDispute(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordCounterStatement(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function resolveAttributionDispute(AD.ResolutionRequest calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function attributionDispute(uint256 id, uint64 generation)
+        external
+        view
+        returns (AD.Head memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeRecord(bytes32 record) external view returns (AD.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeResolution(bytes32 action)
+        external
+        view
+        returns (AD.Resolution memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeDigest(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeOpeningContext(AD.Filing calldata p)
+        external
+        view
+        returns (AD.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeResolutionContext(AD.ResolutionRequest calldata p)
+        external
+        view
+        returns (AD.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function revokeAttribution(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function vetoAttributionRepudiation(uint256 id, bytes32 expected, bytes32 reason) external {
+        _forwardRegistryWriter();
+    }
+
+    function cancelAttributionRepudiation(uint256 id, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function executeAttributionRepudiation(uint256 id, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function pendingRepudiation(uint256 id) external view returns (uint64, uint64, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function attributionRepudiationRecord(bytes32 hash) external view returns (RP.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function attributionRepudiationTerminal(bytes32 hash)
+        external
+        view
+        returns (RP.Terminal memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function activeRepudiationCount(bytes32 artistId) external view returns (uint256) {
+        _forwardRegistryRead();
+    }
+
+    function attributionRepudiationDigest(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+}

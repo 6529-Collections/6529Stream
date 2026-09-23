@@ -2457,6 +2457,13 @@ Requirements [MPA-GRACE]:
 8. Operational guidance: issue long-lived tickets as late as practical;
    a change that must not honor old tickets sets `graceUntil = 0`.
 
+Current implementation: the additive `IStreamMintPolicyGrace` exposes
+`setPhaseExecutorWithGrace` for this Manager's supported executor-set rotations.
+It preserves initial-only phase/counter configuration and requires consent for
+the resulting current policy. The [integration guide](integrations/mint-policy-grace.md)
+defines deadline and no-op behavior, exact governance admission and the
+separate authored-versus-executed acceptance boundary.
+
 ## Mint Requests
 
 Batch mints should be first-class. The manager should not rely on callers to
@@ -4076,6 +4083,11 @@ Requirements [MPA-GAS-BUDGET]:
    ceiling is a spec amendment through the ADR process, not a
    release-artifact change; the report may state tighter per-path
    envelopes inside the ceilings for regression tracking.
+   [ADR 0033](adr/0033-engineering-rehearsals-and-collector-gas.md) permits
+   separately identified local/testnet engineering deployments using test
+   assets while this gate remains failed. That exception supplies development
+   evidence only; these ceilings still gate a conforming release candidate
+   and production deployment.
 3. The report must include side-by-side measured comparisons against
    named competitor primary-mint paths (at minimum one Manifold, one
    Zora, and one Art Blocks mint) and the measured all-cold per-mint and

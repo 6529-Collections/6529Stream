@@ -7,6 +7,7 @@ import "../../../smart-contracts/interfaces/stream/finality/IStreamCoreFinalityS
 import "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import "../../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
 import "../../helpers/Assertions.sol";
+import "../../helpers/FinalityReadProviderBoundary.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 
 contract FinalityAdapterCoreMock is IStreamCoreFinalitySource {
@@ -184,11 +185,14 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
     FinalityAdapterCoreMock private source;
     FinalityAdapterMetadataMock private metadata;
     StreamCoreFinalityAdapter private adapter;
+    FinalityReadProviderBoundary private provider;
 
     function setUp() public {
         source = new FinalityAdapterCoreMock();
         metadata = new FinalityAdapterMetadataMock();
-        adapter = new StreamCoreFinalityAdapter(address(source), address(metadata));
+        provider = new FinalityReadProviderBoundary(address(source), address(metadata));
+        adapter =
+            new StreamCoreFinalityAdapter(address(source), address(metadata), address(provider));
         source.setCollection(true, true, 2, 1, 10_000, 900, 901, 850);
     }
 
@@ -204,6 +208,7 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
         uint256(uint32(type(IStreamCoreFinalityAdapter).interfaceId))
             .assertEq(uint256(uint32(0xebf35615)), "adapter interface id");
 
+        adapter.evidenceProvider().assertEq(address(provider), "fixed evidence provider");
         adapter.core().assertEq(address(source), "core binding");
         adapter.collectionMetadata().assertEq(address(metadata), "metadata binding");
         adapter.supportsInterface(0xebf35615).assertTrue("adapter ERC165 support");
@@ -234,20 +239,20 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
         vm.expectRevert(
             abi.encodeWithSelector(StreamCoreFinalityAdapter.InvalidCore.selector, address(0))
         );
-        new StreamCoreFinalityAdapter(address(0), address(metadata));
+        new StreamCoreFinalityAdapter(address(0), address(metadata), address(provider));
 
         address codeLessCore = address(0xC0DE);
         vm.expectRevert(
             abi.encodeWithSelector(StreamCoreFinalityAdapter.InvalidCore.selector, codeLessCore)
         );
-        new StreamCoreFinalityAdapter(codeLessCore, address(metadata));
+        new StreamCoreFinalityAdapter(codeLessCore, address(metadata), address(provider));
 
         vm.expectRevert(
             abi.encodeWithSelector(
                 StreamCoreFinalityAdapter.InvalidCollectionMetadata.selector, address(0)
             )
         );
-        new StreamCoreFinalityAdapter(address(source), address(0));
+        new StreamCoreFinalityAdapter(address(source), address(0), address(provider));
 
         address codeLessMetadata = address(0xBEEF);
         vm.expectRevert(
@@ -255,7 +260,7 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
                 StreamCoreFinalityAdapter.InvalidCollectionMetadata.selector, codeLessMetadata
             )
         );
-        new StreamCoreFinalityAdapter(address(source), codeLessMetadata);
+        new StreamCoreFinalityAdapter(address(source), codeLessMetadata, address(provider));
     }
 
     function testCollectionFactsComposeGranularReadsWithUint256Supplies() public {
@@ -293,8 +298,11 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
 
     function testScopedSemanticNegativesEchoOnlyAndMakeNoDependencyCall() public {
         FinalityAdapterRevertingDependency dependency = new FinalityAdapterRevertingDependency();
-        StreamCoreFinalityAdapter guarded =
-            new StreamCoreFinalityAdapter(address(dependency), address(dependency));
+        StreamCoreFinalityAdapter guarded = new StreamCoreFinalityAdapter(
+            address(dependency),
+            address(dependency),
+            address(new FinalityReadProviderBoundary(address(dependency), address(dependency)))
+        );
 
         for (uint16 rawScopeType = 0; rawScopeType < 256; rawScopeType++) {
             if (rawScopeType == 0 || rawScopeType > 4) {
@@ -401,22 +409,35 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
     function testDependencyFailuresAndMalformedReturndataRevertFailClosed() public {
         FinalityAdapterRevertingDependency revertingDependency =
             new FinalityAdapterRevertingDependency();
-        StreamCoreFinalityAdapter revertingAdapter =
-            new StreamCoreFinalityAdapter(address(revertingDependency), address(metadata));
+        StreamCoreFinalityAdapter revertingAdapter = new StreamCoreFinalityAdapter(
+            address(revertingDependency),
+            address(metadata),
+            address(
+                new FinalityReadProviderBoundary(address(revertingDependency), address(metadata))
+            )
+        );
         vm.expectRevert();
         revertingAdapter.coreCollectionFinalityFacts(COLLECTION_ID);
 
         FinalityAdapterMalformedDependency malformedDependency =
             new FinalityAdapterMalformedDependency();
-        StreamCoreFinalityAdapter malformedCoreAdapter =
-            new StreamCoreFinalityAdapter(address(malformedDependency), address(metadata));
+        StreamCoreFinalityAdapter malformedCoreAdapter = new StreamCoreFinalityAdapter(
+            address(malformedDependency),
+            address(metadata),
+            address(
+                new FinalityReadProviderBoundary(address(malformedDependency), address(metadata))
+            )
+        );
         vm.expectRevert();
         malformedCoreAdapter.scopedCoreFinalityFacts(
             _scope(uint8(StreamFinalityScopeType.TOKEN), COLLECTION_ID, TOKEN_ID, bytes32(0))
         );
 
-        StreamCoreFinalityAdapter malformedMetadataAdapter =
-            new StreamCoreFinalityAdapter(address(source), address(malformedDependency));
+        StreamCoreFinalityAdapter malformedMetadataAdapter = new StreamCoreFinalityAdapter(
+            address(source),
+            address(malformedDependency),
+            address(new FinalityReadProviderBoundary(address(source), address(malformedDependency)))
+        );
         vm.expectRevert();
         malformedMetadataAdapter.scopedCoreFinalityFacts(
             _scope(uint8(StreamFinalityScopeType.RELEASE), COLLECTION_ID, 0, SCOPE_ID)
@@ -431,6 +452,49 @@ contract StreamCoreFinalityAdapterTest is CharacterizationTestBase {
 
         (bool unknown,) = address(adapter).call(abi.encodeWithSignature("owner()"));
         unknown.assertFalse("unknown writer-shaped selector rejected");
+    }
+
+    function testEvidenceProviderRequiresExactCoreAndMetadataBindings() public {
+        address missing = address(0xE71D);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCoreFinalityAdapter.InvalidEvidenceProvider.selector, missing
+            )
+        );
+        new StreamCoreFinalityAdapter(address(source), address(metadata), missing);
+        FinalityReadProviderBoundary wrongCore =
+            new FinalityReadProviderBoundary(address(0xBAD), address(metadata));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCoreFinalityAdapter.InvalidEvidenceProvider.selector, address(wrongCore)
+            )
+        );
+        new StreamCoreFinalityAdapter(address(source), address(metadata), address(wrongCore));
+        FinalityReadProviderBoundary wrongMetadata =
+            new FinalityReadProviderBoundary(address(source), address(0xBAD));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCoreFinalityAdapter.InvalidEvidenceProvider.selector, address(wrongMetadata)
+            )
+        );
+        new StreamCoreFinalityAdapter(address(source), address(metadata), address(wrongMetadata));
+        adapter.coreCollectionFinalityFacts(COLLECTION_ID).exists
+            .assertTrue("healthy fixed provider");
+    }
+
+    function testHistoricalAdapterRejectsProviderCodeDriftThenRestoresExactFacts() public {
+        bytes memory before = abi.encode(adapter.coreCollectionFinalityFacts(COLLECTION_ID));
+        bytes memory originalCode = address(provider).code;
+        vm.etch(address(provider), hex"00");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCoreFinalityAdapter.InvalidEvidenceProvider.selector, address(provider)
+            )
+        );
+        adapter.coreCollectionFinalityFacts(COLLECTION_ID);
+        vm.etch(address(provider), originalCode);
+        keccak256(abi.encode(adapter.coreCollectionFinalityFacts(COLLECTION_ID)))
+            .assertEq(keccak256(before), "restored exact facts; no current-selection predicate");
     }
 
     function _assertEchoOnly(

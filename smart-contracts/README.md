@@ -11,7 +11,8 @@ you are integrating.
 | [domains/auctions](domains/auctions/StreamEnglishAuctionHouse.sol) | Artist-authorized English auctions, custody, bids, settlement and refunds |
 | [domains/artist](domains/artist/StreamCollectionArtistRegistry.sol) | Artist nomination, signed acceptance and permanent collection attribution |
 | [domains/entropy](domains/entropy/StreamEntropyCoordinator.sol) | Token/scope registration, external randomness requests and final seeds |
-| [domains/metadata](domains/metadata/StreamMetadataRouter.sol) | Collection presentation, token metadata and artwork rendering |
+| [domains/metadata](domains/metadata/README.md) | Attributed record bytes, interpretation documents, collection presentation and artwork rendering |
+| [domains/finality](domains/finality/StreamFinalityHostAdapter.sol) | Immutable component reads and artwork finality; [host integration status](../docs/finality-host-adapters.md) |
 | [domains/revenue](domains/revenue/StreamSplitFactory.sol) | Immutable split profiles, pull withdrawals, asset policies and revenue assignments |
 | [domains/governance](domains/governance/StreamGovernanceExecutor.sol) | Scheduled governance, roles, one-time genesis setup, deployment discovery and state-export publication |
 | [domains/modules](domains/modules/StreamModuleRegistry.sol) | Canonical registration and eligibility of installed modules |

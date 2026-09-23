@@ -1,0 +1,203 @@
+dContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="extentActor" type="lido:conceptMixedComplexType" minOccurs="0" maxOccurs="unbounded" id="extentActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the specific part of
+							the object/work contributed by a particular actor in the respective
+							event.<br/>
+							Applicable if there is more than one actor.</tei:ab>
+						<!-- Example:  -->
+						<tei:ab type="label">Extent Actor</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#extentActor">Extent Actor</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:extentActor">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sourceActorInRole" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="sourceActorInRole">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element identifying the source of the provided information about 
+							an actor and the role or attribution of this actor related to the event in focus.<br/> 
+							Whenever possible, a published source should be given.
+						</tei:ab>
+						<tei:ab type="label">Source Actor in Role</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="actorInRoleSetComplexType" id="actorInRoleSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for an
+					actor with role information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayActorInRole" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayActorInRole">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for an actor and the specific role or activity performed by the actor, 
+							corresponding to the subsequent <tei:ref target="#actorInRole">Actor in Role</tei:ref> element.<br/>
+							May include name and brief biographical information on the actor.<br/>
+							Repeated for language variants only.</tei:ab>
+							<tei:ab type="label">Display Actor in Role</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="actorInRole" type="lido:actorInRoleComplexType" minOccurs="0" id="actorInRole">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for information about an actor and the
+							role or activity performed by this actor in context of the event.<br/>
+							Includes information about attribution and extent, where applicable.
+							</tei:ab>
+						<tei:ab type="label">Actor in Role</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="actorSetComplexType" id="actorSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for an actor.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayActor" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for an actor, corresponding to the subsequent <tei:ref target="#actor_actorSetComplexType">Actor</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Actor</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="actor" type="lido:actorComplexType" minOccurs="0" id="actor_actorSetComplexType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for identifying and indexing information
+							about an actor with role statement.</tei:ab>
+						<tei:ab type="label">Actor</tei:ab>
+						
+						
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:actor">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:attribute name="addedSearchTerm" default="no" id="addedSearchTerm">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute indicating that the term in the index element has
+					been added to enhance retrieval options. The term may be a synonym, a generic
+					term, or an equivalent term in an additional language, taken from a local or
+					public controlled vocabulary.</tei:ab>
+				<tei:ab type="dataValues">Controlled values</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="yes"/>
+				<xs:enumeration value="no"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+	<xs:element name="administrativeMetadata" type="lido:administrativeMetadataComplexType" id="administrativeMetadata">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Aggregates the administrative metadata for an object/work record.<br/>
+					Repeated once for each language for multilingual resources.<br/>
+					Please note that the repeatability can vary depending on whether the element is used as root element (not repeatable) or as a child element (repeatable).</tei:ab>
+				<tei:ab type="label">Administrative Metadata</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="administrativeMetadataComplexType" id="administrativeMetadataComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines the administrative metadata for an object/work record.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="lido:rightsWorkWrap" minOccurs="0"/>
+			<xs:element ref="lido:recordWrap"/>
+			<xs:element ref="lido:resourceWrap" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute ref="xml:lang" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="appellationComplexType" id="appellationComplexType">
+		<xs:annotation>
+			<xs:documentation>
+			    <tei:ab type="description">Defines appellation information about an
+					individual entity, for instance a name or title, including the preference role, such as 
+			    	<em>preferred</em> or <em>alternative</em>.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="appellationValue" maxOccurs="unbounded" id="appellationValue">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for the name of an individual entity, like the
+							title of a work, a proper name of an actor, or a place name.<br/>
+							Repeated to record different sources for multiple appellations.</tei:ab>
+						<tei:ab type="label">Appellation Value</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+												
+						
+												
+						
+												
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute ref="lido:pref"/>
+							<xs:attributeGroup ref="lido:textAttributesSet"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="sourceAppellation" minOccurs="0" maxOccurs="unbounded" id="sourceAppellation">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element identifying the source of the appellation, gener

@@ -1,0 +1,81 @@
+
+
+<ul>
+  <li>Any resource type <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">requiredStatement</code> property.<br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">requiredStatement</code> on every resource type.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"requiredStatement"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Attribution"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Provided courtesy of Example Institution"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="rights">
+        
+        
+          rights <a href="#rights" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A string that identifies a license or rights statement that applies to the content of the resource, such as the <abbr title="JavaScript Object Notation">JSON</abbr> of a Manifest or the pixels of an image. The value <em class="rfc">must</em> be drawn from the set of <a href="https://creativecommons.org/licenses/" title="Create Commons Licenses">Creative Commons</a> license URIs, the <a href="http://rightsstatements.org/page/1.0/" title="rightsstatements.org">RightsStatements.org</a> rights statement URIs, or those added via the <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">extension</a> mechanism. The inclusion of this property is informative, and for example could be used to display an icon representing the rights assertions.</p>
+
+<p>If displaying rights information directly to the user is the desired interaction, or a publisher-defined label is needed, then it is <em class="rfc">recommended</em> to include the information using the <code class="language-plaintext highlighter-rouge">requiredStatement</code> property or in the <code class="language-plaintext highlighter-rouge">metadata</code> property.</p>
+
+<p>The value <em class="rfc">must</em> be a string. If the value is drawn from Creative Commons or RightsStatements.org, then the string <em class="rfc">must</em> be a URI defined by that specification.</p>
+
+<ul>
+  <li>Any resource type <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">rights</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">rights</code> on any resource type.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"rights"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://creativecommons.org/licenses/by/4.0/"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p class="note"><strong>Machine actionable URIs and links for users</strong><br />
+The machine actionable URIs for both Creative Commons licenses and RightsStatements.org right statements are <code class="language-plaintext highlighter-rouge">http</code> URIs. In both cases, human readable descriptions are available from equivalent <code class="language-plaintext highlighter-rouge">https</code> URIs. Clients may wish to rewrite links presented to users to use these equivalent <code class="language-plaintext highlighter-rouge">https</code> URIs.</p>
+      <h5 id="provider">
+        
+        
+          provider <a href="#provider" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An organization or person that contributed to providing the content of the resource. Clients can then display this information to the user to acknowledge the provider’s contributions.  This differs from the <code class="language-plaintext highlighter-rouge">requiredStatement</code> property, in that the data is structured, allowing the client to do more than just present text but instead have richer information about the people and organizations to use in different interfaces.</p>
+
+<p>The organization or person is represented as an <code class="language-plaintext highlighter-rouge">Agent</code> resource.</p>
+
+<ul>
+  <li>Agents <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> property, and its value <em class="rfc">must</em> be a string. The string <em class="rfc">must</em> be a URI that identifies the agent.</li>
+  <li>Agents <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">type</code> property, and its value <em class="rfc">must</em> be the string “Agent”.</li>
+  <li>Agents <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">label</code> property, and its value <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object as described in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages</a> section.</li>
+  <li>Agents <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">homepage</code> property, and its value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects as described in the <a href="/api/presentation/3.0/#homepage" title="homepage property">homepage</a> section.</li>
+  <li>Agents <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">logo</code> property, and its value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects as described in the <a href="/api/presentation/3.0/#logo" title="logo property">logo</a> section.</li>
+  <li>Agents <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">seeAlso</code> property, and its value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> object as described in the <a href="/api/presentation/3.0/#seealso" title="seeAlso property">seeAlso</a> section.</li>
+</ul>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects, where each item in the array conforms to the structure of an Agent, as described above.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">provider</code> property with at least one item. <br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">provider</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">provider</code> property with at least one item. <br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">provider</code> on a Manifest.</li>
+  <li>Ot

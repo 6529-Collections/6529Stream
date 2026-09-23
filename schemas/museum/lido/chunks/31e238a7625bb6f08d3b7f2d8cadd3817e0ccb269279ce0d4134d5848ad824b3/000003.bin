@@ -1,0 +1,135 @@
+hods with many instances, in Application Schemas that define operation-method-specialized element names and contents. Specific parameter value elements are directly contained in concrete subtypes, not in this abstract type. All concrete types derived from this type shall extend this type to include one "...Value" element with an appropriate type, which should be one of the element types allowed in the ParameterValueType. In addition, all derived concrete types shall extend this type to include a "valueOfParameter" element that references one element substitutable for the "OperationParameter" element. </documentation>
+		</annotation>
+		<sequence/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="parameterValue" type="gml:ParameterValueType" substitutionGroup="gml:_generalParameterValue"/>
+	<!-- =================================================== -->
+	<complexType name="ParameterValueType">
+		<annotation>
+			<documentation>A parameter value, ordered sequence of values, or reference to a file of parameter values. This concrete complexType can be used for operation methods without using an Application Schema that defines operation-method-specialized element names and contents, especially for methods with only one instance. This complexType can be used, extended, or restricted for well-known operation methods, especially for methods with many instances. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeneralParameterValueType">
+				<sequence>
+					<choice>
+						<element ref="gml:value"/>
+						<element ref="gml:dmsAngleValue"/>
+						<element ref="gml:stringValue"/>
+						<element ref="gml:integerValue"/>
+						<element ref="gml:booleanValue"/>
+						<element ref="gml:valueList"/>
+						<element ref="gml:integerValueList"/>
+						<element ref="gml:valueFile"/>
+					</choice>
+					<element ref="gml:valueOfParameter"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="value" type="gml:MeasureType">
+		<annotation>
+			<documentation>Numeric value of an operation parameter, with its associated unit of measure. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="dmsAngleValue" type="gml:DMSAngleType">
+		<annotation>
+			<documentation>Value of an angle operation parameter, in either degree-minute-second format or single value format. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="stringValue" type="string">
+		<annotation>
+			<documentation>String value of an operation parameter. A string value does not have an associated unit of measure. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="integerValue" type="positiveInteger">
+		<annotation>
+			<documentation>Positive integer value of an operation parameter, usually used for a count. An integer value does not have an associated unit of measure. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="booleanValue" type="boolean">
+		<annotation>
+			<documentation>Boolean value of an operation parameter. A Boolean value does not have an associated unit of measure. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="valueList" type="gml:MeasureListType">
+		<annotation>
+			<documentation>Ordered sequence of two or more numeric values of an operation parameter list, where each value has the same associated unit of measure. An element of this type contains a space-separated sequence of double values. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="integerValueList" type="gml:integerList">
+		<annotation>
+			<documentation>Ordered sequence of two or more integer values of an operation parameter list, usually used for counts. These integer values do not have an associated unit of measure. An element of this type contains a space-separated sequence of integer values. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="valueFile" type="anyURI">
+		<annotation>
+			<documentation>Reference to a file or a part of a file containing one or more parameter values, each numeric value with its associated unit of measure. When referencing a part of a file, that file must contain multiple identified parts, such as an XML encoded document. Furthermore, the referenced file or part of a file can reference another part of the same or different files, as allowed in XML documents. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="valueOfParameter" type="gml:OperationParameterRefType">
+		<annotation>
+			<documentation>Association to the operation parameter that this is a value of. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<!-- =================================================== -->
+	<element name="parameterValueGroup" type="gml:ParameterValueGroupType" substitutionGroup="gml:_generalParameterValue"/>
+	<!-- =================================================== -->
+	<complexType name="ParameterValueGroupType">
+		<annotation>
+			<documentation>A group of related parameter values. The same group can be repeated more than once in a Conversion, Transformation, or higher level parameterValueGroup, if those instances contain different values of one or more parameterValues which suitably distinquish among those groups. This concrete complexType can be used for operation methods without using an Application Schema that defines operation-method-specialized element names and contents, especially for methods with only one instance. This complexType can be used, extended, or restricted for well-known operation methods, especially for methods with many instances. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeneralParameterValueType">
+				<sequence>
+					<element ref="gml:includesValue" minOccurs="2" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Unordered set of composition associations to the parameter values and groups of values included in this group. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:valuesOfGroup"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="includesValue" type="gml:AbstractGeneralParameterValueType" substitutionGroup="gml:_generalParameterValue">
+		<annotation>
+			<documentation>A composition association to a parameter value or group of values included in this group. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="valuesOfGroup" type="gml:OperationParameterGroupRefType">
+		<annotation>
+			<documentation>Association to the operation parameter group for which this element provides parameter values. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<!-- =================================================== -->
+	<element name="OperationMethod" type="gml:OperationMethodType" substitutionGroup="gml:Definition"/>
+	<!-- =================================================== -->
+	<complexType name="OperationMethodBaseType" abstract="true">
+		<annotation>
+			<documentation>Basic encoding for operation method objects, simplifying and restricting the DefinitionType as needed. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:DefinitionType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:methodName"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========

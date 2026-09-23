@@ -18,9 +18,16 @@ input where it conflicts with that active state.
   work on independent domains in parallel and hand over coherent commits.
 - Integrate and demonstrate real contract flows frequently. A passing test
   against `LegacyStreamCore` does not prove the current Core integration.
-- During implementation, run compilation, focused behavioral tests, and the
-  current-stack integration tests. Run the broad validation and release
-  evidence pass after the supported implementation stabilizes.
+- The owner changed delivery sequencing on 14 September 2026: finish coherent
+  feature batches first, integrate them, then perform comprehensive validation.
+  Use cheap compilation/type checks and focused tests during implementation
+  where they return promptly; do not block the next feature on a long native
+  build, full cohort, per-increment evidence review or artifact regeneration.
+- Source-reviewed batches may be committed and integrated with runtime
+  validation explicitly pending. Keep writing regression cases with behavior
+  changes. Run combined current-stack tests, fuzz/invariants, gas checks, full
+  CI and release evidence after the feature batch stabilizes. This sequencing
+  takes precedence over the generic per-change validation ladder below.
 - Do not serialize independent implementation behind individual PRs or repeat
   full artifact generation for every development commit.
 - Resolve ordinary implementation choices without asking the owner. Keep
@@ -36,8 +43,9 @@ input where it conflicts with that active state.
 - Do not claim production readiness, public-beta readiness, audit completion,
   protocol correctness, or live deployment readiness unless the corresponding
   evidence is already merged.
-- Prefer small PRs tied to one roadmap item, one tracker issue, or one tightly
-  related bug.
+- During the active full-v1 run, use coherent domain batches in the existing
+  integration PR. Avoid one PR, native rebuild or review ceremony per small
+  feature branch; retain clear commits and explicitly pending validation.
 - Make conservative changes that preserve protocol safety, release
   reproducibility, and integrator compatibility.
 - Do not introduce Docker, Node, frontend tooling, generated scripts, or new
@@ -129,18 +137,18 @@ Use the smallest honest validation set first, then broaden when risk increases.
 For docs-only changes:
 
 ```bash
-python scripts/test_markdown_links.py
-python scripts/check_markdown_links.py
-python scripts/check_changelog.py
+python -m tools.docs.test_markdown_links
+python -m tools.docs.check_markdown_links
+python -m tools.docs.check_changelog
 ```
 
 If the root README or first-contributor path changes, also run:
 
 ```bash
-python scripts/test_readme.py
-python scripts/check_readme.py
-python scripts/test_first_30_minutes.py
-python scripts/check_first_30_minutes.py
+python -m tools.docs.test_readme
+python -m tools.docs.check_readme
+python -m tools.docs.test_first_30_minutes
+python -m tools.docs.check_first_30_minutes
 ```
 
 For Solidity or Foundry tests, run the focused test first, then:

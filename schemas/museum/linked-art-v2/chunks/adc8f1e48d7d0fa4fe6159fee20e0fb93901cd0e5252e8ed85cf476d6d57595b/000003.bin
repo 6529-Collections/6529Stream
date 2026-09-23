@@ -1,0 +1,195 @@
+        "end_of_the_end": {
+                    "title": "crm:P82b_end_of_the_end",
+                    "description": "The latest possible date-time at which the timespan could have ended",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "duration": {
+                    "title": "crm:P191_had_duration",
+                    "description": "A `Dimension` that describes the duration of the timespan within any given date-times",
+                    "$ref": "#/$defs/Dimension"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "Dimension": {
+            "title": "crm:E54_Dimension",
+            "description": "A measurable aspect of an entity, with a numeric value, a unit for that value, and a type relative to the entity\nSee: [API](https://linked.art/api/1.0/shared/dimension/) | [Model](https://linked.art/model/object/physical/#dimensions)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Dimension"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "value": {
+                    "$ref": "#/$defs/valueProp"
+                },
+                "lower_value_limit": {
+                    "$ref": "#/$defs/lower_value_limitProp"
+                },
+                "upper_value_limit": {
+                    "$ref": "#/$defs/upper_value_limitProp"
+                },
+                "unit": {
+                    "title": "crm:P91_has_unit",
+                    "description": "Reference to the MeasurementUnit for this dimension",
+                    "$ref": "#/$defs/UnitRef"
+                },
+                "assigned_by": {
+                    "title": "crm:P141i_was_assigned_by",
+                    "description": "The Measurement(s) that led to the assigning of this dimension",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/AttributeAssignment"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "value",
+                "unit"
+            ],
+            "additionalProperties": false
+        },
+        "MonetaryAmount": {
+            "title": "crm:E97_Monetary_Amount",
+            "description": "An amount of money, with a value and a currency\nSee: [API](https://linked.art/api/1.0/shared/money/) | [Model](https://linked.art/model/provenance/acquisition.html#payments)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "MonetaryAmount"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "value": {
+                    "$ref": "#/$defs/valueProp"
+                },
+                "lower_value_limit": {
+                    "$ref": "#/$defs/lower_value_limitProp"
+                },
+                "upper_value_limit": {
+                    "$ref": "#/$defs/upper_value_limitProp"
+                },
+                "currency": {
+                    "$ref": "#/$defs/CurrencyRef"
+                }
+            },
+            "required": [
+                "type",
+                "value",
+                "currency"
+            ],
+            "additionalProperties": false
+        },
+        "Right": {
+            "title": "crm:E30_Right",
+            "description": "A legal right that can be held by some party over some entity",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Right"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "created_by": {
+                    "title": "crm:P94i_was_created_by", "$ref": "#/$defs/Creation"
+                },
+                "possessed_by": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/PersonRefOrGroupRef"
+                    }
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "Creation": {
+            "title": "crm:E65_Creation",
+            "description": "The creation of the intellectual/conceptual entity",
+            "type": "object",
+            "properties": {
+                "type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+                    {"title": "Specific", "type": "string", "const": "Creation"}]},
+                "_label": {"$ref": "core.json#/$defs/labelProp"},
+                "identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+                "classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+                "referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+                "took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+                "timespan": {"$ref": "core.json#/$defs/timespanProp"},
+                "caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+                "carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+                "used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+                "influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+                "technique": {"$ref": "core.json#/$defs/techniqueProp"},
+                "during": {"$ref": "core.json#/$defs/duringProp"},
+                "after": {"$ref": "core.json#/$defs/afterProp"},
+                "before": {"$ref": "core.json#/$defs/beforeProp"},
+                "part_of": {"title": "crm:P9i_forms_part_of", "description": "An identified event or activity which this creation is part of", "$ref": "core.json#/$defs/EventRefOrActivityRef"}
+            }
+        },
+        "Concept": {
+            "title": "crm:E55_Type",
+            "description": "A concept or 'Type' in the taxonomic sense\nSee: [API](https://linked.art/api/1.0/shared/type/) | [Model](https://linked.art/model/base/#types-and-classifications)",
+            "type": "object",
+            "properti

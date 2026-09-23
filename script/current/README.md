@@ -1,21 +1,159 @@
 # Current-stack development deployment
 
-`DeployCurrentStack.s.sol` deploys the current Core, governance, canonical module
-registry, mint manager and ledger, signed native sale, English auction, accepted
-artist registry, entropy coordinator, metadata router, royalty resolver, and
-immutable split wallet. It commits one genesis plan, prepares its catalog in a
-separate transaction, then atomically activates and seals the stack. It freezes the
-SystemManifest pointer, and publishes an explicitly labeled development manifest.
-These module metadata hashes describe development configurations. They are not
-release checksums, audit evidence, or a frozen release candidate.
+The full-v1 operator entry points deploy the original Finality graph in stages.
+The first phase publishes a checkpoint with reserved addresses; resumption reads
+that checkpoint in a fresh process after the required governance actions. The
+original Finality registry is constructed before its artist Coordinator, and
+WORK/RIGHTS follow the actual artist selection.
 
-The deployment uses `FOUNDRY_PROFILE=current`, Solidity 0.8.19, optimizer 200 runs, and **global via-IR**, the
-same instance profile as the current-stack integration test. The script's deployer
-is the bootstrap authority and controller of each separate governance actor.
-Manager, ledger, sale, auction, asset policy, and royalty control belongs to the
-governance executor after setup. The governance catalog includes operational
-controls, root and role rotation, and module-status updates with their action
-classes. Governance actors are simple development/testnet controllers.
+The current graph passes nine focused workflows and an independently reviewed
+local rehearsal with six processes and 530 successful transactions. Every
+transaction declares and consumes at most 16,777,216 gas; the largest receipt
+uses 10,709,754. The Artist child deployment split resolves the earlier oversized
+constructors. The saved output still records unactivated products. Newer commerce
+activation, complete user-call capacity and a matching testnet release remain
+separate requirements.
+
+The existing version-2 output describes a sealed five-leaf governance foundation
+and unactivated products, with registrations and catalog additions for later
+stages. Its `metadata` field means the Router and `provider` means the entropy
+provider. Generic collection Metadata and the native finality provider need
+separate fields when that output is expanded. Do not reinterpret the old tuple
+or report incomplete artist construction as a completed deployment.
+
+The declared product inventory includes minting, native fixed sales, English
+auctions, entropy, metadata and revenue dependencies. It does not yet include
+every newer full-v1 sale or recording module. The complete operator rehearsal
+and expanded inventory remain tracked in [delivery](../../ops/V1_DELIVERY.md).
+
+Supply the governance root and its guardian array explicitly for Sepolia.
+`STREAM_GOVERNANCE_ROOT` is an address; `STREAM_GOVERNANCE_GUARDIANS` is an
+ABI-encoded `address[]`. The foundation accepts a Safe as root. Local chain
+31337 alone may omit the root to create development governance actors.
+`STREAM_ARCHIVAL_OBSERVERS` is an ABI-encoded `(address,bytes32)[]` containing
+sorted observer accounts and distinct nonzero organization commitments.
+`STREAM_ARCHIVAL_QUORUM` defaults to two; explicit gas settings are available
+as `STREAM_ARCHIVAL_SIGNATURE_GAS` and `STREAM_ARCHIVAL_READ_GAS`. Supplying
+identities constructs the verifier; it does not establish live archival evidence.
+
+`StreamGovernanceStagePlan.sol` prepares exact zero-value publication and
+scheduling calls. Submit scheduling from the returned caller, including through
+`Safe.execTransaction`. Retain the original encoded plan and its independent
+hash before signing, and derive the action ID from the confirmed receipt.
+`PrepareCurrentGovernanceStage.s.sol` and `ExecuteSavedGovernanceStage.s.sol`
+expose preparation and resumption; the durable journal and full operator runner
+are still being connected. Seven actual-foundation/Safe tests cover the library.
+
+Catalog extensions invalidate actions scheduled against the previous catalog.
+Execute those actions first, or retain their stale attempts and prepare new
+ones after the extension. Each catalog chunk requires observed execution,
+updated manifest publication and its own ordinary governance delay. Never reuse
+an old schedule by changing its saved plan or recomputing its journal hash.
+
+After activation and onboarding, the
+[phase setup planner](../../docs/integrations/current-mint-setup.md) prepares
+exact EOA/Safe consent, configuration and final Manager handoff calls. The
+[artist activation guide](../../docs/integrations/current-artist-activation.md)
+describes that separate authority stage.
+
+The development compiler profile is Solidity 0.8.19, optimizer 200 runs and
+global via-IR. Development module hashes identify engineering configurations;
+release binding and full-v1 acceptance remain separate work.
+
+For an existing current graph, the [native commerce deployment guide](../../docs/integrations/native-commerce-deployment.md)
+covers the separate recorder/house deployment, exact catalog and escrow
+admission, and Manager/custody binding through the correct owner or Safe root.
+
+## Local checkpoint rehearsal
+
+Install the local driver's pinned ABI and Ethereum-hash dependencies, then run
+its fast codec checks:
+
+```sh
+python -m pip install -r tools/deployment/requirements-current-graph.txt
+python scripts/test_current_graph_resume_codec.py
+```
+
+`scripts/test_current_graph_resume.py --help` lists the project, artifact output,
+Foundry profile, executable and local port options. The rehearsal starts its own
+Anvil chain using public unlocked development accounts. It requires a completed
+native build with current physical contract artifacts and matching graph
+projections; it does not compile or repair a mixed artifact cache. The portable
+operator artifact-preparation command is still being completed. Retain the
+reported gas multipliers and `transactionCapacityAccepted` flag with the result.
+
+## Reserved deployment coordinates
+
+[StreamDeploymentSlot](StreamDeploymentSlot.sol) reserves one CREATE address while
+other deployment and governance transactions occur. Its immutable `operator` may
+be an EOA or Safe. Read `product()` before constructing contracts that must pin
+that future address; later the operator calls `deploy` with argument-inclusive
+creation bytes and the exact linked runtime commitment.
+
+The helper enforces one successful deployment, the predicted address, nonempty
+runtime, and the EVM creation/runtime size bounds. A failed constructor or runtime
+comparison rolls back consumption, the child and all constructor effects. The
+same coordinate remains available for retry. It always deploys with zero value.
+A product sees the slot as its constructor caller, so use it only when intended
+protocol authorities are explicit constructor arguments. The slot is a deployment
+helper and receives no Stream role or module registration.
+
+The required native sequence has two governance boundaries: select the real
+collection Metadata and Router before constructing Snapshot/Reference and the
+original provider/discovery/Finality graph; then construct Coordinator and select
+the actual artist registry before constructing WORK/RIGHTS selectors. Preserve
+all existing SystemManifest members at each publication. The slot removes the
+old sender-nonce-plus-12 assumption. Both current callers now use these stages;
+the child-deployment capacity rehearsal now passes, while product activation
+remains a separate requirement.
+
+Run its reproducible focused checks from the repository root:
+
+```sh
+python tools/deployment/check_deployment_slot.py
+```
+
+Add `--output <new-directory>` to retain exact source, logs and native artifacts.
+The command runs ten cases in both compiler modes, including 256 fuzz inputs,
+actual two-owner Safe failure/identical-signature retry, and a protected local
+script rehearsal. It does not use an RPC or submit broadcast transactions.
+Its larger test harness limit exercises the helper's own product-size guard;
+this does not increase production EVM limits. These checks validate the helper,
+not the full native deployment or its transaction capacities.
+
+## Local planning boundary
+
+`StreamDeploymentPlan` is a stateless helper created when the script is
+constructed, before broadcasting starts. Both deployment entry points stop
+broadcasting around its foundation read and resume with the same deployer.
+The manifest payload is still created in the original broadcast sequence;
+commit, preparation and initialization remain three intended governance calls.
+Catalog construction also uses this helper after broadcasting stops. The helper
+does not become a protocol module, authority, catalog entry or deployment output.
+
+Six planner tests, including the retained actual foundation/Safe regressions
+and a 256-input fuzz property, cover exact plan bytes and catalog semantics.
+The [protected foundation rehearsal](../../test/fixtures/deployment-planner/ProtectedFoundation.s.sol)
+separately exercises the real Core, Executor, roles, registry and manifest under
+default Foundry script protection. It checks no helper nonce and three resumed
+governance writes. Run it locally without an RPC or broadcast submission:
+
+```sh
+python scripts/dev.py test --match-contract '^StreamDeploymentPlanTest$'
+forge script test/fixtures/deployment-planner/ProtectedFoundation.s.sol:ProtectedFoundation --sig 'run()' --via-ir
+```
+
+The helper and bounded foundation rehearsal pass. The staged current product
+entrypoints also complete the capped local rehearsal described above. Expanded
+commerce activation and a matching new candidate remain open.
+
+## Retained RC1 operator recipes
+
+All PowerShell recipes and measurements below describe the frozen RC1 workflow.
+Run them from its retained checkout. The current version-1 PowerShell decoders
+must not consume the new version-2 deployment tuple. Their migration and a fresh
+complete demonstration are pending; these recipes do not prove current-v1
+operator completion.
 
 ## Local Anvil
 
@@ -328,3 +466,72 @@ pwsh -NoProfile -File scripts/test_current_stack_sepolia.ps1
 pwsh -NoProfile -File scripts/test_current_stack_transaction_journal.ps1
 pwsh -NoProfile -File scripts/test_current_stack_launch_status.ps1
 ```
+
+
+## Canonical native companion entrypoint
+
+`DeployCanonicalNativeSales.s.sol` adds the canonical fixed/open, claim/PWYW and
+Dutch products against an existing Recorder. Its typed configuration requires
+explicit constructor gas settings, manifests and read budgets. It reads only the
+public `STREAM_DEPLOYER` address; supply the Foundry signer independently.
+Construction and all read-only activation entrypoints permit Anvil or Sepolia.
+
+Follow the [companion deployment guide](../../docs/integrations/canonical-native-sales-deployment.md#runnable-script-and-interrupted-deployment)
+for exact calldata, separate CREATE/ownership transactions, original-journal
+resumption and actual Safe-owner versus Executor routing. This entrypoint does
+not extend the original 37-role inventory or execute activation merely by
+preparing its calldata. Its source-focused cases are in
+`test/current/StreamCanonicalNativeSalesEntrypoint.t.sol`; runtime/script
+simulation and transaction-capacity evidence remain separate.
+
+## Separate Artist extension deployments
+
+The new Artist constructor candidate predeploys the facade and Identity children
+through the fixed `StreamArtistExtensionFactory`. Every child call is a separate
+transaction. Each host has its own original operator-owned CREATE slot and checks
+all three original factory receipts before construction completes. Preserve the
+original phase-one broadcast journal and compiler-linked library addresses during
+retry. These additional slots finish in phase one; the ten later graph slots and
+the versioned checkpoint retain their existing meanings.
+
+The focused constructor and original Safe-ingress tests are:
+
+```powershell
+forge test --via-ir --match-path test/unit/artist/StreamArtistDeploymentSplit.t.sol --code-size-limit 2000000 --gas-limit 1000000000 -vvv
+```
+
+The large limits apply to the aggregate test harness. This existing unit fixture
+predicts direct CREATE nonces within one call frame; `--isolate` changes its sender
+nonce semantics and is not supported by this focused command. Its per-deployment
+call assertions are diagnostics. The actual operator uses original one-use slots
+across transactions. Run its receipt checks with the new candidate artifacts:
+
+```powershell
+python scripts/test_current_graph_resume.py --project . --evidence artifacts/current-graph-capacity --transaction-gas-cap 16777216
+```
+
+That command starts a fresh local chain with the target block cap, verifies every
+actual deployment and governance transaction limit and receipt, and rejects a
+nonce gap or duplicate. The output remains scoped to local Actor governance and
+partial product selection; it does not claim Safe, testnet or full ceremony
+capacity. Complete production runtime/initcode checks remain required.
+
+The complete graph also applies the second original governed Artist read-budget
+plan, from 300,000 at revision 2 to 600,000 at revision 3, before configuring mint
+phases. The initial activation remains unchanged. After building and preparing
+current graph artifacts as described in [tooling](../../docs/tooling.md), run the
+cold failure and identical-retry case explicitly:
+
+```powershell
+$env:FOUNDRY_PROFILE = 'current'
+$env:STREAM_EXPECT_COLD_ARTIST_FAILURE = 'true'
+forge test --match-contract '^StreamNativeFinalityAssemblyTest$' --match-test '^testActualColdArtistReadBudgetFailureGovernedExpansionAndIdenticalMintRetry\(' --isolate -vvv
+Remove-Item Env:STREAM_EXPECT_COLD_ARTIST_FAILURE
+Remove-Item Env:FOUNDRY_PROFILE
+```
+
+The captured isolated run must record the enabled flag and exactly one executed
+passing case. Ordinary aggregate runs explicitly skip that cold-only negative
+case; their regular paid-mint and ceremony cases still execute the real governed
+expansion. A skipped case, a successful warm call or an ABI-only check does not
+establish cold-call capacity.

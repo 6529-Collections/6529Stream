@@ -1,0 +1,106 @@
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ================================================================== -->
+	<complexType name="TimeCalendarPropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:TimeCalendar"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ================================================================== -->
+	<element name="TimeCalendarEra" type="gml:TimeCalendarEraType" substitutionGroup="gml:Definition"/>
+	<!-- ===================================== -->
+	<complexType name="TimeCalendarEraType">
+		<annotation>
+			<documentation xml:lang="en">In every calendar, years are numbered relative to the date of a 
+      reference event that defines a calendar era. 
+      In this implementation, we omit the back-pointer "datingSystem".</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:DefinitionType">
+				<sequence>
+					<element name="referenceEvent" type="gml:StringOrRefType">
+						<annotation>
+							<documentation>Name or description of a mythical or historic event which fixes the position of the base scale of the calendar era.</documentation>
+						</annotation>
+					</element>
+					<element name="referenceDate" type="date" default="0001-01-01" minOccurs="0">
+						<annotation>
+							<documentation>Date of the referenceEvent expressed as a date in the given calendar. 
+              In most calendars, this date is the origin (i.e., the first day) of the scale, but this is not always true.</documentation>
+						</annotation>
+					</element>
+					<element name="julianReference" type="decimal">
+						<annotation>
+							<documentation>Julian date that corresponds to the reference date.  
+              The Julian day numbering system is a temporal coordinate system that has an 
+              origin earlier than any known calendar, 
+              at noon on 1 January 4713 BC in the Julian proleptic calendar.  
+              The Julian day number is an integer value; 
+              the Julian date is a decimal value that allows greater resolution. 
+              Transforming calendar dates to and from Julian dates provides a 
+              relatively simple basis for transforming dates from one calendar to another.</documentation>
+						</annotation>
+					</element>
+					<element name="epochOfUse" type="gml:TimePeriodPropertyType">
+						<annotation>
+							<documentation>Period for which the calendar era was used as a basis for dating.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ================================================================== -->
+	<complexType name="TimeCalendarEraPropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:TimeCalendarEra"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ================================================================== -->
+	<!-- == Clock == -->
+	<!-- ================================================================== -->
+	<element name="TimeClock" type="gml:TimeClockType" substitutionGroup="gml:_TimeReferenceSystem"/>
+	<!-- ===================================== -->
+	<complexType name="TimeClockType" final="#all">
+		<annotation>
+			<documentation xml:lang="en">A clock provides a basis for defining temporal position within a day. 
+      A clock must be used with a calendar in order to provide a complete description of a temporal position 
+      within a specific day.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTimeReferenceSystemType">
+				<sequence>
+					<element name="referenceEvent" type="gml:StringOrRefType">
+						<annotation>
+							<documentation>Name or description of an event, such as solar noon or sunrise, 
+              which fixes the position of the base scale of the clock.</documentation>
+						</annotation>
+					</element>
+					<element name="referenceTime" type="time">
+						<annotation>
+							<documentation>time of day associated with the reference event expressed as 
+              a time of day in the given clock. The reference time is usually the origin of the clock scale.</documentation>
+						</annotation>
+					</element>
+					<element name="utcReference" type="time">
+						<annotation>
+							<documentation>24 hour local or UTC time that corresponds to the reference time.</documentation>
+						</annotation>
+					</element>
+					<element name="dateBasis" type="gml:TimeCalendarPropertyType" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ================================================================== -->
+	<complexType name="TimeClockPropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:TimeClock"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ================================================================== -->
+</schema>

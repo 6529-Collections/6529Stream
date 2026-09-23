@@ -921,6 +921,15 @@ event VRFConfigUpdated(
 
 ## StreamEntropyProviderARRNG
 
+The current implementation follows
+[ADR 0026](adr/0026-arrng-callback-and-custody-boundaries.md). ARRNG's
+`VRF_CALLBACK_GAS_LIMIT` bounds the adapter's coordinator subcall; the upstream
+controller does not accept a callback-gas argument. Initial requests capture
+that cap and retries use the live raised cap. Incoming-frame loss remains
+unknown and does not permit a fresh draw. Controller-owner pin refresh is an
+operational custody change, separate from pinned oracle source identity.
+Deployed upstream, custody and incoming-envelope acceptance remain required.
+
 `StreamEntropyProviderARRNG` is the preferred candidate for the reviewed
 fallback provider that genesis ships alongside the VRF primary: genesis
 ships VRF primary plus one reviewed fallback, ARRNG preferred for its

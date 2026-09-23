@@ -128,7 +128,8 @@ copies.
 | Event reconstructability tests | [`test/regression/legacy/protocol/StreamEventReconstructability.t.sol`](../../../../test/regression/legacy/protocol/StreamEventReconstructability.t.sol) | Indexer-style log reconstruction for fixed-price, auction, minter bridge, and admin-reference flows |
 | Curator tests | [`test/unit/revenue/StreamCuratorsPool.t.sol`](../../../../test/unit/revenue/StreamCuratorsPool.t.sol) | Curator credit and root behavior |
 | Split wallet tests | [`test/unit/revenue/StreamSplitWallet.t.sol`](../../../../test/unit/revenue/StreamSplitWallet.t.sol) | Split profile, native release, ERC-20 policy gate, ERC-20 release, and adversarial asset behavior |
-| Primary settlement tests | [`test/unit/revenue/StreamPrimarySaleSettlement.t.sol`](../../../../test/unit/revenue/StreamPrimarySaleSettlement.t.sol) | Resolver precedence, template materialization, exact native/ERC-20 settlement, policy drift, replay, and adversarial asset behavior |
+| Current resolver tests | [`test/unit/revenue/StreamRevenueAssignments.t.sol`](../../../../test/unit/revenue/StreamRevenueAssignments.t.sol) | Preserved resolver precedence, assignment freezes and public template materialization; independent of the retired foundation settlement API |
+| Current universal settlement tests | [`test/unit/revenue/StreamUniversalSettlement.t.sol`](../../../../test/unit/revenue/StreamUniversalSettlement.t.sol) | New ERC-20 recorder accounting, strict policy, replay and event reconstruction; does not imply the old native settlement API remains supported |
 | Admin tests | [`test/unit/access/StreamAdmins.t.sol`](../../../../test/unit/access/StreamAdmins.t.sol) | Role event behavior |
 | Pause tests | [`test/regression/legacy/protocol/StreamPauseControls.t.sol`](../../../../test/regression/legacy/protocol/StreamPauseControls.t.sol) | Pause-domain behavior |
 

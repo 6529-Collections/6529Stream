@@ -1,0 +1,307 @@
+#!/usr/bin/env python3
+"""Check the adopted current recovery extension without changing RC1 evidence."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from jsonschema import Draft202012Validator
+from tools.protocol import check_artist_owner_record_continuity as historical
+
+# Only immutable hash/ABI primitives are reused; historical.check requires its old tree.
+ContinuityError = historical.ContinuityError
+_canonical_sha = historical._canonical_sha
+_keccak_text = historical._keccak_text
+_keccak_bytes = historical._keccak_bytes
+_decode_hex = historical._decode_hex
+_abi_hash = historical._abi_hash
+OWNER_RECORD_FIELDS = historical.OWNER_RECORD_FIELDS
+OWNER_RECORD_DOMAIN_HASH = historical.OWNER_RECORD_DOMAIN_HASH
+RECORD_TRANSITION_FIELDS = historical.RECORD_TRANSITION_FIELDS
+RECORD_TRANSITION_DOMAIN_HASH = historical.RECORD_TRANSITION_DOMAIN_HASH
+RECORD_DELTA_FIELDS = historical.RECORD_DELTA_FIELDS
+RECORD_DELTA_DOMAIN_HASH = historical.RECORD_DELTA_DOMAIN_HASH
+
+PACKET_PATH = Path('docs/architecture/artist-owner-record-continuity-extension-v1.json')
+SCHEMA_PATH = Path('docs/architecture/artist-owner-record-continuity-extension-v1.schema.json')
+SCHEMA_ID = 'https://6529.io/schemas/artist-owner-record-continuity-extension-v1.schema.json'
+SCHEMA_SHA256 = '373cc70d97f6cc9d5b59c2caf9d26407574746b22ee68e0ee480eeadff9edc86'
+SEMANTIC_DIGEST = 'sha256:18b77d1517f8444557f025bedeada40e05dfd078a97451889f0a007f38de8736'
+EXPECTED_IDENTITY = {'schema': '6529stream.artist-owner-record-continuity-extension.v1',
+ 'status': 'ADOPTED_PRE_GENESIS_EXTENSION',
+ 'maturity': 'pre_audit_focused_evidence_only',
+ 'historical_commit': '569bf87f1fa808787d324f6e1582924b5ccf1d40'}
+EXPECTED_HISTORICAL_INPUTS = [{'path': 'docs/architecture/artist-owner-record-continuity-v1.json',
+  'sha256': '09f5d194a6d1938f8a09dfee5d34dd5b0ee5f595132216bd001097a230e53b42'},
+ {'path': 'docs/architecture/artist-owner-record-continuity-v1.schema.json',
+  'sha256': '2c665c57e677e266eb139ad3fb9aeaa63b83f0e3204ed59d10d964052f7dfac5'},
+ {'path': 'tools/protocol/check_artist_owner_record_continuity.py',
+  'sha256': '587b7cd0ce309e405559914191ab4626352aed1a2f30728a1bd1bac3dd95b0ce'},
+ {'path': 'tools/protocol/test_artist_owner_record_continuity.py',
+  'sha256': 'eafa6b3da4d0184b229dda186ad1d399cefd31d87f5fb3605d9d06ddd5a958b8'}]
+
+EXPECTED_OPERATION35_OCCURRENCE = {'amendment': 'pre_genesis_operation35_secondary_occurrence_v2',
+ 'operation_id': 35,
+ 'owner_domain': 'identity_authority',
+ 'record_position': 1,
+ 'primary_record_domain': '0x459749364fd07c3a8f1998b82d893d33ef0942c30d94666b42dac1e37ba5feff',
+ 'secondary_record_domain': '0x0c8573762967a1af597f2a7afc4b655a87b3e22d2b11fbab6cf13c6f7b1396ae',
+ 'ordinary_coordinate_unchanged': True,
+ 'permanent_semantic_preimages_unchanged': True,
+ 'owner_record_commitment_preimage_unchanged': True,
+ 'primary_source': 'same_batch_owner_recomputed_typed_recovery_record',
+ 'primary_secondary_join': 'primary.supersededRecordsHash_equals_recomputed_secondary_semantic_hash',
+ 'existing_or_caller_selected_primary_allowed': False,
+ 'distinct_primaries_may_reuse_identical_lists': True,
+ 'duplicate_primary_action_or_nonce': 'reject_atomically_before_persisting_any_change',
+ 'owner_revision_delta': 1,
+ 'ordered_record_appends': 2,
+ 'second_append_failure': 'rollback_primary_secondary_cursor_roots_replay_events_and_archive',
+ 'coordinate': {'domain': '6529STREAM_ARTIST_IDENTITY_RECOVERY_SECONDARY_OCCURRENCE_V2',
+                'domain_hash': '0x05c1b33dc3307a69a2b02b1fdcc96323c6c2dcb072805ca38ec6462ded34ce09',
+                'schema_version': 2,
+                'encoding': 'abi.encode',
+                'ordered_fields': [{'name': 'domain_separator', 'type': 'bytes32'},
+                                   {'name': 'schema_version', 'type': 'uint16'},
+                                   {'name': 'primary_recovery_record_hash', 'type': 'bytes32'},
+                                   {'name': 'secondary_record_domain', 'type': 'bytes32'},
+                                   {'name': 'secondary_semantic_hash', 'type': 'bytes32'}]},
+ 'fixture_common': {'deployment_chain_id': '31337',
+                    'registry_address': '0x0000000000000000000000000000000000000011',
+                    'old_address': '0x0000000000000000000000000000000000000033',
+                    'new_address': '0x0000000000000000000000000000000000000044',
+                    'vested_authority_class': 1,
+                    'evidence_hash': '0x0000000000000000000000000000000000000000000000000000000000000055',
+                    'reason_hash': '0x0000000000000000000000000000000000000000000000000000000000000066',
+                    'recovered_at': '16909060'},
+ 'vectors': [{'name': 'artist_a_empty',
+              'artist_id': '0x0000000000000000000000000000000000000000000000000000000000000022',
+              'governance_action_id': '0x0000000000000000000000000000000000000000000000000000000000000088',
+              'superseded_record_hashes': [],
+              'expected_primary_recovery_record_hash': '0x13d96d7ab525b41942a305e28d561d3393aa134f1f297a69b3a49392d67ee48a',
+              'expected_secondary_semantic_hash': '0x273a8a33fd441297e67ff984921de6f3c18a253af20f4d18fbf9ba110a0d15f3',
+              'expected_occurrence_key': '0x665dcb735498b7fba08f4e57684e476da9bc5b5c4dfba540d9905f990647424a'},
+             {'name': 'artist_b_empty',
+              'artist_id': '0x0000000000000000000000000000000000000000000000000000000000000023',
+              'governance_action_id': '0x0000000000000000000000000000000000000000000000000000000000000088',
+              'superseded_record_hashes': [],
+              'expected_primary_recovery_record_hash': '0x9063f7cde98a733b002f81a781e4c44eb24eb9100a99cc6abf444346208b271b',
+              'expected_secondary_semantic_hash': '0x273a8a33fd441297e67ff984921de6f3c18a253af20f4d18fbf9ba110a0d15f3',
+              'expected_occurrence_key': '0xa14eebb70649fd83b105e59103ae59f0105b819ed51518c429a377cd8847d628'},
+             {'name': 'artist_a_list_action1',
+              'artist_id': '0x0000000000000000000000000000000000000000000000000000000000000022',
+              'governance_action_id': '0x0000000000000000000000000000000000000000000000000000000000000088',
+              'superseded_record_hashes': ['0x0000000000000000000000000000000000000000000000000000000000000001',
+                                           '0x0000000000000000000000000000000000000000000000000000000000000123'],
+              'expected_primary_recovery_record_hash': '0xedb0c88b6ecb20b2711c94e39d720d32f9360bd400e42b936e219a8d540613bb',
+              'expected_secondary_semantic_hash': '0xe02ab7a028756ba35ac3c485faa6c36c4a316087efdea6fa360dc39918ad6cc3',
+              'expected_occurrence_key': '0xa341539dc50186aa80b31fb85974614d20ac5541ae3c6989ddcf57f4188e4c26'},
+             {'name': 'artist_a_list_action2',
+              'artist_id': '0x0000000000000000000000000000000000000000000000000000000000000022',
+              'governance_action_id': '0x0000000000000000000000000000000000000000000000000000000000000089',
+              'superseded_record_hashes': ['0x0000000000000000000000000000000000000000000000000000000000000001',
+                                           '0x0000000000000000000000000000000000000000000000000000000000000123'],
+              'expected_primary_recovery_record_hash': '0x0ee12a1b3f64526481f73ff26f9096c4914b39e69115b7dde5c6217f9d01204c',
+              'expected_secondary_semantic_hash': '0xe02ab7a028756ba35ac3c485faa6c36c4a316087efdea6fa360dc39918ad6cc3',
+              'expected_occurrence_key': '0x933067e6c2f42adda0bd7bbf4f348c48151559235ecac8dbdfd4c2e0d20a911d'}],
+ 'operative_owner_binding': {'profile': 'current_identity_owner_constructor_domain_v1',
+                             'owner_domain_preimage': 'domain:identity_authority',
+                             'owner_domain_id': '0x6579e41542b1bfc6684ea87b09373c4f4690857bd046eb4faf0f92a42bc88adb',
+                             'source': 'actual_constructor_captured_domainId',
+                             'applies_to': ['owner_record_commitment.owner_domain_id',
+                                            'record_delta.owner_domain_id',
+                                            'record_chain.domain_id'],
+                             'ordinary_owner_state_replay_and_constructor_unchanged': True,
+                             'prior_logical_owner_rows_and_vectors_retained': True,
+                             'logical_domain_fallback_allowed': False,
+                             'fixture_identity': {'deployment_chain_id': '1',
+                                                  'registry_address': '0x1111111111111111111111111111111111111111',
+                                                  'coordinator_address': '0x2222222222222222222222222222222222222222',
+                                                  'archive_v2_address': '0x3333333333333333333333333333333333333333',
+                                                  'owner_address': '0x4444444444444444444444444444444444444444',
+                                                  'owner_domain': 'identity_authority',
+                                                  'owner_domain_id': '0x6579e41542b1bfc6684ea87b09373c4f4690857bd046eb4faf0f92a42bc88adb',
+                                                  'owner_revision': '9',
+                                                  'prior_record_sequence': '10',
+                                                  'prior_record_chain_tip': '0x9999999999999999999999999999999999999999999999999999999999999999',
+                                                  'original_caller': '0x5555555555555555555555555555555555555555'},
+                             'vectors': [{'name': 'artist_a_empty',
+                                          'primary_commitment': '0x0b696e29533508071de2869d8913d9719a87f7b25983323a4e5818d44c358d53',
+                                          'secondary_commitment': '0x110dc226f8a93be2bad3275666d48d537ad0621e6746d3523feb80af35eae1e7',
+                                          'first_tip': '0x540b85c9af767ae77d457c8b2e0788d21f17864539ccb6e9052bdf9d0a6324e6',
+                                          'second_tip': '0xd97194ef6116e078adf1d45d89e7338fd43bac7aabf7587287a291d930e13653',
+                                          'record_delta': '0x858647dc28047b432de1f0ec5d7e980c8dfef48c5db699ae3523acf49a1ecf02'},
+                                         {'name': 'artist_b_empty',
+                                          'primary_commitment': '0x18e619ad3f7b6853114ffbd6eb4f0961116b4913b392b085f76ed4cb87d4aa7a',
+                                          'secondary_commitment': '0x110dc226f8a93be2bad3275666d48d537ad0621e6746d3523feb80af35eae1e7',
+                                          'first_tip': '0x319527137ef0f3f0a0a406c47d09e66b4af8e9d7c1c4d31845315b3da7152431',
+                                          'second_tip': '0x72307f67ffe08ba452f1d59c41a189fc9bd3043c5af5036c3037be5b9ac63328',
+                                          'record_delta': '0x088706c5e5a200cb17b0f4b9626b13d40b3749be81f1ced757a9e8cbdec5c492'},
+                                         {'name': 'artist_a_list_action1',
+                                          'primary_commitment': '0x78823e2cff8c76c201e2c72bdf10cd1672e52c3ca620416442b9ec7b4b134b9f',
+                                          'secondary_commitment': '0x9a6524a55dcece262ba5740abbc3d1b2dbd52c8d2dd557e63ce48c21e3583af6',
+                                          'first_tip': '0x5956b0d799b92706954e4bca09df8c008b8cd4a521154a6933abdf8f999c47ab',
+                                          'second_tip': '0xd3d238c1722960ab04730240fffc8196b05be17e70b5e1698b2fdef1382df8d9',
+                                          'record_delta': '0x04e0aed762a8126c1081a0951a6b489c38ad4b68d0ea4076de0a92c437d4d592'},
+                                         {'name': 'artist_a_list_action2',
+                                          'primary_commitment': '0x4079df9b4736f00185aeb9d358beb9b28686c4963ddc5c0fe5483c5f456a09a3',
+                                          'secondary_commitment': '0x9a6524a55dcece262ba5740abbc3d1b2dbd52c8d2dd557e63ce48c21e3583af6',
+                                          'first_tip': '0x94c84e68ac1420dd566f03d39e6a0a993a1bb1b243916aadb636b7bbe9484a07',
+                                          'second_tip': '0x7f38740069f2bc5ee0b24608a086743f2d9ea97e81d57e85adcd4dbdcac5301c',
+                                          'record_delta': '0xd93dad351b58f51b9e99c64e76b1248c9b09f756075eb2a2f880103fa99f2ebf'}]}}
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ContinuityError(f"duplicate JSON key: {key}")
+        value[key] = item
+    return value
+
+
+def _reject_constant(value: str) -> None:
+    raise ContinuityError(f"non-JSON constant: {value}")
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"),
+                           object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ContinuityError(f"cannot read JSON {path.as_posix()}") from exc
+    if not isinstance(value, dict):
+        raise ContinuityError(f"JSON object required: {path.as_posix()}")
+    return value
+
+
+def _check_occurrence(packet: dict[str, Any]) -> None:
+    occurrence = packet["operation35_secondary_occurrence"]
+    if occurrence != EXPECTED_OPERATION35_OCCURRENCE:
+        raise ContinuityError("operation35 occurrence policy or vectors drifted")
+    coordinate = occurrence["coordinate"]
+    if _keccak_text(coordinate["domain"]) != coordinate["domain_hash"]:
+        raise ContinuityError("operation35 occurrence domain drifted")
+    common = occurrence["fixture_common"]
+    for row in occurrence["vectors"]:
+        records = row["superseded_record_hashes"]
+        ordered = [_decode_hex(v, 32) for v in records]
+        if any(v == bytes(32) for v in ordered) or ordered != sorted(set(ordered)):
+            raise ContinuityError("operation35 list vector is not canonical")
+        secondary = "0x" + _keccak_bytes(_decode_hex(occurrence["secondary_record_domain"], 32) + (64).to_bytes(32, "big") + len(ordered).to_bytes(32, "big") + b"".join(ordered)).hex()
+        fields = (("domain", "bytes32"), ("chain", "uint256"), ("registry", "address"), ("artist", "bytes32"), ("old", "address"), ("new", "address"), ("class", "uint8"), ("evidence", "bytes32"), ("reason", "bytes32"), ("secondary", "bytes32"), ("action", "bytes32"), ("time", "uint64"))
+        values = dict(domain=occurrence["primary_record_domain"], chain=common["deployment_chain_id"], registry=common["registry_address"], artist=row["artist_id"], old=common["old_address"], new=common["new_address"], evidence=common["evidence_hash"], reason=common["reason_hash"], secondary=secondary, action=row["governance_action_id"], time=common["recovered_at"])
+        values["class"] = common["vested_authority_class"]
+        primary = _abi_hash(fields, values)
+        key_fields = tuple((f["name"], f["type"]) for f in coordinate["ordered_fields"])
+        key = _abi_hash(key_fields, dict(domain_separator=coordinate["domain_hash"], schema_version=2, primary_recovery_record_hash=primary, secondary_record_domain=occurrence["secondary_record_domain"], secondary_semantic_hash=secondary))
+        if (primary, secondary, key) != (row["expected_primary_recovery_record_hash"], row["expected_secondary_semantic_hash"], row["expected_occurrence_key"]):
+            raise ContinuityError("operation35 occurrence vector calculation drifted")
+
+
+def _check_current_owner_vectors(packet: dict[str, Any]) -> None:
+    occurrence = packet["operation35_secondary_occurrence"]
+    profile = occurrence["operative_owner_binding"]
+    if _keccak_text(profile["owner_domain_preimage"]) != profile["owner_domain_id"]:
+        raise ContinuityError("operation35 current constructor domain drifted")
+    identity = profile["fixture_identity"]
+    common = {key: identity[key] for key in (
+        "deployment_chain_id", "registry_address", "coordinator_address",
+        "archive_v2_address", "owner_address", "owner_domain_id"
+    )}
+    for semantic, expected in zip(occurrence["vectors"], profile["vectors"], strict=True):
+        commitments = []
+        tips = []
+        tip = identity["prior_record_chain_tip"]
+        for index, (domain, value) in enumerate((
+            (occurrence["primary_record_domain"], semantic["expected_primary_recovery_record_hash"]),
+            (occurrence["secondary_record_domain"], semantic["expected_secondary_semantic_hash"]),
+        )):
+            commitment = _abi_hash(OWNER_RECORD_FIELDS, {
+                "domain_separator": OWNER_RECORD_DOMAIN_HASH, "schema_version": 2,
+                **common, "owner_revision": identity["owner_revision"],
+                "record_sequence": 11 + index, "original_caller": identity["original_caller"],
+                "record_domain": domain, "semantic_record_hash": value,
+            })
+            tip = _abi_hash(RECORD_TRANSITION_FIELDS, {
+                "domain_separator": RECORD_TRANSITION_DOMAIN_HASH, **common,
+                "domain_id": profile["owner_domain_id"], "prior_record_sequence": 10 + index,
+                "next_record_sequence": 11 + index, "prior_record_chain_tip": tip,
+                "record_commitment": commitment,
+            })
+            commitments.append(commitment)
+            tips.append(tip)
+        delta = _abi_hash(RECORD_DELTA_FIELDS, {
+            "domain_separator": RECORD_DELTA_DOMAIN_HASH, "schema_version": 2, **common,
+            "owner_revision": identity["owner_revision"], "prior_record_sequence": 10,
+            "next_record_sequence": 12, "prior_record_chain_tip": identity["prior_record_chain_tip"],
+            "record_count": 2, "record_0_domain": occurrence["primary_record_domain"],
+            "record_0_semantic_hash": semantic["expected_primary_recovery_record_hash"],
+            "record_0_owner_commitment": commitments[0],
+            "record_1_domain": occurrence["secondary_record_domain"],
+            "record_1_semantic_hash": semantic["expected_secondary_semantic_hash"],
+            "record_1_owner_commitment": commitments[1], "next_record_chain_tip": tips[1],
+        })
+        actual = dict(name=semantic["name"], primary_commitment=commitments[0],
+                      secondary_commitment=commitments[1], first_tip=tips[0],
+                      second_tip=tips[1], record_delta=delta)
+        if actual != expected:
+            raise ContinuityError("operation35 current owner vector calculation drifted")
+
+
+def _check_semantic_digest(packet: dict[str, Any]) -> None:
+    payload = dict(packet)
+    observed_field = payload.pop("semantic_digest")
+    observed = "sha256:" + _canonical_sha(payload)
+    if observed_field != observed or observed != SEMANTIC_DIGEST:
+        raise ContinuityError("packet semantic digest drifted")
+
+
+def check(root: Path) -> None:
+    root = root.resolve(strict=True)
+    packet = _read_json(root / PACKET_PATH)
+    schema = _read_json(root / SCHEMA_PATH)
+    if hashlib.sha256((root / SCHEMA_PATH).read_bytes()).hexdigest() != SCHEMA_SHA256:
+        raise ContinuityError("packet schema digest drifted")
+    if schema.get("$id") != SCHEMA_ID:
+        raise ContinuityError("packet schema id drifted")
+    errors = list(Draft202012Validator(schema).iter_errors(packet))
+    if errors:
+        raise ContinuityError(f"packet schema validation failed: {errors[0].message}")
+    if any(packet.get(k) != v for k, v in EXPECTED_IDENTITY.items()):
+        raise ContinuityError("current extension identity drifted")
+    if packet["historical_inputs"] != EXPECTED_HISTORICAL_INPUTS:
+        raise ContinuityError("historical input references drifted")
+    for row in EXPECTED_HISTORICAL_INPUTS:
+        try:
+            observed = hashlib.sha256((root / row["path"]).read_bytes()).hexdigest()
+        except OSError as exc:
+            raise ContinuityError(f"historical input unavailable: {row['path']}") from exc
+        if observed != row["sha256"]:
+            raise ContinuityError(f"historical input bytes drifted: {row['path']}")
+    _check_occurrence(packet)
+    _check_current_owner_vectors(packet)
+    _check_semantic_digest(packet)
+    print("current recovery continuity extension: four semantic and four owner vectors exact; "
+          "historical inputs preserved; no full-v1 release or deployment acceptance")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
+    args = parser.parse_args()
+    try:
+        check(args.root)
+    except ContinuityError as exc:
+        print(f"current recovery continuity check failed: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

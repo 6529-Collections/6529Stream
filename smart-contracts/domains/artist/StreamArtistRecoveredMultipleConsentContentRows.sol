@@ -1,0 +1,257 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import {
+    StreamArtistRecoveredHydrationTypes as RH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
+import {
+    StreamArtistRecoveredIdentityHydrationTypes as IH
+} from "../../interfaces/stream/artist/StreamArtistRecoveredIdentityHydrationTypes.sol";
+import {
+    StreamArtistAuthorityHydrationTypes as AH
+} from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    StreamArtistDelegationTypes as D
+} from "../../interfaces/stream/artist/StreamArtistDelegationTypes.sol";
+import {
+    IStreamArtistContentRecordsOwner as ContentOwner
+} from "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
+import {
+    StreamArtistContentTypes as Content
+} from "../../interfaces/stream/artist/StreamArtistContentTypes.sol";
+import {
+    StreamArtistRecoveredContentConsentHydration as ContentH
+} from "./StreamArtistRecoveredContentConsentHydration.sol";
+import {
+    StreamArtistRecoveredHydrationChronology as Chronology
+} from "./StreamArtistRecoveredHydrationChronology.sol";
+
+/// @notice Slim linked worker for original17/20/21 evidence and delegated20 use reconciliation.
+/// @dev The facade supplies every field consumed by the original validator. Complete source
+/// certificate and owner-map authentication remain prerequisites; no authority is reauthorized.
+library StreamArtistRecoveredMultipleConsentContentRows {
+    struct IdentityRows {
+        bytes32 artistId;
+        IH.SignatureRow[] signatures;
+        IH.DelegationRow[] delegations;
+    }
+
+    struct ConsentRows {
+        bytes32 artistId;
+        uint256 collectionId;
+        bytes32 bindingHash;
+        ContentOwner.ConsentRecord[] consents;
+        ContentH.Royalty[] royalties;
+        Content.FreezeRecord[] freezes;
+    }
+
+    struct Scope {
+        bytes32 artistId;
+        uint256 collectionId;
+        bytes32 bindingHash;
+    }
+
+    function validateRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p
+    ) public pure returns (uint256[] memory uses) {
+        return _validateRows(identity, consent, q, p, 1, false);
+    }
+
+    function validateGenerationRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory uses) {
+        if (generation < 2 || generation > 128 || identity.delegations.length != 0) _invalid();
+        return _validateRows(identity, consent, q, p, generation, false);
+    }
+
+    /// @notice Explicit grant-bearing generation profile; original no-grant entry stays strict.
+    /// @dev Complete grant hashes/nonces and exact aggregate uses are checked by the paired
+    /// authenticated generation-delegation caller. Every original row check remains below.
+    function validateGenerationRowsWithGrants(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory uses) {
+        if (generation < 2 || generation > 128) _invalid();
+        return _validateRows(identity, consent, q, p, generation, false);
+    }
+
+    /// @dev The paired RatificationFacts validates every52 row against this same full journal.
+    function validateRatifiedRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory) {
+        if (generation == 0 || generation > 128) _invalid();
+        return _validateRows(identity, consent, q, p, generation, true);
+    }
+
+    function _validateRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation,
+        bool ratified
+    ) private pure returns (uint256[] memory uses) {
+        if (
+            q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0
+                || identity.artistId != q.artistId || consent.artistId != q.artistId
+                || consent.collectionId != q.collectionId || consent.bindingHash != q.bindingHash
+        ) _invalid();
+        uses = new uint256[](identity.delegations.length);
+        uint256 contents;
+        uint256 royalties;
+        uint256 freezes;
+        for (uint256 i; i < p.journals[6].length; ++i) {
+            RH.JournalEntry memory native_ = p.journals[6][i];
+            // Keep the complete original certificate; select only this collection's row indices.
+            if (
+                native_.receipt.artistId != q.artistId
+                    || native_.receipt.collectionId != q.collectionId
+            ) continue;
+            uint16 op = native_.receipt.operation;
+            if (op == 14 || op == 15 || op == 16 || (ratified && op == 52)) continue;
+            if (op != 17 && op != 20 && op != 21) _invalid();
+            if (
+                native_.receipt.artistId != q.artistId
+                    || native_.receipt.collectionId != q.collectionId
+                    || native_.receipt.recordHash == 0 || native_.position.point.ownerIndex != 6
+            ) _invalid();
+            Chronology.validatePoint(p, native_.position.point);
+            for (uint256 j; j < i; ++j) {
+                if (p.journals[6][j].receipt.recordHash == native_.receipt.recordHash) _invalid();
+            }
+            _signature(identity, native_.receipt.recordHash);
+            if (op == 17) {
+                if (contents == consent.consents.length) _invalid();
+                ContentOwner.ConsentRecord memory row = consent.consents[contents++];
+                if (
+                    row.recordHash != native_.receipt.recordHash || row.artistId != q.artistId
+                        || row.bindingGeneration != generation
+                        || row.terms.collectionId != q.collectionId
+                        || (row.authorityClass != 1 && row.authorityClass != 3)
+                ) _invalid();
+            } else if (op == 21) {
+                if (freezes == consent.freezes.length) _invalid();
+                Content.FreezeRecord memory row = consent.freezes[freezes++];
+                if (
+                    row.recordHash != native_.receipt.recordHash || row.artistId != q.artistId
+                        || row.bindingGeneration != generation
+                        || (row.authorityClass != 1 && row.authorityClass != 3)
+                ) _invalid();
+            } else {
+                if (royalties == consent.royalties.length) _invalid();
+                ContentH.Royalty memory row = consent.royalties[royalties++];
+                if (
+                    row.item.recordHash != native_.receipt.recordHash
+                        || row.item.artistId != q.artistId
+                        || row.item.bindingGeneration != generation
+                        || row.terms.collectionId != q.collectionId
+                ) _invalid();
+                if (row.grant != 0) {
+                    ++uses[_grant(identity, p, q.collectionId, row.grant, native_.position.point)];
+                }
+            }
+        }
+        if (
+            contents != consent.consents.length || royalties != consent.royalties.length
+                || freezes != consent.freezes.length
+        ) _invalid();
+    }
+
+    function _signature(IdentityRows memory identity, bytes32 record) private pure {
+        bool found;
+        for (uint256 i; i < identity.signatures.length; ++i) {
+            if (identity.signatures[i].recordHash != record) continue;
+            if (found || identity.signatures[i].signature.length > 4096) _invalid();
+            found = true;
+        }
+        // Empty bytes are valid direct/Safe evidence. Exact source bytes and all nonce/replay
+        // inventories are authenticated separately; there is no new ERC1271 check here.
+        if (!found) _invalid();
+    }
+
+    function _grant(
+        IdentityRows memory identity,
+        RH.Provenance memory p,
+        uint256 collectionId,
+        bytes32 hash,
+        RH.Point memory usePoint
+    ) private pure returns (uint256 at) {
+        uint256 useEra = _era(p, usePoint.environmentHash);
+        for (uint256 i; i < identity.delegations.length; ++i) {
+            IH.DelegationRow memory row = identity.delegations[i];
+            if (row.recordHash != hash) continue;
+            D.Grant memory grant = row.record.grant;
+            if (
+                grant.artistId != identity.artistId || grant.delegate == address(0)
+                    || (grant.collectionId != 0 && grant.collectionId != collectionId)
+                    || (grant.capabilities & D.ROYALTY_FREEZE) == 0
+                    || row.position.point.ownerIndex != 2
+                    || _era(p, row.position.point.environmentHash) > useEra
+            ) _invalid();
+            Chronology.validatePoint(p, row.position.point);
+            if (
+                row.record.revoked
+                    && _revocationEra(p, identity.artistId, row.record.revocationRecordHash)
+                        < useEra
+            ) _invalid();
+            for (uint256 j = i + 1; j < identity.delegations.length; ++j) {
+                IH.DelegationRow memory next = identity.delegations[j];
+                if (
+                    next.record.grant.delegate == grant.delegate
+                        && _era(p, next.position.point.environmentHash) < useEra
+                ) _invalid();
+            }
+            // Within one era, Identity and Consent have independent revision counters. The
+            // original writer authenticated order, live epoch, validity and grant consumption.
+            // Only an earlier/later era supplies an additional cross-owner ordering fact.
+            return i;
+        }
+        _invalid();
+    }
+
+    function _revocationEra(RH.Provenance memory p, bytes32 artist, bytes32 record)
+        private
+        pure
+        returns (uint256 era)
+    {
+        bool found;
+        if (record == 0) _invalid();
+        for (uint256 i; i < p.journals[2].length; ++i) {
+            RH.JournalEntry memory native_ = p.journals[2][i];
+            if (native_.receipt.recordHash != record) continue;
+            if (
+                found || native_.receipt.operation != 27 || native_.receipt.artistId != artist
+                    || native_.receipt.collectionId != 0 || native_.position.point.ownerIndex != 2
+            ) _invalid();
+            Chronology.validatePoint(p, native_.position.point);
+            era = _era(p, native_.position.point.environmentHash);
+            found = true;
+        }
+        if (!found) _invalid();
+    }
+
+    function _era(RH.Provenance memory p, bytes32 origin) private pure returns (uint256) {
+        for (uint256 i; i < p.eras.length; ++i) {
+            if (p.eras[i].originHash == origin) return i;
+        }
+        _invalid();
+    }
+
+    function _invalid() private pure {
+        revert RH.InvalidRecoveredHydrationProfile();
+    }
+}

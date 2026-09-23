@@ -1,0 +1,831 @@
+{
+  "sourceCommit": "bba738e9a9af3f12fdccd2e9cbc825aa555adb08",
+  "sourceTree": "236b9e7c52de9701177394f302925788a2bbb695",
+  "compilerVersion": "0.8.19",
+  "sourceCount": 130,
+  "scope": "Selected mint counter-profile and Manager/Ledger continuity/ancestry callers and reads; no retirement, Core activation or runtime acceptance",
+  "provenance": {
+    "compilerInputSha256": "b2e12eef016901d44188ced46c02fd5893a0554c65dc1cc061c6c9445b6d79ac",
+    "compilerOutputSha256": "736b7dd4955030afb89d3cc9feef1b8eddefc7fbe5d00f905b043b9b07782b59"
+  },
+  "contracts": [
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintCounterPolicy.sol",
+      "contract": "IStreamMintCounterPolicy",
+      "sourceSha256": "bd599062df648b8f27ca7c9d8d12e1b4a8e81313415695a347a53e245e180a6d",
+      "methods": [
+        "registerCounterDefinition",
+        "counterDefinition",
+        "counterDefinitionForManager",
+        "managerDefinitionCount",
+        "managerDefinitionAt"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "definitionHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterDefinition",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum IStreamMintCounterPolicy.CounterScope",
+                  "name": "scope",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "capRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintCounterPolicy.Definition",
+              "name": "definition",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "definitionHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterDefinitionForManager",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum IStreamMintCounterPolicy.CounterScope",
+                  "name": "scope",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "capRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintCounterPolicy.Definition",
+              "name": "definition",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "managerDefinitionAt",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "definitionHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "defined",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum IStreamMintCounterPolicy.CounterScope",
+                  "name": "scope",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "capRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintCounterPolicy.Definition",
+              "name": "definition",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            }
+          ],
+          "name": "managerDefinitionCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "enum IStreamMintCounterPolicy.CounterScope",
+                  "name": "scope",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "capRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintCounterPolicy.Definition",
+              "name": "definition",
+              "type": "tuple"
+            }
+          ],
+          "name": "registerCounterDefinition",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintLedgerImport.sol",
+      "contract": "IStreamMintLedgerImport",
+      "sourceSha256": "8ac413a101dabe2b0fc49777f288a096771094e5b1449e1158c42728f88e04d9",
+      "methods": [
+        "ledgerWriterRetiredAt",
+        "commitCounterImportRoot",
+        "importCounterDefinitions",
+        "mintImportDefinitionProgress",
+        "completeCounterImport",
+        "mintImportCommitment",
+        "isMintSuccessorReady"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "predecessorLedger",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "predecessorManager",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "successorManager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "snapshotBlock",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "commitCounterImportRoot",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "counterLeaves",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "nullifierLeaves",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "descriptorProof",
+              "type": "bytes32[]"
+            }
+          ],
+          "name": "completeCounterImport",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "importCounterDefinitions",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "predecessorLedger",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "predecessorManager",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "successorManager",
+              "type": "address"
+            }
+          ],
+          "name": "isMintSuccessorReady",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "name": "ledgerWriterRetiredAt",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "mintImportCommitment",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "predecessorLedger",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "predecessorManager",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "successorManager",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "snapshotBlock",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "manifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "importedCounters",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "importedNullifiers",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "complete",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct IStreamMintLedgerImport.ImportCommitment",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "mintImportDefinitionProgress",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "imported",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "required",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintManagerImport.sol",
+      "contract": "IStreamMintManagerImport",
+      "sourceSha256": "836c0612d4b42baec975cbf9b53c23f66c496b883aaa32e49a2d9227b70909f0",
+      "methods": [
+        "importMintState"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes",
+              "name": "encodedBatch",
+              "type": "bytes"
+            }
+          ],
+          "name": "importMintState",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol",
+      "contract": "IStreamMintLedger",
+      "sourceSha256": "be94ef9d2b751f57de9fec33f55cabc5c3556d6c48a2d1a5949fd575f162c2ce",
+      "methods": [
+        "deriveCounterValueKey",
+        "counterValue",
+        "isManagerNullifierUsed"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterValue",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "deriveCounterValueKey",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isManagerNullifierUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintLedgerContinuity.sol",
+      "contract": "IStreamMintLedgerContinuity",
+      "sourceSha256": "0d5463144d8304113c05e137aa1a2f8ffd51dd4ffd56ba20d8e2337cf5221e1b",
+      "methods": [
+        "mintAncestorCount",
+        "mintAncestorAt",
+        "importMintAncestors",
+        "mintImportAncestryProgress",
+        "isCompletedMintDescendant"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "importMintAncestors",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "ancestorLedger",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ancestorManager",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "successorManager",
+              "type": "address"
+            }
+          ],
+          "name": "isCompletedMintDescendant",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "mintAncestorAt",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "ledger",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ancestorManager",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            }
+          ],
+          "name": "mintAncestorCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "importRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "mintImportAncestryProgress",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "imported",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "required",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
+      "contract": "StreamMintLedger",
+      "sourceSha256": "8c6af5ec1bbb548f40f82b2cbccab34c2b1d9890ed0c095bb614d594c31d8e22",
+      "methods": [
+        "owner",
+        "ledgerWriter"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "ledgerWriter",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+      "contract": "StreamMintManager",
+      "sourceSha256": "7d2cf82fdad72c9ce009a0eaf599570a242b8f371df45d9c756c45989eb21698",
+      "methods": [
+        "owner",
+        "governanceAuthority",
+        "mintLedger",
+        "core"
+      ],
+      "abi": [
+        {
+          "inputs": [],
+          "name": "core",
+          "outputs": [
+            {
+              "internalType": "contract IStreamCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "governanceAuthority",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "mintLedger",
+          "outputs": [
+            {
+              "internalType": "contract IStreamMintLedger",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    }
+  ]
+}

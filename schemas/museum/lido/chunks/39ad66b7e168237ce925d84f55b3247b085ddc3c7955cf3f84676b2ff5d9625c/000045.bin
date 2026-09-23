@@ -1,0 +1,115 @@
+an class="ot">    xmlns:gml=</span><span class="st">&quot;http://www.opengis.net/gml&quot;</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="ot">    xmlns:owl=</span><span class="st">&quot;http://www.w3.org/2002/07/owl#&quot;</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="ot">    xmlns:rdf=</span><span class="st">&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="ot">    xmlns:skos=</span><span class="st">&quot;http://www.w3.org/2004/02/skos/core#&quot;</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="ot">    xmlns:xml=</span><span class="st">&quot;http://www.w3.org/XML/1998/namespace&quot;</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="ot">    xmlns:xsi=</span><span class="st">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.3.1" id="geographic-locations-gml"><span
+            class="header-section-number">5.3.1</span> Geographic
+            locations (gml)</h3>
+            <p><strong>Namespace:</strong> <a
+            href="http://www.opengis.net/gml"
+            class="uri">http://www.opengis.net/gml</a></p>
+            <p><strong>Origin:</strong> Open Geospatial Consortium
+            (OGC)</p>
+            <p><strong>Elements used:</strong> gml:Point,
+            gml:LineString, gml:Polygon</p>
+            <p>GML is a huge XML schema widely used in geographic
+            information system (GIS) applications. LIDO reuses three
+            elements from GML for representing location coordinates
+            wrapped up in the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#gml">lido:gml</a>&gt;
+            element. &lt;lido:gml&gt; is available in all LIDO elements
+            derived from <a
+            href="https://lido-schema.org/schema/latest/lido.html#placeComplexType">lido:placeComplexType</a>.
+            These are:</p>
+            <ul>
+            <li><a
+            href="http://www.lido-schema.org/schema/v1.1/lido-v1.1.html#partOfPlace">lido:partOfPlace</a></li>
+            <li><a
+            href="http://www.lido-schema.org/schema/v1.1/lido-v1.1.html#place">lido:place</a></li>
+            <li><a
+            href="http://www.lido-schema.org/schema/v1.1/lido-v1.1.html#repositoryLocation">lido:repositoryLocation</a></li>
+            <li><a
+            href="http://www.lido-schema.org/schema/v1.1/lido-v1.1.html#vitalPlaceActor">lido:vitalPlaceActor</a></li>
+            </ul>
+            <p>The &lt;lido:gml&gt; element is structured as
+            follows:</p>
+            <figure>
+            <img src="img/figure_gml.png"
+            alt="Figure 10: Sub-elements of lido:gml" />
+            <figcaption aria-hidden="true">Figure 10: Sub-elements of
+            lido:gml</figcaption>
+            </figure>
+            <p>All three GML elements can have an attribute,
+            <em>srsName</em>, for the <a
+            href="https://spatialreference.org/">spatial reference
+            system</a> (SRS) to which the coordinate values apply. If
+            the <em>srsName</em> attribute is omitted, then the <a
+            href="https://spatialreference.org/ref/epsg/wgs-84/">World
+            Geodetic System 1984</a> (WGS 84, also known as EPSG 4326)
+            coordinate system is assumed. Thus the <em>srsName</em>
+            attribute is only required in the rare case where a location
+            given in historical coordinates has not been translated to
+            WGS 84.</p>
+            <p>The most common GML sub-element will be
+            <em>gml:point</em> for a single coordinate pair. Here,
+            coordinates are written as decimal degrees with negative
+            values for western and southern hemispheres, respectively.
+            The format is latitude, followed by a space, followed by
+            longitude. For example, &lt;gml:pos&gt;-34.6
+            -58.38&lt;/gml:pos&gt; is the approximate location of Buenos
+            Aires, Argentina, and &lt;gml:pos&gt;43.78
+            11.25&lt;/gml:pos&gt; encodes the location Florence,
+            Italy.</p>
+            <p>Validating parsers will check the syntax of all GML
+            elements within a LIDO record using the GML XML schema
+            included via an <em>xs:import</em> directive.</p>
+            <h3 data-number="5.3.2" id="concepts-skos"><span
+            class="header-section-number">5.3.2</span> Concepts
+            (skos)</h3>
+            <p><strong>Namespace:</strong> <a
+            href="http://www.w3.org/2004/02/skos/core"
+            class="uri">http://www.w3.org/2004/02/skos/core</a>#</p>
+            <p><strong>Origin:</strong> W3C Semantic Web Deployment
+            Working Group</p>
+            <p><strong>Element used:</strong> skos:Concept</p>
+            <p>The <a href="https://www.w3.org/2004/02/skos/">Simple
+            Knowledge Organization System</a> (SKOS) is a data model for
+            representing controlled vocabularies in the <a
+            href="https://www.w3.org/RDF/">Resource Description
+            Framework</a> (RDF). SKOS has evolved to the de-facto
+            standard for authority data in the Linked Data sphere. Many
+            important controlled vocabularies are published in SKOS, for
+            instance, the <a
+            href="https://www.getty.edu/research/tools/vocabularies/aat/index.html">Art
+            &amp; Architecture Thesaurus</a> (AAT) or the <a
+            href="https://id.loc.gov/authorities/subjects.html">Library
+            of Congress Subject Headings</a> (LCSH).</p>
+            <p>The SKOS class &lt;skos:Concept&gt; is introduced in LIDO
+            v1.1 to represent LOD vocabularies. All LIDO elements for
+            which a &lt;[lido:conceptID]&gt; element is defined, can
+            preferably use the SKOS class &lt;skos:Concept&gt; together
+            with allowed SKOS properties of this class represented in
+            RDF/XML syntax.</p>
+            <p>Following this syntax, &lt;skos:Concept&gt; becomes an
+            XML element with the attribute ‘rdf:about’ for the URI of
+            the Linked Data resource to be referenced. In its most basic
+            form, &lt;skos:Concept&gt; could be used as follows in LIDO
+            v1.1, referencing the AAT concept ‘<a
+            href="http://vocab.getty.edu/aat/300033799">oil
+            paintings</a>’:</p>
+            <div class="sourceCode" id="cb43"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300033799&quot;</span>/&gt;</span></code></pre></div>
+            <p>which is equivalent to</p>
+            <div class="sourceCode" id="cb44"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:conceptID</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    http://vocab.getty.edu/aat/300033799</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:conceptID</span>&gt;</span></code></pre></div>
+            <p>The advantage of using &lt;skos:Concept&gt; instead of
+            &lt;lido:conceptID&gt; becomes evident when further
+            information from or about the Linked Data resource is added
+            to the concept reference, for example:</p>
+            <div class="sourceCode" id="cb45"><pre
+            class

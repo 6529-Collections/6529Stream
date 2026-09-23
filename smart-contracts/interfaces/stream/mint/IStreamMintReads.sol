@@ -9,6 +9,18 @@ import "../../../vendor/openzeppelin/IERC165.sol";
 /// @dev Caller ABI at the manager address. Use IStreamMintManager for ERC165
 ///      discovery and canonical nested request types; subset IDs are not advertised.
 interface IStreamMintReads {
+    /// @notice Computes the prospective policy under this Manager's immutable dependencies.
+    /// @dev Sign this result before registration; pause does not alter policy identity.
+    function previewPhasePolicyHash(
+        uint256 collectionId,
+        bytes32 phaseId,
+        IStreamMintManager.MintPhaseConfig calldata config,
+        IStreamMintManager.MintGateConfig calldata gateConfig,
+        bytes32[] calldata counterIds,
+        IStreamMintManager.MintCounterConfig[] calldata counterConfigs,
+        address[] calldata executors
+    ) external view returns (bytes32);
+
     /// @notice Permanent Core to which this manager allocates tokens.
     function core() external view returns (IStreamCore);
 

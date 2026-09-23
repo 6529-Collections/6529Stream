@@ -1,0 +1,315 @@
+on",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "spatial_projection": {
+      "@id": "crm:P161_has_spatial_projection",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "presence_of": {
+      "@id": "crm:P165_incorporates",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "incorporated_by": {
+      "@id": "crm:P165i_is_incorporated_in",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "a_presence_of": {
+      "@id": "crm:P166_was_a_presence_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "presence": {
+      "@id": "crm:P166i_had_presence",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "at": {
+      "@id": "crm:P167_at",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "place_of": {
+      "@id": "crm:P167i_was_place_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "defined_by": {
+      "@id": "crm:P168_place_is_defined_by"
+    },
+    "spacetime_volume_is_defined_by": {
+      "@id": "crm:P169i_spacetime_volume_is_defined_by"
+    },
+    "time_is_defined_by": {
+      "@id": "crm:P170i_time_is_defined_by"
+    },
+    "at_some_place_within": {
+      "@id": "crm:P171_at_some_place_within"
+    },
+    "spatially_contains": {
+      "@id": "crm:P172_contains"
+    },
+    "starts_before_or_with_the_end_of": {
+      "@id": "crm:P173_starts_before_or_with_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_after_or_with_the_start_of": {
+      "@id": "crm:P173i_ends_after_or_with_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "starts_before_the_end_of": {
+      "@id": "crm:P174_starts_before_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_after_the_start_of": {
+      "@id": "crm:P174i_ends_after_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "starts_before_or_with_the_start_of": {
+      "@id": "crm:P175_starts_before_or_with_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "starts_with_or_after_the_start_of": {
+      "@id": "crm:P175i_starts_with_or_after_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "starts_before_the_start_of": {
+      "@id": "crm:P176_starts_before_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "starts_after_the_start_of": {
+      "@id": "crm:P176i_starts_after_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "assigned_property": {
+      "@id": "crm:P177_assigned_property_of_type",
+      "@type": "@vocab"
+    },
+    "sales_price": {
+      "@id": "crm:P179_had_sales_price",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "sales_price_of": {
+      "@id": "crm:P179i_was_sales_price_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "currency": {
+      "@id": "crm:P180_has_currency",
+      "@type": "@id"
+    },
+    "currency_of": {
+      "@id": "crm:P180i_was_currency_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_before_or_with_the_start_of": {
+      "@id": "crm:P182_ends_before_or_with_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "starts_after_or_with_the_end_of": {
+      "@id": "crm:P182i_starts_after_or_with_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "before": {
+      "@id": "crm:P183_ends_before_the_start_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "after": {
+      "@id": "crm:P183i_starts_after_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_before_or_with_the_end_of": {
+      "@id": "crm:P184_ends_before_or_with_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_with_or_after_the_end_of": {
+      "@id": "crm:P184i_ends_with_or_after_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_before_the_end_of": {
+      "@id": "crm:P185_ends_before_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "ends_after_the_end_of": {
+      "@id": "crm:P185i_ends_after_the_end_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "produced_thing_of_product_type": {
+      "@id": "crm:P186_produced_thing_of_product_type",
+      "@type": "@id"
+    },
+    "type_produced_by": {
+      "@id": "crm:P186i_is_produced_by",
+      "@type": "@id"
+    },
+    "production_plan": {
+      "@id": "crm:P187_has_production_plan",
+      "@type": "@id"
+    },
+    "production_plan_for": {
+      "@id": "crm:P187i_is_production_plan_for",
+      "@type": "@id"
+    },
+    "requires_production_tool": {
+      "@id": "crm:P188_requires_production_tool",
+      "@type": "@id"
+    },
+    "production_tool_for": {
+      "@id": "crm:P188i_is_production_tool_for",
+      "@type": "@id"
+    },
+    "approximates": {
+      "@id": "crm:P189_approximates",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "approximated_by": {
+      "@id": "crm:P189i_is_approximated_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "content": {
+      "@id": "crm:P190_has_symbolic_content"
+    },
+    "duration": {
+      "@id": "crm:P191_had_duration",
+      "@type": "@id"
+    },
+    "duration_of": {
+      "@id": "crm:P191i_was_duration_of",
+      "@type": "@id"
+    },
+    "presence_of_thing": {
+      "@id": "crm:P195_was_a_presence_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "thing_presence": {
+      "@id": "crm:P195i_had_presence",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "defines": {
+      "@id": "crm:P196_defines",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "thing_defined_by": {
+      "@id": "crm:P196i_is_defined_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "covered_parts_of": {
+      "@id": "crm:P197_covered_parts_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "partially_covered_by": {
+      "@id": "crm:P197i_was_partially_covered_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "holds_or_supports": {
+      "@id": "crm:P198_holds_or_supports",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "held_or_supported_by": {
+      "@id": "crm:P198i_is_held_or_supported_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "represents_instance_of_type": {
+      "@id": "crm:P199_represents_instance_of_type",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "instance_represented_by": {
+      "@id": "crm:P199i_has_instance_represented_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "end_of_the_begin": {
+      "@id": "crm:P81a_end_of_the_begin",
+      "@type": "xsd:dateTime"
+    },
+    "begin_of_the_end": {
+      "@id": "crm:P81b_begin_of_the_end",
+      "@type": "xsd:dateTime"
+    },
+    "begin_of_the_begin": {
+      "@id": "crm:P82a_begin_of_the_begin",
+      "@type": "xsd:dateTime"
+    },
+    "end_of_the_end": {
+      "@id": "crm:P82b_end_of_the_end",
+      "@type": "xsd:dateTime"
+    },
+    "lower_value_limit": {
+      "@id": "crm:P90a_has_lower_value_limit"
+    },
+    "upper_value_limit": {
+      "@id": "crm:P90b_has_upper_value_limit"
+    },
+    "DigitalObject": {
+      "@id": "dig:D1_Digital_Object",
+      "@context": {
+        "part": {
+          "@id": "crm:P106_is_composed_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P106i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Encounter": {
+      "@id": "sci:S19_Encounter_Event"
+    },
+    "caused": {
+      "@id": "

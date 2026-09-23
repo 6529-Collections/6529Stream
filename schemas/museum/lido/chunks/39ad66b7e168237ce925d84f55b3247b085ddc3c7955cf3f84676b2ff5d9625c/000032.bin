@@ -1,0 +1,79 @@
+a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:measurementUnit</span>&gt;</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementValue</span>&gt;</span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>                0.79</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:measurementValue</span>&gt;</span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:measurementsSet</span>&gt;</span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:extentMeasurements</span>&gt;</span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300014657&quot;</span>&gt;</span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>                    panel (wood by form)</span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:altLabel</span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a>                    wood panel</span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:altLabel</span>&gt;</span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:extentMeasurements</span>&gt;</span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:shapeMeasurements</span>&gt;</span>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300263831&quot;</span>&gt;</span>
+<span id="cb28-46"><a href="#cb28-46" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb28-47"><a href="#cb28-47" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb28-48"><a href="#cb28-48" aria-hidden="true" tabindex="-1"></a>                    rectangular</span>
+<span id="cb28-49"><a href="#cb28-49" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb28-50"><a href="#cb28-50" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb28-51"><a href="#cb28-51" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:shapeMeasurements</span>&gt;</span>
+<span id="cb28-52"><a href="#cb28-52" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:objectMeasurements</span>&gt;</span>
+<span id="cb28-53"><a href="#cb28-53" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:objectMeasurementsSet</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.2.4" id="materialstechniques"><span
+            class="header-section-number">5.2.4</span>
+            Materials/Techniques</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#materialsTech">lido:materialsTech</a>&gt;</p>
+            <p><strong>Note:</strong> Materials/Techniques contains
+            information about the substances, such as the medium or
+            support, and the techniques or implements, either
+            incorporated in the object in focus, or used in the
+            production or modification of the object. LIDO provides two
+            elements, &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechSet">lido:objectMaterialsTechSet</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventMaterialsTech">lido:eventMaterialsTech</a>&gt;,
+            to catalog materials and techniques either as found in the
+            object, or as used in the context of an event,
+            respectively.</p>
+            <p><strong>Example:</strong> The following example describes
+            materials and techniques found in the <em>Mona Lisa</em>
+            painting. The &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#extentMaterialsTech">lido:extentMaterialsTech</a>&gt;
+            element is applied to describe the part of the painting
+            where a certain technique was utilized.</p>
+            <blockquote>
+            <p><strong>Display Materials/Techniques:</strong> Oil on
+            poplar panel<br /> <strong>Materials/Techniques:</strong>
+            oil paint <strong><em>Type:</em></strong> Medium
+            <strong><em>Preference:</em></strong> Display<br />
+            <strong>Materials/Techniques:</strong> poplar wood
+            <strong><em>Type:</em></strong> Support
+            <strong><em>Preference:</em></strong> Display<br />
+            <strong>Materials/Techniques:</strong> panel painting
+            <strong><em>Type:</em></strong> Technique
+            <strong><em>Preference:</em></strong> Display<br />
+            <strong>Materials/Techniques:</strong> sfumato
+            <strong><em>Type:</em></strong> Technique
+            <strong><em>Preference:</em></strong> Display |
+            <strong>Extent:</strong> landscape
+            <strong><em>Preference:</em></strong> Display</p>
+            </blockquote>
+            <div class="sourceCode" id="cb29"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:objectMaterialsTechSet</span>&gt;</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayMaterialsTech</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>        Oil on poplar panel</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayMaterialsTech</span>&gt;</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:materialsTech</span>&gt;</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- Mediu

@@ -1,0 +1,130 @@
+Group"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="Conversion" type="gml:ConversionType" substitutionGroup="gml:_GeneralConversion"/>
+	<!-- =================================================== -->
+	<complexType name="ConversionType">
+		<annotation>
+			<documentation>A concrete operation on coordinates that does not include any change of Datum. The best-known example of a coordinate conversion is a map projection. The parameters describing coordinate conversions are defined rather than empirically derived. Note that some conversions have no parameters.
+
+This concrete complexType can be used with all operation methods, without using an Application Schema that defines operation-method-specialized element names and contents, especially for methods with only one Conversion instance. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeneralConversionType">
+				<sequence>
+					<element ref="gml:usesMethod"/>
+					<element ref="gml:usesValue" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Unordered list of composition associations to the set of parameter values used by this conversion operation. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesMethod" type="gml:OperationMethodRefType">
+		<annotation>
+			<documentation>Association to the operation method used by this coordinate operation. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesValue" type="gml:ParameterValueType">
+		<annotation>
+			<documentation>Composition association to a parameter value used by this coordinate operation. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="conversionRef" type="gml:ConversionRefType"/>
+	<!-- =================================================== -->
+	<complexType name="ConversionRefType">
+		<annotation>
+			<documentation>Association to a concrete general-purpose conversion, either referencing or containing the definition of that conversion. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:Conversion"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="_GeneralTransformation" type="gml:AbstractGeneralTransformationType" abstract="true" substitutionGroup="gml:_Operation"/>
+	<!-- =================================================== -->
+	<complexType name="AbstractGeneralTransformationType" abstract="true">
+		<annotation>
+			<documentation>An abstract operation on coordinates that usually includes a change of Datum. The parameters of a coordinate transformation are empirically derived from data containing the coordinates of a series of points in both coordinate reference systems. This computational process is usually "over-determined", allowing derivation of error (or accuracy) estimates for the transformation. Also, the stochastic nature of the parameters may result in multiple (different) versions of the same coordinate transformation.
+
+This abstract complexType is expected to be extended for well-known operation methods with many Transformation instances, in Application Schemas that define operation-method-specialized value element names and contents. This transformation uses an operation method with associated parameter values. However, operation methods and parameter values are directly associated with concrete subtypes, not with this abstract type. All concrete types derived from this type shall extend this type to include a "usesMethod" element that references one "OperationMethod" element. Similarly, all concrete types derived from this type shall extend this type to include one or more elements each named "uses...Value" that each use the type of an element substitutable for the "_generalParameterValue" element. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractCoordinateOperationType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:coordinateOperationName"/>
+					<element ref="gml:coordinateOperationID" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:remarks" minOccurs="0"/>
+					<element ref="gml:operationVersion"/>
+					<element ref="gml:validArea" minOccurs="0"/>
+					<element ref="gml:scope" minOccurs="0"/>
+					<element ref="gml:_positionalAccuracy" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:sourceCRS"/>
+					<element ref="gml:targetCRS"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="generalTransformationRef" type="gml:GeneralTransformationRefType"/>
+	<!-- =================================================== -->
+	<complexType name="GeneralTransformationRefType">
+		<annotation>
+			<documentation>Association to a general transformation, either referencing or containing the definition of that transformation. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_GeneralTransformation"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="Transformation" type="gml:TransformationType" substitutionGroup="gml:_GeneralTransformation"/>
+	<!-- =================================================== -->
+	<complexType name="TransformationType">
+		<annotation>
+			<documentation>A concrete operation on coordinates that usually includes a change of datum. The parameters of a coordinate transformation are empirically derived from data containing the coordinates of a series of points in both coordinate reference systems. This computational process is usually "over-determined", allowing derivation of error (or accuracy) estimates for the transformation. Also, the stochastic nature of the parameters may result in multiple (different) versions of the same coordinate transformation.
+
+This concrete complexType can be used for all operation methods, without using an Application Schema that defines operation-method-specialized element names and contents, especially for methods with only one Transformation instance. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeneralTransformationType">
+				<sequence>
+					<element ref="gml:usesMethod"/>
+					<element ref="gml:usesValue" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Unordered set of composition associations to the set of parameter values used by this transformation operation. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="transformationRef" type="gml:TransformationRefType"/>
+	<!-- =================================================== -->
+	<complexType name="TransformationRefType">
+		<annotation>
+			<documentation>Association to a transformation, either referencing or containing the definition of that transformation. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:Transformation"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<!-- =================================================== -->
+	<element name="_generalParameterValue" type="gml:AbstractGeneralParameterValueType" abstract="true"/>
+	<!-- =================================================== -->
+	<complexType name="AbstractGeneralParameterValueType" abstract="true">
+		<annotation>
+			<documentation>Abstract parameter value or group of parameter values.
+			
+This abstract complexType is expected to be extended and restricted for well-known operation met

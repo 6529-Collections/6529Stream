@@ -1,0 +1,58 @@
+be an array of strings.</p>
+
+<ul>
+  <li>Any resource type <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">behavior</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">behavior</code> on any resource type.</li>
+</ul>
+
+<table class="api-table" id="table-behavior">
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td><strong>Temporal Behaviors</strong></td>
+    </tr>
+    <tr>
+      <td><code style="white-space:nowrap;" class="language-plaintext highlighter-rouge">auto-advance</code></td>
+      <td>Valid on Collections, Manifests, Canvases, and Ranges that include or are Canvases with at least the <code class="language-plaintext highlighter-rouge">duration</code> dimension. When the client reaches the end of a Canvas, or segment thereof as specified in a Range, with a duration dimension that has this behavior, it <em class="rfc">should</em> immediately proceed to the next Canvas or segment and render it. If there is no subsequent Canvas in the current context, then this behavior should be ignored. When applied to a Collection, the client should treat the first Canvas of the next Manifest as following the last Canvas of the previous Manifest, respecting any <code class="language-plaintext highlighter-rouge">start</code> property specified. Disjoint with <code class="language-plaintext highlighter-rouge">no-auto-advance</code>.</td>
+    </tr>
+    <tr>
+      <td><code style="white-space:nowrap;" class="language-plaintext highlighter-rouge">no-auto-advance</code></td>
+      <td>Valid on Collections, Manifests, Canvases, and Ranges that include or are Canvases with at least the <code class="language-plaintext highlighter-rouge">duration</code> dimension. When the client reaches the end of a Canvas or segment with a duration dimension that has this behavior, it <em class="rfc">must not</em> proceed to the next Canvas, if any. This is a default temporal behavior if not specified. Disjoint with <code class="language-plaintext highlighter-rouge">auto-advance</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">repeat</code></td>
+      <td>Valid on Collections and Manifests, that include Canvases that have at least the <code class="language-plaintext highlighter-rouge">duration</code> dimension. When the client reaches the end of the duration of the final Canvas in the resource, and the <code class="language-plaintext highlighter-rouge">behavior</code> value <code style="white-space:nowrap;" class="language-plaintext highlighter-rouge">auto-advance</code> is also in effect, then the client <em class="rfc">should</em> return to the first Canvas, or segment of Canvas, in the resource that has the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">repeat</code> and start playing again. If the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">auto-advance</code> is not in effect, then the client <em class="rfc">should</em> render a navigation control for the user to manually return to the first Canvas or segment. Disjoint with <code class="language-plaintext highlighter-rouge">no-repeat</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">no-repeat</code></td>
+      <td>Valid on Collections and Manifests, that include Canvases that have at least the <code class="language-plaintext highlighter-rouge">duration</code> dimension. When the client reaches the end of the duration of the final Canvas in the resource, the client <em class="rfc">must not</em> return to the first Canvas, or segment of Canvas. This is a default temporal behavior if not specified. Disjoint with <code class="language-plaintext highlighter-rouge">repeat</code>.</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>Layout Behaviors</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">unordered</code></td>
+      <td>Valid on Collections, Manifests and Ranges. The Canvases included in resources that have this behavior have no inherent order, and user interfaces <em class="rfc">should</em> avoid implying an order to the user. Disjoint with <code class="language-plaintext highlighter-rouge">individuals</code>, <code class="language-plaintext highlighter-rouge">continuous</code>, and <code class="language-plaintext highlighter-rouge">paged</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">individuals</code></td>
+      <td>Valid on Collections, Manifests, and Ranges. For Collections that have this behavior, each of the included Manifests are distinct objects in the given order. For Manifests and Ranges, the included Canvases are distinct views, and <em class="rfc">should not</em> be presented in a page-turning interface. This is the default layout behavior if not specified. Disjoint with <code class="language-plaintext highlighter-rouge">unordered</code>, <code class="language-plaintext highlighter-rouge">continuous</code>, and <code class="language-plaintext highlighter-rouge">paged</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">continuous</code></td>
+      <td>Valid on Collections, Manifests and Ranges, which include Canvases that have at least <code class="language-plaintext highlighter-rouge">height</code> and <code class="language-plaintext highlighter-rouge">width</code> dimensions. Canvases included in resources that have this behavior are partial views and an appropriate rendering might display all of the Canvases virtually stitched together, such as a long scroll split into sections. This behavior has no implication for audio resources. The <code class="language-plaintext highlighter-rouge">viewingDirection</code> of the Manifest will determine the appropriate arrangement of the Canvases. Disjoint with <code class="language-plaintext highlighter-rouge">unordered</code>, <code class="language-plaintext highlighter-rouge">individuals</code> and <code class="language-plaintext highlighter-rouge">paged</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">paged</code></td>
+      <td>Valid on Collections, Manifests and Ranges, which include Canvases that have at least <code class="language-plaintext highlighter-rouge">height</code> and <code class="language-plaintext highlighter-rouge">width</code> dimensions. Canvases included in resources that have this behavior represent views that <em class="rfc">should</em> be presented in a page-turning interface if one is available. The first canvas is a single view (the first recto) and thus the second canvas likely represents the back of the object in the first canvas. If this is not the case, see the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">non-paged</code>. Disjoint with <code class="language-plaintext highlighter-rouge">unordered</code>, <code class="language-plaintext highlighter-rouge">individuals</code>, <code class="language-plaintext highlighter-rouge">continuous</code>, <code class="language-plaintext highlighter-rouge">facing-pages</code> and <code class="language-plaintext highlighter-rouge">non-paged</code>.</td>
+    </tr>
+    <tr>
+      <td><code style="white-space:nowrap;" class="language-plaintext highlighter-rouge">facing-pages</code></td>
+      <td>Valid only on Canvases, where the Canvas has at least <code class="language-plaintext highlighter-rouge">height</code> and <code class="language-plaintext highlighter-rouge">width</code> dimensions. Canvases that have this behavior, in a Manifest that has the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">paged</code>, <em class="rfc">must</em> be displayed by themselves, as they depict both parts of the opening. If all of the Can

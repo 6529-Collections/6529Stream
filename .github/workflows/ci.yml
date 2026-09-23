@@ -18,15 +18,16 @@ permissions:
 env:
   FOUNDRYUP_MAX_RETRIES: "10"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
   current-stack:
+    concurrency:
+      # Finish a draft native run and save its cache; retain only the newest pending revision.
+      group: ${{ github.workflow }}-current-stack-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
     name: Current stack integration
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # A cold via-IR graph build exceeds 90 minutes; retain its checked cache for successors.
+    timeout-minutes: 240
 
     steps:
       - name: Checkout
@@ -73,6 +74,14 @@ jobs:
           python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
           python -m pip check
 
+      - name: Check native fixture tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m tools.build.test_native_artifact_storage
+          python -m tools.build.test_prepare_current_graph
+          python -m tools.build.test_instant_provider_runtime
+
       - name: Identify current compiler inputs
         id: current_compiler_inputs
         shell: bash
@@ -113,6 +122,11 @@ jobs:
           fi
           python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate --check
 
+      - name: Verify call-free instant provider runtime
+        shell: bash
+        run: |
+          python -m tools.build.check_instant_provider_runtime --out out/current --cache-path cache/current
+
       - name: Save current compiler outputs
         if: ${{ fromJSON(steps.current_compiler_cache.outputs.cache-hit || 'false') == false }}
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
@@ -122,13 +136,12 @@ jobs:
             cache/current
           key: ${{ steps.current_compiler_cache.outputs.cache-primary-key }}
 
-      - name: Validate and export the current compilation
+      - name: Validate the current compilation
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
           make current-stack-check 2>&1 | tee ci-logs/current-stack.log
-          python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate
           python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate --check
 
       - name: Reproducible current fuzz and invariant campaign
@@ -158,6 +171,9 @@ jobs:
           retention-days: 14
 
   windows-wrapper:
+    concurrency:
+      group: ${{ github.workflow }}-windows-wrapper-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Windows PowerShell wrapper
     runs-on: windows-latest
@@ -292,9 +308,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  stream-client:
+  stream-client-prepare:
+    concurrency:
+      group: ${{ github.workflow }}-stream-client-prepare-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    name: TypeScript client
+    name: TypeScript client preparation
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -310,14 +329,129 @@ jobs:
           cache: npm
           cache-dependency-path: packages/stream-client/package-lock.json
 
-      - name: Test generated ABIs, signing payloads and snapshots
+      - name: Check ABIs and types, test collector, and plan complete suite
         shell: bash
         run: |
           npm --prefix packages/stream-client ci --ignore-scripts
-          npm --prefix packages/stream-client test
+          npm --prefix packages/stream-client run test:prepare
           node scripts/test_current_stack_collector.mjs
+          npm --prefix packages/stream-client run test:plan -- --shards 16
+
+      - name: Upload prepared client and complete test plan
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stream-client-plan
+          path: |
+            packages/stream-client/dist/
+            packages/stream-client/.test-runs/plan.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  stream-client-shards:
+    needs: stream-client-prepare
+    concurrency:
+      group: ${{ github.workflow }}-stream-client-shard-${{ matrix.shard }}-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    name: TypeScript client shard ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+          cache: npm
+          cache-dependency-path: packages/stream-client/package-lock.json
+
+      - name: Install pinned dependencies
+        run: |
+          npm --prefix packages/stream-client ci --ignore-scripts
+
+      - name: Download prepared client and plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: stream-client-plan
+          path: packages/stream-client
+
+      - name: Run bounded shard with native Node reporters
+        run: |
+          npm --prefix packages/stream-client run test:shard -- --plan .test-runs/plan.json --shard ${{ matrix.shard }} --concurrency 2 --timeout-ms 420000
+
+      - name: Upload shard results and test logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stream-client-results-${{ matrix.shard }}
+          path: |
+            packages/stream-client/.test-runs/shard-${{ matrix.shard }}.json
+            packages/stream-client/.test-runs/shard-${{ matrix.shard }}/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  stream-client:
+    needs: [stream-client-prepare, stream-client-shards]
+    concurrency:
+      group: ${{ github.workflow }}-stream-client-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    if: ${{ always() && (github.event_name == 'pull_request' || github.event_name == 'push') }}
+    name: TypeScript client
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+
+      - name: Require successful preparation and every shard
+        env:
+          PREPARE_RESULT: ${{ needs.stream-client-prepare.result }}
+          SHARDS_RESULT: ${{ needs.stream-client-shards.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PREPARE_RESULT" = success
+          test "$SHARDS_RESULT" = success
+
+      - name: Download complete test plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: stream-client-plan
+          path: packages/stream-client
+
+      - name: Download every shard result
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: ${{ 'stream-client-results-*' }}
+          merge-multiple: true
+          path: packages/stream-client/.test-runs/results
+
+      - name: Verify full file and case coverage against prepared inputs
+        run: |
+          npm --prefix packages/stream-client run test:verify -- --plan .test-runs/plan.json --results .test-runs/results
 
   slither-baseline:
+    concurrency:
+      group: ${{ github.workflow }}-slither-baseline-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Slither first-party baseline
     runs-on: ubuntu-latest
@@ -379,6 +513,9 @@ jobs:
           make slither-baseline-check 2>&1 | tee ci-logs/slither-baseline-check.log
 
   release-verification:
+    concurrency:
+      group: ${{ github.workflow }}-release-verification-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Release artifact verification
     runs-on: ubuntu-latest
@@ -455,12 +592,14 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  foundry:
+  repository-checks:
+    concurrency:
+      group: ${{ github.workflow }}-repository-checks-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    name: Foundry smoke
+    name: Repository and orchestration checks
     runs-on: ubuntu-latest
-    # Cold via-IR compilation must leave time for the final deployment rehearsals.
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -473,27 +612,6 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.12.13"
-
-      - name: Changelog gate
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p ci-logs
-          python3 -m tools.docs.test_changelog_check 2>&1 | tee ci-logs/changelog-tests.log
-
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            base_ref="${{ github.event.pull_request.base.sha }}"
-          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            base_ref="${{ github.event.before }}"
-          else
-            base_ref=""
-          fi
-
-          if [ -n "$base_ref" ]; then
-            python3 -m tools.docs.check_changelog --base-ref "$base_ref" 2>&1 | tee ci-logs/changelog-check.log
-          else
-            python3 -m tools.docs.check_changelog 2>&1 | tee ci-logs/changelog-check.log
-          fi
 
       - name: Install Foundry
         id: foundry_setup
@@ -522,6 +640,33 @@ jobs:
             fi
           done
           exit 1
+
+      - name: Install pinned Python toolchain
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
+
+      - name: Changelog gate
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.docs.test_changelog_check 2>&1 | tee ci-logs/changelog-tests.log
+
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            base_ref="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            base_ref="${{ github.event.before }}"
+          else
+            base_ref=""
+          fi
+
+          if [ -n "$base_ref" ]; then
+            python3 -m tools.docs.check_changelog --base-ref "$base_ref" 2>&1 | tee ci-logs/changelog-check.log
+          else
+            python3 -m tools.docs.check_changelog 2>&1 | tee ci-logs/changelog-check.log
+          fi
 
       - name: Repository hygiene
         shell: bash
@@ -784,33 +929,44 @@ jobs:
 
           python3 -m tools.development.test_windows_check_wrapper
           python3 -m tools.development.test_windows_ci_wrapper
+          python3 -m tools.development.test_python_toolchain
+          python3 -m tools.development.check_python_toolchain
           python3 -m tools.build.test_solidity_source_layout
           python3 -m tools.build.check_solidity_source_layout
           python3 -m tools.build.test_solidity_layout_equivalence
           python3 -m tools.build.check_solidity_layout_equivalence --check-receipt
 
-      - name: Install browser test tooling
-        shell: bash
-        run: |
-          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
-          python -m pip check
-          python -m playwright install --with-deps chromium
-
-      - name: Artist record/event reconstruction correction gate
+      - name: Current artist extension design and historical runner isolation
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 -m tools.protocol.test_artist_record_event_reconstruction_correction 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-tests.log
-          python3 -m tools.protocol.check_artist_record_event_reconstruction_correction 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-check.log
+          python3 -m tools.protocol.test_frozen_artist_checks 2>&1 | tee ci-logs/frozen-artist-runner-tests.log
+          python3 -m tools.protocol.test_artist_operation_extension 2>&1 | tee ci-logs/artist-extension-tests.log
+          python3 -m tools.protocol.test_artist_owner_record_continuity_extension 2>&1 | tee ci-logs/artist-continuity-extension-tests.log
+          python3 -m tools.protocol.check_artist_operation_extension 2>&1 | tee ci-logs/artist-extension-check.log
+          python3 -m tools.protocol.check_artist_owner_record_continuity_extension 2>&1 | tee ci-logs/artist-continuity-extension-check.log
 
-      - name: Artist owner-record continuity gate
+      - name: Historical artist-57 semantic owner matrix
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 -m tools.protocol.test_artist_owner_record_continuity 2>&1 | tee ci-logs/artist-owner-record-continuity-tests.log
-          python3 -m tools.protocol.check_artist_owner_record_continuity 2>&1 | tee ci-logs/artist-owner-record-continuity-check.log
+          python3 -m tools.protocol.run_frozen_artist_checks matrix 2>&1 | tee ci-logs/historical-artist-matrix.log
+
+      - name: Historical artist-57 record/event reconstruction
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.protocol.run_frozen_artist_checks reconstruction 2>&1 | tee ci-logs/historical-artist-reconstruction.log
+
+      - name: Historical artist-57 owner-record continuity
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.protocol.run_frozen_artist_checks continuity 2>&1 | tee ci-logs/historical-artist-continuity.log
 
       - name: PowerShell syntax and wrapper runtime
         shell: pwsh
@@ -835,6 +991,73 @@ jobs:
             }
           }
           & ./scripts/test_windows_check_helpers.ps1
+
+      - name: Upload repository check logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: repository-check-logs
+          path: ci-logs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  foundry:
+    concurrency:
+      # Finish a draft native run and save its cache; retain only the newest pending revision.
+      group: ${{ github.workflow }}-foundry-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    name: Foundry native regressions
+    runs-on: ubuntu-latest
+    # Cold via-IR compilation must leave time for the final deployment rehearsals.
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12.13"
+
+      - name: Install Foundry
+        id: foundry_setup
+        continue-on-error: true
+        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
+        with:
+          version: v1.7.1
+
+      - name: Retry verified Foundry installation
+        if: ${{ steps.foundry_setup.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDRY_DIR="$HOME/.foundry"
+          foundryup="$FOUNDRY_DIR/bin/foundryup"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            foundryup="$foundryup.exe"
+          fi
+          test -x "$foundryup"
+          # Retry the complete verifier, including its attestation download.
+          for attempt in 1 2 3; do
+            sleep "$((attempt * 15))"
+            if "$foundryup" --install 1.7.1; then
+              echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+          done
+          exit 1
+
+      - name: Install browser test tooling
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
+          python -m playwright install --with-deps chromium
 
       - name: Identify default compiler inputs
         id: default_compiler_inputs
@@ -1379,3 +1602,21 @@ jobs:
           path: ci-logs/
           if-no-files-found: ignore
           retention-days: 14
+
+  foundry-result:
+    name: Foundry smoke
+    # Preserve the protected branch's existing required status after splitting jobs.
+    needs: [foundry, repository-checks]
+    if: ${{ always() && (github.event_name == 'pull_request' || github.event_name == 'push') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require native and repository checks from this revision
+        shell: bash
+        env:
+          NATIVE_RESULT: ${{ needs.foundry.result }}
+          REPOSITORY_RESULT: ${{ needs.repository-checks.result }}
+        run: |
+          set -euo pipefail
+          test "$NATIVE_RESULT" = success
+          test "$REPOSITORY_RESULT" = success

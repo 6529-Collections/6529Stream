@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "capture": "parallel-feature-batch43-20260920",
+  "sourceCheckpoint": "23e45d78",
+  "sourceCount": 2138,
+  "inputSha256": "c3e27ea0432cbb0548eb191e23243e06f597332045c0f6d96b604f88fc3be159",
+  "outputSha256": "70092a7c16deac5fff64a4e8d7a89b2429d988e556387cbe3263e78f3d38c307",
+  "sources": {
+    "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol": "12607affd0163d0f6638a2cf1613bc5e072a43ef56db4dbfb3fe05165f29a9d9",
+    "smart-contracts/domains/revenue/StreamSettlementContext.sol": "69184dc59110de732c9a117edf43559423a4e325e1f4c4311f7a2b9fc7026f08"
+  },
+  "sourceBinding": "The concrete recorder and its getter-bearing base source are byte-identical to d1a58e4403cfbb80d921e117e0a7ac9b90ff61c7 Git blobs. This is a separate integrated compiler capture; other sources are not asserted identical.",
+  "qualification": "Selected concrete recorder getters only; no runtime, lifecycle, paid-genesis or release acceptance.",
+  "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
+  "contract": "StreamPrimarySaleSettlement",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "core",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "coreCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleRegistryCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "id",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

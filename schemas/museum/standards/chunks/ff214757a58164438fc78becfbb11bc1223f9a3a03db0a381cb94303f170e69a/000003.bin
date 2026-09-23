@@ -1,0 +1,65 @@
+ple, “Impressionism” can be viewed as a period in the European sphere of influence lasting from approximately 1870 to 1905 during which paintings with particular characteristics were produced by a group of artists that included (among others) Monet, Renoir, Pissarro, Sisley and Degas. Alternatively, it can be regarded as a style applicable to all paintings sharing the characteristics of the works produced by the Impressionist painters, regardless of historical context. The first interpretation is an instance of E4 Period, and the second defines morphological object types that fall under E55 Type.
+A geopolitical unit as a specific case of an instance of E4 Period is the set of activities and phenomena related to the claim of power, the consequences of belonging to a jurisdictional area and an administrative system that establishes a geopolitical unit. Examples from the modern period are countries or administrative areas of countries such as districts whose actions and structures define activities and phenomena in the area that they intend to govern. The borders of geopolitical units are often defined in contracts or treaties although they may deviate from the actual practice. The spatiotemporal properties of Geopolitical units can be modelled through the properties inherited from E92 Spacetime Volume.
+Another specific case of an instance of E4 Period is the actual extent of the set of activities and phenomena as evidenced by their physical traces that define a settlement, such as the populated period of Nineveh.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subClassOf rdf:resource="E92_Spacetime_Volume" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E5_Event">
+    <rdfs:label xml:lang="en">Event</rdfs:label>
+    <rdfs:label xml:lang="de">Ereignis</rdfs:label>
+    <rdfs:label xml:lang="el">Συμβάν</rdfs:label>
+    <rdfs:label xml:lang="fr">Évènement</rdfs:label>
+    <rdfs:label xml:lang="pt">Evento</rdfs:label>
+    <rdfs:label xml:lang="ru">Событиe</rdfs:label>
+    <rdfs:label xml:lang="zh">事件</rdfs:label>
+    <rdfs:comment>This class comprises distinct, delimited and coherent processes and interactions of a material nature, in cultural, social or physical systems, involving and affecting instances of E77 Persistent Item in a way characteristic of the kind of process. Typical examples are meetings, births, deaths, actions of decision taking, making or inventing things, but also more complex and extended ones such as conferences, elections, building of a castle, or battles.
+While the continuous growth of a tree lacks the limits characteristic of an event, its germination from a seed does qualify as an event. Similarly, the blowing of the wind lacks the distinctness and limits of an event, but a hurricane, flood or earthquake would qualify as an event. Mental processes are considered as events, in cases where they are connected with the material externalization of their results; for example, the creation of a poem, a performance or a change of intention that becomes obvious from subsequent actions or declarations.
+The effects of an instance of E5 Event may not lead to relevant permanent changes of properties or relations of the items involved in it, for example an unrecorded performance. Of course, in order to be documented, some kind of evidence for an event must exist, be it witnesses, traces or products of the event.
+While instances of E4 Period always require some form of coherence between its constituent phenomena, in addition, the essential constituents of instances of E5 Event should contribute to an overall effect; for example, the statements made during a meeting and the listening of the audience.
+Viewed at a coarse level of detail, an instance of E5 Event may appear as if it had an ‘instantaneous’ overall effect, but any process or interaction of material nature in reality have an extent in time and space. At a fine level, instances of E5 Event may be analysed into component phenomena and phases within a space and timeframe, and as such can be seen as a period, regardless of the size of the phenomena. The reverse is not necessarily the case: not all instances of E4 Period give rise to a noteworthy overall effect and are thus not instances of E5 Event.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E4_Period" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E6_Destruction">
+    <rdfs:label xml:lang="en">Destruction</rdfs:label>
+    <rdfs:label xml:lang="de">Zerstörung</rdfs:label>
+    <rdfs:label xml:lang="el">Καταστροφή</rdfs:label>
+    <rdfs:label xml:lang="fr">Destruction</rdfs:label>
+    <rdfs:label xml:lang="pt">Destruição</rdfs:label>
+    <rdfs:label xml:lang="ru">Разрушeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">破坏</rdfs:label>
+    <rdfs:comment>This class comprises events that destroy one or more instances of E18 Physical Thing, such that they lose their identity as the subjects of documentation.
+Some destruction events are intentional, while others are independent of human activity. Intentional destruction can be documented by classifying the event as both an instance of E6 Destruction and of E7 Activity.
+The decision to document an object as destroyed, transformed, or modified is context-sensitive:
+1. If the matter remaining from the destruction is not documented, the event is modelled solely as an instance of E6 Destruction.
+2. An event should also be documented using E81 Transformation if it results in the destruction of one or more objects and the simultaneous production of others using parts or material from the original. In this case, the new items have separate identities. Matter is preserved, but identity is not.
+3. When the initial identity of the changed instance of E18 Physical Thing is preserved, the event should be documented as an instance of E11 Modification.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E64_End_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E7_Activity">
+    <rdfs:label xml:lang="en">Activity</rdfs:label>
+    <rdfs:label xml:lang="de">Handlung</rdfs:label>
+    <rdfs:label xml:lang="el">Δράση</rdfs:label>
+    <rdfs:label xml:lang="fr">Activité</rdfs:label>
+    <rdfs:label xml:lang="pt">Atividade</rdfs:label>
+    <rdfs:label xml:lang="ru">Дeятeльность</rdfs:label>
+    <rdfs:label xml:lang="zh">活动</rdfs:label>
+    <rdfs:comment>This class comprises actions intentionally carried out by instances of E39 Actor that result in changes of state in the cultural, social, or physical systems documented.
+This notion includes complex, composite, and long-lasting actions such as the building of a settlement or a war, as well as simple, short-lived actions such as the opening of a door.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E5_Event" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E8_Acquisition">
+    <rdfs:label xml:lang="en">Acquisition</rdfs:label>
+    <rdfs:label xml:lang="de">Erwerb</rdfs:label>
+    <rdfs:label xml:lang="el">Απόκτηση</rdfs:label>
+    <rdfs:label xml:lang="fr">Acquisition</rdfs:label>
+    <rdfs:label xml:lang="pt">Aquisição</rdfs:label>
+    <rdfs:label xml:lang="ru">Поступлeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">采访</rdfs:label>
+    <rdfs:comment>This class comprises transfers of legal ownership from one or more instances of E39 Actor to one or more other instances of E39 Actor.
+The class also applies to the establishment or loss of ownership of instances of E18 Physical Thing. It does not, however, imply changes of any other kinds of rights. The recording of the donor and/or recipient is optional. It is possible that in an instance of E8 Acquisition there is either no donor or no recipient. Depending on the circumstances, it may describe:
+1. the beginning of ownership
+2. the end of ownership
+3. the transfer of ownership
+4. the acquisition from an unknown source
+5. the loss of title due to destruction of the item
+It may also describe events where a collector appropriates legal title, for example, by annexation or field collection. The interpretation of the museum not

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/entropy/IStreamEntropyProvider.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../../integrations/chainlink/IVRFCoordinatorV2Plus.sol";
 import "../../vendor/chainlink/VRFConsumerBaseV2.sol";
@@ -153,7 +154,8 @@ contract StreamEntropyProviderVRF is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamEntropyProvider).interfaceId || super.supportsInterface(id);
+        return id == type(IStreamEntropyProvider).interfaceId
+            || id == type(IStreamEntropyProviderFeeQuote).interfaceId || super.supportsInterface(id);
     }
 
     function isStreamEntropyProvider() external pure override returns (bool) {
@@ -183,6 +185,11 @@ contract StreamEntropyProviderVRF is
     }
 
     function quoteRequest(bytes calldata) external pure override returns (uint256) {
+        return contextIndependentRequestFee();
+    }
+
+    /// @notice The subscription funds every context; no collection reveal fee is required.
+    function contextIndependentRequestFee() public pure returns (uint256) {
         return 0;
     }
 

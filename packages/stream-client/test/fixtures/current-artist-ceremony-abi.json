@@ -1,0 +1,98 @@
+{
+  "source": "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol",
+  "sourceCommit": "0d7c1b57",
+  "compilerVersion": "0.8.19",
+  "scope": "Selected current Artist authorization-state reads; no runtime or write-path acceptance",
+  "provenance": {
+    "sourceSha256": "d662c96043e4fd1809bba76da045e05ce8df921b2e8c6dc2fe05b05ed22fe994",
+    "compilerInputSha256": "6b5a36b391f91187447d38e77939ca882df43ccb978924b8d69e7c2a5abb8012",
+    "compilerOutputSha256": "0719df2601b45dbb79e65d41d0b378a7e858677390062ab4307a2441cc97a9eb"
+  },
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "artistId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "artistAuthorizationState",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "digestObserved",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "digestRevoked",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "nonceConsumed",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "nonceRevoked",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nextUnusedNonce",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StreamArtistAuthorizationTypes.State",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "collaboratorRegistrationNonceState",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

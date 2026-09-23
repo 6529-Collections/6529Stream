@@ -1,0 +1,61 @@
+ext highlighter-rouge">items</code> property <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code>, <code class="language-plaintext highlighter-rouge">type</code> and <code class="language-plaintext highlighter-rouge">label</code> properties. They <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property.</p>
+
+<p>An example Collection document:</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/collection/top"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Collection"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Collection for Example Organization"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Short summary of the Collection"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"requiredStatement"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Attribution"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Provided by Example Organization"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/manifest"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Manifest"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Example Manifest 1"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"thumbnail"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/manifest1/thumbnail.jpg"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/jpeg"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Note that while the Collection <em class="rfc">may</em> reference Collections or Manifests from previous versions of the <abbr title="Application Programming Interface">API</abbr>, the information included in this document <em class="rfc">must</em> follow the current version requirements, not the requirements of the target document. This is in contrast to the requirements of <code class="language-plaintext highlighter-rouge">service</code>, as there is no way to distinguish a version 2 Manifest from a version 3 Manifest by its <code class="language-plaintext highlighter-rouge">type</code>.</p>
+      <h3 id="52-manifest">
+        
+        
+          5.2. Manifest <a href="#52-manifest" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>The Manifest resource typically represents a single object and any intellectual work or works embodied within that object. In particular it includes descriptive, rights and linking information for the object. The Manifest embeds the Canvases that should be rendered as views of the object and contains sufficient information for the client to initialize itself and begin to display something quickly to the user.</p>
+
+<p>The identifier in <code class="language-plaintext highlighter-rouge">id</code> <em class="rfc">must</em> be able to be dereferenced to retrieve the <abbr title="JavaScript Object Notation">JSON</abbr> description of the Manifest, and thus <em class="rfc">must</em> use the <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI scheme.</p>
+
+<p>The Manifest <em class="rfc">must</em> have an <code class="language-plaintext highlighter-rouge">items</code> property, which is an array of <abbr title="JSON for Linking Data">JSON-LD</abbr> objects. Each object is a Canvas, with requirements as described in the next section. The Manifest <em class="rfc">may</em> also have a <code class="language-plaintext highlighter-rouge">structures</code> property listing one or more <a href="/api/presentation/3.0/#54-range">Ranges</a> which describe additional structure of the content, such as might be rendered as a table of contents. The Manifest <em class="rfc">may</em> have an <code class="language-plaintext highlighter-rouge">annotations</code> property, which includes Annotation Page resources where the Annotations have the Manifest as their <code class="language-plaintext highlighter-rouge">target</code>. These will typically be comment style Annotations, and <em class="rfc">must not</em> have <code class="language-plaintext highlighter-rouge">painting</code> as their <code class="language-plaintext highlighter-rouge">motivation</code>.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="

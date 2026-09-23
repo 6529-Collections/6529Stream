@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentStackFixture.sol";
+import "../helpers/CurrentStatefulConservationFixture.sol";
+import "../helpers/StreamCurrentAssetPolicy.sol";
 import "../helpers/StreamCurrentStackHandler.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 
 /// @notice Stateful sequence fuzzing against actual sealed current-stack contracts.
 /// @dev Only the bounded handler is targeted. No arbitrary-call revert campaign or mocked Core.
-contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
+interface StatefulInvariantFaultVm {
+    function mockCall(address target, bytes calldata data, bytes calldata returned) external;
+    function clearMockedCalls() external;
+}
+
+contract StreamCurrentStackInvariantTest is CurrentStatefulConservationFixture {
     struct FuzzSelector {
         address addr;
         bytes4[] selectors;
@@ -23,8 +29,7 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
         string[] artifacts;
     }
     bytes32 private constant ERC20_PHASE = keccak256("stateful ERC20 phase");
-    bytes32 private constant REVENUE = keccak256("stateful primary sale");
-    StreamRevenueResolver private primaryResolver;
+    bytes32 private constant REVENUE = PRIMARY_REVENUE_CLASS;
     StreamERC20FixedPriceSaleAdapter private erc20Sale;
     MockStreamPaymentToken private paymentToken;
     bytes32 private erc20SaleId;
@@ -33,10 +38,13 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
     function setUp() public {
         _deployCurrentStack(vm.addr(ARTIST_KEY), vm.addr(PLATFORM_KEY));
         require(executor.genesisInitialized(), "genesis not initialized");
+        _enableStatefulConservation(address(erc20Sale));
         handler = new StreamCurrentStackHandler(
             StreamCurrentStackHandler.Config(
                 core,
                 manager,
+                entropy,
+                revenueEscrow,
                 sale,
                 erc20Sale,
                 auction,
@@ -46,25 +54,44 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
                 PROTOCOL,
                 profile,
                 erc20SaleId,
-                _fixtureSupplyLimit()
+                _fixtureSupplyLimit(),
+                IStreamConservationFloor(address(commerceFloor)),
+                StatefulConservationGovernor(address(this))
             )
         );
+        statefulHandler = address(handler);
     }
 
     function _fixtureSupplyLimit() internal pure override returns (uint64) {
         return 256;
     }
 
-    function _configureAdditionalProducts() internal override {
-        primaryResolver = new StreamRevenueResolver(factory);
-        primaryResolver.setPrimaryProfileAssignment(
-            REVENUE, 1, 1, profile, keccak256("stateful fixed profile")
-        );
+    function _deployAdditionalProducts() internal override {
         paymentToken = new MockStreamPaymentToken();
-        assetPolicy.setAssetStatus(address(paymentToken), 1, keccak256("standard test token"));
         erc20Sale = new StreamERC20FixedPriceSaleAdapter(
-            manager, primaryResolver, vm.addr(PLATFORM_KEY), artists
+            manager,
+            primaryResolver,
+            vm.addr(PLATFORM_KEY),
+            IStreamArtistAttribution(address(artists)),
+            revenueEscrow
         );
+        _assertDeployableProductionInstance(address(erc20Sale));
+    }
+
+    function _additionalEscrowProducers() internal view override returns (address[] memory rows) {
+        rows = new address[](1);
+        rows[0] = address(erc20Sale);
+    }
+
+    function _configureAdditionalProducts() internal override {
+        GovernanceActionRequest memory activation = StreamCurrentAssetPolicy.activationRequest(
+            assetPolicy, address(paymentToken), keccak256("standard test ERC20"), DEPLOYMENT_HASH
+        );
+        bytes memory result = governanceRoot.execute(
+            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (activation))
+        );
+        vm.warp(activation.notBefore);
+        executor.executeGovernanceAction(abi.decode(result, (bytes32)), activation.callData);
         _configureMintPhase(ERC20_PHASE, address(erc20Sale));
         (bytes32 policy,,) = erc20Sale.primaryPolicy(1, REVENUE);
         erc20SaleId = erc20Sale.registerSale(
@@ -80,7 +107,6 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
                 type(uint64).max
             )
         );
-        primaryResolver.transferOwnership(address(executor));
         erc20Sale.transferOwnership(address(executor));
     }
 
@@ -138,6 +164,7 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
     /// @dev Each fuzz run must have exercised every supported opening-cycle operation.
     function afterInvariant() public view {
         handler.assertCampaignActivity();
+        handler.assertRandomizedActivity();
         handler.assertInvariants();
     }
 
@@ -156,10 +183,68 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
     }
 
     function testHandlerOpeningCycleExercisesEveryRequiredOperation() public {
-        for (uint256 i; i < 12; ++i) {
+        for (uint256 i; i < handler.OPENING_ACTIONS(); ++i) {
             handler.step(i * 101 + 7);
             handler.assertInvariants();
         }
         handler.assertCampaignActivity();
+    }
+
+    function testGhostModelRejectsWrongNativePayerEvenWhenAggregateIsUnchanged() public {
+        address first = vm.addr(0xC011EC70);
+        address second = vm.addr(0xC011EC71);
+        uint256 sum = first.balance + second.balance;
+        vm.prank(first);
+        (bool ok,) = payable(second).call{ value: 1 }("");
+        require(ok && first.balance + second.balance == sum, "native aggregate changed");
+        vm.expectRevert(
+            abi.encodeWithSignature("Error(string)", "intended native payer debit and refund")
+        );
+        handler.assertInvariants();
+    }
+
+    function testGhostModelRejectsCampaignWithNoProgress() public {
+        handler.assertInvariants();
+        vm.expectRevert(
+            abi.encodeWithSignature("Error(string)", "campaign lacked required successful activity")
+        );
+        handler.assertCampaignActivity();
+    }
+
+    function testGhostModelRequiresRandomTailAndEveryRandomTargetCanProgress() public {
+        for (uint256 i; i < handler.OPENING_ACTIONS(); ++i) {
+            handler.step(i * 101 + 7);
+        }
+        handler.assertCampaignActivity();
+        vm.expectRevert(
+            abi.encodeWithSignature("Error(string)", "campaign stopped at deterministic opening")
+        );
+        handler.assertRandomizedActivity();
+        for (uint256 i; i < handler.OPENING_ACTIONS(); ++i) {
+            // Past the opening, seed modulo twenty selects the actual random dispatch branch.
+            uint256 beforeCalls = handler.actionCalls(i);
+            handler.step(20_000 + i);
+            require(handler.actionCalls(i) == beforeCalls + 1, "every random target reached");
+            handler.assertInvariants();
+        }
+        handler.assertRandomizedActivity();
+        handler.assertCampaignActivity();
+    }
+
+    function testGhostModelDetectsMissingFirstReceiptAfterSuccessfulPayment() public {
+        handler.step(7);
+        handler.assertInvariants();
+        StreamConservationFloorTypes.FirstSaleReceipt memory absent;
+        // A sensitivity control for the checker, not a substituted successful sale proof.
+        StatefulInvariantFaultVm(address(vm))
+            .mockCall(
+                address(commerceFloor),
+                abi.encodeCall(commerceFloor.firstSale, (1)),
+                abi.encode(absent)
+            );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "first sale history is permanent"));
+        handler.assertInvariants();
+        StatefulInvariantFaultVm(address(vm)).clearMockedCalls();
+        handler.assertInvariants();
     }
 }

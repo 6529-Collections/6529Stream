@@ -1,0 +1,100 @@
+i/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Manifest</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Canvas</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" />*</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" />*</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Annotation</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+    <tr>
+      <td>Annotation Page</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Range</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Annotation Collection</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Content Resources</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>*If a Canvas has either of <code class="language-plaintext highlighter-rouge">height</code> and <code class="language-plaintext highlighter-rouge">width</code>, it <em class="rfc">must</em> have the other, as described in the <a href="/api/presentation/3.0/#height" title="height property">definitions</a> of those properties.<br /></p>
+
+<p><strong>Linking Properties</stro

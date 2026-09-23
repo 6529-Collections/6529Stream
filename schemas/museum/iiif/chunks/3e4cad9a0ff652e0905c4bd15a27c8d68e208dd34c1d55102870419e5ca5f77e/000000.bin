@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang='en'><head>
+  <meta charset="utf-8">
+  <title>
+     Presentation API 3.0 —  IIIF | International Image Interoperability Framework
+  </title>
+  <meta name="description" content="IIIF is a set of open standards for delivering high-quality digital objects online at scale. It’s also the international community that makes it all work.">
+  <link rel="shortcut icon" href="/api/assets/favicon.ico">
+ <link rel="apple-touch-icon" sizes="180x180" href="/api/assets/apple-touch-icon.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="/api/assets/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="/api/assets/favicon-16x16.png">
+ <link rel="manifest" href="/api/assets/site.webmanifest">
+ <link rel="mask-icon" href="/api/assets/safari-pinned-tab.svg" color="#E82334">
+ <meta name="msapplication-TileColor" content="#da532c">
+ <meta name="theme-color" content="#ffffff">
+
+
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/api/assets/css/style.css">
+  <link rel="canonical" href="/api/presentation/3.0/" />    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5W9QRPH6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-ZW5W9QRPH6');
+    </script>
+        
+
+  <link rel="preload" as="image" href="/api">
+  
+
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Presentation API 3.0" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="/api/presentation/3.0/" />
+<meta property="og:url" content="/api/presentation/3.0/" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Presentation API 3.0" />
+<meta name="twitter:site" content="@iiif_io" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"Presentation API 3.0","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/api/assets/favicon.ico"}},"url":"/api/presentation/3.0/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<!-- add for Mastodon verification -->
+<link rel="me" href="https://glammr.us/@iiif">
+
+</head>
+<body>
+
+<section class="hero is-primary" style="background-image: linear-gradient(to bottom, rgba(0, 25, 39, 0.68), rgba(0, 25, 39, 0.68)), url('/api');
+  background-size: cover;
+  background-position: bottom center;
+  background-attachment: fixed;
+  ">
+  
+  <div class="hero-head">
+    <nav id="navbar" class="navbar is-transparent is-spaced">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://iiif.io/">
+        <img src="/api/assets/images/logos/logo-sm.png" alt="IIIF logo" height="28">
+        <span class="brand-title">International Image Interoperability Framework</span>
+      </a>
+      <div class="navbar-burger" data-target="navbar" onclick="document.querySelector('.navbar-menu').classList.toggle('is-active');">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="navbar-menu">
+      <div class="navbar-end">
+            <a class="navbar-item" href="https://iiif.io/">Home</a>
+          
+            <a class="navbar-item" href="https://iiif.io/demos">Demos</a>
+          
+            <a class="navbar-item" href="https://iiif.io/events">Events</a>
+          
+            <a class="navbar-item" href="https://iiif.io/news">News</a>
+          
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link"  href="https://iiif.io/get-involved">
+                Get Involved
+              </a>
+              <div class="navbar-dropdown is-boxed is-active">
+                
+                  <a class="navbar-item" href="https://iiif.io/community/">Community</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/community/consortium">Consortium</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/newsletter">Join Newsletter</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/get-involved/outreach-materials">Outreach Materials</a>
+                
+              </div>
+            </div>
+          
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link"  href="https://iiif.io/get-started">
+                Get Started
+              </a>
+              <div class="navbar-dropdown is-boxed is-active">
+                
+                  <a class="navbar-item" href="https://iiif.io/get-started/how-iiif-works">How IIIF Works</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/community/ambassadors/">IIIF Ambassadors</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/guides">Guides</a>
+                
+                  <a class="navbar-item" href="/api">APIs & Documentation</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/get-started/cookbook">Cookbooks</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/get-started/training">Training</a>
+                
+              </div>
+            </div>
+          </div>
+    </div>
+  </div>
+</nav>
+
+  </div>
+  
+
+  <div class="hero-body container">
+
+    
+    <nav class="breadcrumb is-centered" aria-label="breadcrumbs">
+      <ul>
+        
+          <li><a href="https://iiif.io/get-started">Get Started</a></li>
+        
+          <li><a href="/api/">APIs & Documentation</a></li>
+        
+      </ul>
+    </nav>
+    
+
+    <div class="container has-text-centered">
+      
+      <h1 class="title is-size-2 is-size-3-mobile is-size-desktop is-size-1-widescreen">Presentation API 3.0</h1>
+      
+
+      
+      <p class="subtitle is-size-5"></p>
+      
+
+      
+    </div>
+  </div>
+</section>
+<section id="main">
+      
+      
+      
+
+
+
+<div class="container-block no-padding is-max-desktop">
+  <div class="columns is-max-desktop">
+    <aside class="column is-one-quarter api-sidebar-container" markdown="1">
+      <div class="toc-sidebar sticky">
+        <ul class="menu" id="toc-menu"><li><a href="#1-introduction">1. Introduction</a><ul class="menu-list toc-submenu-2"><li><a href="#11-objectives-and-scope">1.1. Objectives and Scope</a></li><li><a href="#12-terminology">1.2. Terminology</a></li></ul></li><li><a href="#2-resource-type-overview">2. Resource Type Overview</a><ul class="menu-list toc-submenu-2"><li><a href="#21-defined-types">2.1. Defined Types</a></li><li><a href="#22-additional-types">2.2. Additional Types</a></li></ul></li><li><a href="#3-resource-properties">3. Resource Properties</a><ul class="menu-list toc-submenu-2"><li><a href="#31-descriptive-properties">3.1. Descriptive Properties</a></li><li><a href="#32-technical-properties">3.2. Technical Properties</a></li><li><a href="#33-linking-properties">3.3. Linking Properties</a></li><li><a href="#34-structural-properties">3.4. Structural Properties</a></li><li><a href="#35-values">3.5. Values</a></li></ul></li><li><a href="#4-json-ld-considerations">4. <abbr title="JSON for Linking Data">JSON-LD</abbr> Considerations</a><ul class="menu-list toc-submenu-2"><li><a href="#41-case-sensitivity">4.1. Case Sensitivity</a></li><li><a href="#42-resource-representations">4.2. Resource Representations</a></li><li><a href="#43-properties-with-multiple-values">4.3. Properties with Multiple Values</a></li><li><a href="#language-of-property-values">4.4. Language of Property Values</a></li><li><a href="#45-html-markup-in-property-values">4.5. <abbr title="HyperText Markup Language">HTML</abbr> Markup in Property Values</a></li><li><a href="#46-linked-data-context-and-extensions">4.6. Linked Data Context and Extensions</a></li><li><a href="#47-term-collisions-between-contexts">4.7. Term Collisions between Contexts</a></li><li><a href="#48-keyword-mappings">4.8. Keyword Mappings

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang='en'><head>
+    <!-- from: https://github.com/IIIF/iiifc-theme/blob/main/_includes/head.html with extra JS at the end -->
+  <meta charset="utf-8">
+  <title>
+Simplest Manifest - Audio —  IIIF | International Image Interoperability Framework
+  </title>
+  <meta name="description" content="IIIF is a set of open standards for delivering high-quality digital objects online at scale. It’s also the international community that makes it all work.">
+  <link rel="shortcut icon" href="https://iiif.io/api/cookbook/assets/favicon.ico">
+ <link rel="apple-touch-icon" sizes="180x180" href="https://iiif.io/api/cookbook/assets/apple-touch-icon.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="https://iiif.io/api/cookbook/assets/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="https://iiif.io/api/cookbook/assets/favicon-16x16.png">
+ <link rel="manifest" href="https://iiif.io/api/cookbook/assets/site.webmanifest">
+ <link rel="mask-icon" href="https://iiif.io/api/cookbook/assets/safari-pinned-tab.svg" color="#E82334">
+ <meta name="msapplication-TileColor" content="#da532c">
+ <meta name="theme-color" content="#ffffff">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/api/cookbook/assets/css/style.css">
+  <link rel="canonical" href="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/" />    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5W9QRPH6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-ZW5W9QRPH6');
+    </script>
+        
+
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Simplest Manifest - Audio" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/" />
+<meta property="og:url" content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Simplest Manifest - Audio" />
+<meta name="twitter:site" content="@iiif_io" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"Simplest Manifest - Audio","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://iiif.io/api/cookbook/assets/favicon.ico"}},"url":"https://iiif.io/api/cookbook/recipe/0002-mvm-audio/"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- add for Mastodon verification -->
+<link rel="me" href="https://glammr.us/@iiif">
+
+<script>
+(function () {
+  if (window.location.hash) {
+    // The browser's native "scroll to fragment" behaviour retries right
+    // up until the page finishes loading (the 'load' event), which is
+    // what makes the tab panel jump into view once tabSwitch.js's own
+    // hash handling shows it. Lock scrolling for that window instead of
+    // touching the URL/hash - with nothing able to visibly scroll, the
+    // native jump has nowhere to go, and #version-4 etc. stay in the
+    // address bar the whole time.
+    document.documentElement.style.overflow = 'hidden';
+
+    window.addEventListener('load', function () {
+      // Reset in case a scroll got queued while locked, then release.
+      window.scrollTo({
+  top: 0,
+  left: 0,
+  behavior: "instant",
+});
+      document.documentElement.style.overflow = '';
+      if (document.body) {
+        document.body.style.overflow = '';
+      }
+    });
+  }
+})();
+</script>
+</head><body>
+
+<section class="hero is-primary" style="background-image: linear-gradient(to bottom, rgba(0, 25, 39, 0.68), rgba(0, 25, 39, 0.68));
+  background-size: cover;
+  background-position: bottom center;
+  background-attachment: fixed;
+  ">
+  
+  <div class="hero-head">
+    <nav id="navbar" class="navbar is-transparent is-spaced">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://iiif.io/">
+        <img src="https://iiif.io/api/cookbook/assets/images/logos/logo-sm.png" alt="IIIF logo" height="28">
+        <span class="brand-title">International Image Interoperability Framework</span>
+      </a>
+      <div class="navbar-burger" data-target="navbar" onclick="document.querySelector('.navbar-menu').classList.toggle('is-active');">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="navbar-menu">
+      <div class="navbar-end">
+            <a class="navbar-item" href="https://iiif.io/">Home</a>
+          
+            <a class="navbar-item" href="https://iiif.io/demos">Demos</a>
+          
+            <a class="navbar-item" href="https://iiif.io/events">Events</a>
+          
+            <a class="navbar-item" href="https://iiif.io/news">News</a>
+          
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link"  href="https://iiif.io/get-involved">
+                Get Involved
+              </a>
+              <div class="navbar-dropdown is-boxed is-active">
+                
+                  <a class="navbar-item" href="https://iiif.io/community/">Community</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/community/consortium">Consortium</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/newsletter">Join Newsletter</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/get-involved/outreach-materials">Outreach Materials</a>
+                
+              </div>
+            </div>
+          
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link"  href="https://iiif.io/get-started">
+                Get Started
+              </a>
+              <div class="navbar-dropdown is-boxed is-active">
+                
+                  <a class="navbar-item" href="https://iiif.io/get-started/how-iiif-works">How IIIF Works</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/community/ambassadors/">IIIF Ambassadors</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/guides">Guides</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/api">APIs & Documentation</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/get-started/cookbook">Cookbooks</a>
+                
+                  <a class="navbar-item" href="https://iiif.io/get-started/training">Training</a>
+                
+              </div>
+            </div>
+          </div>
+    </div>
+  </div>
+</nav>
+
+  </div>
+  
+
+  <div class="hero-body container">
+
+    
+    <nav class="breadcrumb is-centered" aria-label="breadcrumbs">
+      <ul>
+        
+          <li><a href="https://iiif.io/api/cookbook/index.html">IIIF Cookbook</a></li>
+        
+      </ul>
+    </nav>
+    
+
+    <div class="container has-text-centered">
+      
+      <h1 class="title is-size-2 is-size-3-mobile is-size-desktop is-size-1-widescreen">Simplest Manifest - Audio</h1>
+      
+
+      
+      <p class="subtitle is-size-5"></p>
+      
+
+      
+    </div>
+  </div>
+</section>
+<section id="main">
+      
+      
+      <div class='container-block is-max-widescreen'><div class='container' markdown='1'>
+  <div class="content">
+    <link rel='stylesheet' href="https://iiif.io/api/cookbook/css/style.css"/>
+<link rel='stylesheet' href="https://iiif.io/api/cookbook/css/prism.css"/>
+
+<div class="container-block is-max-widescreen"><div class="container has-text-centered">
+
+    <nav class="tabs is-fullwidth">
+  <div class="container">
+    <ul>
+      
+      <li class="tab" id="version-3-heading" onclick="openTab('version-3')">
+        <h3><a>Version 3</a></h3>
+      </li>
+      
+      <li class="tab" id="version-4-heading" onclick="openTab('version-4')">
+        <h3><a>Version 4</a></h3>
+      </li>
+      
+      <li class="tab" id="manifest-comparison-heading" onclick="openTab('manif

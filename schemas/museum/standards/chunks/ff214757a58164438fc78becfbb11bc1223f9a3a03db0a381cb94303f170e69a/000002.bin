@@ -1,0 +1,70 @@
+s but include formatting data, a simple removal of the formatting data does not always produce a readable format. Therefore we followed the below simple conventions for the transformation of CIDOC-CRM scope note text into a readable rdfs:comment:
+
+- Each Paragraph defines a new line
+- Each element in an unordered list defines a new line
+- Each element in an ordered list defines a new line prefixed with `'{order}. '`
+- Each superscript text is separated from its base with `'-'`
+- Each subscript text is separated from its base with `'_'` (none found)
+
+&gt; F3. **Scope notes of Inverse Properties**. Scope notes for the inverse/backwards direction of properties are not defined as they are covered by the definition of the direct/forward direction definition. Whenever the direct/forward property direction of a property `Pxxx` is not defined due to policy **B1**, then its scope note is used as scope note for the inverse/backwards property `Pxxxi`, and labeled as `Scope note for 'Pxxx':`.
+
+As a result, the direct/forward property definition was used for the rdfs:comment definition of
+
+- `E92 Spacetime Volume. P169i spacetime volume is defined by: rdfs:Literal`
+- `E52 Time-Span. P170i time is defined by: rdfs:Literal`
+
+</rdfs:comment>
+  </owl:Ontology>
+  <rdfs:Class rdf:about="E1_CRM_Entity">
+    <rdfs:label xml:lang="en">CRM Entity</rdfs:label>
+    <rdfs:label xml:lang="de">CRM Entität</rdfs:label>
+    <rdfs:label xml:lang="el">Οντότητα CIDOC CRM</rdfs:label>
+    <rdfs:label xml:lang="fr">Entité CRM</rdfs:label>
+    <rdfs:label xml:lang="pt">Entidade CRM</rdfs:label>
+    <rdfs:label xml:lang="ru">CRM Сущность</rdfs:label>
+    <rdfs:label xml:lang="zh">CRM实体</rdfs:label>
+    <rdfs:comment>This class comprises all things in the universe of discourse of the CIDOC Conceptual Reference Model.
+It is an abstract concept providing for three general properties:
+Identification by name or appellation, and in particular by a preferred identifier
+Classification by type, allowing further refinement of the specific subclass to which an instance belongs
+Attachment of free text and other unstructured data for the expression of anything not captured by formal properties
+All other classes within the CIDOC CRM are directly or indirectly specialisations of E1 CRM Entity.</rdfs:comment>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E2_Temporal_Entity">
+    <rdfs:label xml:lang="en">Temporal Entity</rdfs:label>
+    <rdfs:label xml:lang="de">Geschehendes</rdfs:label>
+    <rdfs:label xml:lang="el">Έγχρονη Οντότητα</rdfs:label>
+    <rdfs:label xml:lang="fr">Entité temporelle</rdfs:label>
+    <rdfs:label xml:lang="pt">Entidade Temporal</rdfs:label>
+    <rdfs:label xml:lang="ru">Врeмeнная Сущность</rdfs:label>
+    <rdfs:label xml:lang="zh">时序实体</rdfs:label>
+    <rdfs:comment>This class comprises all phenomena, such as the instances of E4 Periods and E5 Events, which happen over a limited extent in time. This extent in time must be contiguous, i.e., without gaps. In case the defining kinds of phenomena for an instance of E2 Temporal Entity cease to happen, and occur later again at another time, we regard that the former instance of E2 Temporal Entity has ended and a new instance has come into existence. In more intuitive terms, the same event cannot happen twice.
+In some contexts, such phenomena are also called perdurants. This class is disjoint from E77 Persistent Item and is an abstract class that typically has no direct instances. E2 Temporal Entity is specialized into E4 Period, which applies to a particular geographic area (defined with a greater or lesser degree of precision), and E3 Condition State, which applies to instances of E18 Physical Thing.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E1_CRM_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E3_Condition_State">
+    <rdfs:label xml:lang="en">Condition State</rdfs:label>
+    <rdfs:label xml:lang="de">Zustandsphase</rdfs:label>
+    <rdfs:label xml:lang="el">Κατάσταση</rdfs:label>
+    <rdfs:label xml:lang="fr">État matériel</rdfs:label>
+    <rdfs:label xml:lang="pt">Estado Material</rdfs:label>
+    <rdfs:label xml:lang="ru">Состояниe</rdfs:label>
+    <rdfs:label xml:lang="zh">条件状态</rdfs:label>
+    <rdfs:comment>This class comprises the states of objects characterised by a certain condition over a time-span.
+An instance of this class describes the prevailing physical condition of any material object or feature during a specific instance of E52 Time-Span. In general, the time-span for which a certain condition can be asserted may be shorter than the real time-span, for which this condition held.
+The nature of that condition can be described using P2 has type. For example, the instance of E3 Condition State “condition of the SS Great Britain between 22-nd September 1846 and 27-th August 1847” can be characterized as an instance “wrecked” of E55 Type.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E2_Temporal_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E4_Period">
+    <rdfs:label xml:lang="en">Period</rdfs:label>
+    <rdfs:label xml:lang="de">Phase</rdfs:label>
+    <rdfs:label xml:lang="el">Περίοδος</rdfs:label>
+    <rdfs:label xml:lang="fr">Période</rdfs:label>
+    <rdfs:label xml:lang="pt">Período</rdfs:label>
+    <rdfs:label xml:lang="ru">Пeриод</rdfs:label>
+    <rdfs:label xml:lang="zh">时期</rdfs:label>
+    <rdfs:comment>This class comprises sets of coherent phenomena or cultural manifestations occurring in time and space.
+It is the social or physical coherence of these phenomena that identify an instance of E4 Period and not the associated spatiotemporal extent. This extent is only the “ground” or space in an abstract physical sense that the actual process of growth, spread and retreat has covered. Consequently, different periods can overlap and coexist in time and space, such as when a nomadic culture exists in the same area and time as a sedentary culture. This also means that overlapping land use rights, common among first nations, amounts to overlapping periods.
+Often, this class is used to describe prehistoric or historic periods such as the “Neolithic Period”, the “Ming Dynasty” or the “McCarthy Era”, but also geopolitical units and activities of settlements are regarded as special cases of E4 Period. However, there are no assumptions about the scale of the associated phenomena. In particular all events are seen as synthetic processes consisting of coherent phenomena. Therefore, E4 Period is a superclass of E5 Event. For example, a modern clinical birth, an instance of E67 Birth, can be seen as both a single event, i.e. an instance of E5 Event, and as an extended period, i.e. an instance of E4 Period, that consists of multiple physical processes and complementary activities performed by multiple instances of E39 Actor.
+E4 Period is a subclass of E2 Temporal Entity and of E92 Spacetime Volume. The latter is intended as a phenomenal spacetime volume as defined in CIDOC CRMgeo (Doerr &amp;amp; Hiebel, 2013). By virtue of this multiple inheritance, it is possible to discuss the physical extent of an instance of E4 Period without representing each instance of it together with an instance of its associated spacetime volume. This model combines two quite different kinds of substance: an instance of E4 Period is a phenomenon while an instance of E92 Spacetime Volume is an aggregation of points in spacetime. However, the real spatiotemporal extent of an instance of E4 Period is regarded to be unique to it due to all its details and fuzziness; its identity and existence depends uniquely on the identity of the instance of E4 Period. Therefore, this multiple inheritance is unambiguous and effective and furthermore corresponds to the intuitions of natural language.
+Typical use of this class in cultural heritage documentation is for documenting cultural and artistic periods. There are two different conceptualisations of ‘artistic style’, defined either by physical features or by historical context. For exam

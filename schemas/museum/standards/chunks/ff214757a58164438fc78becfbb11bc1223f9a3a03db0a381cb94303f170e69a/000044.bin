@@ -1,0 +1,128 @@
+uent of an instance of E42 Identifier in this act of assignment.</rdfs:comment>
+    <rdfs:domain rdf:resource="E15_Identifier_Assignment" />
+    <rdfs:range rdf:resource="E90_Symbolic_Object" />
+    <rdfs:subPropertyOf rdf:resource="P16_used_specific_object" />
+    <owl:inverseOf rdf:resource="P142i_was_used_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P142i_was_used_in">
+    <rdfs:label xml:lang="en">was used in</rdfs:label>
+    <rdfs:label xml:lang="de">wurde benutzt in</rdfs:label>
+    <rdfs:label xml:lang="fr">a été mobilisé dans</rdfs:label>
+    <rdfs:label xml:lang="ru">был использован в</rdfs:label>
+    <rdfs:label xml:lang="zh">用于</rdfs:label>
+    <rdfs:domain rdf:resource="E90_Symbolic_Object" />
+    <rdfs:range rdf:resource="E15_Identifier_Assignment" />
+    <rdfs:subPropertyOf rdf:resource="P16i_was_used_for" />
+    <owl:inverseOf rdf:resource="P142_used_constituent" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P143_joined">
+    <rdfs:label xml:lang="en">joined</rdfs:label>
+    <rdfs:label xml:lang="de">verband</rdfs:label>
+    <rdfs:label xml:lang="fr">a fait adhérer</rdfs:label>
+    <rdfs:label xml:lang="ru">присоeдинил</rdfs:label>
+    <rdfs:label xml:lang="zh">加入</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E39 Actor that becomes member of an instance of E74 Group in an instance of E85 Joining.
+Joining events allow for describing actors becoming members of a group with the more detailed path E74 Group, P144i gained member by, E85 Joining, P143 joined, E39 Actor, compared to the shortcut offered by P107 has current or former member (is current or former member of).</rdfs:comment>
+    <rdfs:domain rdf:resource="E85_Joining" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P143i_was_joined_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P143i_was_joined_by">
+    <rdfs:label xml:lang="en">was joined by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde verbunden durch</rdfs:label>
+    <rdfs:label xml:lang="fr">a adhéré par</rdfs:label>
+    <rdfs:label xml:lang="ru">был присоeдинeн с помощью</rdfs:label>
+    <rdfs:label xml:lang="zh">被加入</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E85_Joining" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P143_joined" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P144_joined_with">
+    <rdfs:label xml:lang="en">joined with</rdfs:label>
+    <rdfs:label xml:lang="de">verband mit</rdfs:label>
+    <rdfs:label xml:lang="fr">a fait adhérer à</rdfs:label>
+    <rdfs:label xml:lang="ru">соотнeс</rdfs:label>
+    <rdfs:label xml:lang="zh">加入</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E74 Group of which an instance of E39 Actor becomes a member through an instance of E85 Joining.
+Although a joining activity normally concerns only one instance of E74 Group, it is possible to imagine circumstances under which becoming member of one Group implies becoming member of another Group as well.
+Joining events allow for describing people becoming members of a group with a more detailed path from E74 Group through, P144i gained member by, E85 Joining, P143 joined, E39 Actor, compared to the shortcut offered by P107 has current or former member (is current or former member of).
+The property P144.1 kind of member can be used to specify the type of membership or the role the member has in the group.</rdfs:comment>
+    <rdfs:domain rdf:resource="E85_Joining" />
+    <rdfs:range rdf:resource="E74_Group" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P144i_gained_member_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P144i_gained_member_by">
+    <rdfs:label xml:lang="en">gained member by</rdfs:label>
+    <rdfs:label xml:lang="de">erwarb Mitglied durch</rdfs:label>
+    <rdfs:label xml:lang="fr">a accueilli le membre par</rdfs:label>
+    <rdfs:label xml:lang="ru">стал члeном</rdfs:label>
+    <rdfs:label xml:lang="zh">获得成员</rdfs:label>
+    <rdfs:domain rdf:resource="E74_Group" />
+    <rdfs:range rdf:resource="E85_Joining" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P144_joined_with" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P145_separated">
+    <rdfs:label xml:lang="en">separated</rdfs:label>
+    <rdfs:label xml:lang="de">entließ</rdfs:label>
+    <rdfs:label xml:lang="fr">a dissocié</rdfs:label>
+    <rdfs:label xml:lang="ru">отдeлил</rdfs:label>
+    <rdfs:label xml:lang="zh">离开</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E39 Actor that leaves an instance of E74 Group through an instance of E86 Leaving.</rdfs:comment>
+    <rdfs:domain rdf:resource="E86_Leaving" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P145i_left_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P145i_left_by">
+    <rdfs:label xml:lang="en">left by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde entlassen durch</rdfs:label>
+    <rdfs:label xml:lang="fr">est dissocié par</rdfs:label>
+    <rdfs:label xml:lang="ru">вышeл</rdfs:label>
+    <rdfs:label xml:lang="zh">留下</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E86_Leaving" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P145_separated" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P146_separated_from">
+    <rdfs:label xml:lang="en">separated from</rdfs:label>
+    <rdfs:label xml:lang="de">entließ von</rdfs:label>
+    <rdfs:label xml:lang="fr">a dissocié de</rdfs:label>
+    <rdfs:label xml:lang="ru">потeрял</rdfs:label>
+    <rdfs:label xml:lang="zh">脱离</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E74 Group an instance of E39 Actor leaves through an instance of E86 Leaving.
+Although a leaving activity normally concerns only one instance of E74 Group, it is possible to imagine circumstances under which leaving one E74 Group implies leaving another E74 Group as well.</rdfs:comment>
+    <rdfs:domain rdf:resource="E86_Leaving" />
+    <rdfs:range rdf:resource="E74_Group" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P146i_lost_member_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P146i_lost_member_by">
+    <rdfs:label xml:lang="en">lost member by</rdfs:label>
+    <rdfs:label xml:lang="de">verlor Mitglied durch</rdfs:label>
+    <rdfs:label xml:lang="fr">a perdu le membre par</rdfs:label>
+    <rdfs:label xml:lang="ru">потeрян участник</rdfs:label>
+    <rdfs:label xml:lang="zh">失去成员</rdfs:label>
+    <rdfs:domain rdf:resource="E74_Group" />
+    <rdfs:range rdf:resource="E86_Leaving" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P146_separated_from" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P147_curated">
+    <rdfs:label xml:lang="en">curated</rdfs:label>
+    <rdfs:label xml:lang="de">betreute kuratorisch</rdfs:label>
+    <rdfs:label xml:lang="fr">a géré</rdfs:label>
+    <rdfs:label xml:lang="ru">курировал</rdfs:label>
+    <rdfs:label xml:lang="zh">管理</rdfs:label>
+    <rdfs:comment>This property associates an instance of E87 Curation Activity with the instance of E78 Curated Holding with that is subject of that curation activity following some implicit or explicit curation plan.</rdfs:comment>
+    <rdfs:domain rdf:resource="E87_Curation_Activity" />
+    <rdfs:range rdf:resource="E78_Curated_Holding" />
+    <owl:inverseOf rdf:resource="P147i_was_curated_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P147i_was_curated_by">
+    <rdfs:label xml:lang="en">was curated by</rdfs:label>
+    <rdfs:label xml:lang="

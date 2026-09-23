@@ -1,0 +1,131 @@
+ntext highlighter-rouge">profile</code> parameter.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-plaintext urltemplate highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Content-Type: application/json
+</code></pre></div></div>
+
+<p>The <abbr title="Hypertext Transfer Protocol">HTTP</abbr> server <em class="rfc">must</em> follow the <a href="https://www.w3.org/TR/cors/" title="Cross-Origin Resource Sharing"><abbr title="Cross-Origin Resource Sharing">CORS</abbr> requirements</a> to enable browser-based clients to retrieve the descriptions. If the server receives a request with one of the content types above in the Accept header, it <em class="rfc">should</em> respond with that content type following the rules of <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2" title="HTTP 1.1, 5.3.2. Accept">content negotiation</a>. Recipes for enabling <abbr title="Cross-Origin Resource Sharing">CORS</abbr> and conditional Content-Type headers are provided in the <a href="/api/annex/notes/apache/" title="Apache HTTP Server Implementation Notes">Apache <abbr title="Hypertext Transfer Protocol">HTTP</abbr> Server Implementation Notes</a>.</p>
+
+<p>Responses <em class="rfc">should</em> be compressed by the server as there are significant performance gains to be made for very repetitive data structures.</p>
+      <h2 id="7-authentication">
+        
+        
+          7. Authentication <a href="#7-authentication" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+
+<p>It may be necessary to restrict access to the descriptions made available via the Presentation <abbr title="Application Programming Interface">API</abbr>. As the primary means of interaction with the descriptions is by web browsers using XmlHttpRequests across domains, there are some considerations regarding the most appropriate methods for authenticating users and authorizing their access. The approach taken is described in the <a href="/api/auth/" title="IIIF Authentication API">Authentication</a> specification, and requires requesting a token to add to the requests to identify the user. This token might also be used for other requests defined by other APIs.</p>
+
+<p>It is possible to include Image <abbr title="Application Programming Interface">API</abbr> service descriptions within the Manifest, and within those it is also possible to include links to the Authentication <abbr title="Application Programming Interface">API</abbr>’s services that are needed to interact with the image content. The first time an Authentication <abbr title="Application Programming Interface">API</abbr> service is included within a Manifest, it <em class="rfc">must</em> be the complete description. Subsequent references <em class="rfc">should</em> be just the URI of the service, and clients are expected to look up the details from the full description by matching the URI. Clients <em class="rfc">must</em> anticipate situations where the Authentication service description in the Manifest is out of date: the source of truth is the Image Information document, or other system that references the Authentication <abbr title="Application Programming Interface">API</abbr> services.</p>
+      <h2 id="appendices">
+        
+        
+          Appendices <a href="#appendices" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+      <h3 id="a-summary-of-property-requirements">
+        
+        
+          A. Summary of Property Requirements <a href="#a-summary-of-property-requirements" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<table class="api-table" id="table-reqs-icons">
+  <thead>
+    <tr>
+      <th>Icon</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td>Required</td>
+    </tr>
+    <tr>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td>Recommended</td>
+    </tr>
+    <tr>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td>Optional</td>
+    </tr>
+    <tr>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td>Not Allowed</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Descriptive and Rights Properties</strong></p>
+
+<table class="api-table" id="table-reqs-1">
+  <thead>
+    <tr>
+      <th> </th>
+      <th>label</th>
+      <th>metadata</th>
+      <th>summary</th>
+      <th>requiredStatement</th>
+      <th>rights</th>
+      <th>navDate</th>
+      <th>language</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Collection</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Manifest</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Canvas</td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Annotation</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>AnnotationPage</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="O

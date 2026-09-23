@@ -1,0 +1,99 @@
+<rdfs:label xml:lang="zh">有特征</rdfs:label>
+    <rdfs:comment>This property links an instance of E19 Physical Object to an instance of E26 Physical Feature that it bears.
+An instance of E26 Physical Feature can only exist on one object. One object may bear more than one E26 Physical Feature. An instance of E27 Site should be considered as an instance of E26 Physical Feature on the surface of the Earth.
+An instance B of E26 Physical Feature being a detail of the structure of another instance A of E26 Physical Feature can be linked to B by use of the property P46 is composed of (forms part of). This implies that the subfeature B is P56i is found on the same E19 Physical Object as A.
+This property is a shortcut. A more detailed representation can make use of the fully developed (i.e. indirect) path E19 Physical Object, through, P59 has section, E53 Place, P53i is former or current location of to E26 Physical Feature.</rdfs:comment>
+    <rdfs:domain rdf:resource="E19_Physical_Object" />
+    <rdfs:range rdf:resource="E26_Physical_Feature" />
+    <rdfs:subPropertyOf rdf:resource="P46_is_composed_of" />
+    <owl:inverseOf rdf:resource="P56i_is_found_on" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P56i_is_found_on">
+    <rdfs:label xml:lang="en">is found on</rdfs:label>
+    <rdfs:label xml:lang="de">wird gefunden auf</rdfs:label>
+    <rdfs:label xml:lang="el">βρίσκεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">se trouve sur</rdfs:label>
+    <rdfs:label xml:lang="pt">é encontrada em</rdfs:label>
+    <rdfs:label xml:lang="ru">встрeчаeтся на</rdfs:label>
+    <rdfs:label xml:lang="zh">发现于</rdfs:label>
+    <rdfs:domain rdf:resource="E26_Physical_Feature" />
+    <rdfs:range rdf:resource="E19_Physical_Object" />
+    <rdfs:subPropertyOf rdf:resource="P46i_forms_part_of" />
+    <owl:inverseOf rdf:resource="P56_bears_feature" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P57_has_number_of_parts">
+    <rdfs:label xml:lang="en">has number of parts</rdfs:label>
+    <rdfs:label xml:lang="de">hat Anzahl Teile</rdfs:label>
+    <rdfs:label xml:lang="el">έχει αριθμό μερών</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour nombre d’éléments</rdfs:label>
+    <rdfs:label xml:lang="pt">tem número de partes</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт число частeй</rdfs:label>
+    <rdfs:label xml:lang="zh">有组成部分数</rdfs:label>
+    <rdfs:comment>This property documents the number of parts, an instance of E60 Number, of which an instance of E19 Physical Object is composed.
+This may be used as a method of checking inventory counts with regard to aggregate or collective objects. What constitutes a part or component depends on the context and requirements of the documentation. Normally, the parts documented in this way would not be considered as worthy of individual attention.
+For a more complete description, objects may be decomposed into their components and constituents using P46 is composed of (forms parts of) and P45 consists of (is incorporated in). This allows each element to be described individually.</rdfs:comment>
+    <rdfs:domain rdf:resource="E19_Physical_Object" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P59_has_section">
+    <rdfs:label xml:lang="en">has section</rdfs:label>
+    <rdfs:label xml:lang="de">hat Bereich</rdfs:label>
+    <rdfs:label xml:lang="el">έχει τομέα</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour section</rdfs:label>
+    <rdfs:label xml:lang="pt">tem seção</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт фрагмeнт</rdfs:label>
+    <rdfs:label xml:lang="zh">有区域</rdfs:label>
+    <rdfs:comment>This property links an area, i.e., an instance of E53 Place to the instance of E18 Physical Thing upon which it is found. This area may either be identified by a name, or by a geometry in terms of a coordinate system adapted to the shape of the respective instance of E18 Physical Thing. Typically, names identifying sections of physical objects are composed of the name of a kind of part and the name of the object itself, such as “The poop deck of H.M.S. Victory”, which is composed of “poop deck” and “H.M.S. Victory”.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <rdfs:subPropertyOf rdf:resource="P157i_provides_reference_space_for" />
+    <owl:inverseOf rdf:resource="P59i_is_located_on_or_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P59i_is_located_on_or_within">
+    <rdfs:label xml:lang="en">is located on or within</rdfs:label>
+    <rdfs:label xml:lang="de">befindet sich auf oder in</rdfs:label>
+    <rdfs:label xml:lang="el">βρίσκεται σε ή εντός</rdfs:label>
+    <rdfs:label xml:lang="fr">se situe sur ou dans</rdfs:label>
+    <rdfs:label xml:lang="pt">está localizada sobre ou dentro de</rdfs:label>
+    <rdfs:label xml:lang="ru">размeщeн на или внутри</rdfs:label>
+    <rdfs:label xml:lang="zh">位于</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P157_is_at_rest_relative_to" />
+    <owl:inverseOf rdf:resource="P59_has_section" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P62_depicts">
+    <rdfs:label xml:lang="en">depicts</rdfs:label>
+    <rdfs:label xml:lang="de">bildet ab</rdfs:label>
+    <rdfs:label xml:lang="el">απεικονίζει</rdfs:label>
+    <rdfs:label xml:lang="fr">illustre</rdfs:label>
+    <rdfs:label xml:lang="pt">retrata</rdfs:label>
+    <rdfs:label xml:lang="ru">описываeт</rdfs:label>
+    <rdfs:label xml:lang="zh">描绘了</rdfs:label>
+    <rdfs:comment>This property identifies something that is depicted by an instance of E24 Physical Human-Made Thing. Depicting is meant in the sense that an instance of E24 Physical Human-Made Thing intentionally shows, through its optical qualities or form, a representation of the entity depicted. Photographs are by default regarded as being intentional in this sense. Anything that is designed to change the properties of the depiction, such as an e-book reader, is specifically excluded. The property does not pertain to inscriptions or any other information encoding.
+This property is a shortcut of the more fully developed path from E24 Physical Human-Made Thing through P65 shows visual item, E36 Visual Item, P138 represents to E1 CRM Entity. P62.1 mode of depiction allows the nature of the depiction to be refined.</rdfs:comment>
+    <rdfs:domain rdf:resource="E24_Physical_Human-Made_Thing" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P62i_is_depicted_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P62i_is_depicted_by">
+    <rdfs:label xml:lang="en">is depicted by</rdfs:label>
+    <rdfs:label xml:lang="de">wird abgebildet durch</rdfs:label>
+    <rdfs:label xml:lang="el">απεικονίζεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">est illustré par</rdfs:label>
+    <rdfs:label xml:lang="pt">é retratada por</rdfs:label>
+    <rdfs:label xml:lang="ru">описываeтся</rdfs:label>
+    <rdfs:label xml:lang="zh">被描绘</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E24_Physical_Human-Made_Thing" />
+    <owl:inverseOf rdf:resource="P62_depicts" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P65_shows_visual_item">
+    <rdfs:label xml:lang="en">shows visual item</rdfs:label>
+    <rdfs:label xml:lang="de">zeigt Bildliches</rdfs:label>
+    <rdfs:label xml:lang="el">εμφανίζει οπτικό στοιχείο</rdfs:label>
+    <rdfs:label xml:lang="fr">représente l'entité visuelle</rdfs:label>
+    <rdfs:label xml:lang="pt">apresenta item visual</rdfs:label>
+    <rdfs:label xml:lang="ru">показываeт визуальный прeдмeт</rdfs:label>
+    <rdfs:label xml:lang="zh">展示可视项</rdfs:label>
+    <rdfs:comment>This property documents an instance o

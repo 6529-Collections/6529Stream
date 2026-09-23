@@ -1,0 +1,1070 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "90e68ebfc62e63eb46c6f23b23c32f3ccf2957a8",
+  "sourceTree": "1011eb3e1470dab54cf770904f0fb3ac749777fe",
+  "sourceCount": 291,
+  "compilerVersion": "0.8.19",
+  "sourceNormalization": "UTF-8 CRLF to LF",
+  "qualification": "Selected ABI and source encoding evidence only; no native-runtime, live eligibility, historical provenance, Safe or release acceptance claim.",
+  "inputSha256": "43a641fea018f20fe0119d4c4003a0c4b5dacc335b49eb13263c3e338a711a09",
+  "outputSha256": "2c5d098727bcba813eb8215a78be8efc2faedd333628946691be3548d729210f",
+  "sources": {
+    "smart-contracts/domains/mint/StreamNativeRefundWindowSale.sol": "e4d19be96c5e26a77dba0fc03f2f7f99f11404370fe05a38a72933c91cd17cb8",
+    "smart-contracts/domains/mint/StreamNativeRefundWindowWorker.sol": "7182d73c3506aea76bfc03d5a65bf4b2112aaa9e88a19b9e73d76bcf2dd817df",
+    "smart-contracts/domains/mint/StreamRefundWindowSupport.sol": "beb10cb1806083a694e1df1f5ab3d791f13cd811b55fe347d237c52793ff6fc4",
+    "smart-contracts/domains/mint/StreamRefundWindowBookStore.sol": "9e402acdbdfc1245d147720e764d1eda3f8a79bd1ee074134a55f2e6091a73d2",
+    "smart-contracts/domains/mint/StreamRefundWindowBook.sol": "a946107d3e543ad12e9db3e9ed433046fc01c18e4058fdb0be685c205d788d2d",
+    "smart-contracts/domains/mint/StreamRefundWindowPriceStore.sol": "c7f47cf8acc850a6ae11ed87cf5854dbaf7b54dd1aae919f1ab5477ceeccc806",
+    "smart-contracts/domains/mint/StreamRefundClock.sol": "d323a559a91aab63d5a5d04c785842f1d2384de81b5429ac09b7dd5cbd968ae1",
+    "smart-contracts/domains/mint/StreamRefundUnlock.sol": "d09014583173420e286b8da986865b9c7671f52c7f392d7bfd3631e0255cdcb2",
+    "smart-contracts/domains/mint/StreamMintSaleAllowlist.sol": "d315b29738e5a70c8b0272ba247c03e15fbeb05b96be244bb09405776d5202d6",
+    "smart-contracts/domains/mint/StreamMintCounterPolicy.sol": "86f8e2308d298e093c6a1f7e746f1d18e2940a722d991c7733e6834396b5ba76",
+    "smart-contracts/interfaces/stream/mint/IStreamNativeRefundWindowSale.sol": "6a32247806fcfbfb351ac0e2197b3fd6b5c9d67849ada0c9be03f6f9a51b2ab4",
+    "smart-contracts/interfaces/stream/mint/IStreamNativeAllowlistRefundWindowSale.sol": "0707b964215f1406119fba5af86bee3728c81738191316ac92d4a8eb48d8003f",
+    "smart-contracts/interfaces/stream/entropy/IStreamRevealFeeEscrow.sol": "825385f4b71cde29d2f0bc37331415e5156f6de785e99652fc0497035f10b5c0",
+    "smart-contracts/interfaces/stream/revenue/StreamNativeSettlementTypes.sol": "5ce37350566d225333360f9c04575904c969faecaa2beb1aad3d38b9e997956c"
+  },
+  "selections": {
+    "refund": {
+      "source": "smart-contracts/domains/mint/StreamNativeRefundWindowSale.sol",
+      "contract": "StreamNativeRefundWindowSale",
+      "methods": [
+        "registerAllowlistRefundSale",
+        "purchaseAllowlistRefundWindow",
+        "allowlistRefundSalePolicy",
+        "refundSaleRecord",
+        "refundPurchaseAuthorizationDigest",
+        "nextSaleNonce",
+        "nextPurchaseNonce",
+        "refundableBalance",
+        "finalizeRefundWindow",
+        "refundPurchase",
+        "unlockRefund",
+        "synchronizePurchaseWindow",
+        "claimRefund",
+        "purchaseDeadlines",
+        "owner",
+        "core",
+        "mintManager",
+        "entropyCoordinator",
+        "refundPurchaseRecord",
+        "refundPurchasePriceFacts",
+        "refundPurchaseResolverData"
+      ]
+    },
+    "entropy": {
+      "source": "smart-contracts/interfaces/stream/entropy/IStreamRevealFeeEscrow.sol",
+      "contract": "IStreamRevealFeeEscrow",
+      "methods": [
+        "collectionRevealPolicy"
+      ]
+    }
+  },
+  "abis": {
+    "refund": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "allowlistRefundSalePolicy",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "counterId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bool",
+                "name": "allowFree",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address payable",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "claimRefund",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "entropyCoordinator",
+        "outputs": [
+          {
+            "internalType": "contract IStreamRevealFeeEscrow",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "finalizeRefundWindow",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "executionId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "operationRoot",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "operationId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "settlementKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "revealFeeForwarded",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "revealFeeRefunded",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "escrowed",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundWindowSale.RefundFinalizationResult",
+            "name": "r",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "mintManager",
+        "outputs": [
+          {
+            "internalType": "contract IStreamMintManager",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "payer",
+            "type": "address"
+          }
+        ],
+        "name": "nextPurchaseNonce",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextSaleNonce",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "saleId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "saleConfigHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "payer",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "recipient",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "artist",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "tokenDataHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "mintCommitment",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "purchaseNonce",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "nonce",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "price",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "deadline",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "windowPolicyHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "maximumNominalFinalizeBy",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "absoluteEscapeDeadline",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "expectedPrimaryPolicyHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamNativeRefundWindowSale.RefundPurchaseAuthorization",
+                "name": "authorization",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes",
+                "name": "tokenData",
+                "type": "bytes"
+              },
+              {
+                "internalType": "bytes",
+                "name": "platformSignature",
+                "type": "bytes"
+              },
+              {
+                "internalType": "bytes",
+                "name": "artistSignature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundWindowSale.RefundPurchaseData",
+            "name": "d",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "resolverData",
+            "type": "bytes"
+          }
+        ],
+        "name": "purchaseAllowlistRefundWindow",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "purchaseDeadlines",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "refundDeadline",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "finalizeBy",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "pauseToll",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "refundPurchase",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "saleId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "saleConfigHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "payer",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "artist",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "tokenDataHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "mintCommitment",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "purchaseNonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "nonce",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "deadline",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "windowPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "maximumNominalFinalizeBy",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "absoluteEscapeDeadline",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedPrimaryPolicyHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundWindowSale.RefundPurchaseAuthorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "refundPurchaseAuthorizationDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "refundPurchasePriceFacts",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "captured",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "chargedPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "resolverDataHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "refundPurchaseRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "saleId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "saleConfigHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "payer",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "recipient",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "artist",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "tokenDataHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "mintCommitment",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "purchaseNonce",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "nonce",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "price",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "deadline",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "windowPolicyHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "maximumNominalFinalizeBy",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "absoluteEscapeDeadline",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "expectedPrimaryPolicyHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamNativeRefundWindowSale.RefundPurchaseAuthorization",
+                "name": "authorization",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "authorizationDigest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "purchaseRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "bindingGeneration",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "bindingHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "referencedGate",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "tokenData",
+                "type": "bytes"
+              },
+              {
+                "internalType": "uint256",
+                "name": "savedRevealFee",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "purchasedAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "pauseBaseline",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "nominalRefundDeadline",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "nominalFinalizeBy",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "terminalToll",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint8",
+                "name": "status",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundWindowSale.RefundPurchaseRecord",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "refundPurchaseResolverData",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "refundSaleRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "phaseId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "price",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "maxSaleQuantity",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "startsAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "endsAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "refundWindowSeconds",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "finalizationWindowSeconds",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "primaryPolicyMode",
+                    "type": "uint8"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "mintPolicyHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamNativeRefundWindowSale.RefundSaleConfig",
+                "name": "config",
+                "type": "tuple"
+              },
+              {
+                "internalType": "uint256",
+                "name": "saleNonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "configHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "windowPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint64",
+                    "name": "saleCreatedAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "saleAdapterRegistryRevision",
+                    "type": "uint64"
+                  }
+                ],
+                "internalType": "struct StreamNativeSettlementTypes.SaleLifecycleBinding",
+                "name": "lifecycle",
+                "type": "tuple"
+              },
+              {
+                "internalType": "uint64",
+                "name": "purchasedQuantity",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedPrimaryPolicyHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundWindowSale.RefundSaleRecord",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "refundableBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "phaseId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "maxSaleQuantity",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "startsAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "endsAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "refundWindowSeconds",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "finalizationWindowSeconds",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint8",
+                "name": "primaryPolicyMode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "mintPolicyHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundWindowSale.RefundSaleConfig",
+            "name": "c",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "counterId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bool",
+                "name": "allowFree",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy",
+            "name": "policy",
+            "type": "tuple"
+          }
+        ],
+        "name": "registerAllowlistRefundSale",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "synchronizePurchaseWindow",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "reason",
+            "type": "uint8"
+          }
+        ],
+        "name": "unlockRefund",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "entropy": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionRevealPolicy",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "declared",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint8",
+                "name": "requestMode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revealOwnerRole",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "requestSLOBlocks",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint256",
+                "name": "revealFeePerTokenWei",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IStreamRevealFeeEscrow.CollectionRevealPolicy",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

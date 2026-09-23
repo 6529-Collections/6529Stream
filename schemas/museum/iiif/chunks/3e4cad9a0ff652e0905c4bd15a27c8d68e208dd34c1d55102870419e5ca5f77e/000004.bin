@@ -1,0 +1,74 @@
+er-rouge">value</code> properties. The values of both <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlighter-rouge">value</code> <em class="rfc">must</em> be <abbr title="JavaScript Object Notation">JSON</abbr> objects, as described in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages</a> section.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">metadata</code> property with at least one item. <br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">metadata</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">metadata</code> property with at least one item.<br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">metadata</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">metadata</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">metadata</code> on a Canvas.</li>
+  <li>Other types of resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">metadata</code> property with at least one item.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">metadata</code> on other types of resource.</li>
+</ul>
+
+<p>Clients <em class="rfc">should</em> display the entries in the order provided. Clients <em class="rfc">should</em> expect to encounter long texts in the <code class="language-plaintext highlighter-rouge">value</code> property, and render them appropriately, such as with an expand button, or in a tabbed interface.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Creator"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Anne Artist (1776-1824)"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="summary">
+        
+        
+          summary <a href="#summary" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A short textual summary intended to be conveyed to the user when the <code class="language-plaintext highlighter-rouge">metadata</code> entries for the resource are not being displayed. This could be used as a brief description for item level search results, for small-screen environments, or as an alternative user interface when the <code class="language-plaintext highlighter-rouge">metadata</code> property is not currently being rendered. The <code class="language-plaintext highlighter-rouge">summary</code> property follows the same pattern as the <code class="language-plaintext highlighter-rouge">label</code> property described above.</p>
+
+<p>The value of the property <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object, as described in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages</a> section.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">summary</code> property with at least one entry.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">summary</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">summary</code> property with at least one entry.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">summary</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">summary</code> property with at least one entry.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">summary</code> on a Canvas.</li>
+  <li>Other types of resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">summary</code> property with at least one entry.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">summary</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"This is a summary of the object."</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="requiredstatement">
+        
+        
+          requiredStatement <a href="#requiredstatement" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>Text that <em class="rfc">must</em> be displayed when the resource is displayed or used. For example, the <code class="language-plaintext highlighter-rouge">requiredStatement</code> property could be used to present copyright or ownership statements, an acknowledgement of the owning and/or publishing institution, or any other text that the publishing organization deems critical to display to the user. Given the wide variation of potential client user interfaces, it will not always be possible to display this statement to the user in the client’s initial state. If initially hidden, clients <em class="rfc">must</em> make the method of revealing it as obvious as possible.</p>
+
+<p>The value of the property <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object, that has the <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlighter-rouge">value</code> properties, in the same way as a <code class="language-plaintext highlighter-rouge">metadata</code> property entry. The values of both <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlighter-rouge">value</code> <em class="rfc">must</em> be <abbr title="JavaScript Object Notation">JSON</abbr> objects, as described in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages</a> section.</p>

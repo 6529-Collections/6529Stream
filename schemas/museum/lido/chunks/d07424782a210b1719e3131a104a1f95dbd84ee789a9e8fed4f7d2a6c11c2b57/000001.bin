@@ -1,0 +1,81 @@
+"remarks" type="gml:StringOrRefType">
+		<annotation>
+			<documentation>Information about this object or code. Contains text or refers to external text.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="scope" type="string">
+		<annotation>
+			<documentation>Description of domain of usage, or limitations of usage, for which this CRS object is valid.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="validArea" type="gml:ExtentType">
+		<annotation>
+			<documentation>Area or region in which this CRS object is valid.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<complexType name="ExtentType">
+		<annotation>
+			<documentation>Information about the spatial, vertical, and/or temporal extent of a reference system object. Constraints: At least one of the elements "description", "boundingBox", "boundingPolygon", "verticalExtent", and temporalExtent" must be included, but more that one can be included when appropriate. Furthermore, more than one "boundingBox", "boundingPolygon", "verticalExtent", and/or temporalExtent" element can be included, with more than one meaning the union of the individual domains.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:description" minOccurs="0">
+				<annotation>
+					<documentation>Description of spatial and/or temporal extent of this object.</documentation>
+				</annotation>
+			</element>
+			<choice>
+				<annotation>
+					<documentation>Geographic domain of this reference system object.</documentation>
+				</annotation>
+				<element ref="gml:boundingBox" minOccurs="0" maxOccurs="unbounded">
+					<annotation>
+						<documentation>Unordered list of bounding boxes (or envelopes) whose union describes the spatial domain of this object.</documentation>
+					</annotation>
+				</element>
+				<element ref="gml:boundingPolygon" minOccurs="0" maxOccurs="unbounded">
+					<annotation>
+						<documentation>Unordered list of bounding polygons whose union describes the spatial domain of this object.</documentation>
+					</annotation>
+				</element>
+			</choice>
+			<element ref="gml:verticalExtent" minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>Unordered list of vertical intervals whose union describes the spatial domain of this object.</documentation>
+				</annotation>
+			</element>
+			<element ref="gml:temporalExtent" minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>Unordered list of time periods whose union describes the spatial domain of this object.</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="boundingBox" type="gml:EnvelopeType">
+		<annotation>
+			<documentation>A bounding box (or envelope) defining the spatial domain of this object.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="boundingPolygon" type="gml:PolygonType">
+		<annotation>
+			<documentation>A bounding polygon defining the horizontal spatial domain of this object.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="verticalExtent" type="gml:EnvelopeType">
+		<annotation>
+			<documentation>An interval defining the vertical spatial domain of this object.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="temporalExtent" type="gml:TimePeriodType">
+		<annotation>
+			<documentation>A time period defining the temporal domain of this object.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+</schema>

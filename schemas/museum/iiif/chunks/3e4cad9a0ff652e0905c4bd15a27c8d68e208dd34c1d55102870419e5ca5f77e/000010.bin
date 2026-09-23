@@ -1,0 +1,109 @@
+     </h5>
+    
+
+<p>The language or languages used in the content of this external resource. This property is already available from the Web Annotation model for content resources that are the body or target of an Annotation, however it <em class="rfc">may</em> also be used for resources <a href="/api/presentation/3.0/#12-terminology">referenced</a> from <code class="language-plaintext highlighter-rouge">homepage</code>, <code class="language-plaintext highlighter-rouge">rendering</code>, and <code class="language-plaintext highlighter-rouge">partOf</code>.</p>
+
+<p>The value <em class="rfc">must</em> be an array of strings. Each item in the array <em class="rfc">must</em> be a valid language code, as described in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages section</a>.</p>
+
+<ul>
+  <li>An external resource <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">language</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process the <code class="language-plaintext highlighter-rouge">language</code> of external resources.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">language</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">language</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"language"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"en"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="profile">
+        
+        
+          profile <a href="#profile" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A schema or named set of functionality available from the resource. The profile can further clarify the <code class="language-plaintext highlighter-rouge">type</code> and/or <code class="language-plaintext highlighter-rouge">format</code> of an external resource or service, allowing clients to customize their handling of the resource that has the <code class="language-plaintext highlighter-rouge">profile</code> property.</p>
+
+<p>The value <em class="rfc">must</em> be a string, either taken from the <a href="/api/registry/profiles/">profiles registry</a> or a URI.</p>
+
+<ul>
+  <li>Resources <a href="/api/presentation/3.0/#12-terminology">referenced</a> by the <code class="language-plaintext highlighter-rouge">seeAlso</code> or <code class="language-plaintext highlighter-rouge">service</code> properties <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">profile</code> property.<br />
+Clients <em class="rfc">should</em> process the <code class="language-plaintext highlighter-rouge">profile</code> of a service or external resource.</li>
+  <li>Other types of resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">profile</code> property.<br />
+Clients <em class="rfc">may</em> process the <code class="language-plaintext highlighter-rouge">profile</code> of other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/profile/statuary"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="height">
+        
+        
+          height <a href="#height" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The height of the Canvas or external content resource. For content resources, the value is in pixels. For Canvases, the value does not have a unit. In combination with the width, it conveys an aspect ratio for the space in which content resources are located.</p>
+
+<p>The value <em class="rfc">must</em> be a positive integer.</p>
+
+<ul>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">height</code> property. If it has a <code class="language-plaintext highlighter-rouge">height</code>, it <em class="rfc">must</em> also have a <code class="language-plaintext highlighter-rouge">width</code>.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">height</code> on a Canvas.</li>
+  <li>Content resources <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">height</code> property, with the value given in pixels, if appropriate to the resource type.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">height</code> on content resources.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">height</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">height</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="width">
+        
+        
+          width <a href="#width" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The width of the Canvas or external content resource. For content resources, the value is in pixels. For Canvases, the value does not have a unit. In combination with the height, it conveys an aspect ratio for the space in which content resources are located.</p>
+
+<p>The value <em class="rfc">must</em> be a positive integer.</p>
+
+<ul>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">width</code> property. If it has a <code class="language-plaintext highlighter-rouge">width</code>, it <em class="rfc">must</em> also have a <code class="language-plaintext highlighter-rouge">height</code>.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">width</code> on a Canvas.</li>
+  <li>Content resources <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">width</code> property, with the value given in pixels, if appropriate to the resource type.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">width</code> on content resources.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">width</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">width</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code

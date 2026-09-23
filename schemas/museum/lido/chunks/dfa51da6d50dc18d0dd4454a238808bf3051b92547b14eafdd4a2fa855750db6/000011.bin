@@ -1,0 +1,179 @@
+ type="description">A text element providing an URL reference to a description of the object or
+							work related to the object/work in focus.<br/>
+							Usually a resource in the World Wide Web.</tei:ab>
+						<tei:ab type="label">Object Web Resource</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="objectID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="objectID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier of the referenced object or work.<br/>
+							Repeatable for identifiers from different authority files or other sources. 
+							The recommended method, however, is to reference equivalent resources using the 
+							<tei:ref target="https://www.w3.org/TR/owl-ref/#sameAs-def">owl:sameAs</tei:ref> property, 
+							stating that two or more URIs identify the same individual entity.</tei:ab>
+						<tei:ab type="label">Object Identifier</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" namespace="http://www.w3.org/2002/07/owl#"/>
+			<xs:element name="objectType" type="lido:conceptComplexType" minOccurs="0" maxOccurs="unbounded" id="objectType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the particular kind of object or work in focus.</tei:ab>
+						<tei:ab type="label">Object Type</tei:ab>				
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">To be determined by application profiles. If the object is a collection, refer to LIDO Terminology for
+							<tei:ref target="../../documents/terminology-recommendation.html#objectType">Object Type</tei:ref></tei:ab>
+						</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="objectName" minOccurs="0" maxOccurs="unbounded" id="objectName">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for the object/work in focus as an 
+							individual entity, such as a title or a proper name.</tei:ab>
+						<tei:ab type="label">Object Name</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:appellationComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+							<xs:attribute ref="lido:pref"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="objectNote" minOccurs="0" maxOccurs="unbounded" id="objectNote">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for further descriptive information about 
+							the object/work in focus, including actor, and other information as necessary 
+							for clarity.</tei:ab>
+						<tei:ab type="label">Object Note</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="lido:textComplexType">
+							<xs:attribute ref="lido:type" id="objectNote_type">
+							<xs:annotation>
+								<xs:documentation>
+									<tei:ab type="description">An attribute for the particular kind of note.<br/>
+										Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+									<tei:ab type="dataValues">Controlled</tei:ab>
+									<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+								</xs:documentation>
+							</xs:annotation>
+						   </xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="objectDescriptionWrap" id="objectDescriptionWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for the description and descriptive notes
+					referring to the object or work in focus.</tei:ab>
+				<tei:ab type="label">Object Description Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="objectDescriptionSet" minOccurs="0" maxOccurs="unbounded" id="objectDescriptionSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of descriptive information about the object/work, including
+								description identifier, descriptive note and source of the description.<br/>
+								Repeated if there is more than one descriptive note.</tei:ab>
+							<tei:ab type="note">A reference to a text resource holding the
+								description may be given in description identifier.</tei:ab>
+							<tei:ab type="label">Description/Descriptive Note Set</tei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:descriptiveNoteComplexType">
+								<xs:sequence>
+									<xs:element name="objectDescriptionRights" type="lido:rightsComplexType" minOccurs="0" maxOccurs="unbounded" id="objectDescriptionRights">
+										<xs:annotation>
+											<xs:documentation>
+												<tei:ab type="description">A set of structured information about rights
+													regarding the content provided in <tei:ref target="#objectDescriptionSet">Description/Descriptive Note Set</tei:ref>.</tei:ab>
+												<tei:ab type="note">The information about rights
+												overrides information about rights in <tei:ref target="#recordRights">recordRights</tei:ref>.</tei:ab>
+												<tei:ab type="label">Description/Descriptive Note Rights</tei:ab>
+											</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="objectIdentificationWrap" id="objectIdentificationWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for information that identifies the object or
+					work in focus.</tei:ab>
+				<tei:ab type="label">Object Identification Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="lido:titleWrap"/>
+				<xs:element ref="lido:inscriptionsWrap" minOccurs="0"/>
+				<xs:element ref="lido:repositoryWrap" minOccurs="0"/>
+				<xs:element ref="lido:displayStateEditionWrap" minOccurs="0"/>
+				<xs:element ref="lido:objectDescriptionWrap" minOccurs="0"/>
+				<xs:element ref="lido:objectMeasurementsWrap" minOccurs="0"/>
+				<xs:element ref="lido:objectMaterialsTechWrap" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="objectMeasurementsComplexType" id="objectMeasurementsComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about the dimensions, or other
+					measurements, of the object/work in focus.
+				</tei:ab>
+				</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="measurementsSet" minOccurs="0" maxOccurs="unbounded" id="measurementsSet">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information about dimensions, or other
+							measurements, for one aspect of the object/work, including mandatory
+							sub-elements for measurement type, unit and value. This also covers
+							environmental quantities, such as relative humidity or light exposure,
+							assessed as object requirements.</tei:ab>
+						<tei:ab type="label">Measurements Set</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:measurementsSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="extentMeasurements" minOccurs="0" maxOccurs="unbounded" id="extentMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element specifying the part of the
+							object

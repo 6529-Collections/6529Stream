@@ -1,0 +1,126 @@
+ionality, and this functionality has been built into various GML 3 elements by including the gml:AssociationAttributeGroup.</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="MultiCurve" type="gml:MultiCurveType" substitutionGroup="gml:_GeometricAggregate"/>
+	<!-- ======================================================= -->
+	<complexType name="MultiCurveType">
+		<annotation>
+			<documentation>A MultiCurve is defined by one or more Curves, referenced through curveMember elements.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeometricAggregateType">
+				<sequence>
+					<annotation>
+						<documentation>The members of the geometric aggregate can be specified either using the "standard" property or the array property style. It is also valid to use both the "standard" and the array property style in the same collection.
+NOTE: Array properties cannot reference remote geometry elements.</documentation>
+					</annotation>
+					<element ref="gml:curveMember" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:curveMembers" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiCurveProperty" type="gml:MultiCurvePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check either href or content not both">
+					<sch:rule context="gml:multiCurveProperty">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>This property element either references a curve aggregate via the XLink-attributes or contains the "multi curve" element. multiCurveProperty is the predefined property which can be used by GML Application Schemas whenever a GML Feature has a property with a value that is substitutable for MultiCurve.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="MultiCurvePropertyType">
+		<annotation>
+			<documentation>A property that has a collection of curves as its value domain can either be an appropriate geometry element encapsulated in an element of this type or an XLink reference to a remote geometry element (where remote includes geometry elements located elsewhere in the same document). Either the reference or the contained element must be given, but neither both nor none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:MultiCurve"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup">
+			<annotation>
+				<documentation>This attribute group includes the XLink attributes (see xlinks.xsd). XLink is used in GML to reference remote resources (including those elsewhere in the same document). A simple link element can be constructed by including a specific set of XLink attributes. The XML Linking Language (XLink) is currently a Proposed Recommendation of the World Wide Web Consortium. XLink allows elements to be inserted into XML documents so as to create sophisticated links between resources; such links can be used to reference remote properties.
+A simple link element can be used to implement pointer functionality, and this functionality has been built into various GML 3 elements by including the gml:AssociationAttributeGroup.</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="MultiSurface" type="gml:MultiSurfaceType" substitutionGroup="gml:_GeometricAggregate"/>
+	<!-- ======================================================= -->
+	<complexType name="MultiSurfaceType">
+		<annotation>
+			<documentation>A MultiSurface is defined by one or more Surfaces, referenced through surfaceMember elements.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeometricAggregateType">
+				<sequence>
+					<annotation>
+						<documentation>The members of the geometric aggregate can be specified either using the "standard" property or the array property style. It is also valid to use both the "standard" and the array property style in the same collection.
+NOTE: Array properties cannot reference remote geometry elements.</documentation>
+					</annotation>
+					<element ref="gml:surfaceMember" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:surfaceMembers" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiSurfaceProperty" type="gml:MultiSurfacePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check either href or content not both">
+					<sch:rule context="gml:multiSurfaceProperty">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>This property element either references a surface aggregate via the XLink-attributes or contains the "multi surface" element. multiSurfaceProperty is the predefined property which can be used by GML Application Schemas whenever a GML Feature has a property with a value that is substitutable for MultiSurface.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="MultiSurfacePropertyType">
+		<annotation>
+			<documentation>A property that has a collection of surfaces as its value domain can either be an appropriate geometry element encapsulated in an element of this type or an XLink reference to a remote geometry element (where remote includes geometry elements located elsewhere in the same document). Either the reference or the contained element must be given, but neither both nor none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:MultiSurface"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup">
+			<annotation>
+				<documentation>This attribute group includes the XLink attributes (see xlinks.xsd). XLink is used in GML to reference remote resources (including those elsewhere in the same document). A simple link element can be constructed by including a specific set of XLink attributes. The XML Linking Language (XLink) is currently a Proposed Recommendation of the World Wide Web Consortium. XLink allows elements to be inserted into XML documents so as to create sophisticated links between resources; such links can be used to reference remote properties.
+A simple link element can be used to implement pointer functionality, and this functionality has been built into various GML 3 elements by including the gml:AssociationAttributeGroup.</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- ============================================================ -->
+	<element name="MultiSolid" type="gml:MultiSolidType" substitutionGroup="gml:_GeometricAggregate"/>
+	<!-- ======================================================= -->
+	<complexType name="MultiSolidType">
+		<annotation>
+			<documentation>A MultiSolid is defined by one or more Solids, referenced through solidMember elements.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeometricAggregateType">
+				<sequence>
+					<annotation>
+						<documentation>The members of the geometric aggregate can be specified either using the "standard" property or the array property style. It is also valid to use both the "standard" and the array property style in the same collection.
+NOTE: Array properties cannot reference remote geometry elements.</documentation>
+					</annotation>
+					<element ref="gml:solidMember" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:solidMembers" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiSolidProperty" type="gml:MultiSolidPropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check either href or content not both">
+					<sch:rule context="gml:multiSolidPro

@@ -214,7 +214,6 @@ library StreamMintOperationIdentity {
         preimage.phaseConfigHash = keccak256(
             abi.encode(
                 PHASE_CONFIG_DOMAIN,
-                phaseConfig.paused,
                 phaseConfig.startTime,
                 phaseConfig.endTime,
                 phaseConfig.maxBatchQuantity,
@@ -358,38 +357,48 @@ library StreamMintOperationIdentity {
             authorizer: context.authorizer,
             contextHash: batch.contextHash
         });
+        return counterConsumption(subjectContext, config, tokenIndex, context);
+    }
+
+    /// @notice The original single-row preimage shared by execution and counter-only reads.
+    function counterConsumption(
+        SubjectContext memory subjectContext,
+        IStreamMintManager.MintCounterConfig memory config,
+        uint256 tokenIndex,
+        CounterContext memory context
+    ) public pure returns (IStreamMintLedger.CounterConsumption memory consumption) {
         bytes32 subject = _subjectKey(config.keyMode, subjectContext);
         consumption.valueKey = keccak256(
             abi.encode(
                 VALUE_KEY_DOMAIN,
                 context.manager,
-                batch.collectionId,
-                batch.phaseId,
-                counterId,
+                subjectContext.collectionId,
+                subjectContext.phaseId,
+                subjectContext.counterId,
                 subject
             )
         );
-        consumption.collectionId = batch.collectionId;
-        consumption.phaseId = batch.phaseId;
-        consumption.counterId = counterId;
+        consumption.collectionId = subjectContext.collectionId;
+        consumption.phaseId = subjectContext.phaseId;
+        consumption.counterId = subjectContext.counterId;
         consumption.subjectKey = subject;
-        consumption.payer = batch.payer;
-        consumption.recipient = recipient;
+        consumption.payer = subjectContext.payer;
+        consumption.recipient = subjectContext.recipient;
         consumption.authorizer = context.authorizer;
         consumption.executor = context.executor;
         consumption.increment = config.staticIncrement;
         consumption.cap =
             config.capMode == IStreamMintLedger.CounterCapMode.STATIC ? config.staticCap : 0;
-        consumption.contextHash = batch.contextHash;
+        consumption.contextHash = subjectContext.contextHash;
         consumption.resolutionHash = keccak256(
             abi.encode(
                 RESOLUTION_DOMAIN,
                 context.chainId,
                 context.manager,
                 context.ledger,
-                batch.collectionId,
-                batch.phaseId,
-                counterId,
+                subjectContext.collectionId,
+                subjectContext.phaseId,
+                subjectContext.counterId,
                 subject,
                 tokenIndex,
                 config.counterConfigHash

@@ -1,0 +1,97 @@
+de">wurde kuratorisch betreut durch</rdfs:label>
+    <rdfs:label xml:lang="fr">a été géré par</rdfs:label>
+    <rdfs:label xml:lang="ru">был куратором</rdfs:label>
+    <rdfs:label xml:lang="zh">被管理</rdfs:label>
+    <rdfs:domain rdf:resource="E78_Curated_Holding" />
+    <rdfs:range rdf:resource="E87_Curation_Activity" />
+    <owl:inverseOf rdf:resource="P147_curated" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P148_has_component">
+    <rdfs:label xml:lang="en">has component</rdfs:label>
+    <rdfs:label xml:lang="de">hat Bestandteil</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour composant</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт компонeнт</rdfs:label>
+    <rdfs:label xml:lang="zh">有组件</rdfs:label>
+    <rdfs:comment>This property associates an instance of E89 Propositional Object with a structural part of it that is by itself an instance of E89 Propositional Object.
+This property is transitive. This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E89_Propositional_Object" />
+    <rdfs:range rdf:resource="E89_Propositional_Object" />
+    <owl:inverseOf rdf:resource="P148i_is_component_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P148i_is_component_of">
+    <rdfs:label xml:lang="en">is component of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Bestandteil von</rdfs:label>
+    <rdfs:label xml:lang="fr">est le composant de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся компонeнтом</rdfs:label>
+    <rdfs:label xml:lang="zh">是组件</rdfs:label>
+    <rdfs:domain rdf:resource="E89_Propositional_Object" />
+    <rdfs:range rdf:resource="E89_Propositional_Object" />
+    <owl:inverseOf rdf:resource="P148_has_component" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P150_defines_typical_parts_of">
+    <rdfs:label xml:lang="en">defines typical parts of</rdfs:label>
+    <rdfs:label xml:lang="fr">définit les éléments typiques de</rdfs:label>
+    <rdfs:label xml:lang="ru">опрeдeляeт типичныe части</rdfs:label>
+    <rdfs:comment>This property associates an instance of E55 Type “A” with an instance of E55 Type “B”, when items of type “A” typically form part of items of type “B”, such as “car motors” and “cars”.
+It allows types to be organised into hierarchies based on one type describing a typical part of another. This property is equivalent to “broader term partitive (BTP)” as defined in ISO 2788 and “broaderPartitive” in SKOS.
+This property is not transitive. This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P150i_defines_typical_wholes_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P150i_defines_typical_wholes_for">
+    <rdfs:label xml:lang="en">defines typical wholes for</rdfs:label>
+    <rdfs:label xml:lang="fr">définit l’ensemble typique pour</rdfs:label>
+    <rdfs:label xml:lang="ru">опрeдeляeт совокупность</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P150_defines_typical_parts_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P151_was_formed_from">
+    <rdfs:label xml:lang="en">was formed from</rdfs:label>
+    <rdfs:label xml:lang="fr">a été formé à partir de</rdfs:label>
+    <rdfs:label xml:lang="ru">был сформирован из</rdfs:label>
+    <rdfs:comment>This property associates an instance of E66 Formation with an instance of E74 Group from which the new group was formed preserving a sense of continuity such as in mission, membership or tradition.</rdfs:comment>
+    <rdfs:domain rdf:resource="E66_Formation" />
+    <rdfs:range rdf:resource="E74_Group" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P151i_participated_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P151i_participated_in">
+    <rdfs:label xml:lang="en">participated in</rdfs:label>
+    <rdfs:label xml:lang="fr">a participé à</rdfs:label>
+    <rdfs:label xml:lang="ru">участвовал в</rdfs:label>
+    <rdfs:domain rdf:resource="E74_Group" />
+    <rdfs:range rdf:resource="E66_Formation" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P151_was_formed_from" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P152_has_parent">
+    <rdfs:label xml:lang="en">has parent</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour parent</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт родитeля</rdfs:label>
+    <rdfs:comment>This property associates an instance of E21 Person with another instance of E21 Person who plays the role of the first instance’s parent, regardless of whether the relationship is biological parenthood, assumed or pretended biological parenthood or an equivalent legal status of rights and obligations obtained by a social or legal act.
+This property is, among others, a shortcut of the fully developed paths from E21 Person through P98i was born, E67 Birth, P96 by mother to E21 Person, and from E21 Person through P98i was born, E67 Birth, P97 from father to E21 Person.
+This property is not transitive. This property is irreflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E21_Person" />
+    <rdfs:range rdf:resource="E21_Person" />
+    <owl:inverseOf rdf:resource="P152i_is_parent_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P152i_is_parent_of">
+    <rdfs:label xml:lang="en">is parent of</rdfs:label>
+    <rdfs:label xml:lang="fr">est le parent de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся родитeлeм</rdfs:label>
+    <rdfs:domain rdf:resource="E21_Person" />
+    <rdfs:range rdf:resource="E21_Person" />
+    <owl:inverseOf rdf:resource="P152_has_parent" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P156_occupies">
+    <rdfs:label xml:lang="en">occupies</rdfs:label>
+    <rdfs:label xml:lang="fr">occupe</rdfs:label>
+    <rdfs:label xml:lang="ru">занимаeт</rdfs:label>
+    <rdfs:comment>This property describes the largest volume in space, an instance of E53 Place, that an instance of E18 Physical Thing has occupied at any time during its existence, with respect to the reference space relative to the physical thing itself. This allows for describing the thing itself as a place that may contain other things, such as a box that may contain coins. In other words, it is the volume that contains all the points which the thing has covered at some time during its existence. The reference space for the associated place must be the one that is permanently at rest (P157 is at rest relative to) relative to the physical thing. For instances of E19 Physical Objects it is the one which is at rest relative to the object itself, i.e., which moves together with the object. For instances of E26 Physical Feature it is one which is at rest relative to the physical feature itself and the surrounding matter immediately connected to it. Therefore, there is a 1:1 relation between the instance E18 Physical Thing and the instance of E53 Place it occupies. We include in the occupied space the space filled by the matter of the physical thing and all its inner spaces.
+This property implies the fully developed path from E18 Physical Thing through P196 defines, E92 Spacetime Volume, P161 has spatial projection to E53 Place. However, in contrast to P156 occupies, the property P161 has spatial projection does not constrain the reference space of the referred instance of E53 Place.
+In contrast to P156 occupies, for the property P53 has former or current location the following holds:
+It does not constrain the reference space of the referred instance of E53 Place.
+It identifies a possibly wider instance of E53 Place at which a thing is or has been for some unspecified time-span.
+If the reference space of the referred instance of E53 Place is not at rest with respect to the physical thing found there, the physical thing may move away after some time to another place and/or ma

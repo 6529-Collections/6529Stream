@@ -56,6 +56,7 @@ running; they are not needed when these tools are already installed. See
 
 ```text
 python scripts/dev.py build
+python scripts/dev.py prepare-graph
 python scripts/dev.py test
 ```
 

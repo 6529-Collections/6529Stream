@@ -1,0 +1,240 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+import {
+    IStreamContentRootPublication as R
+} from "../../interfaces/stream/metadata/IStreamContentRootPublication.sol";
+import {
+    IStreamScopedContentRootPublication as S
+} from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
+import {
+    IStreamPolicyContentRootPublicationV2 as V
+} from "../../interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
+import {
+    StreamMetadataPolicyContentRootV2 as PolicyRoot
+} from "./StreamMetadataPolicyContentRootV2.sol";
+import { StreamMetadataRouterContent as Content } from "./StreamMetadataRouterContent.sol";
+import { StreamMetadataContentRoot as Root } from "./StreamMetadataContentRoot.sol";
+import { StreamMetadataScopedContent as Scoped } from "./StreamMetadataScopedContent.sol";
+import {
+    StreamMetadataScopedPolicyContentV2 as ScopedPolicy
+} from "./StreamMetadataScopedPolicyContentV2.sol";
+import {
+    IStreamScopedPolicyContentRootPublicationV2 as SV
+} from "../../interfaces/stream/metadata/IStreamScopedPolicyContentRootPublicationV2.sol";
+import {
+    StreamMetadataScopedContentState as ScopedState
+} from "./StreamMetadataScopedContentState.sol";
+
+import {
+    IStreamPreservationPolicyContentRootPublicationV1 as P
+} from "../../interfaces/stream/metadata/IStreamPreservationPolicyContentRootPublicationV1.sol";
+import {
+    IStreamScopedPreservationPolicyContentRootPublicationV1 as SP
+} from "../../interfaces/stream/metadata/IStreamScopedPreservationPolicyContentRootPublicationV1.sol";
+import {
+    StreamMetadataPreservationPolicyContentRootV1 as PreservationRoot
+} from "./StreamMetadataPreservationPolicyContentRootV1.sol";
+import {
+    StreamMetadataScopedPreservationPolicyContentV1 as ScopedPreservation
+} from "./StreamMetadataScopedPreservationPolicyContentV1.sol";
+
+import {
+    IStreamViewPreservationContentRootV1 as VP
+} from "../../interfaces/stream/metadata/IStreamViewPreservationContentRootV1.sol";
+import {
+    StreamMetadataViewPreservationContentV1 as ViewPreservation
+} from "./StreamMetadataViewPreservationContentV1.sol";
+
+/// @notice Fixed codecs around the original publication workers and original Router storage.
+/// @dev No record cache or new state. Delegate execution retains the actual caller and Router.
+library StreamMetadataRouterRootCodec {
+    bytes32 private constant FAMILY = keccak256("CONTENT_ROOT");
+
+    function preview(
+        Root.State storage roots,
+        ScopedState.State storage scoped,
+        Content.Layout memory layout,
+        Content.Context memory context,
+        bytes calldata input
+    ) public view returns (bytes32) {
+        bytes4 selector = bytes4(input[:4]);
+        if (selector == R.previewContentRootPublication.selector) {
+            (R.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (R.Publication, address));
+            bytes32 legacy =
+                Root.prepare(
+                roots, Root.Context(context.core, context.artist), publication, publisher
+            )
+            .stateHash;
+            return ScopedState.familyCurrent(context.core, publication.collectionId, legacy);
+        }
+        if (selector == S.previewScopedContentRootPublication.selector) {
+            (S.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (S.Publication, address));
+            return Scoped.preview(scoped, layout, context, publication, publisher);
+        }
+        if (selector == SV.previewScopedPolicyContentRootPublication.selector) {
+            (S.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (S.Publication, address));
+            return ScopedPolicy.preview(scoped, layout, context, publication, publisher);
+        }
+        if (selector == VP.previewViewPreservationContentRoot.selector) {
+            (S.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (S.Publication, address));
+            return ViewPreservation.preview(scoped, layout, context, publication, publisher);
+        }
+        if (selector == SP.previewScopedPreservationPolicyContentRootPublication.selector) {
+            (S.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (S.Publication, address));
+            return ScopedPreservation.preview(scoped, layout, context, publication, publisher);
+        }
+        if (selector == V.previewPolicyContentRootPublication.selector) {
+            (R.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (R.Publication, address));
+            (R.Record memory prepared,) = PolicyRoot.prepare(
+                roots, Root.Context(context.core, context.artist), publication, publisher
+            );
+            return
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                );
+        }
+        if (selector == P.previewPreservationPolicyContentRootPublication.selector) {
+            (R.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (R.Publication, address));
+            (R.Record memory prepared,) = PreservationRoot.prepare(
+                roots, Root.Context(context.core, context.artist), publication, publisher
+            );
+            return
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                );
+        }
+        revert R.InvalidContentRootPublication();
+    }
+
+    function publish(
+        Root.State storage roots,
+        ScopedState.State storage scoped,
+        Content.Layout memory layout,
+        Content.Context memory context,
+        bytes calldata input
+    ) public returns (bytes32 recordHash) {
+        bytes4 selector = bytes4(input[:4]);
+        if (selector == R.publishVerifiedTokenContentRoot.selector) {
+            R.Publication memory publication = abi.decode(input[4:], (R.Publication));
+            Root.Context memory ctx = Root.Context(context.core, context.artist);
+            R.Record memory prepared = Root.prepare(roots, ctx, publication, msg.sender);
+            (bytes32 consent, bytes32 ratification) = Content.authorize(
+                layout,
+                context,
+                publication.collectionId,
+                FAMILY,
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                )
+            );
+            recordHash = Root.publish(roots, ctx, publication, prepared, consent);
+            Content.recordApplication(
+                layout, context, publication.collectionId, FAMILY, consent, ratification
+            );
+            return recordHash;
+        }
+        if (selector == S.publishScopedContentRootPublication.selector) {
+            S.Publication memory publication = abi.decode(input[4:], (S.Publication));
+            return Scoped.publish(scoped, layout, context, publication);
+        }
+        if (selector == SV.publishScopedPolicyContentRootPublication.selector) {
+            S.Publication memory publication = abi.decode(input[4:], (S.Publication));
+            return ScopedPolicy.publish(scoped, layout, context, publication);
+        }
+        if (selector == VP.publishViewPreservationContentRoot.selector) {
+            S.Publication memory publication = abi.decode(input[4:], (S.Publication));
+            return ViewPreservation.publish(scoped, layout, context, publication);
+        }
+        if (selector == SP.publishScopedPreservationPolicyContentRootPublication.selector) {
+            S.Publication memory publication = abi.decode(input[4:], (S.Publication));
+            return ScopedPreservation.publish(scoped, layout, context, publication);
+        }
+        if (selector == V.publishVerifiedPolicyContentRoot.selector) {
+            R.Publication memory publication = abi.decode(input[4:], (R.Publication));
+            Root.Context memory ctx = Root.Context(context.core, context.artist);
+            (R.Record memory prepared, V.Binding memory binding) =
+                PolicyRoot.prepare(roots, ctx, publication, msg.sender);
+            (bytes32 consent, bytes32 ratification) = Content.authorize(
+                layout,
+                context,
+                publication.collectionId,
+                FAMILY,
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                )
+            );
+            recordHash = PolicyRoot.publish(roots, ctx, publication, prepared, binding, consent);
+            Content.recordApplication(
+                layout, context, publication.collectionId, FAMILY, consent, ratification
+            );
+            return recordHash;
+        }
+        if (selector == P.publishVerifiedPreservationPolicyContentRoot.selector) {
+            R.Publication memory publication = abi.decode(input[4:], (R.Publication));
+            Root.Context memory ctx = Root.Context(context.core, context.artist);
+            (R.Record memory prepared, P.Binding memory binding) =
+                PreservationRoot.prepare(roots, ctx, publication, msg.sender);
+            (bytes32 consent, bytes32 ratification) = Content.authorize(
+                layout,
+                context,
+                publication.collectionId,
+                FAMILY,
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                )
+            );
+            recordHash =
+                PreservationRoot.publish(roots, ctx, publication, prepared, binding, consent);
+            Content.recordApplication(
+                layout, context, publication.collectionId, FAMILY, consent, ratification
+            );
+            return recordHash;
+        }
+        revert R.InvalidContentRootPublication();
+    }
+
+    function read(Root.State storage roots, bytes calldata input)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes4 selector = bytes4(input[:4]);
+        bytes32 hash = abi.decode(input[4:], (bytes32));
+        if (selector == R.contentRootRecord.selector) {
+            return abi.encode(Root.readRecord(roots, hash));
+        }
+        if (selector == V.policyContentRootBinding.selector) {
+            return abi.encode(PolicyRoot.readBinding(hash));
+        }
+        if (selector == SV.scopedPolicyContentRootBinding.selector) {
+            return abi.encode(ScopedPolicy.readBinding(hash));
+        }
+        if (selector == P.preservationPolicyContentRootBinding.selector) {
+            return abi.encode(PreservationRoot.readBinding(hash));
+        }
+        if (selector == SP.scopedPreservationPolicyContentRootBinding.selector) {
+            return abi.encode(ScopedPreservation.readBinding(hash));
+        }
+        revert R.InvalidContentRootPublication();
+    }
+
+    /// @notice The VIEW binding authenticates its original record and historical aggregate.
+    function readView(ScopedState.State storage scoped, address core, bytes calldata input)
+        public
+        view
+        returns (bytes memory)
+    {
+        if (bytes4(input[:4]) != VP.viewPreservationContentRootBinding.selector) {
+            revert R.InvalidContentRootPublication();
+        }
+        bytes32 hash = abi.decode(input[4:], (bytes32));
+        return abi.encode(ViewPreservation.readBinding(scoped, core, hash));
+    }
+}

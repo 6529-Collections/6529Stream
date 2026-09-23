@@ -1,0 +1,131 @@
+e achieved.</p>
+      <h3 id="12-terminology">
+        
+        
+          1.2. Terminology <a href="#12-terminology" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>This specification uses the following terms:</p>
+
+<ul>
+  <li><strong>embedded</strong>: When a resource (A) is embedded within an embedding resource (B), the complete <abbr title="JavaScript Object Notation">JSON</abbr> representation of resource A is present within the <abbr title="JavaScript Object Notation">JSON</abbr> representation of resource B, and dereferencing the URI of resource A will not result in additional information. Example: Canvas A is embedded in Manifest B.</li>
+  <li><strong>referenced</strong>: When a resource (A) is referenced from a referencing resource (B), an incomplete <abbr title="JavaScript Object Notation">JSON</abbr> representation of resource A is present within the <abbr title="JavaScript Object Notation">JSON</abbr> representation of resource B, and dereferencing the URI of resource A will result in additional information. Example:  Manifest A is referenced from Collection B.</li>
+  <li><strong><abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S)</strong>: The <abbr title="Hypertext Transfer Protocol">HTTP</abbr> or <abbr title="Hypertext Transfer Protocol (Secure)">HTTPS</abbr> URI scheme and internet protocol.</li>
+</ul>
+
+<p>The terms <em>array</em>, <em><abbr title="JavaScript Object Notation">JSON</abbr> object</em>, <em>number</em>, <em>string</em>, and <em>boolean</em> in this document are to be interpreted as defined by the <a href="https://tools.ietf.org/html/rfc8259" title="JSON RFC">Javascript Object Notation (<abbr title="JavaScript Object Notation">JSON</abbr>)</a> specification.</p>
+
+<p>The key words <em class="rfc">must</em>, <em class="rfc">must not</em>, <em class="rfc">required</em>, <em class="rfc">shall</em>, <em class="rfc">shall not</em>, <em class="rfc">should</em>, <em class="rfc">should not</em>, <em class="rfc">recommended</em>, <em class="rfc">may</em>, and <em class="rfc">optional</em> in this document are to be interpreted as described in <a href="https://tools.ietf.org/html/rfc2119" title="RFC Keywords"><abbr title="Request for Comments">RFC</abbr> 2119</a>.</p>
+      <h2 id="2-resource-type-overview">
+        
+        
+          2. Resource Type Overview <a href="#2-resource-type-overview" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+
+<p>The objectives described above require a model in which one can characterize the compound object (via the <em>Manifest</em> resource) and the individual views of the object (<em>Canvas</em> resources). Each view may reference images, audio, video and other content resources to allow it to be rendered appropriately. A compound object may also have sections; for example, a book may have chapters of several pages, or a play might be divided into acts and scenes (<em>Range</em> resources) and there may be groups of such objects (<em>Collection</em> resources). These resource types, along with their properties, make up the <abbr title="International Image Interoperability Framework">IIIF</abbr> Presentation <abbr title="Application Programming Interface">API</abbr>.</p>
+
+<p>This section provides an overview of the resource types (or classes) that are used in the specification. They are each presented in more detail in <a href="/api/presentation/3.0/#5-resource-structure">Section 5</a>.</p>
+      <h3 id="21-defined-types">
+        
+        
+          2.1. Defined Types <a href="#21-defined-types" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>This specification defines the following resource types:</p>
+
+<p style="float: right">
+  <img src="/api/assets/images/data-model.png" alt="Data Model" width="400" /><br />
+</p>
+      <h5 id="overview-collection">
+        
+        
+          Collection <a href="#overview-collection" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An ordered list of Manifests, and/or further Collections. Collections allow Manifests and child Collections to be grouped in a hierarchical structure for presentation, which can be for generating navigation, showing dynamic results from a search, or providing fixed sets of related resources for any other purpose.</p>
+      <h5 id="overview-manifest">
+        
+        
+          Manifest <a href="#overview-manifest" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A description of the structure and properties of the compound object. It carries information needed for the client to present the content to the user, such as a title and other descriptive information about the object or the intellectual work that it conveys. Each Manifest usually describes how to present a single compound object such as a book, a statue or a music album.</p>
+      <h5 id="overview-canvas">
+        
+        
+          Canvas <a href="#overview-canvas" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A virtual container that represents a particular view of the object and has content resources associated with it or with parts of it. The Canvas provides a frame of reference for the layout of the content, both spatially and temporally. The concept of a Canvas is borrowed from standards like PDF and <abbr title="HyperText Markup Language">HTML</abbr>, or applications like Photoshop and PowerPoint, where an initially blank display surface has images, video, text and other content “painted” on to it by Annotations, collected in Annotation Pages.</p>
+      <h5 id="overview-range">
+        
+        
+          Range <a href="#overview-range" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An ordered list of Canvases, and/or further Ranges. Ranges allow Canvases, or parts thereof, to be grouped together in some way. This could be for content-based reasons, such as might be described in a table of contents or the set of scenes in a play. Equally, physical features might be important such as page gatherings in an early book, or when recorded music is split across different physical carriers such as two CDs.</p>
+      <h3 id="22-additional-types">
+        
+        
+          2.2. Additional Types <a href="#22-additional-types" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>This specification makes use of types defined in the <a href="http://w3.org/TR/annotation-model/" title="Web Annotation Model">Web Annotation Data Model</a> specification, in particular the following:</p>
+      <h5 id="overview-annotationpage">
+        
+        
+          Annotation Page <a href="#overview-annotationpage" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An ordered list of Annotations that is typically associated with a Canvas but may be referenced from other types of resource as well. Annotation Pages collect and order lists of Annotations, which in turn provide commentary about a resource or content that is part of a Canvas.</p>
+      <h5 id="overview-annotation">
+        
+        
+          Annotation <a href="#overview-annotation" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>Annotations associate content resources with Canvases. The same mechanism is used for the visible and/or audible resources as is used for transcriptions, commentary, tags and other content. This provides a single, unified method for aligning information, and provides a standards-based framework for distinguishing parts of resources and parts of Canvases. As Annotations can be added later, it promotes a distributed system in which publishers can align their content with the descriptions created by others. Annotation related functionality may also rely on further classes such as SpecificResource, Choice or Selectors.</p>
+      <h5 id="overview-content">
+        
+        
+          Content <a href="#overview-content" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>Web resources such as images, audio, video, or text which are associated with a Canvas via an Annotation, or provide a representation of any resource.</p>
+      <h5 id="overview-annotationcollection">
+        
+        
+          Annotation Collection <a href="#o

@@ -1,0 +1,801 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "49364823b9e537a33896346b67639e523b4f31d1",
+  "qualification": "Pending compiler-selected caller fixture only; no deployment, Core-cutover, native-runtime, audit or release claim.",
+  "inputSha256": "dc2a6fb013e6ca5a98148032ec0ee60d87902a580d8e68d683e4e4af13400b6b",
+  "outputSha256": "b07f3db4656c8781935470f2dfa662c24c1254936f08a6aa2166f47825d495b3",
+  "sources": {
+    "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol": "de7ab204f68049cb7fe0f78ed4febe9df4dc92767118e7009cb585dca740d349",
+    "smart-contracts/core/StreamCore.sol": "490bf780d048455bbbc8a9b55ccb5efd601439bc2403e3e73e09035d9cfd1c43",
+    "smart-contracts/interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol": "4baccfd7eae2ca245761410df8a0e731100bbb25785e20a2496a3e326b7ce191",
+    "smart-contracts/domains/revenue/StreamRoyaltyContinuityState.sol": "5a516613b3781d4e21ba11c2976193e66ba72c97ac5ba898101c241dabc1fec9",
+    "smart-contracts/domains/revenue/StreamRoyaltyContinuityImport.sol": "663c05472f2dc0fa0da68b0e6343852471663751ab8d685ad07b63745bad6d35",
+    "smart-contracts/domains/revenue/StreamRoyaltyContinuityParameters.sol": "c8a3062eb455302519152ca50fef303f761a3cb220b2e9bc250112c75c06c438"
+  },
+  "abis": {
+    "resolver": [
+      {
+        "inputs": [],
+        "name": "MAX_ROYALTY_BPS",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "source",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "expectedSourceHeaderHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "contentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "uri",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "uriHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "schemaId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamRoyaltyContinuityTypes.ManifestRef",
+            "name": "manifestReference",
+            "type": "tuple"
+          }
+        ],
+        "name": "beginEconomicContinuity",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "boundCore",
+        "outputs": [
+          {
+            "internalType": "contract IStreamCore",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "boundCoreCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "completeEconomicContinuity",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "continuityHeader",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "schemaVersion",
+                "type": "uint16"
+              },
+              {
+                "internalType": "address",
+                "name": "core",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "factory",
+                "type": "address"
+              },
+              {
+                "internalType": "uint16",
+                "name": "maxRoyaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint256",
+                "name": "protectedCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "protectedRoot",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "electionCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionRoot",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "frozenStateHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamRoyaltyContinuityTypes.Header",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "continuityManifestHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "continuitySource",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "economicContinuityReady",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "economicContinuityState",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint8",
+                "name": "status",
+                "type": "uint8"
+              },
+              {
+                "internalType": "address",
+                "name": "source",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sourceRuntimeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "beginActionId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "importedRoutes",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "importedElections",
+                "type": "uint256"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint16",
+                    "name": "schemaVersion",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "core",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "factory",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint16",
+                    "name": "maxRoyaltyBps",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "protectedCount",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "protectedRoot",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "electionCount",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "electionRoot",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "frozenStateHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamRoyaltyContinuityTypes.Header",
+                "name": "expected",
+                "type": "tuple"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "expectedSourceHeaderHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "contentHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "uri",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "uriHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "schemaId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "canonicalizationId",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamRoyaltyContinuityTypes.ManifestRef",
+                "name": "manifestReference",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct StreamRoyaltyContinuityTypes.ImportState",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "economicElectionAt",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint8",
+                "name": "mode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "hashOrigin",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct StreamRoyaltyContinuityTypes.Election",
+            "name": "e",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "governanceAuthority",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "maxRoutes",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxElections",
+            "type": "uint256"
+          }
+        ],
+        "name": "importEconomicContinuity",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "source",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "expectedSourceHeaderHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "contentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "uri",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "uriHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "schemaId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamRoyaltyContinuityTypes.ManifestRef",
+            "name": "manifestReference",
+            "type": "tuple"
+          }
+        ],
+        "name": "previewEconomicContinuity",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "manifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "scope",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "oldValueHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "newValueHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "protectedEconomicRouteAt",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "hashOrigin",
+                "type": "address"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint16",
+                    "name": "royaltyBps",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "configured",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "frozen",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "revision",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "profileId",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+                "name": "config",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bool",
+                    "name": "exists",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "manager",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "operationRoot",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "operationId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "preparedProofHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "electionHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sourceAssignmentHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "modeAssignmentHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "sourceRoyaltyPolicyHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "tokenAssignmentHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "tokenRoyaltyPolicyHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "tokenConfigHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamRoyaltySnapshot.Snapshot",
+                "name": "snapshot",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct StreamRoyaltyContinuityTypes.Route",
+            "name": "r",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "splitFactory",
+        "outputs": [
+          {
+            "internalType": "contract IStreamSplitFactory",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "oldResolver",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "oldHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "manifestHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "supportsEconomicContinuity",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "id",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "core": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getSatellitePointer",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "codeHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes4",
+            "name": "interfaceId",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "address",
+            "name": "registry",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "registryStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "deploymentManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

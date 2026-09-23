@@ -1,0 +1,738 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+import {
+    StreamCurrentAuthorityFullPreservationPolicyDiscoveryReadsV1 as CurrentReads
+} from "./StreamCurrentAuthorityFullPreservationPolicyDiscoveryReadsV1.sol";
+import {
+    StreamFinalityViewPreservationDiscoveryV1 as ViewDiscovery
+} from "./StreamFinalityViewPreservationDiscoveryV1.sol";
+import {
+    StreamArtistCurrentAuthorityTypes as AuthorityTypes
+} from "../../interfaces/stream/artist/StreamArtistCurrentAuthorityTypes.sol";
+import {
+    IStreamFinalityCurrentAuthority
+} from "../../interfaces/stream/finality/IStreamFinalityCurrentAuthority.sol";
+
+import "./StreamFinalityRouterEvidence.sol";
+import {
+    IStreamFinalityProfileSources as Profiles
+} from "../../interfaces/stream/finality/IStreamFinalityProfileSources.sol";
+import {
+    StreamFinalityProfileSourceReads as ProfileReads
+} from "./StreamFinalityProfileSourceReads.sol";
+import {
+    IStreamStaticMetadataRouter as StaticRouter
+} from "../../interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
+import "../../interfaces/stream/finality/IStreamFinalityCurrentComponentRoutes.sol";
+import "../../interfaces/stream/finality/IStreamFinalityServingEvidenceProvider.sol";
+import "../../interfaces/stream/finality/IStreamFinalityDiscoverySources.sol";
+import "../metadata/StreamMetadataRecoveryRoutes.sol";
+import "../metadata/StreamMetadataSubjects.sol";
+import "../../interfaces/stream/finality/StreamFinalityDiscoveryTypes.sol";
+import "../../interfaces/stream/finality/IStreamFinalityEvidenceDiscoveryBinding.sol";
+import "../../interfaces/stream/finality/IStreamNonSanctionFinalityDiscovery.sol";
+import "../../interfaces/stream/finality/IStreamFinalityServingHostAdapter.sol";
+import "../../interfaces/stream/finality/IStreamFinalityRouterEvidenceBinding.sol";
+import "../../interfaces/stream/finality/IStreamFinalityEntropySourceFactory.sol";
+import "../../interfaces/stream/finality/IStreamFinalityScopeMembership.sol";
+import "../../interfaces/stream/finality/IStreamFinalitySanctionReads.sol";
+import "../../interfaces/stream/artist/IStreamArtistMintConsent.sol";
+
+import {
+    IStreamScopedPreservationPolicyPublicationEvidenceBindingV1 as PublicationBinding
+} from "../../interfaces/stream/finality/IStreamScopedPreservationPolicyPublicationEvidenceBindingV1.sol";
+import {
+    StreamScopedPreservationPolicySnapshotDefinitionsV2 as ScopedPolicyDefinitions
+} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV2.sol";
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyDiscoveryFactoryReadsV1 as PublicationFactoryReads
+} from "./StreamCurrentAuthorityScopedPreservationPolicyDiscoveryFactoryReadsV1.sol";
+
+import {
+    IStreamFinalityPreservationFactoryProfileSourcesV1 as Catalogue
+} from "../../interfaces/stream/finality/IStreamFinalityPreservationFactoryProfileSourcesV1.sol";
+import {
+    IStreamPreservationPolicyPublicationGraphBindingV1 as CollectionBinding
+} from "../../interfaces/stream/finality/IStreamPreservationPolicyPublicationGraphBindingV1.sol";
+import {
+    StreamCurrentAuthorityPreservationPolicyDiscoveryFactoryReadsV1 as CollectionFactoryReads
+} from "./StreamCurrentAuthorityPreservationPolicyDiscoveryFactoryReadsV1.sol";
+import {
+    StreamPreservationPolicySnapshotDefinitionsV2 as CollectionPolicyDefinitions
+} from "../records/StreamPreservationPolicySnapshotDefinitionsV2.sol";
+
+/// @notice Current-authority discovery for genuine fixed-factory preservation graphs.
+/// @dev The original two static profiles retain their original branch semantics; no static policy catalogue is fabricated.
+/// @dev This sibling preserves original discovery/component ABI. The original implementation is
+/// untouched. Source selection is acyclic and distinct from independent component validation.
+/// @dev Keeps original Artist/Finality anchors while the authenticated sanction component follows succession.
+/// No caller component list is accepted. This layer does not implement missing evidence producers
+/// or widen their scope support. Historical finalized routes belong to the original Registry.
+contract StreamCurrentAuthorityFullPreservationPolicyDiscoveryV1 is
+    IERC165,
+    IStreamArtworkFinalityDiscovery,
+    IStreamArtworkScopedFinalityDiscovery,
+    IStreamNonSanctionFinalityDiscovery,
+    IStreamFinalityCurrentComponentRoutes,
+    IStreamFinalityEvidenceDiscoveryBinding
+{
+    address public immutable core;
+    address public immutable metadataHost;
+    address public immutable override scopeEvidenceProvider;
+    uint256 public immutable deploymentChainId;
+    // All other configuration, including reciprocal late-runtime pins, is constructor-only
+    // storage. No method mutates it and no configuration hash is embedded into runtime code.
+    StreamFinalityDiscoveryTypes.Configuration private _configuration;
+    mapping(address => bytes32) private _codeHashes;
+    Profiles.Profile[2] private _profiles;
+    CollectionBinding.CollectionFactoryBinding private _collectionBinding;
+    address private _collectionEntropyFactory;
+    bytes32 private _collectionEntropyCodeHash;
+    PublicationBinding.FactoryBinding private _publicationBinding;
+    address private _scopedPolicyEntropyFactory;
+    bytes32 private _scopedPolicyEntropyCodeHash;
+    // Storage prevents a reciprocal runtime-hash cycle. Constructor-only; no setter exists.
+    bytes32 public sourceConfigurationHash;
+    error DiscoveryConfiguration(address target);
+    error DiscoveryDependency(address target);
+    error DiscoveryUnsupportedProfile();
+    error DiscoveryComponent(address target, bytes32 family);
+    error DiscoveryIndex(uint256 index);
+    // Retain the original ABI error emitted by the extracted scope-subject validation.
+    error InvalidMetadataScope();
+
+    constructor(
+        StreamFinalityDiscoveryTypes.Configuration memory c,
+        bytes32 expectedSourceConfigurationHash,
+        CollectionBinding.CollectionFactoryBinding memory collection,
+        PublicationBinding.FactoryBinding memory b
+    ) {
+        if (
+            c.readGas < 50000 || c.componentGas < c.readGas || c.entropyGas < c.readGas
+                || c.finalityRegistry == address(0) || c.finalityRegistryCodeHash == 0
+        ) {
+            revert DiscoveryConfiguration(c.finalityRegistry);
+        }
+        core = c.core;
+        metadataHost = c.metadata;
+        scopeEvidenceProvider = c.provider;
+        deploymentChainId = block.chainid;
+        _configuration = c;
+        _admit(c.core);
+        _admit(c.metadata);
+        _admit(c.router);
+        _admit(c.provider);
+        _admit(c.membership);
+        _admit(c.entropyFactory);
+        _admit(c.metadataAdapter);
+        _admit(c.referenceRender);
+        _admit(c.artist);
+        for (uint256 i; i < 6; ++i) {
+            _admit(c.routerAdapters[i]);
+        }
+        _address(c.provider, "core()", c.core);
+        _address(c.provider, "metadataHost()", c.metadata);
+        _address(c.provider, "metadataRouter()", c.router);
+        _address(c.provider, "scopeMembershipHost()", c.membership);
+        _address(c.membership, "core()", c.core);
+        _address(c.membership, "metadataHost()", c.metadata);
+        _address(c.entropyFactory, "core()", c.core);
+        _address(c.entropyFactory, "metadataHost()", c.metadata);
+        _address(c.entropyFactory, "scopeMembershipHost()", c.membership);
+        _address(c.referenceRender, "core()", c.core);
+        _address(c.referenceRender, "metadataHost()", c.metadata);
+        _address(c.referenceRender, "metadataRouter()", c.router);
+        _address(c.provider, "referenceRenderHost()", c.referenceRender);
+        _address(c.provider, "entropySourceFactory()", c.entropyFactory);
+        address snapshots = abi.decode(
+            _read(
+                c.provider,
+                abi.encodeCall(IStreamFinalityDiscoverySources.snapshotHost, ()),
+                32,
+                c.readGas
+            ),
+            (address)
+        );
+        if (snapshots.code.length == 0) revert DiscoveryConfiguration(snapshots);
+        _address(c.referenceRender, "snapshots()", snapshots);
+        _supports(c.provider, type(IStreamFinalityServingEvidenceProvider).interfaceId);
+        _supports(c.provider, type(IStreamFinalityRouterEvidenceBinding).interfaceId);
+        _supports(c.provider, type(IStreamFinalityDiscoverySources).interfaceId);
+        _supports(c.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
+        _supports(c.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
+        _supports(c.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
+        _supports(c.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
+        _supports(c.artist, type(IStreamArtworkFinalityComponent).interfaceId);
+        _supports(c.artist, type(IStreamArtworkScopedFinalityComponent).interfaceId);
+        for (uint256 i; i < 6; ++i) {
+            _adapter(c.routerAdapters[i], c.router, _routerFamily(i));
+        }
+        _adapter(c.metadataAdapter, c.metadata, StreamFinalityDomains.COMPONENT_COLLECTION_METADATA);
+        _initializeProfiles(expectedSourceConfigurationHash);
+        if (
+            b.graphGas > type(uint32).max || c.componentGas <= b.graphGas + b.graphGas / 63 + 100000
+        ) revert DiscoveryConfiguration(b.factory);
+        (_scopedPolicyEntropyFactory, _scopedPolicyEntropyCodeHash) =
+            PublicationFactoryReads.validate(c, b);
+        _publicationBinding = b;
+        _admitExact(_scopedPolicyEntropyFactory, _scopedPolicyEntropyCodeHash);
+        if (
+            collection.graphGas > type(uint32).max
+                || c.componentGas <= collection.graphGas + collection.graphGas / 63 + 100000
+        ) revert DiscoveryConfiguration(collection.factory);
+        (_collectionEntropyFactory, _collectionEntropyCodeHash) =
+            CollectionFactoryReads.validate(c, collection);
+        _collectionBinding = collection;
+        _admitExact(_collectionEntropyFactory, _collectionEntropyCodeHash);
+        // No original Registry or Coordinator call: both may be constructed later.
+    }
+
+    function supportsInterface(bytes4 id) external pure override returns (bool) {
+        return id == type(IERC165).interfaceId
+            || id == type(IStreamArtworkFinalityDiscovery).interfaceId
+            || id == type(IStreamArtworkScopedFinalityDiscovery).interfaceId
+            || id == type(IStreamNonSanctionFinalityDiscovery).interfaceId
+            || id == type(IStreamFinalityCurrentComponentRoutes).interfaceId
+            || id == type(IStreamFinalityEvidenceDiscoveryBinding).interfaceId;
+    }
+
+    function configuration()
+        external
+        view
+        returns (StreamFinalityDiscoveryTypes.Configuration memory)
+    {
+        return _configuration;
+    }
+
+    function dependencyCodeHash(address target) external view returns (bytes32) {
+        return _codeHashes[target];
+    }
+
+    function finalityComponentCount(uint256 cid) external view override returns (uint256) {
+        _current(_collection(cid), _configuration);
+        return 10;
+    }
+
+    function finalityComponentAt(uint256 cid, uint256 index)
+        external
+        view
+        override
+        returns (StreamFinalityComponentExpectation memory)
+    {
+        return _at(_collection(cid), index, true);
+    }
+
+    function finalityDiscoveryHash(uint256 cid) external view override returns (bytes32) {
+        return _hash(_components(_collection(cid), true));
+    }
+
+    function finalityComponentCountForScope(StreamFinalityScope calldata scope)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        _current(scope, _configuration);
+        return 10;
+    }
+
+    function finalityComponentAtForScope(StreamFinalityScope calldata scope, uint256 index)
+        external
+        view
+        override
+        returns (StreamFinalityComponentExpectation memory)
+    {
+        return _at(scope, index, true);
+    }
+
+    function finalityDiscoveryHashForScope(StreamFinalityScope calldata scope)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _hash(_components(scope, true));
+    }
+
+    function nonSanctionDiscoveryFacts(StreamFinalityScope calldata scope)
+        external
+        view
+        override
+        returns (uint256 count, bytes32 hash)
+    {
+        StreamFinalityComponentExpectation[] memory entries = _components(scope, false);
+        return (entries.length, _hash(entries));
+    }
+
+    function nonSanctionComponentAt(StreamFinalityScope calldata scope, uint256 index)
+        external
+        view
+        override
+        returns (StreamFinalityComponentExpectation memory)
+    {
+        return _at(scope, index, false);
+    }
+
+    /// @inheritdoc IStreamFinalityCurrentComponentRoutes
+    function requireCurrentRoutes(StreamFinalityScope calldata scope, bool includeSanction)
+        external
+        view
+        override
+        returns (StreamFinalityCurrentComponentRoute[] memory routes)
+    {
+        AuthorityTypes.Route memory authority = _current(scope, _configuration);
+        uint8[] memory order = _order(includeSanction);
+        routes = new StreamFinalityCurrentComponentRoute[](order.length);
+        for (uint256 i; i < order.length; ++i) {
+            routes[i] = _identity(scope, order[i], authority);
+        }
+    }
+
+    function _identity(
+        StreamFinalityScope memory scope,
+        uint8 index,
+        AuthorityTypes.Route memory authority
+    ) private view returns (StreamFinalityCurrentComponentRoute memory route) {
+        StreamFinalityDiscoveryTypes.Configuration memory c = _scopeConfiguration(scope);
+        bytes32 family = _family(index);
+        bytes4 expected = scope.scopeType == StreamFinalityScopeType.COLLECTION
+            ? type(IStreamArtworkFinalityComponent).interfaceId
+            : type(IStreamArtworkScopedFinalityComponent).interfaceId;
+        address target;
+        if (index < 7) {
+            target = index < 6 ? c.routerAdapters[index] : c.metadataAdapter;
+            _selection(target);
+        } else if (index == 7) {
+            route = abi.decode(
+                _read(
+                    c.entropyFactory,
+                    abi.encodeCall(IStreamFinalityCurrentEntropyRoute.requireCurrentRoute, (scope)),
+                    128,
+                    c.entropyGas
+                ),
+                (StreamFinalityCurrentComponentRoute)
+            );
+            if (
+                route.componentType != family || route.interfaceId != expected
+                    || route.component.code.length == 0
+                    || route.codeHash != route.component.codehash
+            ) {
+                revert DiscoveryComponent(route.component, family);
+            }
+            _supports(route.component, expected);
+            return route;
+        } else {
+            target = index == 8 ? c.referenceRender : authority.registry;
+            if (
+                index == 9
+                    && abi.decode(
+                            _read(
+                                authority.registry,
+                                abi.encodeCall(
+                                    IStreamFinalitySanctionReads.collectionSanctionComponentType,
+                                    (scope.collectionId)
+                                ),
+                                32,
+                                c.componentGas
+                            ),
+                            (bytes32)
+                        ) != family
+            ) revert DiscoveryUnsupportedProfile();
+        }
+        if (index == 9) _currentPin(authority);
+        else if (index == 8) _pinReference(scope, target);
+        else _pin(target);
+        _supports(target, expected);
+        return StreamFinalityCurrentComponentRoute(family, target, expected, target.codehash);
+    }
+
+    function _components(StreamFinalityScope memory scope, bool full)
+        private
+        view
+        returns (StreamFinalityComponentExpectation[] memory entries)
+    {
+        AuthorityTypes.Route memory authority = _current(scope, _configuration);
+        uint8[] memory order = _order(full);
+        entries = new StreamFinalityComponentExpectation[](order.length);
+        for (uint256 i; i < order.length; ++i) {
+            entries[i] = _route(scope, order[i], authority);
+        }
+    }
+
+    function _route(
+        StreamFinalityScope memory scope,
+        uint8 index,
+        AuthorityTypes.Route memory authority
+    ) private view returns (StreamFinalityComponentExpectation memory entry) {
+        StreamFinalityDiscoveryTypes.Configuration memory c = _scopeConfiguration(scope);
+        bytes32 family = _family(index);
+        if (index < 7) {
+            address adapter = index < 6 ? c.routerAdapters[index] : c.metadataAdapter;
+            _selection(adapter);
+            return _component(adapter, family, scope);
+        }
+        if (index == 7) {
+            entry = abi.decode(
+                _read(
+                    c.entropyFactory,
+                    abi.encodeCall(
+                        IStreamFinalityEntropySourceFactory.requireCurrentComponent, (scope)
+                    ),
+                    224,
+                    c.entropyGas
+                ),
+                (StreamFinalityComponentExpectation)
+            );
+            _expectation(entry, family, entry.component);
+            bytes4 expected = scope.scopeType == StreamFinalityScopeType.COLLECTION
+                ? type(IStreamArtworkFinalityComponent).interfaceId
+                : type(IStreamArtworkScopedFinalityComponent).interfaceId;
+            if (entry.interfaceId != expected) revert DiscoveryComponent(entry.component, family);
+            _supports(entry.component, expected);
+            return entry;
+        }
+        if (index == 8) return _component(c.referenceRender, family, scope);
+        // Only the full projection asks for the artist's signed record.
+        bytes32 actual = abi.decode(
+            _read(
+                authority.registry,
+                abi.encodeCall(
+                    IStreamFinalitySanctionReads.collectionSanctionComponentType,
+                    (scope.collectionId)
+                ),
+                32,
+                c.componentGas
+            ),
+            (bytes32)
+        );
+        if (actual != family) revert DiscoveryUnsupportedProfile();
+        _currentPin(authority);
+        return _componentState(authority.registry, family, scope);
+    }
+
+    function _order(bool full) private pure returns (uint8[] memory order) {
+        order = new uint8[](full ? 10 : 9);
+        for (uint8 i; i < order.length; ++i) {
+            order[i] = i;
+        }
+        for (uint256 i = 1; i < order.length; ++i) {
+            for (uint256 j = i; j > 0 && _family(order[j]) < _family(order[j - 1]); --j) {
+                (order[j], order[j - 1]) = (order[j - 1], order[j]);
+            }
+        }
+    }
+
+    function _family(uint8 index) private pure returns (bytes32) {
+        if (index < 6) return _routerFamily(index);
+        if (index == 6) return StreamFinalityDomains.COMPONENT_COLLECTION_METADATA;
+        if (index == 7) return StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR;
+        if (index == 8) return StreamFinalityDomains.COMPONENT_REFERENCE_RENDER;
+        return StreamFinalityDomains.COMPONENT_ARTIST_SANCTION;
+    }
+
+    function _current(
+        StreamFinalityScope memory scope,
+        StreamFinalityDiscoveryTypes.Configuration memory c
+    ) private view returns (AuthorityTypes.Route memory) {
+        return CurrentReads.current(_configuration, _codeHashes, _readContext(), scope, c);
+    }
+
+    function _initializeProfiles(bytes32 expected) private {
+        StreamFinalityDiscoveryTypes.Configuration memory c = _configuration;
+        _supports(c.provider, type(Catalogue).interfaceId);
+        if (
+            abi.decode(
+                    _read(
+                        c.provider,
+                        abi.encodeCall(Catalogue.preservationFactorySourceProfile, ()),
+                        32,
+                        c.readGas
+                    ),
+                    (bytes32)
+                )
+                != keccak256("6529STREAM_CURRENT_AUTHORITY_PRESERVATION_FACTORY_PROFILE_SOURCES_V1")
+        ) revert DiscoveryConfiguration(c.provider);
+        sourceConfigurationHash = abi.decode(
+            _read(
+                c.provider,
+                abi.encodeCall(Catalogue.finalitySourceConfigurationHash, ()),
+                32,
+                c.readGas
+            ),
+            (bytes32)
+        );
+        if (expected == 0 || sourceConfigurationHash != expected) {
+            revert DiscoveryConfiguration(c.provider);
+        }
+        for (uint8 i; i < 2; ++i) {
+            bytes memory raw = _read(
+                c.provider, abi.encodeCall(Catalogue.finalitySourceProfile, (i)), 256, c.readGas
+            );
+            Profiles.Profile memory p = abi.decode(raw, (Profiles.Profile));
+            if (
+                keccak256(raw) != keccak256(abi.encode(p))
+                    || p.profileHash != ProfileReads.profileHash(i) || p.configurationHash == 0
+            ) revert DiscoveryConfiguration(c.provider);
+            _admitExact(p.referenceRender, p.referenceRenderCodeHash);
+            _admitExact(p.snapshots, p.snapshotsCodeHash);
+            _admitExact(p.entropyFactory, p.entropyFactoryCodeHash);
+            _address(p.snapshots, "core()", c.core);
+            _address(p.snapshots, "metadataHost()", c.metadata);
+            _address(p.referenceRender, "core()", c.core);
+            _address(p.referenceRender, "metadataHost()", c.metadata);
+            _address(p.referenceRender, "metadataRouter()", c.router);
+            _address(p.referenceRender, "snapshots()", p.snapshots);
+            _address(p.entropyFactory, "core()", c.core);
+            _address(p.entropyFactory, "metadataHost()", c.metadata);
+            _address(p.entropyFactory, "scopeMembershipHost()", c.membership);
+            _supports(p.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
+            _supports(p.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
+            _supports(p.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
+            if (i != 1) {
+                _supports(p.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
+            }
+            if (
+                i == 0
+                    && (p.referenceRender != c.referenceRender
+                        || p.entropyFactory != c.entropyFactory)
+            ) {
+                revert DiscoveryConfiguration(c.provider);
+            }
+            _profiles[i] = p;
+        }
+    }
+
+    /// @dev Repeat the original full reciprocal and interface checks for each dynamically selected
+    /// graph. Constructor catalogue declarations are never treated as operative admission.
+
+    function _admitExact(address target, bytes32 expected) private {
+        if (
+            expected == 0 || target.code.length == 0 || target.codehash != expected
+                || (_codeHashes[target] != 0 && _codeHashes[target] != expected)
+        ) revert DiscoveryConfiguration(target);
+        _codeHashes[target] = expected;
+    }
+
+    /// @dev Existing reference hosts use precisely their original constructor pin. Only the
+    /// selected new-profile reference may instead use its actual per-scope factory record;
+    /// this is not a generic dynamically admitted component address.
+    function _pinReference(StreamFinalityScope memory scope, address target) private view {
+        CurrentReads.pinReference(_configuration, _codeHashes, _readContext(), scope, target);
+    }
+
+    function _scopeConfiguration(StreamFinalityScope memory scope)
+        private
+        view
+        returns (StreamFinalityDiscoveryTypes.Configuration memory)
+    {
+        return CurrentReads.scopeConfiguration(_configuration, _codeHashes, _readContext(), scope);
+    }
+
+    function _adapter(address target, address host, bytes32 family) private view {
+        _supports(target, type(IStreamFinalityServingHostAdapter).interfaceId);
+        _supports(target, type(IStreamArtworkFinalityComponent).interfaceId);
+        _supports(target, type(IStreamArtworkScopedFinalityComponent).interfaceId);
+        _address(target, "core()", core);
+        _address(target, "host()", host);
+        _address(target, "metadataHost()", metadataHost);
+        _address(target, "evidenceProvider()", scopeEvidenceProvider);
+        if (
+            abi.decode(
+                    _read(
+                        target,
+                        abi.encodeCall(IStreamFinalityHostAdapter.componentType, ()),
+                        32,
+                        _configuration.readGas
+                    ),
+                    (bytes32)
+                ) != family
+        ) revert DiscoveryConfiguration(target);
+    }
+
+    function _selection(address target) private view {
+        _pin(target);
+        _read(
+            target,
+            abi.encodeCall(IStreamFinalityHostAdapter.requireCurrentSelection, ()),
+            0,
+            _configuration.componentGas
+        );
+    }
+
+    function _component(address target, bytes32 family, StreamFinalityScope memory scope)
+        private
+        view
+        returns (StreamFinalityComponentExpectation memory e)
+    {
+        if (family == StreamFinalityDomains.COMPONENT_REFERENCE_RENDER) {
+            _pinReference(scope, target);
+        } else {
+            _pin(target);
+        }
+        return _componentState(target, family, scope);
+    }
+
+    function _expectation(
+        StreamFinalityComponentExpectation memory e,
+        bytes32 family,
+        address target
+    ) private view {
+        if (
+            target.code.length == 0 || e.component != target || e.codeHash != target.codehash
+                || e.componentType != family || e.interfaceId == 0 || e.moduleVersion == 0
+                || e.manifestHash == 0 || e.dataHash == 0
+        ) revert DiscoveryComponent(target, family);
+    }
+
+    function _at(StreamFinalityScope memory scope, uint256 index, bool full)
+        private
+        view
+        returns (StreamFinalityComponentExpectation memory)
+    {
+        AuthorityTypes.Route memory authority = _current(scope, _configuration);
+        uint8[] memory order = _order(full);
+        if (index >= order.length) revert DiscoveryIndex(index);
+        // One slot only. Full hash/facts plus Registry live checks prove complete readiness.
+        return _route(scope, order[index], authority);
+    }
+
+    function _hash(StreamFinalityComponentExpectation[] memory entries)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(StreamFinalityDomains.STREAM_FINALITY_COMPONENTS_V1, entries));
+    }
+
+    function _collection(uint256 cid) private pure returns (StreamFinalityScope memory) {
+        return StreamFinalityScope(StreamFinalityScopeType.COLLECTION, cid, 0, 0);
+    }
+
+    function _routerFamily(uint256 i) private pure returns (bytes32) {
+        if (i == 0) return StreamFinalityDomains.COMPONENT_METADATA_ROUTER;
+        if (i == 1) return StreamFinalityDomains.COMPONENT_RENDERER;
+        if (i == 2) return StreamFinalityDomains.COMPONENT_RENDER_CONTEXT;
+        if (i == 3) return StreamFinalityDomains.COMPONENT_MEDIA_MANIFEST;
+        if (i == 4) return StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE;
+        return StreamFinalityDomains.COMPONENT_DEPENDENCY_SOURCE;
+    }
+
+    function _supports(address target, bytes4 id) private view {
+        if (
+            abi.decode(
+                        _read(
+                            target,
+                            abi.encodeCall(IERC165.supportsInterface, (type(IERC165).interfaceId)),
+                            32,
+                            _configuration.readGas
+                        ),
+                        (uint256)
+                    ) != 1
+                || abi.decode(
+                        _read(
+                            target,
+                            abi.encodeCall(IERC165.supportsInterface, (id)),
+                            32,
+                            _configuration.readGas
+                        ),
+                        (uint256)
+                    ) != 1
+                || abi.decode(
+                        _read(
+                            target,
+                            abi.encodeCall(IERC165.supportsInterface, (bytes4(0xffffffff))),
+                            32,
+                            _configuration.readGas
+                        ),
+                        (uint256)
+                    ) != 0
+        ) {
+            revert DiscoveryConfiguration(target);
+        }
+    }
+
+    function _admit(address target) private {
+        if (target.code.length == 0) revert DiscoveryConfiguration(target);
+        _codeHashes[target] = target.codehash;
+    }
+
+    function _pin(address target) private view {
+        if (target.code.length == 0 || target.codehash != _codeHashes[target]) {
+            revert DiscoveryDependency(target);
+        }
+    }
+
+    function _address(address target, string memory signature, address expected) private view {
+        if (
+            abi.decode(
+                    _read(target, abi.encodeWithSignature(signature), 32, _configuration.readGas),
+                    (address)
+                ) != expected
+        ) {
+            revert DiscoveryConfiguration(target);
+        }
+    }
+
+    function _read(address target, bytes memory input, uint256 size, uint256 cap)
+        private
+        view
+        returns (bytes memory)
+    {
+        return StreamFinalityRouterEvidence.read(target, input, size, cap);
+    }
+
+    function _componentState(address target, bytes32 family, StreamFinalityScope memory scope)
+        private
+        view
+        returns (StreamFinalityComponentExpectation memory e)
+    {
+        bytes4 expectedInterface = scope.scopeType == StreamFinalityScopeType.COLLECTION
+            ? type(IStreamArtworkFinalityComponent).interfaceId
+            : type(IStreamArtworkScopedFinalityComponent).interfaceId;
+        _supports(target, expectedInterface);
+        bytes memory input = scope.scopeType == StreamFinalityScopeType.COLLECTION
+            ? abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (scope.collectionId))
+            : abi.encodeCall(IStreamArtworkScopedFinalityComponent.finalityStateForScope, (scope));
+        StreamFinalityComponentState memory s = abi.decode(
+            _read(target, input, 256, _configuration.componentGas), (StreamFinalityComponentState)
+        );
+        if (!s.frozen || s.interfaceId != expectedInterface) {
+            revert DiscoveryComponent(target, family);
+        }
+        e = StreamFinalityComponentExpectation(
+            s.componentType,
+            s.component,
+            s.interfaceId,
+            s.codeHash,
+            s.moduleVersion,
+            s.manifestHash,
+            s.dataHash
+        );
+        _expectation(e, family, target);
+    }
+
+    function _currentPin(AuthorityTypes.Route memory authority) private view {
+        if (
+            authority.registry.code.length == 0 || authority.registryCodeHash == 0
+                || authority.registry.codehash != authority.registryCodeHash
+                || authority.coordinator.code.length == 0 || authority.coordinatorCodeHash == 0
+                || authority.coordinator.codehash != authority.coordinatorCodeHash
+        ) revert DiscoveryDependency(authority.registry);
+    }
+
+    /// @dev Values are copied from the original constructor-only fields. Configuration stays
+    /// a typed storage argument so selected-scope memory copies cannot alias this context.
+    function _readContext() private view returns (CurrentReads.Context memory x) {
+        x.core = core;
+        x.scopeEvidenceProvider = scopeEvidenceProvider;
+        x.deploymentChainId = deploymentChainId;
+        x.sourceConfigurationHash = sourceConfigurationHash;
+        x.profiles = _profiles;
+        x.collectionBinding = _collectionBinding;
+        x.collectionEntropyFactory = _collectionEntropyFactory;
+        x.collectionEntropyCodeHash = _collectionEntropyCodeHash;
+        x.publicationBinding = _publicationBinding;
+        x.scopedPolicyEntropyFactory = _scopedPolicyEntropyFactory;
+        x.scopedPolicyEntropyCodeHash = _scopedPolicyEntropyCodeHash;
+    }
+}

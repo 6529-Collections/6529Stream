@@ -1,0 +1,49 @@
+ачeниe Атрибута</rdfs:label>
+    <rdfs:label xml:lang="zh">属性赋值</rdfs:label>
+    <rdfs:comment>This class comprises the actions of making assertions about one property of an object or any single relation between two items or concepts. The type of the property asserted to hold between two items or concepts can be described by the property P177 assigned property of type (is type of property assigned): E55 Type.
+For example, the class describes the actions of people making propositions and statements during certain scientific/scholarly procedures, e.g. the person and date when a condition statement was made, an identifier was assigned, the museum object was measured, etc. Which kinds of such assignments and statements need to be documented explicitly in structures of a schema rather than free text, depends on whether this information should be accessible by structured queries.
+This class allows for the documentation of how the respective assignment came about, and whose opinion it was. Note that all instances of properties described in a knowledge base are the opinion of someone. Per default, they are the opinion of the team maintaining the knowledge base. This fact must not individually be registered for all instances of properties provided by the maintaining team, because it would result in an endless recursion of whose opinion was the description of an opinion. Therefore, the use of instances of E13 Attribute Assignment marks the fact that the maintaining team is in general neutral to the validity of the respective assertion, but registers someone else’s opinion and how it came about.
+All properties assigned in such an action can also be seen as directly relating the respective pair of items or concepts. Multiple use of instances of E13 Attribute Assignment may possibly lead to a collection of contradictory values.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E14_Condition_Assessment">
+    <rdfs:label xml:lang="en">Condition Assessment</rdfs:label>
+    <rdfs:label xml:lang="de">Zustandsfeststellung</rdfs:label>
+    <rdfs:label xml:lang="el">Εκτίμηση Κατάστασης</rdfs:label>
+    <rdfs:label xml:lang="fr">Évaluation d’état matériel</rdfs:label>
+    <rdfs:label xml:lang="pt">Avaliação do Estado Material</rdfs:label>
+    <rdfs:label xml:lang="ru">Оцeнка Состояния</rdfs:label>
+    <rdfs:label xml:lang="zh">状态评估</rdfs:label>
+    <rdfs:comment>This class describes the act of assessing the state of preservation of an object during a particular period.
+The condition assessment may be carried out by inspection, measurement, or through historical research. This class is used to document circumstances of the respective assessment that is relevant to interpret its quality at a later stage, or to continue research on related documents.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E13_Attribute_Assignment" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E15_Identifier_Assignment">
+    <rdfs:label xml:lang="en">Identifier Assignment</rdfs:label>
+    <rdfs:label xml:lang="de">Kennzeichenzuweisung</rdfs:label>
+    <rdfs:label xml:lang="el">Απόδοση Αναγνωριστικού</rdfs:label>
+    <rdfs:label xml:lang="fr">Assignation d’identifiant</rdfs:label>
+    <rdfs:label xml:lang="pt">Atribuição de Identificador</rdfs:label>
+    <rdfs:label xml:lang="ru">Назначeниe Идeнтификатора</rdfs:label>
+    <rdfs:label xml:lang="zh">标识符赋值</rdfs:label>
+    <rdfs:comment>This class comprises activities that result in the allocation of an identifier to an instance of E1 CRM Entity. An instance of E15 Identifier Assignment may include the creation of the identifier from multiple constituents, which themselves may be instances of E41 Appellation. The syntax and kinds of constituents to be used may be declared in a rule constituting an instance of E29 Design or Procedure.
+Examples of such identifiers include Find Numbers, Inventory Numbers, uniform titles in the sense of librarianship and Digital Object Identifiers (DOI). Documenting the act of identifier assignment and deassignment is especially useful when objects change custody or the identification system of an organization is changed. In order to keep track of the identity of things in such cases, it is important to document by whom, when, and for what purpose an identifier is assigned to an item.
+The fact that an identifier is a preferred one for an organisation can be expressed by using the property E1 CRM Entity. P48 has preferred identifier (is preferred identifier of): E42 Identifier. It can better be expressed in a context independent form by assigning a suitable E55 Type, such as “preferred identifier assignment”, to the respective instance of E15 Identifier Assignment through the P2 has type (is type of) property.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E13_Attribute_Assignment" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E16_Measurement">
+    <rdfs:label xml:lang="en">Measurement</rdfs:label>
+    <rdfs:label xml:lang="de">Messung</rdfs:label>
+    <rdfs:label xml:lang="el">Μέτρηση</rdfs:label>
+    <rdfs:label xml:lang="fr">Mesurage</rdfs:label>
+    <rdfs:label xml:lang="pt">Medição</rdfs:label>
+    <rdfs:label xml:lang="ru">Измeрeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">测量</rdfs:label>
+    <rdfs:comment>This class comprises actions measuring physical properties and other values that can be determined by a systematic, objective procedure of direct observation of particular states of physical reality.
+An instance of E16 Measurement may use simple counting or tools, such as yardsticks or radiation detection devices. The interest is in the method and care applied, so that the reliability of the result may be judged at a later stage, or research continued on the associated documents. The date of the event is important for dimensions, which may change value over time, such as the length of an object subject to shrinkage. Methods and devices employed should be associated with instances of E16 Measurement by properties such as P33 used specific technique: E29 Design or Procedure, P125 used object of type: E55 Type, P16 used specific object (was used for): E70 Thing, whereas basic techniques such as "carbon-14 dating" should be encoded using P2 has type (is type of): E55 Type. Details of methods and devices reused or reusable in other instances of E16 Measurement should be documented for these entities rather than the measurements themselves, whereas details of particular execution may be documented by free text or by instantiating adequate sub-activities, if the detail may be of interest for an overarching query.
+Regardless whether a measurement is made by an instrument or by human senses, it represents the initial transition from physical reality to information without any other documented information object in between within the reasoning chain that would represent the result of the interaction of the observer or device with reality. Therefore, determining properties of an instance of E90 Symbolic Object is regarded as an instance of E13 Attribute Assignment, which may be inferred from observing and measuring representative carriers. In the case that the carrier can be named, the property P16 used specific object (was used for) should be used to indicate the instance(s) of E18 Physical Thing that was used as the empirical basis for the attribute assignment. For instance, inferring properties of depicted items using image material, such as satellite images, is not regarded as an instance of E16 Measurement, but as a subsequent instance of E13 Attribute Assignment. Rather, only the production of the images, understood as arrays of radiation intensities, is regarded as an instance of E16 Measurement. The same reasoning holds for other sensor data.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E13_Attribute_Assignment" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E17_Type_Assignment">
+    <rdfs:label xml:lang="en">Type Assignment</rdfs:label>
+    <rdfs:label 

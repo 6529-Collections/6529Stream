@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../helpers/StreamSaleTestBase.sol";
+import "../../helpers/StreamCurrentSaleTestBase.sol";
 import "../../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
 
 contract NativeSaleReceiver is IERC721Receiver {
@@ -59,19 +59,21 @@ contract NativeSale1271Signer {
     }
 }
 
-/// @dev The sale, manager, ledger, Core and split wallet are actual implementations.
-///      Governance context and entropy callbacks are fixtures; deployment integration owns those.
-contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
-    bytes32 private constant PHASE = keccak256("native-fixed-price");
-    StreamFixedPriceSaleAdapter private sale;
-
+/// @dev Actual current contracts and artist consents; one case explicitly injects a callback fault.
+contract StreamFixedPriceSaleAdapterTest is StreamCurrentSaleTestBase {
     function setUp() public {
-        _setUpSaleFixture();
-        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artistRegistry);
-        _configureSalePhase(PHASE, address(sale));
+        vm.deal(address(this), 100 ether);
+        platform = vm.addr(PLATFORM_KEY);
+    }
+
+    /// @dev Select the original artist before the scenario's single current graph deployment.
+    function deploySaleScenario(address scenarioArtist) external {
+        require(msg.sender == address(this), "fixture caller");
+        _deployCurrentStack(scenarioArtist, platform);
     }
 
     function testActualPaidMintFundsSplitAndAllowsRecipientWithdrawals() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (uint256 tokenId, bytes32 operationRoot) = _buy(authorization);
         require(core.ownerOf(tokenId) == authorization.recipient, "actual NFT minted");
@@ -87,6 +89,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testRecipientObservesPaidAccountedMintAndCannotReenterSale() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         NativeSaleReceiver receiver = new NativeSaleReceiver();
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         authorization.recipient = address(receiver);
@@ -101,6 +104,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testReceiverFailureRollsBackPaymentReplayLedgerAndCore() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         NativeSaleReceiver receiver = new NativeSaleReceiver();
         receiver.configure(sale, wallet, true, "");
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
@@ -112,15 +116,20 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testEntropyFailureRollsBackPaidMint() public {
-        entropy.setBehavior(true, false);
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
+        _failEntropyRegistrationCallback();
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.EntropyRegistrationFailed.selector));
         sale.buy{ value: 1 ether }(authorization, tokenData, platformSig, artistSig);
         _assertNothingConsumed(authorization);
+        _restoreEntropyRegistrationCallback();
+        _buy(authorization);
+        require(core.totalSupply() == 1 && wallet.balance == 1 ether, "same signed sale retries");
     }
 
     function testReplayIsRejectedWithoutSecondPayment() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         _buy(authorization);
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
@@ -130,6 +139,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testArtistAndPlatformMustBothAuthorizeExactSale() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         authorization.recipient = address(0xBAD);
@@ -142,6 +152,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testPayerValueDeadlineAndPolicyAreEnforced() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         vm.expectRevert(
@@ -174,7 +185,9 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testArtistRevocationAndSignerRotationInvalidateOutstandingAuthorization() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
+        authorization.deadline = uint64(block.timestamp + 7 days);
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         vm.prank(artist);
         sale.cancelAuthorization(authorization.nonce);
@@ -182,26 +195,30 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
         sale.buy{ value: 1 ether }(authorization, tokenData, platformSig, artistSig);
         authorization.nonce = keccak256("another");
         (platformSig, artistSig) = _sign(authorization);
-        sale.setPlatformSigner(platform);
-        vm.expectRevert();
+        _executeSaleGovernance(address(sale), abi.encodeCall(sale.setPlatformSigner, (platform)));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamFixedPriceSaleAdapter.InvalidSaleAuthorization.selector)
+        );
         sale.buy{ value: 1 ether }(authorization, tokenData, platformSig, artistSig);
         require(wallet.balance == 0 && core.totalSupply() == 0, "no revoked sale");
     }
 
     function testERC1271ArtistAndPlatformSignersCanBuy() public {
-        address contractArtist = address(new NativeSale1271Signer(artist));
-        _bindFixtureArtist(contractArtist);
-        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artistRegistry);
-        manager.setPhaseExecutor(1, PHASE, address(sale), true);
+        address contractArtist = address(new NativeSale1271Signer(vm.addr(ARTIST_KEY)));
+        this.deploySaleScenario(contractArtist);
+        _executeSaleGovernance(
+            address(sale),
+            abi.encodeCall(sale.setPlatformSigner, (address(new NativeSale1271Signer(platform))))
+        );
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         authorization.artist = contractArtist;
-        sale.setPlatformSigner(address(new NativeSale1271Signer(platform)));
         authorization.signerEpoch = sale.signerEpoch();
         _buy(authorization);
         require(core.totalSupply() == 1 && wallet.balance == 1 ether, "ERC1271 paid mint");
     }
 
     function testFullySignedSaleCannotAttributeAnotherArtist() public {
+        this.deploySaleScenario(vm.addr(ARTIST_KEY));
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         authorization.artist = vm.addr(999);
         bytes32 digest = sale.authorizationDigest(authorization);
@@ -234,6 +251,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
             recipient: address(0xCAFE),
             artist: artist,
             profileId: profile,
+            expectedPrimaryPolicyHash: _nativePrimaryPolicyHash(),
             tokenDataHash: keccak256(tokenData),
             mintCommitment: keccak256("mint commitment"),
             mintPolicyHash: manager.phasePolicyHash(1, PHASE),

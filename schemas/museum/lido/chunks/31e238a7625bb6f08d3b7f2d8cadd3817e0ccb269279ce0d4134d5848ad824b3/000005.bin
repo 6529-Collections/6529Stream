@@ -1,0 +1,97 @@
+/element>
+	<!-- =================================================== -->
+	<element name="operationParameterRef" type="gml:OperationParameterRefType"/>
+	<!-- =================================================== -->
+	<complexType name="OperationParameterRefType">
+		<annotation>
+			<documentation>Association to an operation parameter, either referencing or containing the definition of that parameter. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:OperationParameter"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="OperationParameterGroup" type="gml:OperationParameterGroupType" substitutionGroup="gml:_GeneralOperationParameter"/>
+	<!-- =================================================== -->
+	<complexType name="OperationParameterGroupBaseType" abstract="true">
+		<annotation>
+			<documentation>Basic encoding for operation parameter group objects, simplifying and restricting the DefinitionType as needed. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractGeneralOperationParameterType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:groupName"/>
+					<element ref="gml:minimumOccurs" minOccurs="0"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="groupName" type="gml:CodeType" substitutionGroup="gml:name">
+		<annotation>
+			<documentation>The name by which this operation parameter group is identified. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<complexType name="OperationParameterGroupType">
+		<annotation>
+			<documentation>The definition of a group of parameters used by an operation method. This complexType is expected to be used or extended for all applicable operation methods, without defining operation-method-specialized element names.  </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:OperationParameterGroupBaseType">
+				<sequence>
+					<element ref="gml:groupID" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Set of alternative identifications of this operation parameter group. The first groupID, if any, is normally the primary identification code, and any others are aliases. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:remarks" minOccurs="0">
+						<annotation>
+							<documentation>Comments on or information about this operation parameter group, including source information. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:maximumOccurs" minOccurs="0"/>
+					<element ref="gml:includesParameter" minOccurs="2" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Unordered list of associations to the set of operation parameters that are members of this group. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="groupID" type="gml:IdentifierType">
+		<annotation>
+			<documentation>An identification of an operation parameter group. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="maximumOccurs" type="positiveInteger">
+		<annotation>
+			<documentation>The maximum number of times that values for this parameter group can be included. If this attribute is omitted, the maximum number is one. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="includesParameter" type="gml:AbstractGeneralOperationParameterRefType">
+		<annotation>
+			<documentation>Association to an operation parameter that is a member of a group. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="operationParameterGroupRef" type="gml:OperationParameterRefType"/>
+	<!-- =================================================== -->
+	<complexType name="OperationParameterGroupRefType">
+		<annotation>
+			<documentation>Association to an operation parameter, either referencing or containing the definition of that parameter. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:OperationParameterGroup"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+</schema>

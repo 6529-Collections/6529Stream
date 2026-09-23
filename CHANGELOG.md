@@ -1,11 +1,3171 @@
 # Changelog
 
+## Current native fixtures and Museum format coverage
+
+- Load current paid, checkpoint and Artist fixtures from genuine compiled
+  artifacts while retaining constructor arguments, caller, ordering and tests.
+- Add the Museum V4 field/format coverage ledger and validated photograph and
+  software Linked Art/LIDO exports. Retain unsupported-format facts explicitly.
+- Add a byte-backed synthetic photograph example across all four Museum
+  formats, with retained SHA-pinned image input and portable offline replay.
+- Refresh the client inventory against the integrated production source.
+  Full runtime, gas, Safe and release acceptance remain open.
+
+## Complete synthetic Museum corpus projections
+
+- Extend the retained corpus to all eight media/history examples, including
+  interactive execution, uncertain geography, unresolved custody accounts and
+  explicit revision lineage. Preserve prior package versions and verify the
+  exact source/model closure during offline replay. Eighteen focused tests pass;
+  full current-contract and institutional conformance remain separate.
+- Load scoped test-fixture constructors from genuine compiled artifacts to
+  avoid embedding the entire deployment graph in test hosts, preserving real
+  CREATE, constructor arguments, callers and existing assertions.
+
+
+## Integrated publication and Artist capacity repairs
+
+- Split inventory, snapshot, checkpoint and reference publication operations
+  and constructors into fixed typed libraries while preserving existing
+  interfaces, storage and authorization order. Add focused regressions; keep
+  runtime and full constructor acceptance separate from native size checks.
+- Repair current Artist generation-proof size and dispute-import code
+  generation without changing existing external interfaces.
+- Add the synthetic eight-case Museum corpus and portable photograph/interview
+  projection with retained model/crosswalk bytes and tamper-tested offline replay.
+- Record focused inventory, client and Museum passes and the still-open paid
+  fixture compiler failures. Expanded full-v1 release acceptance remains open.
+
+
+## Full-v1 evidence checkpoint (`7de3c00a2`)
+
+- Record the generated Burn suite result: 15 cases, including two 256-run fuzz
+  properties, with independent Astra review. Typed boundaries and full-stack
+  acceptance remain open.
+- Integrate the current client inventory and explicit Safe receive/fallback
+  plans. The inventory records 37 roles, 7,211 functions, four receive
+  handlers, zero fallback handlers and 45 candidate caller routes; it is not
+  all-call Safe acceptance. Root types/build/generator checks and 18 tests
+  pass after the checksum-test correction.
+- Record scoped capacity outcomes: the integrated nine-product preservation
+  repair fits with ABI/storage parity, while its full Forge run timed out
+  without EVM output. Uncommitted split `433` changes 20 paths with 17 selected
+  prototype products fitting, not accepted; root prototypes `429` / `430` are
+  not adopted. ArtistFactory has six native passes with EVM validation pending.
+  Mint and test-construction inventories retain their oversized and missing
+  products, and Collector's later two native jobs timed out. No size or
+  runtime acceptance is inferred beyond the recorded products.
+- Integrate Museum V2 current-assessment reconciliation (`932a6700c` /
+  `7de3c00a2`) after source clearance and 31 inherited plus four V2 test passes;
+  root's four-test validation passed in 207 seconds at `7de3c00a2`. RC1 and the
+  500,000-gas / 16,777,216 transaction ceilings are unchanged. Production
+  Solidity is source-integrated through `8fef2d3ad`; expanded full-v1
+  acceptance remains open.
+
+## Token-resolved Museum script evidence
+
+- Capture token-selected script bytes, authenticated dependencies, override
+  history and registered interpretation documents. Retain explicit unknown
+  classifications and bind inherited global defaults to activation. See the
+  [native token script guide](docs/museum-token-script-native-v1.md).
+
+## Scoped compiler diagnostics
+
+- Add an optional inspector for Solidity code-generation selections, including
+  source AST wildcard expansion and library getters. Separate large test
+  service doubles into their own files to avoid compiling unrelated test hosts.
+  See the [scoped code-generation guide](docs/reference/tooling/scoped-codegen.md).
+
+## Safe receive and fallback plans
+
+- Add explicit ABI-checked Safe plan routes for Solidity receive and fallback
+  handlers. Preserve raw target/value/calldata, enforce dispatch precedence and
+  payable rules, and keep existing function-plan hashes unchanged.
+
+## Current native Museum requirement assessment
+
+- Add a separate, replayed 49-row current assessment for five native-state
+  requirements. Exact target and source-state joins allow verified references
+  while the original V4 dossier and 19/49 decisions stay unchanged. See the
+  [current assessment guide](docs/museum-current-native-assessment-v1.md).
+
+## Unified Artist and General review evidence
+
+- Add a V5 wrapper around the unchanged unified V4 dossier. Replay exact native
+  Artist and General review packets, retain their separate selections and
+  diagnostics, and classify original subject and source-state links without
+  changing the original 19/49 assessments. See the
+  [V5 review dossier guide](docs/museum-unified-review-dossier-v5.md).
+
+## Generation validation deployment size
+
+- Split four existing generation dependencies through fixed typed workers, preserving
+  their public ABI, errors, source reads and validation order. Use a single journal
+  context for Solidity 0.8.19 code generation; see the
+  [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
+
+## Native Artist review selection
+
+- Add explicit native Artist review interpretation and selection with exact
+  original op24 authority, publication scope and revision binding. Preserve
+  the producer-required assertion wire and earlier profile meanings; distinguish
+  selected account review and opted-in SELF review without claiming human or
+  institutional authority. See the
+  [native Artist review guide](docs/museum-native-artist-review.md).
+- Use the adopted semantic-review relation and datatype. Keep semantic
+  eligibility local to each exact assertion selector so an unselected malformed
+  sibling cannot suppress a valid assertion from the same native original.
+- Add a portable public Artist review dossier that retains full original native
+  source transcripts, selected reviews and attributed statements. Offline
+  verification replays the concrete readers and compares every package byte.
+  See the [Artist review dossier guide](docs/museum-native-artist-review-dossier.md).
+
+## Dispute history library deployment size
+
+- Separate unchanged resolution and generation-head validation into a fixed linked library,
+  preserving all three original chain-validation entry points and rules. Add
+  focused restoration, withdrawal, reopening, chronology and head-integrity
+  regressions. See the [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
+
+## General-attestation semantic reviews
+
+- Add a separate General-to-General review profile, original receipt/grant and
+  publication-order proofs, exact historical authority selection and replayable
+  graph output. Preserve the earlier direct-only profile and original source
+  formats. Focused synthetic tests are separate from chain acceptance; see the
+  [General review guide](docs/museum-general-semantic-reviews.md).
+
+## First-run preparation
+
+- Include required graph-fixture preparation between the current native build
+  and tests in the quickstart guides. Use the canonical Museum Python
+  environment consistently for retained review capture and replay commands.
+
+## Recorded account review selection
+
+- Execute qualified source/reviewer policies against retained actual local
+  publications. Cover approval, rejection, explicit SELF, authenticated order
+  and original-preserving projection in eight focused tests. Keep historical
+  product sources, immutable capture facts and account-only qualification
+  explicit in the [review guide](docs/museum-qualified-account-review.md).
+
+## Qualified-account review local originals
+
+- Add an isolated local capture and retained offline replay for a mapping by
+  account A, exact later approval/rejection statements by account B and a SELF
+  control. Keep registered profile bytes, source evidence, publication order
+  and historical native product qualifications explicit. See the
+  [qualified review fixture guide](docs/museum-qualified-review-fixture.md).
+
+## Current collaborator transport integration
+
+- Preserve current sanction and ratification behavior through the fixed
+  collaborator proof/source/family workers, including both original collection
+  overloads, complete eager encoder inputs, supplemented conservation and late
+  catalogue/current carrier checks. All original public interfaces remain.
+  Add eight typed-boundary regressions; current type checks are separate from
+  pending native capacity and linked execution. See the
+  [hydration guide](docs/guides/artist-primary-collaborator-hydration.md).
+
+## Authenticated declaration lineage
+
+- Add a versioned account declaration profile for explicit corrections, merges
+  and complete split cohorts. Preserve original declaration selectors, hashes,
+  authority and history while projecting selected resources; old account
+  profiles and exact review targets remain unchanged. See the
+  [lineage guide](docs/museum-declaration-lineage.md). Focused Python validation
+  does not claim new chain registration or archival-format acceptance.
+
+## Complete Artist history client
+
+- Add separate compiler-backed Complete History carriers and original
+  operation-60 direct/Safe workflows, preserving older profile encodings and
+  strict refusals. Historical principal and collection associations, shared
+  Archive cutoffs and collaborator account lanes retain their original scope.
+  See the [client guide](packages/stream-client/docs/current-artist-complete-history-hydration.md).
+  Provider and envelope checks remain separate from actual seven-owner/Safe
+  execution and release acceptance.
+
+## Native media and preservation correspondence
+
+- Add native IIIF VIEW painting with exact retained token/file correspondence
+  and separately attributed operator designation. Add PREMIS native publication
+  events, distinct agents for native receipt accounts and declared licensors,
+  and documentary rights notices.
+- Preserve earlier profiles and field denominators; independently resolve the
+  complete additional original source fields and actual format targets during
+  portable offline reopening. See the
+  [native media and preservation guide](docs/museum-native-media-preservation.md).
+
+## Native four-format export and family coverage
+
+- Add native V4 Linked Art, PREMIS and IIIF adapters alongside the unchanged
+  WORK-to-LIDO adapter. Preserve qualified native statements, source-payload
+  and conservation-file roles, exact WORK presentation extents and explicit
+  operator context without inventing artwork-media or institutional evidence.
+- Retain one complete source and validation closure, resolve actual target
+  values to original fields, compare same-field representations and report
+  source-family coverage. See the
+  [native four-format guide](docs/museum-native-multiformat.md).
+
+## Preservation checkpoint and output-manifest capacity
+
+- Move complete checkpoint admission/source-image validation and unchanged
+  canonical output documents into fixed libraries. Preserve all six wrappers'
+  public interfaces, storage, source commitments and governed read limits.
+  All eight measured products fit original runtime/full-initialization limits;
+  19 focused tests pass with two 256-input fuzz properties. Complete contract
+  flows and gas remain separate. See the
+  [capacity guide](docs/guides/preservation-checkpoint-capacity.md).
+
+## Scoped preservation publication capacity
+
+- Move complete snapshot source/payload assembly and exact retained-reference
+  scope checks into fixed linked workers. Preserve V1/V2 public interfaces,
+  storage, full source/record hashes, authorization and failure order. Both
+  formerly oversized publication families now fit the original runtime limit
+  in the focused capture; full-flow gas and current-stack acceptance remain
+  separate. Add six retained-history regression tests, including 256 fuzz
+  inputs. See the [capacity guide](docs/guides/scoped-publication-capacity.md).
+
+## Complete client test sharding
+
+- Add bounded client test planning, native execution and coverage verification
+  while preserving the complete `npm test` command and every source-oracle test.
+  CI prepares once, distributes the full inventory, retains failure logs and
+  requires every shard under the existing `TypeScript client` check. See the
+  [runner guide](packages/stream-client/docs/test-sharding.md). Calibrate all
+  original test units from the first remote run and exact-input local supplements,
+  moving two long combined flows ahead of short tests without changing limits.
+  Fresh full-matrix validation remains pending; no release evidence is renewed.
+
+## Complete Artist history composition workers
+
+- Add separate full-source composition, historical-principal storage and
+  seven-owner preparation workers for pending, terminal, collaborator, dispute
+  and mixed unbound histories. Preserve original Archive clocks and one global
+  nonce/grant proof. Connect the observed-history selector, seven existing owner
+  routes and complete source recheck, with four new Safe routing regressions.
+  Class Four integration, runtime and seven-owner acceptance remain pending. See the
+  [composition guide](docs/integrations/artist-complete-history.md).
+
+## Complete-history Consent adapters
+
+- Add separate historical-principal source, journal and grant-use adapters for
+  complete Consent/content/ratification/sanction histories, preserving strict
+  existing profile gates. The source routes are connected; native acceptance remains pending.
+  See the [adapter guide](docs/integrations/artist-complete-history-consents.md).
+
+## Aggregate original sanction history
+
+- Compose original sanction and confirmation history across the supported G,
+  MD and PRIMARY_ONLY collaborator recovery profiles. Preserve exact Archive
+  records, historical signatures, independent owner clocks, source heads and
+  confirmed attribution restoration.
+- Share the additive Consent carrier with original ratifications while keeping
+  previous tuple encodings and strict entry points. Focused regressions accompany
+  the source batch; native capacity and execution remain pending integration.
+  See the [integration guide](docs/integrations/artist-aggregate-sanctions.md).
+
+## Aggregate original ratification history
+
+- Carry original operation-52 records through applicable recovered generation,
+  dispute and PRIMARY_ONLY collaborator hydration, preserving complete original
+  signatures, nonce/replay guards, current heads and atomic seven-owner import.
+- Keep prior consent-row bytes and strict legacy entrypoints. Add focused worker
+  and real-owner/Safe regression cases; native capacity and execution remain
+  pending. See the [integration guide](docs/integrations/artist-aggregate-ratifications.md).
+
+## Native WORK export and current-source authoring history
+
+- Map exact native WORK occurrences from verified V4 dossiers to validated
+  LIDO XML, with original-field correspondence and separately attributed
+  operator metadata. Retain all original source evidence and leave other
+  native formats explicitly unevaluated. See the
+  [native LIDO guide](docs/museum-native-work-lido.md).
+- Add portable General/V4 later-documentation histories around the unchanged
+  draft schema: plain-language capture, immutable source binding, contiguous
+  revisions, exact-text confirmation and preserved review snapshots. Source
+  evidence grants no draft-actor authentication or publication authority. See
+  the [current-source authoring guide](docs/museum-current-source-authoring.md).
+
+## Museum source-field and format correspondence
+
+- Add a replayable schema-derived native field inventory and an exact-source
+  Linked Art/PREMIS/IIIF/LIDO correspondence ledger. Preserve unselected source
+  occurrences and distinguish format-local target evidence from inherited
+  coverage labels. Native families without a four-format adapter remain
+  explicitly retained and unsupported. See the
+  [correspondence guide](docs/museum-field-correspondence.md).
+
+- Add an exact token-scoped NativeAttribution envelope around an unchanged
+  later-documentation draft. Replay complete original evidence and preserve
+  historical authority/current qualification without inferring artist
+  confirmation, token existence or publication permission. See the
+  [native authoring guide](docs/museum-native-authoring-binding.md).
+
+## Retained Museum response checksum policy
+
+- Support the repository's explicit raw-response directory suffix patterns and
+  CRLF whitespace diagnostic setting in release checksum validation. Preserve
+  original response bytes and reject unsupported filters or encodings; verify
+  pattern matching against Git. Release bundle regeneration remains separate.
+
+## Consent owner constructor capacity
+
+- Extract the existing static sanction return encoding into the fixed read library,
+  preserving the owner ABI, storage and constructor. Full creation input now fits
+  at 48,895 bytes, including its five address arguments. Five native getter parity
+  tests pass, including 256 fuzz cases; actual owner/Safe acceptance remains separate.
+  See the [capacity guide](docs/guides/artist-consent-constructor-capacity.md).
+
+## Multiple recovered generation client profile
+
+- Add the separately pinned MULTIPLE_GENERATIONS client for complete supported
+  binding histories across recovered Artists and collections. Preserve original
+  generation clocks, signatures, consent associations and global replay/grant
+  accounting through operation 60 and direct/Safe receipt checks. Earlier
+  profiles remain closed; client evidence remains separate from contract and
+  deployment acceptance. See the
+  [client guide](packages/stream-client/docs/current-artist-recovered-multiple-generation-hydration.md).
+
+## Recovered dispute and repudiation multiplicity
+
+- Add a separately tagged aggregate profile for original signed dispute,
+  withdrawal, repudiation and resolution histories across recovered Artists and
+  collections. Preserve complete global provenance, original Archive clocks,
+  nonce/grant accounting and one atomic seven-owner import.
+- Add 26 focused and actual-owner/Safe regression scenarios, including late
+  Archive rollback and identical retry. Native execution, gas and joined capacity
+  remain pending; see the
+  [integration guide](docs/integrations/artist-recovered-multiple-disputes.md).
+## PRIMARY_ONLY collaborator hydration
+
+- Preserve complete proof/source checks and original family/import order through
+  fixed typed capacity workers, including eager validation of the full original
+  argument domain. Existing ABI entries, selectors and storage stay unchanged.
+- Twelve focused leaf/nonce cases pass with 256 fuzz runs; nineteen additional
+  codec/phase cases are authored. Source-qualified capacity does not establish
+  joined native ownership, actual-owner/Safe execution or added-call gas.
+- Add complete original collaborator proposal, identity, acceptance and nonce
+  transport through the existing seven-owner recovered-authority operation60.
+- Retain partial and repeated primary acceptance history, original binding terms,
+  payout/attribution joins and exact source/currentness validation. Held quorum
+  policy consumption and every old profile remain unchanged.
+- Add focused leaf/nonce and actual-owner/Safe scenarios. Source/type checks do
+  not establish native execution, production capacity or transaction gas; see
+  the [profile guide](docs/guides/artist-primary-collaborator-hydration.md).
+- Factor complete clock and preparation phases into fixed typed workers; all
+  five selected products fit original native size limits. Retain separate
+  whole-profile capacity, actual execution and added-call gas requirements.
+
+
+## Registry writer deployment capacity
+
+- Move seven existing authority-hydration encodings to one fixed typed writer,
+  preserving the Registry writer constructor, same-host CREATE path, guards,
+  actor, original Coordinator selectors and complete request types.
+- All six selected production products fit the original runtime/initcode limits.
+  Thirteen independently source-reviewed cases pass with 256 fuzz runs.
+  Full Artist-history and transaction-gas acceptance remain separate. See the
+  [capacity guide](docs/guides/artist-registry-writer-capacity.md).
+
+## Owner and Genesis Registry capture composition
+
+- Add optional read-only coverage of all 51 Genesis Registry names at the existing
+  final Owner/Museum block, with original deployment runtime pins, retained
+  admission artifact bytes and concrete offline replay before the source join.
+- Preserve original account and owner packages and the Registry reader profile.
+  Pure/transport-double checks pass; actual joined RPC execution remains pending.
+  See the [capture recipe](docs/museum-current-owner-capture.md#optional-genesis-registry-coverage-at-the-same-anchor).
+
+## Scoped policy render-critical read capacity
+
+- Factor complete native-item, historical root-authorization and current-source
+  reads into fixed linked workers, retaining original interfaces, storage,
+  hashes, validation order and complete returned memory values.
+- Add focused segmentation, provenance and current-context regression cases.
+  Complete runtime and added-call gas acceptance remain separate; see the
+  [capacity guide](docs/integrations/scoped-policy-render-critical-read-capacity.md).
+
+## Scoped preservation root-authorization capacity
+
+- Move the complete original V1 root-authorization proof to a fixed linked read
+  worker, preserving public types, ABI errors, stage updates and full provenance.
+- Add focused frame and original-proof regressions. EVM execution and composed
+  gas acceptance remain pending. See the
+  [capacity guide](docs/integrations/scoped-preservation-root-authorization-capacity.md).
+
+## Estate and dormancy recovery capacity
+
+- Split four existing recovery libraries into six fixed typed workers while
+  retaining original provenance, guard order, hashes, public methods and storage.
+  Return the complete predecessor snapshot explicitly across the new call frame.
+- All ten selected products fit the unchanged runtime/initcode limits. Eight
+  focused regression cases are authored and type-checked; their EVM execution
+  and full current recovery/gas acceptance remain pending. See the
+  [capacity guide](docs/integrations/artist-recovery-estate-dormancy-capacity.md).
+
+## Scoped full-policy provider read capacity
+
+- Move the original V2 payload, selected-root and configuration-pin bodies into
+  fixed linked workers while retaining all 21 original ABI entries, complete
+  policy payloads, root bindings and currentness checks.
+- All five selected libraries fit the original runtime and complete-init caps.
+  Seven focused regression cases are typechecked; runtime execution and composed
+  gas validation remain pending. See the
+  [integration guide](docs/integrations/scoped-policy-read-capacity.md).
+
+## Policy inventory current code generation
+
+- Separate the full COLLECTION policy V2 current read and pure evidence projection
+  into a fixed linked worker, preserving original guards, storage, hash and write
+  order. Both selected products fit native production limits.
+- Add four typed-boundary regression cases and exact field/ABI preservation checks.
+  Cases are type-checked; full current execution and added-frame gas remain pending.
+  See the [frame note](docs/integrations/policy-inventory-current-frames.md).
+
+## Recovered generation multiplicity
+
+- Add a distinct complete PRIMARY_ONLY recovered generation profile with original
+  Archive clocks, historical consent/attestation rows, global grants/nonces and
+  one atomic import per owner. Preserve repeated economics/sale terms and
+  interleaved governed-resolution coordinates.
+- Preserve the same profile and ordering through fixed typed decoding, proof,
+  record-write and encoding workers. Retain source-specific fitting native
+  captures with final-context and runtime qualifications.
+- Author eleven actual-owner/Safe scenarios and 29 focused worker cases. Source
+  and type checks are retained; native size diagnostics, runtime and joined
+  acceptance remain qualified in the [integration guide](docs/integrations/artist-recovered-multiple-generations.md).
+
+## Recovered revocation alias coordinates
+
+- Preserve the original opening journal coordinate while checking both resolution
+  replay aliases. Add a real-owner correction, repeated-decode and Safe-import
+  regression; source/type evidence is retained and execution remains pending.
+
+## Complete recovered attestation multiplicity
+
+- Add the explicit recovered multiple-Artist attestation profile, complete original
+  Archive acceptance clocks, global credential/grant conservation and atomic
+  whole-owner transport. Ten actual composition scenarios are authored and
+  type-checked; runtime and joined-capacity acceptance remain pending.
+
+## Complete recovered consent multiplicity
+
+- Add a distinct typed operation60 profile for complete direct/delegated consent
+  and retained delegation histories across recovered Artists and collections.
+  Preserve original domains, full owner provenance, global grant/nonce accounting
+  and one atomic application per owner.
+- Add seven actual-owner/Safe scenarios and six focused nonce controls. Source
+  and type checks are retained; runtime, gas and joined capacity acceptance
+  remain pending. See the [integration guide](docs/integrations/artist-recovered-multiple-consents.md).
+
+## Artist recovery history capacity
+
+- Move existing recovery/history validation into nine fixed typed workers,
+  preserving original host interfaces, storage, checks and receipt positions.
+- Add eight focused regression cases. Type/source comparisons and selected
+  native size captures are retained; runtime, gas and combined acceptance
+  remain pending. See the [worker guide](docs/integrations/artist-recovery-history-capacity.md).
+
+## Complete recovered base multiplicity
+
+- Add a distinct typed operation60 profile for multiple recovered class1/class3
+  Artists and accepted generation-one collections with direct policy history.
+  Preserve complete original owner provenance, global nonce/guard inventories,
+  shared timing/registration state and one atomic apply per owner.
+- Keep existing singleton paths and Coordinator source unchanged. Nine
+  actual-owner/Safe scenarios are authored and type-checked; native, gas and
+  joined capacity acceptance remain pending. Broader aggregate families are
+  subsequent work. See the [integration guide](docs/integrations/artist-recovered-multiple-base.md).
+
+## Native execution cache views
+
+- Permit explicit routing between unused library search-root lists only after
+  proving complete literal relative imports and absence of native sources under
+  every changed root. Preserve the original cache and refuse external, unresolved
+  or actually used changed library paths.
+- Build a separate Forge execution view from explicit original native owners and
+  pinned canonical preparation, preserving every original artifact and build-info
+  file. Namespace routing by full owner identity and recheck sources, cache,
+  native links, projections and exact test rosters with compilation disabled.
+- Add explicit helper entrypoints and owner-only preparation for suites without
+  graph projections. Cached listing and synthetic regression checks do not claim
+  EVM, RPC or deployment acceptance; script dispatch remains unsupported. See
+  [tooling](docs/tooling.md#native-execution-views).
+
+## Current Artist and finality deployment capacity
+
+- Factor complete existing Artist recovery and finality read paths into fixed
+  workers while preserving original interfaces, storage, checks and limits.
+- Selected products fit recorded native size checks; complete contract flows
+  and the extra call-frame gas remain part of current-stack acceptance. See the
+  [scoped provider note](docs/integrations/scoped-preservation-read-capacity.md)
+  and [current delivery status](ops/V1_CURRENT_STATUS.md).
+
+## Pinned current-stack operational observations
+
+- Add a read-only monitoring CLI that consumes existing deployment captures,
+  checks pinned chain/block/runtime identities and explicit genesis role
+  bindings, and observes ABI-supported policy, pause and recovery views.
+- Retain deterministic reports and exact offline RPC replay, including failed
+  reads and reorg detection. Offline transport regressions are covered; actual
+  current-stack and testnet rehearsals remain pending. See the
+  [operator guide](docs/current-stack-monitoring.md).
+
+## Explicit current graph native owners
+
+- Bind each dynamic creation product, helper and test host to its original native
+  capture, physical cache and full build-info. Distinguish colliding short build
+  IDs, require coherent immutable parent and embedded-construction ownership, and
+  preserve all original production size gates without merging compiler outputs.
+- Retain embedded-creation and authenticated same-owner `getCode` preparation;
+  require the explicit owner manifest for separately owned dynamic products. Focused synthetic Python regressions cover valid
+  separate owners and rejection boundaries; compiler and runtime acceptance are
+  separate. See [tooling](docs/tooling.md#explicit-native-product-owners).
+
+## Original Artist attribution lifecycle client
+
+- Add typed original attribution claims, dispute and counterstatement calls,
+  governed resolution, staged repudiation and operation-61 withdrawal. Preserve
+  the original Registry signature domain, evidence documents, record preimages
+  and current authority rules. Client checks remain separate from contract,
+  Safe and deployment acceptance. See the
+  [client guide](packages/stream-client/docs/current-artist-attribution.md).
+
+## Multiple recovered attestation client profile
+
+- Add the separately pinned MULTIPLE_ATTESTATIONS client for original attestation
+  and complete consent histories across recovered Artists and collections. Keep
+  full admission queries, owner4 record projection, original Archive completion
+  clocks, per-Artist C2PA chains and cross-family grant totals in the existing
+  operation-60 direct/Safe workflows. Earlier profiles remain strict. Client
+  checks remain separate from contract execution and deployment acceptance. See
+  the [client guide](packages/stream-client/docs/current-artist-recovered-multiple-attestation-hydration.md).
+
+## Multiple recovered consent client profile
+
+- Add the separately pinned MULTIPLE_CONSENTS client for complete original
+  policy, economics, sale, content and freeze histories across recovered Artists
+  and collections. Retain global grant usage, nonce insertion order, original
+  domains, signatures and ordered witnesses in the original operation-60 calls.
+  Existing BASE/255/511 clients keep their closed profiles. Compiler and mock
+  client checks remain separate from contract/Safe execution and deployment
+  acceptance. See the [client guide](packages/stream-client/docs/current-artist-recovered-multiple-consent-hydration.md).
+
+## Multiple recovered Artist client profile
+
+- Add the explicit MULTIPLE_BASE client for class-1/class-3 recovered Artists
+  and generation-one PRIMARY_ONLY collections. Preserve complete provenance,
+  global nonce order and the original operation-60 Request, with source-pinned
+  preparation, simulation and direct/Safe historical receipt checks. Unsupported
+  aggregate histories reject; existing singleton clients retain their profiles.
+  Client checks do not establish contract execution or deployment acceptance.
+  See the [client guide](packages/stream-client/docs/current-artist-recovered-multiple-hydration.md).
+
+## Offline preservation bootstrap packet decoding
+
+- Add a bounded decoder for the original eight-file Foundry caller-bootstrap
+  export, including canonical tuple wrappers, completion-marker and raw-file
+  hash joins, and source-defined snapshot/preparation relationships. Retain
+  compiler and final-helper identities separately. Parsing does not establish
+  successful outer execution, native state, import or deployment admission.
+  See the [packet guide](packages/stream-client/docs/current-preservation-bootstrap-packet.md).
+
+## Current governance client lifecycle
+
+- Add a source-bound client for the sealed Executor's nine scheduling, execution,
+  cancellation, veto, expiry and calldata-publication methods. Preserve payable
+  execution values and authenticate historical schedule and terminal membership
+  evidence separately from current admission and target-specific effects.
+- Add direct RoleManager and RoleManager Safe grant/revoke workflows for the
+  seven operational roles, including ordered holder transitions, exact mutation
+  chains and historical receipt checks. These client and mock-provider checks
+  do not establish deployed runtime or current-stack acceptance. See the
+  [client guide](packages/stream-client/docs/current-governance-executor-v2.md).
+
+## CI hygiene and workflow checks
+
+- Recognize preserved CRLF line endings in the existing raw Museum retrieval
+  record paths without rewriting evidence bytes. Keep trailing spaces, tabs,
+  blank final lines and indentation checks, with actual Git regression controls.
+- Keep the call-free provider check in canonical workflow syntax and isolate the
+  cache-retry regression to its own step. Refresh the strict Museum command
+  inventory for the existing acquisition cohorts, retaining exact command order
+  and rejection of omitted checks. Slither baseline refresh remains a separate
+  source-freeze task.
+
+## Scoped preservation reference reader compiler repair
+
+- Move complete original scoped reference reads into a fixed linked worker and
+  bound the dynamic decoder's temporary lifetime, resolving the observed via-IR
+  stack-depth failure. Preserve original/V2 bytes, caller, scopes, ABI and checks.
+- Both affected libraries fit the original deployment limits. Six scoped
+  transport/refusal regressions pass with 256 fuzz runs; complete Provider12
+  acceptance remains separate. See the
+  [bounded evidence](docs/guides/scoped-preservation-reference-read-frames.md).
+
+## Current Artist contract capacity
+
+- Extract fixed typed read/forwarding helpers for the current compromise, notice,
+  identity-recovery and Coordinator contracts, retaining original ABI/storage and
+  host operation guards. All twelve selected products fit the unchanged deployment
+  limits; Coordinator has zero runtime-byte headroom. Native execution and workload
+  gas acceptance remain pending. See the [capacity note](docs/integrations/artist-current-read-capacity.md).
+
+## Recovered op24 across complete Artist history
+
+- Add the explicit HISTORY_RECORDS operation-60 profile for original attestations,
+  publication evidence and independent personhood/C2PA heads alongside binding,
+  dispute, sanction, Platform and content/freeze history. Preserve original domains,
+  generation clocks and complete grant-use conservation.
+- Keep existing request interfaces, codecs, storage and seven-owner atomicity.
+  Sixteen actual-owner/Safe cases are authored; runtime and full mixed/multiple-
+  Artist or unbound composition remain separate. See the
+  [integration guide](docs/integrations/artist-recovered-history-records.md).
+
+## Current owner single-process RPC bridge
+
+- Add an opt-in local composition of the original paid-mint graph, explicit
+  WAIVED conservation floor, actual EOA-to-Safe transfer and OwnerRecords
+  publications before one shared account/owner anchor.
+- Reuse only exact ACTIVE schema definitions and retain original receipt hashes,
+  ordered history and account package bytes. Focused Python tests pass; joined
+  native/RPC execution remains pending. See the
+  [capture recipe](docs/museum-current-owner-capture.md#opt-in-single-process-rpc-composition).
+
+## Recovered Platform Works and correction lineage
+
+- Add the explicit HISTORY_PLATFORM operation-60 profile for complete original
+  declaration, claim, contest, correction and later binding-continuation history.
+  Keep zero-Artist receipts collection-only and preserve original records/domains.
+- Authenticate original Archive clocks and all seven owner imports atomically;
+  retain existing request interfaces and earlier codecs. Authored actual-owner/Safe
+  regressions and capacity evidence remain distinct from native acceptance. See the
+  [integration guide](docs/integrations/artist-recovered-platform-history.md).
+
+## Preservation reference reader compiler and capacity repair
+
+- Split the complete original-record read into a fixed library to remove the
+  reproducible via-IR stack-depth failure. Preserve both reference families,
+  original public ABI, complete tuple/hash checks, validation order and caller.
+- Both affected libraries fit the original deployment limits. Five focused
+  transport and refusal regressions pass, including 256 fuzz runs, with genuine
+  native artifacts and unchanged cached execution inputs. Gas and complete
+  provider acceptance remain separately scoped.
+
+## Current preservation-family archive correspondence
+
+- Recognize the four exact collection/scoped V2 preservation snapshot and
+  reference ABI tuples already emitted by the authenticated inventory producers.
+  Archive byte correspondence no longer rejects those current native payloads.
+- Keep original profile tuples and all role, schema, canonicalization, kind,
+  algorithm and size restrictions; extend cross-profile and fuzz regressions.
+  Publication authority and full Archive coverage checks remain separate.
+
+## Original historical metadata serialization
+
+- Restore the original ordinary and script-bundle serializers for historical
+  token JSON. Current citation output stays separate, preserving the original
+  JSON/HTML byte profile consumed by historical onchain content checkpoints.
+- Keep the original Artist field composition and strict checkpoint matchers;
+  current live and explicitly projected preservation outputs retain citations.
+
+## Fresh VIEW constructor-budget measurement source
+
+- Add a separate unmeasured new-deployment budget profile, retaining all original
+  diagnostic defaults and strict full child-call forwarding.
+- Expose the complete checkpoint fixture boundary and add a bounded two-token
+  revalidation measurement plus an actual original-budget refusal control.
+  Every original row/root assertion and publication continuation remains.
+- Source configuration is a trial input only. Execution and gas acceptance remain
+  pending; no existing governed parameter or parent component ceiling changes.
+
+## Full-preservation provider capacity
+
+- Factor the two concrete full-preservation providers through fixed nominal read
+  and VIEW binding workers, retaining original constructors, ABI, storage,
+  Registry guards, profile branches and delegate caller identity.
+- Both provider runtimes and complete constructor payloads fit the original
+  limits. Add twelve focused guard and transport regressions; typechecking and
+  selected size evidence are complete, while execution and the full current
+  finality ceremony remain pending.
+
+## Current-authority VIEW publication and discovery composition
+
+- Add actual original-Artist VIEW adoption, publication and reference fixtures
+  on the complete-bound current-authority graph. Retain exact op17/op24 lineage,
+  preservation output, archive receipts, snapshot, root and final freezes.
+- Add two publication and three genuine nine-component discovery cases, including
+  identical signed Safe retry, missing reference, runtime restore and wrong-scope
+  refusal. Original COLLECTION state, full inventory commitment and Registry
+  anchors remain independently asserted.
+- Reference observations are explicitly synthetic in the default tests. Source
+  review and formatting pass; compilation, native execution, gas fit and browser
+  acceptance remain pending. Preserve the diagnostic constructor budgets.
+
+
+## Bound VIEW discovery
+
+- Add a shared closed VIEW selection and serving worker to both full-preservation
+  discovery hosts. Authenticate the complete binding, exact frozen profile and
+  matching live adoption without an aggregate catalogue callback or token fallback.
+- Add fourteen focused binding, framing, receipt, scope, runtime and serving
+  regression cases. Original Artist anchors, token routes, Registry behavior and
+  component budgets remain unchanged.
+- Source review and formatting pass. Compilation, native composition, gas fit
+  and browser acceptance remain pending.
+
+## Scoped preservation terminal composition tests
+
+- Add distinct executable TOKEN, RELEASE and SEASON contract-composition cases
+  reaching current-Artist sanction, signature archive and scoped Finality after
+  actual A-to-B-to-C migration, plus rejection and exact-retry coverage.
+- Label deterministic observation and archive-attestation fixtures explicitly;
+  retain the supplied-observation local recipe for fresh browser acceptance.
+- Add only the current profile's preservation-schema read permission. Native
+  execution and transaction-cap acceptance remain pending.
+
+## Current-authority VIEW Finality dispatch
+
+- Route all ten VIEW Finality surfaces through the shared bound-source workers
+  before token-preservation graph selection. Keep original Registry caller and
+  runtime guards before both prepared entrypoints.
+- Preserve other scope routes, the constructor and source hash formula. Add
+  nine focused dispatch cases and four actual current-graph binding cases with
+  the complete original inventory commitment, Safe admission, drift refusal,
+  historical receipts and restored retries. Native and complete VIEW ceremony
+  execution remain pending.
+
+## Current-authority complete VIEW source binding
+
+- Forward the shared complete VIEW admission API through the current-authority
+  preservation provider with the original constructor and source hash formula.
+- Share the original one-use guard and exact class2 action with the basic path;
+  preserve historical receipt reads and operative source validation separately.
+- Add focused host coverage. Native execution, linked size, gas and complete
+  VIEW ceremony acceptance remain pending.
+
+## Scoped preservation sanction and Finality source
+
+- Add a distinct local export/resume recipe composing exact current-Artist
+  operation12, its separate signature archive and original governed scoped
+  Finality for TOKEN, RELEASE and SEASON after the final selected migration.
+- Recheck complete preservation evidence and actual live sanction visibility;
+  retain the original bundle-only recipe and COLLECTION-only operation13.
+- Fix current-authority metadata and sanction reads to select the explicit V2
+  family. Add fifteen focused regression cases; original V1 defaults remain.
+- ABI and independent source checks pass. Native, gas, fresh browser and full
+  ceremony acceptance remain pending; see the [recipe boundaries](docs/integrations/current-authority-scoped-preservation-ceremony.md).
+
+## Actual VIEW ceremony source export and supplied-file transport
+
+- Export the prepared current VIEW graph, publication ABI and every original
+  member's full output, token data, JSON and HTML with exact file commitments.
+  Add a pinned supplied-file entry over the existing ceremony and align package
+  endpoint filenames and indices with the retained object producer.
+- Add offline environment ABI, complete-object endpoint and repeated-capture
+  input tooling with refusal coverage. These local transport checks do not
+  establish browser execution, native ceremony execution or transaction capacity.
+  See the [input guide](docs/integrations/current-view-ceremony-inputs.md).
+
+## Original VIEW finality dispatch and ceremony source
+
+- Connect the original combined provider to the fixed VIEW catalogue, component,
+  input, review and metadata kernels, preserving original Registry-only prepared
+  reads and existing collection/scoped routes.
+- Add the explicit supplied-observation Safe sanction/archive/scoped-finality
+  recipe and focused routing/governance cases. VIEW-only finality retains the
+  original COLLECTION confirmation boundary. Runtime, browser provenance and
+  transaction-capacity acceptance remain pending.
+
+## Recovered content across complete accepted and disputed history
+
+- Add the explicit HISTORY_CONTENT operation-60 profile for original content,
+  royalty/content freeze and ratification rows across accepted generations,
+  disputes and sanctions. Preserve original domains, keys and complete grant use.
+- Retain existing selectors/codecs/storage and atomic seven-owner import. Add
+  thirteen actual-owner/Safe regression cases; native and capacity acceptance remain
+  separate. See the [integration guide](docs/integrations/artist-recovered-history-content.md).
+
+## Recovered sanction and confirmed-attribution history
+
+- Add the explicit operation-60 sanction-history profile, retaining complete
+  original signed sanction records and archived operation-13 confirmations,
+  separate owner clocks, state-3 restoration and historical replay/nonce evidence.
+- Keep old encodings and producers unchanged; authenticate complete original
+  Archive catalogues before and after the atomic seven-owner import.
+- Add twelve actual-owner/Safe source cases and eight pure encoding/proof cases.
+  Execution and transaction capacity remain separately pending. See the
+  [integration guide](docs/integrations/artist-recovered-sanction-history.md).
+
+## Scoped current-Artist preservation ceremony source
+
+- Add separate V2 graph and fixture helpers for actual current-Artist producer
+  admission, scoped publication and A-to-B-to-C record succession.
+- Add distinct preservation export packets and exact local resume entrypoints
+  for fresh observations, inventory and complete byte coverage. Keep the
+  original full-output recipes unchanged.
+- Combined ABI-only validation passes. The three scoped tests remain authored;
+  native execution, gas, sizes, browser capture and Finality remain pending.
+  See the [ceremony recipe](docs/integrations/current-authority-scoped-preservation-ceremony.md)
+  for synthetic fixture evidence and finite catalogue limits.
+
+## V2 preservation stored-root reads
+
+- Recognize exact V2 collection and scoped root/family pairs through the
+  ordinary read interfaces. Authenticate the fixed current-authority V2
+  checkpoint/output children and reject mixed or downgraded pairs. Original
+  V1 dispatch and the common six-field token leaf remain unchanged.
+- Add eight stored-state read cases and five further factory-pair cases;
+  these are source and ABI checks pending native execution.
+
+## Complete current VIEW preservation binding
+
+- Add one original class-2 admission of the basic VIEW configuration and fixed
+  reference, inventory and bundle selection. Both entry points share the same
+  irreversible guard; historical receipt access remains separate from current
+  runtime and identity validation.
+- Add actual VIEW Work/Rights/Artist waiver and Safe construction cases, plus
+  an explicit supplied-observation complete inventory and archive recipe.
+  Diagnostic budgets are not transaction-capacity evidence; runtime, provider
+  finality dispatch and the executed ceremony remain pending.
+
+## Actual current VIEW preservation ceremony
+
+- Add genuine declaration/adoption and complete output, snapshot and original
+  CONTENT_ROOT authorization fixtures on the once-bound combined provider.
+- Retain original budgets and add an explicit supplied-observation VIEW
+  reference entry. Source cases cover authority, lineage, complete coverage,
+  runtime drift and locking; execution and full finality remain pending.
+
+## Current-authority COLLECTION publication reader
+
+- Join the distinct authority-bound preservation factory to the ordinary
+  COLLECTION root route. Preserve the standard recipe while checking the new
+  capability, canonical dependency tuples and separate graph domain. Add eight
+  dispatch and corruption regressions; native ceremony acceptance remains open.
+
+## Explicit token-preservation V2 family
+
+- Select fixed V2 checkpoint, output, snapshot and reference children in the
+  new current-authority factories. Retain each row's actual original or
+  current-Artist producer profile and full Registry admission.
+- Add governed V2 interpretations and closed shared-worker dispatch while
+  preserving original V1 documents, tuple widths, consent and historical state.
+  Compose the existing one-time VIEW binding in the new provider separately.
+- Add focused family, publication, rollback and discovery cases. Combined
+  ABI-only validation passes; native execution, sizes, gas and the actual
+  succession ceremony remain pending. See the
+  [integration guide](docs/integrations/current-authority-preservation-graphs.md).
+
+## Governed VIEW route-read budget
+
+- Add an explicitly governed VIEW budget shared by adoption, current-source
+  readers and preservation roots. The once-bound declaration remains the
+  authority; original global limits, complete fresh checks and legacy provider
+  behavior remain. Twenty focused native cases, including 256 fuzz inputs,
+  cover this kernel; complete route and ceremony acceptance is pending.
+
+## VIEW preservation root facade
+
+- Connect the explicit VIEW root worker to the public Router while retaining
+  separate CONTENT_ROOT consent. Authenticate VIEW common reads against the
+  full immutable binding and historical aggregate. Add three dispatch and
+  corruption regressions; combined runtime acceptance remains pending.
+
+## Current-authority preservation publication graphs
+
+- Add separate COLLECTION and scoped preservation inventories with complete
+  authority captures, original receipt proofs and a mandatory sixth token phase.
+  Bind their archive coverage to the same capture and authenticated origin set.
+- Add distinct publication factories, provider reads, Artist review and lineage
+  discovery. Preserve original content types and all old full-output profiles.
+  See the [integration guide](docs/integrations/current-authority-preservation-graphs.md)
+  for constructor bindings, source boundaries and pending runtime acceptance.
+
+## Current-authority Rights graph deployment
+
+- Bind the additive Rights selector in the original current-authority graph,
+  including literal creation, artifact and immutable runtime prediction.
+  Preserve all legacy graph templates and existing creation enum ordinals.
+- Extend actual A/B/C migration assertions to retain original Rights selections
+  and seals while authenticating the current identity tuple. Combined ABI/source
+  checks remain separate from native execution and full ceremony acceptance.
+
+## Metric supplement retention transport
+
+- Derive the full canonical payload hash, length and ordered chunk hashes inside
+  the metric proof worker, reducing large copies across library calls. Retain
+  every original immutable chunk with one owned verification buffer.
+- Preserve receipt, schema, replay, storage, admission and generic retention
+  semantics. Add differential byte, error, event and rollback/retry coverage;
+  original cold transaction-cap acceptance remains a separate validation gate.
+
+## Preservation root facade integration
+
+- Expose separate COLLECTION and scoped preservation root interfaces through
+  the Router and preserve original CONTENT_ROOT consent, history and aggregate
+  rules. Common reads identify the new leaf schema; add dispatch/read regression
+  coverage and an integration guide. Combined runtime acceptance remains pending.
+
+## Exact compiler-ABI inventory archive correspondence
+
+- Admit the closed native Snapshot, Reference, metric and preservation payload
+  tuples with their original schema and canonicalization identifiers. Preserve
+  source authentication, byte checks, original archive evidence and liveness.
+- Retain the separate original significant-properties reference obligation;
+  add mutation and actual-producer regression cases. See the
+  [correspondence guide](docs/integrations/canonical-archive-correspondence.md)
+  for profile boundaries and remaining integrated acceptance.
+
+## Verify request-dependent Solidity import snapshots
+
+- Accept source-only AST entries in selected native compilation so callers can
+  include inherited immutable declarations without fictitious contract outputs
+  or substituting analysis output. Keep finite selection as the default; all-source
+  AST output is explicit opt-in with its additional compiler scheduling cost.
+
+- Reproduce exported-symbol tables using the pinned compiler's source-root DFS
+  and import-snapshot rules when circular imports change those tables. Keep all
+  other selected AST fields exact and preserve both raw native outputs.
+- Extend explicit legacy-capture readmission to this verified snapshot difference;
+  unsupported declarations and unexplained AST changes still refuse acceptance.
+
+## Bind native ABI entries through Forge serialization
+
+- Record exact top-level ABI entry permutations and omitted empty selector maps
+  in Forge build-info. Preserve native output, duplicate entries and all nested
+  parameter ordering; authenticate physical exports using the same checks.
+
+## Preserve completed native captures with generated library references
+
+- Verify Solidity's generated library self-address field separately from
+  AST-declared immutables, with strict library, runtime and instruction checks.
+- Add explicit external readmission receipts and single-use Forge output replay
+  for the exact legacy verifier failure. Preserve original failed records and
+  native outputs; see the [recovery procedure](docs/reference/tooling/scoped-codegen.md).
+
+## Separate analysis from selected native code generation
+
+- Split whole-source AST analysis from explicit bytecode outputs with identical
+  sources, compiler and settings. Bind native declaration IDs and original Forge
+  cache owners without rewriting compiler outputs or weakening runtime checks.
+- Add bounded capture records, refusal/cleanup regressions and a small native
+  output-parity proof. Full current-stack acceptance and timing gains remain
+  unmeasured; see the [maintainer procedure](docs/reference/tooling/scoped-codegen.md).
+
+## Canonical metadata subjects for published scopes
+
+- Keep Metadata deployable by extracting only typed subject writes; preserve the
+  original token behavior and dependency budgets. All twelve focused native
+  cases pass, including both Safe versions, with 54 emitted production products
+  fitting the size checks. Complete current-stack acceptance remains separate.
+
+- Register RELEASE, SEASON and VIEW subjects from the Metadata host's authenticated
+  original scope records. Preserve all writer permissions, membership validation,
+  old interface identifiers and existing storage. See the
+  [integration guide](docs/integrations/published-scope-metadata-subjects.md).
+
+## Current-authority scoped STATIC ceremony source recipe
+
+- Add real pre-mint STATIC activation, TOKEN/RELEASE/SEASON publication and
+  scope-specific B/C op24, Rights and selection-seal regression recipes.
+- Add fresh current-byte export, actual reference publication and dynamic
+  source-inventory helpers. Preserve original hosts, exact receipts and full
+  output currentness; document the remaining production integration joins in
+  the [ceremony guide](docs/integrations/current-authority-scoped-static-ceremony.md).
+- Add explicit local export/resume and A/B/C coverage entrypoints, an
+  authenticated original source-byte collector and per-member package proof
+  files that avoid retaining every endpoint buffer in one parent frame.
+- Source/type checks remain separate from native execution, fresh browser
+  observations, complete archival coverage, Finality and gas acceptance.
+
+## Closed VIEW root history and required consent
+
+- Add an explicit VIEW-only state path sharing the original scoped root history,
+  event and collection aggregate. Preserve all original scope admission and bytes.
+- Add a required CONTENT_ROOT authorization entry through the existing Artist
+  consumption maps. Typed writer/producer and full publication acceptance remain
+  separate; see the [state boundary](docs/integrations/view-content-root-state.md).
+
+## Actual preservation ceremony and governed VIEW source binding
+
+- Add separate current-stack construction and publication fixtures using the
+  actual admitted preservation producer, original Safes and governance, complete
+  inventory/archive coverage and sanction/finalization/confirmation assertions.
+- Add a one-time class-2 VIEW snapshot-source binding on the same provider,
+  allowing actual VIEW products to be deployed after Finality. Pending reads
+  fail closed; receipts retain the exact initial sources and worker pins.
+- Thirty-one new cases and combined ABI compilation accompany source review.
+  Execution, gas, product size and fresh captured ceremony evidence remain
+  pending. The [source checkpoint](artifacts/preservation-policy-current-ceremony-source.md)
+  records the separate prerequisites for actual VIEW publication.
+
+## Preservation graph factories and evidence providers
+
+- Add separate fixed COLLECTION and scoped preservation publication factories,
+  scoped bundle coverage, evidence provider and discovery catalogue.
+- New roots select their exact admitted preservation graph; original static
+  paths retain their existing interpretation. Separate input manifests retain
+  original policy, capture, authority and sanction joins.
+- Forty-seven authored cases and reviewed ABI-checked source accompany this
+  batch. Current-stack ceremony execution, transaction gas and size remain pending.
+
+## Preservation references and complete admitted-source inventories
+
+- Add separate COLLECTION and TOKEN/RELEASE/SEASON reference publishers that
+  compare saved admitted producers and preserve exact environment, capture,
+  package, root and snapshot evidence.
+- Add matching render-critical inventories with a mandatory sixth per-token
+  stage for the complete preservation registration, reads, targets, runtimes
+  and interpretation documents. Original artwork and authority stages remain.
+- Fifty-three authored cases and combined ABI checks accompany source review.
+  Actual composed execution, complete inventory progression, gas and size
+  acceptance remain pending.
+
+## Explicit preservation snapshots
+
+- Add distinct COLLECTION and TOKEN/RELEASE/SEASON snapshot consumers for the
+  admitted preservation output profile. Preserve COLLECTION root-before-snapshot
+  and scoped snapshot-before-root ordering, complete membership and policy joins,
+  original grants, history and locks.
+- Add exact schema documents and closed publication graph/binding interfaces.
+  Twenty-three authored snapshot cases and combined ABI checks accompany the
+  source. Native execution, factory/provider construction and actual composed
+  ceremony acceptance remain pending.
+
+## Explicit preservation checkpoint and output evidence
+
+- Add separate COLLECTION and TOKEN/RELEASE/SEASON checkpoints for admitted
+  non-sanction preservation output, with complete original membership and policy
+  checks, exact producer bindings and governed admission retained per token.
+- Add covered manifests and new byte definitions without changing existing
+  full-output profiles. Every member retains its actual admitted producer and
+  selected renderer, supporting complete heterogeneous scopes without sampling.
+- The [consumer guide](docs/integrations/preservation-policy-consumers-v1.md)
+  records the new ABI and remaining root, snapshot, reference, inventory and
+  provider joins. ABI-only checks pass; native, capacity and actual ceremony
+  acceptance remain pending.
+
+## Bounded current-Artist lineage runtime evidence
+
+- Record cold A/B/C source reads within the unchanged 250,000-gas frame, with
+  complete-render and transaction limits explicitly separate.
+- Preserve the initial 21/1 run and the single corrected chain-restoration retry;
+  production source and artifacts remain unchanged.
+
+## Current-Artist preservation and immutable catalogue reads
+
+- Add a distinct current-Artist preservation producer and closed governed
+  admission profile while retaining the original live and preservation paths.
+- Read complete authenticated lineage catalogue entries from compiler-created
+  immutable code, preserving the original catalogue commitment and authority
+  checks after the storage-based successor cold reads exceeded their budget.
+- Retain failed evidence, exact byte/field parity and cold-frame regressions in
+  the [current-authority guide](docs/guides/static-artist-current-authority.md).
+
+## Explicit current-authority STATIC Artist reads
+
+- Add an immutable complete-suite catalogue and direct original namespace facts
+  for admitted A-to-B-to-C Artist attribution. Keep legacy profiles unchanged.
+- Preserve current claims, corrections, adverse state and sanctions; expose a
+  separate non-sanction projection without suppressing legitimate provenance drift.
+- Record scoped source/type/size evidence and remaining governed admission,
+  actual migration and C2PA work in the [guide](docs/guides/static-artist-current-authority.md).
+
+## Explicit preservation rendering and admission
+
+- Add a fresh full-artwork renderer and attribution profile that exclude only
+  sanction-derived display while preserving the original live rendering paths.
+- Add independent class-1 Registry evidence with actual golden execution, fixed
+  source/runtime binding and per-selection admission receipts.
+- Factor original admission-only validation into a fixed delegate worker while
+  preserving original guards, hashes, storage and serving methods.
+- Record source/type/selected-size evidence and remaining runtime, lineage and
+  complete finality integration in the [guide](docs/guides/preservation-rendering.md).
+
+## Metric context hashing without the full temporary copy
+
+- Reserve a bounded prefix beside the original immutable publication bytes and
+  hash the exact existing context header and tail in place. Restore every borrowed
+  byte before further reads; preserve canonicalization, currentness, proof order,
+  storage, external interfaces and transaction limits.
+- Add full-corpus, fuzz, byte/error parity and invalid-alias regressions. Source
+  review and combined ABI checks pass; measured component and original publication
+  transaction acceptance remain pending.
+
+## Fresh conservation-floor preparation storage
+
+- Avoid zero-to-zero writes in append-only native floor preparations while
+  preserving original keys, full receipts, storage layout and event order.
+- Add literal receipt/event, rollback, optional-field and history parity tests;
+  document the separate warmed Dutch profile and unresolved cold collector-gas
+  requirement in the [integration guide](docs/integrations/conservation-floor-persistence-gas.md).
+- Paired original/successor focused runs pass six cases each with 256 fuzz runs;
+  measured preparation/inline savings remain separate from cold collector gas.
+
+
+## Retained-offer callback regression recipes
+
+- Add three current-stack Safe recipes for original selected native, selected
+  ERC20 and secondary custody offers: actual buyer-owned delegation revocation
+  during NFT delivery, atomic rollback and retry of the original Safe envelope.
+- Reenter the original sale or Payment entry through an authorized buyer Safe
+  module and assert its existing guard while preserving official Safe ERC1271
+  handling, original proofs, payment accounting and settlement receipts.
+- Source/type and test-instrument size checks pass. Current-stack execution,
+  callback gas acceptance and inner failure traces remain pending.
+
+## Original current-authority scoped-policy profiles
+
+- Add distinct current-authority scoped-policy factory, provider and Discovery
+  profiles with exact original archives and resolver-bound inventory plans.
+- Add a separate deferred collection-policy capability to break the original
+  mint/deployment constructor cycle. The original Executor seals actual sources
+  once through the exact terminal Governance action; pending policy reads fail.
+- Author genuine original graph construction and binding cases alongside focused
+  profile, rollback and source-selection cases. Native execution, deployment
+  size, gas and complete scoped STATIC finality evidence remain pending.
+
+## Metric currentness temporary memory
+
+- Reclaim dead canonical evidence and complete context-preimage buffers after
+  hashing. Preserve original builders, currentness checks, receipt bytes and
+  transaction limits; add full-corpus memory-reuse and fuzz regressions.
+- Source/lifetime review is clear. Native publication acceptance remains pending;
+  the preceding native19 result is eight passes and one transaction gas failure.
+
+## Retained secondary-offer delegation
+
+- Bind delegated secondary-offer buyer signatures to the original private
+  consignment lifecycle and compact NFTDelegation declaration, allowing eligible
+  original offers to close after the adapter is deprecated.
+- Keep the buyer as executor and payer, the owner's independent custody grant,
+  ACTIVE-only new registration, live grant rechecks and earned claims unchanged.
+- Add actual-current Safe flows and typed boundary regressions for retirement,
+  authority repair, original custody and accounting. Native execution, linked
+  library size and gas validation remain pending.
+
+## Retained primary-offer delegation
+
+- Bind delegated native and ERC20 primary-offer execution to each original
+  sale lifecycle and compact NFTDelegation declaration, including the actual
+  house identity when checked inside the Manager or selected content gate.
+- Preserve ACTIVE-only new admission, live complete grant checks, original
+  ERC20 Payment binding, proof domains, replay stores and atomic funding.
+- Add sixteen actual-current Safe cases and ten typed-reader cases covering
+  retirement, grant and incident repair, strict lifecycle refusals, malformed
+  reads and original receipts. Source/type checks pass; native execution,
+  linked-library size and gas validation remain pending.
+
+
+## Added: recovered signed attribution history
+
+- Preserve complete original signed disputes, resolutions, withdrawals and
+  repudiation terminals through seven-owner operation-60 migration.
+- Retain paired Identity veto causes, prior-generation consent associations,
+  original replay domains and atomic Archive rollback under explicit new tags.
+- Add twenty-three actual-owner/Safe source oracles, including fresh successor
+  authorization refusals and retries. Runtime, full-current gas and
+  maximum carrier acceptance remain separate from source validation.
+
+## Added: recovered accepted-generation correction histories
+
+- Retain complete governed revocation, fresh correction and acceptance records
+  across original and imported Artist owner eras through explicit operation-60 tags.
+- Preserve old profile bytes, original signatures/replay domains, seven-owner
+  storage and atomic Archive order; reject unsupported history before import.
+- Author eight actual-owner/Safe source recipes, including successor-origin
+  correction and late Archive rollback/retry. Runtime and full-current capacity
+  acceptance remain separate.
+
+## Added: recovered original content ratification histories
+
+- Retain complete original operation-52 maps, current head, journal/replay eras and
+  saved Identity signatures in an explicit seven-owner recovered hydration codec.
+- Compose supported base/content, economics, grant and attestation histories without
+  changing old profile bytes, original signing domains or owner storage layout.
+- Author actual Artist/Safe repeated-import, malformed inventory and late Archive
+  rollback/retry cases. Runtime and full-current capacity acceptance remain separate.
+
+
+## Fixed: recovered generation grant validation routing
+
+- Route the explicit grant-bearing generation profile through additive grant-capable
+  leaf validators. Its previous calls reached older no-grant entrypoints and refused
+  all nonempty grant histories before the original use-count reconciliation.
+- Preserve the older no-grant entrypoints and every row, chronology and aggregate-use
+  check. Add four pure multi-era parity/refusal oracles; runtime acceptance remains
+  separate from source/type validation.
+
+## Added: continued Platform correction generations
+
+- Append fresh class2-authorized lineage after consumed Platform proposals are
+  refused, withdrawn or revoked, preserving original op53 records and independent
+  Artist acceptance.
+- Add effective accepted-lineage status for current admission/display/sanction/
+  conservation and direct STATIC reads; original historical bytes stay intact.
+- Author Safe rollback/retry and exact history/consumer oracles. Complete
+  correction-history hydration and broad runtime acceptance remain required.
+
+## Added: governed Artist binding corrections after revocation
+
+- Add a typed original-operation1 class2 arbiter correction with exact terminal,
+  full proposal and identity-allocation commitments. Ordinary proposal now starts
+  only a first generation; original operation2 remains independently Artist-authorized.
+- Retain immutable correction evidence/action replay and original native/Archive
+  atomicity; author actual Artist/Safe and current delayed-governance regressions.
+- New correction-history hydration and later consumed-Platform lineage composition
+  remain required follow-ups; native acceptance is separate from source validation.
+
+## Authored: current full-policy publication ceremony
+
+- Add actual Safe/STATIC preparation, full output archive, original content-root
+  consent, V2 snapshot/reference, complete inventory/bundle and sanction/finality
+  candidate helpers beside the accepted current construction recipe.
+- Add the genuine factory private-manifest read regression. Preserve original
+  deployment defaults, governance authority and source profile encodings.
+- Record pending native/browser acceptance, fixture budgets above the transaction
+  envelope and the live-sanction metadata dependency that prevents claiming a
+  completed finality ceremony.
+
+## Full-policy construction before the first mint
+
+- Add an immutable COLLECTION publication recipe and distinct factory-mode
+  provider/discovery catalogue. Resolve actual per-plan original products after
+  genuine minting without an empty source set or mutable source binding.
+- Add explicit Router capability resolution while retaining existing root
+  encodings, Artist consent and original fixed-output behavior. Reuse the current
+  37-role graph, native runtime predictions and Safe activation helpers.
+- Author actual-current construction, staged-child and focused regressions.
+  Native size, gas and complete publication/finality acceptance remain pending.
+
+## Added: recovered pending generations with complete delegation histories
+
+- Compose original mode1/mode2 pending generations with full grant, revision, revocation and
+  delegated consent/attestation histories through unchanged seven-owner operation60 authority.
+- Add explicit generation-mode and delegated-consent tags, conserve historical grant uses and
+  nonce lanes, and preserve every earlier supported profile encoding.
+- Author actual Artist/Safe, malformed-inventory and late Archive retry cases; runtime and
+  full-current acceptance remain separate. No storage, signature, capability or cap change.
+
+## Added: recovered generation histories without content writes
+
+- Add the explicit generation-base consent codec for complete direct14/15/16 histories with
+  no17/20/21, preserving original pending-generation14/24 bytes and seven-owner atomic import.
+- Retain exact original economics/sale associations, full grant-free Identity history and
+  capability selection; author actual Artist/Safe, malformed-profile and Archive retry cases.
+- Runtime and full-current acceptance remain pending; no authority, storage-layout or cap change.
+
+
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Runnable canonical native companion entrypoint
+
+- Add an Anvil/Sepolia script calling the existing typed construction planner
+  for canonical fixed/open, claim/PWYW and Dutch companions. Read only a public
+  deployer address and keep the Foundry signer independent.
+- Expose typed read-only activation planning, retain actual Safe/Executor owner
+  routing, and document separate CREATE/handoff receipts and original-journal
+  recovery. Add source-focused entrypoint cases; simulation and broadcast
+  acceptance remain pending.
+
+## Current record selectors after Artist succession
+
+- Resolve the authenticated current Artist through the existing complete
+  succession proof for new WORK, CONSERVATION and RIGHTS selectors and current
+  personhood reads. Preserve the original historical identity resolver.
+- Retain original Metadata/runtime anchors, all seven hydration commitments,
+  fixed response checks, record meanings and read caps. Full-current migration
+  and finality execution remain separate acceptance work.
+
+## Canonical native companion deployment and activation
+
+- Add separate construction and observed-state setup planners for canonical
+  fixed/open, claim/PWYW and Dutch hosts against the existing Recorder, with
+  explicit runtime/manifest pins and unchanged original 37-role inventory.
+- Preserve exact module admission, Recorder credit, Artist phase consent and
+  collection signer ordering. Distinguish actual Executor ownership from direct
+  Safe ownership; saved owner plans reject observed configuration drift.
+- Add an actual-current Safe configuration recipe. Native execution and
+  release evidence for these helpers remain separate from this source batch.
+
+## Compact metric temporary-memory lifetime
+
+- Reclaim temporary runtime and replay hash buffers after their digests are
+  computed. Preserve the full proof, transcript checks, canonical encodings,
+  inputs and transaction limits.
+- Add complete-corpus repeated-allocation and live-memory regression coverage.
+  Independent source review and ABI checks pass; native gas acceptance remains
+  pending. The preceding native18 transaction failure remains recorded.
+
+## Compact metric runtime proof
+
+- Reuse the exact four-word runtime prefix preimage and search required members
+  only after strict ordering and complete commitment checks. Keep original
+  runtime/replay/canonical bytes, validation ordering and the full proof oracle.
+- Add independent differential cases for paired member mutations, executable
+  facts, ordering and path boundaries. Actual transaction acceptance remains a
+  separate unchanged-envelope campaign.
+
+## Native Merkle charging ceilings
+
+- Make a verified Dutch or clearing Merkle price override replace the signed
+  unit-price ceiling, as required by the original sale-kind rule. Keep the
+  original signed fields, digest and Manager replay identity unchanged.
+- Retain native funding and reveal-fee checks, no-override signed maxima,
+  declared-free controls, and clearing floor, supplement and rebate accounting.
+  Add exact-signature underfunding/retry and proof regressions; full-current
+  execution remains separate from the source batch.
+
+## Scoped full-policy provider and discovery
+
+- Add constructor-fixed provider and discovery consumers for genuine per-plan
+  publication graphs, preserving the three original source profiles and exact
+  Registry, Artist, root, archive and component validation.
+- Resolve scope-specific snapshot identities with the declared bounded graph
+  budget and use discovery's configured component budget for source selection.
+  Retain full profile and reciprocal dependency checks before accepting evidence.
+- Add focused source-reviewed regressions. Native execution, complete finality
+  acceptance, deployed size and transaction gas remain pending.
+
+## Scoped full-policy preservation and deployment recipe
+
+- Add distinct scoped-policy reference, ordered render-critical inventory and
+  archive bundle producers, including the original root consent, complete frozen
+  policies, terminal admission and exact recorded output interpretation.
+- Add a constructor-fixed publication factory with seven genuine per-plan
+  children and bounded, resumable creation. It can precede scoped publications;
+  no mutable host routing or supplied implementation is accepted.
+- Retain original COLLECTION and scoped V1 profiles. Provider/discovery assembly,
+  native execution, deployment size and transaction gas remain separate work.
+
+## Scoped full-policy snapshot and root publication
+
+- Add a distinct root-free TOKEN/RELEASE/SEASON snapshot that binds the actual
+  scoped source factory, complete original frozen policies and covered output.
+- Adopt that snapshot through additive Router methods using the existing scoped
+  heads, collection aggregate and original Artist CONTENT_ROOT consent path.
+  Preserve V1 bytes and use explicit V2 capabilities, schemas and profile tags.
+- Keep scope-specific reference, inventory, provider/discovery and native
+  execution as separate acceptance work.
+
+## Scoped full-policy output prerequisite
+
+- Add distinct TOKEN/RELEASE/SEASON STATIC output checkpoint and preserved
+  manifest profiles bound to the actual scoped full-policy factory, complete
+  original coordinator policies and current canonical scope membership.
+- Keep terminal zero-seed output separate from genuinely finalized random
+  output. Require exact rendered bytes, ordered rows and current archive coverage.
+- Preserve original COLLECTION and scoped V1 profiles. Complete scoped root,
+  snapshot/reference/inventory and finality assembly remain separate acceptance
+  work; the new source requires native validation.
+
+## Current burn policy acceptance recipes
+
+- Add seven actual-current Burn cases with independently created source and
+  target collections, genuine settlement admission and separate threshold Safes.
+  Cover source closure versus burn block, late target pause/closure rollback,
+  phase pause and byte-identical Safe retry.
+- Preserve production behavior and shared fixtures. ABI/source review is
+  separate from pending native execution and complete scoped-finality acceptance.
+
+
+## Recovered pending-generation content consents
+
+- Added an explicit recovered pending-generation content-consent codec retaining
+  complete direct14/15/16/17/20/21 and optional24 histories through the original
+  seven-owner operation60 path. Original generation1 and prior generation-only
+  profiles remain unchanged; new cases are authored/typechecked, with runtime pending.
+
+## Recovered pending-generation attestation composition
+
+- Compose complete original operation24 history with original refused/withdrawn
+  binding generations and one final accepted mode1 binding under operation60.
+  Retain original record domains, per-era clocks, complete nonce/signature joins,
+  seven-owner commitment and atomic Archive behavior.
+- Reuse original requests, nominal bundles and capability bits128/512. Preserve
+  generation-one behavior and explicitly refuse unsupported generation-aware
+  grants, economics, sale and content histories. Add ten focused authored
+  regression cases; combined runtime and full-current acceptance remain pending.
+
+## Canonical signed and public native Dutch sales
+
+- Add the kind-3 standard Dutch carrier using the original Sales authorization,
+  immutable linear/stepped schedules, explicit free tiers and singleton mints.
+- Apply proven Merkle ceilings without rewriting signed payloads. Capture the
+  reveal fee once, charge the execution-time price and credit all native excess
+  to the payer. Stops extend closing windows while the price keeps decaying.
+- Author focused real Core/Manager/Recorder/Floor regressions. Scoped native
+  execution, actual-current composition, full capacity and release evidence
+  remain pending.
+
+## Current burn-redemption acceptance recipes
+
+- Add actual current Core, Manager, Artist, registry and delayed-governance
+  burn-redemption cases with distinct threshold Safe principals. Cover source
+  approvals, retained identity, canonical records, retirement and fulfillment.
+- Preserve production behavior and existing typed-suite evidence. The new
+  current-stack cases require combined native execution; ABI/source checks do
+  not establish a runtime or complete finality acceptance result.
+
+## Recovered attestation fixed-worker capacity
+
+- Move complete original attestation validation and source collection/head checks
+  into fixed typed workers. Preserve original nominal bundles, six library entry
+  points, original errors, and all import maps/Credentials/Summary mutation order.
+- Measure the original worker at 23,421 runtime bytes, down from the retained
+  34,120-byte baseline; collection and validation workers also fit. Final source
+  differs from that size capture only by the retained error ABI declaration.
+- Verify 207-source ABI and exact original ABI/nominal selector compatibility.
+  Reuse the unchanged 19-case attestation suite; scoped native and complete
+  seven-owner/current-graph gas acceptance remain pending.
+
+## Merkle recipient allowances for operator distributions
+
+- Admit original Manager/Ledger `MERKLE_STATIC` beneficiary allowances while
+  preserving static phase supply limits, unit increments and existing shared
+  static recipient scopes. Each proven leaf refines the Program's cap ceiling.
+- Add a separate Merkle phase commitment binding the original Program hash,
+  recipient counter definition and nonzero full-list publication hash. Preserve
+  the original Program tuple, V1 hashes, distribution interface ID and slice
+  identity. Existing royalty policy composition wraps the selected commitment.
+- Author actual Manager/Ledger proof, duplicate-recipient, publication,
+  cross-slice and rollback regressions. Native execution, current-stack
+  composition, gas checks and release evidence remain pending.
+
+## Additive ERC20 commerce deployment plans
+
+- Add ordinary construction and read-only activation helpers for Payment,
+  Universal fixed, same-leaf Price and canonical Dutch, preserving the original
+  37-product genesis. Retain exact constructor/runtime/dependency metadata.
+- Plan original Registry/catalog admission and actual phase policy consent with
+  explicit Manager owner/Safe versus Executor routing. No broadcasts performed.
+- Author thirteen focused product/Registry/Manager/Safe cases; the 517-source
+  ABI/type check and all 13 focused helper cases pass, with genuine artifact
+  verification and all 196 captured production products within original limits.
+  Full delayed activation and the broadcast script remain unexecuted.
+
+## Standard ERC20 Dutch sales
+
+- Add a separate fixed-schedule Dutch carrier using the original 24-field Sales
+  authority or payer-executed public mode. Proven leaf prices replace the signed
+  price role; original PaymentIntent caps remain independent.
+- Resolve the current price only from the admitted, pinned carrier. Preserve
+  original fixed Payment entries and layout; add maximum permits with exact
+  actual pulls and truthful declared-free outcomes without official zero revenue.
+- Retain original Artist/Manager checks, atomic funding and mint, reveal allowance
+  and executor refund semantics. All 26 focused native cases pass with exact
+  source/artifact verification and original production size limits; full current
+  graph, cold-budget and deployment acceptance remain separate.
+
+## Same-leaf ERC20 price carrier
+
+- Add a dedicated signed one-token price carrier using the original Manager's
+  PAYER/RECIPIENT Merkle leaf, fixed collection PROFILE rights, and sole-spender
+  Payment adapter. Declared zero tiers use a separate free-mint entry.
+- Keep ERC20 price and native reveal allowance separate; only the authenticated
+  executor owns excess pull refunds. Existing Universal/Payment source is unchanged.
+- Apply the exact reviewed v8 packet; ABI/type and recursive layouts pass.
+  Author 35 focused unit cases and seven zero-native current-stack recipes;
+  selected five-product sizes fit after using the accepted fixed admission worker.
+  The new carrier is 22,005 runtime bytes with its original ABI/storage retained;
+  runtime acceptance remains pending.
+
+## Metadata cold fixture fidelity
+
+- Share the actual Owner/Guards/State and immutable Coordinator read recipe in the
+  retained cold-cost case; preserve every budget, assertion and earlier cooling
+  step, and add explicit cooling for the actual Guards library. Mutable negative
+  fixtures and all production bytes remain unchanged.
+- Record all 46 retained cases passing, including two 256-input fuzz oracles.
+  The corrected cold case uses 324,595/400,000 callback gas and 147,146/150,000
+  dependency gas. Preserve the old mock-cost failure; full current-stack and
+  complete operation-60 acceptance remain separate.
+
+## Single-frame Artist certificate read reuse
+
+- Inline the unchanged imported-origin certificate view body in its fixed read
+  worker and reuse authenticated constructor runtime/suite hashes. Replace nine
+  fixed full-word temporary byte arrays while preserving exact code/return checks.
+  Original APIs, storage,150k dependency frame and400k callback remain unchanged.
+- Add real Owner/Guards/State cold recipes with an explicit immutable Coordinator
+  boundary and independent original constructor-hash fuzz/refusal oracles.
+- Record seven focused passes and45 retained passes with one preserved conservative
+  fixture failure. The real Owner recipe succeeds at324,595 callback gas and
+  147,146 dependency-frame gas; complete current-graph acceptance remains separate.
+  All82 concrete native-closure products fit, with both256-input fuzz oracles passing.
+
+## Canonical native claims and closed Dutch recording
+
+- Add original Sales v1 signed/public ZERO_PRICE_CLAIM and bounded PWYW
+  singleton execution. Zero choices mint without official revenue or a floor
+  receipt; positive choices settle the full chosen amount through the existing
+  strict native path. Preserve reveal credits and atomic Manager replay.
+- Share original full-payload seller verification and extend historical
+  immediate revocation only to kinds 0, 1, 3, 12 and 13. Existing fixed/open
+  execution eligibility and prior signing domains remain unchanged.
+- Add closed signed/public ERC20 Dutch recorder entries with original funding,
+  results and floor semantics, plus exact public witness rechecks. Author
+  focused regressions; combined native/current acceptance remains pending.
+
+## Canonical signed and public native immediate sales
+
+- Add a separate fixed/open adapter for the original 24-field Sales v1
+  authorization and public mode with zero seller digest. Preserve existing sale
+  domains and route payment through the official native recorder and floor.
+- Bind single-token caller-funded execution, configured signer membership,
+  Artist consent, strict primary rights and original Merkle price proofs to the
+  actual Manager/Ledger. Retain atomic callback checks and payer reveal credits.
+- Add a typed public recorder entry and historical full-payload Manager
+  revocation against the same Ledger ID. Author focused rollback, replay, Safe
+  and malformed-return regressions; current-stack and release acceptance remain
+  separate from source validation.
+
+## Bounded repeated Artist selection for original Metadata
+
+- Authenticate repeated Artist ancestry through one governed read frame and an
+  imported-only origin certificate, preserving complete source/current suite,
+  seven-owner, original record-domain and authorization-consumption checks.
+- Keep both gas caps and original prefix producers/storage unchanged; preserve
+  all prior owner ABIs and reduce two terminal read allocations. Candidate views
+  validate document facts before their final selection check; mutation ordering
+  and post-append revalidation remain unchanged.
+- Add exact-certificate, independent document/lineage refusal, low-budget and
+  reached rollback/retry tests, with actual read workers and explicit typed
+  source-admission boundaries. Full current operation60 acceptance is separate.
+- Record38 focused passes and one retained repeated-cold400k refusal. All18
+  selected products fit; this does not close cold repeated publication acceptance.
+
+## Operator distribution supply scope
+
+- Require the distribution's supply counter to resolve to its original PHASE
+  subject through the actual Manager. Reject COLLECTION/GLOBAL supply sharing
+  while preserving latched legacy definitions and configured recipient scopes.
+- Clarify existing explicit terminal entropy-policy behavior in the operator
+  guide; missing policy does not grant a reveal exemption. Combined current
+  execution and transaction-capacity acceptance remain separate.
+
+## Retained Artist sale consent through module retirement
+
+- Preserve eligible existing Artist sale consent when its original adapter is
+  DEPRECATED, while new consent remains ACTIVE-only. Require the actual stored
+  consent timestamp to precede deprecation and recheck live module identity.
+- Add six actual-current Safe settlement continuity cases, including incident
+  rollback, original Payment binding and the equal-timestamp rejection. ABI and
+  storage compatibility checks pass; native execution and capacity remain pending.
+
+## ERC20 executor-funded native reveal allowance
+
+- Keep token prices, payer intents and permits in token units while the bound
+  executor supplies native reveal fees and owns excess pull refunds. Preserve
+  zero-native offer and burn callbacks and current conservation receipt checks.
+- Apply the reviewed implementation with ABI/type and recursive storage checks
+  passing. Native size, runtime and capacity validation remain pending.
+
+## Joined Artist Attribution capacity extraction
+
+- Share original dispute transport and ordinary personhood/recovered read encodings,
+  preserving guarded owner replay/commit order, original ABI and recursive storage.
+- Reduce the joined Attribution runtime from 34,560 to 25,369 bytes; deployment remains
+  blocked by 793 bytes. Author 13 owner-level regression cases; native/current-graph
+  acceptance remains pending. The separately rejected replay-write proposal is inert.
+
+## Conservation provider original OFFCHAIN facts
+
+- Accept the original stable Router's exact empty-script facts: OFFCHAIN mode,
+  zero script bytes and the Keccak256 hash of empty bytes. Preserve the derived
+  release's zero script source hash and the original facts in source context.
+  Reject contradictory hash, length, mode and presentation-profile combinations.
+- Add a regression through the original Router facts library, with explicit
+  storage and Core boundaries. Source and selected-capacity checks pass;
+  focused runtime and complete Router/paid-flow acceptance remain separate.
+
+## Artist personhood documentary references
+
+- Join the native conservation sale provider to current resolved personhood or
+  the original explicit waiver, preserving their distinct original hashes and
+  imported origins. Expose the exact original provider Configuration independently
+  of later governed gas increases. All 35 focused helper/provider cases pass in
+  separate native captures. Add actual Safe/op24 waiver and signed General
+  documentary-reference consumer regressions; their runtime and complete
+  current-graph acceptance remain pending.
+- Link the original signed Artist personhood head to its exact General identity
+  notarization, with immutable proof summaries, explicit currentness and full audit
+  reads. Preserve original signatures, records, waivers and import domains.
+- Require the selected resolved evidence in the prospective Artist mint floor;
+  retain authenticated summaries through the existing complete operation-60 import.
+  ABI/storage checks pass; behavioral, gas and deployment acceptance remain pending.
+
+## Artist extension creation carriers
+
+- Replace the two oversized embedded-creation wrappers with authenticated,
+  compiler-generated initcode parts and the same Factory-context CREATE.
+- Retain original child bytes, constructor arguments, birth records and nonce
+  behavior; update all current deployment consumers for the explicit part profile.
+  Selected products fit; actual deployment and current-graph execution remain pending.
+
+## Artist recovered authority hydration
+
+- Carry complete pending binding generations through recovered class1/class3
+  imports, retaining original refusals, withdrawals, terms, documents, signatures
+  and replay points before final acceptance. Add bounded feature512 for direct
+  policy/base Attribution graphs; preserve old encodings. Runtime and joined
+  deployment-capacity validation remain pending.
+- Carry complete recovered content-consent, royalty-freeze and content-freeze
+  authorization histories through repeated imports, including original grant use,
+  signature, nonce, replay and latest-record associations. Add an ordered
+  royalty-term entry point and explicit feature256; preserve earlier encodings
+  and current authorization rules. Runtime and joined capacity remain pending.
+- Retain complete recovered attestation history, original personhood summaries
+  and C2PA heads through ordered repeated imports. Join original direct/delegated
+  authorization guards and preserve dynamic currentness. Runtime, capacity and
+  the separate Metadata consumer acceptance remain pending.
+- Carry complete recovered delegation and mixed policy/economics/sale consent
+  history through repeated imports, preserving grant versions, revocations, uses,
+  epochs and tagged delegate nonce lanes. Add an explicit capability and retain
+  original current-authority restrictions. Runtime and capacity remain pending.
+- Extend the recovered profile with complete direct economics history and exact
+  original binding associations, signatures and replay origins. Add class-3 V3
+  and repeated V3 import/continuation scenarios. Execution and capacity evidence
+  remain pending.
+- Add operation-60 profile10 for complete recovered class-1/class-3 Identity
+  and Payout histories in the first accepted generation-one PRIMARY_ONLY graph.
+  Retain original hashes, clocks, nonce/replay guards, publication carriers,
+  timing and external observations through bounded repeated imports.
+- Join original-domain readers and current-domain continuations, including
+  pending rotation/estate execution. Add actual-owner/Safe source scenarios
+  and atomic rollback controls. ABI-only checks pass; runtime, gas, deployment
+  size and release acceptance remain pending. Broader graphs remain separate.
+
+## Artist complete living record combinations
+
+- Add one witness-bearing multiple-Artist operation-60 capability for complete
+  original payout, economics, readiness and publication histories, composed with
+  delegation/nonce/replay closure and atomic seven-owner Archive imports.
+- Preserve old profile encodings and original publication domains; retain global
+  C2PA key-history order. Focused cases are authored; native acceptance is pending.
+
+## Entropy policy succession and original-provider relay
+
+- Add complete governed LEGACY/EXPLICIT policy import with retained original
+  hashes, Artist receipts, recovery definitions and distinct local balances.
+- Relay new requests through the immutable original provider caller, preserving
+  successor request identities and once-only raw capture with retryable delivery.
+  Combined runtime, production size and current-stack acceptance remain pending.
+
+## LOW_SECURITY instant entropy
+
+- Add COLLECTION V2 finality statement, source, metadata and Artist-review
+  adapters with exact full-policy commitments and a shared scoped/COLLECTION
+  reference component entry. Twenty-seven focused manifest/source/component tests
+  pass; combined-provider and complete finality acceptance remain separate work.
+
+- Add a distinct explicit-policy current-output checkpoint and covered manifest,
+  plus V2 canonical Router CONTENT_ROOT adoption using original Artist consent,
+  one-use consumption, lineage, evolution and freeze behavior. Original V1
+  records remain unchanged; V2 snapshot/reference and Router capacity remain
+  separate acceptance work.
+
+- Add a bounded synchronous entropy path with separate provider identity,
+  zero-fee pull credits and mint-commitment exclusion. Scope entropy and fresh
+  recovery remain ASYNC; runtime, consumer and deployment acceptance are separate.
+- Add a direct storage getter for full explicit policy and original token facts
+  so terminal STATIC consumers need no delegated entropy read.
+
+## Artist combined multiplicity and delegation hydration
+
+- Extend the existing multiple-Artist operation-60 capability with complete
+  original living delegation histories, all-collection grant accounting and
+  compact canonical owner states. Prior supported profile bytes stay unchanged.
+- Add actual-owner/Safe completeness, historical consent, fresh-write, finite
+  carrier and atomic rollback recipes; native/current-stack acceptance is pending.
+
+## Artist original living delegation hydration
+
+- Add a distinct complete operation-60 profile for original living delegation,
+  revision and revocation history, with exact historic policy/sale grant
+  associations, both nonce kinds and unchanged atomic seven-owner/Archive import.
+- Add actual-owner/Safe regression recipes and fixed hydration transports;
+  native execution and full current-stack acceptance remain separate.
+
+## Artist original living multiplicity hydration
+
+- Add explicit complete multi-Artist/multi-collection operation-60 hydration,
+  preserving predecessor IDs/domains, complete per-Artist nonce/replay guards,
+  shared-Artist lane activation and one atomic seven-owner/Archive completion.
+- Add actual-owner/Safe completeness, evidence, forward-write and rollback
+  regression recipes. Runtime/current-stack and capacity validation remain separate.
+
 ## Unreleased
 
+- Add a portable Museum draft workflow for plain-language capture, scoped text
+  confirmation, attributed review and later revisions. Reopening later
+  documentation replays original recorded-account or selected OwnerRecords
+  evidence; all outputs remain draft previews without publication authority.
+
+- Add a separate repaired-source consent/root transport profile with reviewed
+  ABI164 correspondence, preserving the original version and its evidence.
+
+- Add closed consent/root Safe transport for source-pinned unsigned packets,
+  preserving exact envelope fields and separate original record verification.
+
+- Add canonical Museum evidence links for five fixed script, dependency, media,
+  prospective-render and significant-properties slots. Reuse retained V4
+  captures, compare optional source observations together and preserve original
+  assessments, unavailable outcomes and declaration/byte-availability limits.
+
+- Link verified collection script and dependency observations to two existing
+  Museum dossier requirement slots. Retain both complete packages, original
+  occurrence order and unavailable outcomes; preserve all nineteen packet
+  groups and forty-nine assessments without promoting completion.
+
+- Add unified Museum dossier V4 with exact canonical, physical-production,
+  General and physical-transfer package replay. Preserve original selections,
+  nineteen packet groups and forty-nine assessments; expose source conflicts,
+  unjoined states and missing evidence without promoting institutional acceptance.
+
+- Add qualified physical Acquisition and TransferOfCustody exports from exact
+  original General statements, declaration and instrument evidence bindings.
+  Preserve planned versus completed status, original authority, source selection
+  and complete offline reconstruction without inferring legal or physical facts.
+
+- Add a General institutional and curatorial assertion reader with exact native
+  account authority, registered interpretation definitions, prior Metadata
+  documentary evidence and offline reconstruction. Preserve unsupported records,
+  same-timestamp ordering limits and separate physical/legal claim boundaries.
+
+- Add an offline physical-production export from exact historical Artist
+  statements, with original declaration and evidence bindings, explicit event
+  status, conflict withholding and full source reconstruction. Keep physical
+  custody, legal title and museum accession separate from token activity.
+
+- Add an explicit recorded EXHIBITION location and TGN join, replaying both
+  original source packages and requiring the owner's exact declaration payload
+  commitment. Retain separate account review, unresolved mappings and historical
+  authority without inferring owner approval of geographic identity.
+
+- Add native VIEW reference and file-role semantic exports with exact source
+  replay, occurrence-specific resources, qualified environment/output relations
+  and separate declared-file, received-byte and Archive correspondence evidence.
+
+- Add complete named owner-family interpretation to canonical semantic export,
+  retaining every catalogue lane, historical authority, exact field provenance,
+  unsupported encodings and unresolved notice/redemption state. Preserve the
+  original dossier and all 19 packet groups and 49 acceptance requirements.
+
+- Add offline collection script and dependency preservation with exact native
+  manifest and bundle commitments, original registry versions and explicit
+  unavailable outcomes, without execution or external URI retrieval claims.
+
+- Add native semantic selection and offline expansion for canonical dossiers,
+  preserving all source occurrences, original authority, conflicting statements,
+  exact model dependencies and unchanged dossier acceptance requirements.
+  Retain foreign-subject WORK records while rejecting their selection into a
+  dossier for a different token or collection subject.
+
+- Add read-only genesis Registry coverage for the fixed 29-schema and 22-support
+  plan, with original definition/chunk reconstruction and explicit missing,
+  conflicting and retired results. Preserve registration and conformance limits.
+
+- Add preserved Museum source/runtime archives and explicit offline V10/V3
+  regeneration, with original native release-hash correspondence and complete
+  dossier requirement retention. Keep release and institutional limits explicit.
+
+- Add genuine VIEW inventory and Bundle clients with separate witness binding,
+  ordered retrieval admissions and explicit history/cached/full-current checks.
+
+- Add attributed VIEW retrieval witness clients with original raw signing,
+  canonical retained bytes and separate historical/current admission checks.
+
+- Add an explicit preservation RPC/Safe driver with immutable signed envelopes,
+  original family receipt checks and distinct revert/nonce retry outcomes.
+
+- Add current-authority preservation archive callers with ordered original
+  proofs, exact V2 byte correspondence and separate current coverage refresh.
+
+- Add attributed VIEW retrieval records, exact inventory companion bindings and archive coverage for supported URL routes. Preserve original locator and archive record formats; retrieval runtime acceptance remains pending.
+
+- Add current-authority collection and scoped preservation inventory clients
+  with captured Artist routes and ordered original archive-origin evidence.
+
+- Add collection and scoped token preservation V2 reference clients with exact
+  environment preparation, producer admission and retained archive evidence.
+
+- Add collection and scoped token preservation V2 snapshot publication clients
+  with original writer grants, exact canonical bytes and receipt evidence.
+
+- Add token preservation V2 producer admission, checkpoint and covered-output
+  clients with exact row commitments and separate history/current evidence.
+
+- Add source-qualified complete VIEW preservation binding clients with original
+  class-2 governance calls and distinct historical and operative source reads.
+
+- Add historical ABI129 scoped finality clients for canonical manifest staging,
+  provider/discovery validation and archived canonical-Executor finalization.
+
+- Add original scoped-policy inventory and bundle archive clients with ordered
+  source objects, authenticated segment events and current coverage refresh.
+
+- Add original scoped-policy reference preparation and publication clients,
+  preserving exact environment bytes and external archive coverage semantics.
+
+- Add scoped-policy Router root adoption and original Artist content-consent
+  clients with exact family, replay and historical aggregate commitments.
+
+- Add source-qualified scoped-policy checkpoint, covered-output and root-free
+  snapshot publication clients with original authority and receipt boundaries.
+
+- Add source-qualified scoped-policy source and publication graph preparation
+  callers with bounded child progress, Safe receipts and explicit currentness.
+
+- Add source-qualified tagged full-policy VIEW adoption callers with original
+  Artist consent, shared V1/V2 history and current or historical rendering.
+
+- Add source-qualified canonical native and ERC20 Dutch purchase callers with
+  inclusion-price quotes, separate reveal funding and original maximum permits.
+
+- Add source-qualified recipient Merkle distribution callers with published-list
+  commitments, ordered allowance proofs and original direct/Safe NFT claims.
+
+- Add source-qualified canonical native fixed/open purchases and free/PWYW claims,
+  with original Sales-v1 signing, native refunds and historical Manager revocation.
+
+- Add source-qualified split-wallet, ClaimRouter and Escrow pull/recovery callers
+  with exact authorization, governance stages and direct/Safe receipt checks.
+
+- Add complete original class2 pending-binding correction approvals and replay
+  history to recovered Artist operation60; existing generation codecs remain
+  unchanged. Authored Safe/recovery tests and source/type checks do not imply
+  native or full-history acceptance.
+
+- Add an explicit recovered content/freeze consent caller with ordered royalty
+  witnesses, historical record checks and original Safe/Archive receipt evidence.
+
+- Add recovered Artist operation-60 client preparation, complete source-certificate
+  checks and paged Archive receipt reconciliation through the original Safe CALL.
+
+- Fit the joined Artist Payout owner by factoring six original structured reads
+  into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
+
+- Add native acquisition V10 and object dossier V3 composition with exact prior
+  version replay, current source-family consumers, and unchanged 19/49 acceptance
+  denominators. Preserve source and institutional evidence limits.
+
+- Add an exact retained VIEW retrieval consumer with immutable witness and
+  inventory bindings, original Archive routes and received media correspondence.
+
+- Add conservation documentary Archive correspondence and typed museum mappings
+  with complete original reference accounting and offline reconstruction.
+
+- Add a replayable conservation and interview dossier supplement preserving
+  original intent, waiver, participant, instrument and media declarations,
+  selection histories and exact reference/field provenance.
+
+- Add a separate retained VIEW locator consumer that joins the actual adopted
+  URI, original same-pair Archive evidence and complete supplied media bytes.
+  Existing inventory profiles remain unchanged; current availability and
+  general retrieval witnesses require separate evidence.
+
+- Package complete retained VIEW inventories and all member bytes in BagIt and
+  immutable OCFL versions, with full offline evidence replay in every version.
+  The archival transport retains explicit provenance and conformance limits.
+
+- Join independently pinned local VIEW source exports to complete retained
+  inventory packets, preserving separate provenance and checking original
+  publication/binding commitments and every member's exact bytes.
+
+- Recompute the full native WORK selection commitment and its description and
+  original receipt joins in the retained VIEW inventory consumer.
+
+- Add a distinct offline full VIEW render-critical inventory and original bundle
+  consumer, with ordered source stages, complete member output bytes and explicit
+  recorded-source/coverage trust. Native execution and full finality remain separate.
+
+- Add a bounded original VIEW reference consumer with exact native definitions,
+  source proofs, first/last output samples and environment inventory parts.
+  Supplied evidence checks do not establish browser execution or full finality.
+
+- Add an offline native trace oracle for original VIEW preservation output and
+  manifest bytes, with separate source pins and explicit typed test boundaries.
+  It checks extracted native vectors without implying complete capture or finality.
+
+- Add a separate VIEW preservation capture with complete output Merkle trees,
+  original root-free snapshot payloads and typed Router CONTENT_ROOT history.
+  Exact offline replay joins distinct producer admission and retained source
+  preimages; full native provider/reference/finality acceptance remains separate.
+
+- Add separate adopted VIEW V2 output evidence capture with original tagged
+  adoption history, sealed membership, full entropy policies and complete
+  covered output parts/index. Exact offline replay retains historical evidence;
+  VIEW finality, original rendered bytes and authority remain separate work.
+
+- Add original scoped factory policy V2 capture and V9 acquisition exports for
+  TOKEN, RELEASE and SEASON. Retain the immutable seven-child factory graph,
+  complete membership, output rows and preservation records over unchanged title
+  V5 inputs. Historical authority, native execution and complete acquisition
+  coverage remain unresolved; newer factory variants use separate profiles.
+
+- Add original COLLECTION policy V2 capture and V8 acquisition exports with
+  complete inventory/output/readiness rows, snapshot/reference records and six
+  STATIC component preimages. Preserve title V5 inputs and reconcile twelve
+  sources. Core/metadata facts, terminal admission preimages, historical
+  authority and complete acquisition coverage remain unresolved.
+
+- Add scoped STATIC finality capture and V7 acquisition exports for original
+  TOKEN, RELEASE and SEASON snapshots, complete membership and ordered output
+  hash manifests. Preserve title V5 inputs, reconcile twelve sources and retain
+  original governance inputs. Historical Core/render preimages, authority
+  execution and complete acquisition evidence remain unresolved.
+
+- Add original governance transaction capture and ordered call/action-ID
+  reconstruction from original Executor inputs, receipts and events. Preserve
+  the entire V6 package and exact packet bytes; retain missing or unsupported
+  inputs as partial evidence and keep historical authority unresolved.
+
+- Add original collection finality capture and an additive V6 acquisition export
+  with the typed native manifest, preserved leaf bytes and ordered token proof.
+  Preserve the complete title V5 package and reconcile twelve source captures.
+  Historical Core facts remain hash-only; full batch authority and complete
+  acquisition source coverage remain unresolved.
+
+- Add a native accession/title V5 export derived from original owner receipts,
+  complete captured Core transfers, supported title bindings and owner heads.
+  Reconcile eleven sources, preserve both original packages, and retain explicit
+  historical selection without claiming legal title or institutional authority.
+
+- Add native media-master and prospective-reference capture with historical
+  release joins over an unchanged V5 packet. Reconcile nine source captures,
+  preserve original manifest and publication histories, and distinguish saved
+  evidence from current archive liveness, source state and later replacements.
+  Generic preservation labels and complete packet acceptance remain qualified.
+
+- Add native attribution and sanction capture with exact offline replay and an
+  additive V5 packet join. Preserve original confirmation, latest association
+  sanction and later dispute restoration separately, reconcile seven source
+  captures, and keep unsupported generic record fields and source completeness
+  explicitly qualified.
+
+- Add acquisition packet V5 with all 19 required field groups and exact native
+  personhood authority/scope, DIRECT floor and conservation context fragments.
+  Bind source-preserving packet assemblies to current RIGHTS and captured
+  attribution fields, export validated supplied packet bytes, and report remaining
+  source coverage separately. V1–V4 and institutional acceptance remain unchanged.
+
+- Add standalone native tier/selection context and six-source DIRECT acquisition
+  composition. Join completed-mint chronology, original sale tier, saved provider
+  selection dependencies and first-sale intent/interview history. Preserve current
+  and superseded selections separately, carry earlier RIGHTS/personhood evidence,
+  and keep original captures, V4 and full-packet acceptance boundaries unchanged.
+
+- Add a standalone native DIRECT floor schema and a two-input personhood
+  assembly that replays the original floor, RIGHTS, provider and personhood
+  evidence together. Preserve native adapter receipts and distinguish saved
+  personhood commitments from current evidence. V4 remains unchanged; tier,
+  selection, complete packet integration and actual-chain acceptance remain
+  separate requirements.
+
+- Add native Artist personhood capture, offline replay and acquisition
+  correspondence with saved first-sale commitments and original provider pins.
+  Reconstruct original operation-24 and General documentary evidence, distinguish
+  waiver and proof-summary hashes, and retain same-recorder supersession,
+  imported signing domains and separate identity records. A separate native
+  fragment preserves General authority and its original subject. Earlier captures
+  stay unchanged; synthetic evidence does not establish legal personhood or a
+  complete acquisition packet.
+
+- Add an explicitly admitted native-provider configuration capture and historical
+  RIGHTS binding. Recompute the original ten target/code pins and three gas
+  configurations, retain current gas separately, and match the saved floor
+  source and RIGHTS dependencies without changing earlier capture formats or
+  implying historical execution, personhood or paid Artist acceptance.
+- Allow original Metadata selection through complete repeated recovered Artist
+  ancestry, preserving the original seven-owner completion and publication
+  consumption checks. Add six typed regression recipes; native acceptance remains.
+
+- Add offline correspondence between frozen universal or DIRECT first-sale
+  RIGHTS commitments and original public RIGHTS records, receipts and selected
+  history. Preserve both captures, flag superseded selections and keep historical
+  conservation-provider binding and complete packet evidence unresolved.
+
+- Add separate typed DIRECT conservation capture and offline replay, joining
+  original adapter paid receipts to shared first-sale and release evidence.
+  Retain both known sale families in ledger discovery and reject unsupported
+  mixed target histories without changing frozen universal capture formats.
+
+- Add a native conservation packet representation and offline composition of
+  frozen tier, selected intent/interview and universal floor captures. Reconcile
+  shared RPC observations and preserve historical tier timing, four distinct
+  selection lanes and unresolved documentary joins. Keep V1--V3 definitions and
+  original captures unchanged, with all 19 acquisition requirements visible.
+
+- Add native conservation-floor capture and offline replay with complete bounded
+  ledger discovery, retained source admissions, immutable receipt hashes and
+  original consumed settlement results/events. Preserve inline purchases and
+  optional preparation, historical replacements and candidate commitment limits;
+  keep tier/packet joins and native runtime acceptance explicitly separate.
+
+- Add durable Core conservation-tier capture and offline replay. Reconcile
+  declarations with complete allocation and completed-mint history, preserving
+  aborted and prepared identities and defaults after burns. Distinguish an
+  undeclared collection's public pre-mint zero tier from prospective LITE sale
+  enforcement; retain missing floor and packet-assembly evidence explicitly.
+
+- Add canonical condition-source capture and offline replay against the permanent
+  Core-bound catalog. Retain replacement hosts and complete original lanes;
+  select the latest owner and independent reports by receipt position, preserving
+  unsupported newest records as unresolved. Keep examination joins and complete
+  acquisition packet requirements explicit.
+
+- Add a source-bound whole-v1 Safe caller inventory and canonical Artist personhood
+  reference callers, documentary reads and original operation-24 receipt checks.
+
+- Complete original DIRECT product control callers and receipt checks, with
+  source-bound coverage of all 29 mutable selectors through direct and Safe calls.
+
+- Add original DIRECT sale and auction callers with separate payer consent,
+  typed paid receipts, immutable conservation history and Safe verification.
+
+- Add native Museum anchor, tier and media-master clients with original Artist
+  waiver evidence, permanent governance bindings and Safe receipt verification.
+
+- Add canonical entropy policy succession callers with complete inventory checks,
+  original origin routes, staged catalog admission and atomic cutover receipts.
+
+- Add Artist recovery rewind V3 callers with typed exclusions, complete dual-owner
+  selection, worker preparation seals and atomic Identity/Payout receipt checks.
+
+- Bind a permanent conservation-floor receipt ledger through an additive Core
+  interface and exact one-time delayed governance, preserving receipts across
+  Metadata/recorder replacement. Native floor enforcement remains in progress.
+
+- Add source capture and offline replay for native conservation selections,
+  original op24 intent/interview evidence, separate Artist/estate histories,
+  complete selected catalogs and intent locks. Keep tier and sale-floor inputs
+  explicitly missing. Add packet V3 support for zero optional condition captures
+  while preserving V1/V2 schemas and unsupported selected-record failures.
+
+- Add durable Core conservation-tier declarations and an exact one-time governed
+  condition-source catalog binding. Original interfaces/storage roots remain;
+  the new Metadata producer and actual sale-floor acceptance are separate work.
+
+- Require complete source-bound entropy policy import evidence at Core replacement,
+  alongside original pending-request coverage. Add canonical bounded inventory/readiness
+  checks and fault/fuzz regressions; full successor activation remains separate.
+
+- Connect explicit INSTANT and terminal entropy modes to immediate, Dutch,
+  clearing and deferred sale completion, preserving original ASYNC fees,
+  credits, request events and public sale signatures.
+
+- Support explicit terminal non-random tokens in shared immediate sale reveal
+  handling, retaining ASYNC fee accounting and original token identity. Add
+  focused rollback, malformed-evidence and fee/refund fuzz coverage.
+
+- Include dedicated ERC-20 burn programs in collection freeze/finality warnings,
+  with immutable gate/carrier bindings and source/target impact checks.
+
+
+- Add [truthful current metadata](docs/integrations/terminal-entropy-consumers.md)
+  for explicit DISABLED/NOT_REQUIRED entropy and
+  separately governed STATIC terminal rendering with a direct original-source
+  fact profile. Add complete V2 coordinator-policy/source-set and terminal
+  readiness adapters; V2 reference publication/output and full current-stack
+  acceptance remain separate required work.
+- Add the original chain/Core/global-token citation to current default metadata,
+  with separate governed STATIC profile evidence and preserved historical render
+  entries. Record-state qualifiers and full current-graph acceptance remain separate.
+- Add explicit Artist-consented collection entropy policies and terminal
+  DISABLED/NOT_REQUIRED token registration, preserving the legacy ASYNC profile.
+  Nonrandom consumer integrations and INSTANT support remain separate work;
+  current-stack runtime acceptance is pending.
+
+- Add explicit Artist recovery V3 for typed guardian, succession, directive,
+  document, payout, steward-sanction and standing rewinds. Complete journal
+  selection, exact preparation seals and atomic Identity/Payout writes preserve
+  original records and spent replay, with new continuation scopes for fresh
+  writes. Class3 capability history remains authenticated through later
+  recoveries; native/current-stack, size and capacity validation remain pending.
+
+- Extend Artist recovery V2 to current living notice compromises, retaining
+  original notice and dismissal history. Accepted recovery cancels an open
+  notice through the original activity writer; Archive evidence and later
+  recovery authenticate the exact cancellation and native receipts. Authored
+  regression cases await coordinated native/current-stack validation.
+
+- Add explicit evidence-bound Artist recovery V2 for original class1/class3
+  C1/C2 histories, earliest declared vesting cutoffs, hostile-guardian APPEAL
+  evidence and complete guardian selection, including authenticated empty results.
+  Preserve original recovery records and V1 entry points; native execution,
+  capacity and full current-stack validation remain pending.
+
+- Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
+  plans; current tests are authored and coordinated execution remains pending.
+- Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
+  live provenance semantics, exact analysis and golden-evidence requirements.
+- Add scoped mint counter values and remaining-unit reads, including verified
+  Merkle resolution. Proofless Merkle allowance reads require evidence instead
+  of treating the configured ceiling as an account allocation.
+
+- Add advisory mint eligibility and per-counter diagnostics at the Manager,
+  preserving explicit executor/gate context, aggregate caps and original
+  execution checks. Focused runtime and complete current-stack acceptance remain pending.
+
+- Add one-way governed mint phase freezes with canonical same-Ledger inheritance,
+  retained executor ceilings and fresh successor Artist consent. Terminal-freeze
+  veto and counter limits remain unchanged; combined native acceptance is pending.
+
+- Accept original mode-2 Artist policy consent during Manager registration and
+  executor grace rotation, retaining exact recorded evidence and current mint
+  authority checks. Delegated Safe regression recipes await native execution.
+
+- Add consent-gated mint executor policy rotations with bounded predecessor
+  grace through an additive Manager capability. Preserve current authority,
+  counters and replay; focused and actual Safe recipes await native execution.
+
+
+
+- Replace the historical Artist API subset in its implementation introduction
+  with the source-pinned operation crosswalk and explicit coverage limits.
+- Correct Artist delegation documentation to the integrated capability mask,
+  mode-2 policy/sale consent and consent-time grant checks, with current-state
+  admission and pending validation limits retained.
+- Retain complete 24,576-byte Metadata records through ordered immutable chunks,
+  preserving original small-record bytes, signatures, pointers and storage roots.
+- Compose the full-byte preservation and general attestation products with the
+  original Artist/Metadata graph and explicit current Safe test recipes.
+- Extend first living and class3 recovery across original aborted rotations
+  and cancelled estate requests, preserving their cause, replay, closure and
+  capability history. Existing context encodings remain compatible; native
+  validation and receipt-scan capacity measurements are pending.
+
+- Admit repeated living recovery when the current compromise has already
+  aborted a pending rotation, using its original cause and empty dismissal
+  closure. Guardian election keeps the executed transition cutoff; native
+  validation is pending.
+
+- Extend repeated living recovery with a complete authenticated rotation,
+  dismissal and closure history, including cancelled notices and retained
+  standing vetoes. Existing supported context encodings and authority epochs
+  remain unchanged; native validation is pending.
+
+- Preserve original cancelled-notice challenges through a later designated
+  notice and recovery, including mixed active dismissals and intervening
+  rotations. Original cancellation, restored status and first closures remain
+  independently authenticated; native acceptance is pending.
+
+- Preserve dismissed active-notice challenges through designated-dormancy
+  recovery using original notice, cause, dismissal and closure history.
+  The notice deadline and all original authority producers remain unchanged.
+
+- Admit designated dormancy after a prior living recovery, retaining original
+  recovery actions, receipts, guardian history and cause/resolution boundaries
+  through first and subsequent class-3 recoveries. Native acceptance is pending.
+
+- Admit repeated recovery after a designated-dormancy recovery and later
+  rotations while preserving the original dormancy capability origin and epoch
+  history. Native and current-graph acceptance remain pending.
+
+- Add guardian supersession to first designated-dormancy recovery using the
+  original current vesting cutoff, APPEAL/ARBITER rules and receipt commitments.
+  Broader prior-recovery histories and coordinated runtime acceptance remain pending.
+
+- Extend Artist recovery through executed rotations after an original recovery,
+  and after a dismissed original estate activation, while preserving historical
+  records, guardian standing and the original authority epoch boundaries.
+  Focused source recipes are authored; coordinated runtime acceptance is pending.
+
+- Add full-byte preservation records with original family authority, immutable
+  record history and enumerable ordered chunk retention up to24,576 bytes.
+- Compose original STATIC renderer products with explicit retained-document
+  admission and current Safe test recipes; complete analysis remains separate.
+
+- Retain C2PA standing conflicts independently of live report currentness, with
+  immutable history and exact covered original op46 acknowledgement. Optional
+  STATIC disclosure includes token and collection conflicts without changing
+  the original report ABI or full-output commitment semantics.
+
+- Add original Artist op24 C2PA credential history with independent personhood
+  heads and complete supported-profile hydration, plus exact offline report
+  reconciliation, pinned selected-verifier Metadata evidence and optional typed
+  STATIC provenance fields. Unsupported or stale evidence remains unevaluated;
+  no authorship or signing authority is granted by a report. Full current-graph
+  runtime acceptance and the existing Artist host size repair remain open.
+
+- Add a narrowly scoped current-Executor compatibility adapter and original
+  preservation/family-registry composition, with governed metadata pause/resume
+  and explicit family writers; current Safe tests await coordinated execution.
+
+- Add deterministic version4 split-wallet clones with a pinned, locked singleton
+  implementation, retaining original authorization and historical identities.
+- Add a distinct ordinary/incident mint fallback with genuine Ledger imports,
+  permanent writer retirement and exact governed prepared-mint recovery.
+- Compose six additional genuine genesis products with original dependencies
+  and current/Safe regression recipes; full37 activation remains outstanding.
+- Stage exact reference inventories in authenticated fixed-row parts and
+  reduce duplicate publication tuple decoding while preserving original bytes,
+  identities and validation order. Complete publisher gas acceptance is open.
+
+- Preserve complete collection inventory and finality/preservation membership
+  across incident-aborted serial gaps with bounded authenticated Core scans,
+  exact serial lookup and snapshot-pinned offline reference endpoint checks.
+
+- Add exact frozen entropy-successor policies, constant-time pending-request
+  continuity admission and a configured ordinary backup deployment/plan helper.
+  Preserve original host history and fulfillment; actual-current Safe cutover
+  recipes are authored and await coordinated runtime verification.
+
+- Add Artist recovery adjudication V2 callers with canonical evidence publication,
+  complete guardian selection and current-notice governance receipt verification.
+
+- Add a separate LOW_SECURITY INSTANT entropy client with original policy and
+  delayed request workflows, retained provenance and direct explicit-state reads.
+
+- Add explicit collection entropy policy clients with original Artist content
+  consent and class-1 configuration/class-2 freeze governance workflows.
+
+- Add current metadata citation admission and read clients with exact retained
+  evidence, original class-1 governance calls and Safe receipt verification.
+
+- Extend Artist authority hydration callers to the source-selected combined
+  multiple-Artist delegation profile, retaining complete per-Artist evidence.
+
+- Add original Artist authority hydration callers for baseline, multiple and
+  delegation profiles, with complete source evidence and atomic receipt checks.
+
+- Add original Mint counter accounting reads with scoped keys, proof-aware
+  allowances and pinned Manager/Ledger observations.
+
+- Add Mint phase-freeze callers with original terminal governance, canonical
+  Ledger constraints and bounded successor freeze copying.
+
+- Add reference Mode payload preparation callers preserving complete original
+  inputs, canonical bytes and distinct preview/preparation evidence.
+
+- Add delegated Artist attestation callers with original signatures, authenticated
+  subject reads, scoped finality/economics and durable record evidence.
+
+- Extend Mint policy-grace review to exact mode-2 consent with an explicit
+  reviewed Manager capability, retaining the historical mode-1/3 behavior.
+
+- Add delegated Artist economics and royalty-freeze callers with original
+  signatures, binding-specific records and payout evidence.
+
+- Add Mint executor policy-grace callers with exact policy preimages, bounded
+  predecessor continuity and original delayed governance review.
+
+- Add delegated Artist policy and sale consent callers using original signatures,
+  persistent delegate nonces and durable consent evidence after grant expiry.
+
+- Add original Artist identity revision and delegation callers, preserving dated
+  authorization, nonce-only grants and stored-grantor revocation evidence.
+
+- Add original Artist refusal, sale-consent, freeze-authorization and revocation
+  callers with pinned authority/replay review and explicit remaining operation coverage.
+
+- Add reference environment preparation clients preserving complete typed inputs,
+  canonical bytes, original inventory prerequisites and exact uploader/preparer calls.
+
+- Add current split-factory clients with per-factory clone predictions, immutable
+  profile readback, lazy deployment and original wallet-domain release payloads.
+
+- Add mint Manager fallback ceremony clients with original governance commitments,
+  retirement classification, genuine imports and atomic activation/recovery review.
+
+- Add collection token inventory recovery clients with bounded allocation scans,
+  actual-serial lookups, saved-prefix membership and exact direct/Safe CALL review.
+
+- Add staged reference file-inventory clients with exact fixed-row parts,
+  original full identities, pinned gas quotes, receipt readback and Safe plans.
+
+- Preserve consumed token IDs and collection serials when a replacement Manager
+  aborts a stranded prepared mint; ordinary transaction rollback is unchanged.
+
+- Add dedicated ERC20 paid burn-to-mint clients, original universal signing,
+  independent source approvals, four funding routes and ordinary Safe CALL plans.
+
+- Add pinned, bounded burn-program discovery and source/target closure warnings;
+  clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+
+- Add canonical acquisition packet V2 owner-receipt references and an exact
+  source-replayed item-9 assembly. Bind historical receipts, Core ownership,
+  publication order and original signature bytes without numeric authority
+  substitution. Preserve V1 definitions and keep missing packet requirements
+  and conservation/condition producer dependencies explicit.
+
+- Add an acquisition ACCESSION/instrument and native token-history join with
+  historical owner reconciliation, exact same-block publication order, retained
+  instrument bytes and offline reconstruction. Add a separate public owner
+  catalogue profile while preserving original profiles, unsupported statements,
+  missing evidence and the canonical packet's unresolved owner-authority shape.
+
+- Add public mint/entropy capture with two source-derived history stages,
+  cross-stage receipt/header reconciliation and exact offline leaf replay.
+  Preserve active versus observed request attempts and original profiles.
+  Add a pinned read-only RC1 ownership recipe with explicit historical ABI and
+  pruned-provider limitations; identify the public RPC client by User-Agent.
+
+- Add public-chain RIGHTS and ownership capture with bounded fixed-filter log
+  queries, full returned-receipt/header checks, native state reconciliation and
+  exact offline package replay. Preserve original strict history profiles and
+  explicitly retain provider log-completeness and canonical-mapping trust.
+
+- Add complete bounded current collection/token RIGHTS selection evidence and
+  offline item-7 composition with original publication blocks and receipt
+  authority. Preserve token precedence, explicit unspecified grants, native
+  selected absence and original schema/profile bytes.
+
+- Add original paid-mint and entropy-registration extraction plus an offline
+  composer for complete bounded original-coordinator entropy/event captures.
+  Preserve earlier examinations and explicitly retain unresolved entropy when
+  coordinator reads or complete event history are unavailable.
+
+- Add source-driven token examination gathering with complete admitted native
+  record extraction, exact offline replay and a 19-item acquisition evidence
+  index. Add the V2 executed-recovery citation namespace under ADR 0051,
+  preserving V1 profiles and original definitions. Complete packet, renderer,
+  source registration and institutional acceptance remain separate.
+
+- Add an owner-published exhibition consumer with original receipt/schema
+  admission, same-block token/collection joins, attributed Linked Art resources
+  and complete offline package replay through the BagIt/OCFL workflow.
+  Preserve reported status, burned-token history and original schema meanings.
+
+- Add a complete offline Museum repository export/import workflow with explicit
+  historical-version and external hash selection, full declared semantic replay,
+  exact original bag restoration and atomic no-overwrite publication.
+  Preserve original profiles and separate recovery from current conformance.
+
+- Add complete offline PREMIS authority-field accounting across events, outcomes,
+  agent classes, rights bases and fixity algorithms. Retain original vocabulary
+  bytes and retrieval observations, with explicit unresolved/local fields and
+  prospective close matches while preserving all genesis schema definitions.
+
+- Add a V2 Museum Artist C2PA Standing consumer that retains complete supplied
+  conflict histories and checks original historical acknowledgement guards.
+  Preserve V1 bytes, independent token/collection scopes and live Display;
+  governance authentication and native runtime validation remain separate.
+
+- Add bounded offline LoC PREMIS term snapshots and prospective profile-field
+  bindings, retaining original bytes, dates, unresolved references and provenance
+  with explicit ambiguity and freshness checks.
+
+- Add a direct native Independent-catalogue PREMIS source adapter for typed
+  preservation objects and retained files. Preserve original records while
+  measuring local size/digests, retaining missing/mismatch diagnostics and
+  replaying the full offline package without inventing historical fixity events.
+
+- Add exact Museum decoding for native Artist C2PA credentials and selected
+  reconciliation reports, preserving separate personhood, history and display
+  observations. Supplied-byte and hash checks do not establish C2PA cryptography,
+  authenticated admission, freeze-safe output or full dossier conformance.
+
+- Add the complete 29-name Museum genesis source catalog, broad missing schema
+  definitions, worked examples and ordered registry chunk inputs. Preserve
+  existing definition bytes and distinguish profile/shape validation from
+  actual admission, complete exporter behavior and institutional acceptance.
+
+- Add ordered chunk retention and full-byte reads for general institutional,
+  estate and curatorial payloads through 24,576 bytes, with an explicit V2 Museum
+  reader and closed dossier dispatch preserving V1 replay. Typed notarization and
+  native Artist payloads remain bounded to 8,192 bytes; coordinated successor
+  runtime, genesis and full-capacity acceptance remain pending.
+
+- Add a separate general-attestation companion with mandatory signer verification,
+  exact curatorial grants, retained native Artist provenance and typed operative
+  identity notarizations. Add source-preserving Artist/general Museum adapters,
+  explicit SELF-review selection and closed offline dossier replay. Coordinated
+  contract execution, genesis registration and genuine capture remain pending.
+
+- Add a versioned local token-dossier recipe with registered native hosts,
+  direct-owner and governed Metadata publications, deployment-scope independent
+  records, same-block capture inputs and explicit compiler-source composition
+  checks; native execution remains pending coordinated artifact review.
+
+- Add a dedicated ERC20 paid burn-to-mint carrier and gate with independent NFT
+  burn authority, original payer authorization and atomic burn/payment/mint
+  rollback. The zero-native-reveal-fee profile has 21 passing focused gate tests and
+  eighteen passing current-contract cases, independently bound to their source.
+
+- Add atomic ERC20 primary offer clients with original Sales signatures, separate
+  payer intent, four nonpayable funding routes and complete user-entry Safe CALL plans.
+
+- Add an externally pinned read-only native dossier capture runner with a
+  six-source minimum, complete supported registered scopes and offline result
+  reconstruction; actual native graph execution remains separately required.
+
+- Add retained metric source, runtime and replay clients with staged chunk uploads,
+  writer publication, distinct receipt identities and ordinary Safe CALL plans.
+
+- Add typed native dossier joins, MetadataV1 record enumeration and a current
+  registered-host roster, preserving original assemblies and record occurrences
+  while keeping global host coverage and genuine capture acceptance unresolved.
+
+- Add atomic ERC20 primary offers with original buyer/seller authorization,
+  separate payer intents and exact paid-receipt admission before minting.
+  Support selected and unselected work under a zero-native-reveal-fee profile;
+  current-stack, Safe and permit execution acceptance remains pending.
+
+- Bind full perceptual finality to retained metric source, runtime and replay
+  evidence through an additive original-record supplement and staged byte
+  retention. Preserve historical interfaces and storage; joined publication,
+  replay and transaction-capacity acceptance remain pending.
+
+- Run repository checks independently of native CI builds and cancel superseded
+  PR checks per job, preserving draft native caches and the required combined
+  Foundry status; validate and checksum-cover the separate museum toolchain.
+
+- Add native owner and independent record catalogs with complete per-scope
+  histories and authenticated empty lanes, plus bounded Core ownership-history
+  capture and replay; genuine native acceptance and full dossier assembly
+  remain separate requirements. Repair owner capture URI inputs without
+  asserting hosted fixture availability.
+
+- Add object-dossier requirement accounting, bounded supplied components and
+  replayable partial assembly from the retained actual-token capture, plus a
+  finite native render-inventory reader with complete segment reconstruction;
+  actual inventory capture and full object-dossier conformance remain required.
+
+- Add native primary offer clients with original buyer and seller signatures,
+  executor-funded payments, buyer refunds, historical revocation and Safe CALL plans.
+
+- Add atomic native primary mint offers for unselected and selected artwork,
+  preserving original buyer/seller signatures, separate replay protection,
+  executor-funded payments and buyer-owned pull refunds.
+
+- Preserve exact reference-metric source and runtime archives, verify restored
+  execution with typed transcripts and exact environment joins, and run offline
+  preservation controls in the existing Windows/Linux CI workflow.
+
+- Add an explicitly pinned local paid-token capture with actual Safe consent,
+  token-subject media records, source-block metadata reads and offline scoped
+  dossier replay; full object-dossier acceptance remains separate.
+
+- Add curated manifest, fixed and private sale callers with original content and
+  authorization hashes, commit/reveal refunds, historical revocation and Safe CALL plans.
+
+- Add native selected-work fixed and buyer-bound private sale carriers, with
+  pause-aware commitments, original purchase/settlement identities and pull
+  refunds; keep repeated credited refunds idempotent after clock collapse.
+- Reduce STATIC field/script/UTF-8 scan gas with exact output parity and measured
+  bounded checkpoint workloads; complete deployment acceptance remains pending.
+- Add initial versioned perceptual and curated reference producers/consumers and
+  a deterministic image metric. Independent review corrections, size repairs and
+  current-contract acceptance remain in progress.
+
+- Add offline scoped semantic-evidence dossiers from authenticated museum
+  exports, with required local media bytes, original dependency closure and
+  BagIt/OCFL reconstruction; full token object-dossier acceptance stays explicit.
+
+- Add per-purchase curated native settlement and full-payload historical private
+  authorization revocation, preserving original identities and auction replay.
+  Extract six stored Manager view encodings to preserve deployment headroom.
+
+- Reduce pure STATIC JSON/HTML encoding gas while preserving exact bytes, with
+  frozen-reference differential fuzzing and large-script performance cases.
+
+- Correct the STATIC renderer's exact script-bundle return length, with actual
+  metadata/dependency regression tests and a canonical PNG test fixture.
+
+- Add refund-window same-leaf price capture with immutable charged-price/proof
+  facts, unchanged original signatures and saved-amount refunds/finalization.
+- Add versioned museum Type/declaration continuation and replayable local Safe
+  authority records, preserving original profiles and snapshot provenance.
+
+- Add native Dutch and clearing same-leaf Merkle price consumers, preserving
+  original signatures, Dutch free-sale rules and clearing rebate accounting.
+- Add canonical complete STATIC output-hash manifests with exact registered
+  interpretation and current archival coverage; full-byte retention is separate.
+
+- Add frozen ONCHAIN STATIC full-output checkpoints and require complete gas
+  budgets when validating current output, with reproduced low-gas regressions.
+
+- Add original-opener Artist dispute withdrawal as additive operation 61, with
+  canonical outcome/history records and authored Artist/Safe/Archive regressions.
+- Add free-burn maximum reveal allowances, executor-owned pull credits and
+  governed surplus recovery; extend actual Safe-governance recovery tests.
+- Add source-preserving external museum authority snapshots and reconciliation,
+  retaining original reviews, qualified uncertainty and append-only corrections.
+
+- Add native same-leaf Merkle price programs with explicit price-counter and
+  free-tier policy, retaining original sale signatures, replay and refund ownership.
+
+- Add scoped/Merkle mint accounting, concrete eligibility gates, authenticated
+  Ledger import and Core replacement admission, preserving prepared-mint abort.
+- Add protected Royalty import and Core continuity admission, Artist repudiation,
+  operator distribution and the initial versioned STATIC rendering source.
+- Add source-bound institutional and condition museum adapters and qualified
+  geography drafts; actual current-record joins remain explicit acceptance work.
+
+- Extend the current-stack stateful driver with mandatory phase-counter and
+  per-payer native conservation, persistent mint/cancellation receipts, original
+  entropy registrations and exact native receiver-failure retry. Expanded
+  campaign execution remains pending the frozen current graph.
+
+- Add actual Safe-governed mint succession import, pointer rollback and
+  accounting preservation cases, plus original-Artist successor consent,
+  imported entitlement replay, remaining caps and exact Safe retry coverage;
+  native execution remains pending.
+
+- Add official Safe all-CALL batch tests for paid mint, entropy, custody,
+  replay and cross-component rollback, including payer/beneficiary caller
+  isolation, payout redirection and receiver-handler repair with exact signed
+  retries; native execution remains pending.
+
+- Correct the Artist entropy-recovery test fixture's canonical role-registry
+  pin and add live-role revocation/regrant and registry-drift regressions.
+
+- Add reproducible selected-host current-graph acceptance captures with native
+  compiler provenance, complete suite inventories and production size checks.
+- Add native refund-window allowlist callers and bounded stored-purchase readback,
+  preserving original signatures, captured prices and proofs through finalization or refund.
+
+- Add native Dutch and clearing allowlist callers with original signatures,
+  same-leaf ceilings, explicit registration hash evidence and payer refund recovery.
+
+- Add native allowlist-price registration, original-domain signing and payable
+  purchase callers, with explicit price rules and price-bearing mint-gate proofs.
+
+- Add source-bound burn-to-mint callers with separate owner/gate approval checks,
+  original native purchase signing, explicit free reveal allowances and refund recovery.
+
+- Add ordered operator-distribution manifests, bounded slice callers and retained
+  NFT claim recovery for direct and failure-isolated delivery.
+
+- Add current ticket, delegated vault and static allowlist mint-gate input producers
+  with exact signing and replay commitments and bounded proof encodings.
+
+- Add mint counter profile and continuity callers with canonical inventory proofs,
+  bounded state and ancestry imports, and explicit source and readiness checks.
+
+- Add royalty continuity manifest producers and bounded import callers that
+  preserve original route origins, frozen configurations, snapshots and elections.
+
+- Add declared PLATFORM auction callers for families 8–13, independent signing
+  and configuration hashes, partial pinned inspections and exact Safe CALL inputs.
+
+- Add ordered Safe CALL plans, exact primary-template CLEAR/FREEZE callers with
+  independent assignment reconstruction, and eight-family Artist ceremony packets.
+- Add compact source-bound archival semantic exports, preserving exact typed
+  authority selections and immutable earlier schemas, with a separate governed
+  ARCHIVE publication route and offline reconstruction.
+
+- Add complete typed Artist authority hydration for original living, payout
+  and direct-economics histories, preserving source records and replay guards.
+- Add historical native sale-credit enumeration and pinned offline export for
+  six hosts, including locked liabilities and zeroed historical accounts.
+- Add actual Safe Metadata RIGHTS publication capture and offline museum replay.
+- Add entropy incident, fresh-recovery, original Artist content-consent and
+  executor-credit client helpers with ordinary Safe CALL examples.
+
+- Add ordered incident recovery for registered token/scope entropy, original
+  Artist content-consent evidence, atomic fee/refund handling and frozen
+  late-callback arbitration; unavailability findings remain an integration gap.
+- Add canonical Artist history lanes, successor admission and typed owner guard
+  checkpoints, retaining original operations; typed hydration profiles follow.
+- Add governed native surplus recovery across six sale hosts and actual local
+  preservation-operation capture with independently replayable museum exports.
+
+- Add frozen ordered entropy recovery policies and exact governed pre-mint
+  collection bindings, with original configuration locks and explicit finality
+  commitments; the later fresh-request implementation uses those frozen policies.
+
+- Add governed provider admission, deprecation and incident revocation with
+  original-request callback retention, current graph plans and focused lifecycle tests.
+- Add native secondary inventory, account-directed delegated claims and
+  delegate-signed offers while retaining principal payment and shared replay.
+- Add discoverable Artist authority preimages, typed dormancy/steward execution
+  records and independent event reconstruction cases.
+- Add complete chunked snapshots and offline museum BagIt/OCFL packaging with
+  exact-byte hydration and portable path validation.
+
+
+- Add role-authorized token/scope entropy incidents with immutable evidence and a
+  bounded provider-result probe; declaration alone does not enable a fresh draw.
+- Add Artist dormancy, steward grants and designated dormancy-origin recovery.
+- Add declared platform primary auctions, prepared custody PROFILE/template sales,
+  and explicit known-token platform rights activation.
+- Add complete chunk-backed scripts/libraries and burn-stable artwork checkpoints.
+
+- Add live nested Artist provenance, typed script/media manifests and governed
+  display budgets, preserving original finality routes and optional external hashes.
+- Add state-bound and delegated Artist attestations and declared platform-work
+  royalty admission; complete current-stack acceptance remains pending.
+- Extract fixed Artist and metadata workers to restore contract-size headroom
+  while preserving public interfaces and existing owner storage.
+- Add typed manifest previews, original Artist content-consent signing and
+  zero-value Safe CALL preparation to the current client.
+
+- Track pre-mint entropy provider revisions and immutable request policy inputs,
+  preserving epoch-one commitments and the existing policy lock after registration.
+- Add Artist display facts and permissionless attribution claims with original
+  authority records and append-only history; full renderer acceptance remains pending.
+
+- Support recovery after a dismissed and reopened prior-recovery interval,
+  preserving original closure, guardian and accepted recovery history.
+- Add a reproducible actual-contract/Safe museum media capture with all four
+  recorded export formats and offline reconstruction.
+
+- Add platform-work declarations, permissionless claims, governed contests and
+  corrective Artist binding, with collection-subject archival evidence and retained
+  scoped finality history. Runtime and full display/commerce integration remain pending.
+
+- Add current native fixed-price/price-program signing and Safe call preparation,
+  live reveal-policy reads, digest checks and native excess-refund calls.
+
+- Support repeated Artist recovery and guardian supersession across retained histories.
+- Add default TEMPLATE custody commerce and Artist-approved exact TEMPLATE clear/freeze.
+- Extend recorded-account museum exports through PREMIS, IIIF and LIDO, requiring
+  selected file facts and a separate declared publisher instead of inventing missing data.
+- Add native immediate-sale reveal funding, bounded post-mint attempts and Safe-owned
+  excess refunds. Native runtime, gas and final deployment integration remain pending.
+
+- Extend estate recovery across successive rotations and dismissed terminal histories.
+- Add scoped custody templates and explicit default-profile commerce with current
+  Artist consent; move large auction tuple getters into a fixed linked library.
+  Native size and full integration acceptance remain pending.
+- Package one selected public synthetic museum source as Linked Art, PREMIS, IIIF
+  and LIDO, and recorded account captures as Linked Art, with offline replay.
+- Add current custody approval signing, house digest readback, and explicit
+  activation, bid and settlement calls suitable for Safe transaction preparation.
+
+- Add source support for recovery after estate-successor rotation and token-specific
+  PROFILE custody activation/settlement; comprehensive runtime validation remains pending.
+
+- Add current Artist and collaborator signing, digest readback and Safe CALL
+  preparation for eight onboarding operations; broader runtime acceptance follows
+  the integrated feature batch.
+
+- Support dynamic poster/collaborator primary templates and standing-veto/living-estate
+  recovery history, preserving original Artist consent, guardian and payment rules.
+- Reuse the actual cached creation-library context when preparing current graph
+  tests, independently binding changed test hosts and rejecting stale imports.
+- Construct each native settlement scenario once, including required Artist consent
+  and Safe failure/repair/retry cases.
+
+- Add explicit current native auction, bid and custody signing helpers with
+  native-getter parity vectors, preserving retained RC1 domains and Safe calls.
+
+- Support artist-approved default royalty snapshots and recovery after dismissed
+  first-estate compromise, preserving original consent, veto and replay rules.
+
+- Preserve omitted compiler storage layouts in native graph fixtures and run
+  fixture-tooling regressions before expensive current-stack compilation.
+
+- Refresh the active Solidity source inventory and allow cold current-stack CI builds
+  to complete before their checked compiler outputs are reused.
+
+- Support accelerated first-estate recovery with original guardian, veto and replay rules.
+- Support artist-approved configured-zero royalty snapshots and prepared custody acquisition.
+- Allow explicit compiler-selected typed client catalogs, preserving retained RC1
+  ABIs while supporting current interface calls, overloads, unnamed tuples and Safe CALLs.
+
+- Add explicit Artist Safe consent for positive-share primary templates and
+  consume that consent through native auction settlement.
+- Add elected collection royalty snapshots to actual prepared mint paths, with
+  original Artist approval, immutable token provenance and refund admission
+  that rejects incompatible deposits before payment.
+
+- Add exact native commerce activation plans for Safe-root catalog extension,
+  delayed module/escrow admission and one-time Manager/custody binding.
+
+- Add versioned native collection-template auctions with original opening consent,
+  actual-token policy recording, escrow materialization and atomic Safe retry.
+
+- Add native auction custody acquisition and paid transfer of the original NFT,
+  with canonical house admission, terminal claims and signed Safe retry coverage.
+- Add current native recorder/auction deployment and exact module/escrow admission.
+- Complete the staged local graph rehearsal within enforced transaction gas caps.
+- Bound stored Finality evidence reads by available gas while preserving public
+  interfaces, exact evidence validation and complete-provider admission gates.
+
+- Integrate published curated-work native auctions with complete manifest and
+  exact-byte admission, original counter accounting and atomic Safe retry.
+- Split Artist host deployments into authenticated fixed children while retaining
+  original host bindings and separate real-transaction capacity validation.
+
+- Add an exact separate governed artist read-budget expansion plan, preserving
+  the original activation batch and requiring normal delayed execution.
+
+- Stage current graph deployment through resumable checkpoints with actual local
+  transaction and governance rehearsal coverage; product activation remains open.
+- Bound Finality Registry constructor admission by available gas while preserving
+  its configured runtime budget, exact dependency checks and failed-deployment retry.
+
+- Add native deferred English auctions with atomic paid mint settlement, bounded
+  clocks, pull refunds, original delegated delivery and tested Safe retry paths.
+- Complete the native preservation, Artist Safe sanction and canonical finality
+  integration rehearsal; individual transaction capacity remains separate.
+
+- Add atomic prepared native paid minting through the fixed official recorder,
+  with original-sale replay protection, complete rollback and Safe retry tests.
+- Add the native auction content-proof helper and its curated settlement integration.
+- Prepare fuzz/invariant graph inputs from each campaign's own compiler context
+  before execution, with retained preparation logs and a shared-fixture lock.
+
+- Add portable current graph fixture preparation from authenticated native compiler
+  outputs and exact NFTDelegation grant helpers for the new auction integration.
+
+- Added actual native graph, Artist record/seal and snapshot assembly tests.
+- Separated native finality component leaf budgets from outer source-read budgets,
+  with bounded adapter/provider callback regressions and matching constructor pins.
+
+- Added reviewed Safe preservation call and atomic-retry coverage.
+- Added a tested auction clock library for first-bid timing, capped extensions,
+  pause tolling, rounded increments and signed settlement deadline ceilings.
+- Specified first-bid clocks, signed deadline ceilings and deferred no-bid outcomes
+  for the new native auction under ADR 0043; implementation remains in progress.
+
+- Added an operator-owned deployment slot with deterministic CREATE coordinates,
+  atomic rollback, actual Safe retry tests and a portable local rehearsal command.
+
+- Added complete native render-critical inventories and independently refreshed
+  archival bundles, with original signed evidence and bounded Safe reference stages.
+
+- Added combined artist candidate preparation and original-image review from one
+  validated current statement, retaining legacy interfaces and permanent hashes.
+
+- Added original ordered image facts for native artist approval and a separately
+  registered multi-capture profile, preserving original signed definitions.
+- Extended the candidate consumer's bounded review decoding and adaptive gas
+  forwarding while retaining the original single-capture profile.
+
+- Restored immutable RC1 owner-continuity evidence and moved the adopted recovery
+  occurrence and owner vectors into a separately checked current extension.
+- Corrected the museum LIDO subtree LF rule for release checksum validation.
+
+- Added permanent WORK/RIGHTS selected-head seals through canonical terminal
+  governance, with guarded selector writes and historical seal receipts.
+
+- Added estate-authority recovery and authenticated successor guardian histories,
+  retaining original capabilities, veto standing and atomic Archive retries.
+- Added the developing native collection finality provider, exact source and
+  archive joins, local selected-record facts and Registry-only prepared inputs.
+- Kept finality read caps as upper bounds with exact return validation and
+  tested actual Safe public reads and protocol-only access restrictions.
+
+- Added current-head guardian restoration and restricted root-authorized appeals,
+  preserving original transition evidence, directives and retained veto rights.
+- Added native original reference-render publication, complete retained runtime
+  manifests and a fixed consumer, with exact Safe transaction-envelope tests.
+- Added optional fixed current component routes so finality preparation keeps one
+  strict live-state pass and unchanged permanent hashes, with legacy discovery support.
+
+- Added exact independent finality ABI manifests with complete portable tuple
+  definitions, fixed source bindings and matching Store/original-Registry bytes.
+- Added bounded nonempty guardian-record supersession after an adjudicated
+  original rotation while preserving pre-transition and retained-set veto rights.
+- Included contract/interface guides in the default Markdown link check and
+  corrected the named Safe discovery selector evidence.
+
+- Added fixed current finality discovery with mandatory component families,
+  unsigned artist preparation, shared producer bindings and bounded indexed reads.
+- Added native external-object proofs, complete archival coverage and current
+  liveness for original receipt pairs, with portable runtime capture tooling.
+- Retained guardian history at actual authority vesting and split estate execution
+  preparation to keep its creation helper within the EVM runtime size limit.
+- Added actual Core/Executor/Safe tests for original native entropy across
+  coordinator replacement, token burn and later collection growth.
+
+- Added native full-byte collection snapshots with original source commitments,
+  independent publisher grants, immutable history and a fixed finality consumer.
+- Extended living-artist recovery to completed ordinary rotation histories and
+  prior resolved contests while retaining discarded guardians' applicable vetoes.
+- Added immutable complete entropy source sets and token-specific frozen serving
+  across coordinator replacement, with separate current-discovery validation.
+
+- Added Identity-owned scheduled recovery preparation, action-bound guardian veto
+  and complete admitted guardian history for the initial living-artist profile.
+- Added fixed finality consumers for selected conservation records and every
+  original coordinator policy, with independent locks and source commitments.
+
+- Added the initial living-artist adjudicated recovery path, original authority
+  acceptance, atomic owner/archive continuity and contest/dismissal behavior.
+  Registered-guardian and broader historical/estate profiles remain in development.
+- Added authenticated intent/waiver selection with distinct original artist and
+  estate lineages, exact interview linkage, immutable preparation and artist head locks.
+  Finality consumption and complete archival coverage remain separate work.
+
+- Extended inherited artist recovery approval to actual published RELEASE, SEASON
+  and VIEW membership, with fresh execution validation and preserved approval history.
+
+- Added complete conservation JSON profiles, schemas, format catalogs and dated
+  language validation for artist intent, waivers and interviews. Original record
+  authority, current selection and archive coverage remain separate consumers.
+- Added complete scoped indexing of retained Core coordinators across pointer
+  replacement, with bounded atomic batches, immutable history and explicit
+  indexing-time runtime validation.
+- Added inherited recovery scope-membership authentication and exact permanent
+  identity-recovery hash encodings; complete operative recovery is tracked separately.
+
+- Added inherited TOKEN artist recovery approval using actual retained Core
+  identity, with separate historical approval and fresh execution checks.
+- Added fixed-graph finality consumption of actual selected WORK and RIGHTS
+  records, preserving original receipts and current interpretation checks.
+  Complete scope membership and the other finality inputs remain separate joins.
+- Added authenticated scope membership and original-provider Router reads, typed
+  owner recovery responses and action-bound notice windows, and bounded immutable
+  preparation for complete delivery claims. Wider recovery scopes remain in progress.
+- Reduced shared JSON escaping gas while preserving the prior returned bytes,
+  including arbitrary byte strings. Differential fuzzing and retained owner,
+  rights and work-record flows pass in both compiler modes.
+- Added the current coordinator's immutable collection-policy read and fixed
+  entropy serving evidence. Complete entropy modes, mixed-coordinator discovery
+  and whole-system finality remain separate implementation work.
+- Added a fixed evidence provider for six actual Router serving families, with
+  independent source commitments and explicit current-candidate checks against
+  live module eligibility and the saved original-Finality anchor. Complete typed
+  finality inputs, entropy and full deployment acceptance remain in progress.
+
 ### Added
+
+- Export typed recorded preservation events with explicit outcomes, multiple
+  file/agent links, noncompleted source states and reproducible offline packages.
+
+- Implement canonical ordered entropy recovery-policy configuration and permanent
+  freeze, with exact governance commitments and fixed-library deployment headroom.
+  Collection binding and fresh requests remain separate implementation work.
+
+- Add original Artist authority execution-event reconstruction, recorded PREMIS
+  fixity events/reports/agents, and explicit-ABI secondary inventory and delegated
+  claim/offer client workflows.
+
+
+- Fixed release checksum parsing for the pinned upstream license's Git whitespace
+  diagnostic override while preserving its exact bytes and the existing LF policy.
+  Current deployment and test imports now name their Router dependencies explicitly;
+  full Finality/Coordinator deployment assembly remains in progress.
+- Added complete steward/recovery-response JSON profiles and atomic typed
+  owner steward designations using the original direct/relayed owner record
+  authorization, exact registered definitions and durable per-author history.
+  Typed recovery-response counting and TOKEN notice execution are now implemented.
+- Added authenticated current WORK selection with curator grants or explicit
+  adoption of an artist's predecessor-bound publication, complete typed meaning,
+  original provenance and retained history. Full provider/deployment composition
+  remains open.
+- Added current-owner dossier records with retained payloads, direct and relayed
+  Safe/EOA calls, unordered replay protection and custody history. Typed recovery
+  notices and responses extend this same authorization and history.
+- Added bounded schema facts and original collection-record receipts, preserving
+  existing interfaces and storage. Maximum supported registration and record
+  shapes now fit the existing dependency cap for these readers and record ingress.
+- Added compact governance action facts, so a long reason URI does not consume
+  the onchain budget for reading the original batch identity and execution window.
+- Added an original-record witness entrypoint for rights selection, preserving
+  existing selectors, grants and history while supporting maximum record URIs
+  under the unchanged read cap.
+- Added canonical governed recovery execution, original lineage and bounded refresh
+  plans. Actual Core/Executor/Safe composition is tested with explicit artist,
+  original Finality and owner-notice boundaries.
+- Added complete typed WORK-to-LIDO mapping with original-field accounting,
+  exact provenance and reproducible fixtures; authenticated current selection
+  and institutional ingest remain separate from this mapping profile.
+- Added explicit current rights-record selection backed by original metadata
+  receipts, exact registered definitions, existing RIGHTS-family grants and
+  immutable history. Complete provider, scope and Finality composition remain open.
+- Added the complete typed work-description JSON profile, format catalog,
+  independent canonical fixtures and pinned registered-artist identity reads.
+- Added immutable artist recovery approvals and a bounded recovery owner-evidence
+  reader. The full recovery companion and owner-notice execution remain in development.
+- Added a narrow shared artist/curator WORK_DESCRIPTION authorization path,
+  preserving the original record hash, receipt provenance and family grants.
+- Added complete supported rights JSON serialization, exact recorded-byte
+  comparison, closed schema/profile inputs and independent canonical fixtures.
+  Onchain registration, authenticated current selection and typed write
+  admission remain separate integration work.
+- Added anchored independent-record history and exact publication event order
+  for museum input. Offline replay and actual local captures retain explicit
+  trusted-RPC and fixture boundaries. Registered account-authored semantic
+  records now produce exact museum projections; institutional identity and
+  independence remain separately evidenced.
+- Added pinned LIDO correspondence for the same four-media source used by
+  Linked Art, PREMIS and IIIF, with original schema closure, exact provenance
+  and preserved previous outputs. All 202 tests and eight generators pass;
+  full recorded-input correspondence and institutional conformance remain open.
+- Added current-content evidence reads that join the exact artist-approved root
+  record, fixed deployment route, complete token checkpoint and preserved leaf
+  bytes. Full typed record interpretation and finality composition remain open.
+- Added artist-approved collection-root publication backed by verified preserved
+  manifests, exact governed interpretation bytes and publisher grants, with
+  append-only history, atomic consent/evolution and Safe calls. The complete
+  artist/provider/Finality deployment and additional scope profiles remain open.
+- Added pinned IIIF Presentation 3 correspondence for four media types, exact
+  numeric/identity handling and original-source provenance. Seven generators
+  and all 28 example outputs pass integration readback; the reviewed test union
+  contains 183 distinct cases. Complete museum conformance remains open.
+- Corrected artist Finality admission to distinguish the metadata renderer from
+  the generic record host, and reduced delegation compiler stack lifetimes
+  without changing signed commitments.
+- Added incremental verification of complete content-leaf manifests against
+  actual checkpoint fields and preserved artifact bytes, with stable archival
+  completion identity, historical reads and Safe calls. Authoritative root
+  publication and larger composed manifests remain in development.
+- Added a pinned PREMIS 3 file-object export linked to the same source assertions
+  as Linked Art, with exact datatype, size, format and fixity-field checks.
+  The reviewed museum cohort contains 149 tests; this first file profile does
+  not establish actual file fixity, authenticated-chain input or full PREMIS.
+- Added faithful museum abstract-work and nonvisual projections with shared
+  identities and exact source accounting. All 132 tests and five generators
+  pass locally; the original v1 package remains unchanged.
+- Added permissionless onchain content checkpoints with exact served JSON/HTML,
+  complete Core membership, retained leaf history and threshold Safe calls.
+  Authoritative publication, archival coverage and full finality remain separate.
+- Integrated stable artist presentation, display locks and historical metadata
+  reads. Added image-field-only canonical Base64 raster admission, preserving
+  existing URI bounds, external schemes and artist authorization.
+- Fixed vendored Base64 encoding of inputs followed by dirty memory. Padding is
+  canonical, and input/adjacent memory is restored; literal and independent
+  randomized regressions cover the repair.
+- Preserved artist owner commitments and acceptance event arguments while
+  reducing default-compiler stack pressure. Complete-build acceptance remains
+  separate from the focused compiler repair.
+- Added an independent-attestor record host with permanent author history and
+  Safe direct/relayed paths. Its reviewed 22-case suite uses actual schemas,
+  byte storage and governance, with explicit Core membership boundaries.
+- Added a permissionless collection inventory backed by actual Core serials,
+  including burns and excluding incomplete mints. Sixteen focused cases pass
+  both compiler modes with 256 fuzz inputs and threshold Safe calls.
+- Added four actual artist-registry-to-metadata-host publication checks for
+  Safe signatures, estate intent authority, rotation and atomic append rollback.
+  Full current Core/Executor composition remains separate.
+- Added exact typed metadata-publication authorization through the current artist
+  registry, preserving prior artist methods, signing domains and storage prefixes.
+  The unpruned 271-test artist cohort passes independent review.
+- Added the current full-byte metadata host, a distinct caller interface,
+  attributed history, canonical events and root-authorized family grants.
+  Twenty-three host/adapter cases pass in both compiler modes with fuzzing;
+  three independent actual-Executor cases verify the configuration boundary.
+  Actual artist publication and typed finality composition remain in development.
+- Extracted foundation/catalog planning into a stateless local helper, with
+  explicit stop/read/resume handling in both deployment entry points. Exact
+  plan/catalog tests and a real protected foundation rehearsal pass without
+  adding a deployer transaction. Full product-script compilation and execution
+  remain open after the bounded compilation diagnostic timed out.
+- Added attributed museum resource projections and reproducible offline public
+  packages. The combined suite now contains 104 tests; complete cross-format
+  mappings, authenticated onchain sources and institutional acceptance remain open.
+- Added complete archival artifact chunk coverage with stable completion
+  commitments and separate fresh-fixity validation. Twenty-six focused cases
+  and fuzzing pass independent review; actual full finality composition remains open.
+- Added canonical semantic review bodies and deterministic authority-policy
+  selection, binding reviews to exact original records without circular hashes.
+  Sixteen new tests extend the reviewed museum suite to 80; actual recorded-state
+  authentication and complete projections remain in development.
+- Added a bounded, schema-derived source inventory for museum projections,
+  retaining applicable branch evidence and exact field values. Thirteen new
+  cases extend the independently reviewed museum suite to 65 tests.
+- Added pinned offline Linked Art schema validation and JSON-LD expansion,
+  with complete local schema-reference checks, explicit interpretation repairs
+  and strict format validation. Fifty-two tests pass independent review;
+  museum tooling now has an independent Windows/Linux CI workflow.
+- Added canonical token content-tree and metadata-subject primitives, with
+  independent hash vectors and fuzzing. Added immutable host finality adapters
+  separating historical verification from current discovery; actual metadata
+  publication and full finality integration remain in development.
+- Retained the pinned CRM and Linked Art vocabulary bytes and explicit
+  interpretation policy, with seven independently reviewed hierarchy and
+  domain/range tests. Complete JSON-LD and Linked Art validation remain separate.
+- Reworked collaborator binding serialization to avoid the default compiler's
+  stack limit while preserving the exact sixteen-word preimage, ABI and
+  selectors. Independent literal vectors and 256 fuzz inputs pass against the
+  prior IR implementation and both new compiler profiles. Complete repository
+  compilation remains a separate check.
+- Added the immutable interpretation-document registry and bounded chunk store,
+  with canonical payload reconstruction, versioned identities, governed
+  retirement and retained history. Eighteen current governance/document cases
+  with 256 fuzz inputs and an additional exact-event/Safe-call test pass;
+  both production compiler profiles fit. Official schema publication and
+  complete metadata integration remain separate delivery steps.
+- Added token royalty assignments, explicit disabled royalties and clear-to-
+  inheritance semantics under ADR 0038. The reviewed 262-case artist/provider
+  corpus passes, preserving prior operations and consent history; full-current
+  composition of the new royalty paths remains pending.
+- Added the first museum offline schema and fixture foundation, with three
+  candidate schemas, eight synthetic scenarios, exact retained context bytes
+  and a prospective onchain document publication planner. Thirty-two tests
+  and both deterministic generators pass independent review. Full format
+  mappings, authenticated recorded-state exports and institutional evidence
+  remain in development.
+- Added token-level primary revenue assignments and corrected-binding consent
+  with 249 reviewed domain cases. Added full-payload mint-ticket and sale-offer
+  revocation with 49 domain cases, fuzzing and two actual Executor/Safe cases.
+  Seven combined current Safe setup/mint/reveal regressions also pass.
+- Added the version-2 staged deployment foundation and reviewed catalog
+  inventory chunking. The local deployment dry run verifies actual product
+  construction after governance initialization; complete staged product
+  activation and the full-v1 deployment inventory remain in development.
+- Added native secondary private offers and custody sales with exact typed
+  revocation, buyer binding, royalty settlement and pull credits. Forty-two
+  domain cases, fuzzing and both production compiler profiles pass independent
+  review; actual-current Core/royalty composition remains pending.
+- Added saved governance stage planning for Safe callers, with seven reviewed
+  tests covering real delays, exact action matching, catalog changes and
+  idempotent execution. Full operator activation remains in development.
+- Adopted the complete museum semantic specification under ADR 0036, including
+  CIDOC CRM/Linked Art, Getty TGN, attributed records and offline dossier exports.
+  Tightened review authority, identity, bounded documents and exact field
+  preservation; twelve conformance gates and five parallel delivery packages
+  track implementation and evidence still to be delivered.
+- Added the native clearing-sale consumer with immediate floor mints, permanent
+  buyer rebates, separate supplemental settlement and bounded refund escape.
+  The subsequent compressed-aggregate and sparse-record optimization passes
+  70 domain cases and six fuzz properties with independent review. Updated
+  current-contract composition passes the reviewed nine-case clearing/catalog/
+  archival run; collector gas exceeds the required
+  ceiling and remains a candidate gate under ADR 0033.
+- Added estate activation and successor authority with immutable archival
+  coverage dependencies. All 234 artist-domain cases pass independent review;
+  three current-contract estate/Safe cases now pass independent review. Live
+  archival quorum, commercial mint after activation and operator migration
+  remain pending.
+- Distinguished test-asset engineering rehearsals from conforming candidates
+  in ADR 0033, preserving all numerical collector-gas ceilings and failed gates.
+- Added a network-derived Arweave inclusion fixture with exact source provenance,
+  positive and rejection tests, and changed-payload fuzzing in both compiler
+  profiles. This tests native inclusion without claiming consensus or independent
+  observer authentication.
+
+- Added the public archival-coverage prerequisite with quorum-authenticated
+  Arweave checkpoints, native inclusion, independent storing-family receipts
+  and current fixity records. Twenty-nine tests, two fuzz properties and separate
+  default compiler products pass independent review. Real-network rehearsal and
+  live quorum acceptance remain pending under ADR 0031; current estate
+  composition is covered by the three cases described above.
+
+- Added native supplemental clearing settlement tied to the original paid mint,
+  with independent replay protection, current revenue rights and no second NFT.
+  Twenty-one new cases, 103 prior regressions, fuzzing and both product compiler
+  profiles pass independent review. The separate clearing-sale consumer and
+  its optimization are described above.
+
+- Added standard native Dutch sales with immutable schedules, signed maximum
+  prices, official settlement and per-sale excess credits. Thirty-three domain
+  cases and two fuzz properties pass independent review. Four current-contract
+  Safe workflows pass independent review after a test-only role correction.
+- Implemented identity-contest dismissal and terminal cohort closure under
+  operation 58, preserving history and sole Identity ownership. The 202-case
+  domain suite and twelve actual-current dismissal/refund/dispute cases pass
+  independent review. Five further current succession/cohort/standing cases now
+  pass with eight Dutch/refund regressions on the supplemental recorder after
+  a test-only nonce correction. Effective source/configuration binding remains
+  pending.
+- Added native refund-window purchases with separate buyer custody, per-sale
+  pull refunds, permissionless finalization, official settlement, retained
+  artist-authority checks and reveal-fee handling. The 63-case domain suite and
+  two fuzz properties pass independent review. Four actual-current refund cases
+  and four retained identity-dispute cases also pass independent review against
+  their captured pre-dismissal source.
+- Added signing-domain discovery for native and universal sales, including an
+  explicit getter for the native adapter's separate price-program domain.
+  Existing signed messages, interface IDs and storage remain unchanged. Four
+  focused Safe/domain tests and 256 fuzz runs pass independent review.
+- Added succession directives and successor designations with disjoint authority
+  masks, defensive successor standing and typed record/read interfaces. The
+  185-case domain suite, prior interfaces/storage and eight actual constructor
+  traces pass independent review under the artist IR profile.
+- Added actual Safe/Executor identity-dispute coverage for delayed arbitration,
+  a role grant followed by a contest in the same batch, role-loss rollback,
+  mint denial and existing NFT transfer. Four new cases and seven retained
+  entropy cases pass independent review on their pre-succession snapshot.
+- Recorded the explicit identity-contest dismissal design in ADR 0029: a new
+  operation 58 closes adjudicated provisional cohorts while preserving historical
+  records and consumed replay state. The additive inventory and hostile checker
+  fixtures are recorded separately from the implementation and its acceptance.
+- Added governed reveal timing with a permissionless Safe keeper request after
+  the effective SLO, live request-timeout raises and strict deadline boundaries.
+  Fifty-four domain tests, thirty actual-Core metadata regressions and both
+  compiler profiles pass independent review. Seven actual Executor/Safe scenarios
+  also pass against their captured source. The new constructor takes explicit timing configuration
+  and uses a new storage layout for new deployments.
+- Added exact artist sale-parameter consent across native and universal sales,
+  with explicit capability admission and REQUIRED rejection in legacy consumers.
+  Focused consent and Safe tests pass. Three actual-current REQUIRED purchase
+  scenarios pass independent review after correcting their direct artist-approval
+  nonce setup; the original partial run is retained separately.
+- Added artist identity-compromise filings by eligible guardians, prior
+  authorities and a staged arbiter, with immutable contest records and
+  provisional-cohort consequences. The 159-case domain suite passes independent
+  review; actual governance composition now passes, while dismissal/recovery remain underway.
+- Added declared collection reveal-fee policies, separate escrow and requester
+  credits, canonical operational roles and typed provider quotes. Forty-four
+  focused cases and thirty actual-Core metadata regressions pass independent
+  review. Resumable role activation has six registry regression tests; automatic
+  AT_MINT requests and complete recovery remain in progress.
+- Added the ARRNG provider adapter with pinned source authority, exact fees,
+  stored-output retry, a governed coordinator-call gas cap and contract treasury
+  withdrawals. Seventeen focused tests plus fuzzing pass with independent review;
+  twelve combined current-stack tests also pass, including Safe mint/reveal,
+  retained-output retry and governance. Deployed upstream acceptance remains open.
+- Added artist rotation, guardian contests, provisional records and governed
+  timing windows through typed libraries and fixed extensions. The 133-case
+  domain suite and constructor/size checks pass independent review; wider
+  recovery and finality remain in progress.
+- Added signed native open, zero-price and pay-what-you-want programs, preserving
+  existing sale selectors. Seventy-two focused cases plus fuzzing pass independent
+  review; actual-Core Safe free, PWYW and open-edition purchases also pass.
+  Sale consent and refund windows continue.
+- Added native fixed-price PROFILE and COLLECTION_ARTIST sales through the shared
+  official settlement recorder, with exact payment, deferred wallet escrow and
+  replay protection. Domain tests and fuzzing pass with real Safe wallets;
+  all six current-Core native/ERC-20 composition tests also pass, including
+  template escrow, Safe withdrawals and complete failed-mint rollback.
+- Added a stateless phase-setup planner and JSON encoder for exact EOA/Safe calls,
+  confirmed-state resumption, current artist nonce checks and final Manager
+  ownership handoff. Seven actual-current tests cover real Safe setup, failed
+  target calls, sparse nonce use and paid minting. Identity onboarding and the
+  complete deployment runner remain separate migration work.
+- Added operative artist identity document revisions with immutable registration
+  and binding history, exact document-hash personhood matching, and preserved
+  existing consent records. Current-stack Safe and payment composition passes.
+- Added the shared official revenue recorder, sole ERC-20 payer adapter and a
+  signed fixed-profile sale consumer, including governed EIP-2612/Permit2 paths,
+  exact settlement events, replay protection and Safe domain tests. Actual-Core
+  Safe payment, minting, claims and rollback composition passes; broader sale
+  orchestration remains in progress.
+- Bound universal sale mint authorization IDs to the complete signed digest,
+  preserving the separate commercial and execution nonce protections. Added
+  actual-current Safe payment, exact replay and late-recipient rollback scenarios.
+- Preserved resolver and public SALE_POSTER materialization regressions in their
+  own fixture while retiring the uninstalled settlement API's owner allowlist
+  and direct payer-pull tests. New graph tests cover current transfer/replay rules.
+- Added modular artist content consent, defensive freeze authorization and
+  unused-authorization revocation, preserving the earlier interfaces and owner
+  storage. Current artist/metadata composition passes the actual Safe mint flows;
+  executed-finality admission remains separate work.
+- Added metadata-host content commitments, one-use approval consumption, actual
+  evolution witnesses and defensive artist locks, with real Safe administration
+  and relayer tests. Modular artist composition passes; executed-finality integration
+  remains open.
+- Added exact Safe CALL payload conversion and receipt verification for the expected
+  Safe transaction hash, with actual upstream 1.3.0/1.4.1/1.5.0 success/failure tests.
+  Client ABI/signing documentation now explicitly identifies its retained RC1 scope.
+- Added scoped artist economics/freeze delegation and direct-call timestamp
+  handling for queued EOA and Safe payout/attestation transactions.
+- Added exact native/ERC-20 sale funding with bounded wallet delivery and escrow
+  fallback. Native sale authorization is version 2 and binds the primary policy.
+- Added auction version-2 authorization and retained proceeds commitments;
+  settlement uses the rights approved when the auction was created.
+- Added a resumable modular artist authority-activation plan and current-system
+  Safe ERC-20 payment/recipient-failure tests. Complete operator and client
+  migration remains in progress.
+- Added prospective fixed-profile artist economics approval and exact defensive
+  royalty freeze authorization, with typed resolver previews and consent before
+  governed mutations. Defensive freezing preserves royalty terms; new minting
+  still requires consent to the resulting frozen hash.
+- Added deferred split-profile registration and append-only wallet discovery.
+- Connected modular artist onboarding and exact consent records to actual current
+  native/ERC-20 minting, auctions, metadata and primary/royalty facts. Added real
+  Safe artist, buyer, custody, payout and delayed-governance integration scenarios.
+  Wider artist lifecycle and deployment/client migration remain in progress.
+- Added split-wallet release authorization, revocation and deprecated-asset exits,
+  and immutable Core/artist binding for primary revenue resolution.
+- Added stateless aggregation of native and ERC-20 split-wallet claims, including
+  atomic and continue-on-failure modes and tests across 20 actual wallets.
+- Added offline fixtures from integrity-pinned official Safe 1.3.0, 1.4.1 and
+  1.5.0 packages, real threshold-signature and execution helpers, and focused
+  wallet interoperability tests. Full workflow acceptance remains in progress.
 
 - Added independently checked Sepolia deployment and native-sale demonstration
   evidence, public addresses and client configuration, including real Chainlink
@@ -58,6 +3218,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Run frozen artist-57 packet checks in their exact accepted RC1 Git context,
+  while enforcing unchanged frozen inputs in the active checkout. Current
+  extension-design and contract checks continue against current sources.
+
+- Preserve historical mint and revenue companions in explicitly named, provenance-
+  checked RC1 fixtures so legacy regressions remain separate from evolving v1
+  contract behavior and current deployment artifacts.
+- Admit the narrow artist mint-consent capability at Core and narrow attribution
+  reads at sale adapters. Pin provider identity across committed genesis, and
+  extract mint phase configuration without changing the Manager ABI or storage.
 - Compare client commitment and receipt hashes by their hexadecimal bytes so
   equivalent letter casing does not reject a valid purchase or auction.
 - Order resumed scenario authorizations by contract ABI fields across supported
@@ -1067,7 +4237,7 @@ the release policy in `docs/release-policy.md`.
   component manifests verified against live
   `finalityState`/`finalityStateForScope` reads; the mandatory
   component-type floor enforced onchain per collection metadata mode
-  ([LTA-FINALITY] requirement 1 — COLLECTION_METADATA, METADATA_ROUTER,
+  ([LTA-FINALITY] requirement 1 â€” COLLECTION_METADATA, METADATA_ROUTER,
   RENDERER, RENDER_CONTEXT, MEDIA_MANIFEST, ENTROPY_COORDINATOR for every
   mode, plus SCRIPT_SOURCE, DEPENDENCY_SOURCE, REFERENCE_RENDER for
   ONCHAIN/hybrid script works) independent of the optional discovery module,
@@ -2231,7 +5401,7 @@ the release policy in `docs/release-policy.md`.
   (sale adapter conformance, English/Dutch auctions with anti-snipe and
   increments, burn-to-mint, Merkle allowlists, refund windows, delegated
   minting); replaced every immutable gas cap with Governed Gas Parameters
-  (immutable floors, staged raise/lower, health probes — minting can never
+  (immutable floors, staged raise/lower, health probes â€” minting can never
   brick and marketplace reads can never permanently zero under gas
   repricing); extended finality with per-token content roots for all
   metadata modes, reference-render capture, renderer-determinism gates, and

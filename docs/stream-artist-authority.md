@@ -2878,7 +2878,13 @@ Requirements:
    requirement 10; the global `ARTIST_ROTATION_CONTEST_SECONDS` unless
    the operative guardian-set record pins a higher per-identity floor),
    and emits `ArtistRotationStaged`. At most one rotation may be pending
-   per identity.
+   per identity. Under [ADR 0025](adr/0025-artist-authority-windows-and-fixed-extensions.md),
+   an identity also has at most one active authority-transition window,
+   including its post-execution period. A subsequent rotation can stage only
+   after the preceding executed transition's captured post-window expires
+   uncontested. A pending rotation remains pending after its staging deadline
+   until explicitly executed or vetoed; neither expiry nor this guard clears
+   `IDENTITY_CONTESTED`.
 2. A staged rotation executes through exactly one of two evented paths
    (`AA-GUARD` owns the contest mechanics):
    (a) permissionlessly, by any caller via `executeArtistRotation`, once
@@ -3137,6 +3143,20 @@ Requirements:
    a thief's
    rewrite of the estate plan — or of where the money goes — never
    outruns the contest.
+   The post-window is `[executedAt, postWindowEndsAt)`: an uncontested
+   candidate is eligible at exact expiry without a maintenance transaction.
+   Its transition, deadline and prior operative head are retained; later
+   guardian, payout or document writes cannot extend or reset the window.
+   Guardian selection compares eligible record nonces, while document and
+   payout chains forbid a second provisional child of the same operative
+   predecessor. A contest observed strictly before expiry makes the cohort
+   ineligible. A contest filed at or after uncontested expiry does not by
+   itself rewind already-mature records; adjudicated supersession remains
+   the required route. Rejected/provisional records remain historical evidence.
+   Under ADR 0025's single-window model, future authority-vesting transitions
+   must preserve these bounds or explicitly amend the model. A contested
+   child never implicitly frees a chain predecessor or times out of contested
+   status; adjudication must explicitly resolve that branch.
 9. Dormancy and the contest window interact conservatively: dormancy must
    not initiate while a rotation is pending or the identity status is
    `IDENTITY_CONTESTED`, and any veto, approval, or contest filing counts as

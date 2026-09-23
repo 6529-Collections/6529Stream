@@ -1,0 +1,996 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:6529stream:STREAM_VIEW_CEREMONY_SOURCE_EXPORT_V1",
+  "title": "Exact local actual VIEW ceremony source export V1",
+  "$comment": "Compact UTF-8 without BOM or terminal newline. Properties emit in the listed order. sourceHash is Keccak256 of the exact whole JSON with only the final sourceHash property and its preceding comma omitted. SHA256 of final source.json is a separate caller-supplied anchor. sourceRevision is caller provenance, not an onchain Git attestation. Loader reconstructs every field from the same compiled host/runtime, initial chain/block/timestamp/CREATE context and complete current recipe; fresh replay must match exactly. No browser, RPC, gas or conformance claim. Files are raw complete bytes relative to a fresh export directory; source.json is written last. ABI fields retain actual new VIEW types unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schemaVersion",
+    "fixture",
+    "scope",
+    "graph",
+    "publication",
+    "members",
+    "sourceHash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "STREAM_VIEW_CEREMONY_SOURCE_EXPORT_V1"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "runtimeHash",
+        "sourceRevision",
+        "chainId",
+        "initialBlockNumber",
+        "initialTimestamp",
+        "deploymentHash"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{40}$"
+        },
+        "runtimeHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{40}$",
+          "description": "Caller-supplied source Git revision provenance. Actual compiled host/runtime identity and every current source byte are independently checked; this string is not an onchain Git attestation."
+        },
+        "chainId": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "initialBlockNumber": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "initialTimestamp": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "deploymentHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scopeType",
+        "collectionId",
+        "tokenId",
+        "scopeId"
+      ],
+      "properties": {
+        "scopeType": {
+          "const": 4
+        },
+        "collectionId": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "tokenId": {
+          "const": "0"
+        },
+        "scopeId": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        }
+      }
+    },
+    "graph": {
+      "type": "array",
+      "minItems": 29,
+      "maxItems": 29,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "CORE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "METADATA"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ROUTER"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "FINALITY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "PROVIDER"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "DISCOVERY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ARTIST_REGISTRY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "SCHEMAS"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "STORE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "DECLARATIONS"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "VIEW_REGISTRY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "VIEW_RENDERER"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "VIEW_SOURCE_SET"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "PRESERVATION_RENDERER"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "CHECKPOINT"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "OUTPUT_MANIFEST"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "SNAPSHOT"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "REFERENCE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "INVENTORY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "BUNDLE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ARTIFACT_COVERAGE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "EXTERNAL_COVERAGE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "SCOPE_MEMBERSHIP"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "GOVERNANCE_EXECUTOR"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ROLE_REGISTRY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ARCHIVE"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "SNAPSHOT_AUTHORITY"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{40}$"
+            },
+            "runtimeHash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ROOT_SAFE"
+            },
+            "target": {
+              "pattern": "^0x[0-9a-f]{40}$",
+              "type": "string"
+            },
+            "runtimeHash": {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "target",
+            "runtimeHash"
+          ],
+          "properties": {
+            "role": {
+              "const": "ARTIST_SAFE"
+            },
+            "target": {
+              "pattern": "^0x[0-9a-f]{40}$",
+              "type": "string"
+            },
+            "runtimeHash": {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "items": false
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "viewId",
+        "adoptionRecord",
+        "checkpoint",
+        "outputManifest",
+        "snapshotRecord",
+        "rootRecord",
+        "basicBindingRecord",
+        "completeBindingRecord",
+        "adoptionABI",
+        "checkpointABI",
+        "outputManifestABI",
+        "snapshotReceiptABI",
+        "basicBindingABI",
+        "completeBindingABI",
+        "referenceDependenciesABI",
+        "inventoryDependenciesABI",
+        "bundleDependenciesABI",
+        "rootRecordABI",
+        "rootBindingABI"
+      ],
+      "properties": {
+        "viewId": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "adoptionRecord": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "checkpoint": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "outputManifest": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "snapshotRecord": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "rootRecord": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "basicBindingRecord": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "completeBindingRecord": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "adoptionABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$",
+          "description": "Exact original Router viewAdoptionEncoded return bytes for StreamViewAdoptionTypes.Record, including original RENDERER_CONFIG family and source context."
+        },
+        "checkpointABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "outputManifestABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "snapshotReceiptABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$",
+          "description": "Exact actual StreamViewPreservationSnapshotTypesV1.Receipt; schemaHash/profileHash/canonicalizationHash remain original producer document hashes."
+        },
+        "basicBindingABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "completeBindingABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "referenceDependenciesABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "inventoryDependenciesABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "bundleDependenciesABI": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "rootRecordABI": {
+          "description": "Exact abi.encode(IStreamScopedContentRootPublication.Record): original CONTENT_ROOT family op17 authority, signed source, scope, history and record fields.",
+          "pattern": "^0x(?:[0-9a-f]{2})+$",
+          "type": "string"
+        },
+        "rootBindingABI": {
+          "description": "Exact abi.encode(IStreamViewPreservationContentRootV1.Binding), 896 bytes/28 words: explicit VIEW root profileId, outputProfile, adoptionProfile, producer/runtime/configuration pins and original leaf/root/snapshot schema/profile/canon hashes. No old scoped binding reinterpretation.",
+          "pattern": "^0x(?:[0-9a-f]{2})+$",
+          "type": "string"
+        }
+      }
+    },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16384,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "tokenId",
+          "collectionSerial",
+          "json",
+          "html",
+          "outputReturn",
+          "tokenData"
+        ],
+        "properties": {
+          "index": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "tokenId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "collectionSerial": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "json": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "keccak256",
+              "sha256",
+              "byteLength"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^member-[0-9]{20}\\.json$"
+              },
+              "keccak256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "byteLength": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              }
+            }
+          },
+          "html": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "keccak256",
+              "sha256",
+              "byteLength"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^member-[0-9]{20}\\.html$"
+              },
+              "keccak256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "byteLength": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              }
+            }
+          },
+          "outputReturn": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "keccak256",
+              "sha256",
+              "byteLength"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^member-[0-9]{20}\\.output\\.abi$"
+              },
+              "keccak256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "byteLength": {
+                "const": "992"
+              }
+            }
+          },
+          "tokenData": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "keccak256",
+              "sha256",
+              "byteLength"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^member-[0-9]{20}\\.token-data\\.bin$"
+              },
+              "keccak256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "byteLength": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "sourceHash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    }
+  }
+}

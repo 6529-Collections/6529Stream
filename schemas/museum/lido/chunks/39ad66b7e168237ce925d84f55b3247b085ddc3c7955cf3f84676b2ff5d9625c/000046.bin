@@ -1,0 +1,106 @@
+="sourceCode xml"><code class="sourceCode xml"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">skos:Concept</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300033656&quot;</span>&gt;</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>        panel paintings</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>        Tafelbild (Gemälde)</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>        http://www.wikidata.org/entity/Q55439</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>        https://d-nb.info/gnd/4037220-0</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">skos:Concept</span>&gt;</span></code></pre></div>
+            <p>This gives users and consumers of the LIDO record several
+            clues as to how the concept can be represented in a search
+            index or in a multilingual display, and where contextual
+            information can be obtained from other Linked Data sources.
+            Moreover, when the object at hand is described with several
+            concepts from different vocabularies using &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#conceptID">lido:conceptID</a>&gt;,
+            then it is impossible to tell if two or more identifiers
+            relate to similar concepts and which term relates to which
+            identifier. Using a mapping relation from SKOS prevents such
+            possible confusion. In the example above, the concept URIs
+            from Wikidata and GND are explicitly stated as equivalent to
+            the AAT concept. This greatly facilitates the alignment of
+            indexing vocabulary in cases where an aggregator receives
+            LIDO records using different preferred vocabularies. Using
+            SKOS label properties also obviates the need for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#term">lido:term</a>&gt;
+            elements in cases where portals or aggregators are not
+            prepared to collect term data from Linked Data URIs.</p>
+            <p>Usually, such augmented SKOS concept statements will not
+            be constructed manually, but by software components that
+            produce LIDO records. &lt;lido:conceptID&gt; is still
+            appropriate for indexing terms with local identifiers from
+            vocabularies not published as LOD.</p>
+            <p>The LIDO XML schema only demands that no other foreign
+            namespace besides SKOS is used within a concept element
+            (i.e., one that is derived from <a
+            href="https://lido-schema.org/schema/latest/lido.html#conceptComplexType">conceptComplexType</a>
+            and <a
+            href="https://lido-schema.org/schema/latest/lido.html#conceptMixedComplexType">conceptMixedComplexType</a>).
+            Proper usage of the SKOS namespace must therefore be checked
+            using the given Schematron rules or equivalent tools.</p>
+            <blockquote>
+            <p>For more detailed information about the usage of
+            &lt;skos:Concept&gt; and allowed properties, see <a
+            href="#display-and-index-elements"><em>4.2.3 Display and
+            index elements</em></a> in this document.</p>
+            </blockquote>
+            <h3 data-number="5.3.3" id="individuals-owl"><span
+            class="header-section-number">5.3.3</span> Individuals
+            (owl)</h3>
+            <p><strong>Namespace:</strong> <a
+            href="http://www.w3.org/2002/07/owl"
+            class="uri">http://www.w3.org/2002/07/owl</a>#</p>
+            <p><strong>Origin:</strong> W3C OWL Working Group</p>
+            <p><strong>Element used:</strong> owl:sameAs</p>
+            <p>Individual entities such as persons, organizations,
+            places, objects or named events can be described in more
+            than one authority file, meaning that there can be more than
+            one URI for referencing such an entity. When the content of
+            LIDO records is processed or presented to users, it can be
+            useful to choose among alternative Linked Data sources or to
+            collect complementary information from several sources.</p>
+            <p>The <a href="https://www.w3.org/TR/owl2-overview/">Web
+            Ontology Language</a> (OWL) defines a property, ‘<a
+            href="https://www.w3.org/TR/owl-ref/#sameAs-def">owl:sameAs</a>’,
+            for stating that two identifiers refer to the same
+            individual in the real world. LIDO, from version 1.1, adopts
+            the &lt;owl:sameAs&gt; statement for use in elements defined
+            by the following complex types in LIDO:</p>
+            <ul>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#actorComplexType">actor</a></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#eventComplexType">event</a></li>
+            <li><a
+            href="http://www.lido-schema.org/schema/latest/lido.html#legalBodyRefComplexType">legal
+            body</a></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#objectComplexType">object</a></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#placeComplexType">place</a></li>
+            </ul>
+            <p>As with the SKOS namespace described above, the OWL
+            namespace identifies an RDF data model. ‘owl:sameAs’ is
+            therefore an RDF property represented in XML using RDF/XML
+            syntax. The LIDO schema only demands that identity
+            statements in the above elements are from the OWL namespace.
+            Proper use of this namespace (i.e., only the
+            &lt;owl:sameAs&gt; property is permitted in LIDO and it can
+            only contain a URI) must therefore be checked using the
+            given Schematron rules or equivalent tools.</p>
+            <h2 data-number="5.4" id="attributes"><span
+            class="header-section-number">5.4</span> Attributes</h2>
+            <p>Many LIDO elements can be provided with attributes. An
+            attribute is an XML construct used for qualifying or
+            typifying the contents of an element. The LIDO schema
+            determines which elements can have attributes and which
+            attribute (or attributes) an eleme

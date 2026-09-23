@@ -24,6 +24,7 @@ on Windows, Linux, or macOS:
 ```text
 python scripts/dev.py doctor
 python scripts/dev.py build
+python scripts/dev.py prepare-graph
 python scripts/dev.py test
 ```
 

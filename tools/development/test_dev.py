@@ -7,6 +7,7 @@ from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
 import os
 import json
+import hashlib
 from types import SimpleNamespace
 from pathlib import Path
 import tempfile
@@ -17,11 +18,12 @@ from scripts import dev
 
 
 class DeveloperCommands(unittest.TestCase):
-    def _campaign(self, root, arguments, *, exit_code=0, missing_suite=False, mutate_source=False, config_change=None):
+    def _campaign(self, root, arguments, *, exit_code=0, missing_suite=False, mutate_source=False, config_change=None, preparation_failure=None, mutate_graph=False):
         source = root / "smart-contracts" / "Example.sol"
         source.parent.mkdir(exist_ok=True)
         source.write_text("contract Example {}", encoding="utf-8")
         captured = {}
+        stages = []
         def run(command, **kwargs):
             env = kwargs.get("env", {})
             if command[-1] == "--version":
@@ -35,8 +37,32 @@ class DeveloperCommands(unittest.TestCase):
                 if config_change:
                     config_change(cfg)
                 return SimpleNamespace(returncode=0, stdout=json.dumps(cfg))
+            if "--list" in command or "tools.build.prepare_current_graph" in command:
+                stage = "compile" if "--list" in command else "prepare-graph"
+                stages.append(stage)
+                if preparation_failure == stage:
+                    return SimpleNamespace(returncode=2)
+                if stage == "prepare-graph":
+                    self.assertEqual(Path(command[command.index("--out") + 1]), Path(env["FOUNDRY_OUT"]))
+                    self.assertEqual(Path(command[command.index("--cache-path") + 1]), Path(env["FOUNDRY_CACHE_PATH"]))
+                    self.assertIn("--campaign", command)
+                    graph = root / "artifacts/current-graph"
+                    product = b'{"test": "projected native input"}'
+                    raw = json.dumps({"products": {"Example": {
+                        "projectionBytes": len(product), "projectionSha256": hashlib.sha256(product).hexdigest()}}}).encode()
+                    for folder in (graph / "compiled", root / "artifacts/native-assembly/compiled"):
+                        folder.mkdir(parents=True, exist_ok=True)
+                        (folder / "manifest.json").write_bytes(raw)
+                        (folder / "Example.json").write_bytes(product)
+                    hosts = {k.rsplit(":", 1)[1]: k.rsplit(":", 1)[0] for k in dev.CAMPAIGN_SUITES}
+                    hosts["StreamNativeAssemblyCreation"] = "test/helpers/StreamNativeAssemblyCreation.sol"
+                    (graph / "preparation.json").write_text(json.dumps({
+                        "out": env["FOUNDRY_OUT"], "cache": env["FOUNDRY_CACHE_PATH"], "hosts": hosts,
+                        "projectionManifestSha256": hashlib.sha256(raw).hexdigest()}), encoding="utf-8")
+                return SimpleNamespace(returncode=0)
             return SimpleNamespace(returncode=0, stdout="a" * 40)
         def popen(command, **kwargs):
+            self.assertEqual(stages, ["compile", "prepare-graph"])
             captured.update(command=command, env=kwargs["env"])
             suites = {}
             for key, prefix in dev.CAMPAIGN_SUITES.items():
@@ -51,6 +77,9 @@ class DeveloperCommands(unittest.TestCase):
                 (corpus / "sequence.json").write_text('["retained failure"]', encoding="utf-8")
             if mutate_source:
                 source.write_text("contract Changed {}", encoding="utf-8")
+            if mutate_graph:
+                name = "Example.json" if mutate_graph == "product" else "manifest.json"
+                (root / "artifacts/current-graph/compiled" / name).write_bytes(b'changed')
             return SimpleNamespace(wait=lambda: exit_code, terminate=lambda: None)
         with patch.object(dev, "ROOT", root), patch.object(dev.shutil, "which", return_value="forge"), patch.object(dev.subprocess, "run", side_effect=run), patch.object(dev.subprocess, "Popen", side_effect=popen), redirect_stdout(StringIO()), redirect_stderr(StringIO()):
             result = dev.main(["campaign", *arguments])
@@ -70,6 +99,27 @@ class DeveloperCommands(unittest.TestCase):
             self.assertIn("smart-contracts/Example.sol", report["sources"])
             self.assertIn("out/campaigns/extended-", report["out"].replace("\\", "/"))
             self.assertFalse(list((root / "cache").rglob("*.lock")))
+
+    def test_campaign_preparation_failure_never_executes_properties(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for stage in ("compile", "prepare-graph"):
+                code, child = self._campaign(root, ["--artifacts", stage], preparation_failure=stage)
+                self.assertEqual(code, 1)
+                self.assertFalse(child)
+                report = json.loads((root / stage / "campaign.json").read_text())
+                self.assertIn("no properties executed", report["error"])
+                self.assertFalse((root / stage / "forge.log").exists())
+                self.assertFalse((root / "cache/current-graph.campaign.lock").exists())
+
+    def test_campaign_rejects_changed_graph_projections(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for changed in ("product", "manifest"):
+                code, _ = self._campaign(root, ["--artifacts", changed], mutate_graph=changed)
+                self.assertEqual(code, 1)
+                report = json.loads((root / changed / "campaign.json").read_text())
+                self.assertIn("Graph projections changed", report["error"])
 
     def test_campaign_empty_filter_cannot_be_reported_as_success(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -111,7 +161,7 @@ class DeveloperCommands(unittest.TestCase):
             code, child = self._campaign(root, ["--artifacts", "timeout"], config_change=lambda cfg: cfg["invariant"].update(timeout=1))
             self.assertEqual(code, 1)
             self.assertFalse(child)
-            lock = root / "cache/current.campaign.lock"
+            lock = root / "cache/current-graph.campaign.lock"
             lock.parent.mkdir(parents=True, exist_ok=True)
             lock.write_text("active owner", encoding="utf-8")
             code, child = self._campaign(root, ["--artifacts", "locked", "--reuse-current"])
@@ -136,7 +186,7 @@ class DeveloperCommands(unittest.TestCase):
                 code, child = self._campaign(root, ["--artifacts", "unwritable", "--reuse-current"])
             self.assertEqual(code, 1)
             self.assertFalse(child)
-            self.assertFalse((root / "cache/current.campaign.lock").exists())
+            self.assertFalse((root / "cache/current-graph.campaign.lock").exists())
             self.assertFalse((root / "unwritable").exists())
 
     def test_campaign_rejects_ambiguous_seed_and_forge_overrides(self):

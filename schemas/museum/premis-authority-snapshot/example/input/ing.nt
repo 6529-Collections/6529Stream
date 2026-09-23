@@ -1,0 +1,84 @@
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/mads/rdf/v1#Authority> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#authoritativeLabel> "ingestion" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#code> "ing" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#definitionNote> "The process of adding objects to a preservation repository. More detail can be gained by utilizing \"Ingestion Start\" and \"Ingestion End\" rather than this one event."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#scopeNote> "It is assumed that a SIP is created in this process. Note the relationship with \"information package creation\"."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.loc.gov/premis/rdf/v3/Event> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#hasNarrowerAuthority> <http://id.loc.gov/vocabulary/preservation/eventType/ine> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ine> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/mads/rdf/v1#Authority> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ine> <http://www.loc.gov/mads/rdf/v1#authoritativeLabel> "ingestion end" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ine> <http://www.loc.gov/mads/rdf/v1#code> "ine" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#hasRelatedAuthority> <http://id.loc.gov/vocabulary/preservation/eventType/ipc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ipc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/mads/rdf/v1#Authority> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ipc> <http://www.loc.gov/mads/rdf/v1#authoritativeLabel> "information package creation" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ipc> <http://www.loc.gov/mads/rdf/v1#code> "ipc" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <http://id.loc.gov/vocabulary/preservation> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <http://id.loc.gov/vocabulary/preservation/eventType> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> <http://id.loc.gov/vocabulary/preservation/eventType/collection_PREMIS> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#hasNarrowerAuthority> <http://id.loc.gov/vocabulary/preservation/eventType/ins> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ins> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/mads/rdf/v1#Authority> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ins> <http://www.loc.gov/mads/rdf/v1#authoritativeLabel> "ingestion start" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ins> <http://www.loc.gov/mads/rdf/v1#code> "ins" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b35httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b35httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b35httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "new"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b35httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2010-06-01T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b35httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b48httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b48httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b48httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b48httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2012-06-01T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b48httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2017-09-07T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b74httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b74httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b74httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b74httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2018-09-24T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b74httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#prefLabel> "ingestion" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#narrower> <http://id.loc.gov/vocabulary/preservation/eventType/ine> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ine> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ine> <http://www.w3.org/2004/02/skos/core#prefLabel> "ingestion end" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ine> <http://www.w3.org/2004/02/skos/core#notation> "ine" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#narrower> <http://id.loc.gov/vocabulary/preservation/eventType/ins> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ins> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ins> <http://www.w3.org/2004/02/skos/core#prefLabel> "ingestion start" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ins> <http://www.w3.org/2004/02/skos/core#notation> "ins" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#semanticRelation> <http://id.loc.gov/vocabulary/preservation/eventType/ipc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ipc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ipc> <http://www.w3.org/2004/02/skos/core#prefLabel> "information package creation" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ipc> <http://www.w3.org/2004/02/skos/core#notation> "ipc" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#scopeNote> "It is assumed that a SIP is created in this process. Note the relationship with \"information package creation\"."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#definition> "The process of adding objects to a preservation repository. More detail can be gained by utilizing \"Ingestion Start\" and \"Ingestion End\" rather than this one event."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#notation> "ing" .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#inScheme> <http://id.loc.gov/vocabulary/preservation> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#inScheme> <http://id.loc.gov/vocabulary/preservation/eventType> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#changeNote> _:b118httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b118httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b118httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/ing> .
+_:b118httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b118httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#createdDate> "2010-06-01T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b118httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#changeReason> "new"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#changeNote> _:b126httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b126httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b126httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/ing> .
+_:b126httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b126httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#createdDate> "2012-06-01T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b126httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#changeReason> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#changeNote> _:b134httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b134httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b134httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/ing> .
+_:b134httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b134httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#createdDate> "2017-09-07T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b134httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#changeReason> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://id.loc.gov/vocabulary/preservation/eventType/ing> <http://www.w3.org/2004/02/skos/core#changeNote> _:b142httpc0liddOtlocdOtgovvocabularypreservationeventTypeing .
+_:b142httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b142httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/ing> .
+_:b142httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b142httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#createdDate> "2018-09-24T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b142httpc0liddOtlocdOtgovvocabularypreservationeventTypeing <http://purl.org/vocab/changeset/schema#changeReason> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .

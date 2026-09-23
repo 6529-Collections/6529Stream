@@ -1,0 +1,1 @@
+{"additionalProperties":false,"properties":{"note":{"type":"string"},"version":{"const":"1"}},"required":["note","version"],"type":"object"}

@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+import {
+    StreamPreservationTokenProducerProfilesV1 as Family
+} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalStateV1 as State
+} from "./StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalStateV1.sol";
+import {
+    StreamScopedPreservationPolicyRenderCriticalDefinitionsV1 as Definitions
+} from "./StreamScopedPreservationPolicyRenderCriticalDefinitionsV1.sol";
+import {
+    StreamPreservationDocumentReads as Documents
+} from "./StreamPreservationDocumentReads.sol";
+import {
+    StreamPreservationInventoryTypes as T
+} from "../../interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
+
+library StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalDefinitionStagesV1 {
+    function appendDefinition(State.State storage state, bytes32 id) public {
+        State.stage(state, id, 7);
+        uint64 index = state.definitionCursor[id];
+        (bytes32 documentId, bytes32 expectedHash) =
+            Definitions.definition(index, Family.FAMILY_PROFILE);
+        T.Item[] memory rows = new T.Item[](1);
+        rows[0] = Documents.item(state.dependencies, documentId, expectedHash);
+        state.documents[id].push(State.DocumentPin(documentId, rows[0].provenanceHash));
+        State.append(state, id, rows, keccak256(abi.encode(documentId, rows[0])));
+        state.definitionCursor[id] = index + 1;
+        if (index + 1 == Definitions.COUNT) state.plans[id].progress.completedStages = 8;
+    }
+
+    function requireDefinitions(State.State storage state, bytes32 id, bool full) public view {
+        if (state.documents[id].length != Definitions.COUNT) revert T.InventoryIncomplete();
+        for (uint64 i; i < Definitions.COUNT; ++i) {
+            State.DocumentPin storage pin = state.documents[id][i];
+            (bytes32 documentId, bytes32 expectedHash) =
+                Definitions.definition(i, Family.FAMILY_PROFILE);
+            if (pin.id != documentId) revert T.InventorySourceChanged();
+            bytes32 actual = full
+                ? Documents.item(state.dependencies, documentId, expectedHash).provenanceHash
+                : Documents.currentFactsHash(state.dependencies, documentId);
+            if (actual != pin.factsHash) revert T.InventorySourceChanged();
+        }
+        // Renderer/citation documents were derived from the admitted immutable versions,
+        // not a caller list. Repeated IDs share one exact facts pin; history stays readable.
+        for (uint256 i; i < state.selectedDocuments[id].length; ++i) {
+            State.DocumentPin storage pin = state.selectedDocuments[id][i];
+            bytes32 actual = full
+                ? Documents.item(state.dependencies, pin.id, 0).provenanceHash
+                : Documents.currentFactsHash(state.dependencies, pin.id);
+            if (actual != pin.factsHash || state.selectedDocumentFacts[id][pin.id] != pin.factsHash)
+            {
+                revert T.InventorySourceChanged();
+            }
+        }
+    }
+}
