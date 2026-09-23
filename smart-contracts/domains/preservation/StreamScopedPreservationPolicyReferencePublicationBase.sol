@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamScopedPreservationPolicyReferencePublicationOperations as Operations
+} from "./StreamScopedPreservationPolicyReferencePublicationOperations.sol";
+import {
     StreamPreservationPolicyReferenceFamiliesV2 as F
 } from "./StreamPreservationPolicyReferenceFamiliesV2.sol";
-import {
-    StreamPreservationTokenProducerProfilesV1 as Profiles
-} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+
 import {
     IStreamScopedPreservationPolicyReferencePublicationV1
 } from "../../interfaces/stream/preservation/IStreamScopedPreservationPolicyReferencePublicationV1.sol";
@@ -31,12 +32,7 @@ import {
     StreamFinalityDomains
 } from "../../interfaces/stream/finality/IStreamArtworkFinalityComponents.sol";
 import { IStreamModule } from "../../interfaces/stream/modules/IStreamModule.sol";
-import {
-    IStreamCollectionMetadataV1
-} from "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
-import {
-    StreamScopedPreservationPolicyReferenceDefinitionsV1 as D
-} from "../records/StreamScopedPreservationPolicyReferenceDefinitionsV1.sol";
+
 import {
     StreamScopedPreservationPolicyReferenceSourceReadsV1 as Sources
 } from "./StreamScopedPreservationPolicyReferenceSourceReadsV1.sol";
@@ -53,8 +49,7 @@ import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotM
 import {
     StreamFinalityRouterEvidence as Reads
 } from "../finality/StreamFinalityRouterEvidence.sol";
-import { StreamRecordFamilies } from "../records/StreamRecordFamilies.sol";
-import { StreamMetadataRenderer } from "../metadata/StreamMetadataRenderer.sol";
+
 import {
     StreamGasParameterHost,
     IStreamGovernedParameterAuthority,
@@ -73,6 +68,9 @@ abstract contract StreamScopedPreservationPolicyReferencePublicationBase is
     IStreamModule,
     StreamGasParameterHost
 {
+    /// @dev Retain the original host ABI for the error bubbled by Operations.
+    error ScopedPolicyReferenceDependency(address target);
+
     bytes32 public constant READ_GAS = keccak256("6529STREAM_GGP_SCOPED_POLICY_REFERENCE_READ_GAS");
     bytes32 public constant SOURCE_GAS =
         keccak256("6529STREAM_GGP_SCOPED_POLICY_REFERENCE_SOURCE_GAS");
@@ -184,9 +182,20 @@ abstract contract StreamScopedPreservationPolicyReferencePublicationBase is
         override
         returns (bytes32 sourceHash, bytes memory canonical)
     {
-        bytes32 subject = _candidate(p);
-        T.Receipt memory r = _receipt(p, subject, recorder);
-        return Records.prepare(_fileInventories, dependencies(), p, r, false, _referenceFamily);
+        return Operations.previewReference(
+            _fixed,
+            _publications,
+            _payloads,
+            _receipts,
+            _history,
+            _ids,
+            _locks,
+            _fileInventories,
+            _gasParameters,
+            Operations.Context(core, metadataHost, deploymentChainId, _referenceFamily),
+            p,
+            recorder
+        );
     }
 
     function publishReference(T.Publication calldata p)
@@ -195,64 +204,18 @@ abstract contract StreamScopedPreservationPolicyReferencePublicationBase is
         guarded
         returns (bytes32 hash)
     {
-        bytes32 subject = _candidate(p);
-        T.Receipt memory r = _receipt(p, subject, msg.sender);
-        T.Dependencies memory d = dependencies();
-        bytes memory canonical;
-        (r.observation.sourcesHash, canonical) =
-            Records.prepare(_fileInventories, d, p, r, false, _referenceFamily);
-        if (
-            p.observation.expectedSourcesHash == 0
-                || p.observation.expectedSourcesHash != r.observation.sourcesHash
-        ) revert T.InvalidScopedPolicyReference();
-        r.observation.payloadHash = keccak256(canonical);
-        r.observation.payloadBytes = uint32(canonical.length);
-        r.observation.recordedAt = uint64(block.timestamp);
-        hash = keccak256(
-            abi.encode(
-                F.recordDomain(_referenceFamily, true),
-                deploymentChainId,
-                address(this),
-                core,
-                metadataHost,
-                p,
-                r
-            )
-        );
-        r.observation.recordHash = hash;
-        r.observation.recordChainHash = keccak256(
-            abi.encode(
-                F.chainDomain(_referenceFamily, true),
-                deploymentChainId,
-                address(this),
-                core,
-                subject,
-                p.observation.expectedHead == 0
-                    ? bytes32(0)
-                    : _receipts[p.observation.expectedHead].observation.recordChainHash,
-                r.observation.revision,
-                hash
-            )
-        );
-        Bytes.retain(_payloads[hash], d.targets[3], canonical);
-        Bytes.retain(_publications[hash], d.targets[3], abi.encode(p));
-        // Retention calls only the fixed Store's immutable reads. Still recheck the grant and
-        // exact scope lineage before accepting the append, retaining atomic late-failure rollback.
-        (uint8 cls, uint64 rev) = _authority(p.scope.collectionId, msg.sender);
-        if (
-            cls != r.observation.authorizationClass || rev != r.observation.grantRevision
-                || _candidate(p) != subject
-        ) revert T.ScopedPolicyReferenceAuthority(msg.sender);
-        _receipts[hash] = r;
-        _history[subject].push(hash);
-        _ids[subject][p.observation.referenceId] = true;
-        emit ScopedPolicyReferencePublished(
-            F.isV2(_referenceFamily) ? 2 : 1,
-            subject,
-            p.observation.referenceId,
-            hash,
-            r,
-            p.observation.manifestURI
+        return Operations.publishReference(
+            _fixed,
+            _publications,
+            _payloads,
+            _receipts,
+            _history,
+            _ids,
+            _locks,
+            _fileInventories,
+            _gasParameters,
+            Operations.Context(core, metadataHost, deploymentChainId, _referenceFamily),
+            p
         );
     }
 
@@ -519,71 +482,6 @@ abstract contract StreamScopedPreservationPolicyReferencePublicationBase is
     }
 
     function streamModuleManifest() external pure virtual override returns (string memory, bytes32);
-
-    function _receipt(T.Publication calldata p, bytes32 subject, address recorder)
-        private
-        view
-        returns (T.Receipt memory r)
-    {
-        r.scopeSubject = subject;
-        R.Publication calldata o = p.observation;
-        r.observation.collectionId = o.collectionId;
-        r.observation.referenceId = o.referenceId;
-        r.observation.predecessor = o.expectedHead;
-        r.observation.revision = o.expectedRevision + 1;
-        r.observation.snapshotRecordHash = o.snapshotRecordHash;
-        r.observation.snapshotRevision = o.snapshotRevision;
-        r.observation.recorder = recorder;
-        (r.observation.authorizationClass, r.observation.grantRevision) =
-            _authority(o.collectionId, recorder);
-        r.observation.effectiveAt = o.effectiveAt;
-        r.observation.reasonHash = o.reasonHash;
-        r.observation.schemaHash = F.definition(_referenceFamily, true).schemaHash;
-        r.observation.profileHash = F.definition(_referenceFamily, true).profileHash;
-        r.observation.canonicalizationHash = F.definition(_referenceFamily, true).canonHash;
-    }
-
-    function _authority(uint256 cid, address actor) private view returns (uint8 cls, uint64 rev) {
-        if (actor == address(0)) revert T.ScopedPolicyReferenceAuthority(actor);
-        for (uint8 i; i < 2; ++i) {
-            cls = i == 0 ? 3 : 8;
-            bytes memory raw = Reads.read(
-                metadataHost,
-                abi.encodeCall(
-                    IStreamCollectionMetadataV1.familyWriter,
-                    (i == 0 ? cid : 0, StreamRecordFamilies.CURATOR, cls, actor)
-                ),
-                64,
-                gasParameter(READ_GAS)
-            );
-            bool enabled;
-            (enabled, rev) = abi.decode(raw, (bool, uint64));
-            if (keccak256(raw) != keccak256(abi.encode(enabled, rev))) {
-                revert T.ScopedPolicyReferenceDependency(metadataHost);
-            }
-            if (enabled && rev != 0) return (cls, rev);
-        }
-        revert T.ScopedPolicyReferenceAuthority(actor);
-    }
-
-    function _candidate(T.Publication calldata p) private view returns (bytes32 subject) {
-        subject = _subject(p.scope);
-        _requireExactScope(_head(subject), p.scope);
-        R.Publication calldata o = p.observation;
-        if (
-            o.collectionId != p.scope.collectionId || o.referenceId == 0 || o.reasonHash == 0
-                || o.effectiveAt == 0 || o.effectiveAt > block.timestamp
-                || block.timestamp > type(uint64).max || o.expectedRevision == type(uint64).max
-                || _ids[subject][o.referenceId]
-        ) revert T.InvalidScopedPolicyReference();
-        if (_head(subject) != o.expectedHead || _history[subject].length != o.expectedRevision) {
-            revert T.ScopedPolicyReferenceLineage(o.expectedHead, _head(subject));
-        }
-        if (_locks[subject].actionId != 0) revert T.ScopedPolicyReferenceLocked(subject);
-        StreamMetadataRenderer.requireValidUtf8ContentUri(
-            "referenceManifestURI", o.manifestURI, 2048, true
-        );
-    }
 
     function _requireExactScope(bytes32 hash, StreamFinalityScope memory scope) private view {
         if (hash == 0) return;

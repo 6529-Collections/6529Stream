@@ -1,35 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamPolicyContentObservationV2 as Observation
+} from "./StreamPolicyContentObservationV2.sol";
+import {
     IStreamPolicyContentCheckpointV2 as C
 } from "../../interfaces/stream/finality/IStreamPolicyContentCheckpointV2.sol";
 import {
     IStreamStaticSelectionCheckpoint as S
 } from "../../interfaces/stream/finality/IStreamStaticSelectionCheckpoint.sol";
-import {
-    IStreamStaticMetadataRouter as M
-} from "../../interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
-import { IStreamRenderer as R } from "../../interfaces/stream/metadata/IStreamRenderer.sol";
-import {
-    IStreamMetadataFullViews as F
-} from "../../interfaces/stream/metadata/IStreamMetadataFullViews.sol";
+
 import {
     IStreamFinalityEntropyPolicySourceSet as E
 } from "../../interfaces/stream/finality/IStreamFinalityEntropyPolicySourceSet.sol";
-import {
-    IStreamTerminalEntropyReadiness as T
-} from "../../interfaces/stream/finality/IStreamTerminalEntropyReadiness.sol";
+
 import {
     StreamScopeMembershipFacts
 } from "../../interfaces/stream/finality/StreamScopeMembershipTypes.sol";
-import {
-    IStreamStaticEntropySource as Native
-} from "../../interfaces/stream/metadata/IStreamStaticEntropySource.sol";
-import { IStreamCoreIdentity as I } from "../../interfaces/stream/core/IStreamCoreIdentity.sol";
-import { IStreamCoreMint as D } from "../../interfaces/stream/core/IStreamCoreMint.sol";
-import {
-    StreamTokenContentLeaf
-} from "../../interfaces/stream/metadata/StreamTokenContentTypes.sol";
+
 import { StreamTokenContentTree as Tree } from "../metadata/StreamTokenContentTree.sol";
 import { StreamRendererCalls as Calls } from "../metadata/StreamRendererCalls.sol";
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
@@ -358,161 +346,21 @@ contract StreamPolicyContentCheckpointV2 is C, StreamGasParameterHost, IERC165 {
             string memory imageURI
         )
     {
-        bytes memory raw = _read(
-            metadataRouter,
-            abi.encodeCall(M.resolvedMetadataConfig, (row.tokenId)),
-            8192,
-            false,
-            false
-        );
-        M.ConfigRecord memory config = abi.decode(raw, (M.ConfigRecord));
-        if (
-            keccak256(raw) != keccak256(abi.encode(config)) || keccak256(raw) != row.configHash
-                || config.recordHash != row.configRecordHash
-                || config.config.mode != R.MetadataMode.ONCHAIN || !config.config.frozen
-                || config.selection.rendererId != keccak256("6529STREAM_RENDERER_V1")
-                || config.selection.rendererVersion != keccak256("6529STREAM_STATIC_RENDERER_V1")
-        ) revert StaticContentPayload(row.tokenId);
-        raw = _read(
-            metadataRouter,
-            abi.encodeCall(
-                M.staticRenderSourceForConfig, (p.scope.collectionId, row.configRecordHash)
-            ),
-            24000,
-            false,
-            false
-        );
-        (M.RawSource memory source, R.MetadataConfig memory selected) =
-            abi.decode(raw, (M.RawSource, R.MetadataConfig));
-        if (
-            keccak256(raw) != keccak256(abi.encode(source, selected))
-                || keccak256(abi.encode(source)) != row.rawSourceHash
-                || keccak256(abi.encode(selected)) != keccak256(abi.encode(config.config))
-        ) revert StaticContentPayload(row.tokenId);
-        imageURI = source.imageURI;
-        address entropy = abi.decode(
-            _read(core, abi.encodeCall(I.coordinatorAtMint, (row.tokenId)), 32, true, false),
-            (address)
-        );
-        if (entropy != row.sources[3] || entropy.codehash != row.sourceCodeHashes[3]) {
-            revert StaticContentPayload(row.tokenId);
-        }
-        bytes memory facts = _read(
-            entropySourceSet,
-            abi.encodeCall(E.tokenEntropyReadiness, (row.tokenId)),
-            320,
-            true,
-            false
-        );
-        value.entropy = abi.decode(facts, (E.TokenReadiness));
-        E.TokenReadiness memory e = value.entropy;
-        if (
-            keccak256(facts) != keccak256(abi.encode(e)) || e.coordinator != entropy
-                || e.coordinatorCodeHash != row.sourceCodeHashes[3] || e.policyHash == 0
-        ) revert StaticContentPayload(row.tokenId);
-        if (e.terminal) {
-            if (
-                e.finalized || e.seed != 0 || e.renderRequirement != 1
-                    || !((e.status == 1 && e.mode == 0) || (e.status == 2 && e.mode == 2))
-            ) revert StaticContentPayload(row.tokenId);
-            bytes memory admitted = _read(
-                terminalReadiness,
-                abi.encodeCall(T.requireTerminalRenderReady, (row.tokenId)),
-                608,
-                true,
-                false
-            );
-            T.Evidence memory a = abi.decode(admitted, (T.Evidence));
-            if (
-                keccak256(admitted) != keccak256(abi.encode(a))
-                    || keccak256(abi.encode(a.entropy)) != keccak256(facts)
-                    || a.configRecordHash != row.configRecordHash
-                    || a.versionKey != row.selection.versionKey
-                    || a.renderer != row.selection.renderer
-                    || a.rendererCodeHash != row.selection.rendererCodeHash
-                    || a.registry != row.selection.registry
-                    || a.registryCodeHash != row.selection.registryCodeHash
-                    || a.policyChainHash != p.policyChainHash || a.admissionHash == 0
-                    || a.evidenceHash == 0
-            ) revert StaticContentPayload(row.tokenId);
-            value.terminalAdmissionHash = keccak256(admitted);
-        } else {
-            if (!e.finalized || e.status != 5 || e.mode != 2 || e.renderRequirement != 0) {
-                revert StaticContentPayload(row.tokenId);
-            }
-            bytes memory nativeFacts = _read(
-                entropy,
-                abi.encodeCall(Native.staticTokenRenderFacts, (row.tokenId)),
-                96,
-                true,
-                false
-            );
-            (uint8 status, bytes32 seed, address provider) =
-                abi.decode(nativeFacts, (uint8, bytes32, address));
-            if (
-                keccak256(nativeFacts) != keccak256(abi.encode(status, seed, provider))
-                    || status != 5 || seed != e.seed
-            ) revert StaticContentPayload(row.tokenId);
-        }
-        raw = _read(core, abi.encodeCall(D.tokenData, (row.tokenId)), 16448, false, false);
-        data = abi.decode(raw, (bytes));
-        if (data.length > 16384 || keccak256(raw) != keccak256(abi.encode(data))) {
-            revert StaticContentPayload(row.tokenId);
-        }
-        json = bytes(
-            Calls.stringResult(
-                _read(
-                    metadataRouter,
-                    abi.encodeCall(F.tokenJSON, (row.tokenId)),
-                    MAX_BYTES + 64,
-                    false,
-                    true
-                ),
-                MAX_BYTES
-            )
-        );
-        html = bytes(
-            Calls.stringResult(
-                _read(
-                    metadataRouter,
-                    abi.encodeCall(F.tokenHTML, (row.tokenId)),
-                    MAX_BYTES + 64,
-                    false,
-                    true
-                ),
-                MAX_BYTES
-            )
-        );
-        if (html.length == 0 || json.length == 0) revert StaticContentPayload(row.tokenId);
-        value.leaf = StreamTokenContentLeaf(
-            row.tokenId, keccak256(json), 0, keccak256(html), 0, keccak256(data)
-        );
-        value.selectionRowHash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_STATIC_SELECTION_ROW_V1"),
-                deploymentChainId,
+        return Observation.observe(
+            _gasParameters,
+            Observation.Context(
                 core,
                 metadataRouter,
-                row
-            )
-        );
-        value.sourceFactsHash = keccak256(
-            abi.encode(
-                PROFILE,
-                row.configHash,
-                row.rawSourceHash,
-                entropy,
-                facts,
                 entropySourceSet,
-                entropySourceSetCodeHash,
-                p.inventoryHash,
-                p.policyChainHash,
                 terminalReadiness,
+                entropySourceSetCodeHash,
                 terminalReadinessCodeHash,
-                value.terminalAdmissionHash
-            )
+                deploymentChainId,
+                PROFILE
+            ),
+            p,
+            row
         );
-        value.htmlHash = keccak256(html);
     }
 
     function _append(bytes32 id, uint256 index, bytes32 value) private {

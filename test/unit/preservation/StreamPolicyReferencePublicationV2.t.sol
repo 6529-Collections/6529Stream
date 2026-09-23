@@ -1,5 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPolicyPublicationGraphTypesV2 as CapacityReferenceGraph454
+} from "../../../smart-contracts/interfaces/stream/finality/StreamPolicyPublicationGraphTypesV2.sol";
+import {
+    StreamPolicyPublicationReferenceDeploymentV2 as CapacityReferenceDeploy454
+} from "../../../smart-contracts/domains/finality/StreamPolicyPublicationReferenceDeploymentV2.sol";
+import {
+    LeafManifestVm as CapacityReferenceCreateVm454
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
+import {
+    IStreamGasParameterHost as CapacityReferenceGas454
+} from "../../../smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol";
+
+import { Vm } from "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/PolicyReferenceFixtureV2.sol";
 
 /// @notice Actual V2 Snapshot/reference/Metadata/Schema/Store/Membership and official Safe.
@@ -7,6 +21,238 @@ import "../../helpers/PolicyReferenceFixtureV2.sol";
 /// are explicit typed boundaries. These recipes do not establish actual selected-provider,
 /// browser replay, complete executable archival closure or transaction-cap acceptance.
 contract StreamPolicyReferencePublicationV2Test is PolicyReferenceFixtureV2 {
+    function testCapacityReferenceDeploymentKeepsCreatorArgumentsAndIndependentHistory() public {
+        _reference(true);
+        T.Dependencies memory d = referenceHost.dependencies();
+        CapacityReferenceGraph454.Recipe memory r;
+        CapacityReferenceGraph454.Graph memory g;
+        for (uint256 i; i < 5; ++i) {
+            r.inventory.targets[i] = d.targets[i];
+            r.inventory.codeHashes[i] = d.codeHashes[i];
+        }
+        r.inventory.chainId = d.chainId;
+        r.targets[3] = address(executor);
+        r.codeHashes[3] = address(executor).codehash;
+        g.children[3] = d.targets[5];
+        g.codeHashes[3] = d.codeHashes[5];
+        r.inventory.targets[11] = d.targets[6];
+        r.inventory.codeHashes[11] = d.codeHashes[6];
+        r.referenceGas[0] = CapacityReferenceGas454.GasParameterConfig(
+            "POLICY_REFERENCE_READ_GAS", d.readGas, 50000, 1
+        );
+        r.referenceGas[1] = CapacityReferenceGas454.GasParameterConfig(
+            "POLICY_REFERENCE_SOURCE_GAS", d.sourceGas, 50000, 1
+        );
+        r.referenceGas[2] = CapacityReferenceGas454.GasParameterConfig(
+            "POLICY_REFERENCE_SNAPSHOT_GAS", d.snapshotGas, 50000, 1
+        );
+        r.referenceGas[3] = CapacityReferenceGas454.GasParameterConfig(
+            "POLICY_REFERENCE_ARCHIVE_GAS", d.archiveGas, 50000, 1
+        );
+        uint64 nonce = CapacityReferenceCreateVm454(address(vm)).getNonce(address(this));
+
+        StreamPolicyReferencePublicationV2 child =
+            StreamPolicyReferencePublicationV2(CapacityReferenceDeploy454.deploy(r, g));
+        require(
+            address(child)
+                    == CapacityReferenceCreateVm454(address(vm))
+                        .computeCreateAddress(address(this), nonce)
+                && CapacityReferenceCreateVm454(address(vm)).getNonce(address(this)) == nonce + 1,
+            "original host caller and one CREATE"
+        );
+        require(
+            keccak256(abi.encode(child.dependencies())) == keccak256(abi.encode(d))
+                && child.governanceAuthority() == address(executor)
+                && child.executorCodeHash() == address(executor).codehash,
+            "all seven dependencies and four gas parameters preserved"
+        );
+        require(
+            child.core() == d.targets[0] && child.metadataHost() == d.targets[1]
+                && child.metadataRouter() == d.targets[4] && child.snapshots() == d.targets[5]
+                && child.archiveCoverage() == d.targets[6]
+                && child.deploymentChainId() == block.chainid,
+            "original constructor immutables"
+        );
+
+        StreamPolicyReferencePublicationV2 original = referenceHost;
+        referenceHost = child;
+        referenceHost.prepareFileInventory(
+            referenceInput.observation.environment.packageFiles, true
+        );
+        referenceHost.prepareFileInventory(
+            referenceInput.observation.environment.platformPrerequisites, false
+        );
+        bytes32 record = _publishReference();
+        require(
+            referenceHost.requireCurrent(referenceInput.scope, record, 1).observation.recordHash
+                    == record && original.referenceCount(referenceInput.scope) == 0,
+            "actual new child publication and independent history"
+        );
+    }
+
+    /// @dev Actual Operations and retained Store bytes; the suite's named source/archive
+    /// boundaries remain explicit. No browser replay or whole-stack gas claim.
+    function testCapacityReferenceOperationsRetainCallerEventAndAtomicRetry() public {
+        _reference(true);
+        address recorder = address(0xCA454);
+        _grant(referenceInput.scope.collectionId, StreamRecordFamilies.CURATOR, 3, recorder, true);
+        bytes memory raw = _referenceBytes(recorder);
+        _uploadSnapshot(raw, false);
+        bytes32 sources = referenceInput.observation.expectedSourcesHash;
+        referenceInput.observation.expectedSourcesHash =
+            keccak256("wrong capacity reference sources");
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidPolicyReference.selector));
+        vm.prank(recorder);
+        referenceHost.publishReference(referenceInput);
+        referenceInput.observation.expectedSourcesHash = sources;
+        _grant(referenceInput.scope.collectionId, StreamRecordFamilies.CURATOR, 3, recorder, false);
+        vm.expectRevert(abi.encodeWithSelector(T.PolicyReferenceAuthority.selector, recorder));
+        vm.prank(recorder);
+        referenceHost.publishReference(referenceInput);
+        require(
+            referenceHost.referenceCount(referenceInput.scope) == 0
+                && referenceHost.currentReference(referenceInput.scope).observation.recordHash == 0,
+            "source or authority refusal consumes no id or head"
+        );
+        _grant(referenceInput.scope.collectionId, StreamRecordFamilies.CURATOR, 3, recorder, true);
+        raw = _referenceBytes(recorder);
+        _uploadSnapshot(raw, false);
+        T.Receipt memory expected;
+        {
+            (
+                bytes32 payloadDomain,
+                uint256 chain,
+                address producer,
+                T.Publication memory normalized,
+                T.Receipt memory receipt,,
+            ) = abi.decode(
+                raw, (bytes32, uint256, address, T.Publication, T.Receipt, T.SourceFacts, bytes)
+            );
+            require(
+                payloadDomain == keccak256("6529STREAM_POLICY_REFERENCE_PAYLOAD_V2")
+                    && chain == block.chainid && producer == address(referenceHost),
+                "original payload host and domain"
+            );
+            require(
+                normalized.observation.expectedSourcesHash == 0
+                    && receipt.observation.sourcesHash
+                        == referenceInput.observation.expectedSourcesHash
+                    && receipt.observation.recorder == recorder
+                    && receipt.observation.authorizationClass == 3
+                    && receipt.observation.grantRevision == 3 && receipt.observation.recordHash == 0
+                    && receipt.observation.recordChainHash == 0
+                    && receipt.observation.payloadHash == 0 && receipt.observation.payloadBytes == 0
+                    && receipt.observation.recordedAt == 0,
+                "canonical receipt keeps real recorder and fresh grant"
+            );
+            expected = receipt;
+        }
+        expected.observation.payloadHash = keccak256(raw);
+        expected.observation.payloadBytes = uint32(raw.length);
+        expected.observation.recordedAt = uint64(block.timestamp);
+        bytes32 literalRecord = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_POLICY_REFERENCE_RECORD_V2"),
+                block.chainid,
+                address(referenceHost),
+                address(core),
+                address(metadata),
+                referenceInput,
+                expected
+            )
+        );
+
+        vm.recordLogs();
+        vm.prank(recorder);
+        bytes32 record = referenceHost.publishReference(referenceInput);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        require(record == literalRecord, "delegate host and original caller remain in record");
+        expected.observation.recordHash = record;
+        expected.observation.recordChainHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_POLICY_REFERENCE_CHAIN_V2"),
+                block.chainid,
+                address(referenceHost),
+                address(core),
+                expected.scopeSubject,
+                bytes32(0),
+                uint64(1),
+                record
+            )
+        );
+        (T.Publication memory stored, T.Receipt memory receipt) =
+            referenceHost.referenceRecord(record);
+        require(
+            keccak256(abi.encode(stored)) == keccak256(abi.encode(referenceInput))
+                && keccak256(abi.encode(receipt)) == keccak256(abi.encode(expected)),
+            "all original publication and receipt fields retained"
+        );
+        require(
+            logs.length == 1 && logs[0].emitter == address(referenceHost)
+                && logs[0].topics.length == 4,
+            "original host event only"
+        );
+        require(
+            logs[0].topics[0]
+                    == keccak256(
+                        "PolicyReferencePublished(uint16,bytes32,bytes32,bytes32,(bytes32,(bytes32,bytes32,uint256,bytes32,bytes32,uint64,bytes32,uint32,bytes32,bytes32,uint64,address,uint8,uint64,uint64,uint64,bytes32,bytes32,bytes32,bytes32)),string)"
+                    ) && logs[0].topics[1] == expected.scopeSubject
+                && logs[0].topics[2] == referenceInput.observation.referenceId
+                && logs[0].topics[3] == record,
+            "exact event signature and indexed fields"
+        );
+        (uint16 version, T.Receipt memory eventReceipt, string memory uri) =
+            abi.decode(logs[0].data, (uint16, T.Receipt, string));
+        require(
+            version == 2 && keccak256(abi.encode(eventReceipt)) == keccak256(abi.encode(expected))
+                && keccak256(bytes(uri))
+                    == keccak256(bytes(referenceInput.observation.manifestURI)),
+            "full original event tuple"
+        );
+        require(
+            keccak256(referenceHost.referencePayload(record)) == keccak256(raw)
+                && keccak256(
+                        abi.encode(referenceHost.requireCurrent(referenceInput.scope, record, 1))
+                    ) == keccak256(abi.encode(expected)),
+            "current and historical receipt agree"
+        );
+        bytes32 original = keccak256(abi.encode(stored, receipt, raw));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidPolicyReference.selector));
+        vm.prank(recorder);
+        referenceHost.publishReference(referenceInput);
+        require(
+            referenceHost.referenceCount(referenceInput.scope) == 1,
+            "exact reference id cannot replay"
+        );
+        referenceInput.observation.referenceId = keccak256("capacity reference successor");
+        vm.expectRevert(
+            abi.encodeWithSelector(T.PolicyReferenceLineage.selector, bytes32(0), record)
+        );
+        vm.prank(recorder);
+        referenceHost.publishReference(referenceInput);
+        require(
+            referenceHost.referenceCount(referenceInput.scope) == 1
+                && referenceHost.referenceAt(referenceInput.scope, 0) == record,
+            "stale lineage cannot consume successor id"
+        );
+        referenceInput.observation.expectedHead = record;
+        referenceInput.observation.expectedRevision = 1;
+        _uploadSnapshot(_referenceBytes(recorder), false);
+        vm.prank(recorder);
+        bytes32 successor = referenceHost.publishReference(referenceInput);
+        require(
+            referenceHost.requireCurrent(referenceInput.scope, successor, 2).observation.predecessor
+                    == record && referenceHost.referenceCount(referenceInput.scope) == 2,
+            "same refused id succeeds with exact lineage"
+        );
+        (stored, receipt) = referenceHost.referenceRecord(record);
+        require(
+            keccak256(abi.encode(stored, receipt, referenceHost.referencePayload(record)))
+                == original,
+            "successor cannot rewrite original history"
+        );
+    }
+
     function testTerminalReferenceRetainsExactPolicyAndOriginalV2Record() public {
         _reference(true);
         bytes memory raw = _referenceBytes(address(this));

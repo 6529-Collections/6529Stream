@@ -1,9 +1,191 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPreservationPolicyPublicationGraphTypesV1 as CapacityCollectionGraph446
+} from "../../../smart-contracts/interfaces/stream/finality/StreamPreservationPolicyPublicationGraphTypesV1.sol";
+import {
+    StreamScopedPreservationPolicyPublicationGraphTypesV1 as CapacityScopedGraph446
+} from "../../../smart-contracts/interfaces/stream/finality/StreamScopedPreservationPolicyPublicationGraphTypesV1.sol";
+import {
+    StreamPreservationPolicyPublicationCheckpointDeploymentV2 as CapacityCollectionDeploy446
+} from "../../../smart-contracts/domains/finality/StreamPreservationPolicyPublicationCheckpointDeploymentV2.sol";
+import {
+    StreamScopedPreservationPolicyPublicationCheckpointDeploymentV2 as CapacityScopedDeploy446
+} from "../../../smart-contracts/domains/finality/StreamScopedPreservationPolicyPublicationCheckpointDeploymentV2.sol";
+import {
+    StreamPreservationTokenProducerProfilesV1 as CapacityProfiles446
+} from "../../../smart-contracts/interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+import {
+    IStreamGasParameterHost as CapacityGas446
+} from "../../../smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol";
+import {
+    LeafManifestVm as CapacityCreateVm446
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
 
 import "../../helpers/PreservationPolicyContentFixtureV1.sol";
 
 contract StreamPreservationPolicyContentCheckpointV1Test is PreservationPolicyContentFixtureV1 {
+    /// @dev Genuine fixed V2 CREATE over existing actual source/selection/readiness. Original V1
+    /// producer admission remains a named fixture boundary; this is not a V2 publication ceremony.
+    function testCapacityPreservationConstructorPairsKeepCreatorArgumentsAndClosedFamily() public {
+        _preservationFixture(1);
+        for (uint8 kind; kind < 2; ++kind) {
+            Capture memory c = _capture(_scope(kind == 0 ? 0 : 2), true);
+            uint64 nonce = CapacityCreateVm446(address(vm)).getNonce(address(this));
+            address deployed;
+            if (kind == 0) {
+                CapacityCollectionGraph446.Recipe memory r;
+                CapacityCollectionGraph446.Graph memory g;
+                r.targets[1] = address(scopedSelections);
+                r.targets[3] = address(executor);
+                r.checkpointGas[0] = _scopedGas("STATIC_CONTENT_READ_GAS", 8000000, 2);
+                r.checkpointGas[1] = _scopedGas("STATIC_CONTENT_RENDER_GAS", 16000000, 2);
+                g.sourceSet = c.host.entropySourceSet();
+                g.children[0] = c.host.terminalReadiness();
+                deployed = CapacityCollectionDeploy446.deploy(r, g);
+            } else {
+                CapacityScopedGraph446.Recipe memory r;
+                CapacityScopedGraph446.Graph memory g;
+                r.targets[1] = address(scopedSelections);
+                r.targets[3] = address(executor);
+                r.checkpointGas[0] = _scopedGas("STATIC_CONTENT_READ_GAS", 8000000, 2);
+                r.checkpointGas[1] = _scopedGas("STATIC_CONTENT_RENDER_GAS", 16000000, 2);
+                g.sourceSet = c.host.entropySourceSet();
+                g.children[0] = c.host.terminalReadiness();
+                deployed = CapacityScopedDeploy446.deploy(r, g);
+            }
+            require(
+                deployed
+                        == CapacityCreateVm446(address(vm))
+                            .computeCreateAddress(address(this), nonce)
+                    && CapacityCreateVm446(address(vm)).getNonce(address(this)) == nonce + 1,
+                "same creator and exactly one child"
+            );
+            Preservation child = Preservation(deployed);
+            require(
+                child.core() == address(core) && child.metadataRouter() == address(router)
+                    && child.selectionCheckpoint() == address(scopedSelections)
+                    && child.entropySourceSet() == c.host.entropySourceSet()
+                    && child.terminalReadiness() == c.host.terminalReadiness()
+                    && CapacityGas446(deployed).governanceAuthority() == address(executor),
+                "all constructor arguments retain meaning"
+            );
+            require(
+                CapacityGas446(deployed)
+                        .gasParameter(keccak256("6529STREAM_GGP_STATIC_CONTENT_READ_GAS"))
+                    == 8000000
+                    && CapacityGas446(deployed)
+                        .gasParameter(keccak256("6529STREAM_GGP_STATIC_CONTENT_RENDER_GAS"))
+                    == 16000000,
+                "original gas registrations"
+            );
+            require(
+                child.preservationPolicyProfile()
+                    == (kind == 0
+                            ? CapacityProfiles446.COLLECTION_CHECKPOINT_PROFILE
+                            : CapacityProfiles446.SCOPED_CHECKPOINT_PROFILE),
+                "closed family host profile"
+            );
+            require(
+                child.sourceFactory() == c.host.sourceFactory()
+                    && child.factoryDependenciesHash() == c.host.factoryDependenciesHash(),
+                "collection versus scoped binding preserved"
+            );
+            bytes32 id = child.begin(c.selection, keccak256("capacity family constructor"));
+            require(
+                child.checkpoint(id).preservationProfile == CapacityProfiles446.FAMILY_PROFILE
+                    && c.host.checkpoint(c.id).preservationProfile
+                        == keccak256("6529STREAM_PRESERVATION_RENDER_V1"),
+                "new family never rewrites original profile"
+            );
+            Preservation.Payload[] memory originalPayload = _payload(c);
+            c.producers[0].setProfile(keccak256("unsupported capacity producer"));
+            vm.expectRevert(
+                abi.encodeWithSelector(PreservationTypes.InvalidPreservationBinding.selector)
+            );
+            child.append(id, originalPayload);
+            require(child.checkpoint(id).nextIndex == 0, "unsupported family leaves no rows");
+            c.producers[0].setProfile(CapacityProfiles446.ORIGINAL_PROFILE);
+            c.host.append(c.id, originalPayload);
+            _assertComplete(c);
+            require(
+                child.checkpoint(id).nextIndex == 0,
+                "original append cannot populate new host storage"
+            );
+            child.append(id, originalPayload);
+            require(
+                child.requireCurrentCheckpoint(id).nextIndex == c.host.checkpoint(c.id).nextIndex,
+                "supported original producer retains exact Registry admission in new family"
+            );
+        }
+    }
+
+    function testCapacityPreservationObservationRerendersLastProducerWithoutChangingHistory()
+        public
+    {
+        _preservationFixture(1);
+        Capture memory c = _capture(_scope(2), true);
+        Preservation.Payload[] memory payload = _payload(c);
+        bytes32 inputHash = keccak256(abi.encode(payload));
+        c.host.append(c.id, payload);
+        _assertComplete(c);
+        Preservation.Output memory row = c.host.outputAt(c.id, 1);
+        require(
+            row.preservation.producer == address(c.producers[1])
+                && row.leaf.metadataHash
+                    == keccak256(bytes(c.producers[1].preservationTokenJSON(92)))
+                && row.leaf.animationHash == keccak256(payload[1].animation)
+                && row.leaf.imageHash == keccak256(payload[1].image)
+                && row.leaf.tokenDataHash == keccak256(core.tokenData(92))
+                && row.htmlHash == row.leaf.animationHash,
+            "full observation and admission returned"
+        );
+        bytes32 saved = _history(c);
+        string memory json = c.producers[1].preservationTokenJSON(92);
+        string memory html = c.producers[1].preservationTokenHTML(92);
+        c.producers[1].setBytes(92, json, string(abi.encodePacked(html, " ")));
+        vm.expectRevert(abi.encodeWithSelector(Preservation.StaticContentChanged.selector, c.id));
+        c.host.requireCurrentCheckpoint(c.id);
+        require(
+            _history(c) == saved && keccak256(abi.encode(payload)) == inputHash,
+            "last-row drift retains all saved state and caller payload"
+        );
+        c.producers[1].setBytes(92, json, html);
+        _assertComplete(c);
+    }
+
+    function testCapacityPreservationObservationRenderPreflightRollsBackThenRetries() public {
+        _preservationFixture(1);
+        Capture memory c = _capture(_scope(2), true);
+        Preservation.Payload[] memory payload = _payload(c);
+        bytes32 before = _history(c);
+        uint256 cap = CapacityGas446(address(c.host))
+            .gasParameter(keccak256("6529STREAM_GGP_STATIC_CONTENT_RENDER_GAS"));
+        (bool ok, bytes memory failure) =
+            address(c.host).call{ gas: cap }(abi.encodeCall(c.host.append, (c.id, payload)));
+        require(!ok && failure.length == 68, "explicit parent gas refusal, not empty OOG");
+        bytes4 selector;
+        uint256 available;
+        uint256 required;
+        assembly ("memory-safe") {
+            selector := mload(add(failure, 32))
+            available := mload(add(failure, 36))
+            required := mload(add(failure, 68))
+        }
+        require(
+            selector == Preservation.StaticContentParentGas.selector
+                && required == cap + cap / 63 + 100000 && available <= required,
+            "configured producer budget remains exact"
+        );
+        require(_history(c) == before, "no partial row or frontier after refusal");
+        vm.expectRevert(
+            abi.encodeWithSelector(Preservation.StaticContentIndex.selector, uint256(0))
+        );
+        c.host.outputAt(c.id, 0);
+        c.host.append(c.id, payload);
+        _assertComplete(c);
+    }
+
     function testPreservationAllFourScopesKeepCompleteMembershipAndLiteralNewHashes() public {
         _preservationFixture(1);
         for (uint8 kind; kind < 4; ++kind) {

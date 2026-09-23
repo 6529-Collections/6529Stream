@@ -4,8 +4,8 @@ import {
     StreamScopedPolicyPublicationGraphTypesV2 as T
 } from "../../interfaces/stream/finality/StreamScopedPolicyPublicationGraphTypesV2.sol";
 import {
-    StreamScopedPolicyContentCheckpointV2 as Child
-} from "./StreamScopedPolicyContentCheckpointV2.sol";
+    StreamScopedPolicyPublicationCheckpointConstructorV2 as Constructor
+} from "./StreamScopedPolicyPublicationCheckpointConstructorV2.sol";
 import {
     StreamScopedPolicyPublicationRecipeV2 as Recipe
 } from "./StreamScopedPolicyPublicationRecipeV2.sol";
@@ -13,15 +13,13 @@ import {
 /// @notice Fixed delegate-host CREATE worker; callers cannot nominate implementation code.
 library StreamScopedPolicyPublicationCheckpointDeploymentV2 {
     function deploy(T.Recipe memory r, T.Graph memory g) public returns (address) {
-        return address(
-            new Child(
-                r.targets[1],
-                g.sourceSet,
-                g.children[0],
-                r.targets[3],
-                r.checkpointGas[0],
-                r.checkpointGas[1]
-            )
+        return Constructor.deploy(
+            r.targets[1],
+            g.sourceSet,
+            g.children[0],
+            r.targets[3],
+            r.checkpointGas[0],
+            r.checkpointGas[1]
         );
     }
 }

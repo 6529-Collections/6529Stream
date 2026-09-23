@@ -1,9 +1,149 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamScopedPolicyPublicationGraphTypesV2 as CapacityGraph446
+} from "../../../smart-contracts/interfaces/stream/finality/StreamScopedPolicyPublicationGraphTypesV2.sol";
+import {
+    StreamScopedPolicyPublicationCheckpointDeploymentV2 as CapacityDeploy446
+} from "../../../smart-contracts/domains/finality/StreamScopedPolicyPublicationCheckpointDeploymentV2.sol";
+import {
+    LeafManifestVm as CapacityCreateVm446
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
 
 import "../../helpers/ScopedPolicyContentFixtureV2.sol";
 
 contract StreamScopedPolicyContentCheckpointV2Test is ScopedPolicyContentFixtureV2 {
+    function testCapacityScopedCheckpointConstructorKeepsHostCreateArgumentsAndIndependentPlan()
+        public
+    {
+        _scopedFixture(1, true);
+        StreamFinalityScope memory scope = _scopedScope(2);
+        (Checkpoint original, bytes32 selection) = _scopedCapture(scope);
+        CapacityGraph446.Recipe memory r;
+        CapacityGraph446.Graph memory g;
+        r.targets[1] = address(scopedSelections);
+        r.targets[3] = address(executor);
+        r.checkpointGas[0] = _scopedGas("STATIC_CONTENT_READ_GAS", 8000000, 2);
+        r.checkpointGas[1] = _scopedGas("STATIC_CONTENT_RENDER_GAS", 16000000, 2);
+        g.sourceSet = original.entropySourceSet();
+        g.children[0] = original.terminalReadiness();
+        uint64 nonce = CapacityCreateVm446(address(vm)).getNonce(address(this));
+        Checkpoint child = Checkpoint(CapacityDeploy446.deploy(r, g));
+        require(
+            address(child)
+                    == CapacityCreateVm446(address(vm)).computeCreateAddress(address(this), nonce)
+                && CapacityCreateVm446(address(vm)).getNonce(address(this)) == nonce + 1,
+            "same host and one CREATE"
+        );
+        require(
+            child.core() == address(core) && child.metadataRouter() == address(router)
+                && child.selectionCheckpoint() == address(scopedSelections)
+                && child.entropySourceSet() == g.sourceSet
+                && child.terminalReadiness() == g.children[0]
+                && child.governanceAuthority() == address(executor),
+            "all fixed constructor arguments"
+        );
+        require(
+            child.sourceFactory() == original.sourceFactory()
+                && child.factoryDependenciesHash() == original.factoryDependenciesHash(),
+            "original actual factory binding"
+        );
+        bytes32 oldId = original.begin(selection, keccak256("capacity constructor"));
+        bytes32 id = child.begin(selection, keccak256("capacity constructor"));
+        require(id != oldId, "host is part of checkpoint domain");
+        child.append(id, _scopedPayload(scope));
+        _assertRoots(child, id);
+        require(
+            child.requireCurrentCheckpoint(id).nextIndex == 2
+                && original.checkpoint(oldId).nextIndex == 0,
+            "genuine append with independent storage"
+        );
+    }
+
+    function testCapacityScopedObservationChecksLastRowAndPreservesReturnedValues() public {
+        _scopedFixture(1, true);
+        StreamFinalityScope memory scope = _scopedScope(2);
+        (Checkpoint host, bytes32 selection) = _scopedCapture(scope);
+        bytes32 id = host.begin(selection, keccak256("capacity all-row observation"));
+        O.Payload[] memory payload = _scopedPayload(scope);
+        bytes32 inputHash = keccak256(abi.encode(payload));
+        host.append(id, payload);
+        O.Output memory first = host.outputAt(id, 0);
+        O.Output memory last = host.outputAt(id, 1);
+        require(
+            first.entropy.terminal && first.terminalAdmissionHash != 0 && last.entropy.finalized
+                && last.entropy.seed == scopedFinalizedSeed && last.terminalAdmissionHash == 0,
+            "both original entropy branches survive linked return"
+        );
+        require(
+            last.leaf.metadataHash == keccak256(bytes(router.tokenJSON(92)))
+                && last.leaf.animationHash == keccak256(payload[1].animation)
+                && last.leaf.imageHash == keccak256(payload[1].image)
+                && last.leaf.tokenDataHash == keccak256(core.tokenData(92))
+                && last.htmlHash == last.leaf.animationHash,
+            "complete returned last-row values"
+        );
+        bytes32 saved = keccak256(abi.encode(host.checkpoint(id), first, last));
+        string memory html = router.tokenHTML(92);
+        StaticRouteVm(address(vm))
+            .mockCall(
+                address(router),
+                abi.encodeCall(router.tokenHTML, (uint256(92))),
+                abi.encode(string(abi.encodePacked(html, " ")))
+            );
+        vm.expectRevert(abi.encodeWithSelector(O.StaticContentChanged.selector, id));
+        host.requireCurrentCheckpoint(id);
+        require(
+            keccak256(abi.encode(host.checkpoint(id), host.outputAt(id, 0), host.outputAt(id, 1)))
+                == saved,
+            "last-row drift cannot rewrite either historical row"
+        );
+        require(keccak256(abi.encode(payload)) == inputHash, "input array remains unchanged");
+        StaticRouteVm(address(vm))
+            .mockCall(
+                address(router), abi.encodeCall(router.tokenHTML, (uint256(92))), abi.encode(html)
+            );
+        _assertRoots(host, id);
+        require(
+            host.requireCurrentCheckpoint(id).nextIndex == 2,
+            "all original bytes restore currentness"
+        );
+    }
+
+    function testCapacityScopedObservationRenderPreflightRollsBackEntireBatch() public {
+        _scopedFixture(1, true);
+        StreamFinalityScope memory scope = _scopedScope(2);
+        (Checkpoint host, bytes32 selection) = _scopedCapture(scope);
+        bytes32 id = host.begin(selection, keccak256("capacity render budget"));
+        O.Payload[] memory payload = _scopedPayload(scope);
+        bytes32 before = keccak256(abi.encode(host.checkpoint(id)));
+        uint256 cap = host.gasParameter(keccak256("6529STREAM_GGP_STATIC_CONTENT_RENDER_GAS"));
+        (bool ok, bytes memory failure) =
+            address(host).call{ gas: cap }(abi.encodeCall(host.append, (id, payload)));
+        require(
+            !ok && failure.length == 68, "typed preflight refusal, not dependency unavailability"
+        );
+        bytes4 selector;
+        uint256 available;
+        uint256 required;
+        assembly ("memory-safe") {
+            selector := mload(add(failure, 32))
+            available := mload(add(failure, 36))
+            required := mload(add(failure, 68))
+        }
+        require(
+            selector == O.StaticContentParentGas.selector && required == cap + cap / 63 + 100000
+                && available <= required,
+            "original exact render cap and parent margin"
+        );
+        require(keccak256(abi.encode(host.checkpoint(id))) == before, "plan and frontier rollback");
+        vm.expectRevert(abi.encodeWithSelector(O.StaticContentIndex.selector, uint256(0)));
+        host.outputAt(id, 0);
+        host.append(id, payload);
+        _assertRoots(host, id);
+        require(host.requireCurrentCheckpoint(id).nextIndex == 2, "original complete batch retries");
+    }
+
     function testScopedPolicyAllThreeCanonicalScopesUseActualCreatedSourceSets() public {
         _scopedFixture(1, true);
         for (uint8 kind = 1; kind <= 3; ++kind) {
