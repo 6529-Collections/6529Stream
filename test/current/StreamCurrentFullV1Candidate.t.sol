@@ -24,8 +24,8 @@ import {
 } from "../../smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol";
 import { StreamBurnMintGate } from "../../smart-contracts/domains/mint/StreamBurnMintGate.sol";
 import "../mocks/MockVRFCoordinatorV2Plus.sol";
-import { CurrentARRNGService } from "./StreamCurrentARRNG.t.sol";
-import { GenesisDelegationServiceDouble } from "./StreamCurrentFullV1GenesisProducts.t.sol";
+import { CurrentARRNGService } from "../helpers/CurrentARRNGService.sol";
+import { GenesisDelegationServiceDouble } from "../helpers/GenesisDelegationServiceDouble.sol";
 import {
     IStreamRenderer as Render
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamRenderer.sol";
@@ -314,7 +314,7 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         c.ticketSignerKind = 1;
         c.delegateRegistry = address(
             _artistArtifactCreate(
-                "test/current/StreamCurrentFullV1GenesisProducts.t.sol:GenesisDelegationServiceDouble",
+                "test/helpers/GenesisDelegationServiceDouble.sol:GenesisDelegationServiceDouble",
                 abi.encode()
             )
         );
@@ -375,7 +375,7 @@ contract StreamCurrentFullV1CandidateTest is StreamCurrentStackFixture {
         );
         CurrentARRNGService service = CurrentARRNGService(
             _artistArtifactCreate(
-                "test/current/StreamCurrentARRNG.t.sol:CurrentARRNGService",
+                "test/helpers/CurrentARRNGService.sol:CurrentARRNGService",
                 abi.encode(address(governanceRoot), vm.addr(PLATFORM_KEY))
             )
         );

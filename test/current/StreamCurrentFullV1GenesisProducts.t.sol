@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../helpers/StreamCurrentStackFixture.sol";
 import { StreamFullV1ArtifactProducts } from "../helpers/StreamFullV1ArtifactProducts.sol";
 import "../helpers/OfficialSafeFixture.sol";
+import { GenesisDelegationServiceDouble } from "../helpers/GenesisDelegationServiceDouble.sol";
 import {
     StreamGenesisManifestTailFixture as TailFixture
 } from "../helpers/StreamGenesisManifestTailFixture.sol";
@@ -12,26 +13,6 @@ import "../../script/current/StreamGovernanceStagePlan.sol";
 import {
     IStreamClaimRouter
 } from "../../smart-contracts/interfaces/stream/revenue/IStreamClaimRouter.sol";
-
-/// @dev External delegate.xyz service boundary only, not a substitute for a genesis product.
-contract GenesisDelegationServiceDouble {
-    mapping(bytes32 => bool) private grants;
-
-    function delegateContract(address delegate, address token, bytes32 rights, bool enabled)
-        external
-    {
-        grants[keccak256(abi.encode(msg.sender, delegate, token, rights))] = enabled;
-    }
-
-    function checkDelegateForContract(
-        address delegate,
-        address vault,
-        address token,
-        bytes32 rights
-    ) external view returns (bool) {
-        return grants[keccak256(abi.encode(vault, delegate, token, rights))];
-    }
-}
 
 /// @notice Authored composition of six additional roles on the actual current deployment graph.
 /// @dev Inherited randomness and the external delegation service are explicit doubles.
@@ -70,7 +51,7 @@ contract StreamCurrentFullV1GenesisProductsTest is StreamCurrentStackFixture, Of
         composition.ticketSignerKind = 2;
         composition.delegateRegistry = address(
             _artistArtifactCreate(
-                "test/current/StreamCurrentFullV1GenesisProducts.t.sol:GenesisDelegationServiceDouble",
+                "test/helpers/GenesisDelegationServiceDouble.sol:GenesisDelegationServiceDouble",
                 abi.encode()
             )
         );
