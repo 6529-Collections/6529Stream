@@ -10,6 +10,9 @@ import {
 import {
     StreamArtistExtensionFactory
 } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
+import {
+    StreamArtistExtensionFactoryRuntime
+} from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactoryRuntime.sol";
 
 /// @notice Actual fixed Artist products and Safe ingress with the original explicit unit Core/governance boundaries.
 /// @dev Call-envelope measurements precede separate transaction receipt acceptance; no full current graph claim.
@@ -79,6 +82,7 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
         _measure(keccak256("factory"), started, bytes.concat(type(StreamArtistExtensionFactory).creationCode, abi.encode(parts)));
         require(
             address(f).codehash == keccak256(type(StreamArtistExtensionFactory).runtimeCode)
+                && address(f).codehash == StreamArtistExtensionFactoryRuntime.expected()
                 && address(f).code.length <= 24_576,
             "canonical factory runtime"
         );
