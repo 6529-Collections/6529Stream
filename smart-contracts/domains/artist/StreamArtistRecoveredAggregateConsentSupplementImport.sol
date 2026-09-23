@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import { StreamArtistCompleteHistoryConsentSupplementImport as CompleteSupplement } from "./StreamArtistCompleteHistoryConsentSupplementImport.sol";
+import { StreamArtistRecoveredAggregateConsentSupplementWrites as SupplementWrites } from "./StreamArtistRecoveredAggregateConsentSupplementWrites.sol";
 
 import {
     StreamArtistRecoveredAggregateConsentEnvelope as Aggregate
@@ -63,17 +64,11 @@ library StreamArtistRecoveredAggregateConsentSupplementImport {
             Aggregate.decode(anchor, outer);
         if (!selected) return false;
         Proof.validate(scope.rows, scope.collections, payload.provenance, outer);
-        (, T.RatificationRecord[][] memory ratifications, H.Inventory memory history) = Transport.decode(
-            scope.rows,
+        SupplementWrites.install(
+            sanctions, current, records, scope,
             (e.header.requiredFeatures & RH.RATIFICATIONS) != 0,
             (e.header.requiredFeatures & RH.SANCTION_HISTORY) != 0
         );
-        if (history.sanctions.length != 0) Storage.install(sanctions, history);
-        for (uint256 i; i < scope.collections.length; ++i) {
-            Writes.importRecords(
-                current, records, scope.collections[i].collectionId, ratifications[i]
-            );
-        }
         return true;
     }
 }

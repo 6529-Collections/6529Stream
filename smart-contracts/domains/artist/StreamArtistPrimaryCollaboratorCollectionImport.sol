@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import { StreamArtistCompleteHistoryCollectionImport as Complete } from "./StreamArtistCompleteHistoryCollectionImport.sol";
+import { StreamArtistPrimaryCollaboratorAcceptanceImport as AcceptanceImport } from "./StreamArtistPrimaryCollaboratorAcceptanceImport.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -104,44 +105,7 @@ library StreamArtistPrimaryCollaboratorCollectionImport {
         AH.Query memory anchor,
         bytes memory outer
     ) public returns (bool) {
-        if (Complete.acceptances(primary, times, collaborators_, anchor, outer)) return true;
-        if (!Codec.selected(outer, 3)) return false;
-        (M.State memory scope,, PC.Proof memory proof) = Decode.collect(3, anchor, outer);
-        if (scope.rows.length != proof.accepted.length) _invalid();
-        for (uint256 k; k < proof.accepted.length; ++k) {
-            if (keccak256(scope.rows[k]) != keccak256(abi.encode(proof.accepted[k]))) _invalid();
-            for (uint256 g; g < proof.accepted[k].rows.length; ++g) {
-                bytes32 key = proof.accepted[k].rows[g].bindingHash;
-                if (primary[key] != 0 || times[key] != 0) _invalid();
-            }
-        }
-        for (uint256 i; i < proof.archive.accepted.length; ++i) {
-            C.BindingAcceptance memory row = proof.archive.accepted[i].acceptance;
-            if (
-                collaborators_[
-                        Hashes.rowKey(row.bindingHash, row.account, row.role, row.shareLabelId)
-                    ] != 0
-            ) _invalid();
-        }
-        for (uint256 k; k < proof.accepted.length; ++k) {
-            for (uint256 g; g < proof.accepted[k].rows.length; ++g) {
-                primary[proof.accepted[k].rows[g].bindingHash] =
-                proof.accepted[k].rows[g].recordHash;
-                times[proof.accepted[k].rows[g].bindingHash] = proof.accepted[k].rows[g].acceptedAt;
-            }
-        }
-        for (uint256 i; i < proof.archive.accepted.length; ++i) {
-            PC.AcceptedRow memory row = proof.archive.accepted[i];
-            collaborators_[
-                Hashes.rowKey(
-                    row.acceptance.bindingHash,
-                    row.acceptance.account,
-                    row.acceptance.role,
-                    row.acceptance.shareLabelId
-                )
-            ] = row.join.acceptanceRecordHash;
-        }
-        return true;
+        return AcceptanceImport.acceptances(primary, times, collaborators_, anchor, outer);
     }
 
     function _invalid() private pure {
