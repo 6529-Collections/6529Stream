@@ -1,5 +1,19 @@
 # Changelog
 
+## Token-resolved Museum script evidence
+
+- Capture token-selected script bytes, authenticated dependencies, override
+  history and registered interpretation documents. Retain explicit unknown
+  classifications and bind inherited global defaults to activation. See the
+  [native token script guide](docs/museum-token-script-native-v1.md).
+
+## Scoped compiler diagnostics
+
+- Add an optional inspector for Solidity code-generation selections, including
+  source AST wildcard expansion and library getters. Separate large test
+  service doubles into their own files to avoid compiling unrelated test hosts.
+  See the [scoped code-generation guide](docs/reference/tooling/scoped-codegen.md).
+
 ## Safe receive and fallback plans
 
 - Add explicit ABI-checked Safe plan routes for Solidity receive and fallback

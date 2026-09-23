@@ -18,17 +18,19 @@ Other held proposals remain separate.
 
 ## 23 September integrated batch
 
-Expanded full v1 remains incomplete. Integrated source `106c1b60e` adds
-explicit Safe receive/fallback call plans, a complete same-target Museum
-assessment regression, and reviewed preservation and Genesis test fixtures.
-Production Solidity remains `4e88540ce`. Preservation now has successful
-separate cold local transactions under the original gas ceiling. Genesis
-retains all 44 original cases; its complete runtime acceptance remains open.
-RC1 and Sepolia remain unchanged.
+Expanded full v1 remains incomplete. Integrated source `22752f532` adds
+token-resolved Museum script evidence, actual threshold-Safe preservation
+tests and smaller Genesis test fixtures. Production Solidity remains
+`4e88540ce`. All fifteen remaining collaborator cases now pass on that
+recorded source. Preservation also passes separate cold Safe transactions.
+Genesis retains all 44 original cases; combined runtime acceptance remains
+open. RC1 and Sepolia remain unchanged.
 
 - **Artist contracts:** all 49 collaborator workers fit on their recorded
   `07265d875` source. Twelve codec/projection cases pass, including one
-  256-input fuzz case; fifteen further collaborator cases remain pending.
+  256-input fuzz case. Fifteen further collaborator cases now pass on exact
+  `4e88540ce`, with independent artifact/runtime review and no failures or
+  skips; all 345 frozen source inputs match current integration.
   Five existing generation/dispute dependencies then exceeded the deployment
   limit. The dispute repair `3ea28d8eb` is independently reviewed: runtime
   sizes are 23,804 and 10,299 bytes; all ten focused tests pass, including
@@ -37,8 +39,10 @@ RC1 and Sepolia remain unchanged.
   `845cae7cd`, with independent source/ABI review. All ten selected original
   and new products fit on exact builder `ebbf30c04`; the largest original
   is 24,418 bytes. Original ABI, selectors and storage layouts are preserved.
-  Their remaining collaborator runtime cases continue. Complete History,
-  repeated import, Class4 and all-call Safe acceptance remain open.
+  The fifteen-case runtime capture contains 174 authenticated native products
+  from 26 contexts; all selected production products fit. Typed authority
+  boundaries remain explicit. Complete History, repeated import, Class4 and
+  all-call Safe acceptance remain open.
 - **Museum reviews and exports:** earlier native media/PREMIS tests (46),
   declaration/review tests (89), account-fixture selection tests (21) and
   General adapter tests (36) remain evidence for their recorded sources.
@@ -61,8 +65,13 @@ RC1 and Sepolia remain unchanged.
   codes for the same token and state: identity, finality, content-root, entropy
   and attribution. Supplemental-source reconciliation includes every retained
   V4 family. These are synthetic native RPC controls, not actual-chain or
-  institutional acceptance. Token-scoped script selection and registered
-  interpretation support are being built; unknown work classes remain explicit.
+  institutional acceptance. Token-scoped script selection, exact override
+  lineage and registered interpretation capture are integrated at `749fa0fa9`.
+  All 15 new and 24 inherited tests pass, with independent review. Positive
+  script evidence requires complete authenticated script and dependency bytes;
+  retained global defaults are bound to activation, and unknown classes stay
+  explicit. Joining this capture to the canonical 49-row assessment is next.
+  These tests do not establish actual-chain registration or conformance.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
   the required client aggregate** at merge source `8d2e2323` (dispatch
   `eb840cfb`). All 246 files / 1,472 execution units / 3,354 registrations
@@ -103,6 +112,13 @@ RC1 and Sepolia remain unchanged.
   compiled production sources match `106c1b60e` byte-for-byte. Core, Registry,
   Artist and related typed fixture boundaries still limit this evidence;
   full current-stack and real governance/finality acceptance remain open.
+  Official Safe 1.4.1 threshold execution is now integrated at `82b0b2fa9`:
+  all five cases pass on builder `964cdc55a`, with independent review of every
+  evidence pin, signature, inner call and prestate. Separate cold begin/verify
+  transactions use 3,195,610 / 2,917,555 gas; a tampered signature reverts before
+  the manifest. Each transaction keeps the 16,777,216 ceiling. This proves the
+  named preservation join, not full-stack authorization. Mixed-sequence fuzz
+  and stateful regression work continues independently.
 - **Paid flows and remaining integration:** scoped bundle size repair
   `6903b3b12` / `356d091d3` has independent source clearance. The measured
   builder deployment is 24,435 runtime bytes, below 24,576, and its two
@@ -114,21 +130,32 @@ RC1 and Sepolia remain unchanged.
   executions. A test-only construction split is authorized; the exact source
   equality gate and time bound remain intact. Paid fixture phase split
   `a2e481dfa` and reviewed callback cut `353f58eb1` also timed out, without
-  native outputs or paid executions. No unchanged retry is running. The next
-  source/compiler reachability change is under independent diagnosis; the
-  paid prototype is not adopted.
+  native outputs or paid executions. The compiler bottleneck is now identified:
+  Solidity 0.8.19 source AST selection also expands code generation to concrete
+  sibling contracts. Two unchanged phase bodies moved to individual test files
+  now have genuine native outputs at `bc29a73f2`, within the same 900-second
+  code-generation bounds. The remaining mechanical relocation is sealed at
+  builder `3e612514c` for review and final capture. No paid execution or gas
+  acceptance is inferred, and the paid prototype is not adopted.
   Genesis helper `bf26e7cd8` preserved all 44 cases, but its host and doubles
   timed out. The stateless construction engine at `78cc95f2c` now has genuine
   native output and a validated direct library chain. Reviewed Record setup
   extraction `a0f92ecae` preserves the original Safe callbacks and CREATE
-  context; its smaller host/engine captures are running. Another 58 required
-  mint/auction libraries have genuine native and physical artifacts on exact
-  `2ac670dcd`, with source/ownership joining pending. The remaining 59 named
-  library captures run independently. Genesis and Owner runtime acceptance
-  remain pending; test-only engines do not relax production size limits.
+  context; its smaller host and engine both have genuine native/physical
+  outputs at `afdf888`. The test-only external services are now in separate
+  files at `22752f532`, with unchanged bodies and independent review. Their
+  final source-specific capture is running. Another 117 required libraries
+  and 32 non-Artist products have genuine native/physical outputs on exact
+  `2ac670dcd`. The joined inventory now has 342 products across 127 contexts;
+  222 additional direct library links still need owners, and are assigned to
+  a separate builder. Fifteen Artist products including embedded constructor
+  dependencies are being captured independently. Genesis and Owner runtime
+  acceptance remain pending; test hosts do not relax production size limits.
 
-ABI213 checks **4,698 Solidity sources with zero errors** at `a0f92ecae`;
-`106c1b60e` has identical Solidity bytes. The active inventory remains
+ABI215 checks **4,700 Solidity sources with zero errors** at `22752f532`.
+The optional code-generation selection inspector passes all eight focused
+tests and identifies the real sibling expansion in three retained inputs.
+The active inventory remains
 **3,143 production paths**. Existing parallel runtime work stays pinned to
 its recorded source; these new test and Museum changes do not relabel it. Full current-stack/Safe
 integration, comprehensive fuzz/stateful tests,
