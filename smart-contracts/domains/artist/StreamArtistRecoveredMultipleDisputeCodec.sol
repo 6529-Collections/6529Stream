@@ -16,6 +16,9 @@ import {
 import {
     StreamArtistRecoveredHydrationOwnerPayload as Payload
 } from "./StreamArtistRecoveredHydrationOwnerPayload.sol";
+import {
+    StreamArtistRecoveredAggregateSanctionAttributionTransport as SanctionTransport
+} from "./StreamArtistRecoveredAggregateSanctionAttributionTransport.sol";
 
 /// @notice Canonical aggregate scope and complete whole-owner membership; no projected provenance.
 library StreamArtistRecoveredMultipleDisputeCodec {
@@ -83,6 +86,19 @@ library StreamArtistRecoveredMultipleDisputeCodec {
         AH.Query memory expected = anchorQuery(s);
         if (keccak256(abi.encode(anchor)) != keccak256(abi.encode(expected))) _invalid();
         if (owner != 2 && payload.nonces.length != 0) _invalid();
+    }
+
+    /// @dev Internal owner4 prelude keeps the existing outer and auxiliary reads in order.
+    function attributionPrelude(AH.Query memory anchor, bytes memory raw)
+        internal
+        pure
+        returns (M.State memory scope, RH.OwnerProvenance memory provenance, bytes memory inventory)
+    {
+        Payload.Payload memory payload;
+        (scope, payload) = outer(4, anchor, raw);
+        SanctionTransport.requireFeature(scope.rows, raw);
+        (, inventory) = decodeAuxiliary(4, payload.semanticState, payload.provenance);
+        provenance = payload.provenance;
     }
 
     /// @dev A new struct prevents the envelope anchor from rewriting the first collection query.

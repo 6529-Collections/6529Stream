@@ -36,11 +36,22 @@ import {
 import {
     StreamArtistRecoveredAggregateSanctionLocalProof as SanctionLocal
 } from "./StreamArtistRecoveredAggregateSanctionLocalProof.sol";
+import {
+    StreamArtistRecoveredMultipleGenerationAttributionRows as Rows
+} from "./StreamArtistRecoveredMultipleGenerationAttributionRows.sol";
+import {
+    StreamArtistRecoveredMultipleGenerationAttributionChecks as Checks
+} from "./StreamArtistRecoveredMultipleGenerationAttributionChecks.sol";
+import {
+    StreamArtistRecoveredMultipleGenerationAttributionSanctions as Sanctions
+} from "./StreamArtistRecoveredMultipleGenerationAttributionSanctions.sol";
 
 /// @notice Complete canonical owner4 rows, original clocks, revocations and attestations.
 /// @dev Keeps the original semantic rows for clock/revocation validation and a fresh
 /// attestation row view. Neither validation consumes or alters the original row bytes.
 library StreamArtistRecoveredMultipleGenerationAttributionProof {
+    error InvalidRecoveredHydrationProfile();
+
     struct Result {
         A.AttributionBundle[] histories;
         Original.Bundle[] all;
@@ -51,30 +62,27 @@ library StreamArtistRecoveredMultipleGenerationAttributionProof {
         RH.OwnerProvenance memory provenance,
         G.Inventory memory inventory
     ) public view returns (Result memory result) {
-        H.Inventory memory sanctions;
-        (scope, sanctions) = SanctionTransport.decode(scope);
-        if (sanctions.sanctions.length != 0) {
-            SanctionLocal.validate(provenance, 4, scope.collections, sanctions);
-        }
+        H.ConfirmationRow[] memory confirmations;
+        bool sanctioned;
+        (scope, confirmations, sanctioned) = Sanctions.validate(scope, provenance);
         result.histories = new A.AttributionBundle[](scope.rows.length);
         M.State memory attested =
             M.State(scope.artists, scope.collections, new bytes[](scope.rows.length));
         for (uint256 k; k < scope.rows.length; ++k) {
-            G.Attribution memory row = abi.decode(scope.rows[k], (G.Attribution));
-            if (keccak256(scope.rows[k]) != keccak256(abi.encode(row))) _invalid();
-            if (
-                keccak256(abi.encode(row.history.current))
-                    != keccak256(abi.encode(row.records.item))
-            ) _invalid();
-            result.histories[k] = row.history;
-            attested.rows[k] = abi.encode(row.records);
+            (bytes memory history, bytes memory records) = Rows.validateRow(scope.rows[k]);
+            result.histories[k] = abi.decode(history, (A.AttributionBundle));
+            attested.rows[k] = records;
         }
-        Clocks.Result memory clocks = Clocks.validateLocal(scope, provenance, inventory);
-        Revocations.validate(
-            result.histories, scope, provenance, inventory, clocks, sanctions.confirmations
-        );
-        result.all = Validation.validate(
-            attested, provenance, inventory, clocks, sanctions.sanctions.length != 0
+        result.all = Checks.validate(
+            Checks.Context(
+                result.histories,
+                scope,
+                provenance,
+                inventory,
+                attested,
+                confirmations,
+                sanctioned
+            )
         );
     }
 
@@ -87,7 +95,4 @@ library StreamArtistRecoveredMultipleGenerationAttributionProof {
         validate(scope, provenance, inventory);
     }
 
-    function _invalid() private pure {
-        revert RH.InvalidRecoveredHydrationProfile();
-    }
 }
