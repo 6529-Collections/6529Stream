@@ -1,5 +1,15 @@
 # Stream delivery state
 
+## Latest source: 23 September, `9deeaeaed`
+
+Two Artist native compiler failures are repaired with independently reviewed
+fixed-library extractions. Native size diagnostics pass; matching runtime
+acceptance remains open. Test-only splits preserve all 35 Artist and 19 scoped
+preservation-reference cases. A traced render fixture-budget failure is fixed
+with two new regressions, awaiting execution. See
+[the current status](V1_CURRENT_STATUS.md) for exact source-qualified evidence.
+Full-stack/Safe, paid gas, fuzz/CI, candidate freeze and new testnet work remain.
+
 ## Current delivery checkpoint: 23 September, `60c4488`
 
 Fifteen Artist transport/supplement tests, fourteen policy checkpoint tests

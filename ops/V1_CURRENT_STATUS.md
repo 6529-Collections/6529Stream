@@ -1,5 +1,38 @@
 # Full-v1 current delivery status
 
+## Latest source integration: 23 September, `9deeaeaed`
+
+Two genuine Artist compiler failures are repaired by moving unchanged work
+into fixed linked libraries. Independent source review is clear; canonical
+native compilation succeeds and all four affected libraries fit the original
+runtime/initcode limits. Original interfaces, storage and validation order
+remain unchanged. Matching physical artifacts and behavioral execution are
+the next checks; this source integration does not make the candidate accepted.
+
+All 35 original Artist tests now occupy fourteen smaller hosts, and all nineteen
+scoped preservation-reference tests occupy two separate source files. Every
+original test body is preserved exactly once. Source/ABI checks and independent
+reviews pass; these splits target the earlier 1,800-second compiler timeouts.
+
+### Runtime findings and corrections
+
+The corrected render execution reaches contract logic: one of its 15 cases
+passes and fourteen reject inconsistent metadata. The trace shows an 8-million
+gas test call loses attribution while the same call at 16 million retains the
+original output. The fixture budget correction and two explicit regressions
+are integrated as `c00813090`; the original fifteen cases remain. Native/runtime
+validation follows on the combined source. Product limits and exact hash checks
+remain unchanged, and the original failed run is retained.
+
+Both abbreviated Policy Reference/Snapshot artifact names are corrected in
+test fixtures (`20e3c2c0a`, `dbe8d75f9`). All 45 literals in the seven owned
+checkpoint/reference import closures were checked before another host capture.
+
+The latest production source is now `9deeaeaed`; RC1 remains unchanged. Earlier
+passing cohorts below retain their recorded source and fixture boundaries.
+Full-stack/Safe, paid gas, broad fuzz/stateful tests, full CI, final release
+evidence and the new candidate's testnet demonstration remain open.
+
 ## Current execution checkpoint: 23 September, `60c4488`
 
 Two further contract cohorts now pass with independent review: policy
