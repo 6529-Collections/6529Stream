@@ -252,7 +252,8 @@ evidence are hashed and rechecked. Add other input files/directories with
 `--input PATH`. No source or original native output is rewritten.
 
 When a captured project omits data files needed by `vm.readFile`, add
-`--source-repo REPO --source-commit FULL_SHA`. The view then builds a separate
+`--source-repo REPO --source-commit FULL_SHA --execution-profile PROFILE`. The
+runner must use that same Foundry profile. The view then builds a separate
 execution-only project. Every copied Solidity source must match that Git commit.
 Only Git-tracked, non-Solidity files under its original profile's scoped read
 permissions are staged; broad and write permissions are excluded. The derived

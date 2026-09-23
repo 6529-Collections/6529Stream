@@ -5,9 +5,11 @@ import subprocess
 import tempfile
 import tomllib
 import unittest
+from unittest import mock
 
 from tools.build.current_native_execution_view import recheck_execution_project
-from tools.build.native_execution_fixtures import stage_execution_project
+from tools.build.native_execution_fixtures import _profile_read_scopes, _safe, _tree, stage_execution_project
+from tools.development.run_native_execution_view import require_execution_profile
 
 
 class ExecutionFixtureTests(unittest.TestCase):
@@ -111,6 +113,81 @@ optimizer_runs = 200
             stage_execution_project(self.project, self.view, self.sources,
                                     self.repo, commit)
         self.assertFalse(self.view.exists())
+
+    def test_default_and_current_profiles_keep_distinct_scoped_reads(self):
+        raw = self._git('show', 'HEAD:foundry.toml').stdout
+        self.assertEqual(_profile_read_scopes(raw, 'default'), ['test/fixtures'])
+        self.assertEqual(_profile_read_scopes(raw, 'current'),
+                         ['docs/schemas/preservation', 'test/fixtures'])
+
+    def test_current_inherits_default_permissions_when_unset(self):
+        path = self.repo / 'foundry.toml'
+        block = (b'fs_permissions = [\n'
+                 b'    { access = "read", path = "./test/fixtures" },\n'
+                 b'    { access = "read", path = "./docs/schemas/preservation" },\n'
+                 b'    { access = "read", path = "./" },\n'
+                 b'    { access = "read-write", path = "./artifacts/native-assembly" },\n'
+                 b']\n')
+        raw = path.read_bytes()
+        self.assertIn(block, raw)
+        raw = raw.replace(block, b'')
+        path.write_bytes(raw)
+        self._git('add', 'foundry.toml')
+        self._git('commit', '-qm', 'inherit default reads')
+        commit = self._git('rev-parse', 'HEAD').stdout.decode().strip()
+        self.assertEqual(_profile_read_scopes(raw, 'current'), ['test/fixtures'])
+        result = stage_execution_project(self.project, self.view, self.sources,
+                                         self.repo, commit, profile='current')
+        self.assertEqual(result['readScopes'], ['test/fixtures'])
+        self.assertFalse((self.view / 'docs/schemas/preservation/reference.json').exists())
+
+    def test_absent_execution_profile_in_native_config_preserves_other_fields(self):
+        config = self.project / 'foundry.toml'
+        raw = config.read_bytes()
+        config.write_bytes(raw.split(b'[profile.current]')[0])
+        baseline = tomllib.loads(config.read_text(encoding='utf-8'))
+        stage_execution_project(self.project, self.view, self.sources,
+                                self.repo, self.commit, profile='current')
+        updated = tomllib.loads((self.view / 'foundry.toml').read_text(encoding='utf-8'))
+        self.assertEqual(updated['profile']['current'].pop('fs_permissions'), [
+            {'access': 'read', 'path': './docs/schemas/preservation'},
+            {'access': 'read', 'path': './test/fixtures'},
+        ])
+        self.assertEqual(updated['profile']['current'], {})
+        del updated['profile']['current']
+        self.assertEqual(updated, baseline)
+
+    def test_runner_requires_the_staged_permission_profile(self):
+        snapshot = {'executionProject': 'sealed/project', 'executionProfile': 'default'}
+        require_execution_profile(snapshot, 'default')
+        with self.assertRaisesRegex(ValueError, 'profile differs'):
+            require_execution_profile(snapshot, 'current')
+
+    def test_tree_object_cannot_impersonate_source_commit(self):
+        tree = self._git('rev-parse', 'HEAD^{tree}').stdout.decode().strip()
+        with self.assertRaisesRegex(ValueError, 'not a commit'):
+            stage_execution_project(self.project, self.view, self.sources,
+                                    self.repo, tree)
+        self.assertFalse(self.view.exists())
+
+    def test_windows_aliases_are_rejected_before_materialization(self):
+        entries = _tree(self.repo, self.commit)
+        raw = b'{"same":true}\n'
+        oid = subprocess.run(['git', '-C', str(self.repo), 'hash-object', '-w', '--stdin'],
+                             input=raw, capture_output=True, check=True).stdout.decode().strip()
+        entries['test/fixtures/Token.json'] = oid
+        entries['test/fixtures/token.json'] = oid
+        with mock.patch('tools.build.native_execution_fixtures._tree', return_value=entries):
+            with self.assertRaisesRegex(ValueError, 'Windows-staged path alias'):
+                stage_execution_project(self.project, self.view, self.sources,
+                                        self.repo, self.commit)
+        self.assertFalse(self.view.exists())
+
+    def test_unsafe_windows_components_cannot_bypass_solidity_filter(self):
+        for path in ('test/fixtures/Accidental.sol.', 'test/fixtures/CON.json',
+                     'test/fixtures/name ', 'test/fixtures/AUX', 'test/fixtures/../secret'):
+            with self.subTest(path=path), self.assertRaisesRegex(ValueError, 'Unsafe'):
+                _safe(path)
 
 
 if __name__ == '__main__':

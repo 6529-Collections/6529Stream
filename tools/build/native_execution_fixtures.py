@@ -25,6 +25,11 @@ def _safe(name: str) -> str:
     _require(name and not path.is_absolute() and '..' not in path.parts
              and '\\' not in name and ':' not in name and path.as_posix() == name,
              f'Unsafe source path: {name!r}')
+    for part in name.split('/'):
+        _require(part and part not in ('.', '..') and part == part.rstrip(' .')
+                 and not re.fullmatch(r'(?:con|prn|aux|nul|conin\$|conout\$|com[1-9]|lpt[1-9])(?:\..*)?',
+                                      part, re.IGNORECASE),
+                 f'Unsafe Windows source component: {name!r}')
     return name
 
 
@@ -44,6 +49,7 @@ def _git(repo: Path, *args: str) -> bytes:
 
 def _tree(repo: Path, commit: str) -> dict[str, str]:
     _require(re.fullmatch(r'[0-9a-f]{40}', commit) is not None, 'Exact source commit SHA required')
+    _require(_git(repo, 'cat-file', '-t', commit).strip() == b'commit', 'Git source object is not a commit')
     _require(_git(repo, 'rev-parse', commit).strip().decode() == commit, 'Source commit differs')
     entries = {}
     for row in _git(repo, 'ls-tree', '-r', '-z', commit).split(b'\0'):
@@ -61,7 +67,7 @@ def _profile_read_scopes(raw: bytes, profile: str) -> list[str]:
     config = tomllib.loads(raw.decode('utf-8'))
     profiles = config.get('profile', {})
     selected = profiles.get(profile, profiles.get('default', {}))
-    permissions = selected.get('fs_permissions', [])
+    permissions = selected.get('fs_permissions', profiles.get('default', {}).get('fs_permissions', []))
     _require(isinstance(permissions, list), 'Source filesystem permissions are not a list')
     scopes = []
     for row in permissions:
@@ -115,8 +121,10 @@ def _overlay_config(raw: bytes, profile: str, scopes: list[str]) -> bytes:
     original_has_profile = profile in original.get('profile', {})
     for value in (original, updated):
         value.setdefault('profile', {}).setdefault(profile, {}).pop('fs_permissions', None)
-    if not original_has_profile and not updated['profile'][profile]:
-        updated['profile'].pop(profile)
+    if not original_has_profile:
+        for value in (original, updated):
+            if not value['profile'][profile]:
+                value['profile'].pop(profile)
     _require(original == updated, 'Execution config changed non-filesystem settings')
     _require(_profile_read_scopes(modified.encode(), profile) == scopes,
              'Execution read permissions differ from exact source')
@@ -131,6 +139,8 @@ def stage_execution_project(project: Path, destination: Path, sources: dict[str,
     _require(not destination.is_relative_to(project) and not project.is_relative_to(destination),
              'Execution project overlaps native project')
     tree = _tree(repo, commit)
+    for name in tree:
+        _safe(name)
     original_config = (project / 'foundry.toml').read_bytes()
     _require('foundry.toml' in tree, 'Source commit lacks Foundry configuration')
     source_config = _git(repo, 'cat-file', 'blob', tree['foundry.toml'])
@@ -165,13 +175,22 @@ def stage_execution_project(project: Path, destination: Path, sources: dict[str,
     if remappings.is_file():
         materialized['remappings.txt'] = remappings.read_bytes()
     materialized['foundry.toml'] = _overlay_config(original_config, profile, scopes)
+    aliases = {}
+    for name in materialized:
+        folded = name.casefold()
+        _require(folded not in aliases, f'Windows-staged path alias: {aliases.get(folded)} / {name}')
+        aliases[folded] = name
     destination.mkdir(parents=True)
     for name, raw in materialized.items():
         target = destination / _safe(name)
         _require(target.resolve().is_relative_to(destination), 'Staged file escapes execution project')
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
+    observed = {path.relative_to(destination).as_posix(): _sha(path.read_bytes())
+                for path in destination.rglob('*') if path.is_file()}
+    expected = {name: _sha(raw) for name, raw in materialized.items()}
+    _require(observed == expected, 'Staged execution project differs from intended file inventory')
     return {'sourceCommit': commit, 'sourceFoundrySha256': _sha(source_config),
             'nativeFoundrySha256': _sha(original_config), 'profile': profile,
             'readScopes': scopes, 'fixtureHashes': {name: _sha(raw) for name, raw in fixtures.items()},
-            'projectHashes': {name: _sha(raw) for name, raw in materialized.items()}}
+            'projectHashes': expected}

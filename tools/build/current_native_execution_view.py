@@ -394,7 +394,7 @@ def recheck(snapshot: dict):
 def prepare_view(project: Path, products: Path, owners: Path, preparation: Path, preparation_sha256: str,
                  destination: Path, entrypoints: dict[str, str], *, inputs: tuple[Path, ...] = (),
                  routing: dict | None = None, source_repo: Path | None = None,
-                 source_commit: str | None = None) -> dict:
+                 source_commit: str | None = None, execution_profile: str | None = None) -> dict:
     project = project.resolve(); destination = destination.resolve()
     require(not destination.exists(), 'Execution view must be a new directory')
     evidence = authenticate(project, products, owners, preparation, preparation_sha256, entrypoints)
@@ -403,6 +403,8 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
     require(not project.is_relative_to(destination), 'Execution view cannot contain the project')
     require((source_repo is None) == (source_commit is None),
             'Exact source repository and commit must be supplied together')
+    require((source_repo is None) == (execution_profile is None),
+            'Staged fixtures require an explicit execution profile')
     library_transports = {}
     cache, copies, routing_sources = cache_transport(evidence['contexts'], evidence['owners'], destination,
         routing=routing, project=project, transport_report=library_transports)
@@ -439,7 +441,7 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
     fixture_source = None
     if source_repo is not None:
         fixture_source = stage_execution_project(project, destination / 'project', evidence['sources'],
-                                                 source_repo, source_commit)
+                                                 source_repo, source_commit, profile=execution_profile)
     for relative, original in copies.items():
         target = destination / 'out' / relative
         target.parent.mkdir(parents=True, exist_ok=True); target.write_bytes(original.read_bytes())
@@ -461,6 +463,7 @@ def prepare_view(project: Path, products: Path, owners: Path, preparation: Path,
               'Helper/script authentication is supported; Forge script execution is not supported.'}
     if fixture_source is not None:
         result['executionProject'] = str(destination / 'project')
+        result['executionProfile'] = execution_profile
         result['executionProjectFiles'] = file_inventory(destination / 'project')
         result['authenticatedFixtureSource'] = fixture_source
     for context in evidence['contexts'].values():
@@ -482,6 +485,7 @@ def main():
     parser.add_argument('--input', action='append', default=[], type=Path, help='Additional fixture file/directory to seal')
     parser.add_argument('--source-repo', type=Path, help='Git repository containing exact fixture source commit')
     parser.add_argument('--source-commit', help='Exact source commit for read permissions and non-Solidity fixtures')
+    parser.add_argument('--execution-profile', help='Exact Foundry profile used for authenticated fixture reads')
     args = parser.parse_args()
     coordinates = [(s + ':' + n, kind) for kind, items in [('test', args.host), ('helper', args.entrypoint)] for s, n in items]
     require(len(coordinates) == len(dict(coordinates)), 'Duplicate entrypoint')
@@ -489,7 +493,8 @@ def main():
     routing = {'context': args.routing_context, 'profile': args.routing_profile} if args.routing_context else None
     result = prepare_view(args.project, args.products, args.owners, args.preparation, args.preparation_sha256,
                           args.destination, dict(coordinates), inputs=tuple(args.input), routing=routing,
-                          source_repo=args.source_repo, source_commit=args.source_commit)
+                          source_repo=args.source_repo, source_commit=args.source_commit,
+                          execution_profile=args.execution_profile)
     print(json.dumps({'status': result['status'], 'artifacts': len(result['artifacts']), 'expectedCases': result['expectedCases']}))
 
 

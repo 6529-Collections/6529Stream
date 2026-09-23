@@ -29,6 +29,12 @@ def clean_environment(profile: str, chain_id: int) -> dict:
     return env
 
 
+def require_execution_profile(snapshot: dict, profile: str):
+    if snapshot.get('executionProject'):
+        require(snapshot.get('executionProfile') == profile,
+                'Execution profile differs from authenticated fixture permissions')
+
+
 def validate_local_config(config: dict, chain_id: int):
     require(not config.get('eth_rpc_url') and not config.get('fork_url')
             and config.get('fork_block_number') is None and config.get('fork_block_hash') is None,
@@ -113,6 +119,7 @@ def run(view_file: Path, expected_hash: str, forge: Path, forge_sha256: str, des
     require(file_hash(forge) == forge_sha256, 'Forge binary changed')
     snapshot = strict_json(view_file.read_bytes())
     require(snapshot['version'] == 1 and snapshot['status'] == 'PREPARED_EXECUTION_VIEW', 'Unknown execution view')
+    require_execution_profile(snapshot, profile)
     require(snapshot['expectedCases'], 'No test entrypoint: helper/script execution is unsupported')
     require(0 < timeout <= 3600, 'Expected bounded process timeout')
     # Helpers may exist as dependencies, but are never silently counted as executed cases.
