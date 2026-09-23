@@ -16,11 +16,12 @@ different milestones.
 
 ## Latest integration checkpoint: 22 September
 
-Expanded full v1 remains incomplete. Integrated source `4e88540ce` adds the
-dispute validation size repair, corrected Artist Museum reviews, actual local
-General review capture, preservation fixture corrections and scoped bundle
-size repair. Source integration and successful component tests do not establish
-full current-stack acceptance. RC1 and Sepolia remain unchanged.
+Expanded full v1 remains incomplete. Integrated source `84f2be42f` now adds
+verified Museum review-package composition and the Genesis fixture compilation
+repair to the earlier contract batch `4e88540ce`. The new fixture preserves all
+44 original cases and deploys genuine products from their native artifacts.
+Source integration and component tests do not establish full current-stack
+acceptance. RC1 and Sepolia remain unchanged.
 
 - **Artist contracts:** all 49 collaborator workers fit on their recorded
   `07265d875` source. Twelve codec/projection cases pass, including one
@@ -47,14 +48,22 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   boundary and empty Artist lane are retained. This is not latest-stack,
   institutional qualification or independent-human evidence. Portable Artist
   review dossier `f7e9da5da` passes eight integrated
-  replay/tamper tests and independent review. Broader Museum composition
-  continues through an additive V5 join; earlier packages remain unchanged.
+  replay/tamper tests and independent review. V5 composition `84f2be42f` has
+  independent source review and passes all **20 final focused tests**: eight
+  new join/replay/tamper cases, eight Artist dossier regressions and four
+  retained General capture replays. Original child bytes, profiles and the
+  19/49 assessment denominator remain unchanged. A separate typed native-state
+  assessment adapter is being built; wrapper replay alone does not complete
+  those requirements or establish institutional acceptance.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
   the required client aggregate** at merge source `8d2e2323` (dispatch
   `eb840cfb`). All 246 files / 1,472 execution units / 3,354 registrations
   completed under the original limits, including every Inventory stage and
   Platform group. The temporary publication hold is resolved. This client
   result does not make the full repository CI or current contracts accepted.
+  The newer `35797757494` run also passes all 16 client shards and aggregate
+  at merge `9e9312b9` (dispatch `3f9c9944`). Its native jobs remain running;
+  Slither baseline and release-artifact jobs failed and are being diagnosed.
 - **Preservation:** the repaired component campaign at builder `4a631c0a`
   passes **44/44 cases**: checkpoint 13, manifest V1 21 and V2 10, with no
   failures or skips. Independent runtime review is clear. The fixture
@@ -63,19 +72,28 @@ full current-stack acceptance. RC1 and Sepolia remain unchanged.
   The actual checkpoint-to-manifest join also passes **3/3 cases**, with
   independent trace review clear. Its positive diagnostic uses a 32m read
   allowance; it does not prove execution within the 16,777,216 transaction
-  limit. The builder is now addressing that real gas boundary.
+  limit. Fresh-budget fixture `ca0b9f694` passes four cases with independent
+  review: the warm calls spend 1,979,246 and 1,681,207 gas. These are not fresh
+  transaction receipts. A test-only state-backed fixture is being prepared
+  for separate Anvil transactions; full current-stack acceptance remains open.
 - **Paid flows and remaining integration:** scoped bundle size repair
   `6903b3b12` / `356d091d3` has independent source clearance. The measured
   builder deployment is 24,435 runtime bytes, below 24,576, and its two
   focused native tests pass. All 102 native-context and 191 test-source paths
   match integrated `356d091d3`. Actual current paid-flow acceptance remains
-  open. The 500,000-gas paid-flow ceiling is unchanged. Testing is preparing the original
-  Genesis/Owner execution closure with whole-context artifact reuse and
-  disjoint captures; assembly is not execution acceptance.
+  open. The 500,000-gas paid-flow ceiling is unchanged. Paid prototype
+  `6bdeb2f2` / control `5f138526` has bounded root/Luna source review, but its
+  first two native fixture captures timed out at 900 seconds with zero paid
+  executions. A test-only construction split is authorized; the exact source
+  equality gate and time bound remain intact. Genesis helper `bf26e7cd8`
+  passes independent stage-equivalence review and preserves all 44 cases.
+  Fresh smaller native captures continue; Genesis and Owner runtime acceptance
+  remain pending.
 
-ABI210 checks **4,694 Solidity sources with zero errors** at `4e88540ce`.
-The active inventory contains **3,143 production paths**. This combined source
-is the frozen input for the next parallel runtime work. Full current-stack/Safe
+ABI211 checks **4,695 Solidity sources with zero errors** at `bf26e7cd8`;
+`84f2be42f` has identical Solidity bytes. The active inventory remains
+**3,143 production paths**. Existing parallel runtime work stays pinned to
+its recorded source; these new test and Museum changes do not relabel it. Full current-stack/Safe
 integration, comprehensive fuzz/stateful tests,
 gas/code-size checks, full CI and matching release evidence remain, followed by
 a frozen candidate and testnet demonstration. No new funding is required.
