@@ -200,7 +200,12 @@ contract StreamPolicyContentCheckpointV2Test is StaticMetadataRoutingFixture {
         d.manifest = renderer.rendererManifest();
         d.readGas = _gas("METADATA_DEPENDENCY_READ_GAS", 2000000, 2);
         d.attributionGas = _gas("STATIC_ATTRIBUTION_GAS", 8000000, 1);
-        renderer = new StreamRendererV1(d);
+        renderer = StreamRendererV1(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamRendererV1.sol:StreamRendererV1",
+                abi.encode(d)
+            )
+        );
         admittedVersions = new PolicyOutputVersionsBoundary(
             address(executor), address(schemas), address(renderer)
         );
@@ -240,25 +245,42 @@ contract StreamPolicyContentCheckpointV2Test is StaticMetadataRoutingFixture {
                     uint64(1)
                 )
             );
-        inventory = new StreamCollectionTokenInventory(
-            address(core), address(executor), _gas("TOKEN_INVENTORY_CORE_READ_GAS", 100000, 1)
+        inventory = StreamCollectionTokenInventory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamCollectionTokenInventory.sol:StreamCollectionTokenInventory",
+                abi.encode(
+                    address(core),
+                    address(executor),
+                    _gas("TOKEN_INVENTORY_CORE_READ_GAS", 100000, 1)
+                )
+            )
         );
         uint256[] memory tokens = new uint256[](1);
         tokens[0] = 91;
         inventory.appendCollectionTokens(1, tokens);
-        StreamFinalityScopeMembership members = new StreamFinalityScopeMembership(
-            address(core),
-            address(metadata),
-            address(inventory),
-            address(executor),
-            _gas("SCOPE_MEMBERSHIP_READ_GAS", 500000, 1)
+        StreamFinalityScopeMembership members = StreamFinalityScopeMembership(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamFinalityScopeMembership.sol:StreamFinalityScopeMembership",
+                abi.encode(
+                    address(core),
+                    address(metadata),
+                    address(inventory),
+                    address(executor),
+                    _gas("SCOPE_MEMBERSHIP_READ_GAS", 500000, 1)
+                )
+            )
         );
-        selections = new StreamStaticSelectionCheckpoint(
-            address(core),
-            address(router),
-            address(members),
-            address(executor),
-            _gas("STATIC_CHECKPOINT_READ_GAS", 2000000, 1)
+        selections = StreamStaticSelectionCheckpoint(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamStaticSelectionCheckpoint.sol:StreamStaticSelectionCheckpoint",
+                abi.encode(
+                    address(core),
+                    address(router),
+                    address(members),
+                    address(executor),
+                    _gas("STATIC_CHECKPOINT_READ_GAS", 2000000, 1)
+                )
+            )
         );
         S.ConfigInput memory input = _input(R.MetadataMode.ONCHAIN, true);
         _approve(0, input, keccak256("original config consent"));
@@ -267,16 +289,24 @@ contract StreamPolicyContentCheckpointV2Test is StaticMetadataRoutingFixture {
             selections.begin(StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0));
         selections.append(selection, 1);
         sourceSet = new PolicyOutputSourceBoundary(address(core), address(terminal), members);
-        readiness = new StreamTerminalEntropyReadiness(
-            address(core), address(router), address(sourceSet), 2000000, 6000000
+        readiness = StreamTerminalEntropyReadiness(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamTerminalEntropyReadiness.sol:StreamTerminalEntropyReadiness",
+                abi.encode(address(core), address(router), address(sourceSet), 2000000, 6000000)
+            )
         );
-        outputs = new StreamPolicyContentCheckpointV2(
-            address(selections),
-            address(sourceSet),
-            address(readiness),
-            address(executor),
-            _gas("STATIC_CONTENT_READ_GAS", 8000000, 2),
-            _gas("STATIC_CONTENT_RENDER_GAS", 16000000, 2)
+        outputs = StreamPolicyContentCheckpointV2(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamPolicyContentCheckpointV2.sol:StreamPolicyContentCheckpointV2",
+                abi.encode(
+                    address(selections),
+                    address(sourceSet),
+                    address(readiness),
+                    address(executor),
+                    _gas("STATIC_CONTENT_READ_GAS", 8000000, 2),
+                    _gas("STATIC_CONTENT_RENDER_GAS", 16000000, 2)
+                )
+            )
         );
     }
 
@@ -530,13 +560,16 @@ contract StreamPolicyContentCheckpointV2Test is StaticMetadataRoutingFixture {
         outputs.begin(selection, 0);
         sourceSet.change(true, chain, 0, 1);
         vm.expectRevert();
-        new StreamPolicyContentCheckpointV2(
-            address(selections),
-            address(sourceSet),
-            address(terminal),
-            address(executor),
-            _gas("STATIC_CONTENT_READ_GAS", 8000000, 2),
-            _gas("STATIC_CONTENT_RENDER_GAS", 16000000, 2)
+        _artistArtifactCreate(
+            "smart-contracts/domains/finality/StreamPolicyContentCheckpointV2.sol:StreamPolicyContentCheckpointV2",
+            abi.encode(
+                address(selections),
+                address(sourceSet),
+                address(terminal),
+                address(executor),
+                _gas("STATIC_CONTENT_READ_GAS", 8000000, 2),
+                _gas("STATIC_CONTENT_RENDER_GAS", 16000000, 2)
+            )
         );
         require(outputs.begin(selection, 0) != 0);
     }
@@ -605,31 +638,41 @@ contract StreamPolicyContentCheckpointV2Test is StaticMetadataRoutingFixture {
         LeafManifestVm mvm = LeafManifestVm(address(vm));
         address predicted =
             mvm.computeCreateAddress(address(this), uint256(mvm.getNonce(address(this))) + 1);
-        StreamFinalityArtifactCoverage coverage = new StreamFinalityArtifactCoverage(
-            address(core),
-            address(archive),
-            address(schemas),
-            address(store),
-            predicted,
-            address(executor),
-            IStreamGasParameterHost.GasParameterConfig(
-                "FINALITY_ARTIFACT_DEPENDENCY_READ_GAS", 300000, 300000, 2
+        StreamFinalityArtifactCoverage coverage = StreamFinalityArtifactCoverage(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamFinalityArtifactCoverage.sol:StreamFinalityArtifactCoverage",
+                abi.encode(
+                    address(core),
+                    address(archive),
+                    address(schemas),
+                    address(store),
+                    predicted,
+                    address(executor),
+                    IStreamGasParameterHost.GasParameterConfig(
+                        "FINALITY_ARTIFACT_DEPENDENCY_READ_GAS", 300000, 300000, 2
+                    )
+                )
             )
         );
         require(
             address(new LeafManifestFinalityBoundary(address(core), address(coverage))) == predicted
         );
         core.setPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), predicted);
-        StreamPolicyOutputManifestV2 manifest = new StreamPolicyOutputManifestV2(
-            address(core),
-            address(outputs),
-            address(coverage),
-            address(executor),
-            // Fund the existing 16m render cap (the 8m cap is only dependency reads),
-            // its full EIP-150/parent reserve, and the preceding one-row validation work.
-            // The retained 10m negative stops at StaticContentParentGas before tokenJSON.
-            // This 20m focused-fixture cap is not a production or transaction-cap claim.
-            _gas("STATIC_OUTPUT_MANIFEST_READ_GAS", 20000000, 2)
+        StreamPolicyOutputManifestV2 manifest = StreamPolicyOutputManifestV2(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamPolicyOutputManifestV2.sol:StreamPolicyOutputManifestV2",
+                abi.encode(
+                    address(core),
+                    address(outputs),
+                    address(coverage),
+                    address(executor),
+                    // Fund the existing 16m render cap (the 8m cap is only dependency reads),
+                    // its full EIP-150/parent reserve, and the preceding one-row validation work.
+                    // The retained 10m negative stops at StaticContentParentGas before tokenJSON.
+                    // This 20m focused-fixture cap is not a production or transaction-cap claim.
+                    _gas("STATIC_OUTPUT_MANIFEST_READ_GAS", 20000000, 2)
+                )
+            )
         );
         O.Plan memory p = outputs.requireCurrentCheckpoint(id);
         O.Output[] memory rows = new O.Output[](1);
