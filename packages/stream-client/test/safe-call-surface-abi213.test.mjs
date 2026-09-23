@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildSurfaceInventory, canonical, sha256 } from "../scripts/generate-safe-call-surface-abi213.mjs";
+import { buildSurfaceInventory, canonical, sha256, CURRENT_37_ROLE_MAP, CURRENT_SUPPORT_COMPANIONS, CURRENT_IMPLEMENTATION_ONLY_LIBRARIES, CURRENT_CALLER_ROUTE_RULES } from "../scripts/generate-safe-call-surface-abi213.mjs";
 
 function fixture() {
   const sources = {}, committedBlobSHA256 = {}, contracts = {};
@@ -8,6 +8,14 @@ function fixture() {
     sources[path] = { content };
     committedBlobSHA256[path] = sha256(content);
     if (artifact) contracts[path] = artifact;
+  };
+  const addCurrentProduct = (name, kind = "contract") => {
+    const path = "smart-contracts/current-roster/" + name + ".sol";
+    const methods = [...new Set(["readCurrent", "writeCurrent", ...CURRENT_CALLER_ROUTE_RULES.filter(([contract]) => contract === name).flatMap(([, names]) => names)])];
+    const abi = kind === "library" ? [] : methods.map((method, index) => ({ type: "function", name: method,
+      stateMutability: index === 0 ? "view" : "nonpayable", inputs: [], outputs: [] }));
+    const methodIdentifiers = Object.fromEntries(methods.map((method, index) => [method + "()", (index + 1).toString(16).padStart(8, "0")]));
+    addSource(path, kind + " " + name + " {}", { [name]: { abi, evm: { methodIdentifiers } } });
   };
   const roster = [];
   for (let i = 0; i < 164; i++) {
@@ -32,6 +40,10 @@ function fixture() {
   addSource("smart-contracts/domains/mint/ICandidate.sol", "interface ICandidate {}", { ICandidate: { abi: [] } });
   addSource("smart-contracts/domains/mint/AbstractCandidate.sol", "abstract contract AbstractCandidate {}", { AbstractCandidate: { abi: [] } });
   addSource("smart-contracts/domains/mint/CandidateLib.sol", "library CandidateLib {}", { CandidateLib: { abi: [] } });
+  addSource("smart-contracts/domains/catalog/CatalogOnly.sol", "contract CatalogOnly {}", { CatalogOnly: {
+    abi: [{ type: "function", name: "readCatalogOnly", stateMutability: "view", inputs: [], outputs: [] }],
+    evm: { methodIdentifiers: { "readCatalogOnly()": "12345678" } },
+  } });
   addSource("smart-contracts/legacy/OldCandidate.sol", "contract OldCandidate {}", { OldCandidate: { abi: [] } });
   addSource("smart-contracts/legacy/UsedLegacyModule.sol", "contract UsedLegacyModule {}", { UsedLegacyModule: { abi: [] } });
   addSource("smart-contracts/domains/mint/TupleCandidate.sol", "contract TupleCandidate {}", { TupleCandidate: {
@@ -39,6 +51,12 @@ function fixture() {
     evm: { methodIdentifiers: { "configure(Config)": "ddeeccbb" } },
   } });
   addSource("script/current/DeployCandidate.s.sol", "contract DeployCandidate { function x() external { new Candidate(); type(Candidate).creationCode; type(TupleCandidate).creationCode; type(UsedLegacyModule).creationCode; } }");
+  const currentNames = [...new Set([...CURRENT_37_ROLE_MAP.map(([, name]) => name), ...CURRENT_SUPPORT_COMPANIONS.map(([, name]) => name)])];
+  for (const name of currentNames) addCurrentProduct(name);
+  for (const [, name] of CURRENT_IMPLEMENTATION_ONLY_LIBRARIES) addCurrentProduct(name, "library");
+  const roleSource = "contract StreamFullV1Candidate { function capture() external { inventory.roles = [" +
+    CURRENT_37_ROLE_MAP.map(([expression]) => expression).join(", ") + "]; } }";
+  addSource("script/current/StreamFullV1Candidate.sol", roleSource);
   addSource("test/Candidate.t.sol", "contract CandidateTest { // CommentOnly\n string memory ignored = \"StringOnly\"; Candidate target; ICandidate api; CandidateLib lib; AbstractCandidate abstractTarget; }");
 
   const input = { sources, settings: { optimizer: { enabled: true } } };
@@ -53,6 +71,7 @@ function fixture() {
   const currentTargets = { contracts: [{ name: "Candidate", source: "smart-contracts/domains/mint/Candidate.sol" }] };
   const catalog = { production_contracts: [
     { name: "Candidate", source: "smart-contracts/domains/mint/Candidate.sol" },
+    { name: "CatalogOnly", source: "smart-contracts/domains/catalog/CatalogOnly.sol" },
     { name: "ICandidate", source: "smart-contracts/domains/mint/ICandidate.sol" },
     { name: "CandidateLib", source: "smart-contracts/domains/mint/CandidateLib.sol" },
     { name: "AbstractCandidate", source: "smart-contracts/domains/mint/AbstractCandidate.sol" },
@@ -67,20 +86,62 @@ function fixture() {
   };
 }
 
-test("ABI213 refresh preserves the exact 164 roster and inventories selectors and special entries", () => {
+test("ABI213 refresh preserves historical totals and expands the supported roster from the current capture", () => {
   const report = buildSurfaceInventory(fixture());
-  assert.deepEqual(report.totals, { contracts: 164, functions: 6553, viewOrPure: 3276, stateChanging: 3277, payableFunctions: 0, receive: 0, fallback: 0 });
-  assert.equal(report.surfaces.length, 164);
+  assert.deepEqual(report.historicalTotals, { contracts: 164, functions: 6553, viewOrPure: 3276, stateChanging: 3277, payableFunctions: 0, receive: 0, fallback: 0 });
+  assert.equal(report.surfaces.length, 164 + report.selection.addedCurrentSupportProducts);
+  assert.equal(report.totals.contracts, 164 + report.selection.addedCurrentSupportProducts);
   assert.equal(report.capture.sourceCommit, "a0f92ecae8414d36aa715ae1e37d5fb222c0db97");
   assert.equal(report.surfaces[0].functions[0].selector, "0x00000000");
 });
 
+test("current full37 capture resolves to concrete products while preserving historical labels separately", () => {
+  const report = buildSurfaceInventory(fixture());
+  assert.equal(report.current37RoleCoverage.length, 37);
+  assert.equal(report.current37RoleCoverage[0].currentProduct, "StreamCore");
+  assert.equal(report.current37RoleCoverage[1].currentProduct, "StreamGovernanceExecutor");
+  assert.equal(report.current37RoleCoverage[13].currentProduct, "StreamNativeFixedPriceSaleAdapter");
+  assert.equal(report.current37RoleCoverage[15].currentProduct, "StreamNativeDutchSale");
+  assert.equal(report.current37RoleCoverage[20].currentProduct, "StreamArtistOnboardingRegistry");
+  assert.equal(report.current37RoleCoverage[23].currentProduct, "StreamCollectionMetadataV1");
+  assert.equal(report.current37RoleCoverage[26].currentProduct, "StreamPreservationRecordsV1");
+  assert.equal(report.current37RoleCoverage[31].currentProduct, "StreamEntropyProviderARRNG");
+  assert.equal(report.current37RoleCoverage[34].currentProduct, "StreamMintManagerFallback");
+  assert.equal(report.current37RoleCoverage[1].supportDisposition, "current-role-expansion");
+  assert.equal(report.current37RoleCoverage[1].historicalProfileLabel.key, "ROLE_2");
+  assert.equal(report.historicalGenesisRoleLabels.length, 37);
+  assert.equal(report.genesisRoleCoverage, undefined);
+  assert.ok(report.currentSupportRoster.some(x => x.name === "StreamArtistBindingLifecycle" && x.supportCompanions.length));
+  assert.ok(report.implementationOnlyLibraries.every(x => x.status === "implementation-only-not-standalone-safe-target"));
+  assert.ok(report.candidateProductsAbsent164.every(x => x.supportDisposition === "catalog-only-not-promoted"
+    || x.supportDisposition === "anchored-candidate-not-selected-by-current37-capture" || x.currentSupportRosterMember));
+  const catalogOnly = report.candidateProductsAbsent164.find(x => x.name === "CatalogOnly");
+  assert.equal(catalogOnly.supportDisposition, "catalog-only-not-promoted");
+  assert.equal(catalogOnly.currentSupportRosterMember, false);
+});
+
+test("new commerce, ARRNG, and records surfaces carry focused source-backed caller routes", () => {
+  const report = buildSurfaceInventory(fixture());
+  const surface = name => report.surfaces.find(x => x.contract === name);
+  const route = (product, method) => surface(product).callerRoutes.find(x => x.signature.startsWith(method + "("));
+  assert.equal(route("StreamNativeDutchSale", "registerDutchSale").callerClass, "governance-executor-owner-action");
+  assert.equal(route("StreamNativeDutchSale", "pauseAdapter").callerClass, "configured-role-holder-safe-candidate");
+  assert.equal(route("StreamNativeDutchSale", "purchase").callerClass, "user-or-artist-safe-executor-action");
+  assert.equal(route("StreamERC20PrimarySettlementAdapter", "settleERC20PrimarySaleByPayer").callerClass, "payer-safe-or-signed-payment-intent");
+  assert.equal(route("StreamPrimarySaleSettlement", "settleNativePrimarySaleFromAdapter").callerClass, "registered-sale-adapter-protocol-callback");
+  assert.equal(route("StreamEntropyProviderARRNG", "requestEntropy").callerClass, "entropy-coordinator-protocol-callback");
+  assert.equal(route("StreamEntropyProviderARRNG", "receiveRandomness").callerClass, "arrng-controller-protocol-callback");
+  assert.equal(route("StreamEntropyProviderARRNG", "updateRequestPayment").callerClass, "governance-executor-current-action");
+  assert.equal(route("StreamPreservationRecordsV1", "recordCollectionRecordWithPayload").callerClass, "artist-safe-authorized-record-write");
+  assert.equal(route("StreamPreservationRecordsV1", "recordCollectionRecordWithPayload").deploymentBindingRequired, true);
+  assert.equal(route("StreamNativeDutchSale", "registerDutchSale").deploymentBindingRequired, true);
+  for (const product of ["StreamNativeDutchSale", "StreamEntropyProviderARRNG", "StreamPreservationRecordsV1"]) {
+    assert.ok(surface(product).callerRoutes.every(x => x.selector && x.evidencePaths.length > 0));
+  }
+});
+
 test("anchored gap list keeps concrete current products and qualifies deployment, catalog, reads, and tests", () => {
   const report = buildSurfaceInventory(fixture());
-  assert.equal(report.genesisRoleCoverage.length, 37);
-  assert.equal(report.genesisRoleCoverage[0].status, "contains-product-absent-from-164-roster");
-  assert.equal(report.genesisRoleCoverage[1].status, "covered-by-retained-164-roster");
-  assert.equal(report.genesisRoleCoverage[2].status, "manifest-equivalent-needs-root-mapping");
   const candidate = report.candidateProductsAbsent164.find(row => row.fqn === "smart-contracts/domains/mint/Candidate.sol:Candidate");
   assert.ok(candidate);
   assert.equal(candidate.deploymentEvidence.status, "not-established");
@@ -115,6 +176,12 @@ test("source bridge, planning-candidate identity, and selector coverage fail clo
   const brokenBridge = JSON.parse(original.bridgeRaw);
   brokenBridge.committedBlobSHA256["script/current/DeployCandidate.s.sol"] = "0".repeat(64);
   assert.throws(() => buildSurfaceInventory({ ...original, bridgeRaw: JSON.stringify(brokenBridge) }), /Source bytes differ/);
+  const changedRole = JSON.parse(original.inputRaw), rolePath = "script/current/StreamFullV1Candidate.sol";
+  changedRole.sources[rolePath].content = changedRole.sources[rolePath].content.replace("address(f.core)", "address(TEMP)")
+    .replace("address(f.executor)", "address(f.core)").replace("address(TEMP)", "address(f.executor)");
+  const roleBridge = JSON.parse(original.bridgeRaw);
+  roleBridge.committedBlobSHA256[rolePath] = sha256(changedRole.sources[rolePath].content);
+  assert.throws(() => buildSurfaceInventory({ ...original, inputRaw: JSON.stringify(changedRole), bridgeRaw: JSON.stringify(roleBridge) }), /role expression changed at capture position 1/);
   const badPlanning = JSON.parse(original.planningCandidateRaw);
   badPlanning.instances.push({ address: "0x0000000000000000000000000000000000000001" });
   assert.throws(() => buildSurfaceInventory({ ...original, planningCandidateRaw: JSON.stringify(badPlanning) }), /planning-only candidate without instances/);

@@ -1,7 +1,7 @@
 # Current Safe call-surface inventory (ABI213)
 
-Source: a0f92ecae8414d36aa715ae1e37d5fb222c0db97. The compiler bridge authenticates all 4698 source blobs. The machine file contains exact current signatures, selectors, input/output types and source/ABI hashes for 164 retained supported products.
-The selected set contains 6553 functions, 3 receive handlers and 0 fallback handlers. This is an ABI surface inventory, not Safe acceptance.
+Source: a0f92ecae8414d36aa715ae1e37d5fb222c0db97. The compiler bridge authenticates all 4698 source blobs. The machine file contains exact current signatures, selectors, input/output types and source/ABI hashes for 175 supported products, including the retained historical roster and explicit current full37 additions.
+The selected set contains 7211 functions, 4 receive handlers and 0 fallback handlers. This is an ABI surface inventory, not Safe acceptance.
 
 The prior 164-FQN roster is retained selection evidence, not blanket permission to omit later full-v1 products. Candidate products absent from it are separately listed below. The 6,840 compiler FQNs include interfaces, libraries, abstract contracts, tests and legacy products; presence alone does not make them independent supported Safe surfaces.
 The deployment planning candidate is planning-only, has no instances and is not production-candidate/readiness evidence; no deployment receipt is included. Target/catalog membership means a committed catalog reference only. ABI read/state-changing counts and selectors describe callable shapes if deployed; they do not establish live reads, successful calls, test execution or deployment.
@@ -9,7 +9,7 @@ The deployment planning candidate is planning-only, has no instances and is not 
 ## Keep three questions separate
 
 - ABI: signatures and receive/fallback handlers are enumerated from the current compiler output.
-- Caller authorization: marked source-review-required. ABI entries do not encode role requirements, caller identity or protocol-only boundaries.
+- Caller authorization: only focused current-product routes below have source-scoped caller classifications. ABI entries alone do not encode role requirements, caller identity or protocol-only boundaries; unlisted methods remain source-review-required.
 - Safe runtime: not joined in this static report. Existing source-scoped attestations remain in their historical evidence records; this report neither promotes nor discards them.
 
 ## Supported roster by source family
@@ -19,13 +19,13 @@ The deployment planning candidate is planning-only, has no instances and is not 
 | artist | 30 | 1579 | 1067 | 512 | 0 | 0 |
 | auctions | 2 | 172 | 119 | 53 | 0 | 0 |
 | core | 1 | 61 | 37 | 24 | 0 | 0 |
-| entropy | 2 | 172 | 128 | 44 | 0 | 0 |
+| entropy | 3 | 224 | 173 | 51 | 1 | 0 |
 | finality | 47 | 1355 | 1266 | 89 | 0 | 0 |
 | governance | 4 | 112 | 80 | 32 | 1 | 0 |
-| metadata | 21 | 781 | 669 | 112 | 0 | 0 |
-| mint | 12 | 656 | 531 | 125 | 0 | 0 |
+| metadata | 25 | 950 | 825 | 125 | 0 | 0 |
+| mint | 17 | 1053 | 829 | 224 | 0 | 0 |
 | modules | 1 | 24 | 21 | 3 | 0 | 0 |
-| preservation | 35 | 1272 | 944 | 328 | 0 | 0 |
+| preservation | 36 | 1312 | 980 | 332 | 0 | 0 |
 | revenue | 9 | 369 | 281 | 88 | 2 | 0 |
 
 ## Supported contracts
@@ -196,6 +196,17 @@ The deployment planning candidate is planning-only, has no instances and is not 
 | smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver | 56 | 39 | 17 | 0 | 0 | 0 |
 | smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory | 43 | 38 | 5 | 0 | 0 | 0 |
 | smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet | 32 | 26 | 6 | 0 | 1 | 0 |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | 52 | 45 | 7 | 2 | 1 | 0 |
+| smart-contracts/domains/metadata/StreamGeneralAttestations.sol:StreamGeneralAttestations | 64 | 58 | 6 | 0 | 0 | 0 |
+| smart-contracts/domains/metadata/StreamRendererRegistryModule.sol:StreamRendererRegistryModule | 61 | 55 | 6 | 0 | 0 | 0 |
+| smart-contracts/domains/metadata/StreamRendererV1.sol:StreamRendererV1 | 36 | 35 | 1 | 0 | 0 | 0 |
+| smart-contracts/domains/metadata/StreamStaticAttributionCompanion.sol:StreamStaticAttributionCompanion | 8 | 8 | 0 | 0 | 0 | 0 |
+| smart-contracts/domains/mint/StreamBurnMintGate.sol:StreamBurnMintGate | 53 | 45 | 8 | 1 | 0 | 0 |
+| smart-contracts/domains/mint/StreamMintManagerFallback.sol:StreamMintManagerFallback | 104 | 80 | 24 | 0 | 0 | 0 |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | 74 | 58 | 16 | 2 | 0 | 0 |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | 81 | 63 | 18 | 4 | 0 | 0 |
+| smart-contracts/domains/mint/StreamPrivateSaleAdapter.sol:StreamPrivateSaleAdapter | 85 | 52 | 33 | 4 | 0 | 0 |
+| smart-contracts/domains/preservation/StreamPreservationRecordsV1.sol:StreamPreservationRecordsV1 | 40 | 36 | 4 | 0 | 0 | 0 |
 
 ## Receive and fallback
 
@@ -204,50 +215,177 @@ The deployment planning candidate is planning-only, has no instances and is not 
 | smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor | receive | payable | true |
 | smart-contracts/domains/revenue/StreamRevenueEscrow.sol:StreamRevenueEscrow | receive | payable | true |
 | smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet | receive | payable | true |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | receive | payable | true |
 
-## Genesis role coverage (37-role source profile)
+## Source-backed caller route candidates
 
-Role names in the actual genesis profile resolve only to the retained roster, anchored candidate gaps, explicit exclusions, or an unresolved manifest-equivalent decision. This is role mapping evidence, not a deployment assertion.
+These focused classifications follow concrete caller and role checks in the current product source. Rows naming the Governance Executor or a configured role identify candidate authority routes; exact owner/authority, role-holder and Safe addresses still require a deployment join. When the target caller is the Executor, a Governance Safe must reach it through the scheduled action flow. User/artist Safe routes remain deployment-binding candidates. Protocol callbacks are source-restricted endpoints, not ordinary Safe targets. Unlisted methods remain source-review-required; none of these rows proves runtime acceptance.
 
-| Role ID | Key | Named implementation/aliases | Roster status | ABI213 products |
+| Product | Function | Selector | Caller route | Source basis | Remaining binding |
+| --- | --- | --- | --- | --- | --- |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20PrimarySaleByPayer((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32),bytes)` | 0x3f03540c | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20PrimarySaleWithIntent((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32),(address,address,uint256,bytes32,bytes32,bytes32,uint64),bytes,bytes)` | 0x01e14082 | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20PrimarySaleWithEIP2612Permit((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32),(uint256,uint8,bytes32,bytes32),bytes)` | 0xa63e7389 | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20PrimarySaleWithPermit2((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32),(uint256,uint256,bytes),bytes)` | 0x203e0995 | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20DutchSaleByPayer((address,bytes32,bytes32,bytes32,uint256,bytes))` | 0xc37b0fb0 | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20DutchSaleWithIntent((address,bytes32,bytes32,bytes32,uint256,bytes),(address,address,uint256,bytes32,bytes32,bytes32,uint64),bytes)` | 0xc45f4a07 | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20DutchSaleWithEIP2612Permit((address,bytes32,bytes32,bytes32,uint256,bytes),(uint256,(uint256,uint8,bytes32,bytes32)))` | 0xded57b2e | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | `settleERC20DutchSaleWithPermit2((address,bytes32,bytes32,bytes32,uint256,bytes),(uint256,(uint256,uint256,bytes)))` | 0x8db4f42b | payer-safe-or-signed-payment-intent | Direct entry binds msg.sender to payer; intent entry validates payer signature, nonce, deadline and sale/asset caps. Not an unrestricted recorder callback. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement | `settleERC20PrimarySaleFromAdapter(address,(address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32))` | 0x93981479 | registered-sale-adapter-protocol-callback | Settlement entry points are adapter protocol calls validated against registered sale and replay state. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement | `settleERC20DutchPrimarySaleFromAdapter(address,(address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32))` | 0x251c2245 | registered-sale-adapter-protocol-callback | Settlement entry points are adapter protocol calls validated against registered sale and replay state. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement | `settleERC20PublicDutchPrimarySaleFromAdapter(address,(address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(address,uint64,uint64,uint64),(bytes32,uint256,uint8,bytes32),address,uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32))` | 0x3ebfa1e8 | registered-sale-adapter-protocol-callback | Settlement entry points are adapter protocol calls validated against registered sale and replay state. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement | `settleNativePrimarySaleFromAdapter((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(uint64,uint64),(bytes32,uint256,uint8,bytes32),uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32))` | 0xdd95460b | registered-sale-adapter-protocol-callback | Settlement entry points are adapter protocol calls validated against registered sale and replay state. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement | `settleNativePublicPrimarySaleFromAdapter((address,address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),(uint64,uint64),(bytes32,uint256,uint8,bytes32),uint8,address,bytes32,bytes32,bytes32,bytes32,(bytes32,address,bytes32,bytes32,bytes32),bytes32))` | 0xf44886f4 | registered-sale-adapter-protocol-callback | Settlement entry points are adapter protocol calls validated against registered sale and replay state. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `requestEntropy(bytes32,bytes)` | 0x50fd8523 | entropy-coordinator-protocol-callback | Requires msg.sender == the configured entropy coordinator. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `receiveRandomness(uint256,uint256[])` | 0x37f9c70d | arrng-controller-protocol-callback | Requires msg.sender == the configured ARRNG controller. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `retryCoordinatorFulfillment(uint256)` | 0xf986ba69 | permissionless-protocol-maintenance | Anyone may retry delivery of an already-authenticated retained provider result; this is not a randomness injection route. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `updateRequestPayment(uint256)` | 0x3928c2da | governance-executor-current-action | Requires the configured governance authority and matching current-action scope/state transition. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `updateControllerOwnerPin(address)` | 0x88444a3a | governance-executor-current-action | Requires the configured governance authority and matching current-action scope/state transition. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `withdrawFunds(uint256)` | 0x155dd5ee | governance-executor-current-action | Requires the configured governance authority and matching current-action scope/state transition. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | `raiseGasParameter(bytes32,uint256)` | 0x5c0df7da | governance-executor-current-action | Requires the configured governance authority and matching current-action scope/state transition. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `registerDutchSale((uint256,bytes32,(uint96,uint96,uint64,uint64,uint8,uint32,uint96),uint64,uint64,bool,bytes32))` | 0x2757232c | governance-executor-owner-action | onlyOwner for sale configuration and closure; deployment owner/Executor binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `registerAllowlistDutchSale((uint256,bytes32,(uint96,uint96,uint64,uint64,uint8,uint32,uint96),uint64,uint64,bool,bytes32),bytes32)` | 0x8d0e39c3 | governance-executor-owner-action | onlyOwner for sale configuration and closure; deployment owner/Executor binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `closeSale(bytes32)` | 0x45b092c8 | governance-executor-owner-action | onlyOwner for sale configuration and closure; deployment owner/Executor binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `pauseAdapter(bytes32)` | 0x53cc3981 | configured-role-holder-safe-candidate | Pause and unpause methods require the configured RoleRegistry pause/unpause role; holder-to-Safe binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `unpauseAdapter(bytes32)` | 0x9469f057 | configured-role-holder-safe-candidate | Pause and unpause methods require the configured RoleRegistry pause/unpause role; holder-to-Safe binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `pauseSale(bytes32,bytes32)` | 0x565ef95f | configured-role-holder-safe-candidate | Pause and unpause methods require the configured RoleRegistry pause/unpause role; holder-to-Safe binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `unpauseSale(bytes32,bytes32)` | 0x4943a49f | configured-role-holder-safe-candidate | Pause and unpause methods require the configured RoleRegistry pause/unpause role; holder-to-Safe binding must be joined. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `raiseGasParameter(bytes32,uint256)` | 0x5c0df7da | governance-executor-current-action | Gas parameter update is a governed current-action operation. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `purchase(((bytes32,bytes32,address,address,address,address,bytes32,bytes32,uint256,bytes32,uint64,bytes32,uint256),bytes,bytes,bytes))` | 0x7bd058d3 | user-or-artist-safe-executor-action | Requires msg.sender to equal the bound sale payer and Executor; sale consent also binds the artist. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | `purchaseWithAllowlist(((bytes32,bytes32,address,address,address,address,bytes32,bytes32,uint256,bytes32,uint64,bytes32,uint256),bytes,bytes,bytes),bytes)` | 0xb3c17e28 | user-or-artist-safe-executor-action | Requires msg.sender to equal the bound sale payer and Executor; sale consent also binds the artist. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `registerPriceProgram((uint256,bytes32,uint8,uint256,uint256,uint64,uint64,uint64,uint8,bytes32,bytes32))` | 0xdd618515 | governance-executor-owner-action | onlyOwner; current deployment owner/Executor binding must be joined before planning. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `registerAllowlistPriceProgram((uint256,bytes32,uint8,uint256,uint256,uint64,uint64,uint64,uint8,bytes32,bytes32),(bytes32,bool))` | 0xd38a156e | governance-executor-owner-action | onlyOwner; current deployment owner/Executor binding must be joined before planning. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `closePriceProgram(bytes32)` | 0x64f97130 | governance-executor-owner-action | onlyOwner; current deployment owner/Executor binding must be joined before planning. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `registerSale((uint256,bytes32,uint256,uint64,uint64,bytes32,bytes32))` | 0xc180defd | governance-executor-owner-action | onlyOwner; current deployment owner/Executor binding must be joined before planning. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `cancelSale(bytes32)` | 0x0bea8985 | governance-executor-owner-action | onlyOwner; current deployment owner/Executor binding must be joined before planning. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `setPaused(bool)` | 0x16c38b3c | governance-executor-owner-action | onlyOwner; current deployment owner/Executor binding must be joined before planning. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `raiseGasParameter(bytes32,uint256)` | 0x5c0df7da | governance-executor-current-action | Gas parameter update is a governed current-action operation. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `purchase(((bytes32,bytes32,address,address,address,address,bytes32,bytes32,uint256,bytes32,uint64,bytes32),bytes,bytes,bytes))` | 0x8c798cc5 | user-or-artist-safe-executor-action | Purchase path binds the payer and current Executor action; construct through the captured action envelope. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `purchaseWithBurn(((bytes32,bytes32,address,address,address,address,bytes32,bytes32,uint256,bytes32,uint64,bytes32),bytes,bytes,bytes),uint256[])` | 0xee079314 | user-or-artist-safe-executor-action | Purchase path binds the payer and current Executor action; construct through the captured action envelope. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `executePriceProgram(((bytes32,bytes32,address,address,address,address,bytes32,bytes32,uint256,bytes32,uint64,bytes32,uint256),uint256,bytes,bytes,bytes))` | 0xdbd33480 | user-or-artist-safe-executor-action | Purchase path binds the payer and current Executor action; construct through the captured action envelope. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | `executeBurnPurchase(((bytes32,bytes32,address,address,address,address,bytes32,bytes32,uint256,bytes32,uint64,bytes32),bytes,bytes,bytes),address,uint256,uint256[])` | 0xfe3831d4 | user-or-artist-safe-executor-action | Purchase path binds the payer and current Executor action; construct through the captured action envelope. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/preservation/StreamPreservationRecordsV1.sol:StreamPreservationRecordsV1 | `registerTokenSubject(uint256)` | 0x0878ff71 | permissionless-subject-registration | Derives the subject from current Core/Metadata reads; registration does not assert an artist record. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/preservation/StreamPreservationRecordsV1.sol:StreamPreservationRecordsV1 | `registerMediaSubject(uint256,bytes32)` | 0xa6442f54 | permissionless-subject-registration | Derives the subject from current Core/Metadata reads; registration does not assert an artist record. | source-enforced route; runtime still unjoined |
+| smart-contracts/domains/preservation/StreamPreservationRecordsV1.sol:StreamPreservationRecordsV1 | `recordCollectionRecordWithPayload(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes)` | 0x5e763983 | artist-safe-authorized-record-write | The record writer is msg.sender and Reads.admit checks the selected Metadata-family authority before retaining payload bytes. | join the selected Safe, current role/authority grants and action envelope |
+| smart-contracts/domains/preservation/StreamPreservationRecordsV1.sol:StreamPreservationRecordsV1 | `raiseGasParameter(bytes32,uint256)` | 0x5c0df7da | governance-executor-current-action | Gas parameter update is a governed current-action operation. | join the selected Safe, current role/authority grants and action envelope |
+
+## Current full37 product map
+
+This table follows the exact expression order in `StreamFullV1Candidate.capture()` and resolves every captured address expression to its concrete current product using the typed `Foundation` or `Products` field. Historical genesis labels are shown only as a separate crosswalk; they do not override the current source map. The product map proves neither deployment nor Safe acceptance.
+
+| Position | Capture expression | Current product | Typed source field | Concrete compiler product | Roster disposition | Historical label |
+| ---: | --- | --- | --- | --- | --- | --- |
+| 1 | `address(f.core)` | StreamCore | Foundation.core | smart-contracts/core/StreamCore.sol:StreamCore | retained-164 | STREAM_CORE |
+| 2 | `address(f.executor)` | StreamGovernanceExecutor | Foundation.executor | smart-contracts/domains/governance/StreamGovernanceExecutor.sol:StreamGovernanceExecutor | retained-164 | GOVERNANCE_LAYER |
+| 3 | `address(f.registry)` | StreamModuleRegistry | Foundation.registry | smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry | retained-164 | MODULE_REGISTRY |
+| 4 | `address(f.revenue)` | StreamRevenueResolver | Foundation.revenue | smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver | retained-164 | REVENUE_RESOLVER |
+| 5 | `address(f.factory)` | StreamSplitFactory | Foundation.factory | smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory | retained-164 | SPLIT_FACTORY |
+| 6 | `p.continuity.walletImplementation` | StreamSplitWallet | ContinuityProducts.walletImplementation; factory-pinned implementation | smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet | retained-164 | SPLIT_WALLET_IMPLEMENTATION |
+| 7 | `address(f.escrow)` | StreamRevenueEscrow | Foundation.escrow | smart-contracts/domains/revenue/StreamRevenueEscrow.sol:StreamRevenueEscrow | retained-164 | REVENUE_ESCROW |
+| 8 | `address(f.assets)` | StreamAssetPolicyRegistry | Foundation.assets | smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry | retained-164 | ASSET_POLICY_REGISTRY |
+| 9 | `address(p.commerce.native.recorder)` | StreamPrimarySaleSettlement | CommerceProducts.Products.native.recorder | smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement | retained-164 | PRIMARY_SALE_SETTLEMENT |
+| 10 | `address(p.independent.claims)` | StreamClaimRouter | GenesisProducts.Products.claims | smart-contracts/domains/revenue/StreamClaimRouter.sol:StreamClaimRouter | retained-164 | CLAIM_ROUTER |
+| 11 | `address(f.manager)` | StreamMintManager | Foundation.manager | smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager | retained-164 | MINT_MANAGER |
+| 12 | `address(f.ledger)` | StreamMintLedger | Foundation.ledger | smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger | retained-164 | MINT_LEDGER |
+| 13 | `address(p.independent.tickets)` | StreamMintTicketGate | GenesisProducts.Products.tickets | smart-contracts/domains/mint/StreamMintTicketGate.sol:StreamMintTicketGate | retained-164 | MINT_TICKET_GATE |
+| 14 | `address(p.commerce.fixedSale)` | StreamNativeFixedPriceSaleAdapter | CommerceProducts.Products.fixedSale | smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter | current-role-expansion | FIXED_PRICE_SALE_ADAPTER |
+| 15 | `address(p.commerce.native.house)` | StreamNativeEnglishAuction | CommerceProducts.Products.native.house | smart-contracts/domains/auctions/StreamNativeEnglishAuction.sol:StreamNativeEnglishAuction | retained-164 | ENGLISH_AUCTION_HOUSE |
+| 16 | `address(p.commerce.dutch)` | StreamNativeDutchSale | CommerceProducts.Products.dutch | smart-contracts/domains/mint/StreamNativeDutchSale.sol:StreamNativeDutchSale | current-role-expansion | DUTCH_AUCTION_ADAPTER |
+| 17 | `address(p.commerce.privateSale)` | StreamPrivateSaleAdapter | CommerceProducts.Products.privateSale | smart-contracts/domains/mint/StreamPrivateSaleAdapter.sol:StreamPrivateSaleAdapter | current-role-expansion | PRIVATE_SALE_ADAPTER |
+| 18 | `address(p.commerce.burn)` | StreamBurnMintGate | CommerceProducts.Products.burn | smart-contracts/domains/mint/StreamBurnMintGate.sol:StreamBurnMintGate | current-role-expansion | BURN_MINT_GATE |
+| 19 | `address(p.independent.delegates)` | StreamDelegateRegistryGate | GenesisProducts.Products.delegates | smart-contracts/domains/mint/StreamDelegateRegistryGate.sol:StreamDelegateRegistryGate | retained-164 | DELEGATE_REGISTRY_GATE |
+| 20 | `address(p.commerce.erc20)` | StreamERC20PrimarySettlementAdapter | CommerceProducts.Products.erc20 | smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol:StreamERC20PrimarySettlementAdapter | retained-164 | ERC20_PRIMARY_SETTLEMENT_ADAPTER |
+| 21 | `address(f.artists)` | StreamArtistOnboardingRegistry | Foundation.artists | smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol:StreamArtistOnboardingRegistry | retained-164 | ARTIST_REGISTRY |
+| 22 | `address(f.router)` | StreamMetadataRouter | Foundation.router | smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter | retained-164 | METADATA_ROUTER |
+| 23 | `address(p.rendering.renderer)` | StreamRendererV1 | StaticRendererPlan.Products.renderer | smart-contracts/domains/metadata/StreamRendererV1.sol:StreamRendererV1 | current-role-expansion | RENDERER_V1 |
+| 24 | `address(f.metadata)` | StreamCollectionMetadataV1 | Foundation.metadata | smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol:StreamCollectionMetadataV1 | retained-164 | COLLECTION_METADATA |
+| 25 | `address(f.schemas)` | StreamSchemaRegistry | Foundation.schemas | smart-contracts/domains/metadata/StreamSchemaRegistry.sol:StreamSchemaRegistry | retained-164 | SCHEMA_REGISTRY |
+| 26 | `address(p.independent.owners)` | StreamOwnerRecords | GenesisProducts.Products.owners | smart-contracts/domains/metadata/StreamOwnerRecords.sol:StreamOwnerRecords | retained-164 | OWNER_RECORDS |
+| 27 | `address(p.records.preservation)` | StreamPreservationRecordsV1 | RecordProducts.Products.preservation | smart-contracts/domains/preservation/StreamPreservationRecordsV1.sol:StreamPreservationRecordsV1 | current-role-expansion | PRESERVATION_RECORDS |
+| 28 | `address(p.independent.attestations)` | StreamCollectionAttestations | GenesisProducts.Products.attestations | smart-contracts/domains/metadata/StreamCollectionAttestations.sol:StreamCollectionAttestations | retained-164 | COLLECTION_ATTESTATIONS |
+| 29 | `address(p.independent.views)` | StreamCollectionViews | GenesisProducts.Products.views | smart-contracts/domains/metadata/StreamCollectionViews.sol:StreamCollectionViews | retained-164 | COLLECTION_VIEWS |
+| 30 | `address(f.entropy)` | StreamEntropyCoordinator | Foundation.entropy | smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator | retained-164 | ENTROPY_COORDINATOR |
+| 31 | `address(p.vrf)` | StreamEntropyProviderVRF | Products.vrf; primary provider | smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF | retained-164 | ENTROPY_PROVIDER_VRF |
+| 32 | `address(p.arrng)` | StreamEntropyProviderARRNG | Products.arrng; configured fallback provider | smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG | current-role-expansion | ENTROPY_PROVIDER_FALLBACK |
+| 33 | `address(f.finality)` | StreamArtworkFinalityRegistry | Foundation.finality | smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:StreamArtworkFinalityRegistry | retained-164 | ARTWORK_FINALITY_REGISTRY |
+| 34 | `address(p.continuity.entropy)` | StreamEntropyCoordinator | ContinuityProducts.entropy; distinct backup coordinator | smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator | retained-164 | ENTROPY_COORDINATOR_FALLBACK |
+| 35 | `address(p.continuity.manager)` | StreamMintManagerFallback | ContinuityProducts.manager | smart-contracts/domains/mint/StreamMintManagerFallback.sol:StreamMintManagerFallback | current-role-expansion | MINT_MANAGER_FALLBACK |
+| 36 | `address(f.manifest)` | StreamSystemManifest | Foundation.manifest | smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest | retained-164 | STREAM_SYSTEM_MANIFEST |
+| 37 | `address(f.coreFinality)` | StreamCoreFinalityAdapter | Foundation.coreFinality | smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol:StreamCoreFinalityAdapter | retained-164 | STREAM_CORE_FINALITY_ADAPTER |
+
+## Required current support companions
+
+These concrete contracts are constructed or selected by the current deployment's `_support` rows and related typed deployment sources. Libraries are listed separately and are not standalone Safe targets.
+
+| Product | Current support evidence | Roster disposition |
+| --- | --- | --- |
+| smart-contracts/core/StreamCore.sol:StreamCore | FINALITY_CORE_READS — _support row 17; CurrentFinalityGraph construction | retained 164 |
+| smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol:StreamArtistAcceptanceLifecycle | ARTIST_OWNER[3] — _support row 8; SuiteDeployment owners[3] | retained 164 |
+| smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2 | ARTIST_ARCHIVE — _support row 3 | retained 164 |
+| smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol:StreamArtistAttributionLifecycle | ARTIST_OWNER[4] — _support row 9; SuiteDeployment owners[4] | retained 164 |
+| smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol:StreamArtistBindingLifecycle | ARTIST_OWNER[0] — _support row 5; SuiteDeployment owners[0] | retained 164 |
+| smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol:StreamArtistCollaboratorLifecycle | ARTIST_OWNER[1] — _support row 6; SuiteDeployment owners[1] | retained 164 |
+| smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol:StreamArtistConsentFinalityLifecycle | ARTIST_OWNER[6] — _support row 11; SuiteDeployment owners[6] | retained 164 |
+| smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol:StreamArtistIdentityAuthority | ARTIST_OWNER[2] — _support row 7; split identity deployment | retained 164 |
+| smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol:StreamArtistOnboardingCoordinator | ARTIST_COORDINATOR — _support row 2; suite coordinator | retained 164 |
+| smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol:StreamArtistOnboardingRegistry | FINALITY_SANCTION_READS — _support row 21; CurrentFinalityGraph construction | retained 164 |
+| smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol:StreamArtistPayoutLifecycle | ARTIST_OWNER[5] — _support row 10; SuiteDeployment owners[5] | retained 164 |
+| smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol:StreamArtistRegistryValidatorBase | ARTIST_VALIDATOR — _support row 4 | retained 164 |
+| smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF | BACKUP_ENTROPY_PROVIDER — _support row 16; continuity provider | retained 164 |
+| smart-contracts/domains/finality/StreamFinalityCurrentDiscovery.sol:StreamFinalityCurrentDiscovery | FINALITY_DISCOVERY — _support row 22; CurrentFinalityGraph Late.DISCOVERY | retained 164 |
+| smart-contracts/domains/finality/StreamFinalityNativeEvidenceProvider.sol:StreamFinalityNativeEvidenceProvider | FINALITY_SCOPE_EVIDENCE — _support row 19; CurrentFinalityGraph Late.PROVIDER | retained 164 |
+| smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry | ROLE_REGISTRY — _support row 0 | retained 164 |
+| smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol:StreamCollectionMetadataV1 | FINALITY_METADATA_READS — _support row 18; CurrentFinalityGraph construction | retained 164 |
+| smart-contracts/domains/metadata/StreamGeneralAttestations.sol:StreamGeneralAttestations | GENERAL_ATTESTATIONS — _support row 15; record products | added current support |
+| smart-contracts/domains/metadata/StreamRendererRegistryModule.sol:StreamRendererRegistryModule | RENDERER_REGISTRY — _support row 14; renderer plan product | added current support |
+| smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol:StreamSchemaDocumentStore | SCHEMA_DOCUMENT_STORE — _support row 12; StreamSchemaRegistry constructor | retained 164 |
+| smart-contracts/domains/metadata/StreamStaticAttributionCompanion.sol:StreamStaticAttributionCompanion | STATIC_ATTRIBUTION — _support row 13; renderer plan product | added current support |
+| smart-contracts/domains/preservation/StreamFinalityArtifactCoverage.sol:StreamFinalityArtifactCoverage | FINALITY_ARTIFACT_COVERAGE — _support row 20; CurrentFinalityGraph assemblyArtifact | retained 164 |
+| smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver | ROYALTY_RESOLVER — _support row 1 | retained 164 |
+
+## Historical genesis profile labels
+
+The original 37 profile entries are retained verbatim as historical labels for traceability only.
+
+| Historical ID | Key | Implementation mode | Names | Approved aliases |
 | ---: | --- | --- | --- | --- |
-| 1 | STREAM_CORE | StreamCore | covered-by-retained-164-roster | smart-contracts/core/StreamCore.sol:StreamCore (supported-by-retained-roster) |
-| 2 | GOVERNANCE_LAYER | — | manifest-equivalent-needs-root-mapping | — |
-| 3 | MODULE_REGISTRY | StreamModuleRegistry | covered-by-retained-164-roster | smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry (supported-by-retained-roster) |
-| 4 | REVENUE_RESOLVER | StreamRevenueResolver | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver (supported-by-retained-roster) |
-| 5 | SPLIT_FACTORY | StreamSplitFactory | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory (supported-by-retained-roster) |
-| 6 | SPLIT_WALLET_IMPLEMENTATION | StreamSplitWallet | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet (supported-by-retained-roster) |
-| 7 | REVENUE_ESCROW | StreamRevenueEscrow | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamRevenueEscrow.sol:StreamRevenueEscrow (supported-by-retained-roster) |
-| 8 | ASSET_POLICY_REGISTRY | StreamAssetPolicyRegistry | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry (supported-by-retained-roster) |
-| 9 | PRIMARY_SALE_SETTLEMENT | StreamPrimarySaleSettlement | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement (supported-by-retained-roster) |
-| 10 | CLAIM_ROUTER | StreamClaimRouter | covered-by-retained-164-roster | smart-contracts/domains/revenue/StreamClaimRouter.sol:StreamClaimRouter (supported-by-retained-roster) |
-| 11 | MINT_MANAGER | StreamMintManager | covered-by-retained-164-roster | smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager (supported-by-retained-roster) |
-| 12 | MINT_LEDGER | StreamMintLedger | covered-by-retained-164-roster | smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger (supported-by-retained-roster) |
-| 13 | MINT_TICKET_GATE | StreamMintTicketGate | covered-by-retained-164-roster | smart-contracts/domains/mint/StreamMintTicketGate.sol:StreamMintTicketGate (supported-by-retained-roster) |
-| 14 | FIXED_PRICE_SALE_ADAPTER | StreamFixedPriceSaleAdapter | covered-by-retained-164-roster | smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol:StreamFixedPriceSaleAdapter (supported-by-retained-roster) |
-| 15 | ENGLISH_AUCTION_HOUSE | StreamEnglishAuctionHouse | covered-by-retained-164-roster | smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:StreamEnglishAuctionHouse (supported-by-retained-roster) |
-| 16 | DUTCH_AUCTION_ADAPTER | StreamDutchAuctionAdapter | review-required | StreamDutchAuctionAdapter: — (no-matching-concrete-ABI213-product) |
-| 17 | PRIVATE_SALE_ADAPTER | StreamPrivateSaleAdapter | contains-product-absent-from-164-roster | smart-contracts/domains/mint/StreamPrivateSaleAdapter.sol:StreamPrivateSaleAdapter (anchored-candidate-gap) |
-| 18 | BURN_MINT_GATE | StreamBurnMintGate | contains-product-absent-from-164-roster | smart-contracts/domains/mint/StreamBurnMintGate.sol:StreamBurnMintGate (anchored-candidate-gap) |
-| 19 | DELEGATE_REGISTRY_GATE | StreamDelegateRegistryGate | covered-by-retained-164-roster | smart-contracts/domains/mint/StreamDelegateRegistryGate.sol:StreamDelegateRegistryGate (supported-by-retained-roster) |
-| 20 | ERC20_PRIMARY_SETTLEMENT_ADAPTER | — | review-required | — |
-| 21 | ARTIST_REGISTRY | StreamArtistRegistry | review-required | StreamArtistRegistry: — (no-matching-concrete-ABI213-product) |
-| 22 | METADATA_ROUTER | StreamMetadataRouter | covered-by-retained-164-roster | smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter (supported-by-retained-roster) |
-| 23 | RENDERER_V1 | StreamRendererV1 | contains-product-absent-from-164-roster | smart-contracts/domains/metadata/StreamRendererV1.sol:StreamRendererV1 (anchored-candidate-gap) |
-| 24 | COLLECTION_METADATA | StreamCollectionMetadata | contains-product-absent-from-164-roster | smart-contracts/domains/metadata/StreamCollectionMetadata.sol:StreamCollectionMetadata (anchored-candidate-gap) |
-| 25 | SCHEMA_REGISTRY | StreamSchemaRegistry | covered-by-retained-164-roster | smart-contracts/domains/metadata/StreamSchemaRegistry.sol:StreamSchemaRegistry (supported-by-retained-roster) |
-| 26 | OWNER_RECORDS | StreamOwnerRecords | covered-by-retained-164-roster | smart-contracts/domains/metadata/StreamOwnerRecords.sol:StreamOwnerRecords (supported-by-retained-roster) |
-| 27 | PRESERVATION_RECORDS | StreamPreservationRecords | contains-product-absent-from-164-roster | smart-contracts/domains/preservation/StreamPreservationRecords.sol:StreamPreservationRecords (anchored-candidate-gap) |
-| 28 | COLLECTION_ATTESTATIONS | StreamCollectionAttestations | covered-by-retained-164-roster | smart-contracts/domains/metadata/StreamCollectionAttestations.sol:StreamCollectionAttestations (supported-by-retained-roster) |
-| 29 | COLLECTION_VIEWS | StreamCollectionViews | covered-by-retained-164-roster | smart-contracts/domains/metadata/StreamCollectionViews.sol:StreamCollectionViews (supported-by-retained-roster) |
-| 30 | ENTROPY_COORDINATOR | StreamEntropyCoordinator | covered-by-retained-164-roster | smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator (supported-by-retained-roster) |
-| 31 | ENTROPY_PROVIDER_VRF | StreamEntropyProviderVRF | covered-by-retained-164-roster | smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF (supported-by-retained-roster) |
-| 32 | ENTROPY_PROVIDER_FALLBACK | StreamEntropyProviderARRNG, StreamEntropyProviderPyth | candidate-gap-with-unresolved-alternative | smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol:StreamEntropyProviderARRNG (anchored-candidate-gap)<br>StreamEntropyProviderPyth: — (no-matching-concrete-ABI213-product) |
-| 33 | ARTWORK_FINALITY_REGISTRY | StreamArtworkFinalityRegistry | covered-by-retained-164-roster | smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:StreamArtworkFinalityRegistry (supported-by-retained-roster) |
-| 34 | ENTROPY_COORDINATOR_FALLBACK | StreamEntropyCoordinator | covered-by-retained-164-roster | smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator (supported-by-retained-roster) |
-| 35 | MINT_MANAGER_FALLBACK | StreamMintManager | covered-by-retained-164-roster | smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager (supported-by-retained-roster) |
-| 36 | STREAM_SYSTEM_MANIFEST | StreamSystemManifest | covered-by-retained-164-roster | smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest (supported-by-retained-roster) |
-| 37 | STREAM_CORE_FINALITY_ADAPTER | StreamCoreFinalityAdapter | covered-by-retained-164-roster | smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol:StreamCoreFinalityAdapter (supported-by-retained-roster) |
+| 1 | STREAM_CORE | exact | StreamCore | — |
+| 2 | GOVERNANCE_LAYER | manifest_equivalent | — | — |
+| 3 | MODULE_REGISTRY | exact | StreamModuleRegistry | — |
+| 4 | REVENUE_RESOLVER | exact | StreamRevenueResolver | — |
+| 5 | SPLIT_FACTORY | exact | StreamSplitFactory | — |
+| 6 | SPLIT_WALLET_IMPLEMENTATION | exact | StreamSplitWallet | — |
+| 7 | REVENUE_ESCROW | exact | StreamRevenueEscrow | — |
+| 8 | ASSET_POLICY_REGISTRY | exact | StreamAssetPolicyRegistry | — |
+| 9 | PRIMARY_SALE_SETTLEMENT | exact | StreamPrimarySaleSettlement | — |
+| 10 | CLAIM_ROUTER | exact | StreamClaimRouter | — |
+| 11 | MINT_MANAGER | exact | StreamMintManager | — |
+| 12 | MINT_LEDGER | exact | StreamMintLedger | — |
+| 13 | MINT_TICKET_GATE | exact | StreamMintTicketGate | — |
+| 14 | FIXED_PRICE_SALE_ADAPTER | exact | StreamFixedPriceSaleAdapter | — |
+| 15 | ENGLISH_AUCTION_HOUSE | exact | StreamEnglishAuctionHouse | — |
+| 16 | DUTCH_AUCTION_ADAPTER | exact | StreamDutchAuctionAdapter | — |
+| 17 | PRIVATE_SALE_ADAPTER | exact | StreamPrivateSaleAdapter | — |
+| 18 | BURN_MINT_GATE | exact | StreamBurnMintGate | — |
+| 19 | DELEGATE_REGISTRY_GATE | exact | StreamDelegateRegistryGate | — |
+| 20 | ERC20_PRIMARY_SETTLEMENT_ADAPTER | role_bound | — | — |
+| 21 | ARTIST_REGISTRY | exact | StreamArtistRegistry | — |
+| 22 | METADATA_ROUTER | exact | StreamMetadataRouter | — |
+| 23 | RENDERER_V1 | exact | StreamRendererV1 | — |
+| 24 | COLLECTION_METADATA | exact | StreamCollectionMetadata | — |
+| 25 | SCHEMA_REGISTRY | exact | StreamSchemaRegistry | — |
+| 26 | OWNER_RECORDS | exact | StreamOwnerRecords | — |
+| 27 | PRESERVATION_RECORDS | exact | StreamPreservationRecords | — |
+| 28 | COLLECTION_ATTESTATIONS | exact | StreamCollectionAttestations | — |
+| 29 | COLLECTION_VIEWS | exact | StreamCollectionViews | — |
+| 30 | ENTROPY_COORDINATOR | exact | StreamEntropyCoordinator | — |
+| 31 | ENTROPY_PROVIDER_VRF | exact | StreamEntropyProviderVRF | — |
+| 32 | ENTROPY_PROVIDER_FALLBACK | one_of | StreamEntropyProviderARRNG, StreamEntropyProviderPyth | — |
+| 33 | ARTWORK_FINALITY_REGISTRY | exact | StreamArtworkFinalityRegistry | — |
+| 34 | ENTROPY_COORDINATOR_FALLBACK | distinct_instance | StreamEntropyCoordinator | — |
+| 35 | MINT_MANAGER_FALLBACK | distinct_instance | StreamMintManager | — |
+| 36 | STREAM_SYSTEM_MANIFEST | exact | StreamSystemManifest | — |
+| 37 | STREAM_CORE_FINALITY_ADAPTER | exact | StreamCoreFinalityAdapter | — |
 
 ## Anchored concrete products absent from the 164 roster
 
@@ -281,8 +419,8 @@ Candidates below are concrete source declarations referenced by current genesis 
 
 ## Root decisions and assignment queue
 
-1. Confirm which anchored candidates become separately supported products. Prioritize those named in the 37 genesis roles and explicit current creation sources; keep catalog-only entries distinguishable.
-2. Assign caller classes per selector: user Safe, artist Safe, administrator/governance Safe, permissionless, protocol-only callback, or caller-sensitive read. For Executor-owned operations, identify the required current-action envelope.
+1. The current full37 roster and source-backed companion set are selected explicitly above. Catalog-only candidates remain unpromoted.
+2. Review each selector's caller class: user Safe, artist Safe, administrator/governance Safe, permissionless, protocol-only callback, or caller-sensitive read. For Executor-owned operations, identify the required current-action envelope.
 3. Attach exact local-test or deployed instance bindings and per-selector success or intentional-rejection evidence. Do not infer runtime coverage from source presence or test references.
 4. Preserve receive/fallback dispatch as explicit raw-call routes. ABI213 has three receive entries in the retained roster and more in anchored candidates.
 

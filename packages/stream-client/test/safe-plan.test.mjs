@@ -30,6 +30,30 @@ test('Safe plans preserve approval, owner action, bidder identity and exact nati
   assert.deepEqual(verifySafeCallPlan(plan,catalog),plan);
 });
 
+test('current commerce and preservation plans keep payer and artist Safe callers distinct',()=>{
+  const payerAbi=[{type:'function',name:'claimRefund',stateMutability:'nonpayable',inputs:[{name:'id',type:'bytes32'},{name:'recipient',type:'address'}],outputs:[]}];
+  const recordAbi=[{type:'function',name:'recordCollectionRecordWithPayload',stateMutability:'nonpayable',inputs:[
+    {name:'cid',type:'uint256'},{name:'record',type:'tuple',components:[
+      {name:'recordType',type:'bytes32'},{name:'subjectId',type:'bytes32'},
+      {name:'contentHash',type:'tuple',components:[{name:'canonicalizationId',type:'uint16'},{name:'digest',type:'bytes'},{name:'metadata',type:'bytes32'}]},
+      {name:'uri',type:'string'},{name:'schemaId',type:'bytes32'},{name:'reasonHash',type:'bytes32'},
+      {name:'signatureHash',type:'tuple',components:[{name:'algorithm',type:'uint16'},{name:'digest',type:'bytes'},{name:'metadata',type:'bytes32'}]},
+      {name:'effectiveAt',type:'uint64'},
+    ]},{name:'payload',type:'bytes'},
+  ],outputs:[]}];
+  const payerIface=new Interface(payerAbi),recordIface=new Interface(recordAbi),userSafe=A(61),artistSafe=A(62),sale=A(63),records=A(64);
+  const record=[id('type'),id('subject'),[1,'0x1234',id('content')],'ipfs://record',id('schema'),id('reason'),[0,'0x',id('signature')],1n];
+  const plan=createSafeCallPlan(chainId,'Payer refund and artist record',[
+    {safe:userSafe,intent:'Claim the payer Safe refund to its reviewed recipient',abi:payerAbi,
+      call:{to:sale,value:0n,data:payerIface.encodeFunctionData('claimRefund',[id('sale'),userSafe])}},
+    {safe:artistSafe,intent:'Record the artist-authorized preservation payload',abi:recordAbi,
+      call:{to:records,value:0n,data:recordIface.encodeFunctionData('recordCollectionRecordWithPayload',[1n,record,'0xabcd'])}},
+  ]);
+  assert.deepEqual(plan.steps.map(step=>step.safe),[userSafe,artistSafe]);
+  assert.deepEqual(plan.steps.map(step=>step.method),['claimRefund(bytes32,address)','recordCollectionRecordWithPayload(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes)']);
+  assert.deepEqual(verifySafeCallPlan(plan,[payerAbi,recordAbi]),plan);
+});
+
 const receiveAbi=[{type:'receive',stateMutability:'payable'}];
 const fallbackAbi=[{type:'fallback',stateMutability:'payable'}];
 const dispatchAbi=[
