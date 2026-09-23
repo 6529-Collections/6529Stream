@@ -11,6 +11,9 @@ import {
 import {
     IStreamGasParameterHost as Gas
 } from "../../../smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol";
+import {
+    StreamStaticContentBytes as StaticBytes
+} from "../../../smart-contracts/domains/finality/StreamStaticContentBytes.sol";
 
 /// @dev The reference source read must preserve the same bytes captured from the original Router.
 /// A tight parent cap causes the renderer's guarded Artist attribution read to return unavailable.
@@ -33,6 +36,19 @@ contract StreamScopedPolicyReferenceGasRegressionTest is ScopedPolicyReferenceFi
         require(_contains(high, bytes('"state":"disputed"')), "16m must retain attribution");
         require(keccak256(low) != captured, "8m must differ from original capture");
         require(keccak256(high) == captured, "16m must match original capture");
+        bytes memory html = referenceInput.observation.captures[0].animationHTML;
+        bytes memory tokenData = core.tokenData(token);
+        require(StaticBytes.matches(high, html, tokenData), "current STATIC bytes match");
+        bytes memory wrongHTML = bytes.concat(html);
+        wrongHTML[0] = wrongHTML[0] ^ bytes1(uint8(1));
+        require(!StaticBytes.matches(high, wrongHTML, tokenData), "changed HTML rejected");
+        bytes memory wrongTokenData = bytes.concat(tokenData);
+        wrongTokenData[0] = wrongTokenData[0] ^ bytes1(uint8(1));
+        require(!StaticBytes.matches(high, html, wrongTokenData), "changed data rejected");
+        referenceInput.observation.captures[0].metadataJSONHash =
+            bytes32(uint256(captured) ^ 1);
+        vm.expectRevert(abi.encodeWithSelector(ReferenceTypes.InvalidScopedPolicyReference.selector));
+        referenceHost.previewReference(referenceInput, address(this));
     }
 
     function testTightReferenceHostRejectsWithoutHistoryAndHealthyHostPublishes() public {

@@ -42,7 +42,7 @@ import {
     IStreamFinalityEntropyPolicySourceSet as PolicySet
 } from "../../interfaces/stream/finality/IStreamFinalityEntropyPolicySourceSet.sol";
 import { StreamPolicyContentBytesV2 } from "../finality/StreamPolicyContentBytesV2.sol";
-import { StreamOnchainContentBytes } from "../finality/StreamOnchainContentBytes.sol";
+import { StreamStaticContentBytes } from "../finality/StreamStaticContentBytes.sol";
 
 /// @notice First/last membership ordinals joined to actual permanent Core identity and STATIC rows.
 /// @dev A collection serial is read from Core. It is never inferred from token id or membership index.
@@ -180,7 +180,7 @@ library StreamPolicyReferenceSampleReadsV2 {
             json.length > 65536 || keccak256(json) != output.leaf.metadataHash
                 || (result.entropy.terminal
                         ? !StreamPolicyContentBytesV2.matches(json, c.animationHTML, data)
-                        : !StreamOnchainContentBytes.matchesAnimation(json, c.animationHTML))
+                        : !StreamStaticContentBytes.matches(json, c.animationHTML, data))
         ) revert T.InvalidPolicyReference();
         raw = Reads.dynamicRead(
             d.targets[4], abi.encodeCall(Router.tokenHTML, (token)), 41024, d.sourceGas

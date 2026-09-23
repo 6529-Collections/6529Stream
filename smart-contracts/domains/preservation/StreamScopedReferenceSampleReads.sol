@@ -38,7 +38,7 @@ import {
 import {
     StreamReferenceRenderSourceReads as Archives
 } from "./StreamReferenceRenderSourceReads.sol";
-import { StreamOnchainContentBytes } from "../finality/StreamOnchainContentBytes.sol";
+import { StreamStaticContentBytes } from "../finality/StreamStaticContentBytes.sol";
 
 /// @notice First/last membership ordinals joined to actual permanent Core identity and STATIC rows.
 /// @dev A collection serial is read from Core. It is never inferred from token id or membership index.
@@ -159,7 +159,7 @@ library StreamScopedReferenceSampleReads {
         _canonical(d.targets[4], raw, abi.encode(json));
         if (
             json.length > 65536 || keccak256(json) != output.leaf.metadataHash
-                || !StreamOnchainContentBytes.matchesAnimation(json, c.animationHTML)
+                || !StreamStaticContentBytes.matches(json, c.animationHTML, data)
         ) revert T.InvalidScopedReference();
         f.metadataJSONHash = output.leaf.metadataHash;
         f.htmlHash = output.leaf.animationHash;

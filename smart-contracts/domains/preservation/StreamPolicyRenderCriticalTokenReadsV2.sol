@@ -46,7 +46,7 @@ import {
     IStreamTerminalEntropyReadiness as Terminal
 } from "../../interfaces/stream/finality/IStreamTerminalEntropyReadiness.sol";
 import { StreamPolicyContentBytesV2 } from "../finality/StreamPolicyContentBytesV2.sol";
-import { StreamOnchainContentBytes } from "../finality/StreamOnchainContentBytes.sol";
+import { StreamStaticContentBytes } from "../finality/StreamStaticContentBytes.sol";
 
 /// @notice Exact full output and original source rows for each authoritative scope ordinal.
 /// @dev This finite output segment is not a complete script/dependency/definition inventory.
@@ -129,7 +129,7 @@ library StreamPolicyRenderCriticalTokenReadsV2 {
         }
         if (o.output.entropy.terminal
                 ? !StreamPolicyContentBytesV2.matches(json, html, data)
-                : !StreamOnchainContentBytes.matchesAnimation(json, html)) revert T.InvalidInventoryItem();
+                : !StreamStaticContentBytes.matches(json, html, data)) revert T.InvalidInventoryItem();
         rows = new T.Item[](10);
         bytes32 record = c.records.checkpointHash;
         uint256 token = supplied.tokenId;
