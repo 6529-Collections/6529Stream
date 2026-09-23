@@ -4,6 +4,10 @@
 pins the eight named source fixtures, exports their complete field inventories,
 and verifies a detached archive with its original schema and source bytes.
 
+[Synthetic media/history semantic slice V1](../../docs/museum-media-history-semantic-slice-v1.md)
+validates photograph and interview identity/relationship projections against
+the pinned Linked Art V2 model, with exact source coverage and offline replay.
+
 [Authenticated account review policies](../../docs/museum-qualified-account-review.md)
 select exact recorded approvals, rejections and SELF reviews while preserving
 original statements. [The retained local fixture](../../docs/museum-qualified-review-fixture.md)

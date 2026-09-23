@@ -1,0 +1,154 @@
+"""Exact source mapping and detached replay of the first corpus semantic slice."""
+
+import io
+from pathlib import Path
+from tempfile import TemporaryDirectory
+import unittest
+from unittest.mock import patch
+
+from .canonical import MuseumError, dumps, keccak256, loads
+from .corpus_semantic_v1 import CASES, MODEL_ROOT, _project, build, verify
+from .corpus_v2 import build as build_corpus
+from .package import write_package
+from .package_v2 import _assemble
+from .projection import CRM, DIG, LA
+
+
+class SyntheticCorpusSemanticProjection(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = TemporaryDirectory()
+        cls.root = Path(cls.temp.name)
+        cls.corpus = cls.root / "corpus"
+        cls.corpus_hash = build_corpus(cls.corpus)
+        cls.result = build(cls.corpus, cls.corpus_hash)
+        cls.files = dict(cls.result.files)
+        cls.export = cls.root / "semantic"
+        write_package(cls.result, cls.export)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+
+    def _resources(self, scenario):
+        index = loads(self.files["semantic/entity-index.json"], maximum=65536)
+        return {row["id"]: loads(self.files[row["path"]]) for row in index
+                if row["scenario"] == scenario}
+
+    def _expanded(self, scenario):
+        index = loads(self.files["semantic/entity-index.json"], maximum=65536)
+        return {row["id"]: loads(self.files[row["expandedPath"]])[0] for row in index
+                if row["scenario"] == scenario}
+
+    def test_photo_has_one_visual_content_and_four_distinct_carriers(self):
+        photo = loads(self.files["input/corpus/photograph/source/payload.json"])
+        resources = self._resources("photograph")
+        expanded = self._expanded("photograph")
+        self.assertEqual(len(resources), 5)
+        self.assertEqual(resources[photo["contentId"]]["type"], "VisualItem")
+        for row in photo["resources"]:
+            self.assertIn(row["id"], resources)
+            predicate = LA + "digitally_shows" if row["kind"] == "digital_object" else CRM + "P65_shows_visual_item"
+            self.assertEqual(expanded[row["id"]][predicate][0]["@id"], photo["contentId"])
+            self.assertEqual(expanded[row["id"]]["@type"],
+                             [DIG + "D1_Digital_Object"] if row["kind"] == "digital_object"
+                             else [CRM + "E22_Human-Made_Object"])
+        self.assertNotIn(photo["workId"], resources)
+        self.assertNotIn(b"produced_by", b"".join(raw for path, raw in self.files.items()
+                                                 if path.startswith("semantic/photograph/resources/")))
+        coverage = {row["pointer"]: row for row in loads(self.files["semantic/photograph/coverage.json"], maximum=65536)}
+        self.assertEqual(coverage["/relationships/1/object"]["disposition"], "mapped")
+        self.assertEqual(coverage["/relationships/2/relation"]["disposition"], "retained_stream_only")
+        self.assertEqual(coverage["/resources/2/dimensions/2/value"]["disposition"], "retained_stream_only")
+        self.assertEqual(coverage["/resources/2/dimensions/2/value"]["exactHex"], "0x" + dumps("50.00").hex())
+        self.assertEqual(coverage["/events/2/precision"]["disposition"], "retained_stream_only")
+        provenance = loads(self.files["semantic/photograph/provenance.json"], maximum=65536)
+        self.assertTrue(any(row["sourcePointer"] == "/relationships/1/object"
+                            and row["targetPointer"] == "/digitally_shows/0/id"
+                            and row["sourceHash"] == keccak256(dumps(photo)) for row in provenance))
+
+    def test_interviews_map_distinct_carriers_and_activity_without_invented_content(self):
+        for name in ("written_interview", "av_interview"):
+            with self.subTest(name=name):
+                source = loads(self.files["input/corpus/" + name + "/source/payload.json"])
+                resources = self._resources(name)
+                expanded = self._expanded(name)
+                self.assertEqual({row["id"] for row in source["resources"]},
+                                 {identifier for identifier, value in resources.items()
+                                  if value["type"] == "DigitalObject"})
+                event = source["events"][0]
+                self.assertEqual(resources[event["id"]]["type"], "Activity")
+                self.assertEqual({row["@id"] for row in expanded[event["id"]][CRM + "P14_carried_out_by"]},
+                                 {row["participant"] for row in source["participantRoles"]})
+                self.assertNotIn(source["contentId"], resources)
+                self.assertNotIn(source["workId"], resources)
+                self.assertFalse(any(value["type"] in ("LinguisticObject", "VisualItem")
+                                     for value in resources.values()))
+                coverage = {row["pointer"]: row for row in loads(
+                    self.files["semantic/" + name + "/coverage.json"], maximum=65536)}
+                self.assertEqual(coverage["/participantRoles/0/participant"]["disposition"], "mapped")
+                self.assertEqual(coverage["/participantRoles/0/role"]["disposition"], "retained_stream_only")
+                self.assertEqual(coverage["/events/0/dateExpression"]["disposition"], "retained_stream_only")
+                self.assertEqual(coverage["/duration"]["disposition"], "retained_stream_only")
+                self.assertEqual(coverage["/duration"]["exactHex"], "0x" + dumps(source["duration"]).hex())
+        written = loads(self.files["input/corpus/written_interview/source/payload.json"])
+        self.assertNotIn("recording", {row["role"] for row in written["resources"]})
+        changed = loads(self.files["input/corpus/written_interview/source/payload.json"])
+        changed["participantRoles"][0]["participant"] = "urn:fixture:unclassified-party"
+        schema = loads(self.files["input/corpus/written_interview/source/schema.json"])
+        with self.assertRaisesRegex(MuseumError, "participant kinds unestablished"):
+            _project("written_interview", changed, schema, object())
+
+    def test_profile_source_pins_and_all_eight_original_packages_survive(self):
+        report = loads(self.files["semantic/report.json"])
+        self.assertEqual(report["corpusManifestHash"], self.corpus_hash)
+        self.assertEqual(report["sourceSchemaId"], "urn:6529stream:fixture:museum-source-v2")
+        self.assertEqual(report["crosswalkVersion"], "2")
+        self.assertEqual(report["scenarios"], list(CASES))
+        self.assertEqual(report["completeness"], "incomplete")
+        self.assertFalse(any(report["claims"].values()))
+        self.assertFalse(any(loads(self.result.manifest, maximum=2 * 1024 * 1024)["claims"].values()))
+        for path in self.corpus.rglob("*"):
+            if path.is_file():
+                relative = path.relative_to(self.corpus).as_posix()
+                self.assertEqual(self.files["input/corpus/" + relative], path.read_bytes())
+
+    def test_detached_replay_uses_retained_dependencies_and_catches_rehashed_forgery(self):
+        real_open = io.open
+        forbidden = (MODEL_ROOT.resolve(),)
+
+        def guarded(file, *args, **kwargs):
+            if isinstance(file, (str, bytes, Path)):
+                path = Path(file).resolve()
+                if any(path.is_relative_to(root) for root in forbidden):
+                    raise AssertionError("repository model fallback")
+            return real_open(file, *args, **kwargs)
+
+        with patch("socket.socket", side_effect=AssertionError("network used")), patch("io.open", guarded):
+            self.assertEqual(verify(self.export, self.result.manifest_hash), self.result)
+
+        files = dict(self.files)
+        path = next(name for name in files if name.startswith("semantic/photograph/resources/"))
+        changed = loads(files[path]); changed["_label"] = "forged label"
+        files[path] = dumps(changed)
+        metadata = loads(self.result.manifest, maximum=2 * 1024 * 1024)
+        del metadata["files"]
+        forged = _assemble(MODEL_ROOT, files, metadata)
+        target = self.root / "forged"
+        write_package(forged, target)
+        with self.assertRaisesRegex(MuseumError, "reconstruction differs"):
+            verify(target, forged.manifest_hash)
+
+        files = dict(self.files)
+        policy_path = "dependencies/linked-art-v2/validation-policy.json"
+        policy = loads(files[policy_path]); policy["unreviewedChange"] = True
+        files[policy_path] = dumps(policy)
+        altered = _assemble(MODEL_ROOT, files, metadata)
+        target = self.root / "changed-policy"
+        write_package(altered, target)
+        with self.assertRaisesRegex(MuseumError, "model policy hash differs"):
+            verify(target, altered.manifest_hash)
+
+
+if __name__ == "__main__":
+    unittest.main()
