@@ -1,5 +1,17 @@
 # Full-v1 current delivery status
 
+### Additional integrated results: `004984c37`
+
+All eight synthetic Museum media/history scenarios now have executable semantic
+examples with retained source/model bytes. Eighteen focused tests pass, including
+V1/V2 compatibility, unresolved competing claims, exact revision lineage and
+rehashed-tampering rejection. Required current-contract, cross-format and
+institutional acceptance remain open. The reviewed scoped test-fixture change
+`6ec18f6c1` replaces embedded constructors with genuine artifact-backed CREATE
+while preserving callers, arguments and order; current ABI227 has 4,756 sources
+and zero errors. Its focused execution is underway. This does not change the
+production source `09f32efab` or the supported RC1.
+
 ## Current delivery checkpoint: 23 September, source `09f32efab`
 
 The next production batch is integrated. Full v1 is still incomplete: source

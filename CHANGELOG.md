@@ -1,5 +1,17 @@
 # Changelog
 
+## Complete synthetic Museum corpus projections
+
+- Extend the retained corpus to all eight media/history examples, including
+  interactive execution, uncertain geography, unresolved custody accounts and
+  explicit revision lineage. Preserve prior package versions and verify the
+  exact source/model closure during offline replay. Eighteen focused tests pass;
+  full current-contract and institutional conformance remain separate.
+- Load scoped test-fixture constructors from genuine compiled artifacts to
+  avoid embedding the entire deployment graph in test hosts, preserving real
+  CREATE, constructor arguments, callers and existing assertions.
+
+
 ## Integrated publication and Artist capacity repairs
 
 - Split inventory, snapshot, checkpoint and reference publication operations
