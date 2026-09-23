@@ -146,6 +146,8 @@ class CurrentAssessmentTests(unittest.TestCase):
                 self.entropy_commitment = H(600)
                 super().__init__()
                 self.install_terminal_entropy()
+                hook = getattr(cls, 'fixture_hook', None)
+                if hook is not None: hook(self)
                 holder['fixture'] = self
 
         with patch.object(source_case, 'AllFamilyOwnerFixture', CoherentFixture), \

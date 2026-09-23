@@ -10,8 +10,12 @@ and forty-nine requirement identities. A separately replayed
 The script capture must identify the same chain, Core, collection, token,
 block hash, height, timestamp, state root and environment as the V1 source.
 The selected Core, Metadata, SchemaRegistry and Store runtimes must also agree
-with V1's retained V4 Metadata source. The registered capture itself checks that its native script
-and four ACTIVE interpretation documents came from the same source state and
+with V1's retained V4 Metadata source. The original script and Registry RPC
+transcripts are reconciled with every retained V1/V4 source; overlapping
+successful getter results, headers, receipts and log observations must agree.
+Explicitly unavailable script reads contribute no positive value. The
+registered capture itself checks that its native script and four ACTIVE
+interpretation documents came from the same source state and
 current Metadata host. Every child package is replayed from its original
 transcript; its exact bytes remain under `script/`.
 

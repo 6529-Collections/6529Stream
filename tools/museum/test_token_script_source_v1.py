@@ -25,7 +25,8 @@ class TokenScriptFixture(CollectionScriptFixture):
             source_state=source_state, runtime_overrides=runtime_overrides)
         self.token = 41
         self.registry = A(10)
-        self.codes[self.registry] = b'synthetic renderer registry'
+        self.codes[self.registry] = (runtime_overrides or {}).get(
+            self.registry, b'synthetic renderer registry')
         self.pins[self.registry] = keccak256(self.codes[self.registry])
         self.put('eth_getCode', [self.registry, self.block_ref],
             '0x' + self.codes[self.registry].hex())
@@ -184,7 +185,8 @@ class TokenScriptFixture(CollectionScriptFixture):
         return source.TokenScriptSource(self.anchor_raw, self)
 
     def install_registry(self, *, missing=False, mismatched=False,
-            schemas_address=None, runtime_overrides=None):
+            schemas_address=None, runtime_overrides=None,
+            metadata_pointer=None, carrier_overrides=None):
         """Add real getter/Store responses for four exact documents to this RPC map."""
         from .genesis_registry_source_v1 import DOCUMENT_FACTS, MODULE_RECORD, SOURCE_REVISION
         self.schemas, self.governance = schemas_address or A(11), A(12)
@@ -196,14 +198,15 @@ class TokenScriptFixture(CollectionScriptFixture):
             self.put('eth_getCode', [address, self.block_ref], '0x' + raw.hex())
         cid = int(self.context['collectionId'])
         kind = source.schema_id('COLLECTION_METADATA')
-        module = (1, kind, H('metadata version'), '0x12345678', 0,
-            self.pins[self.metadata], H('metadata deployment'),
-            H('metadata manifest'), '', 1, 1, 1)
+        interface = metadata_pointer[4] if metadata_pointer else '0x12345678'
+        module = (1, kind, H('metadata version'), interface, 0,
+            self.pins[self.metadata], metadata_pointer[8] if metadata_pointer else H('metadata deployment'),
+            metadata_pointer[7] if metadata_pointer else H('metadata manifest'), '', 1, 1, 1)
         self.add(self.module_registry, 'moduleRecord(address)', MODULE_RECORD,
             module, ('address',), (self.metadata,))
         self.add(self.module_registry, 'isModuleEligible(address,bytes32,bytes4)',
             'bool', True, ('address', 'bytes32', 'bytes4'),
-            (self.metadata, kind, '0x12345678'))
+            (self.metadata, kind, interface))
         for signature, output, value in (
                 ('schemaRegistry()', 'address', self.schemas),
                 ('schemaRegistryCodeHash()', 'bytes32', self.pins[self.schemas]),
@@ -252,14 +255,17 @@ class TokenScriptFixture(CollectionScriptFixture):
             self.add(self.schemas, 'documentBytes(bytes32)', 'bytes',
                 '0x' + content.hex(), ('bytes32',), (identifier,))
             for chunk_index, (digest, raw) in enumerate(zip(hashes, chunks)):
-                pointer = A(1000 + int(digest[2:10], 16) % 100000)
+                carrier = (carrier_overrides or {}).get(digest)
+                pointer = (carrier[0] if carrier else
+                    A(1000 + int(digest[2:10], 16) % 100000))
+                code = carrier[1] if carrier else b'\0' + raw
                 self.add(self.schemas, 'documentChunkHashAt(bytes32,uint256)',
                     'bytes32', digest, ('bytes32', 'uint256'), (identifier, chunk_index))
                 self.add(self.store, 'chunk(bytes32)', ('address', 'uint32'),
                     (pointer, len(raw)), ('bytes32',), (digest,))
                 self.add(self.store, 'readChunk(bytes32)', 'bytes', '0x' + raw.hex(),
                     ('bytes32',), (digest,))
-                self.put('eth_getCode', [pointer, self.block_ref], '0x' + (b'\0' + raw).hex())
+                self.put('eth_getCode', [pointer, self.block_ref], '0x' + code.hex())
         self.registry_anchor = {key: self.anchor[key] for key in
             ('chainId', 'core', 'blockHash', 'blockNumber', 'timestamp',
                 'stateRoot', 'environment', 'deploymentEvidenceHash')}

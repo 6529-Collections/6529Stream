@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from . import canonical_current_assessment_v1 as previous
+from . import canonical_dossier_observations_v4 as observations
 from . import object_dossier as package
 from . import object_dossier_inventory as inventory
 from . import token_script_registered_capture_v1 as script_capture
@@ -20,6 +21,7 @@ STATE_KEYS = previous.STATE_KEYS
 CLAIMS = {'originalV4AndCurrentV1BytesRetained': True,
     'originalNineteenFortyNineDenominatorRetained': True,
     'completeRegisteredTokenScriptReplayedWhenSupplied': True,
+    'sameAnchorPositiveObservationsReconciled': True,
     'onlyNativeTokenScriptCodeNewlyEligible': True,
     'negativeWorkClassInferredFromAbsence': False, 'providerCompletenessAssumed': True,
     'sourceOriginAuthenticated': False, 'chainConsensusProven': False,
@@ -40,7 +42,8 @@ PROFILE_BYTES = dumps({'name': NAME, 'version': '2', 'mode': MODE,
     'sourceStateKeys': STATE_KEYS, 'prefixes': PREFIX,
     'eligibleCodes': [SCRIPT_CODE],
     'verification': 'Replay both complete originals, compare exact target/state and current '
-        'Core/Metadata runtime, reconstruct every requirement row and wrapper byte.',
+        'Core/Metadata runtime, reconcile all same-anchor positive RPC observations, '
+        'reconstruct every requirement row and wrapper byte.',
     'claims': CLAIMS, 'qualification': QUALIFICATION})
 PROFILE_HASH = keccak256(PROFILE_BYTES)
 
@@ -140,6 +143,54 @@ def _previous_rows(files):
     return assessment, verified, supplied
 
 
+def _available_rpc(files, name, anchor_path, transcript_path, provenance, config):
+    """Omit only replay-validated unavailable eth_call rows from positive joins."""
+    transcript = _json(files, transcript_path)
+    available = dict(transcript, calls=[row for row in transcript['calls']
+        if 'unavailable' not in row])
+    derived = dict(files, **{transcript_path: dumps(available)})
+    return observations._rpc(derived, name, anchor_path, transcript_path,
+        provenance, config)
+
+
+def _reconcile_sources(old_files, script_files, source):
+    base = _sub(old_files, previous.PREFIX['v4'])
+    observed = previous.joined_dossier._v4_sources(base)
+    config = observed[0]['configuration']
+    for name in ('finality', 'entropy'):
+        child = _sub(old_files, previous.PREFIX[name])
+        if child:
+            observed.append(observations._rpc(child, 'current-v1/' + name,
+                'source/anchor.json', 'source/transcript.json',
+                _json(child, 'manifest.json')['provenance'], config))
+    if script_files is not None:
+        token = _json(script_files, 'token/source/snapshot.json')
+        registry = _json(script_files, 'registry/source/snapshot.json')
+        observed.append(_available_rpc(script_files, 'current-v2/token-script',
+            'token/source/anchor.json', 'token/source/transcript.json',
+            token['provenance'], config))
+        observed.append(_available_rpc(script_files, 'current-v2/script-registry',
+            'registry/source/anchor.json', 'registry/source/transcript.json',
+            registry['provenance'], config))
+    positive_reads = {}
+    for item in observed:
+        if item['kind'] != 'rpc':
+            continue
+        for row in item['transcript']['calls']:
+            if row['method'] not in ('eth_call', 'eth_getCode') or 'result' not in row:
+                continue
+            key = dumps([row['method'], row['params']])
+            before, before_source = positive_reads.setdefault(
+                key, (row['result'], item['name']))
+            require(before == row['result'],
+                'current V2 overlapping positive read differs: ' + row['method'] +
+                ' ' + (row['params'][0]['to'] if row['method'] == 'eth_call'
+                    else row['params'][0]) +
+                (' ' + row['params'][0]['data'] if row['method'] == 'eth_call' else '') +
+                ' ' + before_source + ' vs ' + item['name'])
+    return observations.reconcile(source, observed)
+
+
 def _compose(previous_files, previous_hash, script_files, script_hash, disclosure):
     require(disclosure == 'public', 'current V2 public disclosure required before reads')
     require((script_files is None) == (script_hash is None),
@@ -158,6 +209,7 @@ def _compose(previous_files, previous_hash, script_files, script_hash, disclosur
             'current V2 script promotion scope differs')
         verified.update(added)
         for code in added: supplied.pop(code, None)
+    reconciliation = _reconcile_sources(old_files, new_files, source)
     current = inventory.assess(work_class, verified, supplied)
     codes = [row['code'] for row in inventory.REQUIREMENTS if row['code'] in verified]
     comparison = {'previousAssessment': package._ref(PREFIX['previous'] +
@@ -167,6 +219,7 @@ def _compose(previous_files, previous_hash, script_files, script_hash, disclosur
         'rows': [{'code': before['code'], 'previousState': before['state'],
             'currentState': after['state']} for before, after in
             zip(old_assessment['results'], current['results'])],
+        'sourceReconciliation': reconciliation,
         'claims': CLAIMS, 'qualification': QUALIFICATION}
     output = {PREFIX['previous'] + path: raw for path, raw in old_files.items()}
     if new_files is not None:
