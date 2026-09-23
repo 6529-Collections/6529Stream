@@ -247,11 +247,11 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         _assertComplete(j.capture);
         j.raw = _manifestBytes(j.capture);
         (j.artifact, j.coverage) = _archiveManifest(j.raw);
-        j.verifier = _manifest(j.capture, 10000000);
+        j.verifier = _manifest(j.capture, 12000000);
         (uint256 value, uint256 floor, uint8 failure, uint64 revision) =
             j.verifier.gasParameterInfo(MANIFEST_READ);
         require(
-            value == 10000000 && floor == 100000 && failure == 2 && revision == 1,
+            value == 12000000 && floor == 100000 && failure == 2 && revision == 1,
             "fresh verifier genesis is lawful without lowering a governed parameter"
         );
         bytes32 portablePlan = _planHash(j.verifier, _expectedManifest(j));
