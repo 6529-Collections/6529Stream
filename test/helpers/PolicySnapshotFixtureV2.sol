@@ -289,7 +289,7 @@ abstract contract PolicySnapshotFixtureV2 is
         );
         host = StreamPolicySnapshotPublicationV2(
             _policyArtifactCreate(
-                "StreamPolicySnapshotPublicationV2.sol:StreamPolicySnapshotPublicationV2",
+                "smart-contracts/domains/metadata/StreamPolicySnapshotPublicationV2.sol:StreamPolicySnapshotPublicationV2",
                 "out/StreamPolicySnapshotPublicationV2.sol/StreamPolicySnapshotPublicationV2.json",
                 abi.encode(d, address(executor), gasConfigs),
                 4
