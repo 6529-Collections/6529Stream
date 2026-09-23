@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 from pathlib import Path
+from shutil import copytree
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -15,6 +16,40 @@ from .preview import fixture_package, verify_fixture_package, write_package
 
 
 class MediaHistoryCorpus(unittest.TestCase):
+    def test_builder_rejects_v1_wrong_schema_and_late_bad_row_before_output(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with self.assertRaisesRegex(MuseumError, "source schema ID differs"):
+                build_corpus(root / "v1-output", V1_ROOT)
+            self.assertFalse((root / "v1-output").exists())
+
+            wrong_schema = root / "wrong-schema"
+            copytree(ROOT, wrong_schema)
+            schema_path = wrong_schema / "source.schema.json"
+            schema = loads(schema_path.read_bytes())
+            schema["$id"] = "urn:6529stream:fixture:other-source-v2"
+            schema_path.write_bytes(dumps(schema))
+            with self.assertRaisesRegex(MuseumError, "source schema ID differs"):
+                build_corpus(root / "wrong-schema-output", wrong_schema)
+            self.assertFalse((root / "wrong-schema-output").exists())
+
+            late_bad_row = root / "late-bad-row"
+            copytree(ROOT, late_bad_row)
+            row_path = late_bad_row / "offline_revision.json"
+            row = loads(row_path.read_bytes())
+            row["scenario"] = "photograph"
+            row_path.write_bytes(dumps(row))
+            with self.assertRaisesRegex(MuseumError, "source scenario differs"):
+                build_corpus(root / "late-bad-row-output", late_bad_row)
+            self.assertFalse((root / "late-bad-row-output").exists())
+
+            row["scenario"] = "offline_revision"
+            del row["workId"]
+            row_path.write_bytes(dumps(row))
+            with self.assertRaisesRegex(MuseumError, "source does not satisfy its schema"):
+                build_corpus(root / "invalid-row-output", late_bad_row)
+            self.assertFalse((root / "invalid-row-output").exists())
+
     def test_pinned_corpus_replays_in_a_detached_directory_and_rejects_repinning(self):
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / "corpus"

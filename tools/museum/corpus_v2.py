@@ -9,6 +9,7 @@ from .preview import fixture_package, verify_fixture_package, write_package
 
 
 MANIFEST = "corpus-manifest.json"
+SOURCE_SCHEMA_ID = "urn:6529stream:fixture:museum-source-v2"
 
 
 def build(destination: Path, source: Path = ROOT) -> str:
@@ -16,20 +17,38 @@ def build(destination: Path, source: Path = ROOT) -> str:
     if destination.exists():
         raise MuseumError("corpus output already exists")
     schema = (source / "source.schema.json").read_bytes()
-    destination.mkdir(parents=True)
+    schema_doc = loads(schema, maximum=24576, canonical=True)
+    if not isinstance(schema_doc, dict) or schema_doc.get("$id") != SOURCE_SCHEMA_ID:
+        raise MuseumError("corpus source schema ID differs")
+    # Validate the entire input set before creating any output. A selected
+    # --source directory must not yield an archive that its own verifier rejects.
     rows = []
+    packages = []
     for scenario in SCENARIOS:
         original = (source / (scenario + ".json")).read_bytes()
+        source_doc = loads(original, maximum=24576, canonical=True)
+        if not isinstance(source_doc, dict) or source_doc.get("scenario") != scenario:
+            raise MuseumError("corpus source scenario differs")
         package = fixture_package(schema, original)
-        write_package(destination / scenario, package)
+        if (len(package["source/schema.json"]) > 24576
+                or len(package["source/payload.json"]) > 24576
+                or len(package["reports/coverage.json"]) > 65536
+                or len(package["manifest.json"]) > 24576):
+            raise MuseumError("corpus package component limit")
+        packages.append((scenario, package))
         rows.append({"scenario": scenario, "schemaHash": keccak256(schema),
                      "sourceHash": keccak256(original),
                      "packageHash": keccak256(package["manifest.json"])})
     raw = dumps({"mode": "synthetic_media_history_corpus", "version": "2",
-                 "sourceSchemaId": "urn:6529stream:fixture:museum-source-v2",
+                 "sourceSchemaId": SOURCE_SCHEMA_ID,
                  "cases": rows, "claims": {"recordedState": False,
                                          "targetProjection": False,
                                          "institutionalAcceptance": False}})
+    if len(raw) > 8192:
+        raise MuseumError("corpus manifest limit")
+    destination.mkdir(parents=True)
+    for scenario, package in packages:
+        write_package(destination / scenario, package)
     (destination / MANIFEST).write_bytes(raw)
     return keccak256(raw)
 
@@ -46,7 +65,7 @@ def verify(directory: Path, expected_hash: str) -> dict:
     if (not isinstance(manifest, dict)
             or set(manifest) != {"mode", "version", "sourceSchemaId", "cases", "claims"}
             or manifest["mode"] != "synthetic_media_history_corpus" or manifest["version"] != "2"
-            or manifest["sourceSchemaId"] != "urn:6529stream:fixture:museum-source-v2"
+            or manifest["sourceSchemaId"] != SOURCE_SCHEMA_ID
             or manifest["claims"] != {"recordedState": False, "targetProjection": False,
                                        "institutionalAcceptance": False}
             or not isinstance(manifest["cases"], list)
