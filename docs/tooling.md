@@ -142,6 +142,24 @@ many deployments and calls. Native product checks still enforce the 24,576-byte
 runtime limit, and the fixture checks constructor and deployed products; these
 local allowances do not establish a shipping transaction's gas capacity.
 
+### Native capture selection preflight
+
+Before a new selected native compilation, inspect its retained full analysis
+AST and original requested output fields without running the compiler:
+
+```text
+python -m tools.build.plan_native_capture_selection --analysis-output analysis-output.json --codegen-input codegen-input.json --product test/current/Suite.t.sol:SuiteTest
+```
+
+Repeat `--product` for each intended root in the same context. The report closes
+embedded constructor dependencies, adds inherited immutable declaration ASTs,
+and lists unrelated concrete definitions included by source-wide AST selectors.
+Explicit named output-field lists are preserved; ensure those lists request the
+needed native outputs. Unnamed children inherit their parents' field union.
+Missing dependency/C3 data is an error. This is an advisory plan: physical
+artifact, source, linked-owner, size and execution checks remain required.
+Keep existing frozen captures unchanged when preparing a corrected plan.
+
 ### Explicit native product owners
 
 A fixture that obtains creation bytes through `vm.getCode` can keep the default

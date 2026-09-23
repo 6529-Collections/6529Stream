@@ -1,5 +1,20 @@
 # Full-v1 current delivery status
 
+### Latest bounded results: `64c1d815`
+
+The Museum photograph example now carries a real, explicitly synthetic PNG
+through Linked Art, PREMIS, IIIF and LIDO. Three new root tests pass, including
+exact file identity, offline replay without a compressor or network, and
+rehashed tampering. The PNG input is retained and SHA-pinned; this fixes the
+independent review's portability finding. Original described-only master/print
+records and earlier package versions are preserved. Actual-chain and
+institutional acceptance remain open.
+
+The render test boundary extraction is integrated as `e63274251`; it removes
+34 unrelated test entrypoints from that host's planned AST selection while
+preserving every original test body. Full ABI230 passes 4,787 sources with zero
+errors. Native speed and runtime acceptance for this change remain pending.
+
 ## Latest integrated checkpoint: 23 September, `b0ba19b47`
 
 Production remains `09f32efab`. The final Artist native captures now pass,

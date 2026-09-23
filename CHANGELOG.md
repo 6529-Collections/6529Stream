@@ -6,6 +6,8 @@
   artifacts while retaining constructor arguments, caller, ordering and tests.
 - Add the Museum V4 field/format coverage ledger and validated photograph and
   software Linked Art/LIDO exports. Retain unsupported-format facts explicitly.
+- Add a byte-backed synthetic photograph example across all four Museum
+  formats, with retained SHA-pinned image input and portable offline replay.
 - Refresh the client inventory against the integrated production source.
   Full runtime, gas, Safe and release acceptance remain open.
 
