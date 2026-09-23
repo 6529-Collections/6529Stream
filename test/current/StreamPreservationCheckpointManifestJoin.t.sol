@@ -470,33 +470,134 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         _exerciseStatefulJoin(uint8(seed & 7), false);
     }
 
-    function _exerciseStatefulJoin(uint8 schedule, bool thorough) private {
-        (Joined memory j, bytes32 expectedPlan) = _preparePortableJoin(2);
-        require(j.capture.producers.length == 2, "two independently selected output rows");
-        bytes memory beginInput = abi.encodeCall(
-            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
-        );
-        (bool ok, bytes memory result) =
-            address(j.verifier).call{gas: JOIN_TX_CEILING}(beginInput);
-        require(ok && result.length == 32, "bounded initial manifest begin");
-        j.plan = abi.decode(result, (bytes32));
-        require(j.plan == expectedPlan, "independent expected plan identity");
-        JoinModel memory model = JoinModel({
-            accepted: 0,
-            expectedRecord: keccak256(
-                abi.encode(
-                    keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_VERIFIED_V1"),
-                    expectedPlan
-                )
-            ),
-            checkpointHistory: _history(j.capture),
-            artifactHistory: keccak256(abi.encode(joinCoverage.artifact(j.artifact))),
-            coverageHistory: keccak256(abi.encode(joinCoverage.coverage(j.coverage))),
-            manifestHistory: keccak256(abi.encode(_expectedManifest(j))),
-            complete: false
-        });
+    /// @dev Each seed supplies twelve actions from a sixteen-action alphabet. Drift
+    /// can stay active across reads and partial verification, then be restored and
+    /// retried. The separate model records only calls the verifier actually accepts.
+    function testFuzzStatefulJoinGeneratedActions(uint256 seed) external {
+        (Joined memory j, JoinModel memory model) = _beginTwoRowJoin();
+        DriftSnapshot[4] memory snapshots;
+        bool[4] memory active;
+        for (uint256 step; step < 12; ++step) {
+            uint8 action = uint8(seed >> (step * 4)) & 15;
+            if (action < 4) {
+                uint256 facet = uint256(action);
+                if (active[facet]) {
+                    _restoreJoinDrift(j, snapshots[facet]);
+                    active[facet] = false;
+                } else {
+                    snapshots[facet] = _applyJoinDrift(
+                        j, facet % 2 == 0, facet / 2, uint256(keccak256(abi.encode(seed, step)))
+                    );
+                    active[facet] = true;
+                }
+            } else if (action == 10) {
+                for (uint256 facet; facet < 4; ++facet) {
+                    if (active[facet]) {
+                        _restoreJoinDrift(j, snapshots[facet]);
+                        active[facet] = false;
+                    }
+                }
+            } else if (action == 8 || action == 14) {
+                _generatedBegin(j, _generatedDirty(active));
+            } else if (action == 9 || action == 15) {
+                _generatedCurrentness(j, model, _generatedDirty(active));
+            } else {
+                uint256 count = action == 4 || action == 12
+                    ? 0
+                    : action == 5 || action == 13 ? 3 : action == 7 ? 2 : 1;
+                model = _generatedVerify(j, model, count, _generatedDirty(active));
+            }
+            _assertJoinModel(j, model);
+        }
+        for (uint256 facet; facet < 4; ++facet) {
+            if (active[facet]) _restoreJoinDrift(j, snapshots[facet]);
+        }
         _assertJoinModel(j, model);
+        _generatedBegin(j, false);
+        while (model.accepted < 2) {
+            bytes32 record = _acceptVerify(j, 1);
+            ++model.accepted;
+            if (model.accepted == 2) {
+                require(record == model.expectedRecord, "forced terminal record");
+                model.complete = true;
+            } else {
+                require(record == bytes32(0), "forced partial row");
+            }
+            _assertJoinModel(j, model);
+        }
+        _generatedCurrentness(j, model, false);
+    }
 
+    function _generatedDirty(bool[4] memory active) private pure returns (bool) {
+        return active[0] || active[1] || active[2] || active[3];
+    }
+
+    function _generatedBegin(Joined memory j, bool dirty) private {
+        (bool ok, bytes memory result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(
+            abi.encodeCall(
+                JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+            )
+        );
+        if (dirty) {
+            require(!ok, "drift cannot re-begin the stored plan");
+        } else {
+            require(ok && result.length == 32 && abi.decode(result, (bytes32)) == j.plan,
+                "clean re-begin retains the stored plan");
+        }
+    }
+
+    function _generatedCurrentness(Joined memory j, JoinModel memory model, bool dirty)
+        private
+        view
+    {
+        if (!model.complete) return;
+        (bool ok, bytes memory result) = address(j.verifier).staticcall{gas: JOIN_TX_CEILING}(
+            abi.encodeCall(JoinV.requireCurrentManifest, (model.expectedRecord, JOIN_ARTIST))
+        );
+        if (dirty) {
+            require(!ok, "drift must invalidate currentness");
+        } else {
+            require(ok && keccak256(abi.encode(abi.decode(result, (JoinV.Manifest)))) == model.manifestHistory,
+                "clean currentness returns the historical full manifest");
+        }
+    }
+
+    function _generatedVerify(Joined memory j, JoinModel memory model, uint256 count, bool dirty)
+        private
+        returns (JoinModel memory)
+    {
+        uint256 remaining = 2 - model.accepted;
+        bool validBatch = count != 0 && count <= remaining;
+        bool terminal = validBatch && count == remaining;
+        (bool ok, bytes memory result) = address(j.verifier).call{gas: JOIN_TX_CEILING}(
+            abi.encodeCall(JoinV.verifyNextOutputs, (j.plan, count))
+        );
+        if (validBatch && (!terminal || !dirty)) {
+            require(ok && result.length == 32, "generated accepted batch");
+            bytes32 record = abi.decode(result, (bytes32));
+            model.accepted += uint64(count);
+            if (terminal) {
+                require(record == model.expectedRecord, "generated terminal record");
+                model.complete = true;
+            } else {
+                require(record == bytes32(0), "generated partial row");
+            }
+        } else {
+            require(!ok, "generated rejected batch");
+            if (!validBatch) {
+                require(
+                    keccak256(result)
+                        == keccak256(abi.encodeWithSelector(JoinV.OutputManifestBatch.selector, count)),
+                    "generated invalid count follows batch rule"
+                );
+            }
+        }
+        return model;
+    }
+
+    function _exerciseStatefulJoin(uint8 schedule, bool thorough) private {
+        (Joined memory j, JoinModel memory model) = _beginTwoRowJoin();
+        bytes32 expectedPlan = j.plan;
         uint256 invalidBefore = (schedule & 1) == 0 ? 0 : 3;
         _rejectVerify(j, invalidBefore, true);
         _assertJoinModel(j, model);
@@ -524,7 +625,7 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
 
         DriftSnapshot memory second =
             _applyJoinDrift(j, !first.admission, 1 - index, schedule + 8);
-        (ok, result) = address(j.verifier).staticcall{gas: JOIN_TX_CEILING}(
+        (bool ok, bytes memory result) = address(j.verifier).staticcall{gas: JOIN_TX_CEILING}(
             abi.encodeCall(JoinV.requireCurrentManifest, (model.expectedRecord, JOIN_ARTIST))
         );
         require(
@@ -555,6 +656,35 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         _assertJoinModel(j, model);
         if (thorough) _assertJoined(j, model.expectedRecord);
         emit StatefulJoinSchedule(schedule, expectedPlan, model.expectedRecord);
+    }
+
+    function _beginTwoRowJoin() private returns (Joined memory j, JoinModel memory model) {
+        bytes32 expectedPlan;
+        (j, expectedPlan) = _preparePortableJoin(2);
+        require(j.capture.producers.length == 2, "two independently selected output rows");
+        bytes memory beginInput = abi.encodeCall(
+            JoinV.beginManifest, (j.capture.id, j.artifact, j.coverage, JOIN_ARTIST)
+        );
+        (bool ok, bytes memory result) =
+            address(j.verifier).call{gas: JOIN_TX_CEILING}(beginInput);
+        require(ok && result.length == 32, "bounded initial manifest begin");
+        j.plan = abi.decode(result, (bytes32));
+        require(j.plan == expectedPlan, "independent expected plan identity");
+        model = JoinModel({
+            accepted: 0,
+            expectedRecord: keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_PRESERVATION_POLICY_OUTPUT_MANIFEST_VERIFIED_V1"),
+                    expectedPlan
+                )
+            ),
+            checkpointHistory: _history(j.capture),
+            artifactHistory: keccak256(abi.encode(joinCoverage.artifact(j.artifact))),
+            coverageHistory: keccak256(abi.encode(joinCoverage.coverage(j.coverage))),
+            manifestHistory: keccak256(abi.encode(_expectedManifest(j))),
+            complete: false
+        });
+        _assertJoinModel(j, model);
     }
 
     function _acceptVerify(Joined memory j, uint256 count) private returns (bytes32 record) {
