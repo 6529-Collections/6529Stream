@@ -7,7 +7,7 @@ first offline export surface; recorded packages require the later source adapter
 from hashlib import sha256
 from pathlib import Path
 
-from .canonical import MuseumError, dumps, loads
+from .canonical import MuseumError, dumps, keccak256, loads
 from .coverage import inventory, verify_coverage
 from .dependencies import safe_path
 
@@ -48,10 +48,12 @@ def write_package(destination: Path, components: dict[str, bytes]):
         path.write_bytes(content)
 
 
-def verify_fixture_package(root: Path):
+def verify_fixture_package(root: Path, expected_manifest_hash: str | None = None):
     if (root / "manifest.json").stat().st_size > 24576:
         raise MuseumError("fixture manifest limit")
     manifest_bytes = (root / "manifest.json").read_bytes()
+    if expected_manifest_hash is not None and keccak256(manifest_bytes) != expected_manifest_hash:
+        raise MuseumError("fixture manifest external hash mismatch")
     manifest = loads(manifest_bytes, canonical=True)
     if manifest.get("mode") != "synthetic_fixture":
         raise MuseumError("not a fixture package")
@@ -64,7 +66,10 @@ def verify_fixture_package(root: Path):
         if relative in data or relative == "manifest.json":
             raise MuseumError("duplicate/circular component")
         path = safe_path(root, relative)
-        if path.stat().st_size > 24576:
+        # Repeated V2 scenario fields can produce a larger exact-path ledger
+        # while the source and schema retain their original small-file bound.
+        limit = 65536 if relative == "reports/coverage.json" else 24576
+        if path.stat().st_size > limit:
             raise MuseumError("fixture component limit")
         content = path.read_bytes()
         if _sha(content) != entry["sha256"] or str(len(content)) != entry["byteLength"]:

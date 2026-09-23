@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Synthetic media and history corpus V2](../../docs/museum-media-history-corpus-v2.md)
+pins the eight named source fixtures, exports their complete field inventories,
+and verifies a detached archive with its original schema and source bytes.
+
 [Authenticated account review policies](../../docs/museum-qualified-account-review.md)
 select exact recorded approvals, rejections and SELF reviews while preserving
 original statements. [The retained local fixture](../../docs/museum-qualified-review-fixture.md)
