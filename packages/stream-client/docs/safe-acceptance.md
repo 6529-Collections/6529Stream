@@ -8,6 +8,12 @@ retained outside tracked documentation, with their exact hashes in the summary.
 It implements the inventory promised by [the acceptance plan](../../../ops/SAFE_ACCEPTANCE.md).
 The historical `current-v1-safe-coverage.*` ABI102 client inventory remains frozen.
 
+A separate [ABI213 call-surface inventory and anchored product-gap report](current-safe-call-surface-abi213.md)
+refreshes the retained 164-contract roster against source commit
+`a0f92ecae8414d36aa715ae1e37d5fb222c0db97`. It is a current ABI/source inventory,
+not Safe acceptance; its candidate list does not rewrite this ABI176 report, its
+historical runtime attestations, or the older ABI102 coverage inventory.
+
 ## Current capture and scope
 
 The externally retained `safe-acceptance-current-profile.json` pins ABI176 at source
