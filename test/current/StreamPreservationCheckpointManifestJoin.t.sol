@@ -35,6 +35,7 @@ import {
 } from "../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
 
 interface PortableJoinVm {
+    function createDir(string calldata path, bool recursive) external;
     function dumpState(string calldata path) external;
 }
 
@@ -84,6 +85,8 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         bytes32 artifact,
         bytes32 coverage,
         bytes32 plan,
+        bytes32 expectedManifestHash,
+        uint256 outputCount,
         uint256 chainId,
         uint256 timestamp,
         uint256 blockNumber,
@@ -252,6 +255,7 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
             "fresh verifier genesis is lawful without lowering a governed parameter"
         );
         bytes32 portablePlan = _planHash(j.verifier, _expectedManifest(j));
+        pvm.createDir("artifacts/native-assembly", true);
         pvm.dumpState("artifacts/native-assembly/preservation-join-portable-v1.dump.json");
         emit PortableJoinCut(
             address(j.verifier),
@@ -261,6 +265,8 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
             j.artifact,
             j.coverage,
             portablePlan,
+            keccak256(abi.encode(_expectedManifest(j))),
+            j.capture.producers.length,
             block.chainid,
             block.timestamp,
             block.number,
