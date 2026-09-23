@@ -1,5 +1,12 @@
 # Changelog
 
+## Current native Museum requirement assessment
+
+- Add a separate, replayed 49-row current assessment for five native-state
+  requirements. Exact target and source-state joins allow verified references
+  while the original V4 dossier and 19/49 decisions stay unchanged. See the
+  [current assessment guide](docs/museum-current-native-assessment-v1.md).
+
 ## Unified Artist and General review evidence
 
 - Add a V5 wrapper around the unchanged unified V4 dossier. Replay exact native
