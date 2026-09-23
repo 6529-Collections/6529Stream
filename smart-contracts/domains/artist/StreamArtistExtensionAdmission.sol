@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistExtensionFactory.sol";
+import { StreamArtistExtensionFactoryRuntime } from "./StreamArtistExtensionFactoryRuntime.sol";
 
 /// @notice Constructor-only authentication of the compiler-linked factory and its original CREATE receipts.
 library StreamArtistExtensionAdmission {
@@ -44,7 +45,7 @@ library StreamArtistExtensionAdmission {
     }
 
     function _factory(address factory) private view {
-        if (factory.codehash != keccak256(type(StreamArtistExtensionFactory).runtimeCode)) {
+        if (factory.codehash != StreamArtistExtensionFactoryRuntime.expected()) {
             revert InvalidExtensionBinding(factory);
         }
     }
