@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `615451b9c`; ABI212 4,697 sources / zero errors on identical Solidity; Museum assessment6 PASS and review finding closed; checksum3 PASS; reviewed Genesis engine retains44 cases, runtime pending. |
+| Source checkpoint | `106c1b60e`; ABI213 4,698 sources / zero errors; Museum assessment7 and Safe plans11 PASS; preservation cold begin/verify PASS on matching production source; original Genesis44 runtime pending. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,12 +29,13 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 23 September
 
-Expanded full v1 remains incomplete. Integrated source `615451b9c` adds a
-Museum native-state requirement assessment, a reviewed Genesis test engine and
-a release-checksum test correction. Production Solidity remains `4e88540ce`.
-The Genesis fixture retains all 44 original cases and uses genuine product
-artifacts. Source integration and focused tests do not establish full
-current-stack acceptance. RC1 and Sepolia remain unchanged.
+Expanded full v1 remains incomplete. Integrated source `106c1b60e` adds
+explicit Safe receive/fallback call plans, a complete same-target Museum
+assessment regression, and reviewed preservation and Genesis test fixtures.
+Production Solidity remains `4e88540ce`. Preservation now has successful
+separate cold local transactions under the original gas ceiling. Genesis
+retains all 44 original cases; its complete runtime acceptance remains open.
+RC1 and Sepolia remain unchanged.
 
 - **Artist contracts:** all 49 collaborator workers fit on their recorded
   `07265d875` source. Twelve codec/projection cases pass, including one
@@ -66,14 +67,13 @@ current-stack acceptance. RC1 and Sepolia remain unchanged.
   new join/replay/tamper cases, eight Artist dossier regressions and four
   retained General capture replays. Original child bytes, profiles and the
   19/49 assessment denominator remain unchanged. The additive native-state
-  assessment at `615451b9c` passes all six focused tests and independent review.
-  It can derive five requirement codes from replayed identity, finality,
-  content-root, entropy and attribution proofs. Four codes are exercised in
-  one joined dossier; entropy is separately proved on its own exact target.
-  The reviewer found an omitted supplemental-source comparison; the fix and
-  regression now include every retained V4 family. A coherent all-five positive
-  fixture is next. These synthetic RPC controls do not establish actual-chain
-  or institutional acceptance, and all other requirements remain explicit.
+  assessment now passes all seven focused tests at `36ae50d99`, with independent
+  source/oracle review. One coherent positive dossier proves all five eligible
+  codes for the same token and state: identity, finality, content-root, entropy
+  and attribution. Supplemental-source reconciliation includes every retained
+  V4 family. These are synthetic native RPC controls, not actual-chain or
+  institutional acceptance. Token-scoped script selection and registered
+  interpretation support are being built; unknown work classes remain explicit.
 - **Clients:** run `35721327181` completed preparation, **all 16 shards and
   the required client aggregate** at merge source `8d2e2323` (dispatch
   `eb840cfb`). All 246 files / 1,472 execution units / 3,354 registrations
@@ -88,6 +88,11 @@ current-stack acceptance. RC1 and Sepolia remain unchanged.
   tests pass on a clean Git checkout. The raw `.abi` fixture caused the mismatch;
   Museum `.bin` byte preservation has a separate regression. Generated release
   evidence and the full CI result still need final refresh and validation.
+  Explicit receive/fallback Safe plans are integrated at `106c1b60e` after
+  independent review. Integrated types, build and all 11 focused tests pass;
+  existing function-plan hashes are unchanged. ABI handler/payability and
+  dispatch precedence are checked. This supports preparing and simulating
+  those calls; actual all-call Safe contract acceptance remains open.
 - **Preservation:** the repaired component campaign at builder `4a631c0a`
   passes **44/44 cases**: checkpoint 13, manifest V1 21 and V2 10, with no
   failures or skips. Independent runtime review is clear. The fixture
@@ -98,8 +103,17 @@ current-stack acceptance. RC1 and Sepolia remain unchanged.
   allowance; it does not prove execution within the 16,777,216 transaction
   limit. Fresh-budget fixture `ca0b9f694` passes four cases with independent
   review: the warm calls spend 1,979,246 and 1,681,207 gas. These are not fresh
-  transaction receipts. A test-only state-backed fixture is being prepared
-  for separate Anvil transactions; full current-stack acceptance remains open.
+  transaction receipts. The state-backed successor `172aca447`, integrated
+  through `8b8d23461`, passes all four join cases and now has two separate cold
+  Anvil transactions: beginManifest uses 3,140,264 gas; verifyNextOutputs uses
+  2,879,328 gas. Both succeed under the original 16,777,216 transaction ceiling,
+  with full manifest/record/currentness readback. The fresh fixture uses a 12m
+  manifest read allowance and 8m checkpoint allowance; the earlier 10m cold
+  failure remains recorded. Independent review verifies the 81-account,
+  1,139-slot prestate and single genuine linked-library completion. All 501
+  compiled production sources match `106c1b60e` byte-for-byte. Core, Registry,
+  Artist and related typed fixture boundaries still limit this evidence;
+  full current-stack and real governance/finality acceptance remain open.
 - **Paid flows and remaining integration:** scoped bundle size repair
   `6903b3b12` / `356d091d3` has independent source clearance. The measured
   builder deployment is 24,435 runtime bytes, below 24,576, and its two
@@ -110,16 +124,22 @@ current-stack acceptance. RC1 and Sepolia remain unchanged.
   first two native fixture captures timed out at 900 seconds with zero paid
   executions. A test-only construction split is authorized; the exact source
   equality gate and time bound remain intact. Paid fixture phase split
-  `a2e481dfa` now has independent root/Luna source review; native capture remains
-  in progress and the prototype is not adopted. Genesis helper `bf26e7cd8`
-  preserved all 44 cases, but its host and doubles still timed out in native
-  compilation. Reviewed successor `78cc95f2c` moves the unchanged construction
-  stages behind a stateless test engine, preserving caller and CREATE order.
-  Smaller native captures continue; Genesis and Owner runtime acceptance remain
-  pending. The engine is test-only, not a production-contract change.
+  `a2e481dfa` and reviewed callback cut `353f58eb1` also timed out, without
+  native outputs or paid executions. No unchanged retry is running. The next
+  source/compiler reachability change is under independent diagnosis; the
+  paid prototype is not adopted.
+  Genesis helper `bf26e7cd8` preserved all 44 cases, but its host and doubles
+  timed out. The stateless construction engine at `78cc95f2c` now has genuine
+  native output and a validated direct library chain. Reviewed Record setup
+  extraction `a0f92ecae` preserves the original Safe callbacks and CREATE
+  context; its smaller host/engine captures are running. Another 58 required
+  mint/auction libraries have genuine native and physical artifacts on exact
+  `2ac670dcd`, with source/ownership joining pending. The remaining 59 named
+  library captures run independently. Genesis and Owner runtime acceptance
+  remain pending; test-only engines do not relax production size limits.
 
-ABI212 checks **4,697 Solidity sources with zero errors** at `78cc95f2c`;
-`615451b9c` has identical Solidity bytes. The active inventory remains
+ABI213 checks **4,698 Solidity sources with zero errors** at `a0f92ecae`;
+`106c1b60e` has identical Solidity bytes. The active inventory remains
 **3,143 production paths**. Existing parallel runtime work stays pinned to
 its recorded source; these new test and Museum changes do not relabel it. Full current-stack/Safe
 integration, comprehensive fuzz/stateful tests,
