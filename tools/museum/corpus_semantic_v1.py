@@ -13,7 +13,7 @@ from .fixtures_v2 import ARTIST, INTERVIEWER
 from .package import ResourcePackage, write_package
 from .package_v2 import _assemble, _dependencies, _read_package
 from .projection import CONTEXT
-from .projection_v2 import CROSSWALK_V2_BYTES, CROSSWALK_V2_HASH, ProjectionProfileV2
+from .projection_v2 import CROSSWALK_V2_HASH, ProjectionProfileV2
 
 
 MODEL_ROOT = Path(__file__).resolve().parents[2] / "schemas/museum"
@@ -22,14 +22,17 @@ MODE = "synthetic_media_history_semantic_projection_v1"
 SOURCE_SCHEMA_HASH = "0x052724ed357f286d28d15113a37d2d8f007487205b2f815817f7ef1d11ae35fe"
 VALIDATION_HASH = "0xc5dfe8227e65a2012b707b3d669ec9c4712e1a4e8b3441556b9f8c67da38e19d"
 VOCABULARY_HASH = "0xd56f4d9fdb72ea1eddcb6542c2fe0a52761d6837914f11b3bf0876ec2bd64faf"
+CROSSWALK_PATH = "definitions/crosswalk-v2.json"
 
 
-def _profile(root):
+def _profile(root, crosswalk_bytes):
+    if type(crosswalk_bytes) is not bytes or keccak256(crosswalk_bytes) != CROSSWALK_V2_HASH:
+        raise MuseumError("semantic corpus crosswalk hash differs")
     validation = (root / "linked-art-v2/validation-policy.json").read_bytes()
     vocabulary = (root / "standards/vocabulary-policy.json").read_bytes()
     if keccak256(validation) != VALIDATION_HASH or keccak256(vocabulary) != VOCABULARY_HASH:
         raise MuseumError("semantic corpus model policy hash differs")
-    return ProjectionProfileV2(root, CROSSWALK_V2_BYTES, crosswalk_hash=CROSSWALK_V2_HASH,
+    return ProjectionProfileV2(root, crosswalk_bytes, crosswalk_hash=CROSSWALK_V2_HASH,
         validation_hash=VALIDATION_HASH, vocabulary_hash=VOCABULARY_HASH)
 
 
@@ -133,11 +136,15 @@ def _project(name, source, schema, profile):
     return encoded, dumps(coverage), dumps(sorted(provenance, key=dumps))
 
 
-def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROOT) -> ResourcePackage:
+def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROOT,
+          *, crosswalk_bytes: bytes | None = None) -> ResourcePackage:
     corpus_directory, model_root = Path(corpus_directory).resolve(), Path(model_root).resolve()
     verify_corpus(corpus_directory, corpus_hash)
-    profile = _profile(model_root)
+    if crosswalk_bytes is None:
+        crosswalk_bytes = (model_root / "projection/crosswalk-v2.json").read_bytes()
+    profile = _profile(model_root, crosswalk_bytes)
     files = _dependencies(model_root, recorded=True)
+    files[CROSSWALK_PATH] = crosswalk_bytes
     for path in sorted(corpus_directory.rglob("*")):
         if path.is_file():
             files["input/corpus/" + path.relative_to(corpus_directory).as_posix()] = path.read_bytes()
@@ -180,7 +187,12 @@ def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
     if (manifest.get("mode") != MODE or manifest.get("version") != "1"
             or manifest.get("crosswalkHash") != CROSSWALK_V2_HASH):
         raise MuseumError("semantic corpus package profile differs")
-    rebuilt = build(directory / "input/corpus", manifest["corpusManifestHash"], directory / "dependencies")
+    try:
+        crosswalk_bytes = files[CROSSWALK_PATH]
+    except KeyError as exc:
+        raise MuseumError("semantic corpus retained crosswalk missing") from exc
+    rebuilt = build(directory / "input/corpus", manifest["corpusManifestHash"],
+                    directory / "dependencies", crosswalk_bytes=crosswalk_bytes)
     if rebuilt.manifest != raw or dict(rebuilt.files) != files:
         raise MuseumError("semantic corpus reconstruction differs")
     return rebuilt

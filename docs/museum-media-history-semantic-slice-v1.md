@@ -11,8 +11,8 @@ The source V2 schema hash is
 `0x052724ed357f286d28d15113a37d2d8f007487205b2f815817f7ef1d11ae35fe`
 and the vocabulary-policy hash is
 `0xd56f4d9fdb72ea1eddcb6542c2fe0a52761d6837914f11b3bf0876ec2bd64faf`.
-The package retains those policy bytes, their complete dependencies and all
-eight original source packages. It binds the corpus manifest hash supplied by
+The package retains the exact crosswalk and policy bytes, their complete
+dependencies and all eight original source packages. It binds the corpus manifest hash supplied by
 the caller. The original fixture V1 and V2 source files are unchanged.
 
 | Case | Supported projection | Original meaning retained in source/coverage |
@@ -42,8 +42,9 @@ python -m unittest tools.museum.test_corpus_semantic_v1
 ```
 
 Verification reads the original corpus and pinned model closure solely from
-the package and regenerates every semantic output. It rejects a changed
-model policy or a changed resource even when its enclosing manifest is rehashed;
+the package, including the crosswalk definition, and regenerates every semantic
+output. It rejects a changed crosswalk, model policy or resource even when its
+enclosing manifest is rehashed;
 the trusted external manifest hash remains the package integrity anchor.
 The remaining five cases—interactive work, historical geography, conflicting
 documentation, independent accounts and offline revision—still need their

@@ -108,6 +108,8 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         self.assertEqual(report["completeness"], "incomplete")
         self.assertFalse(any(report["claims"].values()))
         self.assertFalse(any(loads(self.result.manifest, maximum=2 * 1024 * 1024)["claims"].values()))
+        self.assertEqual(self.files["definitions/crosswalk-v2.json"],
+                         (MODEL_ROOT / "projection/crosswalk-v2.json").read_bytes())
         for path in self.corpus.rglob("*"):
             if path.is_file():
                 relative = path.relative_to(self.corpus).as_posix()
@@ -147,6 +149,16 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         target = self.root / "changed-policy"
         write_package(altered, target)
         with self.assertRaisesRegex(MuseumError, "model policy hash differs"):
+            verify(target, altered.manifest_hash)
+
+        files = dict(self.files)
+        crosswalk_path = "definitions/crosswalk-v2.json"
+        crosswalk = loads(files[crosswalk_path]); crosswalk["unreviewedChange"] = True
+        files[crosswalk_path] = dumps(crosswalk)
+        altered = _assemble(MODEL_ROOT, files, metadata)
+        target = self.root / "changed-crosswalk"
+        write_package(altered, target)
+        with self.assertRaisesRegex(MuseumError, "crosswalk hash differs"):
             verify(target, altered.manifest_hash)
 
 
