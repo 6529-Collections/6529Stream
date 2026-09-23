@@ -104,6 +104,29 @@ class NativeCaptureSelectionPlanTests(unittest.TestCase):
         with self.assertRaisesRegex(SelectionError, "duplicate contract coordinate"):
             plan_selection(duplicate_coordinate, codegen, ["src/Root.sol:Root"])
 
+    def test_missing_ast_arrays_and_nonself_c3_fail_closed(self):
+        analysis, codegen = fixture()
+        for field in ("contractDependencies", "linearizedBaseContracts", "nodes"):
+            changed = copy.deepcopy(analysis)
+            del changed["sources"]["src/Root.sol"]["ast"]["nodes"][0][field]
+            with self.subTest(field=field), self.assertRaises(SelectionError):
+                plan_selection(changed, codegen, ["src/Root.sol:Root"])
+        changed = copy.deepcopy(analysis)
+        changed["sources"]["src/Root.sol"]["ast"]["nodes"][0]["linearizedBaseContracts"] = [3, 1]
+        with self.assertRaisesRegex(SelectionError, "invalid C3"):
+            plan_selection(changed, codegen, ["src/Root.sol:Root"])
+
+    def test_named_child_fields_are_preserved_and_propagated_exactly(self):
+        analysis, codegen = fixture()
+        fields = ["metadata", "evm.deployedBytecode.object", "abi"]
+        codegen["settings"]["outputSelection"]["src/Child.sol"] = {"Child": fields}
+        original = copy.deepcopy(codegen)
+        report = plan_selection(analysis, codegen, ["src/Root.sol:Root"])
+        selection = report["outputSelection"]
+        self.assertEqual(selection["src/Child.sol"]["Child"], fields)
+        self.assertEqual(selection["src/Grandchild.sol"]["Grandchild"], sorted(fields))
+        self.assertEqual(codegen, original)
+
     def test_invalid_dependency_and_c3_references_fail_closed(self):
         analysis, codegen = fixture()
         abstract_child = copy.deepcopy(analysis)

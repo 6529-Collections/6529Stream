@@ -26,11 +26,11 @@ def _field_list(value, coordinate: str) -> list[str]:
     return value
 
 
-def _definitions(analysis_output: dict) -> tuple[dict[str, dict], dict[str, dict]]:
+def _definitions(analysis_output: dict) -> tuple[dict[int, dict], dict[str, dict]]:
     sources = analysis_output.get("sources")
     if not isinstance(sources, dict) or not sources:
         _fail("analysis output lacks a non-empty sources object")
-    by_id: dict[str, dict] = {}
+    by_id: dict[int, dict] = {}
     by_coordinate: dict[str, dict] = {}
     for source in sorted(sources):
         if not isinstance(source, str) or not source:
@@ -59,7 +59,7 @@ def _definitions(analysis_output: dict) -> tuple[dict[str, dict], dict[str, dict
 
     for ident, entry in by_id.items():
         node, coordinate = entry["node"], entry["coordinate"]
-        dependencies = node.get("contractDependencies", [])
+        dependencies = node.get("contractDependencies")
         if not isinstance(dependencies, list):
             _fail(f"invalid contractDependencies for {coordinate}")
         if any(type(dep) is not int or dep < 0 for dep in dependencies):
@@ -69,11 +69,13 @@ def _definitions(analysis_output: dict) -> tuple[dict[str, dict], dict[str, dict
         for dep in dependencies:
             if dep not in by_id:
                 _fail(f"unknown dependency declaration ID {dep} for {coordinate}")
-        linearized = node.get("linearizedBaseContracts", [ident])
+        linearized = node.get("linearizedBaseContracts")
         if (not isinstance(linearized, list) or not linearized
                 or any(type(base) is not int or base < 0 for base in linearized)
-                or len(linearized) != len(set(linearized))):
+                or len(linearized) != len(set(linearized)) or linearized[0] != ident):
             _fail(f"invalid C3 linearization for {coordinate}")
+        if not isinstance(node.get("nodes"), list):
+            _fail(f"missing contract declaration nodes for {coordinate}")
         for base in linearized:
             if base not in by_id:
                 _fail(f"unknown C3 base declaration ID {base} for {coordinate}")
@@ -133,8 +135,8 @@ def plan_selection(analysis_output: dict, codegen_input: dict,
     propagated: dict[str, set[str]] = {}
     while pending:
         parent = pending.pop(0)
-        fields = set(root_fields[parent]) if parent in root_fields else (
-            set(requested_fields(parent) or ()) | parent_fields.get(parent, set()))
+        original = root_fields.get(parent) or requested_fields(parent)
+        fields = set(original) if original is not None else parent_fields.get(parent, set()).copy()
         if propagated.get(parent) == fields:
             continue
         propagated[parent] = fields
@@ -160,7 +162,7 @@ def plan_selection(analysis_output: dict, codegen_input: dict,
     for coordinate in sorted(closure - set(roots)):
         original = requested_fields(coordinate)
         inherited = sorted(parent_fields.get(coordinate, set()))
-        selected_fields[coordinate] = sorted(set(original or ()) | set(inherited))
+        selected_fields[coordinate] = list(original) if original is not None else inherited
         if not selected_fields[coordinate]:
             _fail(f"dependency has no inherited output fields: {coordinate}")
     for coordinate in sorted(closure):
@@ -169,7 +171,6 @@ def plan_selection(analysis_output: dict, codegen_input: dict,
     native_selection = _selection(augmented, analysis_output, sorted(closure))
 
     ast_source_names = sorted(source for source, outputs in native_selection.items() if "" in outputs)
-    ast_selected_sources = set(ast_source_names)
     siblings = []
     for source in ast_source_names:
         nodes = analysis_output["sources"][source]["ast"]["nodes"]
