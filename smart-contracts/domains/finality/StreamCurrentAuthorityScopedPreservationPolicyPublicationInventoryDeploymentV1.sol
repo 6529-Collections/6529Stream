@@ -9,12 +9,14 @@ import {
 import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
-import {
-    StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1 as Child
-} from "../preservation/StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1.sol";
+
 import {
     StreamScopedPreservationPolicyPublicationRecipeV1 as Recipe
 } from "./StreamScopedPreservationPolicyPublicationRecipeV1.sol";
+
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryConstructorV1 as Constructor
+} from "./StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryConstructorV1.sol";
 
 /// @notice Fixed delegate-host CREATE; no caller-selected implementation or authority.
 library StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryDeploymentV1 {
@@ -24,6 +26,6 @@ library StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryDeploy
         O.Dependencies memory origin,
         D.Dependencies memory authority
     ) public returns (address) {
-        return address(new Child(Recipe.inventory(r, g), origin, authority));
+        return Constructor.deploy(Recipe.inventory(r, g), origin, authority);
     }
 }

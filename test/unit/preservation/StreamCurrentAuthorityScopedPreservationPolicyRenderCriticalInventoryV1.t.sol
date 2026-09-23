@@ -77,7 +77,24 @@ import {
     StreamFinalityScopeType
 } from "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryDeploymentV1 as InventoryDeployment
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPreservationPolicyPublicationInventoryDeploymentV1.sol";
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyPublicationBundleDeploymentV1 as BundleDeployment
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPreservationPolicyPublicationBundleDeploymentV1.sol";
+import {
+    StreamScopedPreservationPolicyPublicationGraphTypesV1 as Publication
+} from "../../../smart-contracts/interfaces/stream/finality/StreamScopedPreservationPolicyPublicationGraphTypesV1.sol";
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyBundleArchiveCoverageV1 as BundleHost
+} from "../../../smart-contracts/domains/preservation/StreamCurrentAuthorityScopedPreservationPolicyBundleArchiveCoverageV1.sol";
+import {
+    StreamScopedPreservationPolicyPublicationRecipeV1 as Recipe
+} from "../../../smart-contracts/domains/finality/StreamScopedPreservationPolicyPublicationRecipeV1.sol";
+
 interface ScopedPreservationAuthorityVm {
+    function getNonce(address) external view returns (uint64);
     function expectRevert(bytes4) external;
     function expectRevert(bytes calldata) external;
     function etch(address, bytes calldata) external;
@@ -412,6 +429,98 @@ contract StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1
         host.appendTokenPreservation(id);
         vm.expectRevert(T.InventoryIncomplete.selector);
         host.appendOriginRuntime(id);
+    }
+
+    function testLinkedReadsPreserveRawTupleAndExactIncompleteRevert() public {
+        Host host = new Host(config.originalAnchor, od, config.authority);
+        bytes32 id = host.beginInventory(context_.scope);
+        (bool ok, bytes memory result) =
+            address(host).staticcall(abi.encodeCall(IHost.sourceContext, (id)));
+        require(ok && keccak256(result) == keccak256(abi.encode(context_)), "raw context tuple");
+        (ok, result) = address(host).staticcall(abi.encodeCall(IHost.sourceContext, (bytes32(0))));
+        require(
+            !ok
+                && keccak256(result)
+                    == keccak256(abi.encodeWithSelector(T.InventoryIncomplete.selector)),
+            "missing raw context"
+        );
+        (ok, result) =
+            address(host).staticcall(abi.encodeCall(IHost.requireCurrent, (context_.scope)));
+        require(
+            !ok
+                && keccak256(result)
+                    == keccak256(abi.encodeWithSelector(T.InventoryIncomplete.selector)),
+            "incomplete raw evidence"
+        );
+    }
+
+    function testLinkedBeginKeepsPerHostStorageAndPlanDomain() public {
+        Host first = new Host(config.originalAnchor, od, config.authority);
+        Host second = new Host(config.originalAnchor, od, config.authority);
+        bytes32 firstId = first.beginInventory(context_.scope);
+        require(second.plan(firstId).progress.collectionId == 0, "separate storage");
+        bytes32 secondId = second.beginInventory(context_.scope);
+        require(firstId != secondId, "host-specific plan domain");
+        require(first.plan(secondId).progress.collectionId == 0, "no sibling state");
+        require(first.beginInventory(context_.scope) == firstId, "original remains idempotent");
+        require(second.beginInventory(context_.scope) == secondId, "sibling remains idempotent");
+    }
+
+    function testPublicationWorkersPreserveHostCreateAndProjectedDependencies() public {
+        Publication.Recipe memory r;
+        r.inventory = config.originalAnchor;
+        r.bundleReadGas = config.originalAnchor.readGas;
+        r.bundleArchiveGas = config.originalAnchor.sourceGas;
+        Publication.Graph memory g;
+        g.children[3] = config.originalAnchor.targets[5];
+        g.codeHashes[3] = config.originalAnchor.codeHashes[5];
+        g.children[4] = config.originalAnchor.targets[6];
+        g.codeHashes[4] = config.originalAnchor.codeHashes[6];
+        uint64 nonce = vm.getNonce(address(this));
+        Host inventory = Host(InventoryDeployment.deploy(r, g, od, config.authority));
+        require(address(inventory) == _nextCreate(nonce), "inventory creator remains host");
+        require(vm.getNonce(address(this)) == nonce + 1, "one inventory CREATE");
+        require(
+            keccak256(abi.encode(inventory.dependencies()))
+                == keccak256(abi.encode(Recipe.inventory(r, g))),
+            "inventory projection"
+        );
+        require(
+            keccak256(abi.encode(inventory.authorityDependencies()))
+                == keccak256(abi.encode(config.authority)),
+            "inventory authority"
+        );
+        require(
+            keccak256(abi.encode(inventory.originDependencies())) == keccak256(abi.encode(od)),
+            "inventory origins"
+        );
+        g.children[5] = address(inventory);
+        g.codeHashes[5] = address(inventory).codehash;
+        BundleHost bundle = BundleHost(BundleDeployment.deploy(r, g, od, config.authority));
+        require(address(bundle) == _nextCreate(nonce + 1), "bundle creator remains host");
+        require(vm.getNonce(address(this)) == nonce + 2, "one bundle CREATE");
+        require(
+            bundle.dependencyHash()
+                == keccak256(
+                    abi.encode(
+                        bundle.PROFILE(),
+                        bundle.INVENTORY_PROFILE(),
+                        Recipe.bundle(r, g),
+                        od,
+                        config.authority
+                    )
+                ),
+            "full bundle projection"
+        );
+    }
+
+    function _nextCreate(uint64 nonce) private view returns (address) {
+        require(nonce > 0 && nonce < 128, "fixture nonce range");
+        return address(
+            uint160(
+                uint256(keccak256(abi.encodePacked(hex"d694", address(this), bytes1(uint8(nonce)))))
+            )
+        );
     }
 
     function testUnpredictedSuccessorStalesWritesButRetainsAllHistoricalCoordinates() public {

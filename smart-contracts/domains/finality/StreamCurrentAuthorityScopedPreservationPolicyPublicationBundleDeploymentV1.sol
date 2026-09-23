@@ -9,12 +9,14 @@ import {
 import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
-import {
-    StreamCurrentAuthorityScopedPreservationPolicyBundleArchiveCoverageV1 as Child
-} from "../preservation/StreamCurrentAuthorityScopedPreservationPolicyBundleArchiveCoverageV1.sol";
+
 import {
     StreamScopedPreservationPolicyPublicationRecipeV1 as Recipe
 } from "./StreamScopedPreservationPolicyPublicationRecipeV1.sol";
+
+import {
+    StreamCurrentAuthorityScopedPreservationPolicyPublicationBundleConstructorV1 as Constructor
+} from "./StreamCurrentAuthorityScopedPreservationPolicyPublicationBundleConstructorV1.sol";
 
 /// @notice Fixed delegate-host CREATE with the preservation inventory profile explicitly bound.
 library StreamCurrentAuthorityScopedPreservationPolicyPublicationBundleDeploymentV1 {
@@ -24,6 +26,6 @@ library StreamCurrentAuthorityScopedPreservationPolicyPublicationBundleDeploymen
         O.Dependencies memory origin,
         D.Dependencies memory authority
     ) public returns (address) {
-        return address(new Child(Recipe.bundle(r, g), origin, authority));
+        return Constructor.deploy(Recipe.bundle(r, g), origin, authority);
     }
 }
