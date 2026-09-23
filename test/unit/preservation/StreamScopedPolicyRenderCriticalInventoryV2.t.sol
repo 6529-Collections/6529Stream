@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import {
+    StreamScopedPolicyPublicationGraphTypesV2 as InventoryPublication
+} from "../../../smart-contracts/interfaces/stream/finality/StreamScopedPolicyPublicationGraphTypesV2.sol";
+import {
+    StreamScopedPolicyPublicationInventoryDeploymentV2 as InventoryDeployment
+} from "../../../smart-contracts/domains/finality/StreamScopedPolicyPublicationInventoryDeploymentV2.sol";
+
 import { ScopedPolicyReferenceFixtureV2 } from "./StreamScopedPolicyReferencePublicationV2.t.sol";
 import {
     StreamScopedPolicyRenderCriticalTypesV2 as C
@@ -207,6 +214,137 @@ contract StreamScopedPolicyRenderCriticalInventoryV2Test is ScopedPolicyReferenc
     function _payload(uint64 ordinal) internal view returns (Content.Payload memory p) {
         uint256 token = scopedMembership.scopeTokenAt(inventoryC.scope, ordinal);
         p = Content.Payload(token, hex"89504e470d0a1a0a", bytes(router.tokenHTML(token)));
+    }
+
+    /// @dev Actual constructor/linked host reads; only the complete current-source read is
+    /// mocked here. This is not an all-stage inventory or publication-graph acceptance case.
+    function testLinkedInventoryReadsRetainRawContextAndExactIncompleteErrors() public {
+        _inventory(1, 2);
+        snapshotVm.mockCall(
+            address(Sources),
+            abi.encodeWithSelector(Sources.current.selector),
+            abi.encode(inventoryC)
+        );
+        Inventory host = new Inventory(inventoryD);
+        bytes32 key = host.beginInventory(inventoryC.scope);
+        (bool ok, bytes memory raw) =
+            address(host).staticcall(abi.encodeCall(InventoryInterface.sourceContext, (key)));
+        require(ok && keccak256(raw) == keccak256(abi.encode(inventoryC)), "raw context tuple");
+        require(
+            keccak256(abi.encode(host.sourceContext(key))) == keccak256(raw),
+            "typed and raw context agree"
+        );
+        (ok, raw) = address(host)
+            .staticcall(abi.encodeCall(InventoryInterface.sourceContext, (bytes32(0))));
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(I.InventoryIncomplete.selector)),
+            "missing context error"
+        );
+        (ok, raw) = address(host)
+            .staticcall(abi.encodeCall(InventoryInterface.requireCurrent, (inventoryC.scope)));
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(I.InventoryIncomplete.selector)),
+            "open plan cannot become current evidence"
+        );
+    }
+
+    function testPublicationInventoryCreateKeepsCallerProjectionAndIndependentHostStorage() public {
+        _inventory(1, 2);
+        snapshotVm.mockCall(
+            address(Sources),
+            abi.encodeWithSelector(Sources.current.selector),
+            abi.encode(inventoryC)
+        );
+        InventoryPublication.Recipe memory recipe;
+        recipe.inventory = inventoryD;
+        InventoryPublication.Graph memory graph;
+        // Deliberately different from recipe slots 5/6, with genuine runtime code hashes.
+        graph.children[3] = address(snapshotStore);
+        graph.codeHashes[3] = address(snapshotStore).codehash;
+        graph.children[4] = address(schemas);
+        graph.codeHashes[4] = address(schemas).codehash;
+        D.Dependencies memory expected = inventoryD;
+        expected.targets[5] = graph.children[3];
+        expected.codeHashes[5] = graph.codeHashes[3];
+        expected.targets[6] = graph.children[4];
+        expected.codeHashes[6] = graph.codeHashes[4];
+        bytes32 originalRecipe = keccak256(abi.encode(recipe));
+        uint64 nonce = createVm.getNonce(address(this));
+        Inventory first = Inventory(InventoryDeployment.deploy(recipe, graph));
+        require(
+            address(first) == createVm.computeCreateAddress(address(this), nonce)
+                && createVm.getNonce(address(this)) == nonce + 1,
+            "one CREATE by original host"
+        );
+        Inventory second = Inventory(InventoryDeployment.deploy(recipe, graph));
+        require(
+            address(second) == createVm.computeCreateAddress(address(this), uint256(nonce) + 1)
+                && createVm.getNonce(address(this)) == nonce + 2
+                && address(first) != address(second),
+            "same arguments still make a distinct next CREATE"
+        );
+        require(
+            keccak256(abi.encode(first.dependencies())) == keccak256(abi.encode(expected))
+                && first.dependencyHash() == keccak256(abi.encode(expected))
+                && second.dependencyHash() == first.dependencyHash()
+                && keccak256(abi.encode(recipe)) == originalRecipe,
+            "exact projected constructor arguments"
+        );
+        bytes32 firstId = first.beginInventory(inventoryC.scope);
+        bytes32 secondId = second.beginInventory(inventoryC.scope);
+        require(
+            firstId
+                    == keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_SCOPED_POLICY_RENDER_CRITICAL_PLAN_V2"),
+                            block.chainid,
+                            address(first),
+                            first.dependencyHash(),
+                            inventoryC
+                        )
+                    ) && firstId != secondId,
+            "original per-host plan domain"
+        );
+        require(
+            first.plan(secondId).progress.collectionId == 0
+                && second.plan(firstId).progress.collectionId == 0,
+            "linked workers do not share plan storage"
+        );
+        bytes32 before_ = keccak256(abi.encode(first.plan(firstId), first.sourceContext(firstId)));
+        require(
+            first.beginInventory(inventoryC.scope) == firstId, "duplicate begin returns original"
+        );
+        require(
+            before_ == keccak256(abi.encode(first.plan(firstId), first.sourceContext(firstId))),
+            "duplicate begin preserves stored context and progress"
+        );
+    }
+
+    function testPublicationInventoryConstructorRefusalPreservesCreateNonceAndRetry() public {
+        _inventory(1, 2);
+        InventoryPublication.Recipe memory recipe;
+        recipe.inventory = inventoryD;
+        InventoryPublication.Graph memory graph;
+        graph.children[3] = inventoryD.targets[5];
+        graph.codeHashes[3] = inventoryD.codeHashes[5];
+        graph.children[4] = inventoryD.targets[6];
+        graph.codeHashes[4] = inventoryD.codeHashes[6];
+        uint64 nonce = createVm.getNonce(address(this));
+        recipe.inventory.chainId = block.chainid + 1;
+        vm.expectRevert(abi.encodeWithSelector(I.InventorySourceChanged.selector));
+        InventoryDeployment.deploy(recipe, graph);
+        require(createVm.getNonce(address(this)) == nonce, "failed constructor rolls back CREATE");
+        recipe.inventory.chainId = block.chainid;
+        address deployed = InventoryDeployment.deploy(recipe, graph);
+        require(
+            deployed == createVm.computeCreateAddress(address(this), nonce)
+                && createVm.getNonce(address(this)) == nonce + 1,
+            "healthy retry keeps original creator and nonce"
+        );
     }
 
     function testScopedPolicyInventoryNativeRowsRetainExactRootFactoryAndCompletePolicies() public {

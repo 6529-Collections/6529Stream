@@ -76,9 +76,43 @@ import {
     CurrentInventorySelectorFixture as Selector
 } from "./StreamCurrentAuthorityInventorySelection.t.sol";
 
+import {
+    StreamCurrentAuthorityPreservationPolicyInventoryViewsV1 as Views
+} from "../../../smart-contracts/domains/preservation/StreamCurrentAuthorityPreservationPolicyInventoryViewsV1.sol";
+import {
+    StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 as Host
+} from "../../../smart-contracts/domains/preservation/StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1.sol";
+import {
+    StreamCurrentAuthorityScopedPolicyRenderCriticalInventoryV2 as ScopedHost
+} from "../../../smart-contracts/domains/preservation/StreamCurrentAuthorityScopedPolicyRenderCriticalInventoryV2.sol";
+import {
+    StreamMultiOriginScopedPolicyRenderCriticalSourceReadsV2 as ScopedSource
+} from "../../../smart-contracts/domains/preservation/StreamMultiOriginScopedPolicyRenderCriticalSourceReadsV2.sol";
+import {
+    StreamPreservationPolicyPublicationGraphTypesV1 as Publication
+} from "../../../smart-contracts/interfaces/stream/finality/StreamPreservationPolicyPublicationGraphTypesV1.sol";
+import {
+    StreamScopedPolicyPublicationGraphTypesV2 as ScopedPublication
+} from "../../../smart-contracts/interfaces/stream/finality/StreamScopedPolicyPublicationGraphTypesV2.sol";
+import {
+    StreamCurrentAuthorityPreservationPolicyPublicationInventoryDeploymentV1 as Deployment
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityPreservationPolicyPublicationInventoryDeploymentV1.sol";
+import {
+    StreamCurrentAuthorityScopedPolicyPublicationInventoryDeploymentV2 as ScopedDeployment
+} from "../../../smart-contracts/domains/finality/StreamCurrentAuthorityScopedPolicyPublicationInventoryDeploymentV2.sol";
+import {
+    StreamScopedPolicyRenderCriticalTypesV2 as Scoped
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamScopedPolicyRenderCriticalTypesV2.sol";
+import {
+    StreamFinalityScope,
+    StreamFinalityScopeType
+} from "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+
 interface PreservationAuthorityInventoryVm {
     function mockCall(address, bytes calldata, bytes calldata) external;
     function expectRevert(bytes4) external;
+    function getNonce(address) external view returns (uint64);
+    function computeCreateAddress(address, uint256) external pure returns (address);
 }
 
 /// @dev Explicitly seeds the preceding source/record/definition admission boundary. Real
@@ -88,6 +122,7 @@ contract PreservationAuthorityInventoryHarness {
     mapping(bytes32 => State.State) private _states;
     mapping(bytes32 => Authority.State) private _authorities;
     Origins.State private _origins;
+    Authority.Config private _viewConfig;
     bytes32 public constant DEPENDENCIES = keccak256("test-only dependency identity");
     bytes32 public constant LINEAGE = keccak256("explicit lineage boundary");
 
@@ -95,6 +130,7 @@ contract PreservationAuthorityInventoryHarness {
         external
         returns (bytes32 id)
     {
+        _viewConfig = config;
         D.Capture memory captured = Authority.resolve(config);
         id = Guard.planId(DEPENDENCIES, captured, c, LINEAGE);
         Authority.remember(_authorities[id], config, captured);
@@ -148,6 +184,21 @@ contract PreservationAuthorityInventoryHarness {
 
     function requireCurrent(bytes32 id) external view {
         Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+    }
+
+    function returnedCurrent(bytes32 id) external view returns (C.Context memory) {
+        return Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+    }
+
+    function checkCurrent(bytes32 id) external view {
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
+    }
+
+    function currentEvidence(uint256 collectionId) external view returns (T.Evidence memory) {
+        bytes memory encoded = Views.requireCurrent(
+            _states, _authorities, _viewConfig, DEPENDENCIES, _origins, collectionId
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function capture(bytes32 id) external view returns (D.Capture memory) {
@@ -424,6 +475,327 @@ contract StreamCurrentAuthorityPreservationPolicyInventoryV1Test {
         _source(context);
         h.append(id, 0);
         require(h.progress(id).phase == 1);
+    }
+
+    function testVoidGuardPreservesCompleteContextValidationAndMalformedReturnRefusal() public {
+        bytes32 before_ = keccak256(abi.encode(h.plan(id), h.capture(id), h.history(id)));
+        (bool ok, bytes memory raw) = address(h)
+            .staticcall(abi.encodeCall(PreservationAuthorityInventoryHarness.returnedCurrent, (id)));
+        require(ok && keccak256(raw) == keccak256(abi.encode(context)), "original full context");
+        (ok, raw) = address(h)
+            .staticcall(abi.encodeCall(PreservationAuthorityInventoryHarness.checkCurrent, (id)));
+        require(ok && raw.length == 0, "void guard returns no context envelope");
+        C.Context memory changed = context;
+        changed.source.rootBinding.preservationOutputProfile = keccak256("different unused field");
+        _source(changed);
+        _sameGuardFailure(abi.encodeWithSelector(T.InventorySourceChanged.selector));
+        vm.mockCall(address(Source), abi.encodeWithSelector(Source.current.selector), hex"01");
+        (bool returnedOk, bytes memory returnedError) = address(h)
+            .staticcall(abi.encodeCall(PreservationAuthorityInventoryHarness.returnedCurrent, (id)));
+        (bool voidOk, bytes memory voidError) = address(h)
+            .staticcall(abi.encodeCall(PreservationAuthorityInventoryHarness.checkCurrent, (id)));
+        require(
+            !returnedOk && !voidOk && keccak256(returnedError) == keccak256(voidError),
+            "void guard still performs full malformed source decoding"
+        );
+        _source(context);
+        h.checkCurrent(id);
+        require(
+            before_ == keccak256(abi.encode(h.plan(id), h.capture(id), h.history(id))),
+            "success and refusals are read-only"
+        );
+    }
+
+    function testVoidGuardKeepsAuthorityBeforeSourceAndExactLineageChecks() public {
+        vm.mockCall(
+            address(Source),
+            abi.encodeWithSelector(Source.current.selector),
+            abi.encode(context, selected, original, keccak256("wrong lineage"))
+        );
+        _sameGuardFailure(abi.encodeWithSelector(T.InventorySourceChanged.selector));
+        _select(_origin(config.originalAnchor.targets[0]), keccak256("complete C"));
+        // Both authority and source are now stale: the original authority error must win.
+        _sameGuardFailure(abi.encodeWithSelector(A.CurrentAuthorityChanged.selector));
+        _select(selected, keccak256("complete B"));
+        _source(context);
+        h.checkCurrent(id);
+        require(
+            keccak256(abi.encode(h.returnedCurrent(id))) == keccak256(abi.encode(context)),
+            "restored original source and authority"
+        );
+    }
+
+    function testCompletedLinkedViewReturnsExactTypedEvidenceAndRejectsStaleAuthority() public {
+        _complete();
+        T.Evidence memory expected = h.seal(id);
+        (bool ok, bytes memory raw) = address(h)
+            .staticcall(
+                abi.encodeCall(PreservationAuthorityInventoryHarness.currentEvidence, (uint256(77)))
+            );
+        require(ok && keccak256(raw) == keccak256(abi.encode(expected)), "raw evidence tuple");
+        require(
+            keccak256(abi.encode(h.currentEvidence(77))) == keccak256(raw),
+            "typed evidence has no extra bytes wrapper"
+        );
+        _select(_origin(config.originalAnchor.targets[0]), keccak256("complete C"));
+        (ok, raw) = address(h)
+            .staticcall(
+                abi.encodeCall(PreservationAuthorityInventoryHarness.currentEvidence, (uint256(77)))
+            );
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(T.InventoryIncomplete.selector)),
+            "new authority cannot return old completion"
+        );
+        require(
+            keccak256(abi.encode(h.history(id))) == keccak256(abi.encode(expected)),
+            "history retained"
+        );
+        _select(selected, keccak256("complete B"));
+        require(
+            keccak256(abi.encode(h.currentEvidence(77))) == keccak256(abi.encode(expected)),
+            "restore"
+        );
+    }
+
+    /// @dev Real linked CREATE and host storage with the fixture's explicit typed source boundary.
+    function testPreservationPublicationCreatePreservesArgumentsHostDomainAndRawReads() public {
+        Publication.Recipe memory recipe;
+        recipe.inventory = config.originalAnchor;
+        Publication.Graph memory graph;
+        graph.children[3] = config.originalAnchor.targets[2];
+        graph.codeHashes[3] = config.originalAnchor.codeHashes[2];
+        graph.children[4] = config.originalAnchor.targets[3];
+        graph.codeHashes[4] = config.originalAnchor.codeHashes[3];
+        S.Dependencies memory expected = config.originalAnchor;
+        expected.targets[5] = graph.children[3];
+        expected.codeHashes[5] = graph.codeHashes[3];
+        expected.targets[6] = graph.children[4];
+        expected.codeHashes[6] = graph.codeHashes[4];
+        O.Dependencies memory od = _constructorOrigin();
+        bytes32 recipeBefore = keccak256(abi.encode(recipe));
+        uint64 nonce = vm.getNonce(address(this));
+        Host first = Host(Deployment.deploy(recipe, graph, od, config.authority));
+        Host second = Host(Deployment.deploy(recipe, graph, od, config.authority));
+        _twoCreates(address(first), address(second), nonce);
+        require(
+            keccak256(
+                    abi.encode(
+                        first.dependencies(),
+                        first.originDependencies(),
+                        first.authorityDependencies()
+                    )
+                ) == keccak256(abi.encode(expected, od, config.authority))
+                && first.dependencyHash()
+                    == keccak256(
+                        abi.encode(
+                            D.PRESERVATION_POLICY_INVENTORY_PROFILE, expected, od, config.authority
+                        )
+                    ) && second.dependencyHash() == first.dependencyHash()
+                && keccak256(abi.encode(recipe)) == recipeBefore,
+            "exact projected constructor arguments"
+        );
+        bytes32 firstId = first.beginInventory(77);
+        bytes32 secondId = second.beginInventory(77);
+        require(
+            firstId
+                    == keccak256(
+                        abi.encode(
+                            D.PRESERVATION_POLICY_INVENTORY_PROFILE,
+                            block.chainid,
+                            address(first),
+                            first.dependencyHash(),
+                            D.contextHash(
+                                first.authoritySelection(firstId),
+                                keccak256(abi.encode(context)),
+                                h.LINEAGE()
+                            )
+                        )
+                    ) && firstId != secondId && first.plan(secondId).collectionId == 0
+                && second.plan(firstId).collectionId == 0,
+            "original host domain and isolated storage"
+        );
+        bytes32 before_ = keccak256(abi.encode(first.plan(firstId), first.sourceContext(firstId)));
+        require(first.beginInventory(77) == firstId, "duplicate begin");
+        require(
+            before_ == keccak256(abi.encode(first.plan(firstId), first.sourceContext(firstId))),
+            "no reset"
+        );
+        _rawRead(
+            address(first), abi.encodeCall(Host.sourceContext, (firstId)), abi.encode(context), true
+        );
+        _rawRead(
+            address(first),
+            abi.encodeCall(Host.sourceContext, (bytes32(0))),
+            abi.encodeWithSelector(T.InventoryIncomplete.selector),
+            false
+        );
+        _rawRead(
+            address(first),
+            abi.encodeCall(Host.requireCurrent, (uint256(77))),
+            abi.encodeWithSelector(T.InventoryIncomplete.selector),
+            false
+        );
+    }
+
+    function testScopedPublicationCreatePreservesArgumentsHostDomainAndRawReads() public {
+        ScopedPublication.Recipe memory recipe;
+        recipe.inventory = config.originalAnchor;
+        ScopedPublication.Graph memory graph;
+        graph.children[3] = config.originalAnchor.targets[2];
+        graph.codeHashes[3] = config.originalAnchor.codeHashes[2];
+        graph.children[4] = config.originalAnchor.targets[3];
+        graph.codeHashes[4] = config.originalAnchor.codeHashes[3];
+        S.Dependencies memory expected = config.originalAnchor;
+        expected.targets[5] = graph.children[3];
+        expected.codeHashes[5] = graph.codeHashes[3];
+        expected.targets[6] = graph.children[4];
+        expected.codeHashes[6] = graph.codeHashes[4];
+        O.Dependencies memory od = _constructorOrigin();
+        Scoped.Context memory c;
+        c.scope = StreamFinalityScope(StreamFinalityScopeType.TOKEN, 77, 9, 0);
+        c.subject = context.records.subject;
+        c.artistId = context.records.artistId;
+        c.rootRecordHash = context.records.rootRecordHash;
+        c.checkpointHash = context.records.checkpointHash;
+        c.selectionHash = context.source.content.selectionHash;
+        c.tokenCount = 1;
+        vm.mockCall(
+            address(ScopedSource),
+            abi.encodeWithSelector(ScopedSource.current.selector),
+            abi.encode(c, selected, original, h.LINEAGE())
+        );
+        bytes32 recipeBefore = keccak256(abi.encode(recipe));
+        uint64 nonce = vm.getNonce(address(this));
+        ScopedHost first = ScopedHost(ScopedDeployment.deploy(recipe, graph, od, config.authority));
+        ScopedHost second = ScopedHost(ScopedDeployment.deploy(recipe, graph, od, config.authority));
+        _twoCreates(address(first), address(second), nonce);
+        require(
+            keccak256(
+                    abi.encode(
+                        first.dependencies(),
+                        first.originDependencies(),
+                        first.authorityDependencies()
+                    )
+                ) == keccak256(abi.encode(expected, od, config.authority))
+                && first.dependencyHash()
+                    == keccak256(
+                        abi.encode(
+                            D.SCOPED_POLICY_INVENTORY_PROFILE, expected, od, config.authority
+                        )
+                    ) && second.dependencyHash() == first.dependencyHash()
+                && keccak256(abi.encode(recipe)) == recipeBefore,
+            "exact scoped projected constructor arguments"
+        );
+        bytes32 firstId = first.beginInventory(c.scope);
+        bytes32 secondId = second.beginInventory(c.scope);
+        require(
+            firstId
+                    == keccak256(
+                        abi.encode(
+                            D.SCOPED_POLICY_INVENTORY_PROFILE,
+                            block.chainid,
+                            address(first),
+                            first.dependencyHash(),
+                            D.contextHash(
+                                first.authoritySelection(firstId),
+                                keccak256(abi.encode(c)),
+                                h.LINEAGE()
+                            )
+                        )
+                    ) && firstId != secondId && first.plan(secondId).progress.collectionId == 0
+                && second.plan(firstId).progress.collectionId == 0,
+            "scoped original host domain and isolated storage"
+        );
+        bytes32 before_ = keccak256(abi.encode(first.plan(firstId), first.sourceContext(firstId)));
+        require(first.beginInventory(c.scope) == firstId, "duplicate scoped begin");
+        require(
+            before_ == keccak256(abi.encode(first.plan(firstId), first.sourceContext(firstId))),
+            "no scoped reset"
+        );
+        _rawRead(
+            address(first), abi.encodeCall(ScopedHost.sourceContext, (firstId)), abi.encode(c), true
+        );
+        _rawRead(
+            address(first),
+            abi.encodeCall(ScopedHost.sourceContext, (bytes32(0))),
+            abi.encodeWithSelector(T.InventoryIncomplete.selector),
+            false
+        );
+        _rawRead(
+            address(first),
+            abi.encodeCall(ScopedHost.requireCurrent, (c.scope)),
+            abi.encodeWithSelector(T.InventoryIncomplete.selector),
+            false
+        );
+    }
+
+    function testCurrentPublicationConstructorRefusalsRetainNonceAndExactErrors() public {
+        Publication.Recipe memory recipe;
+        recipe.inventory = config.originalAnchor;
+        Publication.Graph memory graph;
+        graph.children[3] = recipe.inventory.targets[5];
+        graph.codeHashes[3] = recipe.inventory.codeHashes[5];
+        graph.children[4] = recipe.inventory.targets[6];
+        graph.codeHashes[4] = recipe.inventory.codeHashes[6];
+        ScopedPublication.Recipe memory scopedRecipe;
+        scopedRecipe.inventory = config.originalAnchor;
+        ScopedPublication.Graph memory scopedGraph;
+        scopedGraph.children[3] = graph.children[3];
+        scopedGraph.codeHashes[3] = graph.codeHashes[3];
+        scopedGraph.children[4] = graph.children[4];
+        scopedGraph.codeHashes[4] = graph.codeHashes[4];
+        O.Dependencies memory od = _constructorOrigin();
+        uint64 nonce = vm.getNonce(address(this));
+        od.profile = keccak256("not the original archive origin profile");
+        vm.expectRevert(O.InvalidArchiveOrigin.selector);
+        Deployment.deploy(recipe, graph, od, config.authority);
+        require(vm.getNonce(address(this)) == nonce, "V1 failed CREATE rollback");
+        vm.expectRevert(O.InvalidArchiveOrigin.selector);
+        ScopedDeployment.deploy(scopedRecipe, scopedGraph, od, config.authority);
+        require(vm.getNonce(address(this)) == nonce, "V2 failed CREATE rollback");
+        od.profile = O.PROFILE;
+        address first = Deployment.deploy(recipe, graph, od, config.authority);
+        address second = ScopedDeployment.deploy(scopedRecipe, scopedGraph, od, config.authority);
+        _twoCreates(first, second, nonce);
+    }
+
+    function _sameGuardFailure(bytes memory expected) private view {
+        (bool returnedOk, bytes memory returnedError) = address(h)
+            .staticcall(abi.encodeCall(PreservationAuthorityInventoryHarness.returnedCurrent, (id)));
+        (bool voidOk, bytes memory voidError) = address(h)
+            .staticcall(abi.encodeCall(PreservationAuthorityInventoryHarness.checkCurrent, (id)));
+        require(
+            !returnedOk && !voidOk && keccak256(returnedError) == keccak256(expected)
+                && keccak256(voidError) == keccak256(expected),
+            "exact original and void guard errors"
+        );
+    }
+
+    function _constructorOrigin() private returns (O.Dependencies memory) {
+        address worker = address(new Runtime());
+        return O.Dependencies(worker, worker.codehash, 500000, O.PROFILE);
+    }
+
+    function _twoCreates(address first, address second, uint64 nonce) private view {
+        require(
+            first == vm.computeCreateAddress(address(this), nonce)
+                && second == vm.computeCreateAddress(address(this), uint256(nonce) + 1)
+                && first != second && vm.getNonce(address(this)) == nonce + 2,
+            "original caller, one CREATE each, original order"
+        );
+    }
+
+    function _rawRead(address target, bytes memory input, bytes memory expected, bool success)
+        private
+        view
+    {
+        (bool ok, bytes memory raw) = target.staticcall(input);
+        require(
+            ok == success && keccak256(raw) == keccak256(expected),
+            "exact raw return or revert bytes"
+        );
     }
 
     function _complete() private {

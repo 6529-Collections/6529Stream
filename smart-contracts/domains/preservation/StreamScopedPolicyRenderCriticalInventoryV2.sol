@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamScopedPolicyInventoryFinishV2 as Finish
+} from "./StreamScopedPolicyInventoryFinishV2.sol";
+import {
+    StreamScopedPolicyInventoryViewsV2 as Views
+} from "./StreamScopedPolicyInventoryViewsV2.sol";
+import {
+    StreamScopedPolicyInventoryBeginV2 as Begin
+} from "./StreamScopedPolicyInventoryBeginV2.sol";
+import {
     IStreamScopedPolicyRenderCriticalInventoryV2
 } from "../../interfaces/stream/preservation/IStreamScopedPolicyRenderCriticalInventoryV2.sol";
 import {
@@ -28,15 +37,11 @@ import {
 import {
     StreamConservationRecordTypes
 } from "../../interfaces/stream/metadata/StreamConservationRecordTypes.sol";
-import {
-    IStreamConservationRecordSelection as Conservation
-} from "../../interfaces/stream/metadata/IStreamConservationRecordSelection.sol";
+
 import {
     StreamScopedPolicyRenderCriticalStateV2 as State
 } from "./StreamScopedPolicyRenderCriticalStateV2.sol";
-import {
-    StreamScopedPolicyRenderCriticalSourceReadsV2 as Sources
-} from "./StreamScopedPolicyRenderCriticalSourceReadsV2.sol";
+
 import {
     StreamScopedPolicyRenderCriticalNativeReadsV2 as Native
 } from "./StreamScopedPolicyRenderCriticalNativeReadsV2.sol";
@@ -141,19 +146,7 @@ contract StreamScopedPolicyRenderCriticalInventoryV2 is
     }
 
     function beginInventory(StreamFinalityScope calldata scope) external returns (bytes32 id) {
-        Scoped.Context memory c = Sources.current(_state.dependencies, scope);
-        id = State.idFor(_state.dependencyHash, c);
-        if (_state.plans[id].progress.collectionId != 0) return id;
-        _state.contexts[id] = c;
-        Scoped.Plan storage plan_ = _state.plans[id];
-        plan_.scope = scope;
-        T.Plan storage p = plan_.progress;
-        p.collectionId = scope.collectionId;
-        p.subject = c.subject;
-        p.artistId = c.artistId;
-        p.sourceContextHash = keccak256(abi.encode(c));
-        p.tokenCount = c.tokenCount;
-        emit ScopedInventoryStarted(2, id, scope, p.sourceContextHash);
+        return Begin.beginInventory(_state, scope);
     }
 
     function appendNative(bytes32 id, uint64 maximum) external {
@@ -249,28 +242,7 @@ contract StreamScopedPolicyRenderCriticalInventoryV2 is
     }
 
     function sealInventory(bytes32 id) external returns (Scoped.Evidence memory evidence) {
-        State.stage(_state, id, 8);
-        T.Plan storage p = _state.plans[id].progress;
-        Scoped.TokenProgress storage token = _state.tokenProgress[id];
-        if (p.nextToken != p.tokenCount || token.phase != 0 || token.row != 0 || token.count != 0) {
-            revert T.InventoryIncomplete();
-        }
-        Definitions.requireDefinitions(_state, id, false);
-        evidence = _evidence(id);
-        evidence.inventory.renderCriticalEvidenceHash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SCOPED_POLICY_RENDER_CRITICAL_EVIDENCE_V2"),
-                block.chainid,
-                address(this),
-                _state.dependencyHash,
-                evidence
-            )
-        );
-        p.renderCriticalEvidenceHash = evidence.inventory.renderCriticalEvidenceHash;
-        _state.completed[id] = evidence;
-        emit ScopedInventoryCompleted(
-            2, id, evidence.inventory.renderCriticalEvidenceHash, evidence
-        );
+        return Finish.sealInventory(_state, id);
     }
 
     function plan(bytes32 id) external view returns (Scoped.Plan memory) {
@@ -282,8 +254,8 @@ contract StreamScopedPolicyRenderCriticalInventoryV2 is
     }
 
     function sourceContext(bytes32 id) external view returns (Scoped.Context memory) {
-        if (_state.plans[id].progress.collectionId == 0) revert T.InventoryIncomplete();
-        return _state.contexts[id];
+        bytes memory encoded = Views.sourceContext(_state, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function inventorySegment(bytes32 id, uint64 index) external view returns (T.Segment memory) {
@@ -301,50 +273,11 @@ contract StreamScopedPolicyRenderCriticalInventoryV2 is
         view
         returns (Scoped.Evidence memory e)
     {
-        Scoped.Context memory c = Sources.current(_state.dependencies, scope);
-        bytes32 id = State.idFor(_state.dependencyHash, c);
-        e = _state.completed[id];
-        if (e.inventory.renderCriticalEvidenceHash == 0) revert T.InventoryIncomplete();
-        Definitions.requireDefinitions(_state, id, false);
+        bytes memory encoded = Views.requireCurrent(_state, scope);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function requireFullDefinitionBytes(bytes32 id) external view {
-        if (_state.completed[id].inventory.renderCriticalEvidenceHash == 0) {
-            revert T.InventoryIncomplete();
-        }
-        State.requireCurrent(_state, id);
-        Definitions.requireDefinitions(_state, id, true);
-    }
-
-    function _evidence(bytes32 id) private view returns (Scoped.Evidence memory result) {
-        Scoped.Context storage c = _state.contexts[id];
-        T.Plan storage p = _state.plans[id].progress;
-        result.scope = c.scope;
-        T.Evidence memory e;
-        e.planId = id;
-        e.collectionId = c.scope.collectionId;
-        e.scopeSubject = c.subject;
-        e.artistId = c.artistId;
-        e.originals = T.OriginalInputs(
-            c.rootRecordHash,
-            c.snapshot.recordHash,
-            c.referenceRender.observation.recordHash,
-            c.conservation.record.kind == Conservation.RecordKind.INTENT
-                ? c.conservation.record.recordHash
-                : bytes32(0),
-            c.conservation.record.kind == Conservation.RecordKind.INTENT_WAIVER
-                ? c.conservation.record.recordHash
-                : bytes32(0),
-            c.interviewEvidenceHash,
-            c.descriptions.rightsStatementRecordHash,
-            c.descriptions.workDescriptionRecordHash
-        );
-        e.sourceContextHash = p.sourceContextHash;
-        e.tokenInventoryHash = c.tokenInventoryHash;
-        e.tokenCount = c.tokenCount;
-        e.segmentCount = p.segmentCount;
-        e.itemCount = p.itemCount;
-        e.segmentChainHash = p.segmentChainHash;
-        result.inventory = e;
+        Views.requireFullDefinitionBytes(_state, id);
     }
 }

@@ -3,9 +3,7 @@ pragma solidity ^0.8.19;
 import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
-import {
-    IStreamCurrentAuthorityInventory
-} from "../../interfaces/stream/preservation/IStreamCurrentAuthorityInventory.sol";
+
 import {
     StreamCurrentAuthorityInventorySelection as Authority
 } from "./StreamCurrentAuthorityInventorySelection.sol";
@@ -56,5 +54,15 @@ library StreamCurrentAuthorityPreservationPolicyInventoryGuardV1 {
                 || D.contextHash(authority.capture, keccak256(abi.encode(c)), lineageHash)
                     != s.records.plans[id].sourceContextHash
         ) revert T.InventorySourceChanged();
+    }
+
+    /// @notice Validate currentness without returning the large context to mutating callers.
+    function checkCurrent(
+        State.State storage s,
+        Origins.State storage origins,
+        Authority.State storage authority,
+        bytes32 id
+    ) public view {
+        requireCurrent(s, origins, authority, id);
     }
 }

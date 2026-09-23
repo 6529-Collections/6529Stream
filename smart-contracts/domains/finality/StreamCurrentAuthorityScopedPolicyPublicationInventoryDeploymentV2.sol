@@ -10,8 +10,8 @@ import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 import {
-    StreamCurrentAuthorityScopedPolicyRenderCriticalInventoryV2 as Child
-} from "../preservation/StreamCurrentAuthorityScopedPolicyRenderCriticalInventoryV2.sol";
+    StreamCurrentAuthorityScopedPolicyPublicationInventoryConstructorV2 as Constructor
+} from "./StreamCurrentAuthorityScopedPolicyPublicationInventoryConstructorV2.sol";
 import {
     StreamScopedPolicyPublicationRecipeV2 as Recipe
 } from "./StreamScopedPolicyPublicationRecipeV2.sol";
@@ -24,6 +24,6 @@ library StreamCurrentAuthorityScopedPolicyPublicationInventoryDeploymentV2 {
         O.Dependencies memory origin,
         D.Dependencies memory authority
     ) public returns (address) {
-        return address(new Child(Recipe.inventory(r, g), origin, authority));
+        return Constructor.deploy(Recipe.inventory(r, g), origin, authority);
     }
 }

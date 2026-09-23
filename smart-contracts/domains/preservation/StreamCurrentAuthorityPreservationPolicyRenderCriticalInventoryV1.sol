@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamCurrentAuthorityPreservationPolicyInventoryRootStageV1 as RootStage
+} from "./StreamCurrentAuthorityPreservationPolicyInventoryRootStageV1.sol";
+import {
+    StreamCurrentAuthorityPreservationPolicyInventoryViewsV1 as Views
+} from "./StreamCurrentAuthorityPreservationPolicyInventoryViewsV1.sol";
+import {
+    StreamCurrentAuthorityPreservationPolicyInventoryBeginV1 as Begin
+} from "./StreamCurrentAuthorityPreservationPolicyInventoryBeginV1.sol";
+import {
     StreamPreservationTokenProducerProfilesV1 as Family
 } from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
-import {
-    StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1 as OriginSources
-} from "./StreamCurrentAuthorityPreservationPolicyRenderCriticalSourceReadsV1.sol";
+
 import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
@@ -26,9 +33,7 @@ import {
 import {
     StreamMultiOriginInventoryCalls as OriginCalls
 } from "./StreamMultiOriginInventoryCalls.sol";
-import {
-    StreamMultiOriginPreservationPolicyRootAuthorizationV1 as RootCalls
-} from "./StreamMultiOriginPreservationPolicyRootAuthorizationV1.sol";
+
 import {
     IStreamArtistArchiveOriginInventory
 } from "../../interfaces/stream/preservation/IStreamArtistArchiveOriginInventory.sol";
@@ -196,37 +201,18 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
     }
 
     function beginInventory(uint256 collectionId) external returns (bytes32 id) {
-        D.Capture memory captured = Authority.resolve(_config);
-        (
-            C.Context memory c,
-            O.Origin memory current,
-            O.Origin memory presented,
-            bytes32 lineageHash
-        ) = OriginSources.current(captured.dependencies, _origins.dependencies, collectionId);
-        id = Guard.planId(_dependencyHash, captured, c, lineageHash);
-        if (_states[id].records.plans[id].collectionId != 0) return id;
-        Authority.remember(_authorities[id], _config, captured);
-        _states[id].records.dependencies = captured.dependencies;
-        _states[id].records.dependencyHash = _dependencyHash;
-        Origins.initialize(_origins, id, current, presented, lineageHash);
-        _states[id].contexts[id] = c;
-        _states[id].records.contexts[id] = c.records;
-        T.Plan storage p = _states[id].records.plans[id];
-        p.collectionId = collectionId;
-        p.subject = c.records.subject;
-        p.artistId = c.records.artistId;
-        p.sourceContextHash = D.contextHash(captured, keccak256(abi.encode(c)), lineageHash);
-        p.tokenCount = c.records.tokenCount;
-        emit InventoryStarted(id, collectionId, p.sourceContextHash);
+        return Begin.beginInventory(
+            _states, _authorities, _config, _dependencyHash, _origins, collectionId
+        );
     }
 
     function appendNative(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         OriginalsV2.appendNative(_states[id], id);
     }
 
     function appendReference(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         OriginalsV2.appendReference(_states[id], id);
     }
 
@@ -236,12 +222,12 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Common.appendWork(_states[id], _origins, msg.data);
     }
 
     function appendRights(bytes32 id, StreamRightsRecordTypes.Statement calldata) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Common.appendRights(_states[id], msg.data);
     }
 
@@ -251,7 +237,7 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Common.appendIntent(_states[id], _origins, msg.data);
     }
 
@@ -261,7 +247,7 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Common.appendIntentWaiver(_states[id], _origins, msg.data);
     }
 
@@ -271,12 +257,12 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
         address,
         O.ReceiptWitness calldata
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Common.appendInterview(_states[id], _origins, msg.data);
     }
 
     function appendInterviewWaiver(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Common.appendInterviewWaiver(_states[id], id);
     }
 
@@ -287,67 +273,45 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
         Aggregate.Aggregate calldata originalAggregate,
         O.ReceiptWitness calldata receipt
     ) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        State.stage(_states[id], id, 6);
-        T.Item[] memory rows = new T.Item[](1);
-        O.RecordOrigin memory original;
-        (rows[0], original) = RootCalls.contentItem(
-            _states[id].records.dependencies,
-            _states[id].contexts[id],
-            actor,
-            observedAt,
-            originalAggregate,
-            _states[id].records.plans[id].sourceContextHash,
-            receipt
+        RootStage.appendRootAuthorization(
+            _states, _origins, _authorities, id, actor, observedAt, originalAggregate, receipt
         );
-        Origins.remember(
-            _origins,
-            id,
-            _states[id].records.plans[id].sourceContextHash,
-            rows[0],
-            original,
-            bytes32(0),
-            actor,
-            keccak256("ORIGINAL_PRESERVATION_POLICY_CONTENT_ROOT_AUTHORIZATION_V1")
-        );
-        State.append(_states[id], id, rows, _states[id].contexts[id].records.rootRecordHash);
-        _states[id].records.plans[id].completedStages = 7;
     }
 
     function appendDefinition(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         StreamPreservationPolicyRenderCriticalDefinitionStagesV1.appendDefinition(
             _states[id], id, Family.FAMILY_PROFILE
         );
     }
 
     function appendToken(bytes32 id, Content.Payload calldata payload) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Tokens.appendOutput(_states[id], id, payload);
     }
 
     function appendScript(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Tokens.appendScript(_states[id], id, false);
     }
 
     function appendLibrary(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Tokens.appendScript(_states[id], id, true);
     }
 
     function appendRenderer(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Tokens.appendRenderer(_states[id], id);
     }
 
     function appendCurrentProfile(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Tokens.appendProfile(_states[id], id);
     }
 
     function appendTokenPreservation(bytes32 id) external {
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         Tokens.appendPreservation(_states[id], id, true);
     }
 
@@ -396,28 +360,15 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
         override
         returns (T.Evidence memory result)
     {
-        D.Capture memory captured = Authority.resolve(_config);
-        (C.Context memory c,,, bytes32 lineageHash) =
-            OriginSources.current(captured.dependencies, _origins.dependencies, collectionId);
-        bytes32 id = Guard.planId(_dependencyHash, captured, c, lineageHash);
-        result = _states[id].records.completed[id];
-        if (result.renderCriticalEvidenceHash == 0) revert T.InventoryIncomplete();
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        Origins.requirePins(_origins, id);
-        StreamPreservationPolicyRenderCriticalDefinitionStagesV1.requireDefinitions(
-            _states[id], id, false
+        bytes memory encoded = Views.requireCurrent(
+            _states, _authorities, _config, _dependencyHash, _origins, collectionId
         );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @notice Stronger diagnostic reconstructing all full bytes, including artificial code edits.
     function requireFullDefinitionBytes(bytes32 id) external view {
-        if (_states[id].records.completed[id].renderCriticalEvidenceHash == 0) {
-            revert T.InventoryIncomplete();
-        }
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
-        StreamPreservationPolicyRenderCriticalDefinitionStagesV1.requireDefinitions(
-            _states[id], id, true
-        );
+        Views.requireFullDefinitionBytes(_states, _origins, _authorities, id);
     }
 
     function originDependencies() external view returns (O.Dependencies memory) {
@@ -456,7 +407,7 @@ contract StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1 is
 
     function appendOriginRuntime(bytes32 id) external {
         State.stage(_states[id], id, 8);
-        Guard.requireCurrent(_states[id], _origins, _authorities[id], id);
+        Guard.checkCurrent(_states[id], _origins, _authorities[id], id);
         T.Plan storage p = _states[id].records.plans[id];
         State.Progress storage token = _states[id].progress[id];
         if (p.nextToken != p.tokenCount || token.phase != 0 || token.row != 0 || token.count != 0) {
