@@ -993,7 +993,14 @@ abstract contract ArtistRecoveredMultipleDisputeFixture is ArtistRecoveredMultip
         internal
         returns (bytes32 hash)
     {
-        if (address(documents) == address(0)) documents = new StreamSchemaDocumentStore();
+        if (address(documents) == address(0)) {
+            documents = StreamSchemaDocumentStore(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol:StreamSchemaDocumentStore",
+                        abi.encode()
+                    ))
+            );
+        }
         T.Binding memory b = Binding(suite.owners[0]).binding(collection);
         bytes memory data =
             abi.encode(AD.Evidence(1, collection, b.generation, b.bindingHash, parent, narrative));

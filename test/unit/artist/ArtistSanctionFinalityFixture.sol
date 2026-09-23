@@ -5,6 +5,7 @@ import "../../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol"
 import "../../../smart-contracts/interfaces/stream/finality/IStreamFinalitySanctionReview.sol";
 import "../../../smart-contracts/interfaces/stream/artist/StreamArtistSanctionRequestTypes.sol";
 import "../../helpers/FinalityMocks.sol";
+import "../../helpers/ArtistArtifactCreate.sol";
 
 interface ArtistSanctionFixtureVm {
     function getNonce(address account) external view returns (uint64);
@@ -130,7 +131,7 @@ contract ArtistSanctionDiscoveryBoundary is MockFinalityDiscovery {
 
 /// @notice Actual canonical Finality/adapter with explicit metadata/discovery/artifact boundaries.
 /// @dev Sanction recording works before archival; this fixture cannot satisfy finalization coverage.
-contract ArtistSanctionFinalityFixture {
+contract ArtistSanctionFinalityFixture is ArtistArtifactCreate {
     address public immutable root;
     StreamArtworkFinalityRegistry public registry;
     ArtistSanctionEvidenceBoundary public provider;
@@ -157,30 +158,39 @@ contract ArtistSanctionFinalityFixture {
         );
         provider = new ArtistSanctionEvidenceBoundary(core, metadata, _manifest);
         discovery = new ArtistSanctionDiscoveryBoundary(address(provider));
-        StreamCoreFinalityAdapter adapter =
-            new StreamCoreFinalityAdapter(core, metadata, address(provider));
+        StreamCoreFinalityAdapter adapter = StreamCoreFinalityAdapter(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol:StreamCoreFinalityAdapter",
+                    abi.encode(core, metadata, address(provider))
+                ))
+        );
         ArtistSanctionFixtureVm cheat =
             ArtistSanctionFixtureVm(address(uint160(uint256(keccak256("hevm cheat code")))));
         address predicted =
             cheat.computeCreateAddress(address(this), cheat.getNonce(address(this)) + 1);
         ArtistSanctionArtifactBoundary artifact =
             new ArtistSanctionArtifactBoundary(core, predicted, governance);
-        registry = new StreamArtworkFinalityRegistry(
-            core,
-            metadata,
-            address(adapter),
-            artist,
-            governance,
-            address(discovery),
-            IStreamGasParameterHost.GasParameterConfig(
-                "FINALITY_COMPONENT_READ_GAS", 500000, 50000, 2
-            ),
-            StreamFinalityDeploymentConfiguration(
-                address(artifact),
-                keccak256("unit finality deployment"),
-                "urn:unit-finality",
-                keccak256("unit finality manifest")
-            )
+        registry = StreamArtworkFinalityRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:StreamArtworkFinalityRegistry",
+                    abi.encode(
+                        core,
+                        metadata,
+                        address(adapter),
+                        artist,
+                        governance,
+                        address(discovery),
+                        IStreamGasParameterHost.GasParameterConfig(
+                            "FINALITY_COMPONENT_READ_GAS", 500000, 50000, 2
+                        ),
+                        StreamFinalityDeploymentConfiguration(
+                            address(artifact),
+                            keccak256("unit finality deployment"),
+                            "urn:unit-finality",
+                            keccak256("unit finality manifest")
+                        )
+                    )
+                ))
         );
         require(address(registry) == predicted, "actual fixed finality creator/nonce");
         provider.setMetadataMode(1, 1);

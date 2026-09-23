@@ -3,11 +3,12 @@ pragma solidity ^0.8.19;
 
 import "../../../smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol";
 import "../../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
+import "../../helpers/ArtistArtifactCreate.sol";
 
 /// @notice Actual canonical metadata/schema/bytes hosts with an explicit governance boundary.
 /// @dev The artist suite and Safe remain real in the caller. Canonical Executor/Core composition
 ///      is separate; this fixture never substitutes an artist publication permit or candidate.
-contract ArtistCanonicalPublicationFixture {
+contract ArtistCanonicalPublicationFixture is ArtistArtifactCreate {
     address public immutable root;
     bytes32 private immutable _rootCodeHash;
     bool private _executing;
@@ -56,7 +57,12 @@ contract ArtistCanonicalPublicationFixture {
 
     function deploy(address core, address artistRegistry) external {
         require(msg.sender == root && address(metadata) == address(0), "fixture deploy once");
-        schemas = new StreamSchemaRegistry(address(this));
+        schemas = StreamSchemaRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/metadata/StreamSchemaRegistry.sol:StreamSchemaRegistry",
+                    abi.encode(address(this))
+                ))
+        );
         store = StreamSchemaDocumentStore(schemas.chunkStore());
         _register(
             "RAW_BYTES",
@@ -92,7 +98,12 @@ contract ArtistCanonicalPublicationFixture {
         c.artistReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_ARTIST_READ_GAS", 2000000, 1000000, 2
         );
-        metadata = new StreamCollectionMetadataV1(c);
+        metadata = StreamCollectionMetadataV1(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/metadata/StreamCollectionMetadataV1.sol:StreamCollectionMetadataV1",
+                    abi.encode(c)
+                ))
+        );
         _admit(keccak256("ARTIST_INTENT"));
         _admit(keccak256("ARTIST_STATEMENT"));
         _admit(keccak256("ARTIST_SEMANTIC_ASSERTION"));
