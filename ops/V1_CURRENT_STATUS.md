@@ -1,5 +1,21 @@
 # Full-v1 current delivery status
 
+### Current source and execution: `e5d5f157e`
+
+The Museum offline join now checks one separately pinned original input set
+across its dossier, unchanged 49-row assessment and four-format export. All
+three integrated regressions pass, including rejection of a different input
+set even when it has been re-pinned. This verifies package consistency; actual
+current-chain capture remains open. The next Museum batch supplies the
+executable composition command using the existing capture adapters.
+
+The policy-reference fixture optimization is integrated as `9cd72d3c0` after
+independent source review. It preserves actual CREATE callers, arguments and
+ordering; 711-source type checking and all 107 focused test-method ABIs agree.
+Runtime is pending. ERC-20 burn has a compiled 19-test host and its required
+artifact graph is complete; execution is next. The count is 19, correcting
+the earlier builder estimate of 18. Current production remains `09f32efab`.
+
 ### Latest bounded results: `64c1d815`
 
 Fifteen focused Artist transport/supplement tests now pass against sources
