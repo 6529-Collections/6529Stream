@@ -23,7 +23,7 @@ ACTIVATED_EVENT = schema_id('MetadataStaticActivated(uint16,uint256,bytes32,byte
 AUTHORIZATION_EVENT = schema_id('MetadataConfigAuthorization(bytes32,address,(address,bytes32,address,uint8,uint256,uint64))')
 OVERRIDES_DOMAIN = schema_id('6529STREAM_STATIC_METADATA_OVERRIDES_V1')
 QUALIFICATION = ('Exact token-to-collection identity, current Router-resolved STATIC config, '
-    'stored record/authorization, collection activation base, original runtime and selected '
+    'stored record/authorization, activation and its retained global default record, original runtime and selected '
     'script bytes at one pinned block. Collection/token overrides and frozen source are checked. A present '
     'manifest with complete bytes establishes positive script classification only. A zero, '
     'unavailable or unsupported source establishes no negative classification. Registered '
@@ -127,6 +127,12 @@ class TokenScriptSource(collection.CollectionScriptSource):
         require(first[3] == 0 and first[6] == 3 and first[4] == 1 and
             first[1] == activated['topics'][2] == activation[0] and
             first[5] == activation[1], 'token script activation default lineage differs')
+        retained_default = self._record(router, first[1])
+        require(retained_default[2] == 0 and retained_default[3] == 0 and
+            retained_default[6] == 0 and retained_default[4] == first[5] and
+            retained_default[5] == first[5] and retained_default[8] == first[8] and
+            retained_default[9] == first[9],
+            'token script retained default/activation differs')
         require(self._record(router, first[0]) == first,
             'token script activation stored record differs')
         position = lambda log: tuple(quantity(log[key]) for key in
@@ -153,7 +159,7 @@ class TokenScriptSource(collection.CollectionScriptSource):
             else:
                 token_keys[record_token] = row[0]
         require(activation[2] == head, 'token script overrides head differs')
-        return first, collection_key, token_keys.get(token, collection_key), observed
+        return first, retained_default, collection_key, token_keys.get(token, collection_key), observed
 
     def _capture(self):
         self._state()
@@ -173,7 +179,8 @@ class TokenScriptSource(collection.CollectionScriptSource):
             'token script collection config differs')
         activation = self._read(router, 'staticMetadataActivation(uint256)', ACTIVATION,
             ('uint256',), (cid,))
-        first, collection_key, token_key, lineage = self._lineage(router, cid, token, activation)
+        first, retained_default, collection_key, token_key, lineage = self._lineage(
+            router, cid, token, activation)
         require(base[0] == collection_key and base[5] == first[5] and
             selected[0] == token_key and selected == self._record(router, selected[0]) and
             selected[2] == cid and selected[5] == first[5] and
@@ -219,6 +226,7 @@ class TokenScriptSource(collection.CollectionScriptSource):
             'identity': json_values(identity), 'graph': self.graph,
             'pointerAdmissions': pointers, 'activation': json_values(activation),
             'activationRecord': json_values(first),
+            'retainedDefaultRecord': json_values(retained_default),
             'lineageEvents': lineage['logs'], 'historyCoverage': lineage['coverage'],
             'baseRecord': json_values(base), 'baseAuthorization': json_values(base_auth),
             'resolvedRecord': json_values(selected), 'resolvedAuthorization': json_values(auth),

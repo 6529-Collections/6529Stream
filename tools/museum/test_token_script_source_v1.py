@@ -18,7 +18,8 @@ from .test_collection_script_source_v1 import CollectionScriptFixture, A, H
 
 class TokenScriptFixture(CollectionScriptFixture):
     def __init__(self, mode='stable', *, override=True, frozen=True,
-            collection_override=False, foreign_override=False, offchain=False):
+            collection_override=False, foreign_override=False, offchain=False,
+            global_mismatch=None):
         super().__init__(mode)
         self.token = 41
         self.registry = A(10)
@@ -41,7 +42,21 @@ class TokenScriptFixture(CollectionScriptFixture):
             '' if mode in ('chunked', 'empty') else
                 bytes.fromhex(self.value['stable']['servingScriptBytes'][2:]).decode(),
             manifest, (ZERO_ADDRESS, ZERO, ZERO))
-        previous = H('global-default')
+        global_record = [ZERO, ZERO, 0, 0, 1, 1, 0, ZERO,
+            selection, base_config]
+        if global_mismatch == 'selection':
+            altered = list(selection); altered[2] = H('other-version')
+            global_record[8] = tuple(altered)
+        elif global_mismatch == 'config':
+            global_record[9] = (2, A(8), '', '', 0, False)
+        elif global_mismatch == 'revision':
+            global_record[4] = global_record[5] = 2
+        elif global_mismatch is not None:
+            raise ValueError('unknown global default mismatch')
+        global_record[0] = static._record_hash(self.core, self.router,
+            tuple(global_record))
+        self.global_record = tuple(global_record)
+        previous = self.global_record[0]
         activation_record = [ZERO, previous, cid, 0, 1, 1, 3, ZERO,
             selection, base_config]
         activation_record[0] = static._record_hash(self.core, self.router,
@@ -65,7 +80,7 @@ class TokenScriptFixture(CollectionScriptFixture):
                 else self.base[4]) + 1, 1, 2, ZERO, selection, base_config]
             foreign[0] = static._record_hash(self.core, self.router, tuple(foreign))
             self.foreign = tuple(foreign)
-        for row in (self.activation_record, self.base, self.selected,
+        for row in (self.global_record, self.activation_record, self.base, self.selected,
                 *((self.foreign,) if self.foreign else ())):
             self.add(self.router, 'metadataConfigRecord(bytes32)', static.CONFIG_RECORD,
                 row, ('bytes32',), (row[0],))
@@ -390,14 +405,35 @@ class TokenScriptSourceTests(unittest.TestCase):
     def test_offchain_mode_still_has_positive_script_and_later_default_does_not_rewrite_activation(self):
         fixture = TokenScriptFixture('stable', offchain=True, foreign_override=True,
             collection_override=True)
+        later_default = [ZERO, fixture.global_record[0], 0, 0, 2, 2, 0,
+            ZERO, fixture.global_record[8], (2, A(8), '', '', 0, False)]
+        later_default[0] = static._record_hash(fixture.core, fixture.router,
+            tuple(later_default))
+        fixture.add(fixture.router, 'metadataConfigRecord(bytes32)',
+            static.CONFIG_RECORD, tuple(later_default), ('bytes32',),
+            (later_default[0],))
         fixture.add(fixture.router, 'defaultMetadataConfig()', static.CONFIG_RECORD,
-            fixture.selected)
+            tuple(later_default))
         value = loads(fixture.source().snapshot(), maximum=rpc.MAX_TRANSCRIPT)
         self.assertEqual(value['workClass'], 'script')
         self.assertEqual(value['resolvedRecord'][9][0], '0')
-        self.assertEqual(value['activationRecord'][1], H('global-default'))
+        self.assertEqual(value['activationRecord'][1], fixture.global_record[0])
+        self.assertEqual(value['retainedDefaultRecord'][0], fixture.global_record[0])
+        self.assertNotEqual(value['retainedDefaultRecord'][0], later_default[0])
         self.assertEqual(len([row for row in value['lineageEvents'] if
             row['topics'][0] == source.RECORDED_EVENT]), 4)
+
+    def test_retained_global_default_missing_or_semantically_different_rejects(self):
+        fixture = TokenScriptFixture()
+        fixture.fail(fixture.router, 'metadataConfigRecord(bytes32)',
+            ('bytes32',), (fixture.global_record[0],))
+        with self.assertRaises(MuseumError): fixture.source().snapshot()
+        for field in ('selection', 'config', 'revision'):
+            with self.subTest(field=field):
+                fixture = TokenScriptFixture(global_mismatch=field)
+                with self.assertRaisesRegex(MuseumError,
+                        'retained default/activation differs'):
+                    fixture.source().snapshot()
 
     def test_foreign_token_history_omission_and_event_order_reject(self):
         fixture = TokenScriptFixture(foreign_override=True)

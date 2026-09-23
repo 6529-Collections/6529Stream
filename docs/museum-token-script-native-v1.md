@@ -10,8 +10,9 @@ The Router's `MetadataConfigAuthorization`, `MetadataConfigRecorded` and
 `MetadataStaticActivated` logs are scanned from block zero through the pinned
 block. Matching successful receipts, transaction positions and canonical
 provider headers are checked. The activation's level-3 record identifies its
-retained global default through `previous`; today's global default is not
-substituted. Every later collection and token override, including other
+retained global default through `previous`. The stored level-0 default must
+match the activation's selection, config and default revision; today's global
+default is not substituted. Every later collection and token override, including other
 tokens' changes to the collection-wide override head, contributes to the
 reconstructed revision and hash chain. Current collection and token getters
 must resolve to the reconstructed records. A frozen source must match the
