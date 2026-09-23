@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistIdentityCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
-import { StreamArtistEstateCreationPart } from "../../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
+import {
+    StreamArtistIdentityCreationPart
+} from "../../../smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol";
+import {
+    StreamArtistEstateCreationPart
+} from "../../../smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol";
 
 import "./ArtistOnboardingFixture.sol";
+import { ArtistArtifactVm } from "../../helpers/ArtistArtifactCreate.sol";
 import {
     StreamArtistExtensionAdmission
 } from "../../../smart-contracts/domains/artist/StreamArtistExtensionAdmission.sol";
@@ -30,6 +35,29 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
         require(envelope < CAP, "individual conservative deployment envelope");
     }
 
+    function _artifactCreation(string memory coordinate) private returns (bytes memory) {
+        ArtistArtifactVm vm =
+            ArtistArtifactVm(address(uint160(uint256(keccak256("hevm cheat code")))));
+        bytes memory creation = vm.getCode(coordinate);
+        require(creation.length != 0, "missing production creation artifact");
+        return creation;
+    }
+
+    function _create(bytes memory creation, bytes memory arguments)
+        private
+        returns (address deployed)
+    {
+        bytes memory init = bytes.concat(creation, arguments);
+        assembly ("memory-safe") {
+            deployed := create(0, add(init, 32), mload(init))
+            if iszero(deployed) {
+                let ptr := mload(0x40)
+                returndatacopy(ptr, 0, returndatasize())
+                revert(ptr, returndatasize())
+            }
+        }
+    }
+
     function _identityChildren(address host) private returns (address[3] memory children) {
         for (uint8 i; i < 3; ++i) {
             children[i] = artistExtensionFactory.deployIdentity(
@@ -51,38 +79,55 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
         returns (StreamArtistIdentityAuthority)
     {
         require(msg.sender == address(this), "fixture deployment only");
-        return new StreamArtistIdentityAuthority(
-            suite.registry,
-            address(coordinator),
-            archive_,
-            suite.core,
-            suite.mintManager,
-            factory_,
-            children
+        return StreamArtistIdentityAuthority(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol:StreamArtistIdentityAuthority",
+                    abi.encode(
+                        suite.registry,
+                        address(coordinator),
+                        archive_,
+                        suite.core,
+                        suite.mintManager,
+                        factory_,
+                        children
+                    )
+                ))
         );
     }
 
     function testEachActualFactoryChildAndHostFitsConservativeDeploymentEnvelope() public {
         address[4] memory parts;
         for (uint8 i; i < 4; ++i) {
-            uint256 beforePart = gasleft();
+            bytes memory creation;
             bytes memory partInit;
             if (i < 2) {
-                parts[i] = address(new StreamArtistIdentityCreationPart(i));
-                partInit = bytes.concat(type(StreamArtistIdentityCreationPart).creationCode, abi.encode(i));
+                creation = _artifactCreation(
+                    "smart-contracts/domains/artist/StreamArtistIdentityCreationPart.sol:StreamArtistIdentityCreationPart"
+                );
             } else {
-                parts[i] = address(new StreamArtistEstateCreationPart(i - 2));
-                partInit = bytes.concat(type(StreamArtistEstateCreationPart).creationCode, abi.encode(i - 2));
+                creation = _artifactCreation(
+                    "smart-contracts/domains/artist/StreamArtistEstateCreationPart.sol:StreamArtistEstateCreationPart"
+                );
             }
+            uint256 beforePart = gasleft();
+            bytes memory arguments = abi.encode(i < 2 ? i : i - 2);
+            parts[i] = _create(creation, arguments);
+            partInit = bytes.concat(creation, arguments);
             _measure(bytes32(uint256(100 + i)), beforePart, partInit);
-            require(parts[i].code.length <= 24_576 && partInit.length <= 49_152, "part deployment bounds");
+            require(
+                parts[i].code.length <= 24_576 && partInit.length <= 49_152,
+                "part deployment bounds"
+            );
         }
+        bytes memory factoryCreation = _artifactCreation(
+            "smart-contracts/domains/artist/StreamArtistExtensionFactory.sol:StreamArtistExtensionFactory"
+        );
         uint256 started = gasleft();
-        StreamArtistExtensionFactory f = new StreamArtistExtensionFactory(parts);
-        _measure(keccak256("factory"), started, bytes.concat(type(StreamArtistExtensionFactory).creationCode, abi.encode(parts)));
+        StreamArtistExtensionFactory f =
+            StreamArtistExtensionFactory(_create(factoryCreation, abi.encode(parts)));
+        _measure(keccak256("factory"), started, bytes.concat(factoryCreation, abi.encode(parts)));
         require(
-            address(f).codehash == keccak256(type(StreamArtistExtensionFactory).runtimeCode)
-                && address(f).codehash == StreamArtistExtensionFactoryRuntime.expected()
+            address(f).codehash == StreamArtistExtensionFactoryRuntime.expected()
                 && address(f).code.length <= 24_576,
             "canonical factory runtime"
         );
@@ -118,24 +163,13 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
             address(f),
             readers
         );
+        bytes memory facadeCreation = _artifactCreation(
+            "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol:StreamArtistOnboardingRegistry"
+        );
         started = gasleft();
-        StreamArtistOnboardingRegistry actualFacade = new StreamArtistOnboardingRegistry(
-            suite.core,
-            suite.mintManager,
-            address(coordinator),
-            address(manager.governanceAuthority()),
-            address(estateCoverageProvider),
-            keccak256("split deployment"),
-            "urn:split-facade",
-            keccak256("split manifest"),
-            address(f),
-            readers
-        );
-        _measure(
-            keccak256("facade"),
-            started,
-            bytes.concat(type(StreamArtistOnboardingRegistry).creationCode, facadeArgs)
-        );
+        StreamArtistOnboardingRegistry actualFacade =
+            StreamArtistOnboardingRegistry(payable(_create(facadeCreation, facadeArgs)));
+        _measure(keccak256("facade"), started, bytes.concat(facadeCreation, facadeArgs));
         bytes memory ownerArgs = abi.encode(
             facade,
             address(coordinator),
@@ -145,21 +179,13 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
             address(f),
             writers
         );
+        bytes memory ownerCreation = _artifactCreation(
+            "smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol:StreamArtistIdentityAuthority"
+        );
         started = gasleft();
-        StreamArtistIdentityAuthority actualOwner = new StreamArtistIdentityAuthority(
-            facade,
-            address(coordinator),
-            suite.archive,
-            suite.core,
-            suite.mintManager,
-            address(f),
-            writers
-        );
-        _measure(
-            keccak256("Identity"),
-            started,
-            bytes.concat(type(StreamArtistIdentityAuthority).creationCode, ownerArgs)
-        );
+        StreamArtistIdentityAuthority actualOwner =
+            StreamArtistIdentityAuthority(payable(_create(ownerCreation, ownerArgs)));
+        _measure(keccak256("Identity"), started, bytes.concat(ownerCreation, ownerArgs));
         require(
             address(actualFacade) == facade && address(actualOwner) == owner,
             "original planned host coordinates"
@@ -168,9 +194,8 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
             facade.code.length <= 24_576 && owner.code.length <= 24_576, "both host runtimes fit"
         );
         require(
-            type(StreamArtistOnboardingRegistry).creationCode.length + facadeArgs.length <= 49_152
-                && type(StreamArtistIdentityAuthority).creationCode.length + ownerArgs.length
-                    <= 49_152,
+            facadeCreation.length + facadeArgs.length <= 49_152
+                && ownerCreation.length + ownerArgs.length <= 49_152,
             "argument-inclusive host initcode"
         );
         require(
@@ -188,17 +213,22 @@ contract StreamArtistDeploymentSplitTest is ArtistOnboardingFixture {
         returns (StreamArtistOnboardingRegistry)
     {
         require(msg.sender == address(this), "fixture deployment only");
-        return new StreamArtistOnboardingRegistry(
-            suite.core,
-            suite.mintManager,
-            address(coordinator),
-            address(manager.governanceAuthority()),
-            address(estateCoverageProvider),
-            keccak256("split deployment"),
-            "urn:split-facade",
-            keccak256("split manifest"),
-            factory_,
-            children
+        return StreamArtistOnboardingRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol:StreamArtistOnboardingRegistry",
+                    abi.encode(
+                        suite.core,
+                        suite.mintManager,
+                        address(coordinator),
+                        address(manager.governanceAuthority()),
+                        address(estateCoverageProvider),
+                        keccak256("split deployment"),
+                        "urn:split-facade",
+                        keccak256("split manifest"),
+                        factory_,
+                        children
+                    )
+                ))
         );
     }
 
