@@ -1,5 +1,19 @@
 # Stream delivery state
 
+## Latest integrated correction: `7b43c911e`
+
+Five current STATIC preservation consumers now use the existing STATIC byte
+validator. Root and independent source reviews are clear; historical and
+terminal serialization behavior and exact content hashes remain unchanged.
+Matching native/runtime verification is active on the source-equivalent builder
+commit `620a9c51e`. Earlier results retain their recorded source below.
+
+Execution-only fixture staging is integrated through `9b860bb4e`, including
+reviewed profile, Git-commit and Windows-path corrections. Root independently
+passed all 40 focused tests. Actual cached execution with this tooling is the
+next check; original compiler evidence remains untouched.
+
+
 ## Runtime integration update: 23 September, source `9deeaeaed`
 
 Snapshot58 now has independent current-source/fixture acceptance: twelve fresh
