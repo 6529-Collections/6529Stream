@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { ScopedPolicyReferenceExternalBoundaryV2 } from "../../helpers/scoped-preservation-boundaries/ScopedPolicyReferenceExternalBoundaryV2.sol";
 import {
     StreamScopedPolicyPublicationGraphTypesV2 as CapacityReferenceGraph454
 } from "../../../smart-contracts/interfaces/stream/finality/StreamScopedPolicyPublicationGraphTypesV2.sol";
@@ -175,18 +176,6 @@ import {
 /// snapshot/output/factory/Router/reference and immutable Store are genuine producers below.
 interface ReferenceAuthoritySequenceVm454 {
     function mockCalls(address target, bytes calldata input, bytes[] calldata responses) external;
-}
-
-contract ScopedPolicyReferenceExternalBoundaryV2 {
-    address public immutable core;
-
-    constructor(address value) {
-        core = value;
-    }
-
-    function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == 0x01ffc9a7 || id == type(IStreamExternalArtifactCurrentPair).interfaceId;
-    }
 }
 
 contract ScopedPolicyReferenceReaderProbeV2 {
