@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamPreservationTokenProducerProfilesV1 as Producers
-} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+    StreamPreservationPolicySnapshotAssembly as Assembly
+} from "./StreamPreservationPolicySnapshotAssembly.sol";
+
 import {
     StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
 } from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
-import {
-    StreamPreservationPolicyRootFamiliesV2 as RootFamilies
-} from "../finality/StreamPreservationPolicyRootFamiliesV2.sol";
 
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
 import {
@@ -30,20 +28,13 @@ import {
 import {
     IStreamCollectionMetadataV1 as Metadata
 } from "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
-import {
-    IStreamSchemaRegistry as Schema
-} from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
+
 import {
     StreamPreservationPolicySnapshotSourceReadsV1 as Sources
 } from "../records/StreamPreservationPolicySnapshotSourceReadsV1.sol";
-import {
-    StreamPreservationPolicySnapshotDefinitionsV1 as Definitions
-} from "../records/StreamPreservationPolicySnapshotDefinitionsV1.sol";
+
 import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
-import { StreamWorkRecordContext as Documents } from "../records/StreamWorkRecordContext.sol";
-import {
-    StreamPreservationPolicyContentRootSchemasV1 as RootDefinitions
-} from "../finality/StreamPreservationPolicyContentRootSchemasV1.sol";
+
 import { StreamRecordFamilies as Families } from "../records/StreamRecordFamilies.sol";
 import {
     StreamFinalityRouterEvidence as Reads
@@ -55,6 +46,9 @@ import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol
 /// @dev Source snapshots are separate from Artist CONTENT_ROOT authority, complete output bytes,
 /// reference-mode evidence and finality. VIEW requires its own actual presentation adoption profile.
 abstract contract StreamPreservationPolicySnapshotPublicationKernel is I, StreamGasParameterHost {
+    /// @dev Preserve the host ABI for the error bubbled by the fixed assembly library.
+    error InvalidPreservationRootFamily();
+
     bytes32 public constant READ_GAS = keccak256("6529STREAM_GGP_POLICY_SNAPSHOT_READ_GAS");
     bytes32 public constant SOURCE_GAS = keccak256("6529STREAM_GGP_POLICY_SNAPSHOT_SOURCE_GAS");
     bytes32 public constant INVENTORY_GAS =
@@ -417,63 +411,9 @@ abstract contract StreamPreservationPolicySnapshotPublicationKernel is I, Stream
         view
         returns (bytes32 hash, bytes memory canonical)
     {
-        S.Dependencies memory d = dependencies();
-        _definitions(d);
-        S.Source memory f = Sources.current(d, p, _family);
-        hash = Sources.sourceHash(d, f, _family);
+        (hash, canonical) = Assembly.assemble(dependencies(), p, r, _family);
         r.sourceHash = hash;
-        p.expectedSourceHash = 0; // The actual hash is present in receipt/source; no preview circularity.
-        canonical = abi.encode(
-            SnapshotFamilies.payloadDomain(_family, false),
-            d.chainId,
-            address(this),
-            d.targets,
-            d.codeHashes,
-            p,
-            r,
-            f
-        );
-        if (canonical.length > 524288) revert S.InvalidPolicySnapshot();
-    }
-
-    function _definitions(S.Dependencies memory d) private view {
-        Documents.Dependencies memory known;
-        for (uint256 i; i < 4; ++i) {
-            known.targets[i] = d.targets[i];
-            known.codeHashes[i] = d.codeHashes[i];
-        }
-        known.chainId = d.chainId;
-        known.readGas = d.readGas;
-        bytes32[5] memory allIds = RootFamilies.ids(_family, false);
-        bytes32[2] memory rootIds = [allIds[3], allIds[4]];
-        for (uint256 i; i < 2; ++i) {
-            bytes memory raw = RootFamilies.document(_family, false, rootIds[i]);
-            Documents.definition(
-                known,
-                rootIds[i],
-                i == 0 ? Schema.DocumentKind.SCHEMA : Schema.DocumentKind.CANONICALIZATION,
-                keccak256(raw),
-                raw.length,
-                keccak256("RAW_BYTES"),
-                true
-            );
-        }
-        bytes32[3] memory ids = SnapshotFamilies.ids(_family, false);
-        bytes32[3] memory hashes = SnapshotFamilies.hashes(_family, false);
-        uint256[3] memory sizes = SnapshotFamilies.lengths(_family, false);
-        for (uint256 i; i < 3; ++i) {
-            Documents.definition(
-                known,
-                ids[i],
-                i == 0
-                    ? Schema.DocumentKind.SCHEMA
-                    : i == 1 ? Schema.DocumentKind.CATALOG : Schema.DocumentKind.CANONICALIZATION,
-                hashes[i],
-                sizes[i],
-                keccak256("RAW_BYTES"),
-                true
-            );
-        }
+        p.expectedSourceHash = 0;
     }
 
     function _head(bytes32 subject) private view returns (bytes32) {

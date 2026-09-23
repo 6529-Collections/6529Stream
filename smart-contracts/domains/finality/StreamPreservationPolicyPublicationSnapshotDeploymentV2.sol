@@ -4,8 +4,8 @@ import {
     StreamPreservationPolicyPublicationGraphTypesV1 as T
 } from "../../interfaces/stream/finality/StreamPreservationPolicyPublicationGraphTypesV1.sol";
 import {
-    StreamPreservationPolicySnapshotPublicationV2 as Child
-} from "../metadata/StreamPreservationPolicySnapshotPublicationV2.sol";
+    StreamPreservationPolicyPublicationSnapshotConstructorV2 as Constructor
+} from "./StreamPreservationPolicyPublicationSnapshotConstructorV2.sol";
 import {
     StreamPreservationPolicyPublicationRecipeV1 as Recipe
 } from "./StreamPreservationPolicyPublicationRecipeV1.sol";
@@ -13,6 +13,6 @@ import {
 /// @notice Fixed family V2 CREATE worker; callers cannot nominate code or a producer family.
 library StreamPreservationPolicyPublicationSnapshotDeploymentV2 {
     function deploy(T.Recipe memory r, T.Graph memory g) public returns (address) {
-        return address(new Child(Recipe.snapshot(r, g), r.targets[3], r.snapshotGas));
+        return Constructor.deploy(Recipe.snapshot(r, g), r.targets[3], r.snapshotGas);
     }
 }

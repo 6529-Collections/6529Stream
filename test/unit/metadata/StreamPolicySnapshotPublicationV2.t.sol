@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamPolicyPublicationGraphTypesV2 as SnapshotGraph442
+} from "../../../smart-contracts/interfaces/stream/finality/StreamPolicyPublicationGraphTypesV2.sol";
+import {
+    StreamPolicyPublicationSnapshotDeploymentV2 as SnapshotDeployment442
+} from "../../../smart-contracts/domains/finality/StreamPolicyPublicationSnapshotDeploymentV2.sol";
+import {
+    LeafManifestVm as SnapshotCreateVm442
+} from "../../helpers/scoped-preservation-boundaries/StreamContentLeafManifestVm.sol";
+import { Vm } from "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+
 import "../../helpers/PolicySnapshotFixtureV2.sol";
 import {
     StreamFinalityPolicySnapshotReadsV2 as Reader
@@ -20,6 +31,222 @@ contract PolicySnapshotReaderProbeV2 {
 /// canonical Router root, selection/output, policy source set and governance are typed boundaries.
 /// No selected-provider, current-stack or finality acceptance claim follows from this cohort.
 contract StreamPolicySnapshotPublicationV2Test is PolicySnapshotFixtureV2 {
+    /// @dev Actual deployment worker and new child publish; no moved helper is mocked.
+    function testCapacitySnapshotDeploymentPreservesCreateArgumentsAndIndependentHistory() public {
+        _initializePolicySnapshot();
+        Scoped.Dependencies memory d = host.dependencies();
+        SnapshotGraph442.Recipe memory r;
+        SnapshotGraph442.Graph memory g;
+        for (uint256 i; i < 5; ++i) {
+            r.inventory.targets[i] = d.targets[i];
+            r.inventory.codeHashes[i] = d.codeHashes[i];
+        }
+        r.inventory.chainId = d.chainId;
+        r.targets[0] = d.targets[5];
+        r.codeHashes[0] = d.codeHashes[5];
+        r.targets[1] = d.targets[6];
+        r.codeHashes[1] = d.codeHashes[6];
+        r.targets[3] = address(executor);
+        r.codeHashes[3] = address(executor).codehash;
+        r.inventory.targets[10] = d.targets[9];
+        r.inventory.codeHashes[10] = d.codeHashes[9];
+        g.children[1] = d.targets[7];
+        g.codeHashes[1] = d.codeHashes[7];
+        g.children[2] = d.targets[8];
+        g.codeHashes[2] = d.codeHashes[8];
+        g.sourceSet = d.targets[10];
+        g.sourceSetCodeHash = d.codeHashes[10];
+        r.snapshotGas[0] = IStreamGasParameterHost.GasParameterConfig(
+            "POLICY_SNAPSHOT_READ_GAS", d.readGas, 50000, 2
+        );
+        r.snapshotGas[1] = IStreamGasParameterHost.GasParameterConfig(
+            "POLICY_SNAPSHOT_SOURCE_GAS", d.sourceGas, 50000, 2
+        );
+        r.snapshotGas[2] = IStreamGasParameterHost.GasParameterConfig(
+            "POLICY_SNAPSHOT_INVENTORY_GAS", d.inventoryGas, 50000, 2
+        );
+
+        uint64 nonce = SnapshotCreateVm442(address(vm)).getNonce(address(this));
+        StreamPolicySnapshotPublicationV2 deployed =
+            StreamPolicySnapshotPublicationV2(SnapshotDeployment442.deploy(r, g));
+        require(
+            address(deployed)
+                == SnapshotCreateVm442(address(vm)).computeCreateAddress(address(this), nonce),
+            "same host CREATE caller and nonce"
+        );
+        require(
+            SnapshotCreateVm442(address(vm)).getNonce(address(this)) == nonce + 1,
+            "exactly one child CREATE"
+        );
+        require(
+            keccak256(abi.encode(deployed.dependencies())) == keccak256(abi.encode(d))
+                && deployed.governanceAuthority() == address(executor)
+                && deployed.authorityCodeHash() == address(executor).codehash,
+            "complete projected arguments and immutable authority"
+        );
+        StreamPolicySnapshotPublicationV2 second =
+            StreamPolicySnapshotPublicationV2(SnapshotDeployment442.deploy(r, g));
+        require(
+            address(second)
+                    == SnapshotCreateVm442(address(vm))
+                        .computeCreateAddress(address(this), uint256(nonce) + 1)
+                && SnapshotCreateVm442(address(vm)).getNonce(address(this)) == nonce + 2
+                && address(second) != address(deployed),
+            "duplicate arguments create independent next host"
+        );
+        host = deployed;
+        bytes32 record = _publishSnapshot();
+        require(
+            host.currentSnapshot(publication.scope).recordHash == record,
+            "real publication through deployed child"
+        );
+        require(
+            second.snapshotCount(publication.scope) == 0
+                && second.currentSnapshot(publication.scope).recordHash == 0,
+            "constructor worker cannot share history storage"
+        );
+    }
+
+    /// @dev Real Assembly/Admission/Writer calls and Metadata grants. The inherited named
+    /// source boundaries remain unchanged; this is not full current-stack gas acceptance.
+    function testCapacityExtractionPreservesPreviewCopiesPublisherEventAndRollback() public {
+        _initializePolicySnapshot();
+        address publisher = address(0xCA442);
+        _grant(publication.scope.collectionId, StreamRecordFamilies.SNAPSHOT, 7, publisher, true);
+        _grant(publication.scope.collectionId, StreamRecordFamilies.IDENTITY, 7, publisher, true);
+        publication.expectedSourceHash = keccak256("preview-only circularity sentinel");
+        (bytes32 source, bytes memory raw) = host.previewSnapshot(publication, publisher);
+        require(
+            source != 0 && source != publication.expectedSourceHash, "independent source commitment"
+        );
+        (,,,,, Scoped.Publication memory canonicalPublication, Scoped.Receipt memory expected,) = abi.decode(
+            raw,
+            (
+                bytes32,
+                uint256,
+                address,
+                address[11],
+                bytes32[11],
+                Scoped.Publication,
+                Scoped.Receipt,
+                Scoped.Source
+            )
+        );
+        require(
+            canonicalPublication.expectedSourceHash == 0 && expected.sourceHash == source
+                && expected.publisher == publisher && expected.authorizationClass == 7
+                && expected.displayAuthorizationClass == 7 && expected.grantRevision == 1
+                && expected.displayGrantRevision == 1 && expected.recordHash == 0
+                && expected.chainHash == 0 && expected.manifestHash == 0
+                && expected.manifestBytes == 0 && expected.recordedAt == 0,
+            "assembly returns normalized bytes and retains full receipt fields"
+        );
+        publication.expectedSourceHash = keccak256("a different preview sentinel");
+        (bytes32 sameSource, bytes memory sameRaw) = host.previewSnapshot(publication, publisher);
+        require(
+            source == sameSource && keccak256(raw) == keccak256(sameRaw),
+            "preview has no circular input"
+        );
+        publication.expectedSourceHash = source;
+        _uploadSnapshot(raw, false);
+        Scoped.Publication memory wrong = publication;
+        wrong.expectedSourceHash = keccak256("wrong actual source commitment");
+        vm.expectRevert(abi.encodeWithSelector(Scoped.InvalidPolicySnapshot.selector));
+        vm.prank(publisher);
+        host.publishSnapshot(wrong);
+        require(
+            host.snapshotCount(publication.scope) == 0
+                && host.currentSnapshot(publication.scope).recordHash == 0,
+            "expected-source refusal leaves no receipt, head or consumed snapshot id"
+        );
+        expected.manifestHash = keccak256(raw);
+        expected.manifestBytes = uint32(raw.length);
+        expected.recordedAt = uint64(block.timestamp);
+        bytes32 literalRecord = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_POLICY_SNAPSHOT_RECORD_V2"),
+                block.chainid,
+                address(host),
+                address(core),
+                address(metadata),
+                publication,
+                expected
+            )
+        );
+        vm.recordLogs();
+        vm.prank(publisher);
+        bytes32 record = host.publishSnapshot(publication);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        require(
+            record == literalRecord,
+            "writer hash retains original publisher and restored sourceHash"
+        );
+        expected.recordHash = record;
+        expected.chainHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_POLICY_SNAPSHOT_CHAIN_V2"),
+                block.chainid,
+                address(host),
+                address(core),
+                publication.scope,
+                bytes32(0),
+                uint64(1),
+                record
+            )
+        );
+        (Scoped.Publication memory stored, Scoped.Receipt memory receipt) =
+            host.snapshotRecord(record);
+        require(
+            keccak256(abi.encode(stored)) == keccak256(abi.encode(publication)),
+            "stored request keeps nonzero expectedSourceHash"
+        );
+        require(
+            keccak256(abi.encode(receipt)) == keccak256(abi.encode(expected)),
+            "all receipt words exact"
+        );
+        require(
+            logs.length == 1 && logs[0].emitter == address(host) && logs[0].topics.length == 4,
+            "event emitted by original host"
+        );
+        require(
+            logs[0].topics[0]
+                == keccak256(
+                    "PolicySnapshotPublished(uint16,bytes32,bytes32,bytes32,((uint8,uint256,uint256,bytes32),bytes32,bytes32,uint64,bytes32,bytes32,bytes32,bytes32,string,uint64,bytes32),(bytes32,bytes32,bytes32,uint64,bytes32,bytes32,uint32,bytes32,address,uint8,uint64,uint8,uint64,uint64,bytes32,bytes32,bytes32))"
+                ),
+            "original event signature"
+        );
+        (
+            uint16 eventVersion,
+            Scoped.Publication memory eventPublication,
+            Scoped.Receipt memory eventReceipt
+        ) = abi.decode(logs[0].data, (uint16, Scoped.Publication, Scoped.Receipt));
+        require(
+            eventVersion == 2 && logs[0].topics[1] == expected.scopeSubject
+                && logs[0].topics[2] == publication.snapshotId && logs[0].topics[3] == record
+                && keccak256(abi.encode(eventPublication, eventReceipt))
+                    == keccak256(abi.encode(stored, receipt)),
+            "original event and storage agree"
+        );
+        require(
+            keccak256(host.snapshotPayload(record)) == keccak256(raw), "complete immutable payload"
+        );
+        require(
+            host.requireCurrent(publication.scope, record, 1).recordHash == record,
+            "restored currentness"
+        );
+        vm.expectRevert(abi.encodeWithSelector(Scoped.InvalidPolicySnapshot.selector));
+        vm.prank(publisher);
+        host.publishSnapshot(publication);
+        require(
+            host.snapshotCount(publication.scope) == 1
+                && host.snapshotAt(publication.scope, 0) == record,
+            "replay cannot append"
+        );
+        require(
+            keccak256(host.snapshotPayload(record)) == keccak256(raw), "replay keeps original bytes"
+        );
+    }
+
     function testCompletePolicyPayloadAndOriginalRecordDomain() public {
         _initializePolicySnapshot();
         bytes memory raw = _bytes(address(this));

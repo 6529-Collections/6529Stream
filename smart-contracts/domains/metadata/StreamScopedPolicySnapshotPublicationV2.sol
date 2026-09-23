@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamScopedPolicySnapshotAdmissionV2 as Admission
+} from "./StreamScopedPolicySnapshotAdmissionV2.sol";
+import {
+    StreamScopedPolicySnapshotWriterV2 as Writer
+} from "./StreamScopedPolicySnapshotWriterV2.sol";
+import {
+    StreamScopedPolicySnapshotAssemblyV2 as Assembly
+} from "./StreamScopedPolicySnapshotAssemblyV2.sol";
 
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
 import {
@@ -18,25 +27,17 @@ import {
 import {
     StreamFinalityScope
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
-import {
-    IStreamCollectionMetadataV1 as Metadata
-} from "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
-import {
-    IStreamSchemaRegistry as Schema
-} from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
+
 import {
     StreamScopedPolicySnapshotSourceReadsV2 as Sources
 } from "../records/StreamScopedPolicySnapshotSourceReadsV2.sol";
-import {
-    StreamScopedPolicySnapshotDefinitionsV2 as Definitions
-} from "../records/StreamScopedPolicySnapshotDefinitionsV2.sol";
+
 import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
-import { StreamWorkRecordContext as Documents } from "../records/StreamWorkRecordContext.sol";
-import { StreamRecordFamilies as Families } from "../records/StreamRecordFamilies.sol";
+
 import {
     StreamFinalityRouterEvidence as Reads
 } from "../finality/StreamFinalityRouterEvidence.sol";
-import { StreamMetadataRenderer } from "./StreamMetadataRenderer.sol";
+
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Exact full-policy scope-bound source publication, preceding separate scoped root adoption.
@@ -129,8 +130,9 @@ contract StreamScopedPolicySnapshotPublicationV2 is I, StreamGasParameterHost {
         override
         returns (bytes32 sourceHash, bytes memory canonical)
     {
-        _candidate(p);
-        S.Receipt memory r = _receipt(p, publisher);
+        S.Receipt memory r = Admission.prepare(
+            _fixed, _locks, _ids, _history, metadataHost, gasParameter(READ_GAS), p, publisher
+        );
         return _assemble(p, r);
     }
 
@@ -140,47 +142,24 @@ contract StreamScopedPolicySnapshotPublicationV2 is I, StreamGasParameterHost {
         guarded
         returns (bytes32 hash)
     {
-        _candidate(p);
-        S.Receipt memory r = _receipt(p, msg.sender);
+        S.Receipt memory r = Admission.prepare(
+            _fixed, _locks, _ids, _history, metadataHost, gasParameter(READ_GAS), p, msg.sender
+        );
         bytes memory canonical;
         (r.sourceHash, canonical) = _assemble(p, r);
-        if (p.expectedSourceHash == 0 || p.expectedSourceHash != r.sourceHash) {
-            revert S.InvalidScopedPolicySnapshot();
-        }
-        r.manifestHash = keccak256(canonical);
-        r.manifestBytes = uint32(canonical.length);
-        r.recordedAt = uint64(block.timestamp);
-        hash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SCOPED_POLICY_SNAPSHOT_RECORD_V2"),
-                _fixed.chainId,
-                address(this),
-                core,
-                metadataHost,
-                p,
-                r
-            )
+        return Writer.publish(
+            _publications,
+            _receipts,
+            _payloads,
+            _ids,
+            _history,
+            _fixed,
+            core,
+            metadataHost,
+            p,
+            r,
+            canonical
         );
-        r.recordHash = hash;
-        r.chainHash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SCOPED_POLICY_SNAPSHOT_CHAIN_V2"),
-                _fixed.chainId,
-                address(this),
-                core,
-                p.scope,
-                _receipts[p.expectedHead].chainHash,
-                r.revision,
-                hash
-            )
-        );
-        // The fixed Store cannot call back into the writer. Its immutable bytes grant no authority.
-        Bytes.retain(_payloads[hash], _fixed.targets[3], canonical);
-        _publications[hash] = p;
-        _receipts[hash] = r;
-        _ids[r.scopeSubject][p.snapshotId] = hash;
-        _history[r.scopeSubject].push(hash);
-        emit ScopedPolicySnapshotPublished(2, r.scopeSubject, p.snapshotId, hash, p, r);
     }
 
     function currentSnapshot(StreamFinalityScope calldata scope)
@@ -320,122 +299,14 @@ contract StreamScopedPolicySnapshotPublicationV2 is I, StreamGasParameterHost {
         return _history[Sources.scopeSubject(_fixed, scope)][index];
     }
 
-    function _candidate(S.Publication memory p) private view {
-        bytes32 subject = Sources.scopeSubject(_fixed, p.scope);
-        if (_locks[subject].actionId != 0) revert S.ScopedPolicySnapshotLocked(subject);
-        if (
-            p.snapshotId == 0 || p.reasonHash == 0 || p.effectiveAt == 0
-                || p.effectiveAt > block.timestamp || block.timestamp > type(uint64).max
-                || p.expectedRevision == type(uint64).max || _ids[subject][p.snapshotId] != 0
-        ) revert S.InvalidScopedPolicySnapshot();
-        if (_head(subject) != p.expectedHead || _history[subject].length != p.expectedRevision) {
-            revert S.ScopedPolicySnapshotLineage(p.expectedHead, _head(subject));
-        }
-        StreamMetadataRenderer.requireValidUtf8ContentUri(
-            "snapshotManifestURI", p.manifestURI, 2048, true
-        );
-    }
-
-    function _receipt(S.Publication memory p, address publisher)
-        private
-        view
-        returns (S.Receipt memory r)
-    {
-        r.scopeSubject = Sources.scopeSubject(_fixed, p.scope);
-        r.predecessor = p.expectedHead;
-        r.revision = p.expectedRevision + 1;
-        r.publisher = publisher;
-        (r.authorizationClass, r.grantRevision) =
-            _authority(p.scope.collectionId, Families.SNAPSHOT, publisher);
-        (r.displayAuthorizationClass, r.displayGrantRevision) =
-            _authority(p.scope.collectionId, Families.IDENTITY, publisher);
-        r.schemaHash = Definitions.SCHEMA_HASH;
-        r.profileHash = Definitions.PROFILE_HASH;
-        r.canonicalizationHash = Definitions.CANON_HASH;
-    }
-
-    function _authority(uint256 cid, bytes32 family, address actor)
-        private
-        view
-        returns (uint8, uint64)
-    {
-        if (actor == address(0)) revert S.ScopedPolicySnapshotAuthority(actor);
-        for (uint8 i; i < 2; ++i) {
-            uint8 cls = i == 0 ? 7 : 8;
-            bytes memory raw = Reads.read(
-                metadataHost,
-                abi.encodeCall(Metadata.familyWriter, (i == 0 ? cid : 0, family, cls, actor)),
-                64,
-                gasParameter(READ_GAS)
-            );
-            (bool enabled, uint64 rev) = abi.decode(raw, (bool, uint64));
-            if (keccak256(raw) != keccak256(abi.encode(enabled, rev))) {
-                revert S.InvalidScopedPolicySnapshot();
-            }
-            if (enabled && rev != 0) return (cls, rev);
-        }
-        revert S.ScopedPolicySnapshotAuthority(actor);
-    }
-
     function _assemble(S.Publication memory p, S.Receipt memory r)
         private
         view
         returns (bytes32 hash, bytes memory canonical)
     {
-        S.Dependencies memory d = dependencies();
-        _definitions(d);
-        S.Source memory f = Sources.current(d, p);
-        hash = Sources.sourceHash(d, f);
+        (hash, canonical) = Assembly.assemble(dependencies(), p, r);
         r.sourceHash = hash;
-        p.expectedSourceHash = 0; // The actual hash is present in receipt/source; no preview circularity.
-        canonical = abi.encode(
-            keccak256("6529STREAM_SCOPED_POLICY_SNAPSHOT_PAYLOAD_V2"),
-            d.chainId,
-            address(this),
-            d.targets,
-            d.codeHashes,
-            p,
-            r,
-            f
-        );
-        if (canonical.length > 524288) revert S.InvalidScopedPolicySnapshot();
-    }
-
-    function _definitions(S.Dependencies memory d) private view {
-        Documents.Dependencies memory known;
-        for (uint256 i; i < 4; ++i) {
-            known.targets[i] = d.targets[i];
-            known.codeHashes[i] = d.codeHashes[i];
-        }
-        known.chainId = d.chainId;
-        known.readGas = d.readGas;
-        Documents.definition(
-            known,
-            Definitions.SCHEMA_ID,
-            Schema.DocumentKind.SCHEMA,
-            Definitions.SCHEMA_HASH,
-            Definitions.SCHEMA_BYTES,
-            keccak256("RAW_BYTES"),
-            true
-        );
-        Documents.definition(
-            known,
-            Definitions.PROFILE_ID,
-            Schema.DocumentKind.CATALOG,
-            Definitions.PROFILE_HASH,
-            Definitions.PROFILE_BYTES,
-            keccak256("RAW_BYTES"),
-            true
-        );
-        Documents.definition(
-            known,
-            Definitions.CANON_ID,
-            Schema.DocumentKind.CANONICALIZATION,
-            Definitions.CANON_HASH,
-            Definitions.CANON_BYTES,
-            keccak256("RAW_BYTES"),
-            true
-        );
+        p.expectedSourceHash = 0;
     }
 
     function _head(bytes32 subject) private view returns (bytes32) {

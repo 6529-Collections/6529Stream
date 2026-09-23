@@ -10,8 +10,8 @@ import {
     StreamCurrentAuthorityInventoryTypes as D
 } from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 import {
-    StreamCurrentAuthorityScopedBundleArchiveCoverage as Child
-} from "../preservation/StreamCurrentAuthorityScopedBundleArchiveCoverage.sol";
+    StreamCurrentAuthorityScopedPolicyPublicationBundleConstructorV2 as Constructor
+} from "./StreamCurrentAuthorityScopedPolicyPublicationBundleConstructorV2.sol";
 import {
     StreamScopedPolicyPublicationRecipeV2 as Recipe
 } from "./StreamScopedPolicyPublicationRecipeV2.sol";
@@ -24,8 +24,8 @@ library StreamCurrentAuthorityScopedPolicyPublicationBundleDeploymentV2 {
         O.Dependencies memory origin,
         D.Dependencies memory authority
     ) public returns (address) {
-        return address(
-            new Child(Recipe.bundle(r, g), origin, authority, D.SCOPED_POLICY_INVENTORY_PROFILE)
+        return Constructor.deploy(
+            Recipe.bundle(r, g), origin, authority, D.SCOPED_POLICY_INVENTORY_PROFILE
         );
     }
 }

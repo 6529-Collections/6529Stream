@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    StreamPreservationTokenProducerProfilesV1 as Producers
-} from "../../interfaces/stream/finality/StreamPreservationTokenProducerProfilesV1.sol";
+    StreamScopedPreservationPolicySnapshotAdmission as Admission
+} from "./StreamScopedPreservationPolicySnapshotAdmission.sol";
+import {
+    StreamScopedPreservationPolicySnapshotWriter as Writer
+} from "./StreamScopedPreservationPolicySnapshotWriter.sol";
+
 import {
     StreamPreservationPolicySnapshotFamiliesV2 as SnapshotFamilies
 } from "../records/StreamPreservationPolicySnapshotFamiliesV2.sol";
@@ -24,24 +28,20 @@ import {
 import {
     StreamFinalityScope
 } from "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
-import {
-    IStreamCollectionMetadataV1 as Metadata
-} from "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
+
 import {
     StreamScopedPreservationPolicySnapshotSourceReadsV1 as Sources
 } from "../records/StreamScopedPreservationPolicySnapshotSourceReadsV1.sol";
-import {
-    StreamScopedPreservationPolicySnapshotDefinitionsV1 as Definitions
-} from "../records/StreamScopedPreservationPolicySnapshotDefinitionsV1.sol";
+
 import {
     StreamScopedPreservationSnapshotAssemblyV1 as Assembly
 } from "../records/StreamScopedPreservationSnapshotAssemblyV1.sol";
 import { StreamSnapshotManifestBytes as Bytes } from "../records/StreamSnapshotManifestBytes.sol";
-import { StreamRecordFamilies as Families } from "../records/StreamRecordFamilies.sol";
+
 import {
     StreamFinalityRouterEvidence as Reads
 } from "../finality/StreamFinalityRouterEvidence.sol";
-import { StreamMetadataRenderer } from "./StreamMetadataRenderer.sol";
+
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Exact preservation-policy scope-bound source publication, preceding separate scoped root adoption.
@@ -148,8 +148,17 @@ abstract contract StreamScopedPreservationPolicySnapshotPublicationKernel is
         override
         returns (bytes32 sourceHash, bytes memory canonical)
     {
-        _candidate(p);
-        S.Receipt memory r = _receipt(p, publisher);
+        S.Receipt memory r = Admission.prepare(
+            _fixed,
+            _locks,
+            _ids,
+            _history,
+            metadataHost,
+            gasParameter(READ_GAS),
+            p,
+            publisher,
+            _family
+        );
         return _assemble(p, r);
     }
 
@@ -159,48 +168,32 @@ abstract contract StreamScopedPreservationPolicySnapshotPublicationKernel is
         guarded
         returns (bytes32 hash)
     {
-        _candidate(p);
-        S.Receipt memory r = _receipt(p, msg.sender);
+        S.Receipt memory r = Admission.prepare(
+            _fixed,
+            _locks,
+            _ids,
+            _history,
+            metadataHost,
+            gasParameter(READ_GAS),
+            p,
+            msg.sender,
+            _family
+        );
         bytes memory canonical;
         (r.sourceHash, canonical) = _assemble(p, r);
-        if (p.expectedSourceHash == 0 || p.expectedSourceHash != r.sourceHash) {
-            revert S.InvalidScopedPolicySnapshot();
-        }
-        r.manifestHash = keccak256(canonical);
-        r.manifestBytes = uint32(canonical.length);
-        r.recordedAt = uint64(block.timestamp);
-        hash = keccak256(
-            abi.encode(
-                SnapshotFamilies.recordDomain(_family, true),
-                _fixed.chainId,
-                address(this),
-                core,
-                metadataHost,
-                p,
-                r
-            )
-        );
-        r.recordHash = hash;
-        r.chainHash = keccak256(
-            abi.encode(
-                SnapshotFamilies.chainDomain(_family, true),
-                _fixed.chainId,
-                address(this),
-                core,
-                p.scope,
-                _receipts[p.expectedHead].chainHash,
-                r.revision,
-                hash
-            )
-        );
-        // The fixed Store cannot call back into the writer. Its immutable bytes grant no authority.
-        Bytes.retain(_payloads[hash], _fixed.targets[3], canonical);
-        _publications[hash] = p;
-        _receipts[hash] = r;
-        _ids[r.scopeSubject][p.snapshotId] = hash;
-        _history[r.scopeSubject].push(hash);
-        emit ScopedPolicySnapshotPublished(
-            SnapshotFamilies.version2(_family) ? 2 : 1, r.scopeSubject, p.snapshotId, hash, p, r
+        return Writer.publish(
+            _publications,
+            _receipts,
+            _payloads,
+            _ids,
+            _history,
+            _fixed,
+            core,
+            metadataHost,
+            p,
+            r,
+            canonical,
+            _family
         );
     }
 
@@ -341,64 +334,6 @@ abstract contract StreamScopedPreservationPolicySnapshotPublicationKernel is
         returns (bytes32)
     {
         return _history[Sources.scopeSubject(_fixed, scope)][index];
-    }
-
-    function _candidate(S.Publication memory p) private view {
-        bytes32 subject = Sources.scopeSubject(_fixed, p.scope);
-        if (_locks[subject].actionId != 0) revert S.ScopedPolicySnapshotLocked(subject);
-        if (
-            p.snapshotId == 0 || p.reasonHash == 0 || p.effectiveAt == 0
-                || p.effectiveAt > block.timestamp || block.timestamp > type(uint64).max
-                || p.expectedRevision == type(uint64).max || _ids[subject][p.snapshotId] != 0
-        ) revert S.InvalidScopedPolicySnapshot();
-        if (_head(subject) != p.expectedHead || _history[subject].length != p.expectedRevision) {
-            revert S.ScopedPolicySnapshotLineage(p.expectedHead, _head(subject));
-        }
-        StreamMetadataRenderer.requireValidUtf8ContentUri(
-            "snapshotManifestURI", p.manifestURI, 2048, true
-        );
-    }
-
-    function _receipt(S.Publication memory p, address publisher)
-        private
-        view
-        returns (S.Receipt memory r)
-    {
-        r.scopeSubject = Sources.scopeSubject(_fixed, p.scope);
-        r.predecessor = p.expectedHead;
-        r.revision = p.expectedRevision + 1;
-        r.publisher = publisher;
-        (r.authorizationClass, r.grantRevision) =
-            _authority(p.scope.collectionId, Families.SNAPSHOT, publisher);
-        (r.displayAuthorizationClass, r.displayGrantRevision) =
-            _authority(p.scope.collectionId, Families.IDENTITY, publisher);
-        bytes32[3] memory hashes = SnapshotFamilies.hashes(_family, true);
-        r.schemaHash = hashes[0];
-        r.profileHash = hashes[1];
-        r.canonicalizationHash = hashes[2];
-    }
-
-    function _authority(uint256 cid, bytes32 family, address actor)
-        private
-        view
-        returns (uint8, uint64)
-    {
-        if (actor == address(0)) revert S.ScopedPolicySnapshotAuthority(actor);
-        for (uint8 i; i < 2; ++i) {
-            uint8 cls = i == 0 ? 7 : 8;
-            bytes memory raw = Reads.read(
-                metadataHost,
-                abi.encodeCall(Metadata.familyWriter, (i == 0 ? cid : 0, family, cls, actor)),
-                64,
-                gasParameter(READ_GAS)
-            );
-            (bool enabled, uint64 rev) = abi.decode(raw, (bool, uint64));
-            if (keccak256(raw) != keccak256(abi.encode(enabled, rev))) {
-                revert S.InvalidScopedPolicySnapshot();
-            }
-            if (enabled && rev != 0) return (cls, rev);
-        }
-        revert S.ScopedPolicySnapshotAuthority(actor);
     }
 
     function _assemble(S.Publication memory p, S.Receipt memory r)
