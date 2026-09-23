@@ -10,7 +10,7 @@ The historical `current-v1-safe-coverage.*` ABI102 client inventory remains froz
 
 A separate [ABI213 call-surface inventory and anchored product-gap report](current-safe-call-surface-abi213.md)
 refreshes the retained 164-contract roster against source commit
-`a0f92ecae8414d36aa715ae1e37d5fb222c0db97`. It is a current ABI/source inventory,
+`09f32efab40659a11353be75a1d46a3e49959bb7`. It is a current ABI/source inventory,
 not Safe acceptance; its candidate list does not rewrite this ABI176 report, its
 historical runtime attestations, or the older ABI102 coverage inventory.
 

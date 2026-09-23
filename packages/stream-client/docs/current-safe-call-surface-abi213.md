@@ -1,6 +1,6 @@
 # Current Safe call-surface inventory (ABI213)
 
-Source: a0f92ecae8414d36aa715ae1e37d5fb222c0db97. The compiler bridge authenticates all 4698 source blobs. The machine file contains exact current signatures, selectors, input/output types and source/ABI hashes for 175 supported products, including the retained historical roster and explicit current full37 additions.
+Source: 09f32efab40659a11353be75a1d46a3e49959bb7. The compiler bridge authenticates all 4756 source blobs. The machine file contains exact current signatures, selectors, input/output types and source/ABI hashes for 175 supported products, including the retained historical roster and explicit current full37 additions.
 The selected set contains 7211 functions, 4 receive handlers and 0 fallback handlers. This is an ABI surface inventory, not Safe acceptance.
 
 The prior 164-FQN roster is retained selection evidence, not blanket permission to omit later full-v1 products. Candidate products absent from it are separately listed below. The 6,840 compiler FQNs include interfaces, libraries, abstract contracts, tests and legacy products; presence alone does not make them independent supported Safe surfaces.

@@ -60,7 +60,7 @@ function fixture() {
   addSource("test/Candidate.t.sol", "contract CandidateTest { // CommentOnly\n string memory ignored = \"StringOnly\"; Candidate target; ICandidate api; CandidateLib lib; AbstractCandidate abstractTarget; }");
 
   const input = { sources, settings: { optimizer: { enabled: true } } };
-  const bridge = { commit: "a0f92ecae8414d36aa715ae1e37d5fb222c0db97", committedBlobSHA256, mismatches: [] };
+  const bridge = { commit: "09f32efab40659a11353be75a1d46a3e49959bb7", committedBlobSHA256, mismatches: [] };
   const output = { contracts };
   const entries = [{ id: 1, key: "CANDIDATE_ROLE", deployment_scope: "singleton", implementation: { mode: "exact", names: ["Candidate"] }, approved_aliases: [] }];
   for (let i = 2; i <= 37; i++) entries.push({ id: i, key: "ROLE_" + i,
@@ -91,7 +91,7 @@ test("ABI213 refresh preserves historical totals and expands the supported roste
   assert.deepEqual(report.historicalTotals, { contracts: 164, functions: 6553, viewOrPure: 3276, stateChanging: 3277, payableFunctions: 0, receive: 0, fallback: 0 });
   assert.equal(report.surfaces.length, 164 + report.selection.addedCurrentSupportProducts);
   assert.equal(report.totals.contracts, 164 + report.selection.addedCurrentSupportProducts);
-  assert.equal(report.capture.sourceCommit, "a0f92ecae8414d36aa715ae1e37d5fb222c0db97");
+  assert.equal(report.capture.sourceCommit, "09f32efab40659a11353be75a1d46a3e49959bb7");
   assert.equal(report.surfaces[0].functions[0].selector, "0x00000000");
 });
 

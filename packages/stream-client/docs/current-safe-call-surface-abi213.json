@@ -1,16 +1,16 @@
 {
   "schemaVersion": "6529stream.safe-call-surface.abi213.v1",
   "capture": {
-    "sourceCommit": "a0f92ecae8414d36aa715ae1e37d5fb222c0db97",
-    "compilerInputSha256": "f247f5c9cb0c6e20d442ea9eaaf3ca251cfee48998fc85fd2f33cf2192409ada",
-    "compilerOutputSha256": "8f511ad7cccce10df115118d24d94d949d5a24637770d3ad3a6788f9d2d552bd",
-    "sourceBridgeSha256": "c1c5cdf16c3b559da61ea0515315abab04fc9e00db438e0dea64f9b2a6f84e7b",
+    "sourceCommit": "09f32efab40659a11353be75a1d46a3e49959bb7",
+    "compilerInputSha256": "db543649bf055df37dcab6729a24c8290748bdbac1133075f83508bcecc1d97a",
+    "compilerOutputSha256": "64d84b156fc8a34a6058635d12a7802666a59b974e62397f0524eec4893cb934",
+    "sourceBridgeSha256": "3254f22112c5bb99efa68e63c96da6935c1018c859eb07bbbd574fa4e2affc64",
     "settingsSha256": "315a88e73d23986ea2c3aafc5a1d0a07a40fe10198fdd411f806a1727d646389",
     "genesisProfileSha256": "e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135",
     "planningCandidateSha256": "b651a8324cb996d0b9957eb5c1cd8ba3a0e61a2033c2a815535bc04e973a48eb",
     "currentTargetCatalogSha256": "76f426d065a6dfe7b9472d98322398df3f68f3c309df5fb9252c164127ba6b29",
     "current37CaptureSourceSha256": "de714600a028692fd36d9e340e213107b0aca10c9b9812fb87a2d4df51ae3446",
-    "compilerSourceCount": 4698
+    "compilerSourceCount": 4756
   },
   "selection": {
     "basis": "Retained historical 164-FQN roster plus products in the exact current full37 capture and its explicit required support rows",
@@ -4362,7 +4362,7 @@
       "source": "smart-contracts/domains/finality/StreamPolicyContentCheckpointV2.sol",
       "contract": "StreamPolicyContentCheckpointV2",
       "family": "finality",
-      "sourceSha256": "46573622769cfc811262048692242e7ae50c169ba8f38811da2dabd9115a5761",
+      "sourceSha256": "04a32d734392d4be09186deeae606dcbc360d751ef24b0c8651cf28f001c6c6e",
       "abiSha256": "058d866f49f9a0595162f1ca4caf1e6c24e6d86fae78ae13e61af31bca85b93c",
       "historicalFunctionCount": 34,
       "functionCount": 34,
@@ -4749,7 +4749,7 @@
       "source": "smart-contracts/domains/finality/StreamScopedPolicyContentCheckpointV2.sol",
       "contract": "StreamScopedPolicyContentCheckpointV2",
       "family": "finality",
-      "sourceSha256": "19a238b51480898fae96ccfe152586cef4891d143c406bc5fe0bc6ae95c9c1bd",
+      "sourceSha256": "fb5bc0eadd9c2f38c325a6cda961034b3e251ef48c858505f3fc5e3f92f5705d",
       "abiSha256": "24d05dd7781484a92ee6058f7f36a5eb2489c0b0922d2da280f90ffdf55e396a",
       "historicalFunctionCount": 38,
       "functionCount": 38,
@@ -6126,7 +6126,7 @@
       "source": "smart-contracts/domains/metadata/StreamPolicySnapshotPublicationV2.sol",
       "contract": "StreamPolicySnapshotPublicationV2",
       "family": "metadata",
-      "sourceSha256": "4543158a1054018b81731fc4b72a8eff4c5f7cffe434cc03e443ddbc25ff72dc",
+      "sourceSha256": "d1e918a29f53739b4eb24d5cbb52ca52258ff4aeb73760edf51549d2f49ad519",
       "abiSha256": "0c52a3723cfbbc84ab253380960fcdc54041db93ee6c56bb54295012d1c051ed",
       "historicalFunctionCount": 31,
       "functionCount": 31,
@@ -6384,7 +6384,7 @@
       "source": "smart-contracts/domains/metadata/StreamScopedPolicySnapshotPublicationV2.sol",
       "contract": "StreamScopedPolicySnapshotPublicationV2",
       "family": "metadata",
-      "sourceSha256": "e80b6180d20097a0c1e2e16f05e2d7c46faa5bd5b5d3e5c5cfb398b411ea6026",
+      "sourceSha256": "c0166ae0154ae31dd542f7b45ee067b6e332480c7a1bfa7b6e2d1ee1024c7944",
       "abiSha256": "29fd445c02c8eba3665c7552a683b812e16e8d88ee85e899fac7de159ed82ac1",
       "historicalFunctionCount": 30,
       "functionCount": 30,
@@ -7968,7 +7968,7 @@
       "source": "smart-contracts/domains/preservation/StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1.sol",
       "contract": "StreamCurrentAuthorityPreservationPolicyRenderCriticalInventoryV1",
       "family": "preservation",
-      "sourceSha256": "b8c9b6b5de4c00de649513acdf74ca70c2d96dca56894a3af4d11ca5e54b46d2",
+      "sourceSha256": "4d50a4cfee2d9ebaa2f4acfcc1bd11878a230fb8431e8dd002bd9238cb96ccbf",
       "abiSha256": "1ac6379a58eb65f1e5f620cfa4f30330cce22cbb1ea59e22a57e5926bf23dad4",
       "historicalFunctionCount": 50,
       "functionCount": 50,
@@ -8148,7 +8148,7 @@
       "source": "smart-contracts/domains/preservation/StreamCurrentAuthorityScopedPolicyRenderCriticalInventoryV2.sol",
       "contract": "StreamCurrentAuthorityScopedPolicyRenderCriticalInventoryV2",
       "family": "preservation",
-      "sourceSha256": "58a23bbefc21a430160844abc5af13386fa426cb61943222497e1a8ead445b0e",
+      "sourceSha256": "c3882e04e19a2658e08e646548472b6ec65bab1b107c6b7d4929cc3be76deb7c",
       "abiSha256": "13764145ca29388f856db93c2c6b0ecb704b5561a646c8d11f887e4dab84b799",
       "historicalFunctionCount": 46,
       "functionCount": 46,
@@ -8264,7 +8264,7 @@
       "source": "smart-contracts/domains/preservation/StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1.sol",
       "contract": "StreamCurrentAuthorityScopedPreservationPolicyRenderCriticalInventoryV1",
       "family": "preservation",
-      "sourceSha256": "7fdae6897e6631b76fa353f3aa9cf507738e64de198434e86d6957a5947fc2a7",
+      "sourceSha256": "9ee7edf6bcafda136d9d7958bb0d490ce284a1971ef892b0721d830ba34056cd",
       "abiSha256": "3f5adabf9b321477c2ad5a1fae8cfbbdaa53f18dce97b3d03e4d231b08098627",
       "historicalFunctionCount": 47,
       "functionCount": 47,
@@ -8504,7 +8504,7 @@
       "source": "smart-contracts/domains/preservation/StreamPolicyReferencePublicationV2.sol",
       "contract": "StreamPolicyReferencePublicationV2",
       "family": "preservation",
-      "sourceSha256": "1999dd00d837f6dc6281d5a8b625fda84515457531e59cc62a3ca4487b331fc5",
+      "sourceSha256": "f7a62a77f5405b61cdcb10c3ba0b8ab452a02f57e6071f0a1a6e80d16419e83d",
       "abiSha256": "50af519aa7a458c6b3d4d677c8173ab5479e142580b7467a3a112d250a63f561",
       "historicalFunctionCount": 52,
       "functionCount": 52,
@@ -9045,7 +9045,7 @@
       "source": "smart-contracts/domains/preservation/StreamScopedPolicyReferencePublicationV2.sol",
       "contract": "StreamScopedPolicyReferencePublicationV2",
       "family": "preservation",
-      "sourceSha256": "019c85e9281572a089f3eda73850e16184e88caa7d27d8975d0d37fd66d4068a",
+      "sourceSha256": "122b4aa5cb1466fe7a0b096342a7ae3eb52bd25b0b003c24facfdd598d47ef44",
       "abiSha256": "27da140f8467d2490c6688545f9bd58c0717c44ae1e4d7194a173a877cd6c060",
       "historicalFunctionCount": 50,
       "functionCount": 50,
@@ -9115,7 +9115,7 @@
       "source": "smart-contracts/domains/preservation/StreamScopedPolicyRenderCriticalInventoryV2.sol",
       "contract": "StreamScopedPolicyRenderCriticalInventoryV2",
       "family": "preservation",
-      "sourceSha256": "5725ee1c81026783cbd76e38cbf2b64dc2f0cade396be428906ef1da3067c77e",
+      "sourceSha256": "dd7d7b3b67acdf0458c613846bd38ee58d9ff4bc72f7dade4e124d340f20a3e7",
       "abiSha256": "b4ed27063be60cc23fc37043e178c4e3be642003c0fea6b183f9bb9774f6b605",
       "historicalFunctionCount": 35,
       "functionCount": 35,
@@ -31899,7 +31899,7 @@
     {
       "name": "StreamPolicyContentCheckpointV2",
       "fqn": "smart-contracts/domains/finality/StreamPolicyContentCheckpointV2.sol:StreamPolicyContentCheckpointV2",
-      "sourceSha256": "46573622769cfc811262048692242e7ae50c169ba8f38811da2dabd9115a5761",
+      "sourceSha256": "04a32d734392d4be09186deeae606dcbc360d751ef24b0c8651cf28f001c6c6e",
       "declarationKind": "contract",
       "functionCount": 34,
       "receiveCount": 0,
@@ -32160,7 +32160,7 @@
     {
       "name": "StreamPolicyReferencePublicationV2",
       "fqn": "smart-contracts/domains/preservation/StreamPolicyReferencePublicationV2.sol:StreamPolicyReferencePublicationV2",
-      "sourceSha256": "1999dd00d837f6dc6281d5a8b625fda84515457531e59cc62a3ca4487b331fc5",
+      "sourceSha256": "f7a62a77f5405b61cdcb10c3ba0b8ab452a02f57e6071f0a1a6e80d16419e83d",
       "declarationKind": "contract",
       "functionCount": 52,
       "receiveCount": 0,
@@ -32206,6 +32206,11 @@
           {
             "kind": "test-source-reference",
             "path": "test/helpers/StreamCurrentFullPolicyReferenceFixture.sol",
+            "qualification": "identifier-reference-only-execution-not-verified"
+          },
+          {
+            "kind": "test-source-reference",
+            "path": "test/unit/preservation/StreamPolicyReferencePublicationV2.t.sol",
             "qualification": "identifier-reference-only-execution-not-verified"
           }
         ]
@@ -32271,7 +32276,7 @@
     {
       "name": "StreamPolicySnapshotPublicationV2",
       "fqn": "smart-contracts/domains/metadata/StreamPolicySnapshotPublicationV2.sol:StreamPolicySnapshotPublicationV2",
-      "sourceSha256": "4543158a1054018b81731fc4b72a8eff4c5f7cffe434cc03e443ddbc25ff72dc",
+      "sourceSha256": "d1e918a29f53739b4eb24d5cbb52ca52258ff4aeb73760edf51549d2f49ad519",
       "declarationKind": "contract",
       "functionCount": 31,
       "receiveCount": 0,
@@ -32317,6 +32322,11 @@
           {
             "kind": "test-source-reference",
             "path": "test/helpers/StreamCurrentFullPolicyPublicationFixture.sol",
+            "qualification": "identifier-reference-only-execution-not-verified"
+          },
+          {
+            "kind": "test-source-reference",
+            "path": "test/unit/metadata/StreamPolicySnapshotPublicationV2.t.sol",
             "qualification": "identifier-reference-only-execution-not-verified"
           }
         ]

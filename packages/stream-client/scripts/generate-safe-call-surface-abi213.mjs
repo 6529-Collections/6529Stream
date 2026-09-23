@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-export const CURRENT_SOURCE_COMMIT = "a0f92ecae8414d36aa715ae1e37d5fb222c0db97";
+export const CURRENT_SOURCE_COMMIT = "09f32efab40659a11353be75a1d46a3e49959bb7";
 const HISTORICAL_ROSTER_SOURCE_COMMIT = "aa2ca4a2764ca981630c668966a665637692842d";
 const HISTORICAL_CONTRACT_COUNT = 164;
 const HISTORICAL_FUNCTION_COUNT = 6553;
