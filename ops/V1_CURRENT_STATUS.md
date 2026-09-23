@@ -1,5 +1,35 @@
 # Full-v1 current delivery status
 
+## Latest integrated checkpoint: 23 September, `b0ba19b47`
+
+Production remains `09f32efab`. The final Artist native captures now pass,
+including Factory, Registry and Identity Authority. The reusable Artist set
+contains 104 products across 33 compiler contexts; independent UTF-8 source
+comparison checks 613 transitive files against current production. Focused
+execution and measured deployment/transaction gas are still pending.
+
+Reviewed test-fixture changes preserve genuine CREATE while loading compiled
+artifacts instead of embedding large construction graphs. The policy checkpoint
+host now compiles and passes physical artifact verification in 52 seconds after
+its previous 900-second timeout. Its fourteen tests have not executed yet.
+The separate render-critical host still times out; its fifteen cases remain
+unexecuted and a narrower test-source extraction is being prepared.
+
+Museum V4 adds an explicit eight-case/four-format coverage ledger and actual
+Linked Art/LIDO photograph and software projections. Eighteen retained tests
+and three new format tests pass in separate root runs. PREMIS/IIIF support for
+received media, authenticated current-contract capture and institutional
+acceptance remain distinct work. The current client inventory is refreshed
+against production `09f32efab`; six inventory tests and twelve generated ABI
+projection checks pass, without implying actual all-call Safe execution.
+
+The combined source check at `4d569abd3` passes 4,785 Solidity files with zero
+type/ABI errors. Paid test-fixture repairs are integrated on that current
+baseline; actual paid execution and the unchanged 500,000-gas ceiling remain
+open. Complete current-stack/Safe execution, fuzz/stateful campaigns, formatting,
+full CI, matching release evidence and the new testnet candidate are unfinished.
+RC1 is unchanged. Earlier checkpoints below retain their original source scope.
+
 ### Additional integrated results: `004984c37`
 
 All eight synthetic Museum media/history scenarios now have executable semantic

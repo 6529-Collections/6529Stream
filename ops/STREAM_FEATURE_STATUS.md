@@ -1,5 +1,15 @@
 # Stream feature status
 
+## Latest integrated checkpoint: 23 September, `b0ba19b47`
+
+Production is `09f32efab`; full v1 remains incomplete. Final Artist native
+captures pass and the reviewed test-fixture changes let the policy checkpoint
+host compile in 52 seconds. Current runtime acceptance remains open, including
+the separate render-critical host timeout. Museum V4 adds bounded four-format
+coverage and 21 distinct focused passes; the client inventory matches current
+production. See [the current status](V1_CURRENT_STATUS.md) for exact sources
+and remaining work. All earlier checkpoints below retain their original scope.
+
 ## Current delivery checkpoint: 23 September, source `09f32efab`
 
 Production repairs for the 20 previously oversized publication deployment

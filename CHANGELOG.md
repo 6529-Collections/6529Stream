@@ -1,5 +1,14 @@
 # Changelog
 
+## Current native fixtures and Museum format coverage
+
+- Load current paid, checkpoint and Artist fixtures from genuine compiled
+  artifacts while retaining constructor arguments, caller, ordering and tests.
+- Add the Museum V4 field/format coverage ledger and validated photograph and
+  software Linked Art/LIDO exports. Retain unsupported-format facts explicitly.
+- Refresh the client inventory against the integrated production source.
+  Full runtime, gas, Safe and release acceptance remain open.
+
 ## Complete synthetic Museum corpus projections
 
 - Extend the retained corpus to all eight media/history examples, including
