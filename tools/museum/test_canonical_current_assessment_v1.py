@@ -153,7 +153,8 @@ class CurrentAssessmentTests(unittest.TestCase):
             source_case.complete_case.cache_clear(); canonical_case.cache_clear()
             original = canonical_case()
             cls.base = v4.compose(dict(original.files), original.manifest_hash, disclosure='public')
-            fixture = holder['fixture']; adapter = fixture.policy_source(); adapter.snapshot()
+            fixture = holder['fixture']; cls.fixture = fixture
+            adapter = fixture.policy_source(); adapter.snapshot()
             transcript = adapter.transcript()
             cls.finality = finality.replay(adapter.anchor_bytes, keccak256(adapter.anchor_bytes),
                 finality._source().PROFILE_HASH, transcript, keccak256(transcript),

@@ -26,19 +26,24 @@ def native(kind, value):
 class CollectionScriptFixture:
     """Generic pinned Registry getter fixture, not that Registry's publication path."""
     def __init__(self, mode='stable', *, registry=False, unavailable=False,
-                 registry_mismatch=False, replaced=False):
+                 registry_mismatch=False, replaced=False,
+                 context_overrides=None, source_state=None, runtime_overrides=None):
         require_mode = mode in ('stable', 'chunked', 'inline', 'empty')
         if not require_mode: raise ValueError('unknown script fixture mode')
         self.mode, self.responses, self.calls = mode, {}, []
         self.value, self.context = chunked_fixture(registry=registry) if mode == 'chunked' else stable_fixture()
+        if context_overrides: self.context.update(context_overrides)
         self.core, self.metadata, self.router = (self.context[k] for k in ('core', 'metadata', 'router'))
-        self.store, self.module_registry = A(5), A(6)
+        self.store, self.module_registry = (self.context.get('store', A(5)),
+            self.context.get('moduleRegistry', A(6)))
         self.codes = {host: b'synthetic script ' + role.encode() for host, role in (
             (self.core, 'core'), (self.metadata, 'metadata'), (self.router, 'router'),
             (self.store, 'store'), (A(8), 'renderer'))}
         if registry: self.codes[self.value['library']['registrySource']['registry']] = b'generic pinned Registry'
+        if runtime_overrides: self.codes.update(runtime_overrides)
         self.pins = {host: keccak256(raw) for host, raw in self.codes.items()}
         self.context.update(metadataRuntimeHash=self.pins[self.metadata], routerRuntimeHash=self.pins[self.router])
+        self.value['selection']['host'] = self.metadata
         if mode == 'chunked':
             library, script = self.value['library'], self.value['script']
             if registry: library['registrySource']['codeHash'] = self.pins[library['registrySource']['registry']]
@@ -58,21 +63,28 @@ class CollectionScriptFixture:
             if mode != 'chunked': raise ValueError('replacement fixture needs chunked mode')
             self.current_metadata = A(9); self.codes[self.current_metadata] = b'synthetic replacement Metadata'
             self.pins[self.current_metadata] = keccak256(self.codes[self.current_metadata])
-        self.block = {'hash': H('script block'), 'number': '0x2a', 'timestamp': '0x64',
-            'stateRoot': H('state'), 'parentHash': H('parent'), 'transactions': []}
+        source_state = source_state or {}
+        self.block = {'hash': source_state.get('blockHash', H('script block')),
+            'number': hex(int(source_state.get('blockNumber', '42'))),
+            'timestamp': hex(int(source_state.get('timestamp', '100'))),
+            'stateRoot': source_state.get('stateRoot', H('state')),
+            'parentHash': H('parent'), 'transactions': []}
         self.block_ref = {'blockHash': self.block['hash'], 'requireCanonical': True}
         self.runtime_bridge_raw = dumps({'kind': 'synthetic_fixture', 'note': 'admitted opaque runtime bridge'})
-        self.anchor = {'profile': source.PROFILE, 'chainId': '31337', 'core': self.core,
-            'collectionId': self.context['collectionId'], 'blockHash': self.block['hash'], 'blockNumber': '42',
-            'timestamp': '100', 'stateRoot': self.block['stateRoot'], 'environment': 'local_evm_fixture',
-            'deploymentEvidenceHash': H('deployment'), 'coreRuntimeHash': self.pins[self.core],
+        self.anchor = {'profile': source.PROFILE, 'chainId': self.context['chainId'], 'core': self.core,
+            'collectionId': self.context['collectionId'], 'blockHash': self.block['hash'],
+            'blockNumber': str(int(self.block['number'], 16)),
+            'timestamp': str(int(self.block['timestamp'], 16)), 'stateRoot': self.block['stateRoot'],
+            'environment': source_state.get('environment', 'local_evm_fixture'),
+            'deploymentEvidenceHash': source_state.get('deploymentEvidenceHash', H('deployment')),
+            'coreRuntimeHash': self.pins[self.core],
             'codePins': [{'address': host, 'runtimeHash': pin} for host, pin in self.pins.items()],
             'runtimeAdmission': {'sourceCommit': source.SOURCE_REVISION, 'kind': 'synthetic_fixture',
                 'artifactHash': keccak256(self.runtime_bridge_raw)}}
         self.anchor_raw = dumps(self.anchor)
-        self.put('eth_chainId', [], '0x7a69')
+        self.put('eth_chainId', [], hex(int(self.context['chainId'])))
         self.put('eth_getBlockByHash', [self.block['hash'], False], self.block)
-        self.put('eth_getBlockByNumber', ['0x2a', False], self.block)
+        self.put('eth_getBlockByNumber', [self.block['number'], False], self.block)
         for host, code in self.codes.items(): self.put('eth_getCode', [host, self.block_ref], '0x' + code.hex())
         cid = int(self.context['collectionId'])
         self.add(self.core, 'collectionExists(uint256)', 'bool', True, ('uint256',), (cid,))

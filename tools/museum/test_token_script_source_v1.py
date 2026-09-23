@@ -19,8 +19,10 @@ from .test_collection_script_source_v1 import CollectionScriptFixture, A, H
 class TokenScriptFixture(CollectionScriptFixture):
     def __init__(self, mode='stable', *, override=True, frozen=True,
             collection_override=False, foreign_override=False, offchain=False,
-            global_mismatch=None):
-        super().__init__(mode)
+            global_mismatch=None, context_overrides=None, source_state=None,
+            runtime_overrides=None, history_offset=0):
+        super().__init__(mode, context_overrides=context_overrides,
+            source_state=source_state, runtime_overrides=runtime_overrides)
         self.token = 41
         self.registry = A(10)
         self.codes[self.registry] = b'synthetic renderer registry'
@@ -118,22 +120,22 @@ class TokenScriptFixture(CollectionScriptFixture):
         authorization = lambda row: (source.AUTHORIZATION_EVENT,
             [row[0], '0x' + '00' * 12 + A(9)[2:]],
             (source.AUTHORIZATION,), (auth,))
-        self._history(10, [authorization(self.activation_record), (source.RECORDED_EVENT,
+        self._history(10 + history_offset, [authorization(self.activation_record), (source.RECORDED_EVENT,
             [topic(cid), topic(0), self.activation_record[0]],
             ('uint16', static.CONFIG_RECORD), (1, self.activation_record)),
             (source.ACTIVATED_EVENT, [topic(cid), previous], ('uint16', 'bytes32'),
                 (1, H('family-state')))])
         if collection_override:
-            self._history(11, [authorization(self.base), (source.RECORDED_EVENT,
+            self._history(11 + history_offset, [authorization(self.base), (source.RECORDED_EVENT,
                 [topic(cid), topic(0), self.base[0]],
                 ('uint16', static.CONFIG_RECORD), (1, self.base))])
         if override:
-            self._history(12 if collection_override else 11,
+            self._history((12 if collection_override else 11) + history_offset,
                 [authorization(self.selected), (source.RECORDED_EVENT,
                 [topic(cid), topic(self.token), self.selected[0]],
                 ('uint16', static.CONFIG_RECORD), (1, self.selected))])
         if self.foreign:
-            self._history(13 if collection_override else 12,
+            self._history((13 if collection_override else 12) + history_offset,
                 [authorization(self.foreign), (source.RECORDED_EVENT,
                 [topic(cid), topic(99), self.foreign[0]],
                 ('uint16', static.CONFIG_RECORD), (1, self.foreign))])
@@ -181,13 +183,15 @@ class TokenScriptFixture(CollectionScriptFixture):
     def source(self):
         return source.TokenScriptSource(self.anchor_raw, self)
 
-    def install_registry(self, *, missing=False, mismatched=False):
+    def install_registry(self, *, missing=False, mismatched=False,
+            schemas_address=None, runtime_overrides=None):
         """Add real getter/Store responses for four exact documents to this RPC map."""
         from .genesis_registry_source_v1 import DOCUMENT_FACTS, MODULE_RECORD, SOURCE_REVISION
-        self.schemas, self.governance = A(11), A(12)
+        self.schemas, self.governance = schemas_address or A(11), A(12)
         for address, raw in ((self.module_registry, b'synthetic module Registry'),
                 (self.schemas, b'synthetic SchemaRegistry'),
                 (self.governance, b'synthetic governance executor')):
+            raw = (runtime_overrides or {}).get(address, raw)
             self.codes[address] = raw; self.pins[address] = keccak256(raw)
             self.put('eth_getCode', [address, self.block_ref], '0x' + raw.hex())
         cid = int(self.context['collectionId'])
