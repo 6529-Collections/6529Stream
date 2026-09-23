@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from .canonical import MuseumError, dumps, keccak256, loads
-from .corpus_semantic_v1 import CASES, LEGACY_CASES, MODEL_ROOT, _project, build, verify
+from .corpus_semantic_v1 import CASES, LEGACY_CASES, V2_CASES, MODEL_ROOT, _extension, _project, build, verify
 from .corpus_v2 import build as build_corpus
 from .package import write_package
 from .package_v2 import _assemble
@@ -21,7 +21,7 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         cls.root = Path(cls.temp.name)
         cls.corpus = cls.root / "corpus"
         cls.corpus_hash = build_corpus(cls.corpus)
-        cls.result = build(cls.corpus, cls.corpus_hash, version="2")
+        cls.result = build(cls.corpus, cls.corpus_hash, version="3")
         cls.files = dict(cls.result.files)
         cls.export = cls.root / "semantic"
         write_package(cls.result, cls.export)
@@ -141,6 +141,69 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         self.assertEqual(coverage["/claims/1/value"]["disposition"], "retained_stream_only")
         self.assertEqual(len({row["author"] for row in source["claims"]}), 2)
 
+    def test_conflict_ledgers_keep_both_authors_without_custody_selection(self):
+        for name, expected_resources in (("incomplete_documentation", 2), ("independent_accounts", 1)):
+            with self.subTest(name=name):
+                source = loads(self.files["input/corpus/" + name + "/source/payload.json"])
+                resources = self._resources(name)
+                self.assertEqual(len(resources), expected_resources)
+                self.assertEqual({row["id"] for row in source["resources"]}, set(resources))
+                self.assertTrue(all("current_location" not in value and "member_of" not in value
+                                    for value in resources.values()))
+                path = "semantic/" + name + "/conflict-ledger.json"
+                ledger = loads(self.files[path])
+                self.assertEqual(ledger["mode"], "synthetic_unresolved_claims")
+                self.assertEqual(ledger["resolution"], "unresolved")
+                self.assertIsNone(ledger["selectedClaim"])
+                self.assertEqual([row["claim"] for row in ledger["claims"]], source["claims"])
+                self.assertEqual(len({row["claim"]["author"] for row in ledger["claims"]}), 2)
+                coverage = {row["pointer"]: row for row in loads(
+                    self.files["semantic/" + name + "/coverage.json"], maximum=65536)}
+                self.assertEqual(coverage["/claims/0/value"]["disposition"], "mapped")
+                self.assertEqual(coverage["/claims/1/author"]["disposition"], "mapped")
+                if name == "incomplete_documentation":
+                    self.assertEqual(source["resources"][0]["presence"], "described_only")
+                    self.assertEqual(coverage["/resources/0/presence"]["disposition"], "retained_stream_only")
+
+    def test_offline_revision_extension_cites_prior_without_replacing_original(self):
+        source = loads(self.files["input/corpus/offline_revision/source/payload.json"])
+        self.assertFalse(self._resources("offline_revision"))
+        path = "semantic/offline_revision/revision-lineage.json"
+        lineage = loads(self.files[path])
+        self.assertEqual(lineage["mode"], "synthetic_revision_lineage")
+        self.assertEqual([row["revision"] for row in lineage["revisions"]], source["revisions"])
+        self.assertEqual(lineage["revisions"][1]["revision"]["prior"],
+                         lineage["revisions"][0]["revision"]["id"])
+        coverage = {row["pointer"]: row for row in loads(
+            self.files["semantic/offline_revision/coverage.json"], maximum=65536)}
+        self.assertEqual(coverage["/revisions/0/statement"]["disposition"], "mapped")
+        self.assertEqual(coverage["/revisions/1/prior"]["disposition"], "mapped")
+        self.assertEqual(coverage["/optionalNote"]["exactHex"], "0x" + b"null".hex())
+
+        def at(value, pointer):
+            for part in pointer.lstrip("/").split("/"):
+                value = value[int(part)] if isinstance(value, list) else value[part]
+            return value
+
+        for name in ("incomplete_documentation", "independent_accounts", "offline_revision"):
+            source = loads(self.files["input/corpus/" + name + "/source/payload.json"])
+            provenance = loads(self.files["semantic/" + name + "/provenance.json"], maximum=65536)
+            extension_rows = [row for row in provenance if "targetPath" in row]
+            self.assertTrue(extension_rows)
+            for row in extension_rows:
+                self.assertEqual(row["sourceHash"], keccak256(dumps(source)))
+                self.assertEqual(at(source, row["sourcePointer"]),
+                                 at(loads(self.files[row["targetPath"]]), row["targetPointer"]))
+
+        altered = loads(self.files["input/corpus/offline_revision/source/payload.json"])
+        altered["revisions"][1]["prior"] = "urn:fixture:unrelated-revision"
+        with self.assertRaisesRegex(MuseumError, "revision lineage differs"):
+            _extension("offline_revision", altered, {}, b"", b"")
+        altered = loads(self.files["input/corpus/independent_accounts/source/payload.json"])
+        altered["claims"][1]["author"] = altered["claims"][0]["author"]
+        with self.assertRaisesRegex(MuseumError, "conflict attribution differs"):
+            _extension("independent_accounts", altered, {}, b"", b"")
+
     def test_profile_source_pins_and_all_eight_original_packages_survive(self):
         report = loads(self.files["semantic/report.json"])
         self.assertEqual(report["corpusManifestHash"], self.corpus_hash)
@@ -150,7 +213,7 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         self.assertEqual(report["completeness"], "incomplete")
         self.assertFalse(any(report["claims"].values()))
         self.assertFalse(any(loads(self.result.manifest, maximum=2 * 1024 * 1024)["claims"].values()))
-        self.assertEqual(loads(self.result.manifest, maximum=2 * 1024 * 1024)["version"], "2")
+        self.assertEqual(loads(self.result.manifest, maximum=2 * 1024 * 1024)["version"], "3")
         self.assertEqual(self.files["definitions/crosswalk-v2.json"],
                          (MODEL_ROOT / "projection/crosswalk-v2.json").read_bytes())
         for path in self.corpus.rglob("*"):
@@ -173,8 +236,21 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         with patch("socket.socket", side_effect=AssertionError("network used")):
             self.assertEqual(verify(target, legacy.manifest_hash), legacy)
 
+    def test_v2_five_case_archive_still_rebuilds_after_v3_expansion(self):
+        prior = build(self.corpus, self.corpus_hash, version="2")
+        self.assertEqual(prior.manifest_hash,
+                         "0x63b7b1384aef4cf2aa7f4e8899bbc1a09aed0ae989b37e507163a132e27ceb87")
+        files = dict(prior.files)
+        self.assertEqual(loads(files["semantic/report.json"])["scenarios"], list(V2_CASES))
+        self.assertNotIn("semantic/offline_revision/revision-lineage.json", files)
+        target = self.root / "prior-v2"
+        write_package(prior, target)
+        with patch("socket.socket", side_effect=AssertionError("network used")):
+            self.assertEqual(verify(target, prior.manifest_hash), prior)
+
     def test_mislabeled_draft_v2_rejected_even_with_rehashed_manifest(self):
-        files = dict(self.files)
+        corrected = build(self.corpus, self.corpus_hash, version="2")
+        files = dict(corrected.files)
         path = "semantic/software_interactive/provenance.json"
         provenance = loads(files[path], maximum=65536)
         changed = 0
@@ -184,7 +260,7 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
                 changed += 1
         self.assertEqual(changed, 3)
         files[path] = dumps(sorted(provenance, key=dumps))
-        metadata = loads(self.result.manifest, maximum=2 * 1024 * 1024)
+        metadata = loads(corrected.manifest, maximum=2 * 1024 * 1024)
         del metadata["files"]
         mislabeled = _assemble(MODEL_ROOT, files, metadata)
         target = self.root / "mislabeled-draft-v2"
@@ -236,6 +312,16 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         target = self.root / "changed-crosswalk"
         write_package(altered, target)
         with self.assertRaisesRegex(MuseumError, "crosswalk hash differs"):
+            verify(target, altered.manifest_hash)
+
+        files = dict(self.files)
+        conflict_path = "semantic/independent_accounts/conflict-ledger.json"
+        conflict = loads(files[conflict_path]); conflict["selectedClaim"] = conflict["claims"][0]["claim"]["id"]
+        files[conflict_path] = dumps(conflict)
+        altered = _assemble(MODEL_ROOT, files, metadata)
+        target = self.root / "forged-conflict-selection"
+        write_package(altered, target)
+        with self.assertRaisesRegex(MuseumError, "reconstruction differs"):
             verify(target, altered.manifest_hash)
 
 

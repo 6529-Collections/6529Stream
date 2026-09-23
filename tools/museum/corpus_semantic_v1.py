@@ -18,7 +18,8 @@ from .projection_v2 import CROSSWALK_V2_HASH, ProjectionProfileV2
 
 MODEL_ROOT = Path(__file__).resolve().parents[2] / "schemas/museum"
 LEGACY_CASES = ("photograph", "written_interview", "av_interview")
-CASES = LEGACY_CASES + ("software_interactive", "disputed_geography")
+V2_CASES = LEGACY_CASES + ("software_interactive", "disputed_geography")
+CASES = V2_CASES + ("incomplete_documentation", "independent_accounts", "offline_revision")
 MODE = "synthetic_media_history_semantic_projection_v1"
 SOURCE_SCHEMA_HASH = "0x052724ed357f286d28d15113a37d2d8f007487205b2f815817f7ef1d11ae35fe"
 VALIDATION_HASH = "0xc5dfe8227e65a2012b707b3d669ec9c4712e1a4e8b3441556b9f8c67da38e19d"
@@ -148,12 +149,65 @@ def _project(name, source, schema, profile):
     return encoded, dumps(coverage), dumps(sorted(provenance, key=dumps))
 
 
+def _extension(name, source, schema, coverage_raw, provenance_raw):
+    """Retain competing voices and revision linkage without selecting truth."""
+    if name in ("incomplete_documentation", "independent_accounts"):
+        claims = source["claims"]
+        if (len(claims) != 2 or len({row["author"] for row in claims}) != 2
+                or len({row["subject"] for row in claims}) != 1
+                or {row["status"] for row in claims} != {"asserted", "disputed"}):
+            raise MuseumError("synthetic conflict attribution differs")
+        path = "semantic/" + name + "/conflict-ledger.json"
+        rows = [{"sourcePointer": "/claims/" + str(i), "claim": row}
+                for i, row in enumerate(claims)]
+        value = {"mode": "synthetic_unresolved_claims", "sourceHash": keccak256(dumps(source)),
+                 "resolution": "unresolved", "selectedClaim": None,
+                 "qualification": "Neither synthetic author is authenticated or selected as universal truth.",
+                 "claims": rows}
+        root = "/claims/"
+        member = "claim"
+    elif name == "offline_revision":
+        revisions = source["revisions"]
+        if (len(revisions) != 2 or revisions[0]["prior"] is not None
+                or revisions[1]["prior"] != revisions[0]["id"]
+                or revisions[0]["id"] == revisions[1]["id"]):
+            raise MuseumError("synthetic revision lineage differs")
+        path = "semantic/offline_revision/revision-lineage.json"
+        rows = [{"sourcePointer": "/revisions/" + str(i), "revision": row}
+                for i, row in enumerate(revisions)]
+        value = {"mode": "synthetic_revision_lineage", "sourceHash": keccak256(dumps(source)),
+                 "qualification": "Later wording cites but does not replace the original; no recorded author authority.",
+                 "revisions": rows}
+        root = "/revisions/"
+        member = "revision"
+    else:
+        return None, coverage_raw, provenance_raw
+
+    coverage = loads(coverage_raw, maximum=65536)
+    provenance = loads(provenance_raw, maximum=65536)
+    for row in coverage:
+        pointer = row["pointer"]
+        if not pointer.startswith(root):
+            continue
+        index, _, rest = pointer[len(root):].partition("/")
+        target_pointer = root + index + "/" + member + ("/" + rest if rest else "")
+        row.update(disposition="mapped", rule="fixture-v2:attributed-extension",
+                   reason="exact original value retained in typed synthetic extension")
+        provenance.append({"entity": source["workId"], "targetPath": path,
+                           "targetPointer": target_pointer, "sourcePointer": pointer,
+                           "sourceHash": value["sourceHash"],
+                           "rule": "fixture-v2:attributed-extension",
+                           "authority": "synthetic fixture; unauthenticated"})
+    verify_coverage(inventory(schema, source), coverage)
+    return (path, dumps(value)), dumps(coverage), dumps(sorted(provenance, key=dumps))
+
+
 def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROOT,
           *, crosswalk_bytes: bytes | None = None, version: str = "1") -> ResourcePackage:
     corpus_directory, model_root = Path(corpus_directory).resolve(), Path(model_root).resolve()
-    if version not in ("1", "2"):
+    if version not in ("1", "2", "3"):
         raise MuseumError("semantic corpus package version unsupported")
-    scenarios = LEGACY_CASES if version == "1" else CASES
+    scenarios = {"1": LEGACY_CASES, "2": V2_CASES, "3": CASES}[version]
     verify_corpus(corpus_directory, corpus_hash)
     if crosswalk_bytes is None:
         crosswalk_bytes = (model_root / "projection/crosswalk-v2.json").read_bytes()
@@ -170,6 +224,10 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
     for name in scenarios:
         source = loads(files["input/corpus/" + name + "/source/payload.json"], canonical=True)
         encoded, coverage, provenance = _project(name, source, schema, profile)
+        if version == "3":
+            extension, coverage, provenance = _extension(name, source, schema, coverage, provenance)
+            if extension is not None:
+                files[extension[0]] = extension[1]
         files["semantic/" + name + "/coverage.json"] = coverage
         files["semantic/" + name + "/provenance.json"] = provenance
         files["semantic/" + name + "/sidecar.json"] = dumps({
@@ -199,7 +257,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
 def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
     directory = Path(directory)
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
-    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2")
+    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2", "3")
             or manifest.get("crosswalkHash") != CROSSWALK_V2_HASH):
         raise MuseumError("semantic corpus package profile differs")
     try:
@@ -220,7 +278,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     make = sub.add_parser("build"); make.add_argument("corpus", type=Path)
     make.add_argument("output", type=Path); make.add_argument("--corpus-hash", required=True)
-    make.add_argument("--version", choices=("1", "2"), default="1")
+    make.add_argument("--version", choices=("1", "2", "3"), default="1")
     check = sub.add_parser("verify"); check.add_argument("directory", type=Path)
     check.add_argument("--manifest-hash", required=True)
     args = parser.parse_args()
