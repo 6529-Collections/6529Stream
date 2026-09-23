@@ -1,20 +1,82 @@
 # Stream feature status
 
-Updated **23 September 2026 (UTC)**. This is the shared feature checklist for
-the **complete v1 contract system and the adopted museum proposal**, including
-the agreed additions. It replaces informal percentage estimates. The integrator
-owns the whole result; domain builders supply implementation and evidence.
+## Current delivery checkpoint: 23 September, source `09f32efab`
+
+Production repairs for the 20 previously oversized publication deployment
+workers are integrated, together with the current Artist generation-proof and
+dispute-import repairs. Original public interfaces/storage were checked;
+focused native measurements fit. Full argument-inclusive deployment and
+combined runtime acceptance remain open. Current execution assignments are
+Burn (inventory), Mint (snapshots), Testing (checkpoints/references), and
+Generation (Artist); Collector is fixing paid-test compiler bottlenecks.
+Museum has an integrated portable photograph/interview semantic slice and 11
+focused passes; clients have 32 focused passes. RC1 remains unchanged.
+
+See [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for source-specific outcomes
+and outstanding work. Earlier checkpoints below are retained history, not the
+current completion claim. Full-stack, all-call Safe, fuzz/gas/CI, matching
+release evidence and the new testnet demonstration remain open.
+
+## Retained earlier checkpoint text
+
+Updated **23 September 2026 (UTC)** at integration checkpoint `7de3c00a2`,
+with the `433` capacity split uncommitted.
+This is the shared feature checklist for the **complete v1 contract system and
+the adopted museum proposal**, including the agreed additions. It replaces
+informal percentage estimates. The integrator owns the whole result; domain
+builders supply implementation and evidence.
 
 **Where we stand:** supported RC1 is on Sepolia. Expanded v1 is not yet
-feature-complete or accepted as a combined system. The integrated branch now
-includes delegated Artist consent, first dormancy guardian supersession, bounded
-mint-policy grace, complete 37-role construction and activation helpers, scoped
-content-root publication, and the complete Museum schema source catalog.
-Remaining product gaps, deployment-size repairs and actual publication capacity
-are explicit below. Source integration and successful system execution are
-different milestones.
+feature-complete or accepted as a combined system. Production Solidity is
+source-integrated through `8fef2d3ad`; the latest integration checkpoint adds bounded tests, client
+inventory and capacity evidence. Burn's generated properties pass 15 cases
+(13 unit plus two fuzz properties at 256 runs each), independently accepted by
+Astra, but typed Core/registry/Artist boundaries remain. The current client
+inventory has 37 roles, 7,211 functions, four receive handlers, zero fallback
+handlers and 45 candidate routes; it does not prove all-call Safe acceptance.
+Capacity, EVM execution, complete runtime, gas and release evidence remain
+separate gates. RC1 and Sepolia are unchanged.
 
-## Latest integration checkpoint: 23 September
+## Latest integration checkpoint: 23 September (`7de3c00a2`)
+
+- **Clients:** receive/fallback plans and inventory sources `b358f4bec9`,
+  `221b72e9f6`, and `f41589acd` are integrated as `f314`, `6a0`, and `9f625`.
+  Root types/build/generator checks and 18 tests pass after checksum-test fix
+  `da794`. The 45 rows are candidate caller routes, not accepted all-call
+  Safe routes.
+- **Size and capacity:** `ada5eaf` source-integrates a nine-path preservation
+  repair and three tests; ABI217 reports 4,706 sources / zero errors, original
+  ABI/storage comparisons are equal and all nine diagnostic products fit. Its
+  full Forge run timed out at 900 seconds without EVM output. Uncommitted split
+  `433` changes 20 paths with 17 selected prototype products fitting, not
+  accepted. Root prototypes `429` / `430` are not adopted; focused Burn native
+  validation remains pending. ArtistFactory hash repair `8fef` and
+  regression `6c423` have source/ABI/storage review and six native passes with
+  independent clearance; EVM validation remains pending.
+- **Mint and test construction:** Mint closure `2ac670dcd` covers 545 owners /
+  131 contexts (438 new, 107 reused); 525 products fit and 20 original finality
+  products remain oversized. Testing `1031` covers 291 contexts; full Record
+  has 870 reachable products and 119 missing, all in Artist. No new original
+  runtime acceptance is claimed.
+- **Collector:** source `405` / `91dc` describes the final 21-singleton set.
+  The first two have physical native output; the next two jobs timed out at
+  900 seconds. Source is unchanged. The next bounded compiler budget is 1,800
+  seconds, no more than four paid processes and no automatic retries. The
+  500,000-gas and 16,777,216 transaction ceilings remain unchanged; a control
+  job is still running.
+- **Museum:** V2 assessment reconciliation `f8d824fd` / `d56aa51fc` has
+  independent source clearance and 31 inherited plus four V2 test passes.
+  It is integrated as `932a6700c` / `7de3c00a2`; root's four-test validation
+  passed in 207 seconds at `7de3c00a2`. The original V1 assessment remains
+  unchanged.
+- **Paid flows:** the prototype has produced no paid executions or gas
+  acceptance; the 500,000-gas ceiling is unchanged.
+
+Full-stack, all-call Safe, runtime, transaction-gas, CI and release acceptance
+remain open. The expanded candidate is not complete; RC1 and Sepolia are
+unchanged.
+
+## Previous integration checkpoint: 23 September (`22752f532`)
 
 Expanded full v1 remains incomplete. Integrated source `22752f532` adds
 token-resolved Museum script evidence, actual threshold-Safe preservation
@@ -204,14 +266,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `4e88540ce`; latest bounded results and remaining work are recorded above. Runtime evidence remains source-specific. |
+| Current integration source | Production Solidity is source-integrated through `8fef2d3ad`; documentation checkpoint `7de3c00a2` has an uncommitted `433` capacity split under review. See [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for current evidence. Runtime evidence remains source-specific. |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | Original `57ac8d04`; composition `65312baa` adds 24 focused root passes, actual RPC pending; MUSEUM-36. |
-| Latest broad cheap compilation evidence | ABI210: 4,694 sources at `4e88540ce`, zero errors in 55.812s. Active inventory 3,143 production paths. |
+| Latest broad cheap compilation evidence | ABI217: 4,706 sources at integrated capacity repair `ada5eaf`, zero errors. The full Forge attempt timed out at 900 seconds without EVM output; this ABI result and nine fitting size-diagnostic products do not establish runtime acceptance. Active inventory 3,143 production paths. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Reader51 passes at exact `9db6df06`; historical8 and Metadata7 pass at exact `7053ab06`, all independently reviewed and sealed. Metadata7 includes 256 fuzz inputs. Archive correspondence adds six native passes and fuzz256 at `e93cb091`. Publication11 now passes with fresh export and independent replay on `9d4af023`; Registry6 passes on `6d9729c6`. Provider12 passes all 12 original cases at frozen `eda052c7`, including one 256-run fuzz case, with independent native creation/link/caller review. This does not accept the later complete graph. |
 

@@ -1,5 +1,44 @@
 # Changelog
 
+## Integrated publication and Artist capacity repairs
+
+- Split inventory, snapshot, checkpoint and reference publication operations
+  and constructors into fixed typed libraries while preserving existing
+  interfaces, storage and authorization order. Add focused regressions; keep
+  runtime and full constructor acceptance separate from native size checks.
+- Repair current Artist generation-proof size and dispute-import code
+  generation without changing existing external interfaces.
+- Add the synthetic eight-case Museum corpus and portable photograph/interview
+  projection with retained model/crosswalk bytes and tamper-tested offline replay.
+- Record focused inventory, client and Museum passes and the still-open paid
+  fixture compiler failures. Expanded full-v1 release acceptance remains open.
+
+
+## Full-v1 evidence checkpoint (`7de3c00a2`)
+
+- Record the generated Burn suite result: 15 cases, including two 256-run fuzz
+  properties, with independent Astra review. Typed boundaries and full-stack
+  acceptance remain open.
+- Integrate the current client inventory and explicit Safe receive/fallback
+  plans. The inventory records 37 roles, 7,211 functions, four receive
+  handlers, zero fallback handlers and 45 candidate caller routes; it is not
+  all-call Safe acceptance. Root types/build/generator checks and 18 tests
+  pass after the checksum-test correction.
+- Record scoped capacity outcomes: the integrated nine-product preservation
+  repair fits with ABI/storage parity, while its full Forge run timed out
+  without EVM output. Uncommitted split `433` changes 20 paths with 17 selected
+  prototype products fitting, not accepted; root prototypes `429` / `430` are
+  not adopted. ArtistFactory has six native passes with EVM validation pending.
+  Mint and test-construction inventories retain their oversized and missing
+  products, and Collector's later two native jobs timed out. No size or
+  runtime acceptance is inferred beyond the recorded products.
+- Integrate Museum V2 current-assessment reconciliation (`932a6700c` /
+  `7de3c00a2`) after source clearance and 31 inherited plus four V2 test passes;
+  root's four-test validation passed in 207 seconds at `7de3c00a2`. RC1 and the
+  500,000-gas / 16,777,216 transaction ceilings are unchanged. Production
+  Solidity is source-integrated through `8fef2d3ad`; expanded full-v1
+  acceptance remains open.
+
 ## Token-resolved Museum script evidence
 
 - Capture token-selected script bytes, authenticated dependencies, override

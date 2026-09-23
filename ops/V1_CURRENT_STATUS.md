@@ -1,6 +1,52 @@
 # Full-v1 current delivery status
 
-Updated 23 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+## Current delivery checkpoint: 23 September, source `09f32efab`
+
+The next production batch is integrated. Full v1 is still incomplete: source
+implementation, focused execution, and acceptance of the combined system are
+tracked separately. RC1 and its Sepolia deployment remain unchanged.
+
+- **Publication and preservation:** all 20 oversized deployment workers from
+  the earlier diagnostic now have source repairs and fitting native size
+  measurements. Inventory, snapshot, checkpoint and reference operations use
+  fixed typed libraries; existing external interfaces and storage layouts are
+  preserved. The final checkpoint/reference batch (`dbb4d0b1c`) preserves 23
+  original surfaces, fits all 36 selected deployable products, and adds 17
+  regressions. Size measurements are not full constructor or runtime acceptance.
+- **Focused execution:** the first inventory repair passes 13 tests with
+  independent review. The next inventory batch reports 11 current-authority
+  tests passing; its separate 15-case render-critical host has not executed
+  because native compilation timed out. Snapshot and checkpoint/reference
+  execution have separate owners. No failed or unexecuted case is counted as
+  passing.
+- **Artist:** the current generation-proof size failure and dispute-import
+  compiler failure are repaired in `09f32efab`. Independent source review and
+  fitting native diagnostics preserve original interfaces and validation order.
+  Current dependency execution, constructor checks and gas remain pending.
+- **Museum:** the eight-case synthetic source corpus and photograph/interview
+  projection are integrated through `c20aea08a`. Eleven focused tests pass,
+  including detached replay and rejection of a rehashed, altered crosswalk.
+  Wider semantic scenarios and actual-current-contract/institutional acceptance
+  remain distinct work.
+- **Clients and Safe:** 32 focused client tests pass. Review confirms callback
+  entries are not exposed by the native purchase preparer and existing generic
+  authorized Safe planning is preserved. This does not establish all-call Safe
+  execution.
+- **Paid-flow tests:** several native helper captures succeeded, but both paid
+  variants' activation and deployment helpers hit the bounded 1,800-second
+  compiler limit. A test-fixture structural repair is being reviewed. There is
+  still no new paid-flow gas acceptance; production gas limits are unchanged.
+
+Next: execute the integrated contracts, complete remaining feature acceptance,
+then run the full current-stack/Safe/fuzz/gas/CI pass and freeze a matching
+candidate for testnet. The retained checkpoints below describe their recorded
+sources; they are not the current inventory or completion claim.
+
+## Retained earlier checkpoint text
+
+Updated 23 September 2026 at integration checkpoint `7de3c00a2` (with the
+`433` capacity split still uncommitted). The
+[feature status checklist](STREAM_FEATURE_STATUS.md)
 records every feature family with separate build, testing and integration status.
 Use it for the common delivery scope and remaining work. This file retains the
 current narrative and historical evidence boundaries.
@@ -16,7 +62,61 @@ owner approval. The separate ERC-20 payable reveal-fee implementation now has re
 approval and is source integrated for runtime validation; it is not deployed.
 Other held proposals remain separate.
 
-## 23 September integrated batch
+## Latest integration checkpoint: 23 September
+
+Full v1 remains incomplete. Production Solidity is source-integrated through
+`8fef2d3ad`; RC1 and Sepolia are unchanged. The latest integration contains
+test, client, and capacity work, with native/runtime acceptance still
+incomplete in several areas.
+
+- **Burn:** generated properties at `736de3da` / root integration `53fe` pass
+  15 cases (13 unit cases and two fuzz properties at 256 runs each); Astra
+  independently accepted the result. Typed Core/registry/Artist boundaries
+  and full-stack acceptance remain open.
+- **Clients:** receive/fallback plans and the current inventory are integrated
+  from `b358f4bec9`, `221b72e9f6`, and `f41589acd` (`f314`, `6a0`, `9f625`).
+  The inventory covers 37 current roles, 7,211 functions, four receive
+  handlers, zero fallback handlers, and 45 candidate caller routes. This is
+  not all-call Safe acceptance. Root types/build/generator checks and 18 tests
+  pass after the checksum-test correction `da794`; source-specific contract
+  and Safe execution acceptance remain distinct.
+- **Capacity and deployment size:** the `ada5eaf` preservation capacity repair
+  is source-integrated across nine changed paths and adds three tests. ABI217 reports 4,706
+  sources and zero errors; original ABI/storage comparisons are equal and all
+  nine prototype products fit. The full Forge run timed out after 900 seconds
+  without EVM output, so this is a size diagnostic, not EVM acceptance. The
+  current `433` split changes 20 source paths and has 17 selected prototype
+  products fitting; it remains uncommitted and not accepted. Root prototypes
+  `429` / `430` are not adopted.
+  Focused Burn native validation is pending. ArtistFactory
+  hash repair `8fef` and regression `6c423` have source/ABI/storage review and
+  six native passes with independent clearance; EVM validation remains
+  pending.
+- **Mint and testing fixtures:** exact Mint closure `2ac670dcd` covers 545
+  owners / 131 contexts (438 new, 107 reused): 525 products fit and 20
+  original finality products remain oversized. Testing `1031` covers 291
+  contexts; full Record has 870 reachable products and 119 missing, all in
+  Artist. No new original runtime acceptance is claimed.
+- **Collector:** final 21-singleton set `405` / `91dc` has physical native
+  output for its first two products. The next two code-generation jobs timed
+  out at 900 seconds. Source is unchanged. The next bounded compiler budget is
+  1,800 seconds, at most four paid processes, with no automatic retries; the
+  on-chain 500,000-gas and 16,777,216 transaction ceilings are unchanged, and
+  the control job remains running.
+- **Museum:** V2 current-assessment reconciliation `f8d824fd` / `d56aa51fc`
+  has independent source clearance and 31 inherited plus four V2 test passes.
+  It is integrated as `932a6700c` / `7de3c00a2`; root's four-test validation
+  passed in 207 seconds at `7de3c00a2`. The original V1 assessment remains
+  unchanged.
+- **Paid-flow prototype:** prior fixture code-generation timeouts produced no
+  paid executions. Its 500,000-gas ceiling is unchanged; no paid-flow runtime
+  or gas acceptance is inferred from fixture construction work.
+
+These results do not complete the expanded candidate. Full-stack, all-call
+Safe, complete runtime, gas, CI, and matching release evidence remain open.
+RC1 remains the supported release baseline; no testnet promotion is implied.
+
+## Previous integrated batch: 23 September (source `22752f532`)
 
 Expanded full v1 remains incomplete. Integrated source `22752f532` adds
 token-resolved Museum script evidence, actual threshold-Safe preservation

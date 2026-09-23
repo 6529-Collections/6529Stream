@@ -1,5 +1,24 @@
 # Stream delivery state
 
+## Current delivery checkpoint: 23 September, source `09f32efab`
+
+Production repairs for the 20 previously oversized publication deployment
+workers are integrated, together with the current Artist generation-proof and
+dispute-import repairs. Original public interfaces/storage were checked;
+focused native measurements fit. Full argument-inclusive deployment and
+combined runtime acceptance remain open. Current execution assignments are
+Burn (inventory), Mint (snapshots), Testing (checkpoints/references), and
+Generation (Artist); Collector is fixing paid-test compiler bottlenecks.
+Museum has an integrated portable photograph/interview semantic slice and 11
+focused passes; clients have 32 focused passes. RC1 remains unchanged.
+
+See [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for source-specific outcomes
+and outstanding work. Earlier checkpoints below are retained history, not the
+current completion claim. Full-stack, all-call Safe, fuzz/gas/CI, matching
+release evidence and the new testnet demonstration remain open.
+
+## Retained earlier checkpoint text
+
 For the shared feature-by-feature scope and status, read
 [STREAM_FEATURE_STATUS.md](STREAM_FEATURE_STATUS.md).
 
@@ -21,13 +40,56 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `22752f532`; ABI215 4,700 sources / zero errors; collaborator15 and official Safe preservation5 PASS on recorded sources; Museum script15 + inherited24 PASS; Genesis44 runtime pending. |
+| Source checkpoint | `7de3c00a2` plus uncommitted `433` capacity split; production Solidity is source-integrated through `8fef2d3ad`. See [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for bounded evidence; full-stack and release acceptance remain open. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-23 UTC` |
 
-## Active continuation: 23 September
+## Current continuation: 23 September
+
+Full v1 remains incomplete. Production Solidity is source-integrated through
+`8fef2d3ad`; RC1 and Sepolia are unchanged. Detailed bounded evidence is in
+[V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md).
+Burn generated properties (`736de3da` / root `53fe`) pass 15 cases, including
+two fuzz properties at 256 runs each; Astra independently accepted the result.
+Typed Core/registry/Artist boundaries and full-stack acceptance remain open.
+
+The integrated client inventory (`b358f4bec9`, `221b72e9f6`, `f41589acd`;
+`f314`, `6a0`, `9f625`) records 37 current roles, 7,211 functions, four
+receive handlers, zero fallback handlers and 45 candidate caller routes. It
+does not establish all-call Safe acceptance. Root types/build/generator checks
+and 18 tests pass after checksum-test fix `da794`.
+
+Capacity work remains qualified: integrated repair `ada5eaf` changes nine
+paths and adds three tests; ABI217 reports 4,706 sources / zero errors,
+original ABI/storage equality and nine fitting size-diagnostic products, but
+the full Forge run timed out at 900 seconds without EVM output. The uncommitted
+`433` split changes 20 paths and has 17 selected prototype products fitting;
+it is not accepted. Root prototypes `429` / `430` are not adopted. Focused Burn
+native validation is pending. ArtistFactory
+hash repair `8fef` plus regression `6c423` has source/ABI/storage review and six
+native passes with independent clearance; EVM validation is pending. Mint
+closure `2ac670dcd` covers 545 owners / 131 contexts (438 new, 107 reused),
+with 525 fitting and 20 original finality products oversized. Testing `1031`
+covers 291 contexts; full Record has 870 reachable / 119 missing, all missing
+in Artist, and no new original runtime acceptance. Collector `405` / `91dc`
+has physical native output for the first two of 21 final singleton products;
+the next two jobs timed out at 900 seconds. Source is unchanged. The next
+bounded compiler budget is 1,800 seconds, no more than four paid processes,
+with no automatic retries. The 500,000-gas and 16,777,216 transaction ceilings
+are unchanged; the control job remains running.
+
+Museum V2 reconciliation `f8d824fd` / `d56aa51fc` has independent source
+clearance, 31 inherited passes and four V2 test passes. It is integrated as
+`932a6700c` / `7de3c00a2`; root's four-test validation passed in 207 seconds
+at `7de3c00a2`.
+The paid-flow prototype still has no paid execution or gas acceptance;
+its 500,000-gas ceiling is unchanged. Full current-stack, all-call Safe, CI,
+gas, release evidence and testnet demonstration remain open. The supported
+RC1 baseline is unchanged.
+
+## Previous integrated batch snapshot: 23 September (`22752f532`)
 
 Expanded full v1 remains incomplete. Integrated source `22752f532` adds
 token-resolved Museum script evidence, actual threshold-Safe preservation
