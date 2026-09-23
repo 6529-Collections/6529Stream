@@ -1,4 +1,5 @@
 """Current native-state requirement references are earned from replayed proofs."""
+from copy import deepcopy
 import unittest
 from unittest.mock import patch
 
@@ -8,7 +9,7 @@ from . import public_mint_entropy_capture as entropy
 from . import public_scoped_policy_finality_capture_v2 as finality
 from . import test_canonical_semantic_sources_v2 as source_case
 from .canonical import MuseumError, dumps, keccak256, loads
-from .canonical_object_dossier_fixture_v4 import canonical_case
+from .canonical_object_dossier_fixture_v4 import canonical_case, complete_case_v4
 from .scoped_policy_finality_fixture_v2 import ScopedPolicyFinalityFixtureV2
 from .test_public_mint_entropy_source import PublicMintEntropyFixture
 
@@ -137,6 +138,41 @@ class CurrentAssessmentTests(unittest.TestCase):
                 current.compose({}, '0x' + '11' * 32, disclosure='restricted')
             with self.assertRaisesRegex(MuseumError, 'required together'):
                 current.compose({}, '0x' + '11' * 32, finality_files={}, disclosure='public')
+
+    def test_supplemental_only_same_state_positive_conflict_is_not_hidden(self):
+        # V4 accepts these exact independent supplements. A subsequent capture
+        # can contradict one supplemental getter at its block while canonical
+        # sources alone have no observation for that host/getter.
+        with patch('socket.socket', side_effect=AssertionError('fixture used network')):
+            case = complete_case_v4(); files, digest, options = case.inputs()
+            full = v4.compose(files, digest, **options)
+            assessed = current.compose(dict(full.files), full.manifest_hash, disclosure='public')
+        checked = dict(full.files)
+        rows = current.joined_dossier._v4_sources(checked)
+        names = {row['name'] for row in rows}
+        self.assertTrue(any(name.startswith('production/') for name in names))
+        self.assertTrue(any(name.startswith('transfer/') for name in names))
+        self.assertFalse(any(name.startswith('general/') for name in names))  # nested alias
+        comparison = loads(dict(assessed.files)[current.COMPARISON_PATH], maximum=current.MAX_BYTES)
+        self.assertEqual({row['name'] for row in comparison['sourceReconciliation']['sources']}, names)
+        canonical = current.observations.sources(current._sub(checked, 'canonical/'))
+        canonical_pins = {address for row in canonical for address in row['runtimePins']}
+        supplemental = next(row for row in rows if row['name'] == 'production/artist')
+        call = next(row for row in supplemental['transcript']['calls']
+            if row['method'] == 'eth_call' and row.get('result') is not None
+            and row['params'][0]['to'] not in canonical_pins)
+        address = call['params'][0]['to']
+        attached = {'kind': 'rpc', 'name': 'current-capture',
+            'anchor': deepcopy(supplemental['anchor']),
+            'runtimePins': {address: supplemental['runtimePins'][address]},
+            'provenance': supplemental['provenance'],
+            'configuration': deepcopy(supplemental['configuration']),
+            'transcript': {'version': 1, 'calls': [deepcopy(call)]}}
+        attached['transcript']['calls'][0]['result'] = '0x00'
+        source = full.report['sourceState']
+        current.observations.reconcile(source, canonical + [attached])
+        with self.assertRaisesRegex(MuseumError, 'conflicting positive RPC outcome'):
+            current.observations.reconcile(source, rows + [attached])
 
 
 if __name__ == '__main__': unittest.main()

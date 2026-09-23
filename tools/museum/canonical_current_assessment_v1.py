@@ -9,6 +9,7 @@ from pathlib import Path
 
 from . import canonical_dossier_observations_v4 as observations
 from . import canonical_object_dossier_v4 as dossier
+from . import canonical_object_dossier_v5 as joined_dossier
 from . import object_dossier as package
 from . import object_dossier_inventory as inventory
 from . import public_attribution_capture as attribution
@@ -164,7 +165,10 @@ def _compose(v4_files, v4_hash, finality_files, finality_hash, entropy_files, en
     packet_report = _json(base, 'canonical/input/report.json')
     require(len(packet_report['packetRequirements']) == 19,
         'current assessment original nineteen packet groups differ')
-    observed = observations.sources(_sub(base, 'canonical/'))
+    # V4 has already replayed every retained family. Compare newly attached
+    # sources with its entire source inventory, including production and the
+    # General/transfer alias, not only the canonical child.
+    observed = joined_dossier._v4_sources(base)
     config = observed[0]['configuration']
     for name, child in (('current-finality', final_files), ('current-entropy', ent_files)):
         if child is not None:
