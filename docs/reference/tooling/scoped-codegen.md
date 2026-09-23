@@ -110,6 +110,24 @@ Pinned Solidity [Common.cpp](https://github.com/argotorg/solidity/blob/7dd6d4048
 names this field; [IRGenerator.cpp](https://github.com/argotorg/solidity/blob/7dd6d404815651b2341ecae220709a88aaed4038/libsolidity/codegen/ir/IRGenerator.cpp#L956)
 assigns the deployed library's address and checks it in the runtime.
 
+## Inspect selector expansion without compiling
+
+For a retained pair, this informational preflight shows the exact named
+bytecode selectors and the additional concrete definitions selected by each
+empty contract-key AST request:
+
+```text
+python -B -m tools.build.inspect_codegen_selection --analysis-output out/selected-capture/analysis-output.json --codegen-input out/selected-capture/codegen-input.json
+```
+
+Both options default to `analysis-output.json` and `codegen-input.json` in
+the current directory. The JSON report lists the implicit sibling definitions
+and counts, separates ordinary concrete hosts from implicit internal-only
+libraries, and reports wildcard selection explicitly. A missing AST name or
+malformed input exits with an error. This is an offline explanation of the
+requested selector roots, not a compiler scheduling trace, validation gate,
+or replacement for native capture verification.
+
 ## Forge forwarding and canonical preparation
 
 For an isolated captured project, make its compiler launcher invoke:
