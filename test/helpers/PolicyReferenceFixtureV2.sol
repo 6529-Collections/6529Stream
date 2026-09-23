@@ -118,7 +118,7 @@ abstract contract PolicyReferenceFixtureV2 is PolicySnapshotFixtureV2 {
         // It is not a production minimum or whole-operation capacity acceptance.
         referenceHost = StreamPolicyReferencePublicationV2(
             _policyArtifactCreate(
-                "StreamPolicyReferencePublicationV2.sol:StreamPolicyReferencePublicationV2",
+                "smart-contracts/domains/preservation/StreamPolicyReferencePublicationV2.sol:StreamPolicyReferencePublicationV2",
                 "out/StreamPolicyReferencePublicationV2.sol/StreamPolicyReferencePublicationV2.json",
                 abi.encode(d, address(executor), configs),
                 8
