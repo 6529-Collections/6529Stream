@@ -203,16 +203,19 @@ def _extension(name, source, schema, coverage_raw, provenance_raw):
 
 
 def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROOT,
-          *, crosswalk_bytes: bytes | None = None, version: str = "1") -> ResourcePackage:
+          *, crosswalk_bytes: bytes | None = None, version: str = "1",
+          base_fixture_root: Path | None = None,
+          photo_image_path: Path | None = None) -> ResourcePackage:
     corpus_directory, model_root = Path(corpus_directory).resolve(), Path(model_root).resolve()
-    if version not in ("1", "2", "3", "4"):
+    if version not in ("1", "2", "3", "4", "5"):
         raise MuseumError("semantic corpus package version unsupported")
-    scenarios = {"1": LEGACY_CASES, "2": V2_CASES, "3": CASES, "4": CASES}[version]
+    scenarios = {"1": LEGACY_CASES, "2": V2_CASES, "3": CASES, "4": CASES, "5": CASES}[version]
     verify_corpus(corpus_directory, corpus_hash)
     if crosswalk_bytes is None:
         crosswalk_bytes = (model_root / "projection/crosswalk-v2.json").read_bytes()
     profile = _profile(model_root, crosswalk_bytes)
-    files = _dependencies(model_root, recorded=True, lido=version == "4")
+    files = _dependencies(model_root, recorded=True, iiif=version == "5",
+                          lido=version in ("4", "5"))
     files[CROSSWALK_PATH] = crosswalk_bytes
     for path in sorted(corpus_directory.rglob("*")):
         if path.is_file():
@@ -224,7 +227,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
     for name in scenarios:
         source = loads(files["input/corpus/" + name + "/source/payload.json"], canonical=True)
         encoded, coverage, provenance = _project(name, source, schema, profile)
-        if version in ("3", "4"):
+        if version in ("3", "4", "5"):
             extension, coverage, provenance = _extension(name, source, schema, coverage, provenance)
             if extension is not None:
                 files[extension[0]] = extension[1]
@@ -248,9 +251,35 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
         "completeness": "incomplete", "claims": {"recordedState": False,
             "receivedMedia": False, "fullMuseumConformance": False,
             "institutionalAcceptance": False}})
-    if version == "4":
+    if version in ("4", "5"):
         from .corpus_formats_v1 import build as build_formats
         files.update(build_formats(files, model_root))
+    if version == "5":
+        from .corpus_photo_bytes_v1 import BASE_ROOT, PNG_PATH, build_four_format, correspondence
+        originals, _, _, image, identity, four = build_four_format(
+            corpus_directory, corpus_hash, model_root, base_fixture_root or BASE_ROOT,
+            photo_image_path or PNG_PATH)
+        for name, raw in originals.items():
+            files["input/base-fixture/" + name] = raw
+        files["input/byte-backed-photo.png"] = image
+        files["media/synthetic-display.png"] = image
+        prefix = "formats/byte-backed/package/"
+        for name, raw in four.files:
+            files[prefix + name] = raw
+        files[prefix + "manifest.json"] = four.manifest
+        files["formats/byte-backed/correspondence.json"] = correspondence(
+            files, dict(four.files), identity, image)
+        files["formats/byte-backed/report.json"] = dumps({
+            "mode": "synthetic_corpus_photograph_generated_bytes_v1",
+            "sourceCorpusManifestHash": corpus_hash,
+            "fourFormatManifestHash": four.manifest_hash,
+            "mediaSha256": identity["sha256"],
+            "claims": {"syntheticGeneratedImageBytesRetained": True,
+                       "originalCorpusMediaReceived": False,
+                       "artistReceiptAuthenticated": False,
+                       "currentChainAuthority": False,
+                       "institutionalAcceptance": False},
+            "qualification": "A generated PNG supplements the described-only corpus display file; the original master and two prints remain described-only. Four-format fixture assertions are synthetic."})
     return _assemble(model_root, files, {"mode": MODE, "version": version,
         "corpusManifestHash": corpus_hash, "crosswalkHash": CROSSWALK_V2_HASH,
         "claims": {"authenticatedChainState": False, "fullMuseumScope": False,
@@ -260,7 +289,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
 def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
     directory = Path(directory)
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
-    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2", "3", "4")
+    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2", "3", "4", "5")
             or manifest.get("crosswalkHash") != CROSSWALK_V2_HASH):
         raise MuseumError("semantic corpus package profile differs")
     try:
@@ -269,7 +298,9 @@ def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
         raise MuseumError("semantic corpus retained crosswalk missing") from exc
     rebuilt = build(directory / "input/corpus", manifest["corpusManifestHash"],
                     directory / "dependencies", crosswalk_bytes=crosswalk_bytes,
-                    version=manifest["version"])
+                    version=manifest["version"],
+                    base_fixture_root=directory / "input/base-fixture" if manifest["version"] == "5" else None,
+                    photo_image_path=directory / "input/byte-backed-photo.png" if manifest["version"] == "5" else None)
     if rebuilt.manifest != raw or dict(rebuilt.files) != files:
         raise MuseumError("semantic corpus reconstruction differs")
     return rebuilt
@@ -281,7 +312,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     make = sub.add_parser("build"); make.add_argument("corpus", type=Path)
     make.add_argument("output", type=Path); make.add_argument("--corpus-hash", required=True)
-    make.add_argument("--version", choices=("1", "2", "3", "4"), default="1")
+    make.add_argument("--version", choices=("1", "2", "3", "4", "5"), default="1")
     check = sub.add_parser("verify"); check.add_argument("directory", type=Path)
     check.add_argument("--manifest-hash", required=True)
     args = parser.parse_args()

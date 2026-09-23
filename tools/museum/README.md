@@ -19,6 +19,10 @@ three cases, preserving both earlier package versions.
 adds a field ledger and bounded LIDO descriptions for the photograph and
 interactive work, with explicit PREMIS and IIIF limitations.
 
+[Synthetic photograph byte-backed supplement V5](../../docs/museum-media-history-semantic-slice-v5.md)
+adds generated PNG bytes and reuses the existing four-format exporters for the
+photograph's display file while retaining the original described-only corpus.
+
 [Authenticated account review policies](../../docs/museum-qualified-account-review.md)
 select exact recorded approvals, rejections and SELF reviews while preserving
 original statements. [The retained local fixture](../../docs/museum-qualified-review-fixture.md)
