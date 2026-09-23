@@ -1,5 +1,42 @@
 # Full-v1 current delivery status
 
+## Current execution checkpoint: 23 September, `60c4488`
+
+Two further contract cohorts now pass with independent review: policy
+checkpoint **14/14** and ERC-20 burn-to-mint **19/19**, with no failures, skips
+or compiler attempts in their accepted runs. Their original typed surrounding
+contracts and high aggregate test limits remain explicit. The checkpoint
+capture matches 454 current source paths; the ERC-20 owner graph matches 171
+current production files. These results complement the earlier 15 accepted
+Artist transport/supplement tests. They do not establish full-stack, all-call
+Safe or cold transaction-gas acceptance.
+
+The three previously timed-out render, native burn and distribution hosts now
+compile in 981–1,418 seconds. The first render execution exposed missing test
+fixture read permissions; its corrected run is pending. Three Artist hosts
+still time out at 1,800 seconds, so a separate builder is splitting their test
+cohorts while preserving all 35 original cases. Production capture and other
+runtime cohorts continue in parallel.
+
+The Museum operator composition command is integrated as `60c4488`, with all
+five root tests passing in 148.595 seconds. Independent review found and then
+cleared a real mismatch between the older capture state and the current
+nine-field state. The command preserves the exact original inputs, 49-row
+assessment and four-format output. A complete real six-source capture and
+positive CLI execution remain pending; synthetic replay is not that evidence.
+
+Source inventory repair `3c72eb2` adds the 56 missing production paths. All 48
+layout tests pass, and root's generator/checker confirms 3,199 current sources
+while preserving the historical inventory and receipt exactly. CI at
+`08871d94a` passes every client shard, client aggregate and Windows wrapper.
+Native jobs are still running; Slither source provenance and release checksum
+refresh remain open. Full CI is not accepted.
+
+Production remains `09f32efab`. Full current-stack/Safe integration, paid-flow
+gas, broad fuzz/stateful campaigns, final formatting and release evidence,
+candidate freeze and the new testnet demonstration remain unfinished. All
+earlier checkpoints below retain their original source and scope.
+
 ### Current source and execution: `e5d5f157e`
 
 The Museum offline join now checks one separately pinned original input set

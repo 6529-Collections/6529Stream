@@ -1,5 +1,24 @@
 # Stream delivery state
 
+## Current delivery checkpoint: 23 September, `60c4488`
+
+Fifteen Artist transport/supplement tests, fourteen policy checkpoint tests
+and nineteen ERC-20 burn-to-mint tests now pass with independent evidence
+review. Each result retains its recorded source, fixture boundaries and
+aggregate test limits. Complete current-stack, all-call Safe, cold transaction
+gas, broad fuzzing and release acceptance remain open.
+
+The Museum composition command is integrated, with five root regressions
+passing after fixing the reviewed capture-state mismatch. It reuses existing
+packages and retains the original 49-row assessment; execution against a real
+complete six-source capture remains pending. The current source inventory is
+repaired, with all 48 layout tests passing and historical evidence unchanged.
+
+Production Solidity remains `09f32efab`; RC1 and Sepolia are unchanged. Current
+client CI passes preparation, all 16 shards and its required aggregate. Full
+CI remains incomplete. Details and earlier source-qualified checkpoints follow
+in [the current status](V1_CURRENT_STATUS.md).
+
 ## Latest integrated checkpoint: 23 September, `b0ba19b47`
 
 Production is `09f32efab`; full v1 remains incomplete. Final Artist native
