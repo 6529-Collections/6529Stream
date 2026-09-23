@@ -50,7 +50,7 @@ abstract contract CanonicalNativeSalesDeploymentFixture is StreamCurrentSafeGove
         _installGovernorSafe(governor, keys);
     }
 
-    function _deployAdditionalProducts() internal override {
+    function _deployAdditionalProducts() internal virtual override {
         companionRecorder = StreamPrimarySaleSettlement(
             _artistArtifactCreate(
                 "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
@@ -101,7 +101,7 @@ abstract contract CanonicalNativeSalesDeploymentFixture is StreamCurrentSafeGove
             "https://example.org/canonical/dutch.json"
         );
         companionConfiguration = c;
-        companionProducts = D.deploy(c);
+        companionProducts = _deployCanonicalCompanions(c);
         _assertDeployableProductionInstance(address(companionRecorder));
         address[3] memory deployed = D.addresses(companionProducts);
         for (uint256 i; i < deployed.length; ++i) {
@@ -109,9 +109,18 @@ abstract contract CanonicalNativeSalesDeploymentFixture is StreamCurrentSafeGove
         }
     }
 
+    function _deployCanonicalCompanions(D.Configuration memory c)
+        internal
+        virtual
+        returns (D.Products memory)
+    {
+        return D.deploy(c);
+    }
+
     function _additionalOperatingPolicies()
         internal
         view
+        virtual
         override
         returns (GovernanceActionPolicyEntry[] memory rows)
     {

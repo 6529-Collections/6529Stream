@@ -171,7 +171,7 @@ abstract contract StreamCurrentSafeGovernanceFixture is
     }
 
     /// @dev External void boundary prevents an expected revert being consumed by Safe nonce reads.
-    function executeCurrentGovernorCall(address target, bytes calldata data) external {
+    function executeCurrentGovernorCall(address target, bytes calldata data) external virtual {
         require(msg.sender == address(this), "test only");
         require(
             executeSafe(governorSafe, governorKeys, target, 0, data, 0), "Safe target execution"

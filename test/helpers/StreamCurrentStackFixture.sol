@@ -106,6 +106,12 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     }
 
     function _deployCurrentStack(address artist_, address platform) internal virtual {
+        _deployCurrentStackFoundation(artist_);
+        _deployCurrentStackProducts(platform);
+        _activateCurrentStack();
+    }
+
+    function _deployCurrentStackFoundation(address artist_) internal {
         artist = artist_;
         executor = StreamGovernanceExecutor(
             payable(_artistArtifactCreate(
@@ -200,6 +206,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
                     abi.encode(assetPolicy, address(executor), _walletGasConfigs())
                 ))
         );
+    }
+
+    function _deployCurrentStackProducts(address platform) internal {
         _deployArtistSuite(
             address(core),
             address(manager),
@@ -260,6 +269,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         entries[1] = IStreamSplitWallet.SplitEntry(PROTOCOL, 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("fixture split"));
         _deployAdditionalProducts();
+    }
+
+    function _activateCurrentStack() internal {
         ledger.transferOwnership(address(executor));
         sale.transferOwnership(address(executor));
         auction.transferOwnership(address(executor));
@@ -286,7 +298,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         return address(manifest);
     }
 
-    function _activateFixtureGraphPrerequisites() private {
+    function _activateFixtureGraphPrerequisites() internal {
         StreamModuleRegistration[] memory records = new StreamModuleRegistration[](3);
         records[0] = _record(
             address(router),
@@ -406,7 +418,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         return 10;
     }
 
-    function _expandArtistReadBudget() private {
+    function _expandArtistReadBudget() internal {
         StreamArtistActivationPlan.Plan memory plan =
             CurrentAuthorityPlans.buildReadBudgetExpansion(manager);
         _executeInitialBatch(GenesisBatch(1, plan.calls, plan.callDatas));
@@ -601,7 +613,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     function scheduleArtistActivationForTest(
         StreamArtistActivationPlan.Plan calldata plan,
         uint64 notBefore
-    ) external {
+    ) external virtual {
         _scheduleFixtureActivation(plan, notBefore);
     }
 
@@ -610,14 +622,14 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         StreamArtistActivationPlan.Plan calldata plan,
         bytes32 actionId,
         address administrator
-    ) external {
+    ) external virtual {
         CurrentAuthorityPlans.executeArtist(executor, roles, manager, administrator, actionId, plan);
     }
 
     /// @dev Check the base topology's production instances despite Foundry's test-harness
     ///      allowance. Derived fixtures check added products with the same helper; linked
     ///      libraries also require the compiler-artifact size check at release acceptance.
-    function _assertDeployableProductionContracts() private view {
+    function _assertDeployableProductionContracts() internal view {
         address[23] memory instances = [
             address(core),
             address(executor),
@@ -689,7 +701,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
     }
 
     /// @dev New products use ordinary delayed governance after the foundation seal.
-    function _activateInitialProducts() private {
+    function _activateInitialProducts() internal {
         GenesisBatch[] memory batches = new GenesisBatch[](3);
         StreamModuleRegistration[] memory records;
         (records, batches[0]) =

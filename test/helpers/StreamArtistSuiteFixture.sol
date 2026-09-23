@@ -49,14 +49,17 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
     uint256 private _artistAuthorizationNonce;
 
     function _deployArtistSuite(
-        address core_,
-        address manager_,
-        address roles_,
-        IStreamSplitFactory factory_,
-        address executor_,
-        bytes32 deploymentHash
-    ) internal {
-        T.SuiteConfiguration memory s;
+        address core_, address manager_, address roles_, IStreamSplitFactory factory_,
+        address executor_, bytes32 deploymentHash
+    ) internal virtual {
+        T.SuiteConfiguration memory s =
+            _deployArtistSuiteStart(core_, manager_, roles_, executor_, deploymentHash);
+        _deployArtistSuiteFinish(s, core_, factory_, executor_, deploymentHash);
+    }
+
+    function _deployArtistSuiteStart(
+        address core_, address manager_, address roles_, address executor_, bytes32 deploymentHash
+    ) internal returns (T.SuiteConfiguration memory s) {
         s.core = core_;
         s.mintManager = manager_;
         s.roleRegistry = roles_;
@@ -184,6 +187,12 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                     ))
             )
         );
+    }
+
+    function _deployArtistSuiteFinish(
+        T.SuiteConfiguration memory s, address core_, IStreamSplitFactory factory_,
+        address executor_, bytes32 deploymentHash
+    ) internal {
         IStreamArtistAttribution attribution = IStreamArtistAttribution(s.registry);
         router = StreamMetadataRouter(
             payable(_artistSuiteArtifactCreate(
@@ -344,7 +353,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
         );
     }
 
-    function _completeFixtureArtistSuite(bytes memory rendererCatalog) internal {
+    function _completeFixtureArtistSuite(bytes memory rendererCatalog) internal virtual {
         _completeCurrentFinalityGraph(rendererCatalog);
         artistCoordinator = assemblyCoordinator;
         require(
