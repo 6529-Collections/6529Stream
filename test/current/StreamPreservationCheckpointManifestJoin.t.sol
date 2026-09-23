@@ -455,12 +455,16 @@ contract StreamPreservationCheckpointManifestJoinTest is PreservationPolicyConte
         require(successes == 1, "actual Safe ExecutionSuccess event");
     }
 
-    /// @dev Eight schedules cover both invalid counts, both drift orders and either output.
-    function testStatefulJoinEightSchedules() external {
-        for (uint8 schedule; schedule < 8; ++schedule) {
-            _exerciseStatefulJoin(schedule, true);
-        }
-    }
+    /// @dev Separate tests give each schedule a fresh fixture. Together they cover both
+    /// invalid counts, both drift orders and either output index.
+    function testStatefulJoinSchedule0() external { _exerciseStatefulJoin(0, true); }
+    function testStatefulJoinSchedule1() external { _exerciseStatefulJoin(1, true); }
+    function testStatefulJoinSchedule2() external { _exerciseStatefulJoin(2, true); }
+    function testStatefulJoinSchedule3() external { _exerciseStatefulJoin(3, true); }
+    function testStatefulJoinSchedule4() external { _exerciseStatefulJoin(4, true); }
+    function testStatefulJoinSchedule5() external { _exerciseStatefulJoin(5, true); }
+    function testStatefulJoinSchedule6() external { _exerciseStatefulJoin(6, true); }
+    function testStatefulJoinSchedule7() external { _exerciseStatefulJoin(7, true); }
 
     function testFuzzStatefulJoinMixedValidInvalid(uint256 seed) external {
         _exerciseStatefulJoin(uint8(seed & 7), false);
