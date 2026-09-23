@@ -1,5 +1,22 @@
 # Stream delivery state
 
+## Runtime integration update: 23 September, source `9deeaeaed`
+
+Snapshot58 now has independent current-source/fixture acceptance: twelve fresh
+cases plus 46 exact-source-qualified prior passes. Render15+2 executes but has
+nine failures sharing a historical-versus-STATIC serialization mismatch; Burn
+owns the consumer fix. Two smaller Artist hosts still time out; the Artist
+test lead is narrowing inherited fixtures while Generation captures required
+production dependencies from actual setup/test roots.
+
+Testing's execution-only fixture staging patch is under review, with profile
+selection/inheritance corrections requested before integration. Museum owns
+complete-suite CI parallelization after both OS jobs timed out. Current CI
+passes client, Windows and repository checks; native timeout, full-stack/Safe,
+gas/fuzz, release evidence and final testnet delivery remain open. See
+[current status](V1_CURRENT_STATUS.md) for scope and evidence.
+
+
 ## Latest source: 23 September, `9deeaeaed`
 
 Two Artist native compiler failures are repaired with independently reviewed

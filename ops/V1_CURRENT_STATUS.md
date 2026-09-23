@@ -1,5 +1,33 @@
 # Full-v1 current delivery status
 
+## Runtime integration update: 23 September, source `9deeaeaed`
+
+Snapshot coverage now has independent acceptance against the current source and
+fixtures: all 58 cases pass. Twelve cases were rebuilt and executed after the
+fixture changes; the other 46 retain their passing runs with exact source
+equality independently checked. This closes the earlier fixture limitation,
+without counting these as 58 additional tests. The original typed boundaries
+and aggregate unit-test limits remain; this is not full-stack acceptance.
+
+The render cohort now passes 7 of 15 original cases and one of two new
+regressions. All nine remaining failures have the same traced cause: a
+historical animation suffix matcher is applied to current STATIC JSON. The
+consumer repair will reuse the existing STATIC validator while retaining
+exact JSON/HTML/token-data checks and historical serialization behavior.
+
+The first two smaller Artist hosts still time out at the 1,800-second native
+compiler bound. Their inherited fixture exposes unrelated external callbacks,
+so the next test-only change removes that inherited work from the priority
+hosts. Original tests, setup behavior and failed records remain preserved.
+
+At CI revision `c6795c597`, every client shard and its aggregate, Windows
+wrapper, and repository checks pass. The default native build reaches its
+120-minute timeout before tests. Both Museum OS jobs reach their 40-minute
+timeout during discovery execution; complete-suite parallelization is assigned.
+Slither provenance and release checksum refresh remain open. No candidate is
+frozen, and RC1/main/Sepolia remain unchanged.
+
+
 ## Latest source integration: 23 September, `9deeaeaed`
 
 Two genuine Artist compiler failures are repaired by moving unchanged work
