@@ -77,7 +77,8 @@ export const CURRENT_IMPLEMENTATION_ONLY_LIBRARIES = [
 export const CURRENT_CALLER_ROUTE_RULES = [
   ["StreamNativeFixedPriceSaleAdapter", ["registerPriceProgram", "registerAllowlistPriceProgram", "closePriceProgram", "registerSale", "cancelSale", "setPaused"], "governance-executor-owner-action", "onlyOwner; current deployment owner/Executor binding must be joined before planning.", ["smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol"]],
   ["StreamNativeFixedPriceSaleAdapter", ["raiseGasParameter"], "governance-executor-current-action", "Gas parameter update is a governed current-action operation.", ["smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol"]],
-  ["StreamNativeFixedPriceSaleAdapter", ["purchase", "purchaseWithBurn", "executePriceProgram", "executeBurnPurchase"], "user-or-artist-safe-executor-action", "Purchase path binds the payer and current Executor action; construct through the captured action envelope.", ["smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol"]],
+  ["StreamNativeFixedPriceSaleAdapter", ["purchase", "purchaseWithBurn", "executePriceProgram"], "user-or-artist-safe-executor-action", "Purchase path binds the payer and current Executor action; construct through the captured action envelope.", ["smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol"]],
+  ["StreamNativeFixedPriceSaleAdapter", ["executeBurnPurchase"], "native-burn-gate-protocol-callback", "Consumes a one-use commitment created by purchaseWithBurn; the gate address and complete purchase inputs are commitment-bound, so a direct Safe call reverts.", ["smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol", "smart-contracts/domains/mint/StreamNativeBurnCallback.sol"]],
   ["StreamNativeDutchSale", ["registerDutchSale", "registerAllowlistDutchSale", "closeSale"], "governance-executor-owner-action", "onlyOwner for sale configuration and closure; deployment owner/Executor binding must be joined.", ["smart-contracts/domains/mint/StreamNativeDutchSale.sol"]],
   ["StreamNativeDutchSale", ["pauseAdapter", "unpauseAdapter", "pauseSale", "unpauseSale"], "configured-role-holder-safe-candidate", "Pause and unpause methods require the configured RoleRegistry pause/unpause role; holder-to-Safe binding must be joined.", ["smart-contracts/domains/mint/StreamNativeDutchSale.sol"]],
   ["StreamNativeDutchSale", ["raiseGasParameter"], "governance-executor-current-action", "Gas parameter update is a governed current-action operation.", ["smart-contracts/domains/mint/StreamNativeDutchSale.sol"]],
@@ -235,9 +236,19 @@ function callerRoutesFor(product, functions) {
   return routeRules.flatMap(([, methodNames, callerClass, basis, evidencePaths]) => methodNames.map(name => {
     const matches = functions.filter(fn => fn.signature.slice(0, fn.signature.indexOf("(")) === name);
     requireThat(matches.length === 1, "Expected one ABI method for caller-route evidence: " + product.fqn + ":" + name);
+    const permissionless = callerClass.startsWith("permissionless-");
+    const bindingNote = callerClass.includes("native-burn-gate") ? "bind the configured burn gate and its runtime"
+      : callerClass.includes("protocol-callback") ? "bind the configured callback address, runtime and protocol owner"
+      : callerClass.includes("registered-sale-adapter") ? "bind the registered adapter identity and runtime"
+      : callerClass.includes("payer-safe") ? "bind payer Safe or verify the signed payment intent"
+      : callerClass.includes("user-or-artist-safe") ? "bind payer/artist identity and the Executor action envelope"
+      : callerClass.includes("artist-safe") ? "bind artist Safe and current Metadata-family authority grant"
+      : callerClass.includes("role-holder") ? "bind the RoleRegistry holder to its selected Safe"
+      : callerClass.includes("governance-executor") ? "bind owner/authority and the Governance Safe to Executor action flow"
+      : permissionless ? "no caller role; deployment/runtime identity remains outside this inventory"
+      : "join the exact caller and deployment authority";
     return { signature: matches[0].signature, selector: matches[0].selector, callerClass, basis, evidencePaths,
-      deploymentBindingRequired: callerClass.includes("governance-executor") || callerClass.includes("role-holder") || callerClass.includes("user-or-artist-safe")
-        || callerClass.includes("artist-safe") };
+      callerBindingRequired: !permissionless, bindingNote };
   }));
 }
 function currentSurface(product, sourceReason) {
@@ -472,6 +483,10 @@ export function buildSurfaceInventory({ inputRaw, outputRaw, bridgeRaw, rosterMa
     candidate.supportDisposition = candidate.currentSupportRosterMember ? "selected-from-current37-or-required-companion"
       : candidate.anchors.every(x => x.kind === "release-contract-catalog") ? "catalog-only-not-promoted"
       : "anchored-candidate-not-selected-by-current37-capture";
+    if (candidate.currentSupportRosterMember) {
+      candidate.supportedSurfaceFqn = candidate.fqn;
+      delete candidate.abiFunctions;
+    }
   }
   const currentSupportTotals = { contracts: currentSupportSurfaces.length, functions: 0, viewOrPure: 0, stateChanging: 0, payableFunctions: 0 };
   for (const row of currentSupportSurfaces) {
@@ -520,7 +535,7 @@ export function buildSurfaceInventory({ inputRaw, outputRaw, bridgeRaw, rosterMa
     historicalGenesisRoleLabels,
     current37RoleCoverage,
     currentSupportRoster,
-    currentSupportSurfaces,
+    currentSupportSurfaceFqns: currentSupportSurfaces.map(x => x.fqn),
     implementationOnlyLibraries,
     candidateProductsAbsent164: currentCandidates.candidates,
     excludedAnchoredProducts: currentCandidates.exclusions,
@@ -536,7 +551,7 @@ export function renderMarkdown(report) {
   const companionRows = report.currentSupportRoster.filter(x => x.supportCompanions.length).map(x => "| " + x.fqn + " | " +
     x.supportCompanions.map(r => r.key + " — " + r.evidence).join("<br>") + " | " + (x.historicalRosterContainsProduct ? "retained 164" : "added current support") + " |" );
   const routeRows = report.surfaces.filter(surface => (surface.callerRoutes ?? []).length).flatMap(surface => surface.callerRoutes.map(route => "| " + surface.fqn + " | `" + route.signature + "` | " + route.selector + " | " + route.callerClass + " | " + route.basis + " | " +
-    (route.deploymentBindingRequired ? "join the selected Safe, current role/authority grants and action envelope" : "source-enforced route; runtime still unjoined") + " |" ));
+    route.bindingNote + " |" ));
   const historicalRows = report.historicalGenesisRoleLabels.map(x => "| " + x.id + " | " + x.key + " | " + x.implementationMode + " | " +
     (x.names.length ? x.names.join(", ") : "—") + " | " + (x.approvedAliases.length ? x.approvedAliases.join(", ") : "—") + " |" );
   const candidateRows = report.candidateProductsAbsent164.map(x => "| " + x.fqn + " | " + x.functionCount + " (" + x.readAndCallEvidence.viewOrPureFunctionCount + " read, " + x.readAndCallEvidence.stateChangingFunctionCount + " state-changing) | " +
@@ -588,6 +603,24 @@ export function renderMarkdown(report) {
   ].join("\n");
 }
 
+export function serializeInventory(report) {
+  const compactObjectArrays = new Set(["functions", "abiFunctions"]);
+  const indent = depth => "  ".repeat(depth);
+  const write = (value, depth = 0, key = "") => {
+    if (value === undefined) return "null";
+    if (value === null || typeof value !== "object") return JSON.stringify(value);
+    if (Array.isArray(value)) {
+      if (!value.length) return "[]";
+      if (compactObjectArrays.has(key)) return "[\n" + value.map(row => indent(depth + 1) + JSON.stringify(row)).join(",\n") + "\n" + indent(depth) + "]";
+      return "[\n" + value.map(row => indent(depth + 1) + write(row, depth + 1)).join(",\n") + "\n" + indent(depth) + "]";
+    }
+    const entries = Object.entries(value).filter(([, child]) => child !== undefined);
+    if (!entries.length) return "{}";
+    return "{\n" + entries.map(([name, child]) => indent(depth + 1) + JSON.stringify(name) + ": " + write(child, depth + 1, name)).join(",\n") + "\n" + indent(depth) + "}";
+  };
+  return write(report) + "\n";
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) {
   const [inputPath, outputPath, bridgePath, mode] = process.argv.slice(2);
   requireThat(inputPath && outputPath && bridgePath && (!mode || mode === "--check"),
@@ -599,7 +632,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
   ]);
   const report = buildSurfaceInventory({ inputRaw, outputRaw, bridgeRaw, rosterMarkdown: roster,
     historicalSummaryRaw: oldSummaryRaw, genesisRaw, planningCandidateRaw, currentTargetsRaw, catalogRaw });
-  const data = JSON.stringify(report, null, 2) + "\n", markdown = renderMarkdown(report);
+  const data = serializeInventory(report), markdown = renderMarkdown(report);
   if (mode === "--check") {
     const [oldData, oldMarkdown] = await Promise.all([readFile(resultPath, "utf8"), readFile(markdownPath, "utf8")]);
     requireThat(oldData === data && oldMarkdown === markdown, "ABI213 Safe call-surface inventory is stale");

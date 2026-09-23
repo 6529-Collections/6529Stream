@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildSurfaceInventory, canonical, sha256, CURRENT_37_ROLE_MAP, CURRENT_SUPPORT_COMPANIONS, CURRENT_IMPLEMENTATION_ONLY_LIBRARIES, CURRENT_CALLER_ROUTE_RULES } from "../scripts/generate-safe-call-surface-abi213.mjs";
+import { buildSurfaceInventory, canonical, sha256, serializeInventory, CURRENT_37_ROLE_MAP, CURRENT_SUPPORT_COMPANIONS, CURRENT_IMPLEMENTATION_ONLY_LIBRARIES, CURRENT_CALLER_ROUTE_RULES } from "../scripts/generate-safe-call-surface-abi213.mjs";
 
 function fixture() {
   const sources = {}, committedBlobSHA256 = {}, contracts = {};
@@ -50,7 +50,7 @@ function fixture() {
     abi: [{ type: "function", name: "configure", stateMutability: "nonpayable", inputs: [{ name: "config", type: "tuple", internalType: "struct Config", components: [{ name: "value", type: "uint256" }] }], outputs: [] }],
     evm: { methodIdentifiers: { "configure(Config)": "ddeeccbb" } },
   } });
-  addSource("script/current/DeployCandidate.s.sol", "contract DeployCandidate { function x() external { new Candidate(); type(Candidate).creationCode; type(TupleCandidate).creationCode; type(UsedLegacyModule).creationCode; } }");
+  addSource("script/current/DeployCandidate.s.sol", "contract DeployCandidate { function x() external { new Candidate(); new StreamNativeFixedPriceSaleAdapter(); type(Candidate).creationCode; type(TupleCandidate).creationCode; type(UsedLegacyModule).creationCode; } }");
   const currentNames = [...new Set([...CURRENT_37_ROLE_MAP.map(([, name]) => name), ...CURRENT_SUPPORT_COMPANIONS.map(([, name]) => name)])];
   for (const name of currentNames) addCurrentProduct(name);
   for (const [, name] of CURRENT_IMPLEMENTATION_ONLY_LIBRARIES) addCurrentProduct(name, "library");
@@ -118,6 +118,13 @@ test("current full37 capture resolves to concrete products while preserving hist
   const catalogOnly = report.candidateProductsAbsent164.find(x => x.name === "CatalogOnly");
   assert.equal(catalogOnly.supportDisposition, "catalog-only-not-promoted");
   assert.equal(catalogOnly.currentSupportRosterMember, false);
+  const selected = report.candidateProductsAbsent164.find(x => x.name === "StreamNativeFixedPriceSaleAdapter");
+  assert.equal(selected.supportedSurfaceFqn, selected.fqn);
+  assert.equal(Object.hasOwn(selected, "abiFunctions"), false);
+  assert.ok(report.surfaces.find(x => x.contract === "StreamNativeFixedPriceSaleAdapter").functions.length > 0);
+  const serialized = serializeInventory(report);
+  assert.deepEqual(JSON.parse(serialized), JSON.parse(JSON.stringify(report)));
+  assert.match(serialized, /"functions": \[\n\s+\{"signature":/);
 });
 
 test("new commerce, ARRNG, and records surfaces carry focused source-backed caller routes", () => {
@@ -127,14 +134,19 @@ test("new commerce, ARRNG, and records surfaces carry focused source-backed call
   assert.equal(route("StreamNativeDutchSale", "registerDutchSale").callerClass, "governance-executor-owner-action");
   assert.equal(route("StreamNativeDutchSale", "pauseAdapter").callerClass, "configured-role-holder-safe-candidate");
   assert.equal(route("StreamNativeDutchSale", "purchase").callerClass, "user-or-artist-safe-executor-action");
+  assert.equal(route("StreamNativeFixedPriceSaleAdapter", "purchaseWithBurn").callerClass, "user-or-artist-safe-executor-action");
+  assert.equal(route("StreamNativeFixedPriceSaleAdapter", "executeBurnPurchase").callerClass, "native-burn-gate-protocol-callback");
+  assert.match(route("StreamNativeFixedPriceSaleAdapter", "executeBurnPurchase").basis, /one-use commitment/);
   assert.equal(route("StreamERC20PrimarySettlementAdapter", "settleERC20PrimarySaleByPayer").callerClass, "payer-safe-or-signed-payment-intent");
   assert.equal(route("StreamPrimarySaleSettlement", "settleNativePrimarySaleFromAdapter").callerClass, "registered-sale-adapter-protocol-callback");
   assert.equal(route("StreamEntropyProviderARRNG", "requestEntropy").callerClass, "entropy-coordinator-protocol-callback");
   assert.equal(route("StreamEntropyProviderARRNG", "receiveRandomness").callerClass, "arrng-controller-protocol-callback");
   assert.equal(route("StreamEntropyProviderARRNG", "updateRequestPayment").callerClass, "governance-executor-current-action");
   assert.equal(route("StreamPreservationRecordsV1", "recordCollectionRecordWithPayload").callerClass, "artist-safe-authorized-record-write");
-  assert.equal(route("StreamPreservationRecordsV1", "recordCollectionRecordWithPayload").deploymentBindingRequired, true);
-  assert.equal(route("StreamNativeDutchSale", "registerDutchSale").deploymentBindingRequired, true);
+  assert.equal(route("StreamPreservationRecordsV1", "recordCollectionRecordWithPayload").callerBindingRequired, true);
+  assert.equal(route("StreamNativeDutchSale", "registerDutchSale").callerBindingRequired, true);
+  assert.equal(route("StreamNativeFixedPriceSaleAdapter", "executeBurnPurchase").callerBindingRequired, true);
+  assert.match(route("StreamNativeFixedPriceSaleAdapter", "executeBurnPurchase").bindingNote, /burn gate/);
   for (const product of ["StreamNativeDutchSale", "StreamEntropyProviderARRNG", "StreamPreservationRecordsV1"]) {
     assert.ok(surface(product).callerRoutes.every(x => x.selector && x.evidencePaths.length > 0));
   }
