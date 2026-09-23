@@ -1,4 +1,4 @@
-"""Conservative Linked Art V2 projection of three synthetic corpus scenarios.
+"""Conservative Linked Art V2 projection of synthetic corpus scenarios.
 
 This is a fixture adapter. Its source/sidecar provenance is not a signed
 STREAM_SEMANTIC_ASSERTION record or a completed museum dossier.
@@ -17,7 +17,8 @@ from .projection_v2 import CROSSWALK_V2_HASH, ProjectionProfileV2
 
 
 MODEL_ROOT = Path(__file__).resolve().parents[2] / "schemas/museum"
-CASES = ("photograph", "written_interview", "av_interview")
+LEGACY_CASES = ("photograph", "written_interview", "av_interview")
+CASES = LEGACY_CASES + ("software_interactive", "disputed_geography")
 MODE = "synthetic_media_history_semantic_projection_v1"
 SOURCE_SCHEMA_HASH = "0x052724ed357f286d28d15113a37d2d8f007487205b2f815817f7ef1d11ae35fe"
 VALIDATION_HASH = "0xc5dfe8227e65a2012b707b3d669ec9c4712e1a4e8b3441556b9f8c67da38e19d"
@@ -89,10 +90,11 @@ def _project(name, source, schema, profile):
             evidence(row["subject"], "/" + field + "/0/type", pointer + "/relation",
                      "fixture-v2:visual-carrier-relation")
 
-    else:
+    elif name in ("written_interview", "av_interview", "software_interactive"):
         people = sorted({row["participant"] for row in source["participantRoles"]})
-        if set(people) != {ARTIST, INTERVIEWER}:
-            raise MuseumError("fixture interview participant kinds unestablished")
+        expected_people = {ARTIST} if name == "software_interactive" else {ARTIST, INTERVIEWER}
+        if set(people) != expected_people:
+            raise MuseumError("fixture activity participant kinds unestablished")
         for person in people:
             pointer = next("/participantRoles/" + str(i) + "/participant"
                            for i, row in enumerate(source["participantRoles"])
@@ -100,11 +102,14 @@ def _project(name, source, schema, profile):
             add(person, "Person", person, pointer, pointer, pointer,
                 "fixture-v2:participant-identity-only")
         for i, event in enumerate(source["events"]):
-            if event["kind"] != "interview" or event["status"] != "completed":
+            expected_kind = "execution" if name == "software_interactive" else "interview"
+            if event["kind"] != expected_kind or event["status"] != "completed":
                 continue
             pointer = "/events/" + str(i)
+            activity_rule = ("fixture-v2:completed-execution" if name == "software_interactive"
+                             else "fixture-v2:completed-interview")
             add(event["id"], "Activity", event["kind"], pointer + "/id",
-                pointer + "/kind", pointer + "/kind", "fixture-v2:completed-interview")
+                pointer + "/kind", pointer + "/kind", activity_rule)
             participants = sorted({row["participant"] for row in source["participantRoles"]
                                    if row["event"] == event["id"]})
             resources[event["id"]]["carried_out_by"] = [
@@ -118,6 +123,13 @@ def _project(name, source, schema, profile):
                 evidence(event["id"], "/carried_out_by/" + str(j),
                          "/participantRoles/" + str(original) + "/event",
                          "fixture-v2:activity-participant-event")
+
+    elif name == "disputed_geography":
+        for i, place in enumerate(source["places"]):
+            pointer = "/places/" + str(i)
+            add(place["id"], "Place", place["statement"], pointer + "/id",
+                pointer + "/id", pointer + "/statement",
+                "fixture-v2:local-place-identity-only")
 
     encoded = {}
     for identifier, resource in sorted(resources.items()):
@@ -137,8 +149,11 @@ def _project(name, source, schema, profile):
 
 
 def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROOT,
-          *, crosswalk_bytes: bytes | None = None) -> ResourcePackage:
+          *, crosswalk_bytes: bytes | None = None, version: str = "1") -> ResourcePackage:
     corpus_directory, model_root = Path(corpus_directory).resolve(), Path(model_root).resolve()
+    if version not in ("1", "2"):
+        raise MuseumError("semantic corpus package version unsupported")
+    scenarios = LEGACY_CASES if version == "1" else CASES
     verify_corpus(corpus_directory, corpus_hash)
     if crosswalk_bytes is None:
         crosswalk_bytes = (model_root / "projection/crosswalk-v2.json").read_bytes()
@@ -152,7 +167,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
     if keccak256(dumps(schema)) != SOURCE_SCHEMA_HASH:
         raise MuseumError("semantic corpus source schema hash differs")
     index = []
-    for name in CASES:
+    for name in scenarios:
         source = loads(files["input/corpus/" + name + "/source/payload.json"], canonical=True)
         encoded, coverage, provenance = _project(name, source, schema, profile)
         files["semantic/" + name + "/coverage.json"] = coverage
@@ -171,11 +186,11 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
     files["semantic/report.json"] = dumps({"corpusManifestHash": corpus_hash,
         "sourceSchemaId": schema["$id"], "sourceSchemaHash": keccak256(dumps(schema)),
         "projectionProfile": loads(profile.identity), "crosswalkVersion": "2",
-        "crosswalkHash": CROSSWALK_V2_HASH, "scenarios": list(CASES),
+        "crosswalkHash": CROSSWALK_V2_HASH, "scenarios": list(scenarios),
         "completeness": "incomplete", "claims": {"recordedState": False,
             "receivedMedia": False, "fullMuseumConformance": False,
             "institutionalAcceptance": False}})
-    return _assemble(model_root, files, {"mode": MODE, "version": "1",
+    return _assemble(model_root, files, {"mode": MODE, "version": version,
         "corpusManifestHash": corpus_hash, "crosswalkHash": CROSSWALK_V2_HASH,
         "claims": {"authenticatedChainState": False, "fullMuseumScope": False,
                    "institutionalAcceptance": False}})
@@ -184,7 +199,7 @@ def build(corpus_directory: Path, corpus_hash: str, model_root: Path = MODEL_ROO
 def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
     directory = Path(directory)
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
-    if (manifest.get("mode") != MODE or manifest.get("version") != "1"
+    if (manifest.get("mode") != MODE or manifest.get("version") not in ("1", "2")
             or manifest.get("crosswalkHash") != CROSSWALK_V2_HASH):
         raise MuseumError("semantic corpus package profile differs")
     try:
@@ -192,7 +207,8 @@ def verify(directory: Path, expected_manifest_hash: str) -> ResourcePackage:
     except KeyError as exc:
         raise MuseumError("semantic corpus retained crosswalk missing") from exc
     rebuilt = build(directory / "input/corpus", manifest["corpusManifestHash"],
-                    directory / "dependencies", crosswalk_bytes=crosswalk_bytes)
+                    directory / "dependencies", crosswalk_bytes=crosswalk_bytes,
+                    version=manifest["version"])
     if rebuilt.manifest != raw or dict(rebuilt.files) != files:
         raise MuseumError("semantic corpus reconstruction differs")
     return rebuilt
@@ -204,11 +220,12 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     make = sub.add_parser("build"); make.add_argument("corpus", type=Path)
     make.add_argument("output", type=Path); make.add_argument("--corpus-hash", required=True)
+    make.add_argument("--version", choices=("1", "2"), default="1")
     check = sub.add_parser("verify"); check.add_argument("directory", type=Path)
     check.add_argument("--manifest-hash", required=True)
     args = parser.parse_args()
     if args.command == "build":
-        package = build(args.corpus, args.corpus_hash)
+        package = build(args.corpus, args.corpus_hash, version=args.version)
         write_package(package, args.output)
         print(package.manifest_hash)
     else:

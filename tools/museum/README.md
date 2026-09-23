@@ -8,6 +8,9 @@ and verifies a detached archive with its original schema and source bytes.
 validates photograph and interview identity/relationship projections against
 the pinned Linked Art V2 model, with exact source coverage and offline replay.
 
+[Synthetic media/history semantic slice V2](../../docs/museum-media-history-semantic-slice-v2.md)
+adds interactive-object and local-place projections while preserving V1 replay.
+
 [Authenticated account review policies](../../docs/museum-qualified-account-review.md)
 select exact recorded approvals, rejections and SELF reviews while preserving
 original statements. [The retained local fixture](../../docs/museum-qualified-review-fixture.md)

@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from .canonical import MuseumError, dumps, keccak256, loads
-from .corpus_semantic_v1 import CASES, MODEL_ROOT, _project, build, verify
+from .corpus_semantic_v1 import CASES, LEGACY_CASES, MODEL_ROOT, _project, build, verify
 from .corpus_v2 import build as build_corpus
 from .package import write_package
 from .package_v2 import _assemble
@@ -21,7 +21,7 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         cls.root = Path(cls.temp.name)
         cls.corpus = cls.root / "corpus"
         cls.corpus_hash = build_corpus(cls.corpus)
-        cls.result = build(cls.corpus, cls.corpus_hash)
+        cls.result = build(cls.corpus, cls.corpus_hash, version="2")
         cls.files = dict(cls.result.files)
         cls.export = cls.root / "semantic"
         write_package(cls.result, cls.export)
@@ -99,6 +99,48 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         with self.assertRaisesRegex(MuseumError, "participant kinds unestablished"):
             _project("written_interview", changed, schema, object())
 
+    def test_interactive_work_maps_carriers_and_execution_without_inventing_software_content(self):
+        source = loads(self.files["input/corpus/software_interactive/source/payload.json"])
+        resources = self._resources("software_interactive")
+        expanded = self._expanded("software_interactive")
+        self.assertEqual({row["id"] for row in source["resources"]},
+                         {identifier for identifier, value in resources.items()
+                          if value["type"] == "DigitalObject"})
+        self.assertEqual(resources[source["events"][0]["id"]]["type"], "Activity")
+        self.assertEqual(expanded[source["events"][0]["id"]][CRM + "P14_carried_out_by"][0]["@id"],
+                         "urn:fixture:artist")
+        self.assertNotIn(source["contentId"], resources)
+        self.assertFalse(any(value["type"] == "LinguisticObject" for value in resources.values()))
+        coverage = {row["pointer"]: row for row in loads(
+            self.files["semantic/software_interactive/coverage.json"], maximum=65536)}
+        self.assertEqual(coverage["/relationships/0/relation"]["disposition"], "retained_stream_only")
+        self.assertEqual(coverage["/significantProperties/0/value"]["disposition"], "retained_stream_only")
+        self.assertEqual(coverage["/resources/0/presence"]["exactHex"],
+                         "0x" + dumps("described_only").hex())
+        provenance = loads(self.files["semantic/software_interactive/provenance.json"], maximum=65536)
+        self.assertTrue(any(row["entity"] == source["events"][0]["id"]
+                            and row["sourcePointer"] == "/events/0/kind"
+                            and row["rule"] == "fixture-v2:completed-execution" for row in provenance))
+
+    def test_historical_place_maps_only_local_identity_and_keeps_competing_claims(self):
+        source = loads(self.files["input/corpus/disputed_geography/source/payload.json"])
+        resources = self._resources("disputed_geography")
+        place = source["places"][0]
+        self.assertEqual(set(resources), {place["id"]})
+        self.assertEqual(resources[place["id"]]["type"], "Place")
+        self.assertEqual(resources[place["id"]]["_label"], place["statement"])
+        self.assertNotIn("equivalent", resources[place["id"]])
+        self.assertNotIn("took_place_at", resources[place["id"]])
+        self.assertEqual(self._expanded("disputed_geography")[place["id"]]["@type"],
+                         [CRM + "E53_Place"])
+        coverage = {row["pointer"]: row for row in loads(
+            self.files["semantic/disputed_geography/coverage.json"], maximum=65536)}
+        self.assertEqual(coverage["/places/0/statement"]["disposition"], "mapped")
+        self.assertEqual(coverage["/places/0/alignment"]["exactHex"], "0x" + b"null".hex())
+        self.assertEqual(coverage["/authorityHistory/0/match"]["disposition"], "retained_stream_only")
+        self.assertEqual(coverage["/claims/1/value"]["disposition"], "retained_stream_only")
+        self.assertEqual(len({row["author"] for row in source["claims"]}), 2)
+
     def test_profile_source_pins_and_all_eight_original_packages_survive(self):
         report = loads(self.files["semantic/report.json"])
         self.assertEqual(report["corpusManifestHash"], self.corpus_hash)
@@ -108,12 +150,47 @@ class SyntheticCorpusSemanticProjection(unittest.TestCase):
         self.assertEqual(report["completeness"], "incomplete")
         self.assertFalse(any(report["claims"].values()))
         self.assertFalse(any(loads(self.result.manifest, maximum=2 * 1024 * 1024)["claims"].values()))
+        self.assertEqual(loads(self.result.manifest, maximum=2 * 1024 * 1024)["version"], "2")
         self.assertEqual(self.files["definitions/crosswalk-v2.json"],
                          (MODEL_ROOT / "projection/crosswalk-v2.json").read_bytes())
         for path in self.corpus.rglob("*"):
             if path.is_file():
                 relative = path.relative_to(self.corpus).as_posix()
                 self.assertEqual(self.files["input/corpus/" + relative], path.read_bytes())
+
+    def test_v1_three_case_archive_still_rebuilds_after_v2_expansion(self):
+        legacy = build(self.corpus, self.corpus_hash)
+        self.assertEqual(legacy.manifest_hash,
+                         "0x621677b8f979b55f425909e32bb12c78ba7e791667c4ede9caa3430a0f95a291")
+        files = dict(legacy.files)
+        report = loads(files["semantic/report.json"])
+        self.assertEqual(report["scenarios"], list(LEGACY_CASES))
+        self.assertEqual(loads(legacy.manifest, maximum=2 * 1024 * 1024)["version"], "1")
+        self.assertNotIn("semantic/software_interactive/coverage.json", files)
+        self.assertNotIn("semantic/disputed_geography/coverage.json", files)
+        target = self.root / "legacy"
+        write_package(legacy, target)
+        with patch("socket.socket", side_effect=AssertionError("network used")):
+            self.assertEqual(verify(target, legacy.manifest_hash), legacy)
+
+    def test_mislabeled_draft_v2_rejected_even_with_rehashed_manifest(self):
+        files = dict(self.files)
+        path = "semantic/software_interactive/provenance.json"
+        provenance = loads(files[path], maximum=65536)
+        changed = 0
+        for row in provenance:
+            if row["rule"] == "fixture-v2:completed-execution":
+                row["rule"] = "fixture-v2:completed-interview"
+                changed += 1
+        self.assertEqual(changed, 3)
+        files[path] = dumps(sorted(provenance, key=dumps))
+        metadata = loads(self.result.manifest, maximum=2 * 1024 * 1024)
+        del metadata["files"]
+        mislabeled = _assemble(MODEL_ROOT, files, metadata)
+        target = self.root / "mislabeled-draft-v2"
+        write_package(mislabeled, target)
+        with self.assertRaisesRegex(MuseumError, "reconstruction differs"):
+            verify(target, mislabeled.manifest_hash)
 
     def test_detached_replay_uses_retained_dependencies_and_catches_rehashed_forgery(self):
         real_open = io.open
