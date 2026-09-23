@@ -225,7 +225,12 @@ contract StreamScopedPolicyRenderCriticalInventoryV2Test is ScopedPolicyReferenc
             abi.encodeWithSelector(Sources.current.selector),
             abi.encode(inventoryC)
         );
-        Inventory host = new Inventory(inventoryD);
+        Inventory host = Inventory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamScopedPolicyRenderCriticalInventoryV2.sol:StreamScopedPolicyRenderCriticalInventoryV2",
+                abi.encode(inventoryD)
+            )
+        );
         bytes32 key = host.beginInventory(inventoryC.scope);
         (bool ok, bytes memory raw) =
             address(host).staticcall(abi.encodeCall(InventoryInterface.sourceContext, (key)));
@@ -596,7 +601,12 @@ contract StreamScopedPolicyRenderCriticalInventoryV2Test is ScopedPolicyReferenc
                 && segmentProbe.progress(id).progress.segmentChainHash
                     == Chains.append(Chains.append(bytes32(0), 0, a), 1, b)
         );
-        Inventory host = new Inventory(inventoryD);
+        Inventory host = Inventory(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamScopedPolicyRenderCriticalInventoryV2.sol:StreamScopedPolicyRenderCriticalInventoryV2",
+                abi.encode(inventoryD)
+            )
+        );
         require(
             host.scopedPolicyInventoryProfile() == C.PROFILE
                 && host.supportsInterface(type(InventoryInterface).interfaceId)
@@ -676,7 +686,12 @@ contract StreamScopedPolicyRenderCriticalInventoryV2Test is ScopedPolicyReferenc
         ConservationSelectionOwnerBoundary identity = new ConservationSelectionOwnerBoundary();
         ScopedPolicyRootConsentOwnerBoundaryV2 owner = new ScopedPolicyRootConsentOwnerBoundaryV2();
         identity.configure(address(core), address(artist), address(coordinator));
-        rootArchive = new ArtistArchive(address(artist), address(coordinator));
+        rootArchive = ArtistArchive(
+            _artistArtifactCreate(
+                "smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2",
+                abi.encode(address(artist), address(coordinator))
+            )
+        );
         A.SuiteConfiguration memory suite;
         suite.registry = address(artist);
         suite.core = address(core);

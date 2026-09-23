@@ -473,13 +473,18 @@ abstract contract ScopedPolicyContentFixtureV2 is
     }
 
     function _scopedCheckpoint(address set, address readiness) internal returns (Checkpoint) {
-        return new Checkpoint(
-            address(scopedSelections),
-            set,
-            readiness,
-            address(executor),
-            _scopedGas("STATIC_CONTENT_READ_GAS", 8000000, 2),
-            _scopedGas("STATIC_CONTENT_RENDER_GAS", 16000000, 2)
+        return Checkpoint(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamScopedPolicyContentCheckpointV2.sol:StreamScopedPolicyContentCheckpointV2",
+                abi.encode(
+                    address(scopedSelections),
+                    set,
+                    readiness,
+                    address(executor),
+                    _scopedGas("STATIC_CONTENT_READ_GAS", 8000000, 2),
+                    _scopedGas("STATIC_CONTENT_RENDER_GAS", 16000000, 2)
+                )
+            )
         );
     }
 

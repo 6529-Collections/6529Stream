@@ -307,7 +307,12 @@ abstract contract ScopedPolicyReferenceFixtureV2 is ScopedPolicyContentFixtureV2
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        referenceHost = new Ref(d, address(executor), _referenceGas());
+        referenceHost = Ref(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamScopedPolicyReferencePublicationV2.sol:StreamScopedPolicyReferencePublicationV2",
+                abi.encode(d, address(executor), _referenceGas())
+            )
+        );
         _upload(
             bytes(
                 StreamReferenceEnvironmentJson.files(
@@ -714,14 +719,21 @@ abstract contract ScopedPolicyReferenceFixtureV2 is ScopedPolicyContentFixtureV2
         address predicted = createVm.computeCreateAddress(
             address(this), uint256(createVm.getNonce(address(this))) + 1
         );
-        snapshotCoverage = new StreamFinalityArtifactCoverage(
-            address(core),
-            address(snapshotArchive),
-            address(schemas),
-            address(snapshotStore),
-            predicted,
-            address(executor),
-            Gas.GasParameterConfig("FINALITY_ARTIFACT_DEPENDENCY_READ_GAS", 300000, 300000, 2)
+        snapshotCoverage = StreamFinalityArtifactCoverage(
+            _artistArtifactCreate(
+                "smart-contracts/domains/preservation/StreamFinalityArtifactCoverage.sol:StreamFinalityArtifactCoverage",
+                abi.encode(
+                    address(core),
+                    address(snapshotArchive),
+                    address(schemas),
+                    address(snapshotStore),
+                    predicted,
+                    address(executor),
+                    Gas.GasParameterConfig(
+                        "FINALITY_ARTIFACT_DEPENDENCY_READ_GAS", 300000, 300000, 2
+                    )
+                )
+            )
         );
         address finality =
             address(new LeafManifestFinalityBoundary(address(core), address(snapshotCoverage)));
@@ -775,12 +787,19 @@ abstract contract ScopedPolicyReferenceFixtureV2 is ScopedPolicyContentFixtureV2
             rows
         );
         (bytes32 artifact, bytes32 coverage) = _archive(raw);
-        snapshotOutputs = new OutputHost(
-            address(core),
-            address(snapshotContent),
-            address(snapshotCoverage),
-            address(executor),
-            Gas.GasParameterConfig("STATIC_OUTPUT_MANIFEST_READ_GAS", 32000000, 100000, 2)
+        snapshotOutputs = OutputHost(
+            _artistArtifactCreate(
+                "smart-contracts/domains/finality/StreamScopedPolicyOutputManifestV2.sol:StreamScopedPolicyOutputManifestV2",
+                abi.encode(
+                    address(core),
+                    address(snapshotContent),
+                    address(snapshotCoverage),
+                    address(executor),
+                    Gas.GasParameterConfig(
+                        "STATIC_OUTPUT_MANIFEST_READ_GAS", 32000000, 100000, 2
+                    )
+                )
+            )
         );
         bytes32 plan =
             snapshotOutputs.beginManifest(checkpoint, artifact, coverage, SNAPSHOT_ARTIST);
@@ -804,7 +823,12 @@ abstract contract ScopedPolicyReferenceFixtureV2 is ScopedPolicyContentFixtureV2
             d.codeHashes[i] = d.targets[i].codehash;
         }
         d.chainId = block.chainid;
-        snapshotHost = new Snapshot(d, address(executor), _snapshotGas());
+        snapshotHost = Snapshot(
+            _artistArtifactCreate(
+                "smart-contracts/domains/metadata/StreamScopedPolicySnapshotPublicationV2.sol:StreamScopedPolicySnapshotPublicationV2",
+                abi.encode(d, address(executor), _snapshotGas())
+            )
+        );
         publication = Snap.Publication(
             scope,
             keccak256(abi.encode("scoped snapshot", kind)),
