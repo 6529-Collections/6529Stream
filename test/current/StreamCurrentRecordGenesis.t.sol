@@ -3,6 +3,10 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
 import { StreamFullV1ArtifactProducts } from "../helpers/StreamFullV1ArtifactProducts.sol";
+import {
+    StreamRecordStackSetupEngine,
+    StreamRecordStackSetupVm
+} from "../helpers/StreamRecordStackSetupEngine.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import {
     StreamGenesisManifestTailFixture as TailFixture
@@ -55,7 +59,7 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         governor = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 3727);
         otherSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 3728);
         artistSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 3729);
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        _delegateCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         _installGovernor();
         configuration.core = address(core);
         configuration.executor = address(executor);
@@ -100,6 +104,46 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
             bytes("{\"fixture\":true,\"meaning\":\"opaque composition test bytes\"}")
         );
         _admitArchiveType();
+    }
+
+    address private constant RECORD_STACK_ENGINE =
+        address(0x000000000000000000000000000000006529F012);
+
+    function _delegateCurrentStack(address artist_, address platform) private {
+        StreamRecordStackSetupVm setupVm =
+            StreamRecordStackSetupVm(address(uint160(uint256(keccak256("hevm cheat code")))));
+        bytes memory runtime = setupVm.getDeployedCode(
+            "test/helpers/StreamRecordStackSetupEngine.sol:StreamRecordStackSetupEngine"
+        );
+        require(runtime.length != 0, "missing record stack test engine artifact");
+        bytes32 runtimeHash = keccak256(runtime);
+        require(
+            RECORD_STACK_ENGINE.code.length == 0 || RECORD_STACK_ENGINE.codehash == runtimeHash,
+            "record stack engine address occupied"
+        );
+        if (RECORD_STACK_ENGINE.code.length == 0) setupVm.etch(RECORD_STACK_ENGINE, runtime);
+        require(RECORD_STACK_ENGINE.codehash == runtimeHash, "record stack engine runtime differs");
+        (bool ok, bytes memory returned) = RECORD_STACK_ENGINE.delegatecall(
+            abi.encodeCall(StreamRecordStackSetupEngine.run, (artist_, platform))
+        );
+        if (!ok) {
+            assembly ("memory-safe") { revert(add(returned, 32), mload(returned)) }
+        }
+    }
+
+    /// @dev Delegatecalled setup calls back into the original Safe-backed host policy.
+    function stackArtistProof(bytes32 digest) external returns (bytes memory) {
+        require(msg.sender == address(this), "record stack callback caller");
+        return _artistProof(digest);
+    }
+
+    function stackAdditionalOperatingPolicies()
+        external
+        view
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        require(msg.sender == address(this), "record stack callback caller");
+        return _additionalOperatingPolicies();
     }
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {
