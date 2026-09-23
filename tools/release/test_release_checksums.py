@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import ast
+import hashlib
 import json
 import re
 import subprocess
@@ -3707,12 +3708,49 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")
         self.assertEqual(
+            classifications[
+                "packages/stream-client/test/fixtures/current-reference-metric-replay.abi"
+            ].classification,
+            "binary",
+        )
+        self.assertEqual(
             {
                 snapshot.classification
                 for snapshot in classifications.values()
             },
-            {"lf", "crlf"},
+            {"lf", "crlf", "binary"},
         )
+
+    def test_binary_discovery_payloads_keep_exact_hashed_bytes(
+        self,
+    ) -> None:
+        relative_path = Path(
+            "schemas/museum/premis-authority-coverage/example/input/discovery/"
+            "unavailable-eventtype-cre.bin"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            attributes = repo_root / generator.GIT_ATTRIBUTES_PATH
+            attributes.write_bytes(
+                b"* text=auto\n.gitattributes text eol=lf\n"
+                b"schemas/museum/premis-authority-coverage/example/input/discovery/*.bin -text\n"
+            )
+            binary_path = repo_root / relative_path
+            binary_path.parent.mkdir(parents=True)
+            original_bytes = b"\x00premis response\r\nraw bytes\xff\n"
+            binary_path.write_bytes(original_bytes)
+
+            classifications = generator.validate_covered_file_line_endings(
+                repo_root,
+                [attributes, binary_path],
+            )
+            snapshot = classifications[relative_path.as_posix()]
+            self.assertEqual(snapshot.classification, "binary")
+            self.assertEqual(snapshot.data, original_bytes)
+            self.assertEqual(
+                snapshot.sha256,
+                "sha256:" + hashlib.sha256(original_bytes).hexdigest(),
+            )
 
     def test_whitespace_diagnostic_override_preserves_canonical_eol_rules(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
